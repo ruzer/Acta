@@ -123,23 +123,23 @@ También puedes ver [Organizar](docs/assets/02-editor-organize.png), [Responder]
 
 Acta está diseñado para instalarse en infraestructura propia y adaptarse mediante forks. Las organizaciones pueden mantener personalizaciones y sincronizarse con el upstream conforme a AGPL-3.0-only. Las mejoras genéricas son bienvenidas de regreso mediante Pull Requests: contribuir así ayuda a otras instalaciones y reduce divergencia; no es una obligación de enviar PR atribuida a la licencia.
 
-El upstream oficial es [github.com/ruzer/Acta](https://github.com/ruzer/Acta). La publicación de este snapshot y la habilitación de canales se registrarán después del gate remoto; no se presume que ya estén completadas.
+El upstream oficial es [github.com/ruzer/Acta](https://github.com/ruzer/Acta). El código está disponible públicamente. La primera release formal 0.2.0 todavía no se ha creado.
 
-[Gobernanza](GOVERNANCE.md) · [Forks y sincronización](docs/UPSTREAM-FORKS.md) · [Roadmap](ROADMAP.md) · [Soporte comunitario previsto](SUPPORT.md).
+[Gobernanza](GOVERNANCE.md) · [Forks y sincronización](docs/UPSTREAM-FORKS.md) · [Roadmap](ROADMAP.md) · [Soporte comunitario](SUPPORT.md).
 
 ## Contribuir
 
-La colaboración externa todavía no está abierta. Consulta [CONTRIBUTING](CONTRIBUTING.md) para el recorrido previsto, el mapa del repositorio y los requisitos de una contribución. Para preparar un entorno local: [Desarrollo](docs/DEVELOPMENT.md).
+Consulta [CONTRIBUTING](CONTRIBUTING.md) para el recorrido de contribución, el mapa del repositorio y los requisitos de una contribución. Para preparar un entorno local: [Desarrollo](docs/DEVELOPMENT.md).
 
-Destino previsto: **github.com/ruzer/Acta — PENDING UNTIL PUBLICATION**. [Issues previstos](https://github.com/ruzer/Acta/issues) — PENDING UNTIL PUBLICATION; no se afirma que este canal esté habilitado. La configuración real se verificará durante la fase de publicación.
+[Issues](https://github.com/ruzer/Acta/issues) para bugs y trabajo concreto; [Discussions](https://github.com/ruzer/Acta/discussions) para preguntas e ideas. Ambos canales están habilitados.
 
 [Documentación por audiencia](docs/README.md) · [Contratos por función](docs/CONTRACTS.md) · [Código de conducta](CODE_OF_CONDUCT.md) · [Cambios](CHANGELOG.md)
 
 ## Seguridad
 
-Los errores normales irán al futuro issue tracker. Las vulnerabilidades necesitan un canal privado; no publiques detalles sensibles en un issue.
+Los errores normales se reportan en Issues. Las vulnerabilidades necesitan un canal privado; no publiques detalles sensibles en un issue.
 
-**PRIVATE SECURITY CONTACT — pending. PENDING BEFORE PUBLICATION.** Lee [SECURITY](SECURITY.md).
+Utiliza [Report a vulnerability](https://github.com/ruzer/Acta/security/advisories/new), el canal privado habilitado en GitHub. Lee [SECURITY](SECURITY.md).
 
 ## Licencia
 

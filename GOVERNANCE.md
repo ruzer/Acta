@@ -4,7 +4,7 @@
 
 ## Acta crece desde el upstream
 
-El upstream oficial es [Acta](https://github.com/ruzer/Acta). Su estado y la publicación de este snapshot se comprueban antes de realizar cambios remotos. Acta mantiene un núcleo genérico. Las organizaciones pueden adaptarlo mediante forks, conforme a AGPL-3.0-only. Devolver mejoras de utilidad amplia ayuda a otros usuarios y reduce la divergencia de esos forks.
+El upstream oficial es [Acta](https://github.com/ruzer/Acta). El código es público; las releases formales se anuncian por separado. Acta mantiene un núcleo genérico. Las organizaciones pueden adaptarlo mediante forks, conforme a AGPL-3.0-only. Devolver mejoras de utilidad amplia ayuda a otros usuarios y reduce la divergencia de esos forks.
 
 Contribuir mediante Pull Request es una invitación y una práctica del proyecto, no una obligación atribuida a la licencia. No enviar un PR no es motivo, por sí solo, para considerar inválido un fork.
 

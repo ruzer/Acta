@@ -1,6 +1,6 @@
 # Upstream y forks de Acta
 
-El upstream oficial es [github.com/ruzer/Acta](https://github.com/ruzer/Acta). Acta permite y espera forks bajo [AGPL-3.0-only](../LICENSE). La publicación del snapshot y los canales remotos se verifican por separado; esta guía no afirma que ya se haya realizado el primer push.
+El upstream oficial es [github.com/ruzer/Acta](https://github.com/ruzer/Acta). Acta permite y espera forks bajo [AGPL-3.0-only](../LICENSE). El código está publicado; Issues y Discussions están habilitados. Una publicación de código no equivale a una release formal.
 
 ## Vocabulario y recorrido
 
@@ -26,7 +26,7 @@ Branding, integraciones privadas, adaptadores a sistemas internos, reglas exclus
 
 ## Recibir cambios sin perder personalizaciones
 
-Ejemplo documental para un fork local **ya creado**, solo después de publicación. No ejecutar ahora contra el destino pendiente. Requiere working tree limpio, `main` existente y verificar los remotes antes de continuar.
+Ejemplo para un fork local **ya creado**. Requiere working tree limpio, `main` existente y verificar los remotes antes de continuar.
 
 ```sh
 git status --short
@@ -40,7 +40,7 @@ git merge --ff-only upstream/main
 git switch -c fix/generic-improvement
 ```
 
-El destino del ejemplo es **PENDING UNTIL PUBLICATION**. Si `upstream` ya existe, comprueba su URL; no lo sobrescribas automáticamente. Si hay cambios locales sin guardar, detente y resuélvelos antes de cambiar de rama. `--ff-only` rechaza una actualización divergente: no borra commits ni fuerza su sustitución.
+Si `upstream` ya existe, comprueba su URL; no lo sobrescribas automáticamente. Si hay cambios locales sin guardar, detente y resuélvelos antes de cambiar de rama. `--ff-only` rechaza una actualización divergente: no borra commits ni fuerza su sustitución.
 
 Si `main` contiene personalizaciones, integra upstream en una rama de trabajo separada, revisa conflictos y tests, y propone un PR a tu fork. No se prescribe rebase de historia compartida ni force push. Una alternativa sostenible es conservar `main` cerca de upstream y gestionar personalizaciones mediante ramas propias de corta duración cuando sea viable.
 
@@ -50,4 +50,4 @@ Seguir `upstream/main` sirve para desarrollo, no significa desplegarlo automáti
 
 Crea una rama desde upstream actualizado, lleva únicamente el cambio genérico, conserva atribuciones y explica qué se separó del fork. Verifica que funciona sin endpoints ni datos internos. No subas accidentalmente secretos o historia privada al extraer commits. Confirma autorización de los titulares antes de aportar código institucional y revisa [procedencia de contribuciones](CONTRIBUTION-ORIGIN.md).
 
-Abre PR hacia `main` de Acta cuando el canal esté habilitado, enlaza el issue si existe y atiende revisión. Mantén las diferencias del fork documentadas y comprueba actualizaciones periódicamente; no hay frecuencia ni SLA garantizados. [CONTRIBUTING](../CONTRIBUTING.md) · [Política de forks](../GOVERNANCE.md#política-de-forks).
+Abre PR hacia `main` de Acta, enlaza el issue si existe y atiende revisión. Mantén las diferencias del fork documentadas y comprueba actualizaciones periódicamente; no hay frecuencia ni SLA garantizados. [CONTRIBUTING](../CONTRIBUTING.md) · [Política de forks](../GOVERNANCE.md#política-de-forks).

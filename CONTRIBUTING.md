@@ -1,12 +1,12 @@
 # Contribuir a Acta
 
-Acta se distribuye bajo [AGPL-3.0-only](LICENSE). Se adopta [DCO 1.1](DCO) + Signed-off-by para contribuciones; no hay CLA inicialmente. Los canales remotos se indican como pendientes hasta verificar su habilitación.
+Acta se distribuye bajo [AGPL-3.0-only](LICENSE). Se adopta [DCO 1.1](DCO) + Signed-off-by para contribuciones; no hay CLA inicialmente. Issues, Discussions y GitHub Private Vulnerability Reporting están habilitados.
 
 ## Cómo contribuir
 
 ### Encontré un bug
 
-Cuando se habiliten los canales, busca un reporte existente y utiliza la plantilla **Bug report**. Incluye versión, entorno, pasos mínimos con datos ficticios, comportamiento esperado y observado. Adjunta logs o capturas únicamente después de revisar privacidad. Si el problema puede exponer datos, evadir permisos o comprometer seguridad, no abras un issue público: sigue [SECURITY](SECURITY.md).
+Busca un reporte existente y utiliza la plantilla **Bug report**. Incluye versión, entorno, pasos mínimos con datos ficticios, comportamiento esperado y observado. Adjunta logs o capturas únicamente después de revisar privacidad. Si el problema puede exponer datos, evadir permisos o comprometer seguridad, no abras un issue público: sigue [SECURITY](SECURITY.md).
 
 ### Tengo una idea
 
@@ -33,15 +33,15 @@ Identifica la parte reutilizable y extrae una rama limpia desde upstream. Elimin
 
 Explica el problema con un ejemplo ficticio, evita traer todo el historial del fork y prueba el cambio sin servicios privados. Si no se puede separar con seguridad, discute primero una alternativa genérica. [Guía de forks y sincronización](docs/UPSTREAM-FORKS.md).
 
-## Canales previstos
+## Canales
 
-Todos los destinos siguientes son **PENDING UNTIL PUBLICATION**, sin acceso ni habilitación remota verificados:
+Canales habilitados y verificados el 2026-10-01:
 
-- [Upstream previsto](https://github.com/ruzer/Acta).
-- [Issues previstos](https://github.com/ruzer/Acta/issues): bugs y trabajo concreto.
-- [Discussions previstas](https://github.com/ruzer/Acta/discussions): ideas, dudas y propuestas amplias. Si no se habilitan, el maintainer indicará cómo convertir propuestas concretas en issues.
-- Contacto privado de seguridad: **PENDING BEFORE PUBLICATION**, véase [SECURITY](SECURITY.md).
-- Contacto privado de moderación: **PENDING BEFORE PUBLICATION**, véase [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md).
+- [Upstream oficial](https://github.com/ruzer/Acta).
+- [Issues](https://github.com/ruzer/Acta/issues): bugs y trabajo concreto.
+- [Discussions](https://github.com/ruzer/Acta/discussions): ideas, dudas y propuestas amplias.
+- [Reporte privado de vulnerabilidades](https://github.com/ruzer/Acta/security/advisories/new), véase [SECURITY](SECURITY.md).
+- Contacto privado de moderación: **pendiente de designación**, véase [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md).
 
 No envíes información sensible a placeholders ni a issues públicos. [Soporte](SUPPORT.md) explica límites y responsabilidades.
 

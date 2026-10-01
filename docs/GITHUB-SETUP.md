@@ -1,32 +1,33 @@
 # Preparación de GitHub para Acta
 
-**Configuración de publicación en curso.** Upstream oficial: [github.com/ruzer/Acta](https://github.com/ruzer/Acta). La inspección inicial confirmó repositorio privado vacío y permisos administrativos; [gate remoto](../REMOTE-PUBLICATION-PLAN.md). Los checks sin marcar no se presentan como activos.
+**Publicación inicial realizada; configuración verificada el 2026-10-01.** Upstream oficial: [github.com/ruzer/Acta](https://github.com/ruzer/Acta). La inspección inicial confirmó repositorio privado vacío y permisos administrativos; [gate remoto](../REMOTE-PUBLICATION-PLAN.md). Los checks sin marcar no se presentan como activos.
 
 ## Antes de cambiar visibilidad o recibir contribuciones
 
 - [x] Titularidad y autorización confirmadas por Cristóbal Ruz Escobar; AGPL-3.0-only adoptada y LICENSE oficial agregado. Avisos de terceros conservados.
 - [x] Initial maintainer y responsable de moderación: Cristóbal Ruz Escobar.
-- [ ] Verificar permisos efectivos sobre el repositorio y el canal privado de moderación.
+- [x] Permisos administrativos verificados.
+- [ ] Designar y verificar canal privado de moderación; no confundirlo con reporte de vulnerabilidades.
 - [x] [DCO 1.1 + Signed-off-by](CONTRIBUTION-ORIGIN.md) adoptado; sin CLA inicialmente. No se instala ningún bot.
-- [ ] Revisar el snapshot exacto a distribuir, secretos y datos, sin copiar historia privada.
-- [ ] Confirmar visibilidad pública apropiada y rama por defecto `main` únicamente en la fase autorizada.
-- [ ] Habilitar y probar reporte privado de vulnerabilidades y moderación antes de abrir colaboración; reemplazar placeholders con canales reales.
+- [x] Revisar el snapshot exacto a distribuir, secretos y datos, sin copiar historia privada.
+- [x] Confirmar visibilidad pública apropiada y rama por defecto `main` únicamente en la fase autorizada.
+- [x] Reporte privado de vulnerabilidades habilitado y comprobado por API. No se envió un reporte ficticio.
 
 ## Comunidad y mantenimiento
 
-- [ ] Habilitar Issues; comprobar las plantillas Bug report, Feature request y Documentation issue en la rama por defecto. No necesitan labels o assignees preexistentes.
-- [ ] Habilitar Discussions si está disponible: preguntas, ideas amplias y arquitectura. Issues conserva bugs y trabajo concreto. No anunciar Discussions antes de verificarla.
-- [ ] Preferir GitHub Private Vulnerability Reporting si lo permite la configuración/plan; si no, acordar y probar un contacto privado equivalente. No usar Issues para recibir vulnerabilidades.
-- [ ] Confirmar SECURITY, SUPPORT, CONTRIBUTING, GOVERNANCE y código de conducta desde la vista de una persona externa.
-- [ ] Activar/revisar Dependabot, alertas de dependencias y los avisos de terceros. El archivo actual cubre npm, Actions y Docker de frontend/backend/legacy; revisar en una tarea de configuración la cobertura de imágenes del default en `docker/versity`. No se cambia ahora el archivo ni el provider.
-- [ ] Verificar disponibilidad y activar secret scanning y push protection. No sustituye a Gitleaks ni resuelve secretos ya publicados; una alerta real exige respuesta y rotación según el caso.
+- [x] Habilitar Issues; comprobar las plantillas Bug report, Feature request y Documentation issue en la rama por defecto. No necesitan labels o assignees preexistentes.
+- [x] Habilitar Discussions si está disponible: preguntas, ideas amplias y arquitectura. Issues conserva bugs y trabajo concreto. No anunciar Discussions antes de verificarla.
+- [x] Preferir GitHub Private Vulnerability Reporting si lo permite la configuración/plan; si no, acordar y probar un contacto privado equivalente. No usar Issues para recibir vulnerabilidades.
+- [x] Confirmar SECURITY, SUPPORT, CONTRIBUTING, GOVERNANCE y código de conducta desde la vista de una persona externa.
+- [x] Dependabot alerts/security updates habilitados; avisos de terceros conservados. El archivo actual cubre npm, Actions y Docker de frontend/backend/legacy; revisar en una tarea de configuración la cobertura de imágenes del default en `docker/versity`. No se cambia ahora el archivo ni el provider.
+- [x] Verificar disponibilidad y activar secret scanning y push protection. No sustituye a Gitleaks ni resuelve secretos ya publicados; una alerta real exige respuesta y rotación según el caso.
 - [ ] Evaluar CODEOWNERS solo después de designar responsables reales. No crear nombres ficticios ni requerir aprobaciones de equipos inexistentes.
 
-[Reporte privado: documentación oficial](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/configure-vulnerability-reporting/configure-for-a-repository). Es una capacidad que debe habilitarse, no un estado comprobado de Acta.
+[Reporte privado: documentación oficial](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/configure-vulnerability-reporting/configure-for-a-repository). Habilitado y comprobado mediante API; no se envió un reporte ficticio.
 
 ## CI y checks requeridos
 
-Inspección del workflow [CI](../.github/workflows/ci.yml). Está preparado para `push`, `pull_request` y ejecución manual, con permiso global `contents: read`. **No se ejecutó en GitHub en esta fase.**
+Inspección del workflow [CI](../.github/workflows/ci.yml). Está preparado para `push`, `pull_request` y ejecución manual, con permiso global `contents: read`. La primera ejecución real está en [Actions](https://github.com/ruzer/Acta/actions/runs/36908495209). Se observaron los checks `verify`, `secrets` y `selfhosting`; consultar su resultado antes de declarar CI aprobado.
 
 | Job existente | Incluye | Política inicial propuesta |
 |---|---|---|
@@ -53,9 +54,19 @@ Las pruebas costosas son integración PostgreSQL/S3, instalación Docker, navega
 
 ## Releases, packages y badges
 
-- [ ] Confirmar la versión inicial recomendada y la checklist de [RELEASING](RELEASING.md); no crear tags o releases por el solo hecho de completar este documento.
+- [x] Versión inicial prevista 0.2.0 confirmada. La checklist de [RELEASING](RELEASING.md) sigue siendo requisito antes de crear una release.
 - [ ] GitHub Releases: notas, assets autorizados y commit verificado. Packages/GHCR u otros registros: decisión posterior; no hay publicación automática habilitada aquí.
 - [ ] Agregar badges únicamente cuando sus destinos existan y estén comprobados: CI real, licencia aplicada y última release. No colocar un badge AGPL antes de adoptar LICENSE.
-- [ ] Revisar enlaces y quitar **PENDING UNTIL PUBLICATION** únicamente de canales realmente habilitados.
+- [x] Revisar enlaces y quitar **PENDING UNTIL PUBLICATION** únicamente de canales realmente habilitados.
 
-No se inicializa Git, crea remote, usa API/CLI de GitHub ni publica imágenes al preparar este plan.
+No se ha creado tag, GitHub Release ni publicado imágenes. La primera release formal 0.2.0 requiere completar la revisión y CI.
+
+## Estado remoto comprobado
+
+- Repositorio público, `main`, historia pública nueva; remoto inicialmente vacío.
+- Issues y Discussions habilitados; plantillas incluidas en `main`.
+- Private Vulnerability Reporting habilitado. Canal de moderación separado aún pendiente.
+- Dependabot alerts y security updates habilitados. Secret scanning y push protection habilitados. DCO manual, sin app ni CLA.
+- Protección prevista inmediatamente después de este cierre documental: PR obligatorio, checks reales `verify`, `secrets`, `selfhosting`, rama actualizada y conversaciones resueltas; sin force push ni eliminación. Se comprobará la respuesta de GitHub antes de darla por activa.
+- Maintainer único: cero aprobaciones ajenas obligatorias inicialmente, porque no puede aprobar su propio PR. Se mantiene PR, self-review y CI; no se habilita bypass administrativo. Activar revisión independiente cuando exista otra persona elegible.
+- La configuración Dependabot heredada todavía no cubre el Dockerfile default `docker/versity`; revisar esa cobertura en una tarea posterior sin cambiar storage. El CI sí contiene su build y gate de vulnerabilidades.
