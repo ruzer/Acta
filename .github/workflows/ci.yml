@@ -22,7 +22,7 @@ jobs:
       MIGRATION_DATABASE_URL: postgresql://requirements_owner:disposable-ci-owner-only@localhost:5432/requirements
       APP_DB_PASSWORD: disposable-ci-app-only
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: npm }
       - run: npm ci
@@ -49,7 +49,7 @@ jobs:
   secrets:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { fetch-depth: 0 }
       - name: All-history secret scan (redacted; exact fixture exceptions only)
         run: docker run --rm -v "$PWD:/repo:ro" -w /repo zricethezav/gitleaks:v8.30.1 git . --config .gitleaks.toml --log-opts=--all --redact=100
@@ -60,7 +60,7 @@ jobs:
     env:
       COMPOSE_PROJECT_NAME: readiness-ci
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: cp .env.example .env
       - name: Docker-only install with empty volumes
         run: docker compose up --build -d --wait
