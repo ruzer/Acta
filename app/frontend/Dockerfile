@@ -7,7 +7,7 @@ COPY app/frontend/package.json app/frontend/package.json
 RUN npm ci --ignore-scripts
 COPY . .
 RUN npm run build -w @requirements/contracts && npm run build -w @requirements/frontend
-FROM nginxinc/nginx-unprivileged:1.30.5-alpine
+FROM nginxinc/nginx-unprivileged:1.31.6-alpine
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/app/frontend/dist /usr/share/nginx/html
 EXPOSE 8080
