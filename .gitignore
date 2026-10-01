@@ -1,0 +1,51 @@
+# Secretos y configuración local
+.env
+.env.*
+!.env.example
+# Dependencias y salidas futuras
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
+# Datos privados y almacenamiento de ejecución
+storage/
+uploads/
+backups/
+*.dump
+*.sql.gz
+
+**/generated/
+playwright-report/
+test-results/
+artifacts/
+.env.test
+
+.private-evidence/
+
+# Private operational data and local tooling
+evidence/
+screenshots/
+*.sql
+!docker/postgres-init.sql
+!app/backend/prisma/migrations/**/migration.sql
+*.backup
+*.bak
+*.sqlite*
+*.tar
+*.tar.gz
+*.tgz
+.idea/
+.vscode/
+Thumbs.db
+
+# Generated from installed frontend dependency licenses during build
+app/frontend/public/third-party-notices.txt
+
+# Temporary editor files and log directories
+logs/
+*.tmp
+*.temp
+*.swp
+*.swo
+*~

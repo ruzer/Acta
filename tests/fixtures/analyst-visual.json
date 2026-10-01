@@ -1,0 +1,714 @@
+{
+  "projectId": "f09219fb-fec8-4885-b03a-1a02dc589e37",
+  "emptyProjectId": "a07fff1d-dfd7-4a82-875c-3cab8ce2e3b8",
+  "ids": [
+    "c3fe602a-770b-4978-b294-9ffe45ad2f95",
+    "3154c68a-1945-4dc9-b94b-a8b37f65f184",
+    "127e2a70-8173-46d6-81e5-0fc094b979e0",
+    "046676d4-e61e-4fe6-90ef-ad97deab4859"
+  ],
+  "conflict": {
+    "projectId": "f09219fb-fec8-4885-b03a-1a02dc589e37",
+    "projectName": "Revisi\u00f3n de solicitudes \u00b7 prueba visual",
+    "question": {
+      "id": "c3fe602a-770b-4978-b294-9ffe45ad2f95",
+      "sectionId": "41fd5101-c025-4dcf-9aca-d96843033cc8",
+      "sectionTitle": "Recepci\u00f3n y seguimiento",
+      "title": "Recepci\u00f3n de expedientes",
+      "question": "\u00bfC\u00f3mo se recibe un expediente incompleto?",
+      "helpText": "",
+      "type": "SHORT_TEXT",
+      "required": true,
+      "config": null,
+      "options": [],
+      "position": 1,
+      "total": 1,
+      "applicability": "ENABLED"
+    },
+    "status": "CONFLICT",
+    "priority": "P1",
+    "lockVersion": 9,
+    "canReview": true,
+    "partialReviewReason": null,
+    "pendingReview": false,
+    "pendingReviewReason": null,
+    "participants": [
+      {
+        "memberId": "90d1ece2-cce6-495e-aa5c-83c33b4b40ec",
+        "person": {
+          "id": "e88d7f1d-c1f7-4705-ba48-7cb83466f814",
+          "displayName": "Fictional participant"
+        },
+        "area": "Fictional team",
+        "required": true,
+        "applicability": "ENABLED",
+        "currentRevisionId": "b690f022-ac07-4688-bd0c-5f60fe1fe524"
+      },
+      {
+        "memberId": "c962b508-63f1-4289-ad4e-36f02313c73d",
+        "person": {
+          "id": "d15c314b-d763-4da6-8c5b-460147f980b4",
+          "displayName": "Participante B ficticio"
+        },
+        "area": "Fictional team",
+        "required": true,
+        "applicability": "ENABLED",
+        "currentRevisionId": "7fc0378a-d24a-4207-baa6-3f79ac2e59d3"
+      }
+    ],
+    "submissions": [
+      {
+        "id": "7fc0378a-d24a-4207-baa6-3f79ac2e59d3",
+        "number": 1,
+        "status": "SUBMITTED",
+        "answer": "Se devuelve hasta contar con la documentaci\u00f3n completa.",
+        "comment": "Aportaci\u00f3n ficticia para comparar.",
+        "example": "",
+        "createdAt": "2026-09-29T21:58:05.747Z",
+        "current": true,
+        "evidence": [],
+        "respondent": {
+          "id": "d15c314b-d763-4da6-8c5b-460147f980b4",
+          "displayName": "Participante B ficticio"
+        },
+        "area": {
+          "id": "8661ee5c-6723-4c2f-a553-5e55c706573b",
+          "name": "Fictional team"
+        }
+      },
+      {
+        "id": "b690f022-ac07-4688-bd0c-5f60fe1fe524",
+        "number": 1,
+        "status": "SUBMITTED",
+        "answer": "Se recibe y se solicita completar la documentaci\u00f3n.",
+        "comment": "Aportaci\u00f3n ficticia para comparar.",
+        "example": "",
+        "createdAt": "2026-09-29T21:58:05.667Z",
+        "current": true,
+        "evidence": [
+          {
+            "id": "cf2a0940-047a-4f97-aa5f-e4a56cb63d50",
+            "evidence": {
+              "id": "924bd760-620e-44c7-9ecd-47c3f3f3a93c",
+              "originalName": "guia-ficticia.pdf",
+              "detectedMimeType": "application/pdf",
+              "byteSize": 869,
+              "sha256": "5f8e74aae92564a149b5a684a427c90af97653911141ab888634c1e5051f7cb4",
+              "status": "READY",
+              "createdAt": "2026-09-29T21:58:05.613Z"
+            }
+          }
+        ],
+        "respondent": {
+          "id": "e88d7f1d-c1f7-4705-ba48-7cb83466f814",
+          "displayName": "Fictional participant"
+        },
+        "area": {
+          "id": "8661ee5c-6723-4c2f-a553-5e55c706573b",
+          "name": "Fictional team"
+        }
+      }
+    ],
+    "threads": [],
+    "validations": [],
+    "conflicts": [
+      {
+        "id": "bea1f388-e5ef-4c9f-8bb3-45c08c627b6a",
+        "reason": "Las aportaciones difieren en el tratamiento del expediente incompleto.",
+        "openedBy": {
+          "id": "fc37b7b5-695b-47a9-bb21-36482895ea9b",
+          "displayName": "Installation test administrator"
+        },
+        "openedAt": "2026-09-29T21:58:05.858Z",
+        "status": "OPEN",
+        "lockVersion": 0,
+        "participants": [
+          {
+            "id": "478a65f8-3e86-47c2-adc2-097d2e3ef929",
+            "responseRevisionId": "7fc0378a-d24a-4207-baa6-3f79ac2e59d3"
+          },
+          {
+            "id": "1dc03afc-02bd-43b7-b4ee-70b7ab4f3cf2",
+            "responseRevisionId": "b690f022-ac07-4688-bd0c-5f60fe1fe524"
+          }
+        ],
+        "resolution": null
+      }
+    ],
+    "dispositions": [],
+    "references": []
+  },
+  "decision": {
+    "projectId": "f09219fb-fec8-4885-b03a-1a02dc589e37",
+    "projectName": "Revisi\u00f3n de solicitudes \u00b7 prueba visual",
+    "question": {
+      "id": "3154c68a-1945-4dc9-b94b-a8b37f65f184",
+      "sectionId": "41fd5101-c025-4dcf-9aca-d96843033cc8",
+      "sectionTitle": "Recepci\u00f3n y seguimiento",
+      "title": "Comunicaci\u00f3n del resultado",
+      "question": "\u00bfC\u00f3mo se comunica el resultado?",
+      "helpText": "",
+      "type": "SHORT_TEXT",
+      "required": true,
+      "config": null,
+      "options": [],
+      "position": 1,
+      "total": 1,
+      "applicability": "ENABLED"
+    },
+    "status": "VALIDATED",
+    "priority": "P1",
+    "lockVersion": 10,
+    "canReview": true,
+    "partialReviewReason": null,
+    "pendingReview": false,
+    "pendingReviewReason": null,
+    "participants": [
+      {
+        "memberId": "90d1ece2-cce6-495e-aa5c-83c33b4b40ec",
+        "person": {
+          "id": "e88d7f1d-c1f7-4705-ba48-7cb83466f814",
+          "displayName": "Fictional participant"
+        },
+        "area": "Fictional team",
+        "required": true,
+        "applicability": "ENABLED",
+        "currentRevisionId": "0b9a35b2-dc12-406b-aa75-c6d42c5cbfc2"
+      }
+    ],
+    "submissions": [
+      {
+        "id": "0b9a35b2-dc12-406b-aa75-c6d42c5cbfc2",
+        "number": 1,
+        "status": "SUBMITTED",
+        "answer": "Se env\u00eda una notificaci\u00f3n por el canal registrado.",
+        "comment": "Aportaci\u00f3n ficticia para comparar.",
+        "example": "",
+        "createdAt": "2026-09-29T21:58:05.807Z",
+        "current": true,
+        "evidence": [],
+        "respondent": {
+          "id": "e88d7f1d-c1f7-4705-ba48-7cb83466f814",
+          "displayName": "Fictional participant"
+        },
+        "area": {
+          "id": "8661ee5c-6723-4c2f-a553-5e55c706573b",
+          "name": "Fictional team"
+        }
+      }
+    ],
+    "threads": [],
+    "validations": [
+      {
+        "id": "dbec37db-3ce1-4599-89ab-76678c05ad05",
+        "decisionText": "Se comunica el resultado por el canal registrado y se conserva constancia de la notificaci\u00f3n.",
+        "scope": "Solicitudes del proyecto ficticio.",
+        "exceptions": "Cuando el canal no est\u00e9 disponible, se documenta el intento de contacto.",
+        "validationComment": "Fuentes revisadas para esta prueba.",
+        "validatedBy": {
+          "id": "fc37b7b5-695b-47a9-bb21-36482895ea9b",
+          "displayName": "Installation test administrator"
+        },
+        "validatedAt": "2026-09-29T21:58:06.002Z",
+        "invalidatedAt": null,
+        "invalidatedBy": null,
+        "invalidationReason": null,
+        "sources": [
+          {
+            "id": "fddad6b6-be5b-4118-9e2b-f04f59f6728d",
+            "responseRevisionId": "0b9a35b2-dc12-406b-aa75-c6d42c5cbfc2"
+          }
+        ],
+        "messages": [],
+        "resolutions": []
+      },
+      {
+        "id": "7f1863d3-9a34-46a2-81db-c8aff8390ef9",
+        "decisionText": "El resultado se comunica por el canal registrado por la persona solicitante.",
+        "scope": "Solicitudes del proyecto ficticio.",
+        "exceptions": "Cuando el canal no est\u00e9 disponible, se documenta el intento de contacto.",
+        "validationComment": "Fuentes revisadas para esta prueba.",
+        "validatedBy": {
+          "id": "fc37b7b5-695b-47a9-bb21-36482895ea9b",
+          "displayName": "Installation test administrator"
+        },
+        "validatedAt": "2026-09-29T21:58:05.914Z",
+        "invalidatedAt": "2026-09-29T21:58:05.948Z",
+        "invalidatedBy": {
+          "id": "fc37b7b5-695b-47a9-bb21-36482895ea9b",
+          "displayName": "Installation test administrator"
+        },
+        "invalidationReason": "Precisar el alcance de la comunicaci\u00f3n.",
+        "sources": [
+          {
+            "id": "443e29c9-bcbd-4699-8084-3c932239df70",
+            "responseRevisionId": "0b9a35b2-dc12-406b-aa75-c6d42c5cbfc2"
+          }
+        ],
+        "messages": [],
+        "resolutions": []
+      }
+    ],
+    "conflicts": [],
+    "dispositions": [],
+    "references": []
+  },
+  "dashboard": {
+    "projectName": "Revisi\u00f3n de solicitudes \u00b7 prueba visual",
+    "role": "ANALYST",
+    "metrics": {
+      "validation": {
+        "numerator": 1,
+        "denominator": 4,
+        "percentage": 25
+      },
+      "closure": {
+        "numerator": 1,
+        "denominator": 4,
+        "percentage": 25
+      },
+      "submission": {
+        "numerator": 2,
+        "denominator": 4,
+        "percentage": 50
+      }
+    },
+    "states": [
+      {
+        "status": "NOT_REVIEWED",
+        "count": 1
+      },
+      {
+        "status": "PENDING",
+        "count": 1
+      },
+      {
+        "status": "PARTIAL",
+        "count": 0
+      },
+      {
+        "status": "ANSWERED",
+        "count": 0
+      },
+      {
+        "status": "CLARIFICATION_REQUIRED",
+        "count": 0
+      },
+      {
+        "status": "VALIDATED",
+        "count": 1
+      },
+      {
+        "status": "NOT_APPLICABLE",
+        "count": 0
+      },
+      {
+        "status": "CONFLICT",
+        "count": 1
+      }
+    ],
+    "breakdowns": [
+      {
+        "dimension": "section",
+        "key": "41fd5101-c025-4dcf-9aca-d96843033cc8",
+        "label": "Recepci\u00f3n y seguimiento",
+        "metrics": {
+          "validation": {
+            "numerator": 1,
+            "denominator": 4,
+            "percentage": 25
+          },
+          "closure": {
+            "numerator": 1,
+            "denominator": 4,
+            "percentage": 25
+          },
+          "submission": {
+            "numerator": 2,
+            "denominator": 4,
+            "percentage": 50
+          }
+        }
+      },
+      {
+        "dimension": "priority",
+        "key": "P1",
+        "label": "P1",
+        "metrics": {
+          "validation": {
+            "numerator": 1,
+            "denominator": 4,
+            "percentage": 25
+          },
+          "closure": {
+            "numerator": 1,
+            "denominator": 4,
+            "percentage": 25
+          },
+          "submission": {
+            "numerator": 2,
+            "denominator": 4,
+            "percentage": 50
+          }
+        }
+      },
+      {
+        "dimension": "area",
+        "key": "8661ee5c-6723-4c2f-a553-5e55c706573b",
+        "label": "Fictional team",
+        "metrics": {
+          "validation": {
+            "numerator": 1,
+            "denominator": 4,
+            "percentage": 25
+          },
+          "closure": {
+            "numerator": 1,
+            "denominator": 4,
+            "percentage": 25
+          },
+          "submission": {
+            "numerator": 2,
+            "denominator": 4,
+            "percentage": 50
+          }
+        }
+      },
+      {
+        "dimension": "status",
+        "key": "CONFLICT",
+        "label": "Requiere resolver diferencias",
+        "metrics": {
+          "validation": {
+            "numerator": 0,
+            "denominator": 1,
+            "percentage": 0
+          },
+          "closure": {
+            "numerator": 0,
+            "denominator": 1,
+            "percentage": 0
+          },
+          "submission": {
+            "numerator": 1,
+            "denominator": 1,
+            "percentage": 100
+          }
+        }
+      },
+      {
+        "dimension": "status",
+        "key": "VALIDATED",
+        "label": "Validada",
+        "metrics": {
+          "validation": {
+            "numerator": 1,
+            "denominator": 1,
+            "percentage": 100
+          },
+          "closure": {
+            "numerator": 1,
+            "denominator": 1,
+            "percentage": 100
+          },
+          "submission": {
+            "numerator": 1,
+            "denominator": 1,
+            "percentage": 100
+          }
+        }
+      },
+      {
+        "dimension": "status",
+        "key": "PENDING",
+        "label": "Pendiente",
+        "metrics": {
+          "validation": {
+            "numerator": 0,
+            "denominator": 1,
+            "percentage": 0
+          },
+          "closure": {
+            "numerator": 0,
+            "denominator": 1,
+            "percentage": 0
+          },
+          "submission": {
+            "numerator": 0,
+            "denominator": 1,
+            "percentage": 0
+          }
+        }
+      },
+      {
+        "dimension": "status",
+        "key": "NOT_REVIEWED",
+        "label": "Sin revisar",
+        "metrics": {
+          "validation": {
+            "numerator": 0,
+            "denominator": 1,
+            "percentage": 0
+          },
+          "closure": {
+            "numerator": 0,
+            "denominator": 1,
+            "percentage": 0
+          },
+          "submission": {
+            "numerator": 0,
+            "denominator": 1,
+            "percentage": 0
+          }
+        }
+      }
+    ],
+    "questions": [
+      {
+        "id": "c3fe602a-770b-4978-b294-9ffe45ad2f95",
+        "externalId": "VIS-0",
+        "title": "Recepci\u00f3n de expedientes",
+        "sectionId": "41fd5101-c025-4dcf-9aca-d96843033cc8",
+        "sectionTitle": "Recepci\u00f3n y seguimiento",
+        "priority": "P1",
+        "areaId": "8661ee5c-6723-4c2f-a553-5e55c706573b",
+        "areaName": "Fictional team",
+        "status": "CONFLICT",
+        "submittedRespondents": 2,
+        "requiredRespondents": 2,
+        "conditionalWithoutCase": false,
+        "referenceIds": []
+      },
+      {
+        "id": "3154c68a-1945-4dc9-b94b-a8b37f65f184",
+        "externalId": "VIS-1",
+        "title": "Comunicaci\u00f3n del resultado",
+        "sectionId": "41fd5101-c025-4dcf-9aca-d96843033cc8",
+        "sectionTitle": "Recepci\u00f3n y seguimiento",
+        "priority": "P1",
+        "areaId": "8661ee5c-6723-4c2f-a553-5e55c706573b",
+        "areaName": "Fictional team",
+        "status": "VALIDATED",
+        "submittedRespondents": 1,
+        "requiredRespondents": 1,
+        "conditionalWithoutCase": false,
+        "referenceIds": []
+      },
+      {
+        "id": "127e2a70-8173-46d6-81e5-0fc094b979e0",
+        "externalId": "VIS-2",
+        "title": "Seguimiento pendiente",
+        "sectionId": "41fd5101-c025-4dcf-9aca-d96843033cc8",
+        "sectionTitle": "Recepci\u00f3n y seguimiento",
+        "priority": "P1",
+        "areaId": "8661ee5c-6723-4c2f-a553-5e55c706573b",
+        "areaName": "Fictional team",
+        "status": "PENDING",
+        "submittedRespondents": 0,
+        "requiredRespondents": 1,
+        "conditionalWithoutCase": false,
+        "referenceIds": []
+      },
+      {
+        "id": "046676d4-e61e-4fe6-90ef-ad97deab4859",
+        "externalId": "VIS-3",
+        "title": "Revisi\u00f3n inicial",
+        "sectionId": "41fd5101-c025-4dcf-9aca-d96843033cc8",
+        "sectionTitle": "Recepci\u00f3n y seguimiento",
+        "priority": "P1",
+        "areaId": "8661ee5c-6723-4c2f-a553-5e55c706573b",
+        "areaName": "Fictional team",
+        "status": "NOT_REVIEWED",
+        "submittedRespondents": 0,
+        "requiredRespondents": 1,
+        "conditionalWithoutCase": false,
+        "referenceIds": []
+      }
+    ]
+  },
+  "questionnaire": {
+    "structureVersion": 0,
+    "sections": [
+      {
+        "externalId": "TEMA-1",
+        "title": "Recepci\u00f3n y seguimiento",
+        "description": "Tema ficticio",
+        "order": 0,
+        "id": "41fd5101-c025-4dcf-9aca-d96843033cc8"
+      }
+    ],
+    "questions": [
+      {
+        "externalId": "VIS-0",
+        "sectionId": "41fd5101-c025-4dcf-9aca-d96843033cc8",
+        "title": "Recepci\u00f3n de expedientes",
+        "question": "\u00bfC\u00f3mo se recibe un expediente incompleto?",
+        "helpText": "",
+        "type": "SHORT_TEXT",
+        "required": true,
+        "priority": "P1",
+        "responsibleAreaId": "8661ee5c-6723-4c2f-a553-5e55c706573b",
+        "order": 0,
+        "groupParentId": null,
+        "supersedesQuestionId": null,
+        "config": null,
+        "options": [],
+        "condition": null,
+        "references": [],
+        "id": "c3fe602a-770b-4978-b294-9ffe45ad2f95",
+        "publication": "PUBLISHED",
+        "status": "CONFLICT",
+        "lockVersion": 9,
+        "revisionNumber": 1,
+        "assignments": [
+          {
+            "id": "bd51e419-1d2a-4b0b-a203-ac2c7c4cb2cb",
+            "projectMemberId": "90d1ece2-cce6-495e-aa5c-83c33b4b40ec",
+            "required": true,
+            "active": true
+          },
+          {
+            "id": "0d6e5a3d-8b4c-42fc-aeae-0f03cd8503d7",
+            "projectMemberId": "c962b508-63f1-4289-ad4e-36f02313c73d",
+            "required": true,
+            "active": true
+          }
+        ]
+      },
+      {
+        "externalId": "VIS-1",
+        "sectionId": "41fd5101-c025-4dcf-9aca-d96843033cc8",
+        "title": "Comunicaci\u00f3n del resultado",
+        "question": "\u00bfC\u00f3mo se comunica el resultado?",
+        "helpText": "",
+        "type": "SHORT_TEXT",
+        "required": true,
+        "priority": "P1",
+        "responsibleAreaId": "8661ee5c-6723-4c2f-a553-5e55c706573b",
+        "order": 1,
+        "groupParentId": null,
+        "supersedesQuestionId": null,
+        "config": null,
+        "options": [],
+        "condition": null,
+        "references": [],
+        "id": "3154c68a-1945-4dc9-b94b-a8b37f65f184",
+        "publication": "PUBLISHED",
+        "status": "VALIDATED",
+        "lockVersion": 10,
+        "revisionNumber": 1,
+        "assignments": [
+          {
+            "id": "5ab18f52-814f-4e81-948c-dc05990146ef",
+            "projectMemberId": "90d1ece2-cce6-495e-aa5c-83c33b4b40ec",
+            "required": true,
+            "active": true
+          }
+        ]
+      },
+      {
+        "externalId": "VIS-2",
+        "sectionId": "41fd5101-c025-4dcf-9aca-d96843033cc8",
+        "title": "Seguimiento pendiente",
+        "question": "\u00bfC\u00f3mo se documenta el seguimiento?",
+        "helpText": "",
+        "type": "SHORT_TEXT",
+        "required": true,
+        "priority": "P1",
+        "responsibleAreaId": "8661ee5c-6723-4c2f-a553-5e55c706573b",
+        "order": 2,
+        "groupParentId": null,
+        "supersedesQuestionId": null,
+        "config": null,
+        "options": [],
+        "condition": null,
+        "references": [],
+        "id": "127e2a70-8173-46d6-81e5-0fc094b979e0",
+        "publication": "PUBLISHED",
+        "status": "PENDING",
+        "lockVersion": 4,
+        "revisionNumber": 1,
+        "assignments": [
+          {
+            "id": "9eeb9e87-9805-4bbd-8a23-ae40a90b7f1e",
+            "projectMemberId": "90d1ece2-cce6-495e-aa5c-83c33b4b40ec",
+            "required": true,
+            "active": true
+          }
+        ]
+      },
+      {
+        "externalId": "VIS-3",
+        "sectionId": "41fd5101-c025-4dcf-9aca-d96843033cc8",
+        "title": "Revisi\u00f3n inicial",
+        "question": "\u00bfQui\u00e9n recibe las solicitudes?",
+        "helpText": "",
+        "type": "SHORT_TEXT",
+        "required": true,
+        "priority": "P1",
+        "responsibleAreaId": "8661ee5c-6723-4c2f-a553-5e55c706573b",
+        "order": 3,
+        "groupParentId": null,
+        "supersedesQuestionId": null,
+        "config": null,
+        "options": [],
+        "condition": null,
+        "references": [],
+        "id": "046676d4-e61e-4fe6-90ef-ad97deab4859",
+        "publication": "PUBLISHED",
+        "status": "NOT_REVIEWED",
+        "lockVersion": 2,
+        "revisionNumber": 1,
+        "assignments": [
+          {
+            "id": "fa3b0cf6-f667-4e33-be0d-0be60a87b75c",
+            "projectMemberId": "90d1ece2-cce6-495e-aa5c-83c33b4b40ec",
+            "required": true,
+            "active": true
+          }
+        ]
+      }
+    ],
+    "references": [],
+    "areas": [
+      {
+        "id": "8661ee5c-6723-4c2f-a553-5e55c706573b",
+        "code": "TEST",
+        "name": "Fictional team",
+        "active": true
+      }
+    ],
+    "members": [
+      {
+        "id": "03816291-f3b6-43de-921b-7c00cc7f5490",
+        "userId": "fc37b7b5-695b-47a9-bb21-36482895ea9b",
+        "displayName": "Installation test administrator",
+        "username": "installation_admin",
+        "role": "ANALYST",
+        "areaId": null,
+        "areaName": null,
+        "active": true
+      },
+      {
+        "id": "90d1ece2-cce6-495e-aa5c-83c33b4b40ec",
+        "userId": "e88d7f1d-c1f7-4705-ba48-7cb83466f814",
+        "displayName": "Fictional participant",
+        "username": "installation_participant",
+        "role": "STAKEHOLDER",
+        "areaId": "8661ee5c-6723-4c2f-a553-5e55c706573b",
+        "areaName": "Fictional team",
+        "active": true
+      },
+      {
+        "id": "c962b508-63f1-4289-ad4e-36f02313c73d",
+        "userId": "d15c314b-d763-4da6-8c5b-460147f980b4",
+        "displayName": "Participante B ficticio",
+        "username": "visual_second_5c8c4858",
+        "role": "STAKEHOLDER",
+        "areaId": "8661ee5c-6723-4c2f-a553-5e55c706573b",
+        "areaName": "Fictional team",
+        "active": true
+      }
+    ]
+  }
+}

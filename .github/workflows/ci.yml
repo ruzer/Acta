@@ -1,0 +1,83 @@
+name: CI
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:18.6-bookworm
+        env:
+          POSTGRES_USER: requirements_owner
+          POSTGRES_PASSWORD: disposable-ci-owner-only
+          POSTGRES_DB: requirements
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U requirements_owner -d requirements"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      DATABASE_URL: postgresql://requirements_app:disposable-ci-app-only@localhost:5432/requirements
+      MIGRATION_DATABASE_URL: postgresql://requirements_owner:disposable-ci-owner-only@localhost:5432/requirements
+      APP_DB_PASSWORD: disposable-ci-app-only
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: npm }
+      - run: npm ci
+      - name: Create isolated runtime role
+        run: PGPASSWORD=disposable-ci-owner-only psql -h localhost -U requirements_owner -d requirements -f docker/postgres-init.sql
+      - run: npm run prisma:generate
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run prisma:validate
+      - run: npm test
+      - run: npm run test:integration
+      - run: npm run build
+      - run: npm audit --audit-level=high
+      - name: Container builds (no publication)
+        run: docker compose --env-file .env.example build backend frontend object-storage storage-init
+      - name: Storage vulnerability gate (no publication)
+        run: |
+          docker build -t requirements-storage-audit -f docker/versity/Dockerfile .
+          docker create --name storage-binary requirements-storage-audit
+          docker cp storage-binary:/usr/local/bin/versitygw ./storage-audit-binary
+          docker rm storage-binary
+          docker run --rm -v "$PWD/storage-audit-binary:/input/versitygw:ro" golang:1.26.8-bookworm sh -c 'go install golang.org/x/vuln/cmd/govulncheck@v1.8.0 && /go/bin/govulncheck -mode=binary /input/versitygw'
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: All-history secret scan (redacted; exact fixture exceptions only)
+        run: docker run --rm -v "$PWD:/repo:ro" -w /repo zricethezav/gitleaks:v8.30.1 git . --config .gitleaks.toml --log-opts=--all --redact=100
+
+  selfhosting:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      COMPOSE_PROJECT_NAME: readiness-ci
+    steps:
+      - uses: actions/checkout@v4
+      - run: cp .env.example .env
+      - name: Docker-only install with empty volumes
+        run: docker compose up --build -d --wait
+      - name: API and real S3 storage gate (disposable bucket only)
+        run: >-
+          docker compose run --rm --no-deps
+          -v "$PWD/tests:/app/tests:ro"
+          -v readiness-ci_db-secrets:/run/db-secrets:ro
+          -e SELFHOST_STORAGE_TEST_ALLOWED=true
+          backend node scripts/test-storage-container.mjs
+      - name: Bootstrap and authorized evidence round trip
+        run: docker compose exec -T -e SELFHOST_SMOKE_ALLOWED=true backend node scripts/selfhost-smoke.mjs
+      - name: Restart preserves response and evidence
+        run: |
+          docker compose restart
+          docker compose up -d --wait
+          docker compose exec -T -e SELFHOST_SMOKE_ALLOWED=true backend node scripts/selfhost-smoke.mjs --verify
+      - name: Remove disposable CI volumes
+        if: always()
+        run: docker compose down --volumes

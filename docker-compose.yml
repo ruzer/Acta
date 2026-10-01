@@ -1,0 +1,163 @@
+name: requirements-platform
+x-backend-build: &backend-build
+  context: .
+  dockerfile: app/backend/Dockerfile
+  target: runtime
+services:
+  secrets-init:
+    image: node:24.21.0-bookworm-slim
+    entrypoint: [node, /opt/init-secrets.mjs]
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:-}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-}
+    volumes:
+      - ./scripts/init-secrets.mjs:/opt/init-secrets.mjs:ro
+      - db-secrets:/secrets/db
+      - api-secrets:/secrets/api
+      - object-secrets:/secrets/object
+      - provision-secrets:/secrets/provision
+    network_mode: none
+    restart: 'no'
+  postgres:
+    image: postgres:18.6-bookworm
+    entrypoint: [sh, /opt/bootstrap/postgres-entrypoint.sh]
+    command: [postgres]
+    environment:
+      POSTGRES_USER: requirements_owner
+      POSTGRES_DB: requirements
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - db-secrets:/run/db-secrets:ro
+      - ./docker/postgres-init.sh:/opt/bootstrap/postgres-init.sh:ro
+      - ./docker/postgres-init.sql:/opt/bootstrap/postgres-init.sql:ro
+      - ./docker/postgres-entrypoint.sh:/opt/bootstrap/postgres-entrypoint.sh:ro
+    depends_on:
+      secrets-init: { condition: service_completed_successfully }
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -h 127.0.0.1 -U requirements_owner -d requirements && psql -U requirements_owner -d requirements -tAc "SELECT 1" | grep -q 1']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [data]
+    restart: unless-stopped
+  object-storage:
+    build: {context: ., dockerfile: docker/versity/Dockerfile}
+    volumes:
+      - objectdata:/data
+      - object-secrets:/run/object-secrets:ro
+    depends_on:
+      secrets-init: { condition: service_completed_successfully }
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:9000/_health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    networks: [data]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    restart: unless-stopped
+  storage-init:
+    build:
+      <<: *backend-build
+      target: storage-init
+    entrypoint: [node, scripts/init-object-storage.mjs]
+    environment:
+      S3_BUCKET: ${S3_BUCKET:-requirements-evidence}
+    volumes:
+      - provision-secrets:/run/provision-secrets:ro
+    tmpfs: [/tmp:mode=1777]
+    depends_on:
+      object-storage: { condition: service_healthy }
+    networks: [data]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    restart: 'no'
+  migrate:
+    build: *backend-build
+    entrypoint: [node, scripts/migrate-container.mjs]
+    volumes:
+      - db-secrets:/run/db-secrets:ro
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [data]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    restart: 'no'
+  backend:
+    build: *backend-build
+    environment:
+      ORGANIZATION_CODE: ${ORGANIZATION_CODE:-DEFAULT}
+      ORGANIZATION_NAME: ${ORGANIZATION_NAME:-Example Organization}
+      APP_NAME: ${APP_NAME:-Acta}
+      APP_SHORT_NAME: ${APP_SHORT_NAME:-Acta}
+      APP_LOGO: ${APP_LOGO:-}
+      APP_FAVICON: ${APP_FAVICON:-}
+      APP_ACCENT: ${APP_ACCENT:-#2b4d7c}
+      DEFAULT_LOCALE: ${DEFAULT_LOCALE:-es-MX}
+      DEFAULT_TIMEZONE: ${DEFAULT_TIMEZONE:-UTC}
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:4317}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      NODE_ENV: ${NODE_ENV:-development}
+      DEMO_SEED: ${DEMO_SEED:-false}
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-}
+      PORT: 3000
+      STORAGE_PROVIDER: ${STORAGE_PROVIDER:-S3}
+      S3_ENDPOINT: ${S3_ENDPOINT:-http://object-storage:9000}
+      S3_REGION: ${S3_REGION:-us-east-1}
+      S3_BUCKET: ${S3_BUCKET:-requirements-evidence}
+      S3_FORCE_PATH_STYLE: ${S3_FORCE_PATH_STYLE:-true}
+      EVIDENCE_ROOT: /app/.private-evidence
+      EVIDENCE_MAX_BYTES: ${EVIDENCE_MAX_BYTES:-20971520}
+      EVIDENCE_MAX_ATTACHMENTS: ${EVIDENCE_MAX_ATTACHMENTS:-10}
+      EVIDENCE_PROJECT_BYTES: ${EVIDENCE_PROJECT_BYTES:-2147483648}
+      IMPORT_MAX_BYTES: ${IMPORT_MAX_BYTES:-5242880}
+      IMPORT_MAX_DEPTH: ${IMPORT_MAX_DEPTH:-20}
+      IMPORT_MAX_SECTIONS: ${IMPORT_MAX_SECTIONS:-100}
+      IMPORT_MAX_QUESTIONS: ${IMPORT_MAX_QUESTIONS:-2000}
+      IMPORT_MAX_LINKS: ${IMPORT_MAX_LINKS:-20000}
+      IMPORT_MAX_REFERENCES: ${IMPORT_MAX_REFERENCES:-10000}
+    volumes:
+      - api-secrets:/run/app-secrets:ro
+      - evidence:/app/.private-evidence
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      storage-init: { condition: service_completed_successfully }
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3000/api/v1/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      start_period: 30s
+      retries: 20
+    networks: [web, data]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    restart: unless-stopped
+  frontend:
+    build: {context: ., dockerfile: app/frontend/Dockerfile}
+    ports: ['127.0.0.1:${APP_PORT:-4317}:8080']
+    depends_on:
+      backend: { condition: service_healthy }
+    healthcheck:
+      test: [CMD, wget, -q, --spider, http://127.0.0.1:8080/]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks: [web]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    restart: unless-stopped
+networks:
+  web:
+  data:
+volumes:
+  pgdata:
+  evidence:
+  objectdata:
+  db-secrets:
+  api-secrets:
+  object-secrets:
+  provision-secrets:

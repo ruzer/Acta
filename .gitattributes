@@ -1,0 +1,10 @@
+# Preserve official legal texts byte for byte.
+/LICENSE -text
+/DCO -text
+/app/frontend/public/fonts/ibm-plex-sans-OFL.txt -text whitespace=cr-at-eol,-blank-at-eol
+/app/frontend/public/fonts/manrope-OFL.txt -text whitespace=-blank-at-eol
+
+# Existing generated inventories use CRLF. Preserve original bytes.
+/docs/DEPENDENCY-LICENSES.csv -text whitespace=cr-at-eol
+/docs/NATIVE-DEPENDENCY-LICENSES.csv -text whitespace=cr-at-eol
+/docs/STORAGE-DEPENDENCY-LICENSES.csv -text whitespace=cr-at-eol

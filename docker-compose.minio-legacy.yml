@@ -1,0 +1,16 @@
+# Existing installations only. Archived upstream remains a security blocker.
+# Never share one volume concurrently between two storage implementations.
+services:
+  object-storage:
+    build: {context: ., dockerfile: docker/minio/Dockerfile}
+    healthcheck:
+      test: [CMD, curl, --fail, --silent, http://127.0.0.1:9000/minio/health/ready]
+    networks:
+      data:
+        aliases: [minio]
+  storage-init:
+    build: !override {context: ., dockerfile: docker/minio/Dockerfile}
+    entrypoint: [sh, /opt/init.sh]
+  backend:
+    environment:
+      S3_ENDPOINT: http://object-storage:9000

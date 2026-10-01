@@ -1,0 +1,784 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProjectRole {
+  ADMIN
+  ANALYST
+  STAKEHOLDER
+  VIEWER
+}
+
+enum Priority {
+  P0
+  P1
+  P2
+  P3
+}
+
+enum QuestionType {
+  YES_NO
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  SHORT_TEXT
+  LONG_TEXT
+  DATE
+  NUMBER
+  MATRIX
+}
+
+enum ReviewStatus {
+  NOT_REVIEWED
+  PENDING
+  PARTIAL
+  ANSWERED
+  CLARIFICATION_REQUIRED
+  VALIDATED
+  NOT_APPLICABLE
+  CONFLICT
+}
+
+enum RevisionStatus {
+  SUBMITTED
+}
+
+enum ReferenceType {
+  QUESTION
+  BUSINESS_RULE
+  REQUIREMENT
+  CAPABILITY
+  WORKFLOW
+  DOCUMENT
+  CODE
+  OTHER
+}
+
+enum ConditionOperator {
+  EQUALS
+  NOT_EQUALS
+  CONTAINS
+}
+
+enum ProjectLifecycle {
+  ACTIVE
+  ARCHIVED
+}
+
+enum QuestionPublication {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ThreadStatus {
+  WAITING_STAKEHOLDER
+  WAITING_ANALYST
+  CLOSED
+}
+
+enum ConflictStatus {
+  OPEN
+  RESOLVED
+}
+
+enum EvidenceStatus {
+  STAGED
+  READY
+  QUARANTINED
+  REJECTED
+}
+
+enum StorageBackend {
+  LOCAL
+  MINIO
+  S3
+}
+
+model Organization {
+  id                      String       @id @default(uuid()) @db.Uuid
+  code                    String       @unique
+  name                    String
+  createdAt               DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt               DateTime     @updatedAt @db.Timestamptz(3)
+  User_organization       User[]       @relation("User_organization")
+  Area_organization       Area[]       @relation("Area_organization")
+  Project_organization    Project[]    @relation("Project_organization")
+  AuditEvent_organization AuditEvent[] @relation("AuditEvent_organization")
+}
+
+model User {
+  id                              String                 @id @default(uuid()) @db.Uuid
+  organizationId                  String                 @db.Uuid
+  username                        String
+  displayName                     String
+  passwordHash                    String?
+  active                          Boolean                @default(true)
+  mustChangePassword              Boolean                @default(true)
+  isOrganizationAdmin             Boolean                @default(false)
+  createdAt                       DateTime               @default(now()) @db.Timestamptz(3)
+  updatedAt                       DateTime               @updatedAt @db.Timestamptz(3)
+  organization                    Organization           @relation("User_organization", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  Session_user                    Session[]              @relation("Session_user")
+  ProjectMember_user              ProjectMember[]        @relation("ProjectMember_user")
+  QuestionRevision_createdBy      QuestionRevision[]     @relation("QuestionRevision_createdBy")
+  Response_respondent             Response[]             @relation("Response_respondent")
+  Evidence_uploadedBy             Evidence[]             @relation("Evidence_uploadedBy")
+  ClarificationThread_requestedBy ClarificationThread[]  @relation("ClarificationThread_requestedBy")
+  ClarificationThread_closedBy    ClarificationThread[]  @relation("ClarificationThread_closedBy")
+  ClarificationMessage_author     ClarificationMessage[] @relation("ClarificationMessage_author")
+  Validation_validatedBy          Validation[]           @relation("Validation_validatedBy")
+  Validation_invalidatedBy        Validation[]           @relation("Validation_invalidatedBy")
+  Conflict_openedBy               Conflict[]             @relation("Conflict_openedBy")
+  ConflictResolution_resolvedBy   ConflictResolution[]   @relation("ConflictResolution_resolvedBy")
+  QuestionDisposition_markedBy    QuestionDisposition[]  @relation("QuestionDisposition_markedBy")
+  QuestionDisposition_revokedBy   QuestionDisposition[]  @relation("QuestionDisposition_revokedBy")
+  AuditEvent_actor                AuditEvent[]           @relation("AuditEvent_actor")
+  ImportBatch_importedBy          ImportBatch[]          @relation("ImportBatch_importedBy")
+
+  @@unique([organizationId, username])
+}
+
+model Session {
+  id             String    @id @default(uuid()) @db.Uuid
+  userId         String    @db.Uuid
+  tokenHash      String    @unique
+  csrfSecretHash String
+  createdAt      DateTime  @default(now()) @db.Timestamptz(3)
+  lastSeenAt     DateTime  @default(now()) @db.Timestamptz(3)
+  expiresAt      DateTime  @db.Timestamptz(3)
+  revokedAt      DateTime? @db.Timestamptz(3)
+  user           User      @relation("Session_user", fields: [userId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model LoginAttempt {
+  id             String   @id @default(uuid()) @db.Uuid
+  accountKeyHash String
+  ipKeyHash      String
+  occurredAt     DateTime @default(now()) @db.Timestamptz(3)
+  success        Boolean
+
+  @@index([accountKeyHash, occurredAt])
+  @@index([ipKeyHash, occurredAt])
+}
+
+model Area {
+  id                       String             @id @default(uuid()) @db.Uuid
+  organizationId           String             @db.Uuid
+  code                     String
+  name                     String
+  active                   Boolean            @default(true)
+  createdAt                DateTime           @default(now()) @db.Timestamptz(3)
+  updatedAt                DateTime           @updatedAt @db.Timestamptz(3)
+  organization             Organization       @relation("Area_organization", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  ProjectMember_area       ProjectMember[]    @relation("ProjectMember_area")
+  Question_responsibleArea Question[]         @relation("Question_responsibleArea")
+  ResponseDraft_area       ResponseDraft[]    @relation("ResponseDraft_area")
+  ResponseRevision_area    ResponseRevision[] @relation("ResponseRevision_area")
+
+  @@unique([organizationId, code])
+}
+
+model Project {
+  id                               String                     @id @default(uuid()) @db.Uuid
+  organizationId                   String                     @db.Uuid
+  externalId                       String
+  name                             String
+  description                      String                     @default("")
+  lifecycle                        ProjectLifecycle           @default(ACTIVE)
+  lockVersion                      Int                        @default(0)
+  createdAt                        DateTime                   @default(now()) @db.Timestamptz(3)
+  updatedAt                        DateTime                   @updatedAt @db.Timestamptz(3)
+  organization                     Organization               @relation("Project_organization", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  ClarificationMessage_project     ClarificationMessage[]     @relation("ClarificationMessage_project")
+  ClarificationThread_project      ClarificationThread[]      @relation("ClarificationThread_project")
+  Conflict_project                 Conflict[]                 @relation("Conflict_project")
+  ConflictParticipant_project      ConflictParticipant[]      @relation("ConflictParticipant_project")
+  ConflictResolution_project       ConflictResolution[]       @relation("ConflictResolution_project")
+  ConflictResolutionSource_project ConflictResolutionSource[] @relation("ConflictResolutionSource_project")
+  DraftEvidence_project            DraftEvidence[]            @relation("DraftEvidence_project")
+  Evidence_project                 Evidence[]                 @relation("Evidence_project")
+  ImportBatch_project              ImportBatch[]              @relation("ImportBatch_project")
+  ProjectMember_project            ProjectMember[]            @relation("ProjectMember_project")
+  Question_project                 Question[]                 @relation("Question_project")
+  QuestionAssignment_project       QuestionAssignment[]       @relation("QuestionAssignment_project")
+  QuestionCondition_project        QuestionCondition[]        @relation("QuestionCondition_project")
+  QuestionDisposition_project      QuestionDisposition[]      @relation("QuestionDisposition_project")
+  QuestionOption_project           QuestionOption[]           @relation("QuestionOption_project")
+  QuestionRevision_project         QuestionRevision[]         @relation("QuestionRevision_project")
+  QuestionTraceability_project     QuestionTraceability[]     @relation("QuestionTraceability_project")
+  Response_project                 Response[]                 @relation("Response_project")
+  ResponseDraft_project            ResponseDraft[]            @relation("ResponseDraft_project")
+  ResponseRevision_project         ResponseRevision[]         @relation("ResponseRevision_project")
+  RevisionEvidence_project         RevisionEvidence[]         @relation("RevisionEvidence_project")
+  Section_project                  Section[]                  @relation("Section_project")
+  TraceabilityReference_project    TraceabilityReference[]    @relation("TraceabilityReference_project")
+  Validation_project               Validation[]               @relation("Validation_project")
+  ValidationMessage_project        ValidationMessage[]        @relation("ValidationMessage_project")
+  ValidationResolution_project     ValidationResolution[]     @relation("ValidationResolution_project")
+  ValidationSource_project         ValidationSource[]         @relation("ValidationSource_project")
+  AuditEvent_project               AuditEvent[]               @relation("AuditEvent_project")
+
+  @@unique([organizationId, externalId])
+}
+
+model ProjectMember {
+  id                        String               @id @default(uuid()) @db.Uuid
+  projectId                 String               @db.Uuid
+  userId                    String               @db.Uuid
+  role                      ProjectRole
+  areaId                    String?              @db.Uuid
+  active                    Boolean              @default(true)
+  createdAt                 DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt                 DateTime             @updatedAt @db.Timestamptz(3)
+  project                   Project              @relation("ProjectMember_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  user                      User                 @relation("ProjectMember_user", fields: [userId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  area                      Area?                @relation("ProjectMember_area", fields: [areaId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  QuestionAssignment_member QuestionAssignment[] @relation("QuestionAssignment_member")
+
+  @@unique([projectId, id])
+  @@unique([projectId, userId])
+  @@index([projectId])
+}
+
+model Section {
+  id               String     @id @default(uuid()) @db.Uuid
+  projectId        String     @db.Uuid
+  externalId       String
+  title            String
+  description      String     @default("")
+  order            Int
+  createdAt        DateTime   @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime   @updatedAt @db.Timestamptz(3)
+  project          Project    @relation("Section_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  Question_section Question[] @relation("Question_section")
+
+  @@unique([projectId, id])
+  @@unique([projectId, externalId])
+  @@unique([projectId, order])
+  @@index([projectId])
+}
+
+model Question {
+  id                              String                 @id @default(uuid()) @db.Uuid
+  projectId                       String                 @db.Uuid
+  sectionId                       String                 @db.Uuid
+  externalId                      String
+  groupParentId                   String?                @db.Uuid
+  supersedesQuestionId            String?                @db.Uuid
+  responsibleAreaId               String                 @db.Uuid
+  priority                        Priority
+  order                           Int
+  status                          ReviewStatus           @default(NOT_REVIEWED)
+  publication                     QuestionPublication    @default(DRAFT)
+  publishedRevisionNumber         Int?
+  currentRevisionNumber           Int                    @default(1)
+  pendingReview                   Boolean                @default(false)
+  partialReviewReason             String?
+  lockVersion                     Int                    @default(0)
+  createdAt                       DateTime               @default(now()) @db.Timestamptz(3)
+  updatedAt                       DateTime               @updatedAt @db.Timestamptz(3)
+  project                         Project                @relation("Question_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  section                         Section                @relation("Question_section", fields: [projectId, sectionId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  groupParent                     Question?              @relation("Question_groupParent", fields: [projectId, groupParentId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  Question_groupParent            Question[]             @relation("Question_groupParent")
+  supersedes                      Question?              @relation("Question_supersedes", fields: [projectId, supersedesQuestionId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  Question_supersedes             Question[]             @relation("Question_supersedes")
+  responsibleArea                 Area                   @relation("Question_responsibleArea", fields: [responsibleAreaId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  QuestionRevision_questionRecord QuestionRevision[]     @relation("QuestionRevision_questionRecord")
+  QuestionCondition_parent        QuestionCondition[]    @relation("QuestionCondition_parent")
+  QuestionCondition_child         QuestionCondition?     @relation("QuestionCondition_child")
+  QuestionAssignment_question     QuestionAssignment[]   @relation("QuestionAssignment_question")
+  QuestionTraceability_question   QuestionTraceability[] @relation("QuestionTraceability_question")
+  Response_question               Response[]             @relation("Response_question")
+  Validation_question             Validation[]           @relation("Validation_question")
+  Conflict_question               Conflict[]             @relation("Conflict_question")
+  QuestionDisposition_question    QuestionDisposition[]  @relation("QuestionDisposition_question")
+
+  @@unique([projectId, id])
+  @@unique([projectId, externalId])
+  @@unique([sectionId, order])
+  @@index([projectId])
+  @@index([projectId, status, priority])
+}
+
+model QuestionRevision {
+  id                                String             @id @default(uuid()) @db.Uuid
+  projectId                         String             @db.Uuid
+  questionId                        String             @db.Uuid
+  number                            Int
+  title                             String
+  question                          String
+  helpText                          String             @default("")
+  type                              QuestionType
+  required                          Boolean
+  config                            Json?
+  sourceLocator                     Json?
+  snapshot                          Json
+  createdById                       String             @db.Uuid
+  createdAt                         DateTime           @default(now()) @db.Timestamptz(3)
+  project                           Project            @relation("QuestionRevision_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  questionRecord                    Question           @relation("QuestionRevision_questionRecord", fields: [projectId, questionId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  createdBy                         User               @relation("QuestionRevision_createdBy", fields: [createdById], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  QuestionOption_revision           QuestionOption[]   @relation("QuestionOption_revision")
+  ResponseDraft_questionRevision    ResponseDraft[]    @relation("ResponseDraft_questionRevision")
+  ResponseRevision_questionRevision ResponseRevision[] @relation("ResponseRevision_questionRevision")
+
+  @@unique([projectId, id])
+  @@unique([questionId, number])
+  @@index([projectId])
+}
+
+model QuestionOption {
+  id                 String           @id @default(uuid()) @db.Uuid
+  projectId          String           @db.Uuid
+  questionRevisionId String           @db.Uuid
+  value              String
+  label              String
+  order              Int
+  project            Project          @relation("QuestionOption_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  revision           QuestionRevision @relation("QuestionOption_revision", fields: [projectId, questionRevisionId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([projectId, id])
+  @@unique([questionRevisionId, value])
+  @@unique([questionRevisionId, order])
+  @@index([projectId])
+}
+
+model QuestionCondition {
+  id               String            @id @default(uuid()) @db.Uuid
+  projectId        String            @db.Uuid
+  parentQuestionId String            @db.Uuid
+  childQuestionId  String            @unique @db.Uuid
+  operator         ConditionOperator
+  value            Json
+  project          Project           @relation("QuestionCondition_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  parent           Question          @relation("QuestionCondition_parent", fields: [projectId, parentQuestionId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  child            Question          @relation("QuestionCondition_child", fields: [projectId, childQuestionId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([projectId, id])
+  @@unique([projectId, childQuestionId])
+  @@index([projectId])
+}
+
+model QuestionAssignment {
+  id              String        @id @default(uuid()) @db.Uuid
+  projectId       String        @db.Uuid
+  questionId      String        @db.Uuid
+  projectMemberId String        @db.Uuid
+  required        Boolean       @default(true)
+  active          Boolean       @default(true)
+  createdAt       DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime      @updatedAt @db.Timestamptz(3)
+  project         Project       @relation("QuestionAssignment_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  question        Question      @relation("QuestionAssignment_question", fields: [projectId, questionId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  member          ProjectMember @relation("QuestionAssignment_member", fields: [projectId, projectMemberId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([projectId, id])
+  @@unique([questionId, projectMemberId])
+  @@index([projectId])
+  @@index([projectMemberId, active])
+}
+
+model TraceabilityReference {
+  id                             String                 @id @default(uuid()) @db.Uuid
+  projectId                      String                 @db.Uuid
+  type                           ReferenceType
+  externalId                     String
+  label                          String
+  url                            String?
+  priority                       Priority?
+  description                    String                 @default("")
+  createdAt                      DateTime               @default(now()) @db.Timestamptz(3)
+  updatedAt                      DateTime               @updatedAt @db.Timestamptz(3)
+  project                        Project                @relation("TraceabilityReference_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  QuestionTraceability_reference QuestionTraceability[] @relation("QuestionTraceability_reference")
+
+  @@unique([projectId, id])
+  @@unique([projectId, type, externalId])
+  @@index([projectId])
+}
+
+model QuestionTraceability {
+  id          String                @id @default(uuid()) @db.Uuid
+  projectId   String                @db.Uuid
+  questionId  String                @db.Uuid
+  referenceId String                @db.Uuid
+  scopeNote   String                @default("")
+  project     Project               @relation("QuestionTraceability_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  question    Question              @relation("QuestionTraceability_question", fields: [projectId, questionId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  reference   TraceabilityReference @relation("QuestionTraceability_reference", fields: [projectId, referenceId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([projectId, id])
+  @@unique([questionId, referenceId])
+  @@index([projectId])
+}
+
+model Response {
+  id                        String             @id @default(uuid()) @db.Uuid
+  projectId                 String             @db.Uuid
+  questionId                String             @db.Uuid
+  respondentId              String             @db.Uuid
+  lockVersion               Int                @default(0)
+  createdAt                 DateTime           @default(now()) @db.Timestamptz(3)
+  updatedAt                 DateTime           @updatedAt @db.Timestamptz(3)
+  project                   Project            @relation("Response_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  question                  Question           @relation("Response_question", fields: [projectId, questionId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  respondent                User               @relation("Response_respondent", fields: [respondentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  ResponseDraft_response    ResponseDraft?     @relation("ResponseDraft_response")
+  ResponseRevision_response ResponseRevision[] @relation("ResponseRevision_response")
+  Evidence_response         Evidence[]         @relation("Evidence_response")
+
+  @@unique([projectId, id])
+  @@unique([questionId, respondentId])
+  @@index([projectId])
+}
+
+model ResponseDraft {
+  id                    String            @id @default(uuid()) @db.Uuid
+  projectId             String            @db.Uuid
+  responseId            String            @unique @db.Uuid
+  basedOnRevisionId     String?           @db.Uuid
+  questionRevisionId    String            @db.Uuid
+  answer                Json?
+  comment               String?
+  example               String?
+  areaId                String            @db.Uuid
+  conditionContext      Json
+  consultationRequested Boolean           @default(false)
+  lockVersion           Int               @default(0)
+  createdAt             DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime          @updatedAt @db.Timestamptz(3)
+  project               Project           @relation("ResponseDraft_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  response              Response          @relation("ResponseDraft_response", fields: [projectId, responseId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  basedOnRevision       ResponseRevision? @relation("ResponseDraft_basedOnRevision", fields: [projectId, basedOnRevisionId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  questionRevision      QuestionRevision  @relation("ResponseDraft_questionRevision", fields: [projectId, questionRevisionId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  area                  Area              @relation("ResponseDraft_area", fields: [areaId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  DraftEvidence_draft   DraftEvidence[]   @relation("DraftEvidence_draft")
+
+  @@unique([projectId, id])
+  @@unique([projectId, responseId])
+  @@index([updatedAt])
+  @@index([projectId])
+}
+
+model ResponseRevision {
+  id                                String                     @id @default(uuid()) @db.Uuid
+  projectId                         String                     @db.Uuid
+  responseId                        String                     @db.Uuid
+  questionRevisionId                String                     @db.Uuid
+  number                            Int
+  status                            RevisionStatus             @default(SUBMITTED)
+  answer                            Json?
+  comment                           String?
+  example                           String?
+  areaId                            String                     @db.Uuid
+  respondentSnapshot                Json
+  areaSnapshot                      Json
+  conditionContext                  Json
+  createdAt                         DateTime                   @default(now()) @db.Timestamptz(3)
+  project                           Project                    @relation("ResponseRevision_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  ResponseDraft_basedOnRevision     ResponseDraft[]            @relation("ResponseDraft_basedOnRevision")
+  response                          Response                   @relation("ResponseRevision_response", fields: [projectId, responseId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  questionRevision                  QuestionRevision           @relation("ResponseRevision_questionRevision", fields: [projectId, questionRevisionId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  area                              Area                       @relation("ResponseRevision_area", fields: [areaId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  RevisionEvidence_revision         RevisionEvidence[]         @relation("RevisionEvidence_revision")
+  ClarificationThread_revision      ClarificationThread[]      @relation("ClarificationThread_revision")
+  ValidationSource_revision         ValidationSource[]         @relation("ValidationSource_revision")
+  ConflictParticipant_revision      ConflictParticipant[]      @relation("ConflictParticipant_revision")
+  ConflictResolutionSource_revision ConflictResolutionSource[] @relation("ConflictResolutionSource_revision")
+
+  @@unique([projectId, id])
+  @@unique([responseId, number])
+  @@index([projectId])
+}
+
+model Evidence {
+  id                        String             @id @default(uuid()) @db.Uuid
+  projectId                 String             @db.Uuid
+  responseId                String             @db.Uuid
+  uploadedById              String             @db.Uuid
+  originalName              String
+  detectedMimeType          String
+  byteSize                  BigInt
+  sha256                    String             @db.Char(64)
+  backend                   StorageBackend
+  storageKey                String
+  status                    EvidenceStatus
+  createdAt                 DateTime           @default(now()) @db.Timestamptz(3)
+  project                   Project            @relation("Evidence_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  response                  Response           @relation("Evidence_response", fields: [projectId, responseId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  uploadedBy                User               @relation("Evidence_uploadedBy", fields: [uploadedById], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  DraftEvidence_evidence    DraftEvidence[]    @relation("DraftEvidence_evidence")
+  RevisionEvidence_evidence RevisionEvidence[] @relation("RevisionEvidence_evidence")
+
+  @@unique([projectId, id])
+  @@unique([backend, storageKey])
+  @@index([status, createdAt])
+  @@index([projectId])
+}
+
+model DraftEvidence {
+  id              String        @id @default(uuid()) @db.Uuid
+  projectId       String        @db.Uuid
+  responseDraftId String        @db.Uuid
+  evidenceId      String        @db.Uuid
+  project         Project       @relation("DraftEvidence_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  draft           ResponseDraft @relation("DraftEvidence_draft", fields: [projectId, responseDraftId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  evidence        Evidence      @relation("DraftEvidence_evidence", fields: [projectId, evidenceId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([projectId, id])
+  @@unique([responseDraftId, evidenceId])
+  @@index([projectId])
+}
+
+model RevisionEvidence {
+  id                 String           @id @default(uuid()) @db.Uuid
+  projectId          String           @db.Uuid
+  responseRevisionId String           @db.Uuid
+  evidenceId         String           @db.Uuid
+  project            Project          @relation("RevisionEvidence_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  revision           ResponseRevision @relation("RevisionEvidence_revision", fields: [projectId, responseRevisionId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  evidence           Evidence         @relation("RevisionEvidence_evidence", fields: [projectId, evidenceId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([projectId, id])
+  @@unique([responseRevisionId, evidenceId])
+  @@index([projectId])
+}
+
+model ClarificationThread {
+  id                          String                 @id @default(uuid()) @db.Uuid
+  projectId                   String                 @db.Uuid
+  responseRevisionId          String                 @db.Uuid
+  requestedById               String                 @db.Uuid
+  status                      ThreadStatus
+  lockVersion                 Int                    @default(0)
+  createdAt                   DateTime               @default(now()) @db.Timestamptz(3)
+  closedAt                    DateTime?              @db.Timestamptz(3)
+  closedById                  String?                @db.Uuid
+  closeReason                 String?
+  project                     Project                @relation("ClarificationThread_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  revision                    ResponseRevision       @relation("ClarificationThread_revision", fields: [projectId, responseRevisionId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  requestedBy                 User                   @relation("ClarificationThread_requestedBy", fields: [requestedById], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  closedBy                    User?                  @relation("ClarificationThread_closedBy", fields: [closedById], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  ClarificationMessage_thread ClarificationMessage[] @relation("ClarificationMessage_thread")
+
+  @@unique([projectId, id])
+  @@index([projectId])
+}
+
+model ClarificationMessage {
+  id                        String              @id @default(uuid()) @db.Uuid
+  projectId                 String              @db.Uuid
+  threadId                  String              @db.Uuid
+  authorId                  String              @db.Uuid
+  body                      String
+  createdAt                 DateTime            @default(now()) @db.Timestamptz(3)
+  project                   Project             @relation("ClarificationMessage_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  thread                    ClarificationThread @relation("ClarificationMessage_thread", fields: [projectId, threadId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  author                    User                @relation("ClarificationMessage_author", fields: [authorId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  ValidationMessage_message ValidationMessage[] @relation("ValidationMessage_message")
+
+  @@unique([projectId, id])
+  @@index([projectId])
+}
+
+model Validation {
+  id                              String                 @id @default(uuid()) @db.Uuid
+  projectId                       String                 @db.Uuid
+  questionId                      String                 @db.Uuid
+  decisionText                    String
+  scope                           String
+  exceptions                      String?
+  validationComment               String
+  validatedById                   String                 @db.Uuid
+  validatedAt                     DateTime               @default(now()) @db.Timestamptz(3)
+  invalidatedAt                   DateTime?              @db.Timestamptz(3)
+  invalidatedById                 String?                @db.Uuid
+  invalidationReason              String?
+  project                         Project                @relation("Validation_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  question                        Question               @relation("Validation_question", fields: [projectId, questionId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  validatedBy                     User                   @relation("Validation_validatedBy", fields: [validatedById], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  invalidatedBy                   User?                  @relation("Validation_invalidatedBy", fields: [invalidatedById], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  ValidationSource_validation     ValidationSource[]     @relation("ValidationSource_validation")
+  ValidationMessage_validation    ValidationMessage[]    @relation("ValidationMessage_validation")
+  ValidationResolution_validation ValidationResolution[] @relation("ValidationResolution_validation")
+
+  @@unique([projectId, id])
+  @@index([projectId])
+}
+
+model ValidationSource {
+  id                 String           @id @default(uuid()) @db.Uuid
+  projectId          String           @db.Uuid
+  validationId       String           @db.Uuid
+  responseRevisionId String           @db.Uuid
+  project            Project          @relation("ValidationSource_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  validation         Validation       @relation("ValidationSource_validation", fields: [projectId, validationId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  revision           ResponseRevision @relation("ValidationSource_revision", fields: [projectId, responseRevisionId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([projectId, id])
+  @@unique([validationId, responseRevisionId])
+  @@index([projectId])
+}
+
+model ValidationMessage {
+  id                     String               @id @default(uuid()) @db.Uuid
+  projectId              String               @db.Uuid
+  validationId           String               @db.Uuid
+  clarificationMessageId String               @db.Uuid
+  project                Project              @relation("ValidationMessage_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  validation             Validation           @relation("ValidationMessage_validation", fields: [projectId, validationId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  message                ClarificationMessage @relation("ValidationMessage_message", fields: [projectId, clarificationMessageId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([projectId, id])
+  @@unique([validationId, clarificationMessageId])
+  @@index([projectId])
+}
+
+model Conflict {
+  id                           String                @id @default(uuid()) @db.Uuid
+  projectId                    String                @db.Uuid
+  questionId                   String                @db.Uuid
+  reason                       String
+  openedById                   String                @db.Uuid
+  openedAt                     DateTime              @default(now()) @db.Timestamptz(3)
+  status                       ConflictStatus
+  lockVersion                  Int                   @default(0)
+  project                      Project               @relation("Conflict_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  question                     Question              @relation("Conflict_question", fields: [projectId, questionId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  openedBy                     User                  @relation("Conflict_openedBy", fields: [openedById], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  ConflictParticipant_conflict ConflictParticipant[] @relation("ConflictParticipant_conflict")
+  ConflictResolution_conflict  ConflictResolution?   @relation("ConflictResolution_conflict")
+
+  @@unique([projectId, id])
+  @@index([projectId])
+}
+
+model ConflictParticipant {
+  id                 String           @id @default(uuid()) @db.Uuid
+  projectId          String           @db.Uuid
+  conflictId         String           @db.Uuid
+  responseRevisionId String           @db.Uuid
+  project            Project          @relation("ConflictParticipant_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  conflict           Conflict         @relation("ConflictParticipant_conflict", fields: [projectId, conflictId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  revision           ResponseRevision @relation("ConflictParticipant_revision", fields: [projectId, responseRevisionId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([projectId, id])
+  @@unique([conflictId, responseRevisionId])
+  @@index([projectId])
+}
+
+model ConflictResolution {
+  id                                  String                     @id @default(uuid()) @db.Uuid
+  projectId                           String                     @db.Uuid
+  conflictId                          String                     @unique @db.Uuid
+  resolutionText                      String
+  resolvedById                        String                     @db.Uuid
+  resolvedAt                          DateTime                   @default(now()) @db.Timestamptz(3)
+  project                             Project                    @relation("ConflictResolution_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  conflict                            Conflict                   @relation("ConflictResolution_conflict", fields: [projectId, conflictId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  resolvedBy                          User                       @relation("ConflictResolution_resolvedBy", fields: [resolvedById], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  ConflictResolutionSource_resolution ConflictResolutionSource[] @relation("ConflictResolutionSource_resolution")
+  ValidationResolution_resolution     ValidationResolution[]     @relation("ValidationResolution_resolution")
+
+  @@unique([projectId, id])
+  @@unique([projectId, conflictId])
+  @@index([projectId])
+}
+
+model ConflictResolutionSource {
+  id                 String             @id @default(uuid()) @db.Uuid
+  projectId          String             @db.Uuid
+  resolutionId       String             @db.Uuid
+  responseRevisionId String             @db.Uuid
+  project            Project            @relation("ConflictResolutionSource_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  resolution         ConflictResolution @relation("ConflictResolutionSource_resolution", fields: [projectId, resolutionId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  revision           ResponseRevision   @relation("ConflictResolutionSource_revision", fields: [projectId, responseRevisionId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([projectId, id])
+  @@unique([resolutionId, responseRevisionId])
+  @@index([projectId])
+}
+
+model ValidationResolution {
+  id                   String             @id @default(uuid()) @db.Uuid
+  projectId            String             @db.Uuid
+  validationId         String             @db.Uuid
+  conflictResolutionId String             @db.Uuid
+  project              Project            @relation("ValidationResolution_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  validation           Validation         @relation("ValidationResolution_validation", fields: [projectId, validationId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  resolution           ConflictResolution @relation("ValidationResolution_resolution", fields: [projectId, conflictResolutionId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([projectId, id])
+  @@unique([validationId, conflictResolutionId])
+  @@index([projectId])
+}
+
+model QuestionDisposition {
+  id           String    @id @default(uuid()) @db.Uuid
+  projectId    String    @db.Uuid
+  questionId   String    @db.Uuid
+  reason       String
+  scope        String
+  markedById   String    @db.Uuid
+  markedAt     DateTime  @default(now()) @db.Timestamptz(3)
+  revokedAt    DateTime? @db.Timestamptz(3)
+  revokedById  String?   @db.Uuid
+  revokeReason String?
+  project      Project   @relation("QuestionDisposition_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  question     Question  @relation("QuestionDisposition_question", fields: [projectId, questionId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  markedBy     User      @relation("QuestionDisposition_markedBy", fields: [markedById], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  revokedBy    User?     @relation("QuestionDisposition_revokedBy", fields: [revokedById], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([projectId, id])
+  @@index([projectId])
+}
+
+model AuditEvent {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  projectId      String?      @db.Uuid
+  actorId        String       @db.Uuid
+  actorSnapshot  Json
+  action         String
+  objectType     String
+  objectId       String
+  occurredAt     DateTime     @default(now()) @db.Timestamptz(3)
+  before         Json?
+  after          Json?
+  requestId      String
+  payloadHash    String?
+  eventIndex     Int          @default(0)
+  result         Json?
+  organization   Organization @relation("AuditEvent_organization", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  actor          User         @relation("AuditEvent_actor", fields: [actorId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  project        Project?     @relation("AuditEvent_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([organizationId, actorId, requestId, eventIndex])
+  @@index([projectId, occurredAt, id])
+}
+
+model ImportBatch {
+  id            String   @id @default(uuid()) @db.Uuid
+  projectId     String   @db.Uuid
+  formatVersion String
+  sourceSha256  String
+  importedById  String   @db.Uuid
+  importedAt    DateTime @default(now()) @db.Timestamptz(3)
+  counts        Json
+  requestId     String
+  project       Project  @relation("ImportBatch_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  importedBy    User     @relation("ImportBatch_importedBy", fields: [importedById], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([projectId, id])
+  @@unique([projectId, sourceSha256])
+  @@unique([importedById, requestId], map: "ImportBatch_actor_request")
+  @@index([projectId])
+}

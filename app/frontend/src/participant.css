@@ -1,0 +1,999 @@
+@font-face {
+  font-family: "Acta Manrope";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/fonts/manrope-0.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Acta Manrope";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/fonts/manrope-1.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Acta Manrope";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/fonts/manrope-2.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Acta Manrope";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(/fonts/manrope-3.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Acta Plex Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(/fonts/ibm-plex-sans-0.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Acta Plex Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(/fonts/ibm-plex-sans-1.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Acta Plex Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(/fonts/ibm-plex-sans-2.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Acta Plex Sans";
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(/fonts/ibm-plex-sans-3.ttf) format("truetype");
+}
+/* Acta participant variant. These tokens and selectors never restyle other roles. */
+.acta-participant {
+  --ink: #1b1d22;
+  --ink-2: #5b5f6b;
+  --muted: #5b5f6b;
+  --paper: #f5f3f0;
+  --surface: #fff;
+  --surface-2: #edebe7;
+  --border: #dedbd5;
+  --border-strong: #c7c3bc;
+  --line: var(--border);
+  --accent: var(--installation-accent, #2b4d7c);
+  --primary: var(--accent);
+  --accent-strong: #1e3a5c;
+  --accent-soft: #e4eaf1;
+  --on-accent: #ffffff;
+  --teal: #18675f;
+  --teal-soft: #dceeec;
+  --amber: #805508;
+  --amber-soft: #f6ecd4;
+  --forest: #356842;
+  --forest-soft: #e4efe6;
+  --terracotta: #a8503b;
+  --font-display: "Acta Manrope", sans-serif;
+  --font-body: "Acta Plex Sans", sans-serif;
+  --motion-fast: 120ms;
+  --motion-base: 180ms;
+  --motion-slow: 240ms;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+  font: 14px/1.5 var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+.acta-participant h1,
+.acta-participant h2,
+.acta-participant h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.acta-participant h1 {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.4;
+  margin: 0 0 4px;
+}
+.acta-participant h2 {
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 800;
+}
+.acta-participant h3 {
+  font-size: 13.5px;
+}
+.acta-participant p {
+  line-height: 1.5;
+}
+.acta-participant a {
+  color: var(--accent);
+}
+.acta-participant .hint,
+.acta-participant .muted {
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.acta-participant .participant-content {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 28px 20px 80px;
+  min-height: calc(100vh - 56px);
+}
+.acta-participant .participant-page {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+.participant-icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  vertical-align: middle;
+}
+.acta-participant .participant-topbar {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  gap: 14px;
+}
+.participant-brand,
+.participant-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13.5px;
+  min-height: 44px;
+  flex-shrink: 0;
+}
+.participant-brand > span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  background: var(--accent);
+  color: var(--on-accent);
+  border-radius: 6px;
+}
+.acta-participant .participant-brand {
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--ink);
+}
+.participant-project-name {
+  font-size: 14px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.participant-header-context {
+  margin-left: auto;
+  color: var(--ink-2);
+  font-size: 12px;
+}
+.participant-account {
+  margin-left: auto;
+  position: relative;
+  font-size: 13px;
+}
+.participant-account > summary {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  cursor: pointer;
+  min-height: 44px;
+  font-weight: 600;
+}
+.participant-avatar {
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 11px;
+}
+.participant-account > div {
+  position: absolute;
+  right: 0;
+  top: 46px;
+  z-index: 10;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 14px -2px #1414191a;
+  padding: 12px;
+  min-width: 180px;
+  display: grid;
+  gap: 12px;
+  border-radius: 8px;
+}
+.participant-subtitle {
+  font-size: 13px;
+  color: var(--ink-2);
+  margin: 0 0 20px;
+}
+.participant-welcome {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px;
+  margin-bottom: 20px;
+}
+.participant-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0 0 16px;
+}
+.participant-summary > div {
+  display: flex;
+  flex-direction: column-reverse;
+}
+.participant-summary dt {
+  font-size: 11px;
+  color: var(--ink-2);
+  line-height: 1.3;
+  margin-top: 2px;
+}
+.participant-summary dd {
+  margin: 0;
+  font: 800 22px/1.5 var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
+.participant-summary > div:nth-child(2) dd {
+  color: var(--accent);
+}
+.participant-summary > div:nth-child(3) dd {
+  color: var(--amber);
+}
+.participant-summary > div:nth-child(4) dd {
+  color: var(--teal);
+}
+.acta-participant .button {
+  font: 600 13.5px/1.2 var(--font-body);
+  min-height: 36px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  gap: 7px;
+  box-shadow: none;
+  transition:
+    background var(--motion-fast) var(--ease),
+    border-color var(--motion-fast) var(--ease);
+  text-decoration: none;
+}
+.acta-participant .button.primary {
+  background: var(--accent);
+  color: var(--on-accent);
+  border: 1px solid transparent;
+}
+.acta-participant .button.primary:hover:not(:disabled) {
+  background: var(--accent-strong);
+}
+.acta-participant .button.secondary {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border-strong);
+}
+.acta-participant .button.secondary:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+.acta-participant .participant-continue {
+  width: 100%;
+}
+.acta-participant .participant-save-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ink-2);
+  margin: 14px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.participant-all-done {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--forest);
+  font-size: 13px;
+  margin: 0;
+}
+.participant-project {
+  margin-top: 28px;
+}
+.participant-project h2 {
+  margin: 0 0 10px;
+}
+.participant-project h2 a {
+  color: inherit;
+  text-decoration: none;
+}
+.acta-participant .participant-text-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 0;
+  color: var(--accent);
+  font: 600 13.5px var(--font-body);
+  padding: 0;
+  min-height: 36px;
+  text-align: left;
+}
+.participant-tools-toggle {
+  margin-bottom: 8px;
+}
+.participant-topic {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.participant-topic h3 {
+  margin: 0;
+}
+.participant-topic h3 button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 0;
+  background: none;
+  padding: 12px 14px;
+  text-align: left;
+  font: 700 13.5px var(--font-body);
+  color: var(--ink);
+  min-height: 44px;
+}
+.participant-topic h3 button:disabled {
+  cursor: default;
+  opacity: 1;
+}
+.participant-chevron {
+  color: var(--ink-2);
+  transition: transform var(--motion-fast) var(--ease);
+}
+.participant-chevron.open {
+  transform: rotate(90deg);
+}
+.participant-topic-count {
+  margin-left: auto;
+  font-size: 11.5px;
+  color: var(--ink-2);
+  font-weight: 600;
+}
+.participant-topic ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--border);
+}
+.participant-work-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--border);
+  min-height: 44px;
+}
+.participant-work-row:last-child {
+  border-bottom: 0;
+}
+.participant-work-row:hover {
+  background: var(--surface-2);
+}
+.participant-work-row > div {
+  flex: 1;
+  min-width: 0;
+}
+.participant-work-row > .button {
+  flex-shrink: 0;
+  padding: 5px 10px;
+  min-height: 30px;
+  font-size: 12.5px;
+  border-radius: 4px;
+}
+.acta-participant .participant-row-question {
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.5;
+  margin: 0 0 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.participant-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-left: 3px solid var(--ink-2);
+  background: var(--surface-2);
+  border-radius: 2px;
+  padding: 2px 7px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+.participant-badge .participant-icon {
+  width: 13px;
+  height: 13px;
+}
+.participant-badge.draft {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+.participant-badge.clarification {
+  border-color: var(--amber);
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+.participant-badge.sent,
+.participant-badge.review {
+  border-color: var(--teal);
+  background: var(--teal-soft);
+  color: var(--teal);
+}
+.participant-badge.validated {
+  border-color: var(--forest);
+  background: var(--forest-soft);
+  color: var(--forest);
+}
+.acta-participant .participant-condition-hint {
+  font-size: 12px;
+  color: var(--ink-2);
+  margin: 6px 0 0;
+}
+.participant-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  align-items: end;
+}
+.participant-toolbar .field {
+  flex: 1;
+  min-width: 160px;
+  margin: 0;
+}
+.participant-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.participant-filters button {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 10px;
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 600;
+  min-height: 32px;
+}
+.participant-filters button[aria-pressed="true"] {
+  background: var(--accent-soft);
+  border-color: var(--accent-soft);
+  color: var(--accent-strong);
+}
+.participant-step-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--ink-2);
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+.participant-progress {
+  height: 5px;
+  background: var(--surface-2);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.participant-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width var(--motion-slow) var(--ease);
+}
+.participant-answer-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 26px;
+  margin-bottom: 16px;
+  animation: participant-enter 160ms var(--ease);
+}
+.acta-participant .participant-answer-card h1 {
+  font-size: 17px;
+  font-weight: 800;
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+.acta-participant .participant-answer-card h2 {
+  font-size: 13px;
+  margin: 16px 0 8px;
+}
+.acta-participant .participant-answer-card h3 {
+  font-size: 12.5px;
+}
+.acta-participant .field {
+  margin: 0 0 14px;
+}
+.acta-participant .field > label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  margin-bottom: 6px;
+}
+.acta-participant input:not([type="checkbox"]):not([type="radio"]),
+.acta-participant textarea,
+.acta-participant select {
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--surface);
+  padding: 9px 11px;
+  font: 400 13.5px/1.5 var(--font-body);
+  color: var(--ink);
+  min-height: 38px;
+  width: 100%;
+}
+.acta-participant textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+.acta-participant input[type="date"],
+.acta-participant input[inputmode="decimal"] {
+  max-width: 220px;
+}
+.acta-participant .field .hint {
+  margin: 5px 0 0;
+}
+.acta-participant fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0 0 16px;
+  min-width: 0;
+}
+.acta-participant .formal-contribution {
+  margin: 0;
+  padding: 0;
+}
+.acta-participant legend {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  padding: 0;
+  margin-bottom: 6px;
+}
+.acta-participant .check {
+  display: flex;
+  gap: 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0 0 8px;
+  cursor: pointer;
+  transition:
+    background var(--motion-fast) var(--ease),
+    border-color var(--motion-fast) var(--ease);
+}
+.acta-participant .check:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+.acta-participant input[type="radio"],
+.acta-participant input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+.acta-participant .help {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  padding: 10px 13px;
+  border-radius: 0 6px 6px 0;
+  font-size: 12.5px;
+  margin: 0 0 16px;
+}
+.acta-participant .participant-disclosure {
+  border: 0;
+  margin: 10px 0;
+  padding: 0;
+  font-size: 12.5px;
+}
+.participant-disclosure > summary {
+  color: var(--accent);
+  font-weight: 600;
+  min-height: 32px;
+  cursor: pointer;
+}
+.participant-disclosure > summary .participant-icon {
+  margin-right: 6px;
+}
+.participant-disclosure[open] > summary {
+  margin-bottom: 12px;
+}
+.acta-participant .response-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 22px 0 10px;
+  flex-wrap: wrap;
+}
+.acta-participant .response-actions .actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.acta-participant .response-actions > .participant-text-button {
+  color: var(--ink-2);
+}
+.acta-participant .save-status {
+  min-height: 0;
+  font-size: 12px;
+  margin: 0 0 12px;
+}
+.acta-participant .save-status:empty {
+  display: none;
+}
+.acta-participant .alert {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-strong);
+  font-size: 13px;
+  padding: 12px 14px;
+}
+.acta-participant .alert.error {
+  background: #f3e2db;
+  border-color: var(--terracotta);
+  color: #833a29;
+}
+.acta-participant .review-submission {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  margin: 0 0 20px;
+  background: none;
+}
+.acta-participant .thread-messages {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+}
+.acta-participant .thread-messages > li {
+  border: 0;
+  padding: 0;
+  margin: 0 0 12px;
+}
+.acta-participant .thread-messages > li > p:first-child {
+  font-size: 11px;
+  color: var(--ink-2);
+  margin: 0 0 3px;
+}
+.acta-participant .thread-messages .answer-text {
+  background: var(--accent-soft);
+  border-radius: 8px;
+  padding: 10px 13px;
+  font-size: 13px;
+  max-width: 92%;
+}
+.acta-participant .participant-submission > .answer-text {
+  background: var(--surface-2);
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.acta-participant .participant-readonly h1 {
+  font-size: 17px;
+  margin: 14px 0;
+}
+.participant-readonly h2 {
+  font: 600 12.5px var(--font-body);
+  color: var(--ink-2);
+  margin-bottom: 6px;
+}
+.participant-readonly .view-meta {
+  font-size: 12.5px;
+  color: var(--ink-2);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 10px 0 18px;
+}
+.participant-receipt .participant-success {
+  text-align: center;
+  padding: 24px 0 20px;
+}
+.participant-success-icon {
+  display: grid;
+  place-items: center;
+  background: var(--forest-soft);
+  color: var(--forest);
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 14px;
+}
+.participant-success-icon svg {
+  width: 28px;
+  height: 28px;
+}
+.participant-receipt .participant-subtitle {
+  margin-top: 12px;
+}
+.participant-receipt .receipt-card {
+  max-width: 420px;
+  margin: 0 auto 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+}
+.participant-receipt .receipt-card ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  font-size: 13.5px;
+}
+.participant-receipt .receipt-card li {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+}
+.participant-receipt > .actions {
+  max-width: 420px;
+  margin: auto;
+  display: grid;
+  gap: 10px;
+}
+.participant-feedback {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--forest-soft);
+  color: var(--forest);
+  border-radius: 6px;
+  font-size: 12.5px;
+  margin-bottom: 16px;
+}
+.acta-participant
+  :is(button, a, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+@keyframes participant-enter {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-width: 768px) {
+  .acta-participant .button,
+  .acta-participant .participant-text-button,
+  .participant-filters button {
+    min-height: 44px;
+  }
+  .participant-header-context {
+    display: none;
+  }
+  .acta-participant .participant-topbar {
+    padding: 6px 16px;
+    flex-wrap: wrap;
+  }
+  .participant-project-name {
+    flex: 1;
+    min-width: 0;
+  }
+  .participant-account > summary > span:last-child {
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+@media (max-width: 600px) {
+  .acta-participant .response-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+  .acta-participant .response-actions .actions {
+    display: flex;
+    flex-direction: column;
+  }
+  .acta-participant .response-actions .button {
+    width: 100%;
+  }
+  .acta-participant .participant-answer-card {
+    padding: 20px;
+  }
+  .acta-participant .matrix-fields {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 480px) {
+  .participant-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 18px;
+  }
+  .participant-work-row {
+    flex-wrap: wrap;
+  }
+  .participant-work-row > .button {
+    width: 100%;
+  }
+  .participant-work-row > div {
+    flex-basis: 100%;
+  }
+  .acta-participant .participant-topbar {
+    gap: 10px;
+  }
+  .participant-account > summary > span:last-child {
+    display: none;
+  }
+  .participant-step-meta {
+    flex-wrap: wrap;
+  }
+  .participant-welcome {
+    padding: 22px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .acta-participant *,
+  .acta-participant *::before,
+  .acta-participant *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Participant-specific density and native keyboard controls. */
+.acta-participant .participant-step-meta {
+  display: none;
+}
+.acta-participant .participant-yesno {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.acta-participant .participant-yesno > legend,
+.acta-participant .participant-yesno > p,
+.acta-participant .participant-yesno > .participant-clear {
+  grid-column: 1/-1;
+}
+.acta-participant .participant-yesno > .check {
+  justify-content: center;
+  margin: 0;
+}
+.acta-participant .participant-clear {
+  font-size: 12px;
+  min-height: 28px;
+}
+@media (max-width: 768px) {
+  .acta-participant .participant-step-meta {
+    display: flex;
+  }
+  .acta-participant .participant-clear {
+    min-height: 44px;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  .acta-participant {
+    --ink: #edeef0;
+    --ink-2: #aeb2bc;
+    --muted: #aeb2bc;
+    --paper: #14161a;
+    --surface: #1b1e23;
+    --surface-2: #232730;
+    --border: #323740;
+    --border-strong: #454b56;
+    --accent: #7fa3d6;
+    --accent-strong: #a9c4e8;
+    --accent-soft: #233246;
+    --on-accent: #0d1520;
+    --teal: #5fc2b6;
+    --teal-soft: #17322f;
+    --amber: #e0ae55;
+    --amber-soft: #3a2e17;
+    --forest: #7fbf8f;
+    --forest-soft: #1e3324;
+    --terracotta: #e1917e;
+  }
+}
+
+/* Corrections verified against the Acta reference screenshots. */
+.acta-participant .participant-account {
+  margin: 0 0 0 auto;
+  padding: 0;
+}
+.acta-participant .participant-account > summary {
+  padding: 0;
+}
+.acta-participant h1[tabindex="-1"]:focus {
+  outline: none;
+}
+.participant-project-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.acta-participant .participant-project-heading h2 {
+  margin: 0;
+}
+.acta-participant .participant-project-heading .participant-tools-toggle {
+  margin: 0;
+  font-size: 12px;
+  min-height: 28px;
+}
+.acta-participant .participant-disclosure > summary {
+  padding: 4px 0;
+}
+.acta-participant .review-submission > .badge {
+  display: none;
+}
+.acta-participant .review-submission > .answer-text {
+  background: var(--surface-2);
+  padding: 10px 13px;
+  border-radius: 8px;
+  max-width: 88%;
+  font-size: 13px;
+}
+.acta-participant .review-submission form > .button {
+  display: flex;
+  margin-left: auto;
+}
+@media (max-width: 768px) {
+  .acta-participant .participant-project-heading .participant-tools-toggle {
+    min-height: 44px;
+  }
+}
+
+.acta-participant .participant-more {
+  margin: 8px 14px;
+  min-height: 44px;
+}

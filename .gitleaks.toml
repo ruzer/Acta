@@ -1,0 +1,20 @@
+# Exact audited false positives only; all default detection rules remain enabled.
+[extend]
+useDefault = true
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Fictional section and area UUIDs in the dashboard fixture"
+condition = "AND"
+paths = ['''(^|/)tests/fixtures/analyst-visual\.json$''']
+regexes = [
+  '''^41fd5101-c025-4dcf-9aca-d96843033cc8$''',
+  '''^8661ee5c-6723-4c2f-a553-5e55c706573b$'''
+]
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Public npm integrity hash for keyv 5.6.0; not a credential"
+condition = "AND"
+paths = ['''(^|/)docs/DEPENDENCY-LICENSES\.csv$''']
+regexes = ['''^sha512\-CYDD3SOtsHtyXeEORYRx2qBtpDJFjRTGXUtmNEMGyzYOKj1TE3tycdlho7kA1Ufx9OYWZzg52QFBGALTirzDSw==$''']

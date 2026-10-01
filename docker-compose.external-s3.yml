@@ -1,0 +1,10 @@
+# Configurable external provider: provision bucket/private credentials first.
+# Set S3_ENDPOINT, S3_REGION, S3_BUCKET and S3_* credentials in private env.
+services:
+  object-storage:
+    profiles: [bundled-storage]
+  storage-init:
+    profiles: [bundled-storage]
+  backend:
+    depends_on: !override
+      migrate: {condition: service_completed_successfully}
