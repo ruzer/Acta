@@ -7,7 +7,7 @@ Acta es una plataforma open source para convertir preguntas estructuradas, conoc
 ![Editor Escribir: temas y preguntas de un proyecto ficticio](docs/assets/01-editor-write.png)
 *Prepara un cuestionario por temas, con preguntas y seguimientos que se pueden leer de un vistazo.*
 
-Autor y titular: **Cristóbal Ruz Escobar**. Copyright (c) Cristóbal Ruz Escobar. Licencia: **AGPL-3.0-only**; [texto íntegro](LICENSE). La publicación inicial sigue su revisión remota de seguridad.
+Autor y titular: **Cristóbal Ruz Escobar**. Copyright (c) Cristóbal Ruz Escobar. Licencia: [AGPL-3.0-only](LICENSE). La publicación inicial sigue su revisión remota de seguridad.
 
 ## Qué problema resuelve
 
@@ -135,7 +135,7 @@ El upstream oficial es [github.com/ruzer/Acta](https://github.com/ruzer/Acta). E
 
 Consulta [CONTRIBUTING](CONTRIBUTING.md) para el recorrido de contribución, el mapa del repositorio y los requisitos de una contribución. Para preparar un entorno local: [Desarrollo](docs/DEVELOPMENT.md).
 
-[Issues](https://github.com/ruzer/Acta/issues) para bugs y trabajo concreto; [Discussions](https://github.com/ruzer/Acta/discussions) para preguntas e ideas. Ambos canales están habilitados.
+[Issues](https://github.com/ruzer/Acta/issues) para bugs y trabajo concreto; [Discussions](https://github.com/ruzer/Acta/discussions) para preguntas e ideas. Su habilitación quedó registrada el 2026-10-01; el estado remoto actual se comprobará en la siguiente revisión autorizada.
 
 [Documentación por audiencia](docs/README.md) · [Contratos por función](docs/CONTRACTS.md) · [Código de conducta](CODE_OF_CONDUCT.md) · [Cambios](CHANGELOG.md)
 
@@ -143,10 +143,10 @@ Consulta [CONTRIBUTING](CONTRIBUTING.md) para el recorrido de contribución, el 
 
 Los errores normales se reportan en Issues. Las vulnerabilidades necesitan un canal privado; no publiques detalles sensibles en un issue.
 
-Utiliza [Report a vulnerability](https://github.com/ruzer/Acta/security/advisories/new), el canal privado habilitado en GitHub. Lee [SECURITY](SECURITY.md).
+El canal preferido es [Report a vulnerability](https://github.com/ruzer/Acta/security/advisories/new). Su habilitación se verificó el 2026-10-01; si no está disponible, conserva el reporte en privado. Lee [SECURITY](SECURITY.md).
 
 ## Licencia
 
-Acta is licensed under the GNU Affero General Public License v3.0.
+Acta está licenciado bajo GNU Affero General Public License v3.0.
 
-**SPDX: AGPL-3.0-only.** Puedes utilizar, estudiar, modificar y redistribuir Acta conforme a [AGPL-3.0](LICENSE). La licencia no exige enviar Pull Requests a Acta. Los componentes de terceros conservan sus propias licencias y [avisos](docs/THIRD-PARTY-NOTICES.md).
+**SPDX: AGPL-3.0-only.** Puedes utilizar, estudiar, modificar y redistribuir Acta conforme a [AGPL-3.0](LICENSE). La licencia no exige enviar Pull Requests a Acta. Los componentes de terceros conservan sus propias licencias y [avisos](docs/THIRD-PARTY-NOTICES.md). Las contribuciones siguen [DCO 1.1](DCO) + Signed-off-by; consulta [CONTRIBUTING](CONTRIBUTING.md) y [GOVERNANCE](GOVERNANCE.md).

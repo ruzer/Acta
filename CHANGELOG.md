@@ -21,7 +21,8 @@ La historia pública comienza con Acta. No hay releases públicas, tags ni fecha
 ### Changed
 
 - Identidad pública Acta y tagline Questions. Evidence. Decisions.; defaults configurables y nombres técnicos de persistencia conservados.
-- Autor, titular y maintainer inicial: Cristóbal Ruz Escobar. AGPL-3.0-only y DCO 1.1 + Signed-off-by adoptados; sin CLA ni bot. Canales remotos sujetos a verificación real.
+- Autor, titular y maintainer inicial: Cristóbal Ruz Escobar. AGPL-3.0-only y DCO 1.1 + Signed-off-by adoptados; sin CLA ni bot. Primera versión prevista: 0.2.0, todavía en Unreleased.
+- Cierre documental local: textos oficiales de LICENSE y DCO cotejados, enlaces de licencia y contribución coherentes, decisiones humanas cerradas y pendientes remotos separados de las verificaciones históricas.
 
 ### Deprecated
 
@@ -37,4 +38,4 @@ Sin entradas por anunciar.
 
 ### Security
 
-- Política preparada para reporte privado de vulnerabilidades; canal pendiente antes de publicación. No se presenta como canal activo ni como corrección nueva de una vulnerabilidad.
+- Reporte de vulnerabilidades exclusivamente privado. La habilitación de GitHub Private Vulnerability Reporting se registró el 2026-10-01; el cierre local no vuelve a comprobar su disponibilidad. El contacto de moderación permanece pendiente. Esta precisión documental no es una corrección nueva de una vulnerabilidad.

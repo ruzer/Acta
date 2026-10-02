@@ -23,7 +23,7 @@ Cada guía operativa describe su procedimiento; el manifiesto registra pruebas, 
 - [Contribución desde forks](UPSTREAM-FORKS.md): sincronización y separación entre core y personalizaciones.
 - [Procedencia DCO/CLA](CONTRIBUTION-ORIGIN.md): DCO 1.1 + Signed-off-by adoptado; sin CLA ni bot.
 - [Releases y versiones](RELEASING.md): proceso futuro y recomendación pre-1.0.
-- [GitHub setup](GITHUB-SETUP.md): checklist pendiente y checks CI reales.
+- [GitHub setup](GITHUB-SETUP.md): registro de verificaciones, pendientes operativos y checks CI reales.
 - [Roadmap](../ROADMAP.md) y [Soporte](../SUPPORT.md): prioridades sin fechas y límites comunitarios.
 
 Las políticas viven en esos documentos; el manifiesto registra resultados fechados y el changelog resume cambios. La estructura preparada no habilita colaboración o publicación por sí misma.

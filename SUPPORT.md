@@ -1,6 +1,6 @@
 # Soporte de Acta
 
-Issues y Discussions están habilitados. El modelo es **community support, best effort**, sin SLA, atención 24/7, soporte empresarial ni tiempos de respuesta garantizados.
+La habilitación de Issues y Discussions se registró el 2026-10-01; su estado actual se comprobará en la siguiente revisión remota autorizada. Consulta [Canales](CONTRIBUTING.md#canales). El modelo es **community support, best effort**, sin SLA, atención 24/7, soporte empresarial ni tiempos de respuesta garantizados.
 
 - Dudas de instalación: consulta primero [Self-hosting](docs/SELF-HOSTING.md) y [Configuración](docs/CONFIGURATION.md); después, [Discussions](https://github.com/ruzer/Acta/discussions).
 - Bugs reproducibles o trabajo concreto: [Issues](https://github.com/ruzer/Acta/issues), según [CONTRIBUTING](CONTRIBUTING.md#canales).

@@ -1,6 +1,6 @@
 # Contribuir a Acta
 
-Acta se distribuye bajo [AGPL-3.0-only](LICENSE). Se adopta [DCO 1.1](DCO) + Signed-off-by para contribuciones; no hay CLA inicialmente. Issues, Discussions y GitHub Private Vulnerability Reporting están habilitados.
+Acta se distribuye bajo [AGPL-3.0-only](LICENSE). Se adopta [DCO 1.1](DCO) + Signed-off-by para contribuciones; no hay CLA inicialmente. El registro de canales y su fecha de verificación se encuentran en la sección [Canales](#canales).
 
 ## Cómo contribuir
 
@@ -35,7 +35,7 @@ Explica el problema con un ejemplo ficticio, evita traer todo el historial del f
 
 ## Canales
 
-Canales habilitados y verificados el 2026-10-01:
+Canales cuya habilitación se verificó el 2026-10-01. Este cierre local no vuelve a comprobar GitHub; su estado actual deberá verificarse en la siguiente fase remota autorizada:
 
 - [Upstream oficial](https://github.com/ruzer/Acta).
 - [Issues](https://github.com/ruzer/Acta/issues): bugs y trabajo concreto.

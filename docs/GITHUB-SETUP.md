@@ -2,6 +2,10 @@
 
 **Publicación inicial realizada; configuración verificada el 2026-10-01.** Upstream oficial: [github.com/ruzer/Acta](https://github.com/ruzer/Acta). La inspección inicial confirmó repositorio privado vacío y permisos administrativos; [gate remoto](../REMOTE-PUBLICATION-PLAN.md). Los checks sin marcar no se presentan como activos.
 
+## Alcance del registro
+
+Las casillas marcadas y el estado remoto descrito conservan evidencia de la verificación del 2026-10-01. El cierre local del 2026-10-02 no consulta ni modifica GitHub. Antes de publicar nuevos commits, comprobar de nuevo repositorio, canales, CI y protección de main; no tomar este registro histórico como confirmación del estado actual. Titularidad, licencia, maintainer y DCO ya están resueltos y no requieren nueva decisión. El canal privado de moderación sigue pendiente.
+
 ## Antes de cambiar visibilidad o recibir contribuciones
 
 - [x] Titularidad y autorización confirmadas por Cristóbal Ruz Escobar; AGPL-3.0-only adoptada y LICENSE oficial agregado. Avisos de terceros conservados.

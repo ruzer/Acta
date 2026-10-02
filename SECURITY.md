@@ -6,11 +6,11 @@ Un bug sin impacto de seguridad corresponde a [Issues](https://github.com/ruzer/
 
 ## Reporte privado
 
-**GitHub Private Vulnerability Reporting está habilitado**, verificado mediante la API de GitHub el 2026-10-01. Usa [Report a vulnerability](https://github.com/ruzer/Acta/security/advisories/new), en Security del repositorio. GitHub requiere iniciar sesión. No uses Issues o PR públicos para vulnerabilidades.
+**GitHub Private Vulnerability Reporting es el canal preferido.** Su habilitación fue verificada mediante la API de GitHub el 2026-10-01; el estado actual no se ha vuelto a consultar durante este cierre local y debe comprobarse en la siguiente fase remota autorizada. Usa [Report a vulnerability](https://github.com/ruzer/Acta/security/advisories/new), en Security del repositorio. GitHub requiere iniciar sesión. No uses Issues o PR públicos para vulnerabilidades.
 
 Incluye versión, impacto y reproducción mínima con datos ficticios. Se coordinará evaluación, corrección y divulgación para evitar exposición innecesaria; no se promete tiempo de respuesta o resolución. No envíes credenciales, evidencia real ni datos sensibles innecesarios. Si no puedes acceder al formulario privado, conserva el reporte privadamente; un issue público no es una alternativa.
 
-La verificación confirma que la función está habilitada; no se ha enviado un reporte ficticio ni probado un plazo de atención. [Configuración oficial](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/configure-vulnerability-reporting/configure-for-a-repository).
+La verificación citada corresponde a esa fecha; no demuestra disponibilidad continua ni un plazo de atención. Si la siguiente inspección encuentra la función deshabilitada, su activación o un canal privado equivalente será requisito antes de recibir reportes. No se ha enviado un reporte ficticio. [Configuración oficial](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/configure-vulnerability-reporting/configure-for-a-repository).
 
 ## Versiones y responsabilidad
 
