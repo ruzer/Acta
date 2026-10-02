@@ -3,7 +3,7 @@ name: Documentation issue
 about: Corregir o aclarar documentación para usuarios y contribuidores
 ---
 
-<!-- PENDING UNTIL PUBLICATION. No adjuntar datos o rutas privadas. -->
+<!-- No adjuntar datos o rutas privadas. Consulta CONTRIBUTING.md para los canales y su estado de verificación. -->
 ## Documento y problema
 
 Ruta relativa/sección, versión y qué resulta incorrecto o difícil de entender.

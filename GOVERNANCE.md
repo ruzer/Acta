@@ -1,6 +1,6 @@
 # Gobernanza de Acta
 
-**Autor, titular e Initial Maintainer: Cristóbal Ruz Escobar.** Licencia: **AGPL-3.0-only**, [LICENSE](LICENSE). Modelo de contribución: [DCO 1.1](DCO) + Signed-off-by; sin CLA inicialmente. Decisiones confirmadas el 2026-10-01.
+**Autor y titular: Cristóbal Ruz Escobar. Maintainer inicial: Cristóbal Ruz Escobar.** Licencia: **AGPL-3.0-only**, [LICENSE](LICENSE). Modelo de contribución: [DCO 1.1](DCO) + Signed-off-by; sin CLA inicialmente. Decisiones confirmadas el 2026-10-01.
 
 ## Acta crece desde el upstream
 

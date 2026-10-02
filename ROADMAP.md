@@ -5,7 +5,7 @@ Prioridades sin fechas ni compromiso de implementación. Esta lista no declara f
 ## Now
 
 - Titularidad, autorización, AGPL-3.0-only, maintainer y DCO 1.1: resueltos por el titular el 2026-10-01. Conservar avisos de terceros.
-- Habilitar y verificar contactos privados de seguridad/moderación y canales comunitarios.
+- Designar y verificar el contacto privado de moderación. Revalidar en la próxima fase remota el canal de seguridad y los canales comunitarios registrados como habilitados el 2026-10-01.
 - Revisar esta estructura upstream, documentación y plantillas; configurar los canales/CI solo en la fase de publicación autorizada.
 - Preparar la primera release pre-1.0 siguiendo [RELEASING](docs/RELEASING.md).
 

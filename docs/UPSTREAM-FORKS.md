@@ -1,6 +1,6 @@
 # Upstream y forks de Acta
 
-El upstream oficial es [github.com/ruzer/Acta](https://github.com/ruzer/Acta). Acta permite y espera forks bajo [AGPL-3.0-only](../LICENSE). El código está publicado; Issues y Discussions están habilitados. Una publicación de código no equivale a una release formal.
+El upstream oficial es [github.com/ruzer/Acta](https://github.com/ruzer/Acta). Acta permite y espera forks bajo [AGPL-3.0-only](../LICENSE). El registro de publicación y habilitación de Issues/Discussions corresponde al 2026-10-01; consulta [Canales](../CONTRIBUTING.md#canales) para la verificación pendiente del estado actual. Una publicación de código no equivale a una release formal.
 
 ## Vocabulario y recorrido
 

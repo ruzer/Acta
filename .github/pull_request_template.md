@@ -1,4 +1,4 @@
-<!-- Plantilla preparada: PENDING UNTIL PUBLICATION. No incluir secretos ni datos reales. Vulnerabilidades: SECURITY.md; no usar un PR público. -->
+<!-- No incluir secretos ni datos reales. Vulnerabilidades: SECURITY.md; no usar un PR público. -->
 ## Qué cambia y por qué
 
 Problema, resultado y alcance. Enlaza el issue si existe. Indica procedencia si viene de un fork.

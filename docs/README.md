@@ -13,13 +13,17 @@ El idioma editorial principal es **español**, conforme a la documentación y la
 
 Cada guía operativa describe su procedimiento; el manifiesto registra pruebas, no reemplaza instrucciones. Los contratos históricos permanecen enlazados desde el índice funcional sin exigir conocer su numeración.
 
+## Importar cuestionarios
+
+[Guía de importación](IMPORTING-QUESTIONNAIRES.md): para usuarios que preparan archivos, administradores que revisan áreas y permisos, y desarrolladores que mantienen ejemplos. [Ejemplo mínimo](../examples/questionnaire-template.minimal.json) · [Ejemplo completo](../examples/questionnaire-template.full.json) · [Contrato técnico](IMPORT-FORMAT.md).
+
 ## Preparación upstream
 
 - [Gobernanza](../GOVERNANCE.md): roles, aceptación y política de forks.
 - [Contribución desde forks](UPSTREAM-FORKS.md): sincronización y separación entre core y personalizaciones.
 - [Procedencia DCO/CLA](CONTRIBUTION-ORIGIN.md): DCO 1.1 + Signed-off-by adoptado; sin CLA ni bot.
 - [Releases y versiones](RELEASING.md): proceso futuro y recomendación pre-1.0.
-- [GitHub setup](GITHUB-SETUP.md): checklist pendiente y checks CI reales.
+- [GitHub setup](GITHUB-SETUP.md): registro de verificaciones, pendientes operativos y checks CI reales.
 - [Roadmap](../ROADMAP.md) y [Soporte](../SUPPORT.md): prioridades sin fechas y límites comunitarios.
 
 Las políticas viven en esos documentos; el manifiesto registra resultados fechados y el changelog resume cambios. La estructura preparada no habilita colaboración o publicación por sí misma.

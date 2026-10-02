@@ -97,7 +97,7 @@ Storage: VersityGW default verificado; MinIO legacy con riesgos upstream; Garage
 
 **No published minimum yet.** No existen mediciones publicadas de CPU, RAM o disco para fijar mínimos. Una instalación independiente reproducible no equivale a imágenes byte-idénticas ni a certificación total de dependencias/OS. Los exports no son backups completos.
 
-## Antes de publicación
+## Registro previo a publicación — sustituido por los cierres posteriores
 
 Titularidad, autorización y licencia de Acta quedaron confirmadas el 2026-10-01. Autor y titular: Cristóbal Ruz Escobar. **AGPL-3.0-only aplicada.** Los avisos de terceros se conservan; sus obligaciones específicas de futuras imágenes binarias permanecen separadas.
 
@@ -136,3 +136,47 @@ LICENSE es copia byte a byte de `https://www.gnu.org/licenses/agpl-3.0.txt`. SHA
 Los OFL, licencias/NOTICE de storage, fuentes y demás archivos de terceros conservan sus hashes. Las revisiones de dependencias binarias ya documentadas se mantienen para futuras imágenes; no se declaran resueltas por adoptar LICENSE.
 
 Clasificación de pendientes: titularidad/licencia/maintainer/DCO **CERRADOS**; canales privados y configuración remota **OPERATIVOS, sujetos a verificación**; futuras releases/imágenes/plataformas no ensayadas **FUERA DE ESTA PUBLICACIÓN INICIAL**; PENDING de los contratos de respuesta **ESTADO FUNCIONAL, no pendiente editorial**. [Informe remoto y estrategia](REMOTE-PUBLICATION-PLAN.md).
+
+## Experiencia de importación — 2026-10-02
+
+**IMPORT EXPERIENCE READY: YES.** Mejora local de ayuda, ejemplos y documentación, sin publicar esta actualización.
+
+Se conserva el importador y contrato 1.0. Se añaden ejemplos mínimo/completo, guía para usuarios, evaluación tabular solo propuesta y descargas estáticas desde Importar. Los errores muestran el elemento y campo en lenguaje humano manteniendo la ruta técnica. Se corrigió el foco del título del preview para ejecutarlo después del render; antes podía perderse por temporización. Backend, persistencia, permisos, contratos, Docker, storage y licencias no se modificaron.
+
+| Verificación ejecutada | Resultado |
+|---|---|
+| Ejemplos con parser, Zod y reglas de producción | PASS: mínimo (2 preguntas) y completo (10 preguntas, 8 tipos) |
+| Unit/component completo | 104/104 PASS, incluye 6 pruebas de ejemplos y 6 de UI de importación |
+| Integración PostgreSQL de intercambio | 9/9 PASS: bytes de ambos archivos → preview sin escritura → confirmación DRAFT; idempotencia, atomicidad/rollback, permisos, hash y versión |
+| E2E Chromium de intercambio/importación | 5/5 PASS; descargas idénticas a los archivos públicos, adaptación de ID, error/corrección, preview, consentimiento, confirmación y acceso al editor |
+| Repetición específica de los dos recorridos nuevos | 6/6 PASS (3 repeticiones por recorrido), retries=0 |
+| Teclado, foco, axe y reflow | PASS en los recorridos E2E, escritorio y 390 px; captura móvil revisada |
+| Lint / typecheck / build frontend y backend | PASS; persiste el aviso previo de bundle mayor de 500 kB |
+| Enlaces / residuos / Gitleaks / diff whitespace | PASS; sin nuevos enlaces rotos, referencias privadas ni secretos |
+
+La primera ejecución de los nuevos E2E encontró un selector ambiguo de detalles; se acotó al error concreto. La siguiente reveló el fallo real de foco descrito arriba; tras corregirlo pasaron los recorridos. No se añadieron retries ni skips. No se repitió la suite Playwright completa de otras funcionalidades: el alcance de navegador fue intercambio e importación. Las pruebas utilizaron una instancia PostgreSQL descartable y datos ficticios, sin tocar bases existentes.
+
+La documentación registra diferencias históricas como DOCUMENTATION MISMATCH en el contrato de importación. No se ofrece JSON Schema parcial como sustituto del validador real. No se implementó Excel/CSV, merge, overwrite ni otro importador. No hubo commit, push, release ni operaciones GitHub en esta tarea.
+
+## Cierre legal y open source local — 2026-10-02
+
+Autor, titular y maintainer inicial: **Cristóbal Ruz Escobar**. Copyright (c) Cristóbal Ruz Escobar. Producto Acta, tagline Questions. Evidence. Decisions., upstream oficial previsto [Acta](https://github.com/ruzer/Acta). Licencia **AGPL-3.0-only**; **DCO 1.1 + Signed-off-by**; sin CLA inicialmente. Soporte comunitario best effort, main, Semantic Versioning y primera versión prevista **0.2.0**. Son decisiones definitivas, no bloqueadores pendientes.
+
+LICENSE ya estaba instalado y se cotejó byte a byte con [GNU](https://www.gnu.org/licenses/agpl-3.0.txt). DCO ya estaba instalado y coincide con el texto del bloque oficial de [Developer Certificate of Origin](https://developercertificate.org/), retirando únicamente la indentación HTML. No se modificaron los textos legales ni los avisos de terceros. LICENSE-PENDING.md está ausente.
+
+| Coincidencia o pendiente | Clasificación y tratamiento |
+|---|---|
+| Titularidad, autorización, licencia, maintainer, DCO | CERRADOS; se conserva la decisión y no se solicita nuevamente |
+| PENDING del expediente editorial anterior y del registro previo a publicación | HISTÓRICO, sustituido por los cierres fechados; no es un bloqueo legal actual |
+| PENDING y pending de contratos/código de respuestas | ESTADO FUNCIONAL; no es una tarea legal ni editorial |
+| Marcadores de publicación de las plantillas de PR e Issues | RETIRADOS; las plantillas están preparadas y remiten a las políticas y al estado de canales |
+| Issues, Discussions, reporte privado, CI y protección de main | REVERIFICACIÓN REMOTA PENDIENTE; existe registro fechado de verificaciones anteriores, no una comprobación actual |
+| Contacto privado de moderación | PENDIENTE REAL de designación/verificación; no se inventa email |
+| Aprobaciones independientes, CODEOWNERS, badges, tags/releases e imágenes | OPERACIÓN FUTURA; solo cuando existan responsables, destinos y autorización |
+| Obligaciones de licencias de futuras imágenes binarias | REVISIÓN DE DISTRIBUCIÓN ESPECÍFICA; no la sustituye la licencia principal del código de Acta |
+
+Las versiones de raíz, frontend, backend, contracts y lockfile coinciden en 0.2.0; no se cambian paquetes ni se crea tag/release. Los avisos OFL, licencias/NOTICE de VersityGW, inventarios y fuentes/activos de terceros se preservan. Los identificadores históricos de migraciones/autenticación y sus pruebas se conservan por compatibilidad; no representan branding público ni información institucional nueva.
+
+Este cierre es local. No consulta GitHub, no hace fetch/push ni configura servicios remotos. El siguiente paso autorizado será inspeccionar el remoto y decidir una publicación controlada, preservando su contenido. Los registros anteriores de publicación se mantienen como historia, no como resultado de esta ejecución.
+
+Verificación local ejecutada: lint, typecheck y build frontend/backend PASS (permanece el aviso previo de bundle mayor de 500 kB); enlaces relativos y anclas válidos; estructura Markdown sin fences abiertos ni marcadores de conflicto; Gitleaks sin hallazgos con las exclusiones exactas existentes; diff sin errores de whitespace. No existe un script dedicado de tests documentales ni markdownlint configurado: se verificaron enlaces, estructura, textos legales, inventario y hashes. No se repitieron pruebas destructivas, PostgreSQL ni navegador por cambios exclusivamente documentales. Código, contratos, permisos, Docker, dependencias, versiones y avisos de terceros permanecen idénticos.

@@ -1,0 +1,51 @@
+{
+  "formatVersion": "1.0",
+  "kind": "questionnaire-template",
+  "project": {
+    "externalId": "EXAMPLE-MINIMAL",
+    "name": "Solicitud interna — ejemplo mínimo"
+  },
+  "areas": [
+    {
+      "code": "SERVICES",
+      "name": "Equipo de servicios"
+    }
+  ],
+  "sections": [
+    {
+      "externalId": "RECEPTION",
+      "title": "Recepción",
+      "order": 1
+    }
+  ],
+  "questions": [
+    {
+      "externalId": "REQ-001",
+      "sectionExternalId": "RECEPTION",
+      "title": "Solicitud registrada",
+      "question": "¿Las solicitudes se registran antes de atenderse?",
+      "priority": "P2",
+      "type": "YES_NO",
+      "required": true,
+      "responsibleAreaCode": "SERVICES",
+      "order": 1,
+      "options": [],
+      "references": []
+    },
+    {
+      "externalId": "REQ-01",
+      "sectionExternalId": "RECEPTION",
+      "title": "Canal de recepción",
+      "question": "¿Cuál es el canal principal para recibir solicitudes?",
+      "priority": "P2",
+      "type": "SHORT_TEXT",
+      "required": true,
+      "responsibleAreaCode": "SERVICES",
+      "order": 2,
+      "options": [],
+      "references": []
+    }
+  ],
+  "conditions": [],
+  "traceabilityReferences": []
+}

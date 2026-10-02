@@ -2,7 +2,7 @@ import { before, after, test } from "node:test";
 import assert from "node:assert/strict";
 import { randomBytes, randomUUID } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { config } from "dotenv";
@@ -696,3 +696,82 @@ test("Areas exact-code/name; analyst imports with existing area; CSRF/scope and 
   );
   assert.equal(unauth.status, 403);
 });
+
+for (const kind of ["minimal", "full"]) {
+  test(`public ${kind} example: exact bytes preview then atomic DRAFT structure`, async () => {
+    const bytes = await readFile(
+      new URL(
+        `../../examples/questionnaire-template.${kind}.json`,
+        import.meta.url,
+      ),
+      "utf8",
+    );
+    const file = JSON.parse(bytes),
+      p = await emptyProject(file.project.externalId);
+    const previous = await db.auditEvent.count({ where: { projectId: p.id } });
+    const preview = await importFile(p, bytes);
+    assert.equal(preview.status, 201);
+    assert.deepEqual(preview.data.errors, []);
+    assert.equal(preview.data.canConfirm, true);
+    assert.equal(preview.data.counts.questions, file.questions.length);
+    assert.equal(preview.data.counts.sections, file.sections.length);
+    assert.equal(await db.section.count({ where: { projectId: p.id } }), 0);
+    assert.equal(
+      await db.auditEvent.count({ where: { projectId: p.id } }),
+      previous,
+    );
+    const command = confirmation(preview.data);
+    const result = await importFile(p, bytes, command);
+    assert.equal(result.status, 201, JSON.stringify(result.data));
+    const questionnaire = await ok(`/projects/${p.id}/questionnaire`, {
+      session: admin,
+    });
+    assert.equal(questionnaire.questions.length, file.questions.length);
+    assert.ok(
+      questionnaire.questions.every(
+        (q) => q.publication === "DRAFT" && q.status === "NOT_REVIEWED",
+      ),
+    );
+    assert.deepEqual(
+      new Set(questionnaire.questions.map((q) => q.externalId)),
+      new Set(file.questions.map((q) => q.externalId)),
+    );
+    const revisions = await db.questionRevision.findMany({
+      where: { projectId: p.id },
+    });
+    assert.deepEqual(
+      new Set(revisions.map((r) => r.type)),
+      new Set(file.questions.map((q) => q.type)),
+    );
+    assert.equal(
+      await db.questionCondition.count({ where: { projectId: p.id } }),
+      file.conditions.length,
+    );
+    assert.equal(
+      await db.questionTraceability.count({ where: { projectId: p.id } }),
+      file.questions.reduce((n, q) => n + q.references.length, 0),
+    );
+    assert.equal(await db.response.count({ where: { projectId: p.id } }), 0);
+    assert.equal(
+      await db.questionAssignment.count({ where: { projectId: p.id } }),
+      0,
+    );
+    if (kind === "full") {
+      const parent = questionnaire.questions.find(
+        (q) => q.externalId === "REQ-006",
+      );
+      const followup = questionnaire.questions.find(
+        (q) => q.externalId === "REQ-007",
+      );
+      assert.equal(followup.groupParentId, parent.id);
+      assert.equal(followup.condition, null);
+      assert.deepEqual(
+        revisions.find((r) => r.type === "MATRIX").config,
+        file.questions.find((q) => q.type === "MATRIX").config,
+      );
+    }
+    const repeat = await importFile(p, bytes, command);
+    assert.deepEqual(repeat.data, result.data);
+    assert.equal(await db.importBatch.count({ where: { projectId: p.id } }), 1);
+  });
+}
