@@ -136,3 +136,24 @@ LICENSE es copia byte a byte de `https://www.gnu.org/licenses/agpl-3.0.txt`. SHA
 Los OFL, licencias/NOTICE de storage, fuentes y demás archivos de terceros conservan sus hashes. Las revisiones de dependencias binarias ya documentadas se mantienen para futuras imágenes; no se declaran resueltas por adoptar LICENSE.
 
 Clasificación de pendientes: titularidad/licencia/maintainer/DCO **CERRADOS**; canales privados y configuración remota **OPERATIVOS, sujetos a verificación**; futuras releases/imágenes/plataformas no ensayadas **FUERA DE ESTA PUBLICACIÓN INICIAL**; PENDING de los contratos de respuesta **ESTADO FUNCIONAL, no pendiente editorial**. [Informe remoto y estrategia](REMOTE-PUBLICATION-PLAN.md).
+
+## Experiencia de importación — 2026-10-02
+
+**IMPORT EXPERIENCE READY: YES.** Mejora local de ayuda, ejemplos y documentación, sin publicar esta actualización.
+
+Se conserva el importador y contrato 1.0. Se añaden ejemplos mínimo/completo, guía para usuarios, evaluación tabular solo propuesta y descargas estáticas desde Importar. Los errores muestran el elemento y campo en lenguaje humano manteniendo la ruta técnica. Se corrigió el foco del título del preview para ejecutarlo después del render; antes podía perderse por temporización. Backend, persistencia, permisos, contratos, Docker, storage y licencias no se modificaron.
+
+| Verificación ejecutada | Resultado |
+|---|---|
+| Ejemplos con parser, Zod y reglas de producción | PASS: mínimo (2 preguntas) y completo (10 preguntas, 8 tipos) |
+| Unit/component completo | 104/104 PASS, incluye 6 pruebas de ejemplos y 6 de UI de importación |
+| Integración PostgreSQL de intercambio | 9/9 PASS: bytes de ambos archivos → preview sin escritura → confirmación DRAFT; idempotencia, atomicidad/rollback, permisos, hash y versión |
+| E2E Chromium de intercambio/importación | 5/5 PASS; descargas idénticas a los archivos públicos, adaptación de ID, error/corrección, preview, consentimiento, confirmación y acceso al editor |
+| Repetición específica de los dos recorridos nuevos | 6/6 PASS (3 repeticiones por recorrido), retries=0 |
+| Teclado, foco, axe y reflow | PASS en los recorridos E2E, escritorio y 390 px; captura móvil revisada |
+| Lint / typecheck / build frontend y backend | PASS; persiste el aviso previo de bundle mayor de 500 kB |
+| Enlaces / residuos / Gitleaks / diff whitespace | PASS; sin nuevos enlaces rotos, referencias privadas ni secretos |
+
+La primera ejecución de los nuevos E2E encontró un selector ambiguo de detalles; se acotó al error concreto. La siguiente reveló el fallo real de foco descrito arriba; tras corregirlo pasaron los recorridos. No se añadieron retries ni skips. No se repitió la suite Playwright completa de otras funcionalidades: el alcance de navegador fue intercambio e importación. Las pruebas utilizaron una instancia PostgreSQL descartable y datos ficticios, sin tocar bases existentes.
+
+La documentación registra diferencias históricas como DOCUMENTATION MISMATCH en el contrato de importación. No se ofrece JSON Schema parcial como sustituto del validador real. No se implementó Excel/CSV, merge, overwrite ni otro importador. No hubo commit, push, release ni operaciones GitHub en esta tarea.

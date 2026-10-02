@@ -191,3 +191,18 @@ Preview inválido retorna hasta 100 errores con JSON Pointer; no guarda archivo 
 Los localizadores documentales se preservan en QuestionRevision.sourceLocator; no se leen sus rutas. Áreas ya existentes deben coincidir en code/nombre y estar activas. Counts.areas indica áreas nuevas, no las ya resueltas. Las referencias sin enlaces pueden permanecer en el catálogo; «huérfana» significa enlace a una referencia inexistente, no obliga artificialmente a utilizar todo el catálogo.
 
 Presupuesto de exportación síncrona: 100,000 registros y 32 MiB de representación JSON estimada por BD; archivo máximo 64 MiB, dos exportaciones por instancia. Esta precisión operativa no altera decisiones/estados ni promete restauración de backup. CSV prefija fórmulas con apóstrofo; no normaliza el dato original. Los datos de auditoría de borradores se reducen a metadatos seguros.
+
+## DOCUMENTATION MISMATCH — auditoría de ejemplos públicos
+
+La implementación es la autoridad. Se preserva la documentación histórica anterior; estas precisiones describen lo realmente aceptado, sin cambiar el importador:
+
+- `externalId`/code deben empezar por letra ASCII o número. Los caracteres `._:/-` se permiten después; no hay trim ni normalización. También se aplica a códigos de opciones (hasta 64 caracteres).
+- El esquema limita además `areas` a 2,000, `conditions` a 2,000 y referencias por pregunta a 10,000. El presupuesto total de enlaces es separado.
+- `config` puede ser `{}` incluso para YES_NO/SINGLE_CHOICE. La ausencia de config es la forma recomendada en ejemplos cuando no se necesita. MATRIX exige filas/columnas mediante `validateQuestion`, no solo Zod.
+- Los límites de importación ya son configurables en `importLimits`; pueden reducirse pero no aumentarse sobre los máximos del esquema. La interfaz anuncia los máximos predeterminados.
+- `project.description` omitida queda vacía al confirmar; nombre y descripción se actualizan con el archivo. El preview devuelve el nombre propuesto, no la descripción ni el nombre anterior. La guía pide revisar ambos en el archivo; no se amplía el contrato.
+- La regla de proyecto vacío incluye lotes previos y elementos archivados. No hay merge, overwrite ni segundo import incremental.
+
+No se publica un JSON Schema parcial como autoridad alternativa. `templateInput` describe forma y tipos; `inspectTemplate` añade parser estricto, unicidad, ciclos, configuración por tipo y límites; `ImportService` verifica permisos, proyecto y áreas en PostgreSQL. Un JSON Schema generado solo desde Zod no cubriría esas reglas y podría inducir una falsa validación completa. Los ejemplos públicos se comprueban contra esa cadena real.
+
+[Guía para usuarios](IMPORTING-QUESTIONNAIRES.md) · [Mínimo](../examples/questionnaire-template.minimal.json) · [Completo](../examples/questionnaire-template.full.json).

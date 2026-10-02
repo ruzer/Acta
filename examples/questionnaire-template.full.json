@@ -1,0 +1,292 @@
+{
+  "formatVersion": "1.0",
+  "kind": "questionnaire-template",
+  "project": {
+    "externalId": "EXAMPLE-FULL",
+    "name": "Proceso de solicitudes internas",
+    "description": "Ejemplo ficticio para documentar recepción, revisión, autorización y seguimiento."
+  },
+  "areas": [
+    {
+      "code": "SERVICES",
+      "name": "Equipo de servicios"
+    },
+    {
+      "code": "COORDINATION",
+      "name": "Equipo de coordinación"
+    }
+  ],
+  "sections": [
+    {
+      "externalId": "RECEPTION",
+      "title": "Recepción",
+      "order": 1
+    },
+    {
+      "externalId": "REVIEW",
+      "title": "Revisión",
+      "order": 2
+    },
+    {
+      "externalId": "AUTHORIZATION",
+      "title": "Autorización",
+      "order": 3
+    },
+    {
+      "externalId": "FOLLOWUP",
+      "title": "Seguimiento",
+      "order": 4
+    }
+  ],
+  "questions": [
+    {
+      "externalId": "REQ-001",
+      "sectionExternalId": "RECEPTION",
+      "title": "Registro inicial",
+      "question": "¿Todas las solicitudes reciben un registro inicial?",
+      "priority": "P2",
+      "type": "YES_NO",
+      "required": true,
+      "responsibleAreaCode": "SERVICES",
+      "order": 1,
+      "options": [],
+      "references": [],
+      "helpText": "Describe la práctica habitual del equipo, sin datos personales."
+    },
+    {
+      "externalId": "REQ-01",
+      "sectionExternalId": "RECEPTION",
+      "title": "Canal principal",
+      "question": "¿Cuál es el canal principal por el que llegan las solicitudes?",
+      "priority": "P2",
+      "type": "SHORT_TEXT",
+      "required": true,
+      "responsibleAreaCode": "SERVICES",
+      "order": 2,
+      "options": [],
+      "references": [],
+      "config": {
+        "maxLength": 200
+      }
+    },
+    {
+      "externalId": "REQ-003",
+      "sectionExternalId": "RECEPTION",
+      "title": "Canales disponibles",
+      "question": "¿Qué canales pueden utilizarse para presentar una solicitud?",
+      "priority": "P2",
+      "type": "MULTIPLE_CHOICE",
+      "required": true,
+      "responsibleAreaCode": "SERVICES",
+      "order": 3,
+      "options": [
+        {
+          "value": "FORM",
+          "label": "Formulario",
+          "order": 1
+        },
+        {
+          "value": "DESK",
+          "label": "Mesa de atención",
+          "order": 2
+        },
+        {
+          "value": "PHONE",
+          "label": "Teléfono",
+          "order": 3
+        }
+      ],
+      "references": [],
+      "config": {
+        "minSelections": 1,
+        "maxSelections": 3
+      }
+    },
+    {
+      "externalId": "REQ-004",
+      "sectionExternalId": "REVIEW",
+      "title": "Información necesaria",
+      "question": "¿Qué información necesita el equipo para revisar una solicitud?",
+      "priority": "P2",
+      "type": "LONG_TEXT",
+      "required": true,
+      "responsibleAreaCode": "SERVICES",
+      "order": 1,
+      "options": [],
+      "references": [
+        {
+          "type": "DOCUMENT",
+          "externalId": "GUIDE-001",
+          "scopeNote": "Campos que deben acompañar a una solicitud."
+        }
+      ],
+      "config": {
+        "maxLength": 2000
+      },
+      "sourceLocator": {
+        "document": "guia-solicitudes-ejemplo.md",
+        "anchor": "revision"
+      }
+    },
+    {
+      "externalId": "REQ-005",
+      "sectionExternalId": "REVIEW",
+      "title": "Plazo habitual",
+      "question": "¿Cuántos días tarda normalmente la revisión inicial?",
+      "priority": "P2",
+      "type": "NUMBER",
+      "required": true,
+      "responsibleAreaCode": "SERVICES",
+      "order": 2,
+      "options": [],
+      "references": [],
+      "config": {
+        "min": 0,
+        "max": 30,
+        "integer": true
+      }
+    },
+    {
+      "externalId": "REQ-006",
+      "sectionExternalId": "AUTHORIZATION",
+      "title": "Criterio de autorización",
+      "question": "¿Cuándo necesita autorización una solicitud?",
+      "priority": "P1",
+      "type": "SINGLE_CHOICE",
+      "required": true,
+      "responsibleAreaCode": "COORDINATION",
+      "order": 1,
+      "options": [
+        {
+          "value": "ALWAYS",
+          "label": "Siempre",
+          "order": 1
+        },
+        {
+          "value": "EXCEPTIONAL",
+          "label": "Solo en casos extraordinarios",
+          "order": 2
+        },
+        {
+          "value": "NEVER",
+          "label": "Nunca",
+          "order": 3
+        }
+      ],
+      "references": [
+        {
+          "type": "BUSINESS_RULE",
+          "externalId": "RULE-001"
+        }
+      ]
+    },
+    {
+      "externalId": "REQ-007",
+      "sectionExternalId": "AUTHORIZATION",
+      "title": "Responsable de autorización",
+      "question": "¿Qué función o equipo autoriza las solicitudes?",
+      "priority": "P2",
+      "type": "SHORT_TEXT",
+      "required": true,
+      "responsibleAreaCode": "COORDINATION",
+      "order": 2,
+      "options": [],
+      "references": [],
+      "groupParentExternalId": "REQ-006",
+      "helpText": "Indica una función o equipo; no incluyas nombres de personas."
+    },
+    {
+      "externalId": "REQ-008",
+      "sectionExternalId": "AUTHORIZATION",
+      "title": "Casos extraordinarios",
+      "question": "¿Qué situaciones se consideran extraordinarias?",
+      "priority": "P2",
+      "type": "LONG_TEXT",
+      "required": true,
+      "responsibleAreaCode": "COORDINATION",
+      "order": 3,
+      "options": [],
+      "references": [],
+      "groupParentExternalId": "REQ-006"
+    },
+    {
+      "externalId": "REQ-009",
+      "sectionExternalId": "FOLLOWUP",
+      "title": "Próxima revisión del proceso",
+      "question": "¿En qué fecha se revisará de nuevo este proceso?",
+      "priority": "P2",
+      "type": "DATE",
+      "required": false,
+      "responsibleAreaCode": "SERVICES",
+      "order": 1,
+      "options": [],
+      "references": []
+    },
+    {
+      "externalId": "REQ-010",
+      "sectionExternalId": "FOLLOWUP",
+      "title": "Avisos durante el proceso",
+      "question": "¿Se informa a quien solicita en cada momento del proceso?",
+      "priority": "P2",
+      "type": "MATRIX",
+      "required": true,
+      "responsibleAreaCode": "SERVICES",
+      "order": 2,
+      "options": [],
+      "references": [],
+      "config": {
+        "rows": [
+          {
+            "key": "received",
+            "label": "Recepción de la solicitud"
+          },
+          {
+            "key": "reviewed",
+            "label": "Resultado de la revisión"
+          },
+          {
+            "key": "closed",
+            "label": "Cierre de la solicitud"
+          }
+        ],
+        "columns": [
+          {
+            "key": "yes",
+            "label": "Sí"
+          },
+          {
+            "key": "no",
+            "label": "No"
+          },
+          {
+            "key": "sometimes",
+            "label": "A veces"
+          }
+        ]
+      }
+    }
+  ],
+  "conditions": [
+    {
+      "parentQuestionExternalId": "REQ-006",
+      "childQuestionExternalId": "REQ-008",
+      "operator": "EQUALS",
+      "value": "EXCEPTIONAL"
+    }
+  ],
+  "traceabilityReferences": [
+    {
+      "type": "DOCUMENT",
+      "externalId": "GUIDE-001",
+      "label": "Guía ficticia de solicitudes",
+      "description": "Referencia de ejemplo; no corresponde a un documento real.",
+      "url": "https://example.org/requests-guide"
+    },
+    {
+      "type": "BUSINESS_RULE",
+      "externalId": "RULE-001",
+      "label": "Autorización de solicitudes extraordinarias",
+      "description": "Regla ficticia que el cuestionario busca aclarar."
+    }
+  ]
+}

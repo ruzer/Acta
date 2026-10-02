@@ -94,6 +94,10 @@ Abre [localhost:4317](http://localhost:4317). Crea un proyecto desde **Administr
 
 Este arranque local no expone la aplicación a otras computadoras. Para un servidor y HTTPS, sigue [Self-hosting](docs/SELF-HOSTING.md). No borres volúmenes para actualizar o resolver errores.
 
+## Importar tu cuestionario
+
+Prepara un proyecto vacío y carga tus temas y preguntas desde JSON. Puedes partir del [ejemplo mínimo](examples/questionnaire-template.minimal.json) o del [ejemplo completo](examples/questionnaire-template.full.json). Sigue la [guía de importación](docs/IMPORTING-QUESTIONNAIRES.md) para adaptar el archivo, revisar errores y confirmar. Las preguntas quedan en borrador; después asignas participantes y publicas.
+
 ## Self-hosting
 
 El despliegue incluido usa **frontend + backend + PostgreSQL + VersityGW**, con trabajos de inicialización y migraciones.

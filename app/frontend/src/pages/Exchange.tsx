@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
@@ -14,6 +14,62 @@ import {
   Select,
 } from "../ui";
 import { ProjectTools } from "./Visibility";
+import minimalTemplateUrl from "../../../../examples/questionnaire-template.minimal.json?url";
+import fullTemplateUrl from "../../../../examples/questionnaire-template.full.json?url";
+
+function importIssueContext(path: string): string {
+  const parts = path.split("/").slice(1);
+  const collections: Record<string, string> = {
+    questions: "Pregunta",
+    sections: "Tema",
+    areas: "Área",
+    conditions: "Condición",
+    traceabilityReferences: "Referencia",
+    options: "Opción",
+    references: "Referencia",
+    rows: "Fila",
+    columns: "Columna",
+  };
+  const fields: Record<string, string> = {
+    externalId: "Identificador externo",
+    sectionExternalId: "Tema de destino",
+    responsibleAreaCode: "Área responsable",
+    type: "Tipo de respuesta",
+    required: "Obligatoriedad",
+    priority: "Prioridad",
+    order: "Orden",
+    title: "Título",
+    question: "Enunciado",
+    helpText: "Ayuda",
+    options: "Opciones",
+    config: "Configuración de respuesta",
+    code: "Código",
+    name: "Nombre",
+    value: "Valor",
+    label: "Texto visible",
+    url: "Enlace",
+    groupParentExternalId: "Pregunta principal",
+    operator: "Condición",
+    parentQuestionExternalId: "Pregunta que activa la condición",
+    childQuestionExternalId: "Pregunta dependiente",
+  };
+  const context: string[] = [];
+  for (let i = 0; i < parts.length; i++) {
+    const key = parts[i] ?? "";
+    const label = Object.hasOwn(collections, key)
+      ? collections[key]
+      : undefined;
+    const next = parts[i + 1];
+    if (label && next && /^\d+$/.test(next)) {
+      context.push(`${label} ${Number(next) + 1}`);
+      i++;
+    } else if (parts[i] === "project") context.push("Proyecto");
+  }
+  const fieldKey = parts.at(-1) ?? "";
+  const field = Object.hasOwn(fields, fieldKey) ? fields[fieldKey] : undefined;
+  if (field) context.push(field);
+  return context.join(" · ") || "Archivo";
+}
 const countLabels = {
   projects: "Proyecto",
   sections: "Temas",
@@ -35,6 +91,9 @@ export function ImportStructure() {
     [error, setError] = useState("");
   const requestId = useRef(crypto.randomUUID()),
     heading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (preview) heading.current?.focus();
+  }, [preview]);
   async function review() {
     if (!file) return;
     setBusy(true);
@@ -49,7 +108,6 @@ export function ImportStructure() {
       );
       setPreview(p);
       requestId.current = crypto.randomUUID();
-      setTimeout(() => heading.current?.focus(), 0);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -104,6 +162,52 @@ export function ImportStructure() {
         </>
       ) : (
         <>
+          <h2>¿No tienes un archivo?</h2>
+          <p>
+            Descarga un ejemplo y adapta sus textos. El mínimo tiene un tema y
+            dos preguntas; el completo muestra los ocho tipos de respuesta.
+          </p>
+          <ul>
+            <li>
+              <a
+                href={minimalTemplateUrl}
+                download="questionnaire-template.minimal.json"
+              >
+                Descargar ejemplo mínimo
+              </a>
+            </li>
+            <li>
+              <a
+                href={fullTemplateUrl}
+                download="questionnaire-template.full.json"
+              >
+                Descargar ejemplo completo
+              </a>
+            </li>
+          </ul>
+          <details>
+            <summary>Cómo preparar el archivo</summary>
+            <p>
+              Crea un proyecto vacío. Copia su identificador externo exactamente
+              en <code>project.externalId</code> dentro del archivo. Los
+              ejemplos usan EXAMPLE-MINIMAL y EXAMPLE-FULL. El nombre y la
+              descripción del archivo serán los del proyecto después de
+              importar.
+            </p>
+            <p>
+              Los temas están en <code>sections</code> y las preguntas en{" "}
+              <code>questions</code>. Conserva los códigos que los relacionan.
+              Cada área responsable debe figurar en <code>areas</code>: un
+              Administrador puede confirmar su creación; un Analista necesita
+              que ya exista con el mismo código y nombre.
+            </p>
+            <p>
+              Guarda como JSON en UTF-8, selecciona el archivo y pulsa Revisar
+              archivo. Si corriges algo, vuelve a seleccionarlo. No se mezclan
+              ni reemplazan cuestionarios existentes. Excel, CSV y el JSON de
+              exportación no son plantillas de importación.
+            </p>
+          </details>
           <h2>1. Seleccionar archivo</h2>
           <Input
             label="Archivo JSON"
@@ -145,6 +249,9 @@ export function ImportStructure() {
               </dl>
               {[...preview.errors, ...preview.warnings].map((issue, i) => (
                 <div className="alert" key={i}>
+                  <p>
+                    <strong>{importIssueContext(issue.path)}</strong>
+                  </p>
                   <p>{issue.message}</p>
                   <details>
                     <summary>Detalles técnicos</summary>

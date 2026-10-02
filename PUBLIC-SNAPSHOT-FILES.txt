@@ -107,6 +107,7 @@ app/frontend/src/pages/AnswerControl.test.tsx
 app/frontend/src/pages/AnswerControl.tsx
 app/frontend/src/pages/Clarifications.tsx
 app/frontend/src/pages/Editor.tsx
+app/frontend/src/pages/Exchange.test.tsx
 app/frontend/src/pages/Exchange.tsx
 app/frontend/src/pages/MyWork.test.tsx
 app/frontend/src/pages/MyWork.tsx
@@ -166,12 +167,14 @@ docs/DEVELOPMENT.md
 docs/DOMAIN-MODEL.md
 docs/GITHUB-SETUP.md
 docs/IMPORT-FORMAT.md
+docs/IMPORTING-QUESTIONNAIRES.md
 docs/NAMING-NOTES.md
 docs/NATIVE-DEPENDENCY-LICENSES.csv
 docs/README.md
 docs/RELEASING.md
 docs/S3-PROVIDERS.md
 docs/SELF-HOSTING.md
+docs/SIMPLE-IMPORT-PROPOSAL.md
 docs/STORAGE-DEPENDENCY-LICENSES.csv
 docs/THIRD-PARTY-NOTICES.md
 docs/UPSTREAM-FORKS.md
@@ -186,6 +189,8 @@ docs/assets/07-dashboard.png
 docs/assets/08-participant-mobile.png
 docs/assets/README.md
 eslint.config.mjs
+examples/questionnaire-template.full.json
+examples/questionnaire-template.minimal.json
 package-lock.json
 package.json
 packages/contracts/package.json
@@ -208,6 +213,7 @@ scripts/start-backend.sh
 scripts/test-storage-container.mjs
 tests/e2e/editor.spec.ts
 tests/e2e/exchange.spec.ts
+tests/e2e/import-examples.spec.ts
 tests/e2e/login-helper.ts
 tests/e2e/participant.spec.ts
 tests/e2e/platform.spec.ts
@@ -223,6 +229,7 @@ tests/integration/review.test.mjs
 tests/selfhosting/s3.test.mjs
 tests/unit/contracts.test.ts
 tests/unit/exchange.test.ts
+tests/unit/import-examples.test.ts
 tests/unit/participant.test.ts
 tests/unit/responses.test.ts
 tests/unit/review.test.ts
