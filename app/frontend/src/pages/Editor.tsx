@@ -260,6 +260,15 @@ export function Editor() {
         )}
       </div>
       <EditorWorkspace
+        onRefresh={async () => {
+          const result = await q.refetch();
+          if (result.error) throw result.error;
+          return result.data!;
+        }}
+        onBulkComplete={(message) => {
+          setNotice(message);
+          refresh();
+        }}
         data={data}
         projectId={projectId}
         onCreateTopic={() => {

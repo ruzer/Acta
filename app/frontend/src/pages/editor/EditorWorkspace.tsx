@@ -15,6 +15,8 @@ export type EditorProps = {
   data: QuestionnaireView;
   projectId: string;
   onCreateTopic: () => void;
+  onBulkComplete?: (message: string) => void;
+  onRefresh?: () => Promise<QuestionnaireView>;
   onTopicAction?: (kind: "edit" | "up" | "down", id: string) => void;
   onCreateReference: () => void;
   onEdit: (question?: QuestionView, sectionId?: string, field?: string) => void;

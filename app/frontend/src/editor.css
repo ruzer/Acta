@@ -447,3 +447,116 @@
 .qe-shell .av-advanced[open] > .av-advanced-content {
   animation: none;
 }
+/* Batch controls share editor surfaces; participant screens are unaffected. */
+.qe-selection-controls,
+.qe-bulk-bar,
+.qe-bulk-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.qe-selection-controls {
+  margin: 16px 0;
+}
+.qe-selection-status {
+  font-weight: 600;
+}
+.qe-bulk-bar {
+  padding: 12px;
+  margin-bottom: 12px;
+  background: var(--av-paper);
+  border: 1px solid var(--av-line);
+  border-radius: 6px;
+}
+.qe-selectable-row {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+}
+.qe-selectable-row > .qe-compact-row {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+}
+.qe-row-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--av-line);
+}
+.qe-row-checkbox input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primary);
+}
+.qe-bulk-dialog {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.qe-bulk-dialog > p,
+.qe-bulk-dialog h3 {
+  margin: 0;
+}
+.qe-bulk-dialog fieldset {
+  border: 1px solid var(--av-line);
+  border-radius: 6px;
+  padding: 12px;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.qe-bulk-dialog .check {
+  min-height: 44px;
+}
+.qe-bulk-dialog select {
+  max-width: 100%;
+}
+.qe-bulk-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  margin: 0;
+}
+.qe-bulk-counts dd {
+  margin: 4px 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.qe-bulk-items {
+  padding-left: 20px;
+}
+.qe-bulk-items > li {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--av-line);
+  overflow-wrap: anywhere;
+}
+.qe-bulk-issue {
+  padding: 8px 0;
+}
+.qe-bulk-dialog summary {
+  min-height: 44px;
+  cursor: pointer;
+  padding: 12px 0;
+}
+.qe-group-select {
+  border-block: 1px solid var(--av-line);
+  padding: 12px 0;
+  margin: 16px 0;
+}
+@media (max-width: 600px) {
+  .qe-bulk-bar > button,
+  .qe-bulk-footer > button,
+  .qe-selection-controls > button {
+    flex: 1 1 100%;
+    white-space: normal;
+  }
+  .qe-bulk-issue button {
+    white-space: normal;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+}
