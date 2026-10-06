@@ -100,7 +100,7 @@ export class AuthService {
       user?.passwordHash || (await dummyPasswordHash),
       dto.password,
     );
-    if (!valid || !user?.active) {
+    if (!valid || !user?.active || user.invitationOnly) {
       throw new UnauthorizedException(
         "No fue posible iniciar sesión con esos datos.",
       );
@@ -112,7 +112,11 @@ export class AuthService {
       const current = await tx.user.findUniqueOrThrow({
         where: { id: user.id },
       });
-      if (!current.active || current.passwordHash !== user.passwordHash)
+      if (
+        !current.active ||
+        current.invitationOnly ||
+        current.passwordHash !== user.passwordHash
+      )
         throw new UnauthorizedException("No fue posible iniciar sesión.");
       await tx.session.create({
         data: {
@@ -150,6 +154,7 @@ export class AuthService {
       session.revokedAt ||
       session.expiresAt <= now ||
       !session.user.active ||
+      session.user.invitationOnly ||
       session.user.organization.code !== loadConfig().ORGANIZATION_CODE ||
       Date.now() - session.lastSeenAt.getTime() >
         loadConfig().SESSION_IDLE_MINUTES * 60000

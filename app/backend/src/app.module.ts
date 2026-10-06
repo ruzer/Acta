@@ -1,3 +1,4 @@
+import { InvitationsModule } from "./invitations/invitations.module.js";
 import { ExchangeModule } from "./exchange/exchange.module.js";
 import { ReviewModule } from "./review/review.module.js";
 import {
@@ -53,6 +54,7 @@ class PublicConfigurationController {
     ResponsesModule,
     ReviewModule,
     ExchangeModule,
+    InvitationsModule,
   ],
   controllers: [HealthController, PublicConfigurationController],
 })

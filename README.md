@@ -43,6 +43,7 @@ Ser administrador no sustituye el rol de analista para validar decisiones. El á
 - Cuestionarios por temas, seguimientos y ocho tipos de respuesta, incluida matriz.
 - Editor con vistas **Escribir**, **Organizar** y **Revisar antes de publicar**. En Organizar, [selecciona preguntas y revisa operaciones por lote](docs/BULK-QUESTIONNAIRE-OPERATIONS.md) para asignar área, agregar participantes o publicar.
 - **Mi trabajo** para participantes: borradores persistentes, envíos y evidencia privada.
+- [Invitaciones privadas mediante enlace](docs/EXTERNAL-INVITATIONS.md) para aportaciones externas sin cuenta: preguntas seleccionadas, vencimiento, revocación y respuestas independientes por invitación.
 - Aclaraciones, comparación de conflictos y decisiones validadas con fuentes identificables.
 - Dashboard, trazabilidad, importación de estructura JSON y exportaciones JSON, CSV y Markdown según permisos.
 - Historial de operaciones y acceso separado por proyecto.

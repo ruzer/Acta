@@ -22,6 +22,7 @@ const result = spawnSync(
     "--test",
     "--test-concurrency=1",
     "tests/integration/responses.test.mjs",
+    "tests/integration/invitations.test.mjs",
     "tests/selfhosting/s3.test.mjs",
   ],
   { env, stdio: "inherit" },

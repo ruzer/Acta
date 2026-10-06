@@ -1,3 +1,4 @@
+import { CreateInvitation } from "../Invitations";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   type QuestionView,
@@ -227,6 +228,7 @@ export function Organize(props: EditorProps & { initialSelected?: string }) {
   const [search, setSearch] = useState("");
   const [publication, setPublication] = useState("");
   const [area, setArea] = useState("");
+  const [inviting, setInviting] = useState(false);
   const [bulkIds, setBulkIds] = useState<Set<string>>(new Set());
   const [bulkOperation, setBulkOperation] = useState<BulkOperation | null>(
     null,
@@ -444,6 +446,15 @@ export function Organize(props: EditorProps & { initialSelected?: string }) {
             >
               Agregar participantes
             </Button>
+            <Button
+              tone="secondary"
+              onClick={() => {
+                bulkTrigger.current = document.activeElement as HTMLElement;
+                setInviting(true);
+              }}
+            >
+              Invitar mediante enlace
+            </Button>
             <Button onClick={() => openBulk("PUBLISH")}>
               Publicar seleccionadas
             </Button>
@@ -538,6 +549,17 @@ export function Organize(props: EditorProps & { initialSelected?: string }) {
           </Button>
         )}
       </section>
+      {inviting && (
+        <CreateInvitation
+          projectId={props.projectId}
+          questions={selectedQuestions}
+          areas={data.areas}
+          onClose={() => {
+            setInviting(false);
+            requestAnimationFrame(() => bulkTrigger.current?.focus());
+          }}
+        />
+      )}
       {bulkOperation && (
         <BulkDialog
           data={data}

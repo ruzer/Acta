@@ -281,6 +281,12 @@ export function Editor() {
         </Alert>
       )}
       <div className="actions">
+        <Link
+          className="button secondary"
+          to={`/projects/${projectId}/invitations`}
+        >
+          Invitaciones mediante enlace
+        </Link>
         <Link className="button secondary" to={"/projects/" + projectId}>
           Ver preguntas publicadas
         </Link>

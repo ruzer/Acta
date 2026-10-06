@@ -13,6 +13,11 @@ const envSchema = z.object({
     .default("development"),
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
   COOKIE_SECURE: z.enum(["true", "false"]).default("true"),
+  INVITATION_IDENTITY: z
+    .enum(["NONE", "NAME", "EMAIL", "BOTH"])
+    .default("NAME"),
+  INVITATION_DEFAULT_DAYS: z.coerce.number().int().min(1).max(365).default(7),
+  INVITATION_MAX_DAYS: z.coerce.number().int().min(1).max(365).default(30),
   SESSION_IDLE_MINUTES: z.coerce.number().int().positive().max(120).default(30),
   SESSION_MAX_HOURS: z.coerce.number().int().positive().max(24).default(8),
 });
@@ -24,6 +29,8 @@ export function loadConfig(): AppConfig {
       "Configuración incompleta o inválida. Revisa las variables del README.",
     );
   const c = parsed.data;
+  if (c.INVITATION_DEFAULT_DAYS > c.INVITATION_MAX_DAYS)
+    throw new Error("Invitation default lifetime exceeds its maximum.");
   const origin = new URL(c.APP_ORIGIN);
   if (c.NODE_ENV === "production" && c.COOKIE_SECURE !== "true")
     throw new Error("Producción requiere cookies Secure.");

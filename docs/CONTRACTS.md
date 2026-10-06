@@ -5,6 +5,7 @@ Usa este índice para localizar capacidades sin conocer las fases históricas. S
 | Función | Documento descriptivo | Fuente ejecutable |
 |---|---|---|
 | Authentication — acceso y sesión | [Identidad y administración](CONTRACTS-2AB.md), incluido ajuste de login | [Contratos compartidos](../packages/contracts/src/index.ts) |
+| Invitations — acceso externo limitado | [Diseño y límites](EXTERNAL-INVITATIONS-DESIGN.md), [guía de uso](EXTERNAL-INVITATIONS.md) | [Contratos compartidos](../packages/contracts/src/index.ts), [endpoints de invitación](../app/backend/src/invitations) |
 | Administration — usuarios, áreas, proyectos y miembros | [Administración](CONTRACTS-2AB.md) | [Contratos compartidos](../packages/contracts/src/index.ts) |
 | Questionnaires — temas, preguntas, opciones, condiciones, asignación, orden y publicación | [Cuestionarios](CONTRACTS-2AB.md) | [Contratos compartidos](../packages/contracts/src/index.ts), [módulo cuestionario](../app/backend/src/questionnaire) |
 | Questionnaire batches — área, añadir participantes, publicar con revisión previa          | [Operaciones masivas](BULK-QUESTIONNAIRE-OPERATIONS.md)                    | [Schemas y seis endpoints](../packages/contracts/src/index.ts), [servicio transaccional](../app/backend/src/questionnaire/bulk-questionnaire.service.ts) |
