@@ -1,0 +1,12 @@
+[
+  {
+    "reduce": false,
+    "scroll": "auto",
+    "animated": []
+  },
+  {
+    "reduce": true,
+    "scroll": "auto",
+    "animated": []
+  }
+]

@@ -176,3 +176,68 @@ it.each([false, true])(
     }
   },
 );
+
+it("Revisar explica el alcance conjunto, conserva bloqueo individual y reutiliza Organizar", async () => {
+  const user = userEvent.setup();
+  const parent = {
+    ...data.questions[0]!,
+    publication: "DRAFT" as const,
+    type: "YES_NO" as const,
+    options: [],
+    config: null,
+    condition: null,
+    groupParentId: null,
+  };
+  const child = {
+    ...parent,
+    id: "child",
+    title: "Seguimiento",
+    question: "Consulta adicional",
+    groupParentId: parent.id,
+  };
+  render(
+    <EditorWorkspace
+      data={{ ...data, questions: [parent, child] }}
+      projectId="p"
+      onEdit={vi.fn()}
+      onAction={vi.fn()}
+      onCreateTopic={vi.fn()}
+      onCreateReference={vi.fn()}
+    />,
+  );
+  await user.click(screen.getByRole("tab", { name: "Revisar" }));
+  expect(screen.getByText(/Para publicarla por separado/)).toBeVisible();
+  expect(
+    screen.getByRole("button", { name: "Publicar: Seguimiento" }),
+  ).toBeDisabled();
+  await user.click(
+    screen.getByRole("button", { name: "Revisar publicación conjunta" }),
+  );
+  expect(screen.getByRole("tabpanel", { name: "Organizar" })).toBeVisible();
+  expect(
+    screen.getByRole("group", { name: "Alcance de selección" }),
+  ).toBeVisible();
+});
+it("Revisar resume 300 publicaciones sin repetir 300 avisos de contenido protegido", async () => {
+  const user = userEvent.setup();
+  const questions = Array.from({ length: 300 }, (_, i) => ({
+    ...data.questions[0]!,
+    id: `p${i}`,
+    publication: "PUBLISHED" as const,
+  }));
+  render(
+    <EditorWorkspace
+      data={{ ...data, questions }}
+      projectId="p"
+      onEdit={vi.fn()}
+      onAction={vi.fn()}
+      onCreateTopic={vi.fn()}
+      onCreateReference={vi.fn()}
+    />,
+  );
+  await user.click(screen.getByRole("tab", { name: "Revisar" }));
+  expect(screen.getByText(/300 preguntas publicadas/)).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Ver pregunta" }),
+  ).not.toBeInTheDocument();
+});

@@ -11,6 +11,18 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 - Operaciones masivas en Organizar: asignar área, añadir participantes y publicar, con selección por página, resultados, tema o grupo y filtro por área.
 - Revisión previa del lote, confirmación atómica, control de concurrencia y reintentos idempotentes; las dependencias externas requieren selección explícita.
 
+### Changed
+
+- El editor orienta hacia las operaciones conjuntas existentes desde Escribir y Revisar; distingue una dependencia pendiente para publicación individual de un conjunto que debe revisarse en Organizar.
+- Por consultar aparece en el resumen y filtro de atención del participante; la confirmación de envío permanece en la pregunta de destino.
+- Inicio administrativo, membresías e importación desde un editor vacío explican mejor el siguiente paso, sin asignaciones ni publicaciones implícitas.
+
+### Fixed
+
+- Retorno de foco tras cancelar o completar asignación/publicación, incluso cuando desaparece el control del inspector.
+- Enlaces de errores identificables por campo, agrupación accesible de controles y conservación de filtros al volver de una revisión.
+- Los avisos repetidos sobre preguntas publicadas se resumen en una sola indicación en Revisar.
+
 ### Security
 
 - Actualización transitiva de desarrollo `source-map-js` a 1.2.2 para corregir [GHSA-68fv-2mgg-jv7q](https://github.com/advisories/GHSA-68fv-2mgg-jv7q), conservando el gate de auditoría de dependencias.

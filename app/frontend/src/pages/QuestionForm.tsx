@@ -116,6 +116,29 @@ export function QuestionForm({
     setValue((v) => ({ ...v, ...p }));
     setDirty(true);
   }
+  function fieldLabel(name: string) {
+    const control = Array.from(formRef.current?.elements ?? []).find(
+      (el) => el.getAttribute("name") === name,
+    ) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | undefined;
+    const label = control?.labels?.[0]?.textContent?.trim();
+    if (label) return label;
+    const labels: Record<string, string> = {
+      question: "Pregunta",
+      title: "Título breve",
+      externalId: "Identificador externo",
+      type: "Tipo de respuesta",
+      sectionId: "Tema",
+      options: "Opciones",
+      config: "Configuración de respuesta",
+      references: "Trazabilidad",
+      condition: "Condición",
+      groupParentId: "Seguimiento",
+      priority: "Prioridad",
+      responsibleAreaId: "Área responsable",
+      supersedesQuestionId: "Pregunta anterior",
+    };
+    return labels[name.split(".")[0]!] ?? "Configuración de pregunta";
+  }
   function revealField(name: string, focus = true) {
     const form = formRef.current;
     let target = Array.from(form?.elements ?? []).find((el) => {
@@ -848,7 +871,7 @@ export function QuestionForm({
                       revealField(key);
                     }}
                   >
-                    {message}
+                    {fieldLabel(key)}: {message}
                   </a>
                 </li>
               ))}

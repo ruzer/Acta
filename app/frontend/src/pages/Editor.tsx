@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import {
@@ -37,22 +37,50 @@ export function Editor() {
   const { projectId = "" } = useParams();
   const qc = useQueryClient();
   const structureTrigger = useRef<HTMLElement | null>(null);
-  function rememberStructureTrigger() {
+  const actionQuestionId = useRef<string | null>(null);
+  const pendingFocusReturn = useRef(false);
+  function rememberStructureTrigger(questionId: string | null = null) {
+    actionQuestionId.current = questionId;
     const active = document.activeElement as HTMLElement;
     structureTrigger.current =
       active.closest("details")?.querySelector("summary") ?? active;
   }
-  function closeStructureDialog() {
-    setEditingTopic(null);
-    setMoving(null);
+  function restoreStructureFocus() {
     requestAnimationFrame(() => {
+      if (document.querySelector("dialog[open]")) return;
+      const active = document.activeElement;
+      if (
+        active !== document.body &&
+        active instanceof HTMLElement &&
+        active.getClientRects().length
+      )
+        return;
       const target = structureTrigger.current;
-      if (target?.isConnected) target.focus();
-      else
+      if (target?.isConnected && target.getClientRects().length) target.focus();
+      else {
+        const row = Array.from(
+          document.querySelectorAll<HTMLElement>(
+            ".qe-compact-row[data-question-id]",
+          ),
+        ).find((el) => el.dataset.questionId === actionQuestionId.current);
+        if (row?.getClientRects().length) {
+          row.focus();
+          return;
+        }
         document
           .querySelector<HTMLElement>('.qe-modes [aria-selected="true"]')
           ?.focus();
+      }
     });
+  }
+  function closeAction() {
+    pendingFocusReturn.current = true;
+    setAction(null);
+  }
+  function closeStructureDialog() {
+    pendingFocusReturn.current = true;
+    setEditingTopic(null);
+    setMoving(null);
   }
   const [editing, setEditing] = useState<QuestionView | "new" | null>(null);
   const [action, setAction] = useState<{
@@ -71,6 +99,12 @@ export function Editor() {
     question: QuestionView;
     snapshot: QuestionnaireView;
   } | null>(null);
+  useEffect(() => {
+    if (pendingFocusReturn.current && !action && !editingTopic && !moving) {
+      pendingFocusReturn.current = false;
+      restoreStructureFocus();
+    }
+  }, [action, editingTopic, moving]);
   const [creatingTopic, setCreatingTopic] = useState(false);
   const [creatingReference, setCreatingReference] = useState(false);
   const [topicExternalId, setTopicExternalId] = useState("");
@@ -126,7 +160,7 @@ export function Editor() {
         { projectId, id: question.id },
         { expectedVersion: question.lockVersion },
       );
-      setAction(null);
+      closeAction();
       setNotice(
         kind === "publish"
           ? "Pregunta publicada. Su contenido quedó protegido."
@@ -135,7 +169,7 @@ export function Editor() {
       refresh();
     } catch (e) {
       setError((e as Error).message);
-      setAction(null);
+      closeAction();
     } finally {
       setBusy(false);
     }
@@ -250,6 +284,14 @@ export function Editor() {
         <Link className="button secondary" to={"/projects/" + projectId}>
           Ver preguntas publicadas
         </Link>
+        {!data.questions.length && (
+          <Link
+            className="button secondary"
+            to={`/projects/${projectId}/import`}
+          >
+            Importar estructura
+          </Link>
+        )}
         {project?.role === "ADMIN" && (
           <Link
             className="button secondary"
@@ -286,9 +328,12 @@ export function Editor() {
         onAction={(kind, question) => {
           if (kind === "up" || kind === "down") reorderQuestion(kind, question);
           else if (kind === "move") {
-            rememberStructureTrigger();
+            rememberStructureTrigger(question.id);
             setMoving({ question, snapshot: data });
-          } else setAction({ kind, q: question });
+          } else {
+            rememberStructureTrigger(question.id);
+            setAction({ kind, q: question });
+          }
         }}
       />
       {editingTopic && (
@@ -460,7 +505,7 @@ export function Editor() {
               metadata: "Configurar pregunta",
             }[action.kind]
           }
-          onClose={() => !busy && setAction(null)}
+          onClose={() => !busy && closeAction()}
         >
           <h3>{action.q.title}</h3>
           {action.kind === "publish" || action.kind === "archive" ? (
@@ -493,7 +538,7 @@ export function Editor() {
               <ActionForm
                 label="Guardar asignación"
                 onDone={() => {
-                  setAction(null);
+                  closeAction();
                   setNotice("Asignación guardada.");
                   refresh();
                 }}
@@ -541,7 +586,7 @@ export function Editor() {
             <ActionForm
               label="Guardar configuración"
               onDone={() => {
-                setAction(null);
+                closeAction();
                 refresh();
                 setNotice(
                   "Configuración actualizada. El contenido de la pregunta se conserva.",

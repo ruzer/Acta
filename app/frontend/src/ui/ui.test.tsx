@@ -1,10 +1,11 @@
+import { MemoryRouter } from "react-router-dom";
 import { afterEach, expect, it, vi } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 import { Input, Checkbox, ErrorState, StatusBadge } from "./index";
-import { Login, Password } from "../pages/Access";
+import { Login, Password, Projects } from "../pages/Access";
 afterEach(cleanup);
 it("asocia etiquetas y errores para lectores de pantalla", () => {
   render(<Input label="Nombre" error="Completa el nombre" />);
@@ -83,3 +84,31 @@ it("evita cambiar contraseña si la confirmación difiere", async () => {
   expect(screen.getByRole("alert")).toHaveTextContent("no coinciden");
   expect(done).not.toHaveBeenCalled();
 });
+
+it.each([true, false])(
+  "inicio sin proyectos orienta según rol administrador %s",
+  (admin) => {
+    const client = new QueryClient({
+      defaultOptions: { queries: { staleTime: Infinity } },
+    });
+    client.setQueryData(["projects"], []);
+    render(
+      <QueryClientProvider client={client}>
+        <MemoryRouter>
+          <Projects isOrganizationAdmin={admin} />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    if (admin) {
+      expect(
+        screen.getByRole("link", { name: "Administración → Proyectos" }),
+      ).toHaveAttribute("href", "/admin");
+      expect(
+        screen.queryByText(/La administración debe asignarte/),
+      ).not.toBeInTheDocument();
+    } else
+      expect(
+        screen.getByText(/La administración debe asignarte/),
+      ).toBeVisible();
+  },
+);

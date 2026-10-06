@@ -1,10 +1,11 @@
-import { afterEach, it, expect } from "vitest";
+import { afterEach, it, expect, vi } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import "@testing-library/jest-dom/vitest";
 import type { PersonalProjectView } from "@requirements/contracts";
 import { ProjectWork } from "./MyWork";
+import { ParticipantSummary, ParticipantNotice } from "./ParticipantFlow";
 afterEach(cleanup);
 it("300 preguntas: listado acotado, búsqueda por texto, filtro y tema colapsable por teclado", async () => {
   const data: PersonalProjectView = {
@@ -66,4 +67,68 @@ it("300 preguntas: listado acotado, búsqueda por texto, filtro y tema colapsabl
     }),
   );
   expect(screen.getAllByRole("listitem")).toHaveLength(60);
+});
+
+it("Por consultar aparece en atención sin perder su estado ni inventar un envío", async () => {
+  const item: PersonalProjectView["sections"][number]["questions"][number] = {
+    id: "q",
+    title: "Consulta",
+    question: "Consulta pendiente",
+    currentSubmission: false,
+    hasSubmission: false,
+    applicability: "ENABLED",
+    state: "CONSULTATION",
+    updatedAt: null,
+    reviewStatus: "NOT_REVIEWED",
+    clarificationWaiting: 0,
+    clarificationCount: 0,
+  };
+  const data: PersonalProjectView = {
+    projectName: "Ejemplo",
+    continueQuestionId: "q",
+    progress: {
+      total: 1,
+      enabled: 1,
+      sent: 0,
+      drafts: 1,
+      pending: 0,
+      excluded: 0,
+      undetermined: 0,
+    },
+    sections: [{ id: "s", title: "Tema", questions: [item] }],
+  };
+  render(
+    <MemoryRouter>
+      <ParticipantSummary items={[item]} />
+      <ProjectWork projectId="p" data={data} />
+    </MemoryRouter>,
+  );
+  expect(
+    screen.getByText("Requieren atención: 0 aclaraciones y 1 por consultar."),
+  ).toBeVisible();
+  const user = userEvent.setup();
+  await user.click(screen.getByRole("button", { name: "Buscar y filtrar" }));
+  await user.click(screen.getByRole("button", { name: "Requiere atención" }));
+  expect(screen.getByText("Por consultar")).toBeVisible();
+  expect(
+    screen.getByRole("link", { name: "Continuar: Consulta" }),
+  ).toHaveAttribute("href", "/projects/p/respond/q");
+});
+it("la confirmación de envío no desaparece mientras se lee la siguiente pregunta", () => {
+  vi.useFakeTimers();
+  try {
+    render(
+      <MemoryRouter
+        initialEntries={[
+          { pathname: "/", state: { participantNotice: "Respuesta enviada." } },
+        ]}
+      >
+        <ParticipantNotice />
+      </MemoryRouter>,
+    );
+    vi.advanceTimersByTime(60000);
+    expect(screen.getByRole("status")).toHaveTextContent("Respuesta enviada.");
+  } finally {
+    vi.useRealTimers();
+  }
 });

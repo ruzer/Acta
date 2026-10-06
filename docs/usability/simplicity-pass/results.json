@@ -1,0 +1,146 @@
+[
+  {
+    "persona": "p10",
+    "steps": [
+      "Empty administrator sees first-project guidance, not an access-wait instruction.",
+      "Editor empty → Importar estructura: one link, zero detours.",
+      "Created project and imported 10 questions/2 topics using preview and confirm; no new import workflow."
+    ],
+    "screens": [
+      "p10-empty-admin.png",
+      "p10-imported.png"
+    ],
+    "axe": [
+      {
+        "url": "/projects/e6e134ff-ea12-410c-9aa5-ad09e29a6d04/editor",
+        "violations": 0,
+        "incomplete": [
+          "color-contrast"
+        ]
+      }
+    ],
+    "result": "PASS"
+  },
+  {
+    "persona": "p07",
+    "steps": [
+      "Existing bulk route is explicit in writing view.",
+      "Assigned 10 questions in one reviewed operation. Explicit reselection still required.",
+      "Published 10 together, including group parents/follow-ups; zero individual parent publications. One published-content summary."
+    ],
+    "screens": [
+      "p07-write.png",
+      "p07-readiness.png",
+      "p07-publication-preview.png",
+      "p07-publication-summary.png"
+    ],
+    "axe": [
+      {
+        "url": "/projects/07a92461-8c87-44fc-90f8-918baeafa201/editor",
+        "violations": 0,
+        "incomplete": []
+      }
+    ],
+    "result": "PASS"
+  },
+  {
+    "persona": "p02",
+    "steps": [
+      "Existing bulk route is explicit in writing view.",
+      "Assigned 50 questions in one reviewed operation. Explicit reselection still required.",
+      "Published 50 together, including group parents/follow-ups; zero individual parent publications. One published-content summary."
+    ],
+    "screens": [
+      "p02-write.png",
+      "p02-readiness.png",
+      "p02-publication-preview.png",
+      "p02-publication-summary.png"
+    ],
+    "axe": [
+      {
+        "url": "/projects/dd5916fb-08e2-466b-ad66-de1a8b03be2d/editor",
+        "violations": 0,
+        "incomplete": []
+      }
+    ],
+    "result": "PASS"
+  },
+  {
+    "persona": "p03",
+    "steps": [
+      "Existing bulk route is explicit in writing view.",
+      "Assigned 300 questions in one reviewed operation. Explicit reselection still required.",
+      "Published 300 together, including group parents/follow-ups; zero individual parent publications. One published-content summary."
+    ],
+    "screens": [
+      "p03-write.png",
+      "p03-readiness.png",
+      "p03-publication-preview.png",
+      "p03-publication-summary.png"
+    ],
+    "axe": [
+      {
+        "url": "/projects/f2bb0219-a4de-4f17-a572-084c9830c7fa/editor",
+        "violations": 0,
+        "incomplete": []
+      }
+    ],
+    "result": "PASS"
+  },
+  {
+    "persona": "p05",
+    "steps": [
+      "30-question workload: 28 pending + 1 draft + 1 requiring attention. Por consultar found directly in attention.",
+      "Draft resumed, submitted, next question with confirmation; no backtrack needed to establish successful submission."
+    ],
+    "screens": [
+      "p05-consultation-filter.png",
+      "p05-submission-feedback.png"
+    ],
+    "axe": [
+      {
+        "url": "/projects/6ad5613d-f145-45e2-b80a-f554148d380a/work",
+        "violations": 0,
+        "incomplete": []
+      }
+    ],
+    "result": "PASS"
+  },
+  {
+    "persona": "p08",
+    "steps": [
+      "390px: save, exit, resume, send, next question; visible confirmation, no horizontal overflow."
+    ],
+    "screens": [
+      "p08-mobile-confirmation.png"
+    ],
+    "axe": [
+      {
+        "url": "/projects/6ffb3394-a481-4b27-b0ea-fd9aed9a31f8/respond/ebcce75c-9fc9-43c2-ae68-da54c1a54c18",
+        "violations": 0,
+        "incomplete": []
+      }
+    ],
+    "result": "PASS"
+  },
+  {
+    "persona": "p09",
+    "steps": [
+      "Keyboard cancel returns immediately to same question: zero recovery Tabs (baseline 14–15).",
+      "Assignment and publication via keyboard also return to same question. Reduced motion enabled."
+    ],
+    "screens": [
+      "p09-keyboard-publication.png"
+    ],
+    "axe": [
+      {
+        "url": "/projects/bcc04ad1-1e5e-4c2b-bcff-78bb08622ff0/editor",
+        "violations": 0,
+        "incomplete": [
+          "color-contrast"
+        ]
+      }
+    ],
+    "result": "PASS"
+  }
+]

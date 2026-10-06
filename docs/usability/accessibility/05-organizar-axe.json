@@ -1,0 +1,332 @@
+{
+  "screen": "05-organizar",
+  "url": "http://localhost:4441/projects/d5c33acb-f4a8-4b03-94da-9d5d006ebde7/editor",
+  "timestamp": "2026-10-06T05:11:03.187Z",
+  "testEngine": {
+    "name": "axe-core",
+    "version": "4.13.0"
+  },
+  "testEnvironment": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+    "windowWidth": 1440,
+    "windowHeight": 1000,
+    "orientationAngle": 0,
+    "orientationType": "landscape-primary"
+  },
+  "violations": [],
+  "incomplete": [
+    {
+      "id": "aria-prohibited-attr",
+      "impact": "serious",
+      "tags": [
+        "cat.aria",
+        "wcag2a",
+        "wcag412",
+        "EN-301-549",
+        "EN-9.4.1.2",
+        "RGAAv4",
+        "RGAA-7.1.1"
+      ],
+      "description": "Ensure ARIA attributes are not prohibited for an element's role",
+      "help": "Elements must only use permitted ARIA attributes",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-prohibited-attr?application=playwright",
+      "nodes": [
+        {
+          "any": [],
+          "all": [],
+          "none": [
+            {
+              "id": "aria-prohibited-attr",
+              "data": {
+                "role": null,
+                "nodeName": "div",
+                "messageKey": "noRoleSingular",
+                "prohibited": [
+                  "aria-label"
+                ]
+              },
+              "relatedNodes": [],
+              "impact": "serious",
+              "message": "aria-label attribute is not well supported on a div with no valid role attribute."
+            }
+          ],
+          "impact": "serious",
+          "html": "<div class=\"qe-selection-controls\" aria-label=\"Alcance de selección\"><button type=\"button\" class=\"button secondary\">Seleccionar esta página (10)</button><button type=\"button\" class=\"button secondary\">Seleccionar todos los resultados (10)</button></div>",
+          "target": [
+            ".qe-selection-controls"
+          ],
+          "failureSummary": "Fix all of the following:\n  aria-label attribute is not well supported on a div with no valid role attribute."
+        }
+      ]
+    }
+  ],
+  "passes": [
+    {
+      "id": "aria-allowed-attr",
+      "impact": null,
+      "nodes": 33
+    },
+    {
+      "id": "aria-allowed-role",
+      "impact": null,
+      "nodes": 9
+    },
+    {
+      "id": "aria-conditional-attr",
+      "impact": null,
+      "nodes": 33
+    },
+    {
+      "id": "aria-deprecated-role",
+      "impact": null,
+      "nodes": 7
+    },
+    {
+      "id": "aria-hidden-body",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "aria-hidden-focus",
+      "impact": null,
+      "nodes": 10
+    },
+    {
+      "id": "aria-prohibited-attr",
+      "impact": "serious",
+      "nodes": 32
+    },
+    {
+      "id": "aria-required-attr",
+      "impact": null,
+      "nodes": 7
+    },
+    {
+      "id": "aria-required-children",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "aria-required-parent",
+      "impact": null,
+      "nodes": 3
+    },
+    {
+      "id": "aria-roles",
+      "impact": null,
+      "nodes": 7
+    },
+    {
+      "id": "aria-valid-attr-value",
+      "impact": null,
+      "nodes": 33
+    },
+    {
+      "id": "aria-valid-attr",
+      "impact": null,
+      "nodes": 33
+    },
+    {
+      "id": "avoid-inline-spacing",
+      "impact": null,
+      "nodes": 12
+    },
+    {
+      "id": "button-name",
+      "impact": null,
+      "nodes": 21
+    },
+    {
+      "id": "bypass",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "color-contrast",
+      "impact": null,
+      "nodes": 79
+    },
+    {
+      "id": "document-title",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "duplicate-id-aria",
+      "impact": null,
+      "nodes": 9
+    },
+    {
+      "id": "empty-heading",
+      "impact": null,
+      "nodes": 2
+    },
+    {
+      "id": "form-field-multiple-labels",
+      "impact": null,
+      "nodes": 13
+    },
+    {
+      "id": "heading-order",
+      "impact": null,
+      "nodes": 2
+    },
+    {
+      "id": "html-has-lang",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "html-lang-valid",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "label-title-only",
+      "impact": null,
+      "nodes": 13
+    },
+    {
+      "id": "label",
+      "impact": null,
+      "nodes": 11
+    },
+    {
+      "id": "landmark-banner-is-top-level",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-contentinfo-is-top-level",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-main-is-top-level",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-no-duplicate-banner",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-no-duplicate-contentinfo",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-no-duplicate-main",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-one-main",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-unique",
+      "impact": null,
+      "nodes": 6
+    },
+    {
+      "id": "link-name",
+      "impact": null,
+      "nodes": 8
+    },
+    {
+      "id": "meta-viewport-large",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "meta-viewport",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "nested-interactive",
+      "impact": null,
+      "nodes": 42
+    },
+    {
+      "id": "page-has-heading-one",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "region",
+      "impact": null,
+      "nodes": 162
+    },
+    {
+      "id": "select-name",
+      "impact": null,
+      "nodes": 2
+    },
+    {
+      "id": "skip-link",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "summary-name",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "tabindex",
+      "impact": null,
+      "nodes": 5
+    }
+  ],
+  "inapplicable": [
+    "accesskeys",
+    "area-alt",
+    "aria-braille-equivalent",
+    "aria-command-name",
+    "aria-dialog-name",
+    "aria-input-field-name",
+    "aria-meter-name",
+    "aria-progressbar-name",
+    "aria-tab-name",
+    "aria-text",
+    "aria-toggle-field-name",
+    "aria-tooltip-name",
+    "aria-treeitem-name",
+    "autocomplete-valid",
+    "blink",
+    "definition-list",
+    "dlitem",
+    "empty-table-header",
+    "frame-focusable-content",
+    "frame-tested",
+    "frame-title-unique",
+    "frame-title",
+    "html-xml-lang-mismatch",
+    "image-alt",
+    "image-redundant-alt",
+    "input-button-name",
+    "input-image-alt",
+    "link-in-text-block",
+    "list",
+    "listitem",
+    "marquee",
+    "meta-refresh",
+    "object-alt",
+    "presentation-role-conflict",
+    "role-img-alt",
+    "scope-attr-valid",
+    "scrollable-region-focusable",
+    "server-side-image-map",
+    "svg-img-alt",
+    "table-duplicate-name",
+    "td-headers-attr",
+    "th-has-data-cells",
+    "valid-lang",
+    "video-caption",
+    "no-autoplay-audio"
+  ]
+}

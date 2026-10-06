@@ -174,7 +174,13 @@ export function Password({
     </section>
   );
 }
-export function Projects({ displayName = "" }: { displayName?: string }) {
+export function Projects({
+  displayName = "",
+  isOrganizationAdmin = false,
+}: {
+  displayName?: string;
+  isOrganizationAdmin?: boolean;
+}) {
   const q = useQuery({
     queryKey: ["projects"],
     queryFn: () => api("projects"),
@@ -189,11 +195,19 @@ export function Projects({ displayName = "" }: { displayName?: string }) {
       <p className="eyebrow">TU ESPACIO DE TRABAJO</p>
       <h1>Mis proyectos</h1>
       <p className="lead">
-        Consulta las preguntas disponibles y su organización por secciones.
+        Accede al cuestionario, las respuestas y el trabajo de cada proyecto.
       </p>
       {q.data.length === 0 ? (
         <EmptyState title="Aún no tienes proyectos">
-          La administración debe asignarte una membresía para comenzar.
+          {isOrganizationAdmin ? (
+            <>
+              Crea tu primer proyecto desde{" "}
+              <Link to="/admin">Administración → Proyectos</Link>. Después
+              podrás preparar o importar su cuestionario.
+            </>
+          ) : (
+            "La administración debe asignarte una membresía para comenzar."
+          )}
         </EmptyState>
       ) : (
         <ul className="project-list">
@@ -250,10 +264,6 @@ export function Projects({ displayName = "" }: { displayName?: string }) {
           ))}
         </ul>
       )}
-      <p className="phase-note">
-        Guarda tus borradores y envía cada respuesta cuando esté lista para
-        revisión.
-      </p>
     </>
   );
 }

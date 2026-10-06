@@ -102,13 +102,19 @@ export function ParticipantSummary({ items }: { items: PersonalQuestion[] }) {
         </div>
         <div>
           <dt>Requieren atención</dt>
-          <dd>{c.attention}</dd>
+          <dd>{c.attention + c.consultation}</dd>
         </div>
         <div>
           <dt>Enviadas</dt>
           <dd>{c.sent}</dd>
         </div>
       </dl>
+      {c.consultation > 0 && (
+        <p className="hint">
+          Requieren atención: {c.attention} aclaraciones y {c.consultation} por
+          consultar.
+        </p>
+      )}
     </>
   );
 }
@@ -380,15 +386,10 @@ export function ParticipantNotice() {
   return notice ? <Notice key={location.key} text={notice} /> : null;
 }
 function Notice({ text }: { text: string }) {
-  const [visible, setVisible] = useState(true);
-  useEffect(() => {
-    const timer = setTimeout(() => setVisible(false), 5000);
-    return () => clearTimeout(timer);
-  }, []);
-  return visible ? (
+  return (
     <p role="status" className="participant-feedback">
       <ParticipantIcon />
       {text}
     </p>
-  ) : null;
+  );
 }

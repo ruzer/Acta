@@ -1,0 +1,223 @@
+{
+  "screen": "03-crear-pregunta",
+  "url": "http://localhost:4441/projects/d5c33acb-f4a8-4b03-94da-9d5d006ebde7/editor",
+  "timestamp": "2026-10-06T05:10:17.658Z",
+  "testEngine": {
+    "name": "axe-core",
+    "version": "4.13.0"
+  },
+  "testEnvironment": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+    "windowWidth": 1440,
+    "windowHeight": 1000,
+    "orientationAngle": 0,
+    "orientationType": "landscape-primary"
+  },
+  "violations": [],
+  "incomplete": [],
+  "passes": [
+    {
+      "id": "aria-allowed-attr",
+      "impact": null,
+      "nodes": 13
+    },
+    {
+      "id": "aria-allowed-role",
+      "impact": null,
+      "nodes": 8
+    },
+    {
+      "id": "aria-conditional-attr",
+      "impact": null,
+      "nodes": 13
+    },
+    {
+      "id": "aria-deprecated-role",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "aria-hidden-body",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "aria-hidden-focus",
+      "impact": null,
+      "nodes": 10
+    },
+    {
+      "id": "aria-prohibited-attr",
+      "impact": null,
+      "nodes": 13
+    },
+    {
+      "id": "aria-required-attr",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "aria-roles",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "aria-valid-attr-value",
+      "impact": null,
+      "nodes": 13
+    },
+    {
+      "id": "aria-valid-attr",
+      "impact": null,
+      "nodes": 13
+    },
+    {
+      "id": "avoid-inline-spacing",
+      "impact": null,
+      "nodes": 12
+    },
+    {
+      "id": "button-name",
+      "impact": null,
+      "nodes": 3
+    },
+    {
+      "id": "color-contrast",
+      "impact": null,
+      "nodes": 34
+    },
+    {
+      "id": "duplicate-id-aria",
+      "impact": null,
+      "nodes": 18
+    },
+    {
+      "id": "empty-heading",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "form-field-multiple-labels",
+      "impact": null,
+      "nodes": 13
+    },
+    {
+      "id": "heading-order",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "label-title-only",
+      "impact": null,
+      "nodes": 13
+    },
+    {
+      "id": "label",
+      "impact": null,
+      "nodes": 12
+    },
+    {
+      "id": "landmark-no-duplicate-banner",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "meta-viewport-large",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "meta-viewport",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "nested-interactive",
+      "impact": null,
+      "nodes": 16
+    },
+    {
+      "id": "region",
+      "impact": null,
+      "nodes": 63
+    },
+    {
+      "id": "scrollable-region-focusable",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "select-name",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "summary-name",
+      "impact": null,
+      "nodes": 2
+    }
+  ],
+  "inapplicable": [
+    "accesskeys",
+    "area-alt",
+    "aria-braille-equivalent",
+    "aria-command-name",
+    "aria-dialog-name",
+    "aria-input-field-name",
+    "aria-meter-name",
+    "aria-progressbar-name",
+    "aria-required-children",
+    "aria-required-parent",
+    "aria-tab-name",
+    "aria-text",
+    "aria-toggle-field-name",
+    "aria-tooltip-name",
+    "aria-treeitem-name",
+    "autocomplete-valid",
+    "blink",
+    "bypass",
+    "definition-list",
+    "dlitem",
+    "document-title",
+    "empty-table-header",
+    "frame-focusable-content",
+    "frame-tested",
+    "frame-title-unique",
+    "frame-title",
+    "html-has-lang",
+    "html-lang-valid",
+    "html-xml-lang-mismatch",
+    "image-alt",
+    "image-redundant-alt",
+    "input-button-name",
+    "input-image-alt",
+    "landmark-banner-is-top-level",
+    "landmark-contentinfo-is-top-level",
+    "landmark-main-is-top-level",
+    "landmark-no-duplicate-contentinfo",
+    "landmark-no-duplicate-main",
+    "landmark-one-main",
+    "landmark-unique",
+    "link-in-text-block",
+    "link-name",
+    "list",
+    "listitem",
+    "marquee",
+    "meta-refresh",
+    "object-alt",
+    "page-has-heading-one",
+    "presentation-role-conflict",
+    "role-img-alt",
+    "scope-attr-valid",
+    "server-side-image-map",
+    "skip-link",
+    "svg-img-alt",
+    "tabindex",
+    "table-duplicate-name",
+    "td-headers-attr",
+    "th-has-data-cells",
+    "valid-lang",
+    "video-caption",
+    "no-autoplay-audio"
+  ]
+}
