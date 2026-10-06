@@ -1,6 +1,6 @@
 {
   "name": "@requirements/frontend",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,7 +9,7 @@
     "dev": "vite --host 127.0.0.1"
   },
   "dependencies": {
-    "@requirements/contracts": "0.2.0",
+    "@requirements/contracts": "0.3.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-router-dom": "7.18.4",

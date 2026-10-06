@@ -63,7 +63,7 @@ Las pruebas costosas son integración PostgreSQL/S3, instalación Docker, navega
 - [ ] Agregar badges únicamente cuando sus destinos existan y estén comprobados: CI real, licencia aplicada y última release. No colocar un badge AGPL antes de adoptar LICENSE.
 - [x] Revisar enlaces y quitar **PENDING UNTIL PUBLICATION** únicamente de canales realmente habilitados.
 
-No se ha creado tag, GitHub Release ni publicado imágenes. La primera release formal 0.2.0 requiere completar la revisión y CI.
+La release [v0.2.0](https://github.com/ruzer/Acta/releases/tag/v0.2.0) se publicó el 2026-10-02. La preparación de v0.3.0 no crea tag, release ni imágenes; su publicación posterior sigue sujeta al proceso de [RELEASING](RELEASING.md).
 
 ## Estado remoto comprobado
 
@@ -71,6 +71,6 @@ No se ha creado tag, GitHub Release ni publicado imágenes. La primera release f
 - Issues y Discussions habilitados; plantillas incluidas en `main`.
 - Private Vulnerability Reporting habilitado. Canal de moderación separado aún pendiente.
 - Dependabot alerts y security updates habilitados. Secret scanning y push protection habilitados. DCO manual, sin app ni CLA.
-- Protección prevista inmediatamente después de este cierre documental: PR obligatorio, checks reales `verify`, `secrets`, `selfhosting`, rama actualizada y conversaciones resueltas; sin force push ni eliminación. Se comprobará la respuesta de GitHub antes de darla por activa.
+- Protección comprobada el 2026-10-06: PR obligatorio, checks reales `verify`, `secrets`, `selfhosting`, rama actualizada y conversaciones resueltas; sin force push ni eliminación. La consulta de GitHub confirmó estas reglas activas, incluido enforce_admins.
 - Maintainer único: cero aprobaciones ajenas obligatorias inicialmente, porque no puede aprobar su propio PR. Se mantiene PR, self-review y CI; no se habilita bypass administrativo. Activar revisión independiente cuando exista otra persona elegible.
 - La configuración Dependabot heredada todavía no cubre el Dockerfile default `docker/versity`; revisar esa cobertura en una tarea posterior sin cambiar storage. El CI sí contiene su build y gate de vulnerabilidades.
