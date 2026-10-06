@@ -1,6 +1,6 @@
 # External response invitations — audit and implementation plan
 
-Status: **IN DEVELOPMENT; not a released capability.** Authoritative HTTP
+Status: **IMPLEMENTED; release pending.** Authoritative HTTP
 shapes are Zod schemas and `contracts` in `packages/contracts/src/index.ts`.
 This document records semantics and the evidence required before delivery.
 
@@ -189,7 +189,9 @@ port and passed all assertions; no service or test assertion was disabled.
 
 Still required before the feature can be declared ready:
 
-- DCO commit, PR, remote CI, review, permitted merge and verification of main.
+- Remote CI, permitted merge and verification of main. The DCO-signed
+  implementation is on PR #14; branch protection requires verify, secrets and
+  selfhosting, an up-to-date branch and resolved conversations.
 
 The first external browser runs reproduced a real same-document navigation bug:
 after logout, reopening the original fragment link left the closed screen visible.
@@ -203,8 +205,9 @@ browser test asserts a successful creation before checking renewal and revocatio
 Client generation checks prevent an older in-flight exchange or response from
 replacing a newer invitation's context; a deterministic unit test covers the race.
 
-No PR, merge or release has been performed for this feature. No downstream
-repository or existing working-instance data has been modified.
+The implementation is proposed in [PR #14](https://github.com/ruzer/Acta/pull/14).
+No release is created by this change. No downstream repository or existing
+working-instance data has been modified.
 
 The initial full-browser run passed 44/45, with the login test expecting a different
 organization name from the disposable seed. A second run reused modified demo data
@@ -213,7 +216,8 @@ explicit matching fictitious organization name and initial password-change flow,
 passed all 45 tests. Product assertions were not weakened and no retries were added.
 The CI verify job now prepares its own clean demo database and runs the full browser
 suite; the selfhosting job includes external-invitation S3 tests and proxy/restart smoke.
-These remote jobs have not run for this branch yet.
+The live remote checks and merge state are available on PR #14; the counts above
+are local evidence and must not be interpreted as remote CI results.
 
 The local Docker host had exhausted its default network pools and the first chosen
 port was occupied. The isolated gate used temporary, non-overlapping subnets and
@@ -238,3 +242,13 @@ uses the project's existing license and DCO contribution policy. User/operator
 instructions cover lifecycle, sharing risks, storage, privacy, rate budgets and
 configuration. Automated tests are not a substitute for usability research with
 human participants, and no WCAG conformance claim is made.
+
+Local source review before publication examined capability guards, ordinary-auth
+separation, immutable DB scope, project-locked writes, evidence reuse, recipient
+attribution, frontend token lifetime, migration upgrade and fixture isolation.
+No unresolved blocking finding remained. The PR diff contains only this feature,
+its tests/configuration and documentation. Existing account cookie/CSRF identifiers
+are preserved for compatibility; the new external cookie is separate. No new
+institutional branding or institutional data is introduced. The staged secret scan
+passed and 597 relative file links resolved. Remote review/checks remain independent
+of this local review; the final merge gate must inspect their current state.

@@ -1,7 +1,8 @@
 # Responder mediante una invitación privada
 
-> Capacidad en validación en esta rama. La publicación depende de los gates de
-> seguridad, navegador y CI descritos en el [plan técnico](EXTERNAL-INVITATIONS-DESIGN.md).
+> Funcionalidad posterior a v0.3.0, todavía sin una release que la incluya.
+> Consulta el [changelog](../CHANGELOG.md) y la
+> [evidencia técnica](EXTERNAL-INVITATIONS-DESIGN.md) antes de actualizar una instalación.
 
 Una invitación permite responder preguntas concretas sin crear una cuenta ni
 recordar una contraseña. Se utiliza para una aportación puntual. Para trabajo
