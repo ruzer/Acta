@@ -11,6 +11,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 - Operaciones masivas en Organizar: asignar área, añadir participantes y publicar, con selección por página, resultados, tema o grupo y filtro por área.
 - Revisión previa del lote, confirmación atómica, control de concurrencia y reintentos idempotentes; las dependencias externas requieren selección explícita.
 
+### Security
+
+- Actualización transitiva de desarrollo `source-map-js` a 1.2.2 para corregir [GHSA-68fv-2mgg-jv7q](https://github.com/advisories/GHSA-68fv-2mgg-jv7q), conservando el gate de auditoría de dependencias.
+
 ## 0.2.0 — 2026-10-02
 
 Primera versión pública preparada. La fecha corresponde a esta preparación; la publicación se confirmará mediante el tag y la release después de aprobar este changelog y verificar el commit definitivo.
