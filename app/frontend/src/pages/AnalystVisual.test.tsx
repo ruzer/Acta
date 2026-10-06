@@ -409,6 +409,11 @@ it("VIS005 Criterio: el selector de tipos funciona con flechas del teclado", asy
 it("el resumen de errores distingue destinos y activa el campo elegido", async () => {
   const { user } = form();
   await user.click(screen.getByRole("button", { name: "Crear pregunta" }));
+  // Validation focuses its first field on the next frame. Observe that state
+  // before exercising a different error link, as the browser interaction does.
+  await waitFor(() =>
+    expect(screen.getByLabelText("Pregunta", { exact: true })).toHaveFocus(),
+  );
   const links = screen.getAllByRole("link");
   const externalId = links.find((link) =>
     link.textContent?.startsWith("Identificador externo:"),
