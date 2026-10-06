@@ -173,7 +173,8 @@ export function ProjectWork({
               .toLocaleLowerCase("es")
               .includes(term)) &&
           (filter === "all" ||
-            (filter === "attention" && state === "clarification") ||
+            (filter === "attention" &&
+              ["clarification", "consultation"].includes(state)) ||
             (filter === "sent" && (q.hasSubmission || q.currentSubmission)) ||
             (filter === "pending" &&
               ["pending", "draft", "consultation"].includes(state)))
@@ -205,7 +206,11 @@ export function ProjectWork({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <div className="participant-filters" aria-label="Filtrar preguntas">
+          <div
+            className="participant-filters"
+            role="group"
+            aria-label="Filtrar preguntas"
+          >
             {[
               ["all", "Todo"],
               ["pending", "Pendientes"],

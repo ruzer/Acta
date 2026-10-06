@@ -5,7 +5,7 @@ import {
 } from "./AnalystVisual";
 import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useLocation } from "react-router-dom";
 import { api } from "../api";
 import {
   Alert,
@@ -22,8 +22,15 @@ import {
 } from "./ReviewActions";
 import { dateText, SubmittedAnswer, ThreadMessages } from "./ReviewShared";
 export function ReviewDetail() {
-  const { projectId = "", id = "" } = useParams(),
-    client = useQueryClient();
+  const location = useLocation();
+  const savedSearch = (location.state as { reviewSearch?: unknown } | null)
+    ?.reviewSearch;
+  const { projectId = "", id = "" } = useParams();
+  const reviewSearch =
+    typeof savedSearch === "string"
+      ? new URLSearchParams(savedSearch).toString()
+      : new URLSearchParams({ projectId }).toString();
+  const client = useQueryClient();
   const q = useQuery({
     queryKey: ["review", projectId, id],
     queryFn: () => api("getReviewDetail", { projectId, id }),
@@ -76,7 +83,7 @@ export function ReviewDetail() {
     <div className="review-page av-scope">
       <Link
         className="back"
-        to={d.canReview ? "/review" : `/projects/${projectId}`}
+        to={d.canReview ? `/review?${reviewSearch}` : `/projects/${projectId}`}
       >
         {d.canReview ? "← Revisión" : "← Proyecto"}
       </Link>

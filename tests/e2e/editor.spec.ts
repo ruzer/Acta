@@ -233,22 +233,33 @@ test("editor: galería responsive, tabs, inspector único, MATRIX y condiciones"
       .evaluate((el) => getComputedStyle(el).animationName),
   ).toBe("none");
 });
-test("editor: Revisar dirige a principal y publicación individual conserva dependencias", async ({
+test("editor: Revisar distingue alcance conjunto y publicación individual conserva dependencias", async ({
   page,
 }) => {
   await login(page, "admin");
   await page.goto(`/projects/${projectId}/editor`);
   await page.getByRole("tab", { name: "Revisar" }).click();
   await expect(
-    page.getByRole("heading", { name: /Errores · resuelve/ }),
+    page.getByRole("heading", { name: /Advertencias · revisa/ }),
   ).toBeVisible();
   await shot(page, "revisar-con-problemas");
   await axe(page);
   const issue = page
     .getByRole("article")
     .filter({ hasText: "¿Cómo funciona el proceso ficticio número 9?" })
-    .filter({ hasText: "Publica primero" });
-  await issue.getByRole("button", { name: "Ir a corregir" }).click();
+    .filter({ hasText: "Para publicarla por separado" });
+  await expect(
+    issue.getByRole("button", { name: "Revisar publicación conjunta" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", {
+      name: "Publicar: Pregunta ficticia 9",
+      exact: true,
+    }),
+  ).toBeDisabled();
+  await page
+    .getByRole("button", { name: "Publicar: Pregunta ficticia 1", exact: true })
+    .click();
   await expect(
     page
       .getByRole("dialog")

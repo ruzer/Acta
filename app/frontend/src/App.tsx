@@ -196,7 +196,12 @@ function Session() {
           <Routes>
             <Route
               path="/"
-              element={<Projects displayName={me.user.displayName} />}
+              element={
+                <Projects
+                  displayName={me.user.displayName}
+                  isOrganizationAdmin={me.user.isOrganizationAdmin}
+                />
+              }
             />
             <Route path="/review" element={<ReviewInbox />} />
             <Route

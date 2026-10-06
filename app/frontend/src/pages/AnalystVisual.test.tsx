@@ -405,3 +405,46 @@ it("VIS005 Criterio: el selector de tipos funciona con flechas del teclado", asy
   expect(screen.getByRole("radio", { name: "Texto amplio" })).toBeChecked();
   expect(screen.getByRole("radio", { name: "Texto amplio" })).toHaveFocus();
 });
+
+it("el resumen de errores distingue destinos y activa el campo elegido", async () => {
+  const { user } = form();
+  await user.click(screen.getByRole("button", { name: "Crear pregunta" }));
+  const links = screen.getAllByRole("link");
+  const externalId = links.find((link) =>
+    link.textContent?.startsWith("Identificador externo:"),
+  );
+  expect(externalId).toBeDefined();
+  expect(links.some((link) => link.textContent?.startsWith("Pregunta:"))).toBe(
+    true,
+  );
+  expect(
+    links.some((link) => link.textContent?.startsWith("Título breve:")),
+  ).toBe(true);
+  await user.click(externalId!);
+  expect(screen.getByLabelText("Identificador externo")).toHaveFocus();
+});
+
+it("volver a Revisión conserva los filtros de procedencia sin cambiar el destino", async () => {
+  vi.spyOn(apiModule, "api").mockResolvedValue(conflict);
+  render(
+    <QueryClientProvider
+      client={
+        new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      }
+    >
+      <MemoryRouter
+        initialEntries={[
+          {
+            pathname: "/",
+            state: { reviewSearch: "projectId=demo&status=CONFLICT" },
+          },
+        ]}
+      >
+        <ReviewDetailPage />
+      </MemoryRouter>
+    </QueryClientProvider>,
+  );
+  expect(
+    await screen.findByRole("link", { name: "← Revisión" }),
+  ).toHaveAttribute("href", "/review?projectId=demo&status=CONFLICT");
+});

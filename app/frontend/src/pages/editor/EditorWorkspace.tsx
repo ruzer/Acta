@@ -285,6 +285,12 @@ export function EditorWorkspace(props: EditorProps) {
           {mode === i && i === 2 && (
             <ReadinessPanel
               {...props}
+              onOrganize={() => {
+                setMode(1);
+                requestAnimationFrame(() =>
+                  document.getElementById("qe-tab-1")?.focus(),
+                );
+              }}
               onInspect={(id) => {
                 setInspectId(id);
                 setMode(1);
@@ -293,6 +299,24 @@ export function EditorWorkspace(props: EditorProps) {
           )}
           {mode === i && i === 0 && (
             <>
+              {data.questions.length > 1 && (
+                <p className="hint">
+                  Para asignar participantes o publicar varias preguntas juntas,
+                  usa{" "}
+                  <Button
+                    tone="secondary"
+                    onClick={() => {
+                      setMode(1);
+                      requestAnimationFrame(() =>
+                        document.getElementById("qe-tab-1")?.focus(),
+                      );
+                    }}
+                  >
+                    Organizar preguntas
+                  </Button>
+                  .
+                </p>
+              )}
               {!data.sections.length && (
                 <EmptyState title="Todavía no hay preguntas.">
                   Agrega el primer tema para comenzar.

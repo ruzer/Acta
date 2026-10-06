@@ -108,6 +108,7 @@ export function ReviewInbox() {
                   <h2>
                     <Link
                       to={`/projects/${item.projectId}/review/${item.questionId}`}
+                      state={{ reviewSearch: params.toString() }}
                     >
                       {item.question}
                     </Link>

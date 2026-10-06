@@ -63,6 +63,8 @@ it("un seguimiento sin condición es válido; principal sin publicar se corrige 
       questionId: "child",
       targetId: base.id,
       field: "groupParentId",
+      level: "ADVERTENCIA",
+      message: expect.stringContaining("seleccionar ambas"),
     }),
   );
   expect(
@@ -144,4 +146,17 @@ it("simula selección múltiple por valor exacto y padres ausentes", () => {
   expect(applicability("b", [a, b], { a: ["F-14"] })).toBe("DISABLED");
   expect(applicability("b", [a, b], { a: ["F-014"] })).toBe("ENABLED");
   expect(applicability("b", [b], { a: ["F-014"] })).toBe("UNDETERMINED");
+});
+
+it("la orientación conjunta no oculta un padre ausente o archivado", () => {
+  for (const questions of [
+    [{ ...base, id: "child", groupParentId: "missing" }],
+    [
+      { ...base, publication: "ARCHIVED" as const },
+      { ...base, id: "child", groupParentId: base.id },
+    ],
+  ])
+    expect(readiness({ ...data, questions })).toContainEqual(
+      expect.objectContaining({ field: "groupParentId", level: "ERROR" }),
+    );
 });

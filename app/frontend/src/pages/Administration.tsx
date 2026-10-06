@@ -358,6 +358,12 @@ export function Members() {
         ← Cuestionario
       </Link>
       <h1>Miembros del proyecto</h1>
+      <p>
+        La membresía da acceso al proyecto. Para que un participante pueda
+        responder, asígnale preguntas en{" "}
+        <Link to={`/projects/${projectId}/editor`}>Organizar</Link> y
+        publícalas. El área no asigna personas automáticamente.
+      </p>
       <Table caption="Acceso al proyecto">
         <thead>
           <tr>

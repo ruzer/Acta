@@ -375,6 +375,7 @@ export function Organize(props: EditorProps & { initialSelected?: string }) {
         </p>
         <div
           className="qe-selection-controls"
+          role="group"
           aria-label="Alcance de selección"
         >
           <Button
@@ -479,6 +480,7 @@ export function Organize(props: EditorProps & { initialSelected?: string }) {
             </label>
             <button
               className="qe-compact-row"
+              data-question-id={q.id}
               key={q.id}
               aria-pressed={selected === q.id}
               onClick={() => setSelected(q.id)}
