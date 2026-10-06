@@ -6,22 +6,39 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
+Sin cambios adicionales por anunciar.
+
+## 0.3.0 — preparada, pendiente de publicación
+
+Esta sección reúne el alcance de la próxima release; todavía no existe tag ni GitHub Release v0.3.0. La fecha de publicación se registrará al publicarla.
+
+### Large questionnaire management
+
+Operaciones conjuntas para preparar cuestionarios grandes con selección y alcance explícitos. Conserva revisión previa, confirmación y validación en el servidor; no incorpora dependencias ni sobrescribe asignaciones implícitamente.
+
 ### Added
 
 - Operaciones masivas en Organizar: asignar área, añadir participantes y publicar, con selección por página, resultados, tema o grupo y filtro por área.
 - Revisión previa del lote, confirmación atómica, control de concurrencia y reintentos idempotentes; las dependencias externas requieren selección explícita.
 
-### Changed
+### Simplicity and usability
+
+#### Changed
 
 - El editor orienta hacia las operaciones conjuntas existentes desde Escribir y Revisar; distingue una dependencia pendiente para publicación individual de un conjunto que debe revisarse en Organizar.
 - Por consultar aparece en el resumen y filtro de atención del participante; la confirmación de envío permanece en la pregunta de destino.
 - Inicio administrativo, membresías e importación desde un editor vacío explican mejor el siguiente paso, sin asignaciones ni publicaciones implícitas.
 
-### Fixed
+#### Fixed
 
 - Retorno de foco tras cancelar o completar asignación/publicación, incluso cuando desaparece el control del inspector.
 - Enlaces de errores identificables por campo, agrupación accesible de controles y conservación de filtros al volver de una revisión.
 - Los avisos repetidos sobre preguntas publicadas se resumen en una sola indicación en Revisar.
+
+### Accessibility
+
+- Retorno de foco probado tras cancelar/completar operaciones y al desaparecer el control del inspector; enlaces de error distinguibles y agrupaciones accesibles.
+- Teclado, reduced motion y reflow comprobados en navegador, con regresión responsive y siete recorridos equivalentes. Axe no detectó violaciones en esas muestras; dos resultados de contraste quedaron incompletos y se conservaron para revisión. No se declara conformidad WCAG ni usabilidad validada con personas humanas.
 
 ### Security
 
@@ -29,7 +46,7 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## 0.2.0 — 2026-10-02
 
-Primera versión pública preparada. La fecha corresponde a esta preparación; la publicación se confirmará mediante el tag y la release después de aprobar este changelog y verificar el commit definitivo.
+Primera versión pública, [publicada el 2 de octubre de 2026](https://github.com/ruzer/Acta/releases/tag/v0.2.0).
 
 ### Added
 

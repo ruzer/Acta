@@ -46,6 +46,12 @@ Si `main` contiene personalizaciones, integra upstream en una rama de trabajo se
 
 Seguir `upstream/main` sirve para desarrollo, no significa desplegarlo automáticamente. Para actualizar una instalación, elige una release, revisa cambios y migraciones, prueba en staging, haz backup coordinado y sigue [Self-hosting](SELF-HOSTING.md#actualizar). Conservar nombre Compose, claves de objetos y volúmenes es parte de la continuidad operativa.
 
+## Próxima base candidata: v0.3.0
+
+La preparación de 0.3.0 en `main` no es todavía una release. Los downstream deben conservar su base actual hasta que se publique el tag/release **v0.3.0**. Entonces podrán verificar su commit, crear una rama de actualización, revisar personalizaciones y migraciones, probar y proponer la integración en su propio repositorio. No actualizar automáticamente desde `main`.
+
+[Preparación y límites de 0.3.0](releases/v0.3.0.md).
+
 ## Devolver una mejora
 
 Crea una rama desde upstream actualizado, lleva únicamente el cambio genérico, conserva atribuciones y explica qué se separó del fork. Verifica que funciona sin endpoints ni datos internos. No subas accidentalmente secretos o historia privada al extraer commits. Confirma autorización de los titulares antes de aportar código institucional y revisa [procedencia de contribuciones](CONTRIBUTION-ORIGIN.md).

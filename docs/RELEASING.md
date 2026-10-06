@@ -1,6 +1,6 @@
 # Versionado y releases de Acta
 
-**PROCESO FUTURO; no hay release pública.** Titularidad, autorización, AGPL-3.0-only y DCO 1.1 están confirmados. La publicación del código exige superar el gate remoto; la release formal requiere además CI, configuración y revisión. El [manifiesto](../PUBLIC-SNAPSHOT-MANIFEST.md) demuestra pruebas del snapshot, no autorización legal ni una release.
+**Proceso para preparar y publicar releases.** La primera release pública es [v0.2.0](https://github.com/ruzer/Acta/releases/tag/v0.2.0). Titularidad, autorización, AGPL-3.0-only y DCO 1.1 están confirmados. La publicación del código exige superar el gate remoto; la release formal requiere además CI, configuración y revisión. El [manifiesto](../PUBLIC-SNAPSHOT-MANIFEST.md) demuestra pruebas del snapshot, no autorización legal ni una release.
 
 ## Política de versiones
 
@@ -14,11 +14,15 @@ Se prepara [Semantic Versioning](https://semver.org/lang/es/) en formato **MAJOR
 
 El contrato público incluye API documentada, configuración, formatos de intercambio y requisitos de actualización/persistencia. No basta con que TypeScript compile para afirmar compatibilidad. Antes de 1.0 no se promete estabilidad absoluta; los cambios incompatibles deben anunciarse, agruparse en un incremento MINOR de `0.x` y acompañarse de instrucciones de migración. PATCH seguirá reservado para cambios compatibles. Una corrección de seguridad que rompa compatibilidad debe decirlo y usar la versión apropiada.
 
-### Primera versión prevista
+### Preparación de 0.3.0
 
-**0.2.0, versión inicial prevista aprobada.** `0.1.0` es una opción válida para empezar una historia pública, pero los cuatro manifiestos de paquetes ya declaran `0.2.0` y el snapshot usa esa base. Conservar 0.2.0 evita renumerar tooling o sugerir un downgrade sin beneficio funcional. No implica que exista una release pública 0.1.0: la historia pública empieza con Acta.
+La primera versión publicada fue **0.2.0**. La siguiente versión recomendada es **0.3.0**, por las nuevas operaciones compatibles de área, participantes y publicación conjunta; el simplicity pass agrega correcciones y orientación sobre capacidades existentes. Un `0.2.x` comunicaría solo correcciones, por lo que no describe todo este alcance.
 
-Si se necesita una candidata, evaluar `0.2.0-rc.1` antes de la release final; no se crea ahora. Los manifiestos y lockfile ya están alineados en 0.2.0 y se conservan. La creación de tag/release requiere una fase posterior autorizada. Las releases publicadas serán inmutables: correcciones posteriores usan otra versión, sin mover tags existentes.
+SemVer trata `0.y.z` como desarrollo inicial. La política de Acta adopta explícitamente MINOR para funcionalidad compatible nueva y PATCH para correcciones compatibles, sin prometer estabilidad absoluta antes de 1.0. Esta decisión no significa un cambio incompatible ni una certificación general de compatibilidad: la revisión de contratos, persistencia y pruebas se conserva en el [informe de preparación](releases/v0.3.0.md).
+
+Raíz, frontend, backend, contracts, referencias internas y lockfile se preparan coherentemente en 0.3.0 mediante PR. Esto no crea una release. Las releases publicadas son inmutables: correcciones posteriores usan otra versión, sin mover tags existentes.
+
+Los forks institucionales y demás downstream **deben esperar al tag y release v0.3.0**, verificar su commit y probar la actualización en su propia rama; no deben desplegar esta preparación directamente desde `main`.
 
 ## Preparar, verificar y autorizar
 
