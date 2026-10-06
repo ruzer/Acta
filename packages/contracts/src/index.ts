@@ -808,7 +808,220 @@ export type ClarificationThreadView = z.infer<typeof clarificationThreadView>;
 export type MyClarifications = z.infer<typeof myClarificationsView>;
 
 // Canonical observable boundaries; Nest validates inputs/outputs and the client parses outputs.
+// External invitations are capabilities, never regular account sessions.
+export const invitationIdentityRequirement = z.enum([
+  "NONE",
+  "NAME",
+  "EMAIL",
+  "BOTH",
+]);
+export const invitationIdentity = z.strictObject({
+  name: z.string().trim().min(1).max(200).optional(),
+  email: z.email().max(254).optional(),
+  organization: z.string().trim().min(1).max(200).optional(),
+});
+export const invitationCreateInput = z
+  .strictObject({
+    requestId: id,
+    label: z.string().trim().min(1).max(200),
+    questionIds: z
+      .array(id)
+      .min(1)
+      .max(500)
+      .refine((v) => new Set(v).size === v.length, "No repitas preguntas."),
+    areaId: id,
+    identity: invitationIdentity,
+    nonNominal: z.boolean().default(false),
+    expiresAt: z.iso.datetime().optional(),
+    allowEvidence: z.boolean().default(false),
+  })
+  .superRefine((v, ctx) => {
+    if (v.nonNominal && Object.keys(v.identity).length)
+      ctx.addIssue({
+        code: "custom",
+        path: ["identity"],
+        message: "Una invitación no nominal no registra datos personales.",
+      });
+    if (!v.nonNominal && !v.identity.name && !v.identity.email)
+      ctx.addIssue({
+        code: "custom",
+        path: ["identity"],
+        message: "Indica nombre o correo del destinatario.",
+      });
+  });
+export const invitationCommand = z.strictObject({
+  expectedVersion: z.number().int().nonnegative(),
+});
+export const invitationRenewInput = invitationCommand.extend({
+  expiresAt: z.iso.datetime().optional(),
+});
+export const invitationPolicyInput = invitationCommand.extend({
+  allowNonNominal: z.boolean(),
+});
+export const invitationPolicyView = z.strictObject({
+  allowNonNominal: z.boolean(),
+  expectedVersion: z.number().int().nonnegative(),
+  identityRequirement: invitationIdentityRequirement,
+  defaultDays: z.number().int().positive(),
+  maxDays: z.number().int().positive(),
+});
+export const invitationView = z.strictObject({
+  id,
+  label: z.string(),
+  identity: invitationIdentity,
+  nonNominal: z.boolean(),
+  questionIds: z.array(id),
+  areaId: id,
+  allowEvidence: z.boolean(),
+  createdAt: z.iso.datetime(),
+  expiresAt: z.iso.datetime(),
+  revokedAt: z.iso.datetime().nullable(),
+  firstOpenedAt: z.iso.datetime().nullable(),
+  lockVersion: z.number().int().nonnegative(),
+  status: z.enum([
+    "PENDING",
+    "OPENED",
+    "DRAFT",
+    "PARTIALLY_SUBMITTED",
+    "SUBMITTED",
+    "EXPIRED",
+    "REVOKED",
+  ]),
+  submitted: z.number().int().nonnegative(),
+  total: z.number().int().nonnegative(),
+});
+export const invitationLinkView = z.strictObject({
+  invitation: invitationView,
+  url: z.url(),
+});
+export const invitationListQuery = z.strictObject({
+  page: z.coerce.number().int().min(1).default(1),
+});
+export const invitationListView = z.strictObject({
+  items: z.array(invitationView),
+  page: z.number().int().positive(),
+  total: z.number().int().nonnegative(),
+});
+export const invitationExchangeInput = z.strictObject({
+  token: z.string().regex(/^[A-Za-z0-9_-]{43}$/),
+});
+export const invitationAccessView = z.strictObject({
+  invitationId: id,
+  csrfToken: z.string().length(64),
+  expiresAt: z.iso.datetime(),
+  allowEvidence: z.boolean(),
+  work: personalProjectView,
+});
+export type InvitationView = z.infer<typeof invitationView>;
+export type InvitationAccessView = z.infer<typeof invitationAccessView>;
+export type InvitationCreateInput = z.infer<typeof invitationCreateInput>;
+
 export const contracts = {
+  invitationPolicy: {
+    method: "GET",
+    path: "/projects/:projectId/invitations/policy",
+    output: invitationPolicyView,
+  },
+  setInvitationPolicy: {
+    method: "PUT",
+    path: "/projects/:projectId/invitations/policy",
+    input: invitationPolicyInput,
+    output: invitationPolicyView,
+  },
+  invitations: {
+    method: "GET",
+    path: "/projects/:projectId/invitations",
+    input: invitationListQuery,
+    output: invitationListView,
+  },
+  createInvitation: {
+    method: "POST",
+    path: "/projects/:projectId/invitations",
+    input: invitationCreateInput,
+    output: invitationLinkView,
+  },
+  revokeInvitation: {
+    method: "POST",
+    path: "/projects/:projectId/invitations/:id/revoke",
+    input: invitationCommand,
+    output: invitationView,
+  },
+  renewInvitation: {
+    method: "POST",
+    path: "/projects/:projectId/invitations/:id/renew",
+    input: invitationRenewInput,
+    output: invitationLinkView,
+  },
+  invitationExchange: {
+    method: "POST",
+    path: "/invitations/access/exchange",
+    input: invitationExchangeInput,
+    output: invitationAccessView,
+  },
+  invitationAccess: {
+    method: "GET",
+    path: "/invitations/access",
+    output: invitationAccessView,
+  },
+  invitationLogout: {
+    method: "POST",
+    path: "/invitations/access/logout",
+    output: okView,
+  },
+  invitationResponse: {
+    method: "GET",
+    path: "/invitations/access/questions/:id",
+    output: responseView,
+  },
+  invitationSave: {
+    method: "PUT",
+    path: "/invitations/access/questions/:id/draft",
+    input: saveDraftInput,
+    output: responseView,
+  },
+  invitationSubmit: {
+    method: "POST",
+    path: "/invitations/access/questions/:id/submit",
+    input: responseCommand,
+    output: responseView,
+  },
+  invitationAttach: {
+    method: "POST",
+    path: "/invitations/access/questions/:id/evidence/attach",
+    input: evidenceCommand,
+    output: responseView,
+  },
+  invitationRemove: {
+    method: "POST",
+    path: "/invitations/access/questions/:id/evidence/remove",
+    input: evidenceCommand,
+    output: responseView,
+  },
+  invitationStage: {
+    transport: "binary" as const,
+    method: "POST",
+    path: "/invitations/access/questions/:id/evidence",
+    input: stageEvidenceInput,
+    output: evidenceView,
+  },
+  invitationDownload: {
+    transport: "binary" as const,
+    method: "GET",
+    path: "/invitations/access/evidence/:id/download",
+    output: evidenceView,
+  },
+  invitationClarifications: {
+    method: "GET",
+    path: "/invitations/access/questions/:id/clarifications",
+    output: myClarificationsView,
+  },
+  invitationReply: {
+    method: "POST",
+    path: "/invitations/access/questions/:id/clarifications/reply",
+    input: replyClarificationInput,
+    output: reviewResult,
+  },
+
   branding: {
     method: "GET",
     path: "/configuration/public",

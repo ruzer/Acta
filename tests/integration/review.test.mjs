@@ -10,8 +10,9 @@ import pg from "pg";
 import { PDFDocument } from "pdf-lib";
 let reviewEvidenceId;
 config({ quiet: true });
+const testPort = process.env.ACTA_REVIEW_TEST_PORT || "4330";
 const name = "requirements_2d_" + randomBytes(6).toString("hex"),
-  origin = "http://localhost:4330",
+  origin = `http://localhost:${testPort}`,
   password = "Test-" + randomBytes(24).toString("base64url");
 const ownerUrl = new URL(process.env.MIGRATION_DATABASE_URL),
   runtimeUrl = new URL(process.env.DATABASE_URL),
@@ -138,7 +139,7 @@ before(
     Object.assign(process.env, {
       DATABASE_URL: runtimeUrl.href,
       APP_ORIGIN: origin,
-      PORT: "4330",
+      PORT: testPort,
       COOKIE_SECURE: "false",
       DEMO_SEED: "true",
       DEMO_PASSWORD: password,

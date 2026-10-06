@@ -1,3 +1,5 @@
+import { Invitations } from "./pages/Invitations";
+import { InvitedResponse } from "./pages/InvitedResponse";
 import { BrandingProvider, Brand } from "./branding";
 import { Dashboard, Traceability, History } from "./pages/Visibility";
 import { ImportStructure, ExportProject } from "./pages/Exchange";
@@ -205,6 +207,10 @@ function Session() {
             />
             <Route path="/review" element={<ReviewInbox />} />
             <Route
+              path="/projects/:projectId/invitations"
+              element={<Invitations />}
+            />
+            <Route
               path="/projects/:projectId/dashboard"
               element={<Dashboard />}
             />
@@ -292,7 +298,10 @@ function Session() {
     </div>
   );
 }
-const router = createBrowserRouter([{ path: "*", element: <Session /> }]);
+const router = createBrowserRouter([
+  { path: "/invite", element: <InvitedResponse /> },
+  { path: "*", element: <Session /> },
+]);
 export function App() {
   return (
     <QueryClientProvider client={client}>

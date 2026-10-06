@@ -21,6 +21,10 @@ Cada guía operativa describe su procedimiento; el manifiesto registra pruebas, 
 
 [Guía de importación](IMPORTING-QUESTIONNAIRES.md): para usuarios que preparan archivos, administradores que revisan áreas y permisos, y desarrolladores que mantienen ejemplos. [Ejemplo mínimo](../examples/questionnaire-template.minimal.json) · [Ejemplo completo](../examples/questionnaire-template.full.json) · [Contrato técnico](IMPORT-FORMAT.md).
 
+## Solicitar aportaciones externas
+
+[Invitaciones mediante enlaces privados](EXTERNAL-INVITATIONS.md): crear, compartir, guardar, enviar, aclarar y revocar sin una cuenta tradicional. Incluye garantías, límites y privacidad.
+
 ## Preparación upstream
 
 - [Gobernanza](../GOVERNANCE.md): roles, aceptación y política de forks.

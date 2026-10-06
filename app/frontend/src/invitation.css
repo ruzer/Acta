@@ -1,0 +1,82 @@
+.invitation-shell {
+  min-height: 100vh;
+  background: var(--bg, #f7f8f9);
+}
+.invitation-header {
+  padding: 1.25rem max(1rem, calc((100vw - 52rem) / 2));
+  border-bottom: 1px solid var(--line, #d7dde3);
+  font-size: 1.25rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.invitation-content {
+  max-width: 52rem;
+  margin: auto;
+  padding: 2rem 1rem 4rem;
+}
+.invitation-content h1,
+.invitation-content h2,
+.invitation-content p {
+  overflow-wrap: anywhere;
+}
+.invitation-section {
+  margin-block: 2rem;
+}
+.invitation-section ul {
+  list-style: none;
+  padding: 0;
+}
+.invitation-section li {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--line, #d7dde3);
+}
+.invitation-question {
+  margin-block: 2rem;
+}
+.invitation-question .field {
+  margin-block: 1rem;
+}
+.invitation-actions,
+.invitation-file {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-block: 1.5rem;
+}
+.invitation-file span {
+  overflow-wrap: anywhere;
+}
+.invitation-answer,
+.invitation-thread p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.invitation-thread {
+  padding-block: 1rem;
+  border-bottom: 1px solid var(--line, #d7dde3);
+}
+@media (max-width: 600px) {
+  .invitation-section li {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .invitation-actions > button {
+    width: 100%;
+  }
+}
+
+.invitation-management {
+  padding: 0;
+  list-style: none;
+}
+.invitation-management li {
+  padding-block: 1.25rem;
+  border-bottom: 1px solid var(--line, #d7dde3);
+}

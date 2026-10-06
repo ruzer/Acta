@@ -41,7 +41,7 @@ export class AdministrationService {
     await this.access.organizationAdmin(this.db, actor);
     return (
       await this.db.user.findMany({
-        where: { organizationId: actor.organizationId },
+        where: { organizationId: actor.organizationId, invitationOnly: false },
         orderBy: { displayName: "asc" },
         take: 500,
       })
@@ -81,7 +81,11 @@ export class AdministrationService {
       if (id === req.actor.id && !active)
         throw new ConflictException("No puedes desactivar tu propia cuenta.");
       const u = await tx.user.findFirst({
-        where: { id, organizationId: req.actor.organizationId },
+        where: {
+          id,
+          organizationId: req.actor.organizationId,
+          invitationOnly: false,
+        },
       });
       if (!u) throw new NotFoundException("No se encontró el usuario.");
       const affected = await tx.projectMember.findMany({
@@ -118,7 +122,11 @@ export class AdministrationService {
     return this.db.$transaction(async (tx) => {
       await this.access.organizationAdmin(tx, req.actor);
       const u = await tx.user.findFirst({
-        where: { id, organizationId: req.actor.organizationId },
+        where: {
+          id,
+          organizationId: req.actor.organizationId,
+          invitationOnly: false,
+        },
       });
       if (!u) throw new NotFoundException("No se encontró el usuario.");
       await tx.user.update({
@@ -273,7 +281,7 @@ export class AdministrationService {
   }
   async memberList(tx: Tx, projectId: string) {
     const rows = await tx.projectMember.findMany({
-      where: { projectId },
+      where: { projectId, user: { invitationOnly: false } },
       include: { user: true, area: true },
       orderBy: { createdAt: "asc" },
       take: 500,
@@ -304,6 +312,7 @@ export class AdministrationService {
       const u = await tx.user.findFirst({
         where: {
           id: d.userId,
+          invitationOnly: false,
           organizationId: req.actor.organizationId,
           ...(d.active ? { active: true } : {}),
         },

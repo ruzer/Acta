@@ -222,7 +222,7 @@ export class BulkQuestionnaireService {
         select: { id: true },
       }),
       tx.projectMember.findMany({
-        where: { projectId },
+        where: { projectId, user: { invitationOnly: false } },
         orderBy: { id: "asc" },
         select: {
           id: true,

@@ -99,18 +99,22 @@ enum StorageBackend {
 }
 
 model Organization {
-  id                      String       @id @default(uuid()) @db.Uuid
-  code                    String       @unique
+  invitations             ResponseInvitation[]
+  id                      String               @id @default(uuid()) @db.Uuid
+  code                    String               @unique
   name                    String
-  createdAt               DateTime     @default(now()) @db.Timestamptz(3)
-  updatedAt               DateTime     @updatedAt @db.Timestamptz(3)
-  User_organization       User[]       @relation("User_organization")
-  Area_organization       Area[]       @relation("Area_organization")
-  Project_organization    Project[]    @relation("Project_organization")
-  AuditEvent_organization AuditEvent[] @relation("AuditEvent_organization")
+  createdAt               DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt               DateTime             @updatedAt @db.Timestamptz(3)
+  User_organization       User[]               @relation("User_organization")
+  Area_organization       Area[]               @relation("Area_organization")
+  Project_organization    Project[]            @relation("Project_organization")
+  AuditEvent_organization AuditEvent[]         @relation("AuditEvent_organization")
 }
 
 model User {
+  invitationOnly                  Boolean                @default(false)
+  responseInvitation              ResponseInvitation?    @relation("InvitedRespondent")
+  createdInvitations              ResponseInvitation[]   @relation("InvitationCreator")
   id                              String                 @id @default(uuid()) @db.Uuid
   organizationId                  String                 @db.Uuid
   username                        String
@@ -169,23 +173,26 @@ model LoginAttempt {
 }
 
 model Area {
-  id                       String             @id @default(uuid()) @db.Uuid
-  organizationId           String             @db.Uuid
+  invitations              ResponseInvitation[]
+  id                       String               @id @default(uuid()) @db.Uuid
+  organizationId           String               @db.Uuid
   code                     String
   name                     String
-  active                   Boolean            @default(true)
-  createdAt                DateTime           @default(now()) @db.Timestamptz(3)
-  updatedAt                DateTime           @updatedAt @db.Timestamptz(3)
-  organization             Organization       @relation("Area_organization", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  ProjectMember_area       ProjectMember[]    @relation("ProjectMember_area")
-  Question_responsibleArea Question[]         @relation("Question_responsibleArea")
-  ResponseDraft_area       ResponseDraft[]    @relation("ResponseDraft_area")
-  ResponseRevision_area    ResponseRevision[] @relation("ResponseRevision_area")
+  active                   Boolean              @default(true)
+  createdAt                DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt                DateTime             @updatedAt @db.Timestamptz(3)
+  organization             Organization         @relation("Area_organization", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  ProjectMember_area       ProjectMember[]      @relation("ProjectMember_area")
+  Question_responsibleArea Question[]           @relation("Question_responsibleArea")
+  ResponseDraft_area       ResponseDraft[]      @relation("ResponseDraft_area")
+  ResponseRevision_area    ResponseRevision[]   @relation("ResponseRevision_area")
 
   @@unique([organizationId, code])
 }
 
 model Project {
+  allowNonNominalInvitations       Boolean                    @default(false)
+  invitations                      ResponseInvitation[]
   id                               String                     @id @default(uuid()) @db.Uuid
   organizationId                   String                     @db.Uuid
   externalId                       String
@@ -266,6 +273,7 @@ model Section {
 }
 
 model Question {
+  invitations                     InvitationQuestion[]
   id                              String                 @id @default(uuid()) @db.Uuid
   projectId                       String                 @db.Uuid
   sectionId                       String                 @db.Uuid
@@ -781,4 +789,74 @@ model ImportBatch {
   @@unique([projectId, sourceSha256])
   @@unique([importedById, requestId], map: "ImportBatch_actor_request")
   @@index([projectId])
+}
+
+// A capability identity reuses the existing author/response history without login.
+model ResponseInvitation {
+  scopeSealed           Boolean              @default(false)
+  id                    String               @id @default(uuid()) @db.Uuid
+  organizationId        String               @db.Uuid
+  projectId             String               @db.Uuid
+  respondentId          String               @unique @db.Uuid
+  createdById           String               @db.Uuid
+  requestId             String               @db.Uuid
+  label                 String
+  recipientName         String?
+  recipientEmail        String?
+  recipientOrganization String?
+  nonNominal            Boolean              @default(false)
+  areaId                String               @db.Uuid
+  allowEvidence         Boolean              @default(false)
+  tokenHash             String               @unique
+  createdAt             DateTime             @default(now()) @db.Timestamptz(3)
+  expiresAt             DateTime             @db.Timestamptz(3)
+  revokedAt             DateTime?            @db.Timestamptz(3)
+  firstOpenedAt         DateTime?            @db.Timestamptz(3)
+  lockVersion           Int                  @default(0)
+  organization          Organization         @relation(fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  project               Project              @relation(fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  respondent            User                 @relation("InvitedRespondent", fields: [respondentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  creator               User                 @relation("InvitationCreator", fields: [createdById], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  area                  Area                 @relation(fields: [areaId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  questions             InvitationQuestion[]
+  sessions              InvitationSession[]
+
+  @@unique([projectId, id])
+  @@unique([createdById, requestId])
+  @@index([projectId, createdAt])
+  @@index([expiresAt])
+}
+
+model InvitationQuestion {
+  projectId    String             @db.Uuid
+  invitationId String             @db.Uuid
+  questionId   String             @db.Uuid
+  invitation   ResponseInvitation @relation(fields: [projectId, invitationId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+  question     Question           @relation(fields: [projectId, questionId], references: [projectId, id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@id([invitationId, questionId])
+  @@index([projectId, questionId])
+}
+
+model InvitationSession {
+  id           String             @id @default(uuid()) @db.Uuid
+  invitationId String             @db.Uuid
+  tokenHash    String             @unique
+  createdAt    DateTime           @default(now()) @db.Timestamptz(3)
+  expiresAt    DateTime           @db.Timestamptz(3)
+  lastSeenAt   DateTime           @default(now()) @db.Timestamptz(3)
+  revokedAt    DateTime?          @db.Timestamptz(3)
+  invitation   ResponseInvitation @relation(fields: [invitationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([invitationId])
+  @@index([expiresAt])
+}
+
+// Short-lived hashed abuse buckets; never token or raw network identifiers.
+model InvitationRateBucket {
+  key       String   @id
+  count     Int
+  expiresAt DateTime @db.Timestamptz(3)
+
+  @@index([expiresAt])
 }

@@ -94,6 +94,7 @@ export class ReviewService {
             actorSnapshot: {
               displayName: r.actor.displayName,
               username: r.actor.username,
+              identityKind: r.actor.invitationOnly ? "INVITATION" : "ACCOUNT",
             },
             action: operation,
             objectType: "Question",

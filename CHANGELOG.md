@@ -6,7 +6,14 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
-Sin cambios adicionales por anunciar.
+### Added
+
+- Invitaciones externas mediante enlaces privados con alcance explícito, vencimiento, renovación y revocación. Cada invitación conserva borradores, respuestas, evidencia y aclaraciones independientes sin exigir una cuenta.
+- Administración de invitaciones desde Organizar y recorrido externo adaptable a móvil, con controles de identidad configurables por instalación.
+
+### Security
+
+- Sesiones de invitación separadas de las cuentas, hashes de credenciales, protección de origen/CSRF, límites de abuso y pruebas de aislamiento, concurrencia y revocación. Los enlaces son credenciales compartibles; no prueban la identidad física del destinatario.
 
 ## 0.3.0 — preparada, pendiente de publicación
 

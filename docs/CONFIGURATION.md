@@ -69,3 +69,56 @@ VersityGW se inicia sin debug, LDAP, WebUI, métricas externas ni endpoints adic
 ## Identidad por defecto
 
 APP_NAME y APP_SHORT_NAME usan **Acta**. Una instalación puede cambiarlos mediante configuración sin editar código; ORGANIZATION_NAME conserva su significado independiente. APP_LOGO/APP_FAVICON vacíos usan el wordmark sin inventar un logo. El nombre técnico del proyecto Compose y los volúmenes existentes se conservan para no alterar persistencia.
+
+## Invitaciones externas (en desarrollo)
+
+| Variable | Predeterminado | Regla |
+| --- | --- | --- |
+| `INVITATION_IDENTITY` | `NAME` | `NONE`, `NAME`, `EMAIL` o `BOTH`: datos registrados del destinatario, no identidad verificada |
+| `INVITATION_DEFAULT_DAYS` | `7` | Entre 1 y 365; no puede superar el máximo |
+| `INVITATION_MAX_DAYS` | `30` | Entre 1 y 365; limita el vencimiento definido al crear o renovar |
+
+El archivo Compose pasa estas variables al backend. Una invitación no nominal
+requiere además la autorización explícita de un ADMIN del proyecto y
+`INVITATION_IDENTITY=NONE`. No habilita formularios públicos generales.
+Cambiar los plazos predeterminados no modifica invitaciones ya emitidas.
+La renovación conserva la misma aportación, cambia el enlace y revoca sus
+sesiones anteriores. Una revocación no se deshace mediante renovación.
+
+El enlace se intercambia por una cookie separada de las cuentas. En producción
+requiere la misma configuración HTTPS y Secure existente. La sesión temporal
+no supera `SESSION_MAX_HOURS` ni el vencimiento de la invitación. El enlace
+original permite volver antes del vencimiento; no se guarda en localStorage,
+sessionStorage ni en el historial una vez abierto.
+
+Los límites usan ventanas fijas y PostgreSQL, compartidos entre procesos:
+
+| Alcance | Límite |
+|---|---|
+| Enlace reconocido | 30 intercambios por 15 minutos |
+| Sesión de invitación válida | 240 solicitudes por minuto |
+| Intercambios inválidos por conexión de red | 30 por 15 minutos |
+| Accesos inválidos por conexión de red | 240 por minuto |
+| Protección agregada de intercambios por red | 6.000 por 15 minutos |
+| Protección agregada de accesos por red | 24.000 por minuto |
+
+Las sesiones y enlaces válidos no consumen el límite de intentos inválidos.
+Un proxy o NAT comparte los límites agregados de red, pero cada invitado conserva
+su límite de sesión. No se confía en `X-Forwarded-For` enviado por el cliente.
+El proxy frontal debe limitar también conexiones, cuerpos y tráfico antes de
+llegar a la aplicación; estos límites no sustituyen protección de red contra DDoS.
+
+Los buckets conservan hashes temporales de alcance, nunca tokens en claro;
+se eliminan al caducar durante solicitudes posteriores. No identifican a una
+persona. El backend registra `INVITATION_ACCESS_DENIED` en el primer rechazo
+de cada bucket y `INVITATION_RATE_LIMITED` al alcanzar su primer bloqueo.
+Estos eventos operativos solo contienen el tipo y categoría: no incluyen IP,
+identidad, URL, token, cookie, encabezados ni cuerpo. Deben conservarse según
+la política de logs de la instalación. La bitácora del proyecto conserva las
+acciones atribuidas a la invitación y a quien la creó.
+
+No registrar cuerpos, cookies, tokens ni enlaces privados en herramientas de
+observación o soporte. Consulta la [guía de invitaciones](EXTERNAL-INVITATIONS.md).
+
+La entrega de esta capacidad sigue sujeta al gate de interfaz, seguridad e
+integración descrito en [el plan de invitaciones](EXTERNAL-INVITATIONS-DESIGN.md).

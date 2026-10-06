@@ -1,7 +1,10 @@
 import { User, ReviewStatus } from "@prisma/client";
 import { AccessService } from "../administration/access.service.js";
 import { Tx, audit } from "../common/http.js";
-import { loadGraph } from "../responses/response-graph.js";
+import {
+  loadGraph,
+  loadAssignedResponseGraph,
+} from "../responses/response-graph.js";
 
 export async function coverage(tx: Tx, access: AccessService, p: string) {
   const assignments = await tx.questionAssignment.findMany({
@@ -25,7 +28,7 @@ export async function coverage(tx: Tx, access: AccessService, p: string) {
     if (!graphs.has(a.member.userId))
       graphs.set(
         a.member.userId,
-        (await loadGraph(tx, access, a.member.user, p)).graph,
+        await loadAssignedResponseGraph(tx, a.member.user, p, a.member.id),
       );
   return { assignments, graphs };
 }

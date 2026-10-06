@@ -1,3 +1,4 @@
+import { EvidenceHttpService } from "./evidence-http.service.js";
 import { Global, Module, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
 import { ResponsesService } from "./responses.service.js";
 import { ResponsesController } from "./responses.controller.js";
@@ -7,10 +8,11 @@ import { evidenceLimits } from "./file-validation.js";
 @Module({
   providers: [
     ResponsesService,
+    EvidenceHttpService,
     { provide: STORAGE, useFactory: createStorage },
   ],
   controllers: [ResponsesController],
-  exports: [ResponsesService, STORAGE],
+  exports: [ResponsesService, EvidenceHttpService, STORAGE],
 })
 export class ResponsesModule implements OnModuleInit, OnModuleDestroy {
   private timer?: ReturnType<typeof setInterval>;

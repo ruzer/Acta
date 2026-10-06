@@ -50,7 +50,11 @@ export const questionInclude = {
   },
   QuestionCondition_child: true,
   QuestionTraceability_question: true,
-  QuestionAssignment_question: true,
+  QuestionAssignment_question: {
+    include: {
+      member: { select: { user: { select: { invitationOnly: true } } } },
+    },
+  },
 };
 type FullQuestion = Prisma.QuestionGetPayload<{
   include: typeof questionInclude;
@@ -94,7 +98,9 @@ export function presentQuestion(q: FullQuestion) {
     status: q.status,
     lockVersion: q.lockVersion,
     revisionNumber: v.number,
-    assignments: q.QuestionAssignment_question.map((a) => ({
+    assignments: q.QuestionAssignment_question.filter(
+      (a) => !a.member?.user.invitationOnly,
+    ).map((a) => ({
       id: a.id,
       projectMemberId: a.projectMemberId,
       required: a.required,
@@ -906,12 +912,13 @@ export class QuestionnaireService {
       const m = await tx.projectMember.findFirst({
         where: {
           id: d.projectMemberId,
+          user: { invitationOnly: false },
           projectId: p,
           ...(d.active
             ? {
                 role: "STAKEHOLDER" as const,
                 active: true,
-                user: { active: true },
+                user: { active: true, invitationOnly: false },
                 area: { active: true },
               }
             : {}),

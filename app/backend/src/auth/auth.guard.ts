@@ -10,6 +10,9 @@ import { randomUUID } from "node:crypto";
 import { ActorRequest } from "../common/http.js";
 import { loadConfig } from "../common/config.js";
 import { AuthService, equal, hash } from "./auth.service.js";
+import { InvitationAuthService } from "./invitation-auth.service.js";
+export const InvitationExchange = () => SetMetadata("invitationExchange", true);
+export const InvitationAccess = () => SetMetadata("invitationAccess", true);
 export const BinaryUpload = () => SetMetadata("binaryUpload", true);
 export const Public = () => SetMetadata("public", true);
 export const PasswordAllowed = () => SetMetadata("passwordAllowed", true);
@@ -17,6 +20,7 @@ export const PasswordAllowed = () => SetMetadata("passwordAllowed", true);
 export class AuthGuard implements CanActivate {
   constructor(
     private readonly auth: AuthService,
+    private readonly invitations: InvitationAuthService,
     private readonly reflector: Reflector,
   ) {}
   async canActivate(context: ExecutionContext) {
@@ -34,6 +38,8 @@ export class AuthGuard implements CanActivate {
         : req.is("application/json"))
     )
       throw new ForbiddenException("Se requiere una solicitud JSON.");
+    if (this.reflector.get<boolean>("invitationExchange", context.getHandler()))
+      await this.invitations.beforeExchange(req.body, req.ip || "unknown");
     if (
       this.reflector.getAllAndOverride<boolean>("public", [
         context.getHandler(),
@@ -42,6 +48,30 @@ export class AuthGuard implements CanActivate {
     )
       return true;
     const cookies = req.cookies as Record<string, unknown> | undefined;
+    if (
+      this.reflector.getAllAndOverride<boolean>("invitationAccess", [
+        context.getHandler(),
+        context.getClass(),
+      ])
+    ) {
+      const token = cookies?.["acta_invitation_session"];
+      const access = await this.invitations.authenticate(
+        typeof token === "string" ? token : "",
+        req.get("x-invitation-id") || "",
+        req.ip || "unknown",
+      );
+      if (
+        !safe &&
+        !equal(hash(req.get("x-csrf-token") || ""), hash(access.csrfToken))
+      )
+        throw new ForbiddenException(
+          "La sesión de seguridad cambió. Abre de nuevo tu enlace.",
+        );
+      req.actor = access.actor;
+      req.sessionId = access.session.id;
+      req.csrfToken = access.csrfToken;
+      return true;
+    }
     const token = cookies?.["fgeo_session"];
     const { session, csrfToken } = await this.auth.authenticate(
       typeof token === "string" ? token : "",
