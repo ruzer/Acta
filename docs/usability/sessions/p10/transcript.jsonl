@@ -1,0 +1,46 @@
+{"time": "2026-10-06T04:55:43.949Z", "source": "await page.waitForLoadState('networkidle'); await snap();", "durationMs": 8}
+{"time": "2026-10-06T04:55:59.686Z", "source": "console.log(await snap());", "durationMs": 6}
+{"time": "2026-10-06T04:56:15.621Z", "source": "await page.getByRole('textbox',{name:'Usuario',exact:true}).fill(credentials.username); await page.getByRole('textbox',{name:'Contraseña',exact:true}).fill(credentials.password); await page.getByRole('button',{name:'Iniciar sesión',exact:true}).click(); await page.getByRole('button',{name:'Cerrar sesión',exact:true}).waitFor(); console.log(await snap());", "durationMs": 163}
+{"time": "2026-10-06T04:56:27.736Z", "source": "await shot('01-empty-admin'); await page.getByRole('link',{name:'Administración',exact:true}).click(); console.log(await snap());", "durationMs": 63}
+{"time": "2026-10-06T04:56:38.890Z", "source": "console.log(await snap());", "durationMs": 13}
+{"time": "2026-10-06T04:56:52.519Z", "source": "await page.getByRole('button',{name:'Proyectos',exact:true}).click(); console.log(await snap());", "durationMs": 30}
+{"time": "2026-10-06T04:57:08.616Z", "source": "await page.getByRole('textbox',{name:'Nombre del proyecto',exact:true}).fill('Servicios de comunidad — Importación'); await page.getByRole('textbox',{name:'Identificador externo',exact:true}).fill('LAB-P10'); await page.getByRole('button',{name:'Crear proyecto',exact:true}).click(); console.log(await snap());", "durationMs": 44}
+{"time": "2026-10-06T04:57:19.619Z", "source": "console.log(await snap());", "durationMs": 4}
+{"time": "2026-10-06T04:58:00.221Z", "source": "await page.getByRole('navigation',{name:'Navegación principal'}).getByRole('link',{name:'Mis proyectos',exact:true}).click(); await page.getByRole('link',{name:/Servicios de comunidad/}).waitFor(); console.log(await snap());", "error": "TimeoutError: locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('link', { name: /Servicios de comunidad/ }) to be visible\u001b[22m\n"}
+{"time": "2026-10-06T04:58:00.232Z", "source": "console.log(await snap());", "durationMs": 10}
+{"time": "2026-10-06T04:58:11.530Z", "source": "await page.getByRole('link',{name:'Editar cuestionario',exact:true}).click(); console.log(await snap());", "durationMs": 22}
+{"time": "2026-10-06T04:58:21.460Z", "source": "console.log(await snap());", "durationMs": 5}
+{"time": "2026-10-06T04:58:34.078Z", "source": "await shot('02-editor-empty'); await page.getByRole('link',{name:'Ver preguntas publicadas',exact:true}).click();", "durationMs": 56}
+{"time": "2026-10-06T04:58:45.764Z", "source": "console.log(await snap());", "durationMs": 6}
+{"time": "2026-10-06T04:58:59.757Z", "source": "await page.getByRole('link',{name:'← Mis proyectos',exact:true}).click();", "durationMs": 20}
+{"time": "2026-10-06T04:59:09.289Z", "source": "console.log(await snap()); await page.getByRole('link',{name:'Resumen del proyecto',exact:true}).click();", "durationMs": 14}
+{"time": "2026-10-06T04:59:16.968Z", "source": "console.log(await snap());", "durationMs": 10}
+{"time": "2026-10-06T04:59:26.257Z", "source": "await page.getByRole('link',{name:'Importar',exact:true}).click();", "durationMs": 27}
+{"time": "2026-10-06T04:59:35.177Z", "source": "console.log(await snap());", "durationMs": 7}
+{"time": "2026-10-06T04:59:46.073Z", "source": "await page.getByLabel('Archivo JSON',{exact:true}).setInputFiles('./cuestionario-servicios.json'); await page.getByRole('button',{name:'Revisar archivo',exact:true}).click();", "durationMs": 36}
+{"time": "2026-10-06T04:59:55.834Z", "source": "console.log(await snap()); await shot('03-import-preview');", "durationMs": 58}
+{"time": "2026-10-06T05:00:07.438Z", "source": "await page.getByRole('button',{name:'Confirmar importación',exact:true}).click();", "durationMs": 16}
+{"time": "2026-10-06T05:00:19.317Z", "source": "console.log(await snap());", "durationMs": 4}
+{"time": "2026-10-06T05:00:30.820Z", "source": "await page.getByRole('link',{name:'Revisar estructura importada',exact:true}).click();", "durationMs": 20}
+{"time": "2026-10-06T05:00:40.926Z", "source": "console.log(await snap());", "durationMs": 9}
+{"time": "2026-10-06T05:00:52.702Z", "source": "await page.getByRole('link',{name:'Administrar miembros',exact:true}).click();", "durationMs": 10}
+{"time": "2026-10-06T05:01:19.817Z", "source": "console.log(await snap());", "durationMs": 6}
+{"time": "2026-10-06T05:01:34.300Z", "source": "await page.getByRole('combobox',{name:'Usuario',exact:true}).selectOption({label:'Participante A demo'}); await page.getByRole('combobox',{name:'Rol',exact:true}).selectOption({label:'Área participante'}); await page.getByRole('combobox',{name:'Área',exact:true}).selectOption({label:'Equipo de coordinación'}); await page.getByRole('button',{name:'Guardar membresía',exact:true}).click();", "durationMs": 47}
+{"time": "2026-10-06T05:01:44.988Z", "source": "console.log(await snap()); await shot('04-membership'); await page.getByRole('link',{name:'← Cuestionario',exact:true}).click();", "durationMs": 76}
+{"time": "2026-10-06T05:01:59.404Z", "source": "await page.getByRole('tab',{name:'Organizar',exact:true}).click(); console.log(await snap());", "durationMs": 25}
+{"time": "2026-10-06T05:02:12.561Z", "source": "await page.getByRole('button',{name:'Seleccionar todos los resultados (10)',exact:true}).click(); console.log(await snap());", "durationMs": 27}
+{"time": "2026-10-06T05:02:25.516Z", "source": "await page.getByRole('button',{name:'Agregar participantes',exact:true}).click(); console.log(await snap());", "durationMs": 22}
+{"time": "2026-10-06T05:02:38.675Z", "source": "await page.getByRole('checkbox',{name:'Participante A demo · Equipo de coordinación',exact:true}).check(); await page.getByRole('combobox',{name:'Las nuevas asignaciones serán',exact:true}).selectOption({label:'Obligatorias'}); await page.getByRole('button',{name:'Revisar lote',exact:true}).click();", "durationMs": 64}
+{"time": "2026-10-06T05:02:49.964Z", "source": "console.log(await page.getByRole('dialog').ariaSnapshot()); await shot('05-assign-preview');", "durationMs": 57}
+{"time": "2026-10-06T05:03:00.023Z", "source": "await page.getByRole('button',{name:'Confirmar 10 preguntas',exact:true}).click();", "durationMs": 11}
+{"time": "2026-10-06T05:03:10.617Z", "source": "console.log(await snap());", "durationMs": 9}
+{"time": "2026-10-06T05:03:20.995Z", "source": "await page.getByRole('tab',{name:'Revisar',exact:true}).click(); console.log(await snap());", "durationMs": 29}
+{"time": "2026-10-06T05:03:31.759Z", "source": "await shot('06-review-parent-errors'); await page.getByRole('button',{name:'Publicar: Canal de entrada',exact:true}).click(); console.log(await page.getByRole('dialog').ariaSnapshot());", "durationMs": 57}
+{"time": "2026-10-06T05:03:44.924Z", "source": "await page.getByRole('button',{name:'Confirmar publicación',exact:true}).click();", "durationMs": 23}
+{"time": "2026-10-06T05:03:57.376Z", "source": "console.log(await page.getByRole('tabpanel').ariaSnapshot()); await page.getByRole('tab',{name:'Organizar',exact:true}).click(); await page.getByRole('button',{name:'Seleccionar todos los resultados (10)',exact:true}).click(); await page.getByRole('button',{name:'Publicar seleccionadas',exact:true}).click(); console.log(await page.getByRole('dialog').ariaSnapshot());", "durationMs": 88}
+{"time": "2026-10-06T05:04:11.221Z", "source": "await page.getByRole('button',{name:'Revisar lote',exact:true}).click();", "durationMs": 13}
+{"time": "2026-10-06T05:04:31.543Z", "source": "console.log(await page.getByRole('dialog').ariaSnapshot()); await shot('07-publish-preview');", "durationMs": 68}
+{"time": "2026-10-06T05:04:45.037Z", "source": "await page.getByRole('button',{name:'Confirmar 9 preguntas',exact:true}).click();", "durationMs": 15}
+{"time": "2026-10-06T05:04:54.718Z", "source": "console.log(await snap()); await shot('08-all-published');", "durationMs": 60}
+{"time": "2026-10-06T05:05:05.928Z", "source": "await page.getByRole('button',{name:'¿Cómo reciben las solicitudes de servicio? Recepción de solicitudes Texto breve Publicada',exact:true}).click(); console.log(await snap());", "durationMs": 22}
+{"time": "2026-10-06T05:05:37.743Z", "source": "await browser.close();", "durationMs": 26}

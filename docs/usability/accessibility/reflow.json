@@ -1,0 +1,103 @@
+[
+  {
+    "screen": "organizar",
+    "width": 390,
+    "height": 800,
+    "scrollWidth": 390,
+    "bodyWidth": 390,
+    "overflow": []
+  },
+  {
+    "screen": "crear",
+    "width": 390,
+    "height": 800,
+    "scrollWidth": 390,
+    "bodyWidth": 390,
+    "overflow": []
+  },
+  {
+    "screen": "organizar",
+    "width": 320,
+    "height": 800,
+    "scrollWidth": 320,
+    "bodyWidth": 320,
+    "overflow": []
+  },
+  {
+    "screen": "crear",
+    "width": 320,
+    "height": 800,
+    "scrollWidth": 320,
+    "bodyWidth": 320,
+    "overflow": [
+      {
+        "tag": "BUTTON",
+        "text": "Editar tema",
+        "width": 187,
+        "right": 68
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Mover arriba",
+        "width": 187,
+        "right": 68
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Mover abajo",
+        "width": 187,
+        "right": 68
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Editar tema",
+        "width": 187,
+        "right": 68
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Mover arriba",
+        "width": 187,
+        "right": 68
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Mover abajo",
+        "width": 187,
+        "right": 68
+      }
+    ]
+  },
+  {
+    "screen": "mi-trabajo",
+    "width": 390,
+    "height": 800,
+    "scrollWidth": 390,
+    "bodyWidth": 390,
+    "overflow": []
+  },
+  {
+    "screen": "mi-trabajo",
+    "width": 320,
+    "height": 800,
+    "scrollWidth": 320,
+    "bodyWidth": 320,
+    "overflow": []
+  },
+  {
+    "screen": "matriz-error",
+    "width": 390,
+    "height": 800,
+    "scrollWidth": 390,
+    "bodyWidth": 390,
+    "overflow": []
+  },
+  {
+    "screen": "matriz-error",
+    "width": 320,
+    "height": 800,
+    "scrollWidth": 320,
+    "bodyWidth": 320,
+    "overflow": []
+  }
+]

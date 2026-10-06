@@ -1,0 +1,545 @@
+{
+  "screen": "02-editor",
+  "url": "http://localhost:4441/projects/d5c33acb-f4a8-4b03-94da-9d5d006ebde7/editor",
+  "timestamp": "2026-10-06T05:10:07.654Z",
+  "testEngine": {
+    "name": "axe-core",
+    "version": "4.13.0"
+  },
+  "testEnvironment": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+    "windowWidth": 1440,
+    "windowHeight": 1000,
+    "orientationAngle": 0,
+    "orientationType": "landscape-primary"
+  },
+  "violations": [],
+  "incomplete": [
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "tags": [
+        "cat.color",
+        "wcag2aa",
+        "wcag143",
+        "TTv5",
+        "TT13.c",
+        "EN-301-549",
+        "EN-9.1.4.3",
+        "ACT",
+        "RGAAv4",
+        "RGAA-3.2.1"
+      ],
+      "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+      "nodes": [
+        {
+          "any": [
+            {
+              "id": "color-contrast",
+              "data": {
+                "messageKey": "nonBmp"
+              },
+              "relatedNodes": [],
+              "impact": "serious",
+              "message": "Element content contains only non-text characters"
+            }
+          ],
+          "all": [],
+          "none": [],
+          "impact": "serious",
+          "html": "<summary aria-label=\"Acciones del tema Recepción de solicitudes\">⋯</summary>",
+          "target": [
+            "section[aria-label=\"Recepción de solicitudes\"] > header > details > summary"
+          ],
+          "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+        },
+        {
+          "any": [
+            {
+              "id": "color-contrast",
+              "data": {
+                "messageKey": "nonBmp"
+              },
+              "relatedNodes": [],
+              "impact": "serious",
+              "message": "Element content contains only non-text characters"
+            }
+          ],
+          "all": [],
+          "none": [],
+          "impact": "serious",
+          "html": "<summary aria-label=\"Acciones de Canal de entrada\">⋯ <span class=\"sr-only\">Acciones</span></summary>",
+          "target": [
+            "summary[aria-label=\"Acciones de Canal de entrada\"]"
+          ],
+          "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+        },
+        {
+          "any": [
+            {
+              "id": "color-contrast",
+              "data": {
+                "messageKey": "nonBmp"
+              },
+              "relatedNodes": [],
+              "impact": "serious",
+              "message": "Element content contains only non-text characters"
+            }
+          ],
+          "all": [],
+          "none": [],
+          "impact": "serious",
+          "html": "<summary aria-label=\"Acciones de Registro de entrada\">⋯ <span class=\"sr-only\">Acciones</span></summary>",
+          "target": [
+            "article[aria-label=\"Registro de entrada\"] > details > summary"
+          ],
+          "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+        },
+        {
+          "any": [
+            {
+              "id": "color-contrast",
+              "data": {
+                "messageKey": "nonBmp"
+              },
+              "relatedNodes": [],
+              "impact": "serious",
+              "message": "Element content contains only non-text characters"
+            }
+          ],
+          "all": [],
+          "none": [],
+          "impact": "serious",
+          "html": "<summary aria-label=\"Acciones de Medio de contacto\">⋯ <span class=\"sr-only\">Acciones</span></summary>",
+          "target": [
+            "summary[aria-label=\"Acciones de Medio de contacto\"]"
+          ],
+          "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+        },
+        {
+          "any": [
+            {
+              "id": "color-contrast",
+              "data": {
+                "messageKey": "nonBmp"
+              },
+              "relatedNodes": [],
+              "impact": "serious",
+              "message": "Element content contains only non-text characters"
+            }
+          ],
+          "all": [],
+          "none": [],
+          "impact": "serious",
+          "html": "<summary aria-label=\"Acciones de Información necesaria\">⋯ <span class=\"sr-only\">Acciones</span></summary>",
+          "target": [
+            "article[aria-label=\"Información necesaria\"] > details > summary"
+          ],
+          "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+        },
+        {
+          "any": [
+            {
+              "id": "color-contrast",
+              "data": {
+                "messageKey": "nonBmp"
+              },
+              "relatedNodes": [],
+              "impact": "serious",
+              "message": "Element content contains only non-text characters"
+            }
+          ],
+          "all": [],
+          "none": [],
+          "impact": "serious",
+          "html": "<summary aria-label=\"Acciones de Plazo de atención\">⋯ <span class=\"sr-only\">Acciones</span></summary>",
+          "target": [
+            "summary[aria-label=\"Acciones de Plazo de atención\"]"
+          ],
+          "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+        },
+        {
+          "any": [
+            {
+              "id": "color-contrast",
+              "data": {
+                "messageKey": "nonBmp"
+              },
+              "relatedNodes": [],
+              "impact": "serious",
+              "message": "Element content contains only non-text characters"
+            }
+          ],
+          "all": [],
+          "none": [],
+          "impact": "serious",
+          "html": "<summary aria-label=\"Acciones del tema Evaluación del servicio\">⋯</summary>",
+          "target": [
+            "section[aria-label=\"Evaluación del servicio\"] > header > details > summary"
+          ],
+          "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+        },
+        {
+          "any": [
+            {
+              "id": "color-contrast",
+              "data": {
+                "messageKey": "nonBmp"
+              },
+              "relatedNodes": [],
+              "impact": "serious",
+              "message": "Element content contains only non-text characters"
+            }
+          ],
+          "all": [],
+          "none": [],
+          "impact": "serious",
+          "html": "<summary aria-label=\"Acciones de Próxima revisión\">⋯ <span class=\"sr-only\">Acciones</span></summary>",
+          "target": [
+            "summary[aria-label=\"Acciones de Próxima revisión\"]"
+          ],
+          "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+        },
+        {
+          "any": [
+            {
+              "id": "color-contrast",
+              "data": {
+                "messageKey": "nonBmp"
+              },
+              "relatedNodes": [],
+              "impact": "serious",
+              "message": "Element content contains only non-text characters"
+            }
+          ],
+          "all": [],
+          "none": [],
+          "impact": "serious",
+          "html": "<summary aria-label=\"Acciones de Excepciones\">⋯ <span class=\"sr-only\">Acciones</span></summary>",
+          "target": [
+            "summary[aria-label=\"Acciones de Excepciones\"]"
+          ],
+          "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+        },
+        {
+          "any": [
+            {
+              "id": "color-contrast",
+              "data": {
+                "messageKey": "nonBmp"
+              },
+              "relatedNodes": [],
+              "impact": "serious",
+              "message": "Element content contains only non-text characters"
+            }
+          ],
+          "all": [],
+          "none": [],
+          "impact": "serious",
+          "html": "<summary aria-label=\"Acciones de Avisos del proceso\">⋯ <span class=\"sr-only\">Acciones</span></summary>",
+          "target": [
+            "summary[aria-label=\"Acciones de Avisos del proceso\"]"
+          ],
+          "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+        },
+        {
+          "any": [
+            {
+              "id": "color-contrast",
+              "data": {
+                "messageKey": "nonBmp"
+              },
+              "relatedNodes": [],
+              "impact": "serious",
+              "message": "Element content contains only non-text characters"
+            }
+          ],
+          "all": [],
+          "none": [],
+          "impact": "serious",
+          "html": "<summary aria-label=\"Acciones de Responsable de cierre\">⋯ <span class=\"sr-only\">Acciones</span></summary>",
+          "target": [
+            "article[aria-label=\"Responsable de cierre\"] > details > summary"
+          ],
+          "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+        },
+        {
+          "any": [
+            {
+              "id": "color-contrast",
+              "data": {
+                "messageKey": "nonBmp"
+              },
+              "relatedNodes": [],
+              "impact": "serious",
+              "message": "Element content contains only non-text characters"
+            }
+          ],
+          "all": [],
+          "none": [],
+          "impact": "serious",
+          "html": "<summary aria-label=\"Acciones de Seguimiento posterior\">⋯ <span class=\"sr-only\">Acciones</span></summary>",
+          "target": [
+            "article[aria-label=\"Seguimiento posterior\"] > details > summary"
+          ],
+          "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+        }
+      ]
+    }
+  ],
+  "passes": [
+    {
+      "id": "aria-allowed-attr",
+      "impact": null,
+      "nodes": 30
+    },
+    {
+      "id": "aria-allowed-role",
+      "impact": null,
+      "nodes": 7
+    },
+    {
+      "id": "aria-conditional-attr",
+      "impact": null,
+      "nodes": 30
+    },
+    {
+      "id": "aria-deprecated-role",
+      "impact": null,
+      "nodes": 5
+    },
+    {
+      "id": "aria-hidden-body",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "aria-hidden-focus",
+      "impact": null,
+      "nodes": 10
+    },
+    {
+      "id": "aria-prohibited-attr",
+      "impact": null,
+      "nodes": 30
+    },
+    {
+      "id": "aria-required-attr",
+      "impact": null,
+      "nodes": 5
+    },
+    {
+      "id": "aria-required-children",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "aria-required-parent",
+      "impact": null,
+      "nodes": 3
+    },
+    {
+      "id": "aria-roles",
+      "impact": null,
+      "nodes": 5
+    },
+    {
+      "id": "aria-valid-attr-value",
+      "impact": null,
+      "nodes": 30
+    },
+    {
+      "id": "aria-valid-attr",
+      "impact": null,
+      "nodes": 30
+    },
+    {
+      "id": "avoid-inline-spacing",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "button-name",
+      "impact": null,
+      "nodes": 8
+    },
+    {
+      "id": "bypass",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "nodes": 58
+    },
+    {
+      "id": "document-title",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "duplicate-id-aria",
+      "impact": null,
+      "nodes": 6
+    },
+    {
+      "id": "empty-heading",
+      "impact": null,
+      "nodes": 14
+    },
+    {
+      "id": "heading-order",
+      "impact": null,
+      "nodes": 14
+    },
+    {
+      "id": "html-has-lang",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "html-lang-valid",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-banner-is-top-level",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-contentinfo-is-top-level",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-main-is-top-level",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-no-duplicate-banner",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-no-duplicate-contentinfo",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-no-duplicate-main",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-one-main",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-unique",
+      "impact": null,
+      "nodes": 6
+    },
+    {
+      "id": "link-name",
+      "impact": null,
+      "nodes": 8
+    },
+    {
+      "id": "meta-viewport-large",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "meta-viewport",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "nested-interactive",
+      "impact": null,
+      "nodes": 20
+    },
+    {
+      "id": "page-has-heading-one",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "region",
+      "impact": null,
+      "nodes": 140
+    },
+    {
+      "id": "skip-link",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "summary-name",
+      "impact": null,
+      "nodes": 12
+    },
+    {
+      "id": "tabindex",
+      "impact": null,
+      "nodes": 4
+    }
+  ],
+  "inapplicable": [
+    "accesskeys",
+    "area-alt",
+    "aria-braille-equivalent",
+    "aria-command-name",
+    "aria-dialog-name",
+    "aria-input-field-name",
+    "aria-meter-name",
+    "aria-progressbar-name",
+    "aria-tab-name",
+    "aria-text",
+    "aria-toggle-field-name",
+    "aria-tooltip-name",
+    "aria-treeitem-name",
+    "autocomplete-valid",
+    "blink",
+    "definition-list",
+    "dlitem",
+    "empty-table-header",
+    "form-field-multiple-labels",
+    "frame-focusable-content",
+    "frame-tested",
+    "frame-title-unique",
+    "frame-title",
+    "html-xml-lang-mismatch",
+    "image-alt",
+    "image-redundant-alt",
+    "input-button-name",
+    "input-image-alt",
+    "label-title-only",
+    "label",
+    "link-in-text-block",
+    "list",
+    "listitem",
+    "marquee",
+    "meta-refresh",
+    "object-alt",
+    "presentation-role-conflict",
+    "role-img-alt",
+    "scope-attr-valid",
+    "scrollable-region-focusable",
+    "select-name",
+    "server-side-image-map",
+    "svg-img-alt",
+    "table-duplicate-name",
+    "td-headers-attr",
+    "th-has-data-cells",
+    "valid-lang",
+    "video-caption",
+    "no-autoplay-audio"
+  ]
+}

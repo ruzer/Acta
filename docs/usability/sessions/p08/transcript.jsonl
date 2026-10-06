@@ -1,0 +1,34 @@
+{"time": "2026-10-06T04:49:00.749Z", "source": "await page.getByRole('textbox').first().waitFor(); await snap();", "durationMs": 15}
+{"time": "2026-10-06T04:49:13.690Z", "source": "console.log(await snap());", "durationMs": 5}
+{"time": "2026-10-06T04:49:27.147Z", "source": "await page.getByRole('textbox',{name:'Usuario',exact:true}).fill(credentials.username); await page.getByRole('textbox',{name:'Contraseña',exact:true}).fill(credentials.password); await page.getByRole('button',{name:'Iniciar sesión',exact:true}).click(); await page.getByRole('button',{name:'Iniciar sesión',exact:true}).waitFor({state:'hidden'}); console.log(await snap()); console.log(await shot('01-inicio'));", "durationMs": 122}
+{"time": "2026-10-06T04:49:42.916Z", "source": "await page.getByRole('textbox',{name:'Contraseña',exact:true}).waitFor({state:'hidden'}); console.log(await snap()); console.log(await shot('02-inicio-final'));", "durationMs": 42}
+{"time": "2026-10-06T04:50:08.519Z", "source": "await page.getByRole('link',{name:'Responder: Canal de entrada',exact:true}).click(); console.log(await snap()); console.log(await shot('03-pregunta-canal'));", "durationMs": 53}
+{"time": "2026-10-06T04:50:23.262Z", "source": "console.log(await snap()); console.log(await shot('04-canal-estable'));", "durationMs": 29}
+{"time": "2026-10-06T04:50:39.166Z", "source": "await page.getByRole('textbox',{name:'Tu respuesta',exact:true}).fill('En el servicio ficticio recibimos solicitudes por correo electrónico y en una ventanilla de atención. La persona encargada registra cada entrada antes de asignarla.'); await page.getByText('Adjuntar evidencia',{exact:true}).click(); console.log(await snap()); console.log(await shot('05-adjunto-abierto'));", "durationMs": 59}
+{"time": "2026-10-06T04:50:53.641Z", "source": "globalThis.chooserPromise=page.waitForEvent('filechooser'); await page.getByRole('button',{name:'Seleccionar evidencia',exact:true}).click(); await (await chooserPromise).setFiles('lab-data/guia-ficticia.pdf'); console.log(await snap());", "durationMs": 35}
+{"time": "2026-10-06T04:51:10.210Z", "source": "await page.mouse.wheel(0,480); console.log(await shot('06-adjunto-pendiente')); await page.getByRole('button',{name:'Adjuntar al borrador',exact:true}).click();", "durationMs": 71}
+{"time": "2026-10-06T04:51:24.912Z", "source": "console.log(await snap()); console.log(await shot('07-adjunto-guardado'));", "durationMs": 23}
+{"time": "2026-10-06T04:51:37.799Z", "source": "await page.mouse.wheel(0,460);", "durationMs": 3}
+{"time": "2026-10-06T04:51:56.018Z", "source": "await page.getByRole('button',{name:'Guardar y salir',exact:true}).click();", "durationMs": 23}
+{"time": "2026-10-06T04:52:12.860Z", "source": "console.log(await snap()); console.log(await shot('08-borrador-en-lista'));", "durationMs": 27}
+{"time": "2026-10-06T04:52:25.415Z", "source": "await page.getByRole('link',{name:'Continuar: Canal de entrada',exact:true}).click();", "durationMs": 19}
+{"time": "2026-10-06T04:52:38.109Z", "source": "console.log(await snap()); console.log(await shot('09-retomar'));", "durationMs": 23}
+{"time": "2026-10-06T04:52:50.950Z", "source": "await page.getByRole('button',{name:'Enviar respuesta',exact:true}).click();", "durationMs": 27}
+{"time": "2026-10-06T04:53:02.840Z", "source": "console.log(await snap()); console.log(await shot('10-envio-canal'));", "durationMs": 25}
+{"time": "2026-10-06T04:53:24.998Z", "source": "await page.getByRole('link',{name:'Mi trabajo',exact:true}).click();", "durationMs": 13}
+{"time": "2026-10-06T04:53:39.977Z", "source": "console.log(await snap()); console.log(await shot('11-lista-enviada')); await page.mouse.wheel(0,730);", "durationMs": 30}
+{"time": "2026-10-06T04:53:50.199Z", "source": "console.log(await shot('12-lista-scroll'));", "durationMs": 16}
+{"time": "2026-10-06T04:54:13.524Z", "source": "await page.mouse.wheel(0,390);", "durationMs": 2}
+{"time": "2026-10-06T04:54:26.029Z", "source": "console.log(await shot('13-avisos-localizado')); await page.getByRole('link',{name:'Responder: Avisos del proceso',exact:true}).click();", "durationMs": 46}
+{"time": "2026-10-06T04:54:41.969Z", "source": "console.log(await snap()); console.log(await shot('14-avisos-formulario'));", "durationMs": 22}
+{"time": "2026-10-06T04:55:05.190Z", "source": "await page.getByRole('combobox',{name:'Recepción de solicitud',exact:true}).selectOption({label:'Sí'}); await page.getByRole('combobox',{name:'Resultado de revisión',exact:true}).selectOption({label:'A veces'}); await page.getByRole('combobox',{name:'Cierre de solicitud',exact:true}).selectOption({label:'Sí'}); await page.getByRole('textbox',{name:'Comentario adicional (opcional)',exact:true}).fill('Ejemplo ficticio: al recibir y cerrar se envía un correo; durante la revisión se avisa solo si falta información.'); await page.mouse.wheel(0,420);", "durationMs": 24}
+{"time": "2026-10-06T04:55:16.571Z", "source": "console.log(await shot('15-avisos-scroll-acciones')); console.log(await snap());", "durationMs": 32}
+{"time": "2026-10-06T04:55:31.176Z", "source": "await page.getByRole('button',{name:'Enviar respuesta',exact:true}).click();", "durationMs": 17}
+{"time": "2026-10-06T04:55:57.207Z", "source": "console.log(await snap()); console.log(await shot('16-envio-avisos')); await page.getByRole('link',{name:'Mi trabajo',exact:true}).click();", "durationMs": 57}
+{"time": "2026-10-06T04:56:10.956Z", "source": "console.log(await snap()); console.log(await shot('17-lista-dos-enviadas')); await page.getByRole('link',{name:'Ver: Canal de entrada',exact:true}).click();", "durationMs": 76}
+{"time": "2026-10-06T04:56:20.634Z", "source": "console.log(await snap()); console.log(await shot('18-respuesta-enviada'));", "durationMs": 16}
+{"time": "2026-10-06T04:56:32.588Z", "source": "await page.getByRole('link',{name:'Mi trabajo',exact:true}).click();", "durationMs": 14}
+{"time": "2026-10-06T04:56:48.535Z", "source": "await page.getByRole('button',{name:'Recepción de solicitudes, 5 preguntas',exact:true}).click(); await page.mouse.wheel(0,450);", "durationMs": 42}
+{"time": "2026-10-06T04:57:00.204Z", "source": "console.log(await shot('19-lista-seccion-colapsada')); await page.getByRole('link',{name:'Ver: Avisos del proceso',exact:true}).click();", "durationMs": 52}
+{"time": "2026-10-06T04:57:11.425Z", "source": "console.log(await snap()); console.log(await shot('20-avisos-enviados'));", "durationMs": 22}
+{"time": "2026-10-06T04:57:23.042Z", "source": "await browser.close();", "durationMs": 25}
