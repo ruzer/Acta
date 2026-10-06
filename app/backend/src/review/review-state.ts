@@ -158,24 +158,49 @@ export async function recomputeReview(
 ) {
   const c = await coverage(tx, access, p);
   const questions = await tx.question.findMany({ where: { projectId: p } });
-  for (const q of questions) {
-    const cv = questionCoverage(c, q.id);
-    const validations = await tx.validation.findMany({
-      where: { projectId: p, questionId: q.id, invalidatedAt: null },
-      include: {
-        ValidationSource_validation: true,
-        ValidationMessage_validation: {
-          include: { message: { include: { thread: true } } },
-        },
-        ValidationResolution_validation: {
-          include: {
-            resolution: {
-              include: { ConflictResolutionSource_resolution: true },
+  const [allValidations, conflicts, clarifications, dispositions] =
+    await Promise.all([
+      tx.validation.findMany({
+        where: { projectId: p, invalidatedAt: null },
+        include: {
+          ValidationSource_validation: true,
+          ValidationMessage_validation: {
+            include: { message: { include: { thread: true } } },
+          },
+          ValidationResolution_validation: {
+            include: {
+              resolution: {
+                include: { ConflictResolutionSource_resolution: true },
+              },
             },
           },
         },
-      },
-    });
+      }),
+      tx.conflict.findMany({
+        where: { projectId: p, status: "OPEN" },
+        select: { questionId: true },
+      }),
+      tx.clarificationThread.findMany({
+        where: { projectId: p, status: { not: "CLOSED" } },
+        select: {
+          revision: { select: { response: { select: { questionId: true } } } },
+        },
+      }),
+      tx.questionDisposition.findMany({
+        where: { projectId: p, revokedAt: null },
+        select: { questionId: true },
+      }),
+    ]);
+  const openConflicts = new Set(conflicts.map((x) => x.questionId));
+  const openClarifications = new Set(
+    clarifications.map((x) => x.revision.response.questionId),
+  );
+  const notApplicable = new Set(dispositions.map((x) => x.questionId));
+  const updates = new Map<ReviewStatus, string[]>();
+  for (const q of questions) {
+    const cv = questionCoverage(c, q.id);
+    const validations = allValidations.filter((v) => v.questionId === q.id);
+    let invalidated = false;
     for (const v of validations) {
       const ids = [
         ...v.ValidationSource_validation.map((s) => s.responseRevisionId),
@@ -200,7 +225,8 @@ export async function recomputeReview(
             a.currentRevisionId &&
             !ids.includes(a.currentRevisionId),
         )
-      )
+      ) {
+        invalidated = true;
         await invalidateValidation(
           tx,
           actor,
@@ -208,25 +234,14 @@ export async function recomputeReview(
           q.id,
           "Cambió una fuente, su contexto o la cobertura de participantes.",
         );
+      }
     }
     if (q.publication !== "PUBLISHED") continue;
     const status = projectedStatus({
-      conflict: !!(await tx.conflict.findFirst({
-        where: { projectId: p, questionId: q.id, status: "OPEN" },
-      })),
-      clarification: !!(await tx.clarificationThread.findFirst({
-        where: {
-          projectId: p,
-          status: { not: "CLOSED" },
-          revision: { response: { questionId: q.id } },
-        },
-      })),
-      validated: !!(await tx.validation.findFirst({
-        where: { projectId: p, questionId: q.id, invalidatedAt: null },
-      })),
-      notApplicable: !!(await tx.questionDisposition.findFirst({
-        where: { projectId: p, questionId: q.id, revokedAt: null },
-      })),
+      conflict: openConflicts.has(q.id),
+      clarification: openClarifications.has(q.id),
+      validated: validations.length > 0 && !invalidated,
+      notApplicable: notApplicable.has(q.id),
       partial: !!q.partialReviewReason,
       submitted: cv.currentIds.size,
       missing: cv.missing,
@@ -234,9 +249,11 @@ export async function recomputeReview(
       pending: q.pendingReview,
     });
     if (q.status !== status)
-      await tx.question.update({
-        where: { id: q.id },
-        data: { status, lockVersion: { increment: 1 } },
-      });
+      updates.set(status, [...(updates.get(status) ?? []), q.id]);
   }
+  for (const [status, ids] of updates)
+    await tx.question.updateMany({
+      where: { projectId: p, id: { in: ids } },
+      data: { status, lockVersion: { increment: 1 } },
+    });
 }

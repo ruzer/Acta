@@ -229,6 +229,117 @@ export const metadataInput = z.strictObject({
   order: z.number().int().nonnegative(),
   expectedVersion: z.number().int().nonnegative(),
 });
+// Bulk commands are additive; individual questionnaire contracts remain available.
+export const bulkQuestions = z
+  .array(
+    z.strictObject({
+      id,
+      expectedVersion: z.number().int().nonnegative(),
+    }),
+  )
+  .min(1)
+  .max(2000)
+  .refine(
+    (xs) => new Set(xs.map((x) => x.id)).size === xs.length,
+    "No repitas preguntas en la selección.",
+  );
+const bulkBase = { requestId: id, questions: bulkQuestions };
+export const bulkAreaInput = z.strictObject({
+  ...bulkBase,
+  targetAreaId: id,
+  sourceAreaId: id.nullable(), // null explicitly means every selected question.
+});
+export const bulkParticipantsInput = z
+  .strictObject({
+    ...bulkBase,
+    participants: z
+      .array(z.strictObject({ projectMemberId: id, required: z.boolean() }))
+      .min(1)
+      .max(20)
+      .refine(
+        (xs) => new Set(xs.map((x) => x.projectMemberId)).size === xs.length,
+        "No repitas participantes.",
+      ),
+  })
+  .refine(
+    (d) => d.questions.length * d.participants.length <= 10000,
+    "El lote excede 10.000 asignaciones. Reduce la selección.",
+  );
+export const bulkPublishInput = z.strictObject(bulkBase);
+const bulkHash = z.string().regex(/^[a-f0-9]{64}$/);
+export const bulkAreaConfirm = bulkAreaInput.extend({ previewHash: bulkHash });
+export const bulkParticipantsConfirm = bulkParticipantsInput.safeExtend({
+  previewHash: bulkHash,
+});
+export const bulkPublishConfirm = bulkPublishInput.extend({
+  previewHash: bulkHash,
+});
+export const bulkOperation = z.enum([
+  "ASSIGN_AREA",
+  "ADD_PARTICIPANTS",
+  "PUBLISH",
+]);
+export const bulkIssue = z.strictObject({
+  message: z.string(),
+  field: z.string(),
+  targetId: id.nullable(),
+});
+export const bulkPreview = z.strictObject({
+  operation: bulkOperation,
+  requestId: id,
+  previewHash: bulkHash,
+  canConfirm: z.boolean(),
+  counts: z.strictObject({
+    selected: z.number().int().nonnegative(),
+    applicable: z.number().int().nonnegative(),
+    ignored: z.number().int().nonnegative(),
+    blocked: z.number().int().nonnegative(),
+    warnings: z.number().int().nonnegative(),
+    newAssignments: z.number().int().nonnegative(),
+    reactivatedAssignments: z.number().int().nonnegative(),
+    existingAssignments: z.number().int().nonnegative(),
+  }),
+  items: z.array(
+    z.strictObject({
+      questionId: id,
+      title: z.string(),
+      state: z.enum([
+        "READY",
+        "ALREADY_PUBLISHED",
+        "WARNING",
+        "BLOCKED",
+        "UNCHANGED",
+      ]),
+      errors: z.array(bulkIssue),
+      warnings: z.array(bulkIssue),
+    }),
+  ),
+  dependencies: z.array(
+    z.strictObject({
+      questionId: id,
+      dependsOnId: id,
+      title: z.string(),
+      kind: z.enum(["GROUP", "CONDITION"]),
+      inSelection: z.boolean(),
+      publication: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]),
+    }),
+  ),
+});
+export const bulkResult = z.strictObject({
+  operation: bulkOperation,
+  requestId: id,
+  changedIds: z.array(id),
+  ignoredIds: z.array(id),
+  newAssignments: z.number().int().nonnegative(),
+  reactivatedAssignments: z.number().int().nonnegative(),
+});
+export type BulkAreaInput = z.infer<typeof bulkAreaInput>;
+export type BulkParticipantsInput = z.infer<typeof bulkParticipantsInput>;
+export type BulkPublishInput = z.infer<typeof bulkPublishInput>;
+export type BulkOperation = z.infer<typeof bulkOperation>;
+export type BulkPreview = z.infer<typeof bulkPreview>;
+export type BulkResult = z.infer<typeof bulkResult>;
+
 export const userView = z.strictObject({
   id,
   username: z.string(),
@@ -933,6 +1044,42 @@ export const contracts = {
     path: "/projects/:projectId/questions/reorder",
     input: reorderQuestionsInput,
     output: structureResult,
+  },
+  bulkAreaPreview: {
+    method: "POST",
+    path: "/projects/:projectId/questions/bulk/area/preview",
+    input: bulkAreaInput,
+    output: bulkPreview,
+  },
+  bulkAreaConfirm: {
+    method: "POST",
+    path: "/projects/:projectId/questions/bulk/area/confirm",
+    input: bulkAreaConfirm,
+    output: bulkResult,
+  },
+  bulkParticipantsPreview: {
+    method: "POST",
+    path: "/projects/:projectId/questions/bulk/participants/preview",
+    input: bulkParticipantsInput,
+    output: bulkPreview,
+  },
+  bulkParticipantsConfirm: {
+    method: "POST",
+    path: "/projects/:projectId/questions/bulk/participants/confirm",
+    input: bulkParticipantsConfirm,
+    output: bulkResult,
+  },
+  bulkPublishPreview: {
+    method: "POST",
+    path: "/projects/:projectId/questions/bulk/publish/preview",
+    input: bulkPublishInput,
+    output: bulkPreview,
+  },
+  bulkPublishConfirm: {
+    method: "POST",
+    path: "/projects/:projectId/questions/bulk/publish/confirm",
+    input: bulkPublishConfirm,
+    output: bulkResult,
   },
   createReference: {
     method: "POST",
