@@ -13,6 +13,10 @@ El idioma editorial principal es **español**, conforme a la documentación y la
 
 Cada guía operativa describe su procedimiento; el manifiesto registra pruebas, no reemplaza instrucciones. Los contratos históricos permanecen enlazados desde el índice funcional sin exigir conocer su numeración.
 
+## Administrar cuestionarios grandes
+
+[Operaciones por lote](BULK-QUESTIONNAIRE-OPERATIONS.md): selección por pregunta, grupo, tema, página o resultados filtrados; revisión previa y cambios atómicos. [Integración del editor](QUESTIONNAIRE-EDITOR-INTEGRATION.md) · [Revisión de diseño](DESIGN-REVIEW.md).
+
 ## Importar cuestionarios
 
 [Guía de importación](IMPORTING-QUESTIONNAIRES.md): para usuarios que preparan archivos, administradores que revisan áreas y permisos, y desarrolladores que mantienen ejemplos. [Ejemplo mínimo](../examples/questionnaire-template.minimal.json) · [Ejemplo completo](../examples/questionnaire-template.full.json) · [Contrato técnico](IMPORT-FORMAT.md).
