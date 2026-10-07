@@ -303,9 +303,7 @@ test("analyst creates, renews and revokes a link from the editor without creatin
     .inputValue();
   expect(new URL(original).hash.length > 40).toBe(true);
   await linkDialog.getByRole("button", { name: "Listo", exact: true }).click();
-  await page
-    .getByRole("link", { name: "Invitaciones mediante enlace", exact: true })
-    .click();
+  await page.getByRole("link", { name: "Invitaciones", exact: true }).click();
   const row = page
     .getByRole("listitem")
     .filter({ has: page.getByRole("heading", { name: label, exact: true }) });

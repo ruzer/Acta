@@ -222,7 +222,7 @@ export function Projects({
                 </span>
                 {(p.role === "ADMIN" || p.role === "ANALYST") && (
                   <Link to={`/projects/${p.id}/dashboard`}>
-                    Resumen del proyecto
+                    Atención del proyecto
                   </Link>
                 )}
                 {p.role === "VIEWER" && (

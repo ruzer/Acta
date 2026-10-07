@@ -131,7 +131,9 @@ for (const count of [50, 300])
     test.setTimeout(120000);
     const id = await fixture(page, count);
     await page.goto(`/projects/${id}/editor`);
-    await page.getByRole("tab", { name: "Revisar", exact: true }).click();
+    await page
+      .getByRole("tab", { name: "Revisar publicación", exact: true })
+      .click();
     await expect(page.getByText(/Para publicarla por separado/)).toBeVisible();
     await expect(
       page.getByRole("button", {
@@ -178,7 +180,9 @@ for (const count of [50, 300])
       .getByRole("button", { name: `Confirmar ${count} preguntas` })
       .click();
     await expect(page.getByRole("dialog")).toHaveCount(0);
-    await page.getByRole("tab", { name: "Revisar", exact: true }).click();
+    await page
+      .getByRole("tab", { name: "Revisar publicación", exact: true })
+      .click();
     await expect(
       page.getByText(
         `${count} preguntas publicadas. Su contenido está protegido; puedes consultar su detalle en Organizar.`,

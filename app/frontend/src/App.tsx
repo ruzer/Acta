@@ -1,3 +1,4 @@
+import { ProjectDecisions } from "./pages/ProjectDecisions";
 import { Invitations } from "./pages/Invitations";
 import { InvitedResponse } from "./pages/InvitedResponse";
 import { BrandingProvider, Brand } from "./branding";
@@ -42,6 +43,7 @@ const client = new QueryClient({
 });
 // Presentation context lasts for this authenticated session; logout clears it.
 client.setQueryDefaults(["questionnaire-context"], { gcTime: Infinity });
+client.setQueryDefaults(["workbench-context"], { gcTime: Infinity });
 function RouteFocus() {
   const location = useLocation();
   useEffect(() => {
@@ -208,6 +210,10 @@ function Session() {
               }
             />
             <Route path="/review" element={<ReviewInbox />} />
+            <Route
+              path="/projects/:projectId/decisions"
+              element={<ProjectDecisions />}
+            />
             <Route
               path="/projects/:projectId/invitations"
               element={<Invitations />}

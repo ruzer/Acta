@@ -56,7 +56,9 @@ it("modos permiten flechas, Home/End y relacionan cada panel sin etapas obligato
   expect(screen.getByRole("tab", { name: "Organizar" })).toHaveFocus();
   expect(screen.getByRole("tabpanel", { name: "Organizar" })).toBeVisible();
   await user.keyboard("{End}");
-  expect(screen.getByRole("tab", { name: "Revisar" })).toHaveFocus();
+  expect(
+    screen.getByRole("tab", { name: "Revisar publicación" }),
+  ).toHaveFocus();
   await user.keyboard("{Home}");
   expect(screen.getByRole("tab", { name: "Escribir" })).toHaveFocus();
 });
@@ -169,7 +171,9 @@ it.each([false, true])(
       expect(focusMoved ? tab : trigger).toHaveFocus();
       if (focusMoved) {
         await user.keyboard("{End}");
-        expect(screen.getByRole("tab", { name: "Revisar" })).toHaveFocus();
+        expect(
+          screen.getByRole("tab", { name: "Revisar publicación" }),
+        ).toHaveFocus();
       }
     } finally {
       vi.unstubAllGlobals();
@@ -205,7 +209,7 @@ it("Revisar explica el alcance conjunto, conserva bloqueo individual y reutiliza
       onCreateReference={vi.fn()}
     />,
   );
-  await user.click(screen.getByRole("tab", { name: "Revisar" }));
+  await user.click(screen.getByRole("tab", { name: "Revisar publicación" }));
   expect(screen.getByText(/Para publicarla por separado/)).toBeVisible();
   expect(
     screen.getByRole("button", { name: "Publicar: Seguimiento" }),
@@ -235,7 +239,7 @@ it("Revisar resume 300 publicaciones sin repetir 300 avisos de contenido protegi
       onCreateReference={vi.fn()}
     />,
   );
-  await user.click(screen.getByRole("tab", { name: "Revisar" }));
+  await user.click(screen.getByRole("tab", { name: "Revisar publicación" }));
   expect(screen.getByText(/300 preguntas publicadas/)).toBeVisible();
   expect(
     screen.queryByRole("button", { name: "Ver pregunta" }),

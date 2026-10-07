@@ -1,5 +1,7 @@
-import { useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { ProjectWorkbench } from "./ProjectWorkbench";
+import { expiringInvitations, invitationQueryOptions } from "./invitation-data";
+import { useEffect, useRef, useState } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import type {
   InvitationView,
@@ -288,19 +290,40 @@ export function CreateInvitation({
 }
 export function Invitations() {
   const { projectId = "" } = useParams();
-  const [page, setPage] = useState(1),
-    [error, setError] = useState("");
+  const [error, setError] = useState("");
   const [command, setCommand] = useState<{
     kind: "revoke" | "renew";
     row: InvitationView;
   }>();
   const [busy, setBusy] = useState(false),
     [url, setUrl] = useState("");
-  const rows = useQuery({
-    queryKey: ["invitations", projectId, page],
-    queryFn: () => api("invitations", { projectId }, { page }),
-    staleTime: 0,
-  });
+  const [params, setParams] = useSearchParams();
+  const expires = params.get("expiresWithin") === "7";
+  const requestedPage = Number(params.get("page") ?? 1);
+  const page =
+    Number.isSafeInteger(requestedPage) && requestedPage > 0
+      ? requestedPage
+      : 1;
+  function setPage(value: number) {
+    const next = new URLSearchParams(params);
+    if (value > 1) next.set("page", String(value));
+    else next.delete("page");
+    setParams(next);
+  }
+  const rows = useQuery(invitationQueryOptions(projectId));
+  const [now, setNow] = useState(Date.now);
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 60000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const filtered = expires
+    ? expiringInvitations(rows.data ?? [], now)
+    : (rows.data ?? []);
+  const currentPage = Math.min(
+    page,
+    Math.max(1, Math.ceil(filtered.length / 25)),
+  );
+  const items = filtered.slice((currentPage - 1) * 25, currentPage * 25);
   const policy = useQuery({
     queryKey: ["invitation-policy", projectId],
     queryFn: () => api("invitationPolicy", { projectId }),
@@ -310,14 +333,17 @@ export function Invitations() {
     queryKey: ["projects"],
     queryFn: () => api("projects"),
   });
-  const admin =
-    projects.data?.find((p) => p.id === projectId)?.role === "ADMIN";
+  const project = projects.data?.find((p) => p.id === projectId);
+  const admin = project?.role === "ADMIN";
   return (
     <>
-      <Link to={`/projects/${projectId}/editor`}>
-        ← Editor del cuestionario
-      </Link>
-      <h1>Invitaciones mediante enlace</h1>
+      <ProjectWorkbench
+        projectId={projectId}
+        projectName={project?.name ?? "Proyecto"}
+        role={project?.role}
+        active="invitations"
+      />
+      <h2>Invitaciones mediante enlace</h2>
       <p>
         Son aportaciones externas independientes de los participantes con
         cuenta. Para crear una, selecciona preguntas publicadas en Organizar y
@@ -366,18 +392,30 @@ export function Invitations() {
           />
         </section>
       )}
+      <Select
+        label="Vigencia"
+        value={expires ? "7" : ""}
+        onChange={(e) => {
+          const next = new URLSearchParams(params);
+          if (e.target.value) next.set("expiresWithin", "7");
+          else next.delete("expiresWithin");
+          next.delete("page");
+          setParams(next);
+        }}
+      >
+        <option value="">Todas las invitaciones</option>
+        <option value="7">Vencen en los próximos 7 días</option>
+      </Select>
       {rows.isPending ? (
         <LoadingState />
       ) : rows.error ? (
         <Alert error>{rows.error.message}</Alert>
       ) : (
         <>
-          <p role="status">{rows.data.total} invitaciones</p>
-          {!rows.data.items.length && (
-            <p>Todavía no hay invitaciones en esta página.</p>
-          )}
+          <p role="status">{filtered.length} invitaciones</p>
+          {!items.length && <p>Todavía no hay invitaciones en esta página.</p>}
           <ul className="invitation-management">
-            {rows.data.items.map((row) => (
+            {items.map((row) => (
               <li key={row.id}>
                 <h2>{row.label}</h2>
                 <p>
@@ -412,16 +450,16 @@ export function Invitations() {
           <div className="actions">
             <Button
               tone="secondary"
-              disabled={page === 1}
-              onClick={() => setPage(page - 1)}
+              disabled={currentPage === 1}
+              onClick={() => setPage(currentPage - 1)}
             >
               Anterior
             </Button>
-            <span>Página {page}</span>
+            <span>Página {currentPage}</span>
             <Button
               tone="secondary"
-              disabled={page * 25 >= rows.data.total}
-              onClick={() => setPage(page + 1)}
+              disabled={currentPage * 25 >= filtered.length}
+              onClick={() => setPage(currentPage + 1)}
             >
               Siguiente
             </Button>

@@ -44,7 +44,9 @@ afterEach(() => {
 
 it("volver desde una aportación abierta en Cuestionario conserva el destino del editor", async () => {
   const detail = data(3);
-  vi.spyOn(apiModule, "api").mockResolvedValue(detail);
+  vi.spyOn(apiModule, "api").mockImplementation(
+    async (key) => (key === "projects" ? [] : detail) as never,
+  );
   const router = createMemoryRouter(
     [
       {
@@ -74,7 +76,7 @@ it("volver desde una aportación abierta en Cuestionario conserva el destino del
     await screen.findByRole("link", { name: "← Cuestionario" }),
   ).toHaveAttribute("href", `/projects/${detail.projectId}/editor`);
   expect(
-    screen.queryByRole("link", { name: "← Revisión" }),
+    screen.queryByRole("link", { name: "← Revisar respuestas" }),
   ).not.toBeInTheDocument();
 });
 

@@ -7,6 +7,8 @@ import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams, useLocation } from "react-router-dom";
 import { api } from "../api";
+import { ProjectWorkbench } from "./ProjectWorkbench";
+import { workbenchPath } from "../workbench-context";
 import { ContributionSet } from "./ContributionSet";
 import { Alert, Button, ErrorState, LoadingState, Select } from "../ui";
 import {
@@ -27,6 +29,26 @@ export function ReviewDetail() {
     typeof savedSearch === "string"
       ? new URLSearchParams(savedSearch).toString()
       : new URLSearchParams({ projectId }).toString();
+  const source = (
+    location.state as {
+      workbenchReturn?: { view?: unknown; search?: unknown };
+    } | null
+  )?.workbenchReturn;
+  const sourceView =
+    source?.view === "decisions" || source?.view === "attention"
+      ? source.view
+      : null;
+  const sourcePath = sourceView
+    ? workbenchPath(
+        projectId,
+        sourceView,
+        typeof source?.search === "string" ? source.search : "",
+      )
+    : null;
+  const projects = useQuery({
+    queryKey: ["projects"],
+    queryFn: () => api("projects"),
+  });
   const client = useQueryClient();
   const q = useQuery({
     queryKey: ["review", projectId, id],
@@ -79,21 +101,35 @@ export function ReviewDetail() {
   }
   return (
     <div className="review-page av-scope">
+      <ProjectWorkbench
+        projectId={projectId}
+        projectName={d.projectName}
+        role={projects.data?.find((p) => p.id === projectId)?.role}
+        active={
+          questionnaireReturn ? "questionnaire" : (sourceView ?? "attention")
+        }
+        compact
+      />
       <Link
         className="back"
         to={
-          questionnaireReturn
+          sourcePath ??
+          (questionnaireReturn
             ? `/projects/${projectId}/editor`
             : d.canReview
               ? `/review?${reviewSearch}`
-              : `/projects/${projectId}`
+              : `/projects/${projectId}`)
         }
       >
-        {questionnaireReturn
-          ? "← Cuestionario"
-          : d.canReview
-            ? "← Revisión"
-            : "← Proyecto"}
+        {sourceView
+          ? sourceView === "attention"
+            ? "← Atención"
+            : "← Decisiones"
+          : questionnaireReturn
+            ? "← Cuestionario"
+            : d.canReview
+              ? "← Revisar respuestas"
+              : "← Proyecto"}
       </Link>
       <p className="eyebrow">
         {d.projectName} · {d.question.sectionTitle}

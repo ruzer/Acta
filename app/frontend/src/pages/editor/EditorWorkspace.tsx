@@ -209,7 +209,7 @@ export function TopicActions({
     </details>
   );
 }
-const modes = ["Escribir", "Organizar", "Revisar"] as const;
+const modes = ["Escribir", "Organizar", "Revisar publicación"] as const;
 export function EditorModeSwitcher({
   value,
   onChange,
@@ -284,9 +284,6 @@ export function EditorWorkspace(props: EditorProps) {
       <div className="qe-heading">
         <div>
           <h2>Cuestionario</h2>
-          <p className="hint">
-            Contenido, estructura y preparación para publicar.
-          </p>
         </div>
         <div className="actions">
           <Button tone="secondary" onClick={() => setPreview(true)}>

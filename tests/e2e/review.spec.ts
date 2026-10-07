@@ -206,7 +206,7 @@ test("2D-A: envío → aclaración → respuesta → cierre → decisión valida
   await login(analyst, "analyst");
   await analyst.goto(`/review?projectId=${projectId}`);
   await expect(
-    analyst.getByRole("heading", { name: "Revisión", exact: true }),
+    analyst.getByRole("heading", { name: "Revisar respuestas", exact: true }),
   ).toBeVisible();
   await expect(
     analyst.getByRole("link", { name: /procedimiento ficticio 1/ }),

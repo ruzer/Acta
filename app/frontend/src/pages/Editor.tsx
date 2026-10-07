@@ -25,6 +25,8 @@ import { QuestionForm } from "./QuestionForm";
 import { EditorWorkspace } from "./editor/EditorWorkspace";
 import type { OrganizeContext } from "./editor/questionnaire-presentation";
 import "../editor.css";
+import { ProjectWorkbench } from "./ProjectWorkbench";
+import { rememberWorkbenchItem } from "../workbench-context";
 const refLabels = {
   QUESTION: "Pregunta",
   BUSINESS_RULE: "Regla de negocio",
@@ -282,15 +284,12 @@ export function Editor() {
   return (
     <div className="qe-shell av-scope">
       {composer}
-      <Link to="/" className="back">
-        ← Mis proyectos
-      </Link>
-      <p className="eyebrow">EDITOR DE CUESTIONARIO</p>
-      <h1>{project?.name || "Cuestionario del proyecto"}</h1>
-      <p>
-        Prepara las preguntas, asigna participantes y publica cuando el
-        contenido esté listo.
-      </p>
+      <ProjectWorkbench
+        projectId={projectId}
+        projectName={project?.name || "Cuestionario del proyecto"}
+        role={project?.role}
+        active="questionnaire"
+      />
       {notice && <Alert>{notice}</Alert>}
       {error && (
         <Alert error>
@@ -306,33 +305,16 @@ export function Editor() {
           </Button>
         </Alert>
       )}
-      <div className="actions">
-        <Link
-          className="button secondary"
-          to={`/projects/${projectId}/invitations`}
-        >
-          Invitaciones mediante enlace
-        </Link>
-        <Link className="button secondary" to={"/projects/" + projectId}>
-          Ver preguntas publicadas
-        </Link>
-        {!data.questions.length && (
+      {!data.questions.length && (
+        <p>
           <Link
             className="button secondary"
             to={`/projects/${projectId}/import`}
           >
             Importar estructura
           </Link>
-        )}
-        {project?.role === "ADMIN" && (
-          <Link
-            className="button secondary"
-            to={"/projects/" + projectId + "/members"}
-          >
-            Administrar miembros
-          </Link>
-        )}
-      </div>
+        </p>
+      )}
       <EditorWorkspace
         initialMode={savedContext?.mode ?? 1}
         onModeChange={(mode) =>
@@ -350,11 +332,12 @@ export function Editor() {
         contributionsLoading={contributions.isPending}
         contributionsError={contributions.isError}
         onRetryContributions={() => void contributions.refetch()}
-        onOpenContributions={(id) =>
+        onOpenContributions={(id) => {
+          rememberWorkbenchItem(qc, projectId, "questionnaire", id);
           navigate(`/projects/${projectId}/review/${id}`, {
             state: { questionnaireReturn: true },
-          })
-        }
+          });
+        }}
         onRefresh={async () => {
           const result = await q.refetch();
           if (result.error) throw result.error;

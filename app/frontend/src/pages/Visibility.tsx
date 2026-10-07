@@ -1,11 +1,12 @@
-import { reviewLabels } from "./ReviewShared";
-import { AnalystStatus, AttentionPanel } from "./AnalystVisual";
+import { ProjectAttention } from "./ProjectAttention";
+import { ProjectWorkbench } from "./ProjectWorkbench";
+import { AnalystStatus } from "./AnalystVisual";
 import { useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import * as C from "@requirements/contracts";
-import { exchangeRequest } from "../api";
+import { api, exchangeRequest } from "../api";
 import {
   Alert,
   Button,
@@ -16,15 +17,18 @@ import {
   Select,
 } from "../ui";
 export function ProjectTools({ projectId }: { projectId: string }) {
+  const projects = useQuery({
+    queryKey: ["projects"],
+    queryFn: () => api("projects"),
+  });
+  const project = projects.data?.find((p) => p.id === projectId);
   return (
-    <nav className="actions" aria-label="Herramientas del proyecto">
-      <Link to={`/projects/${projectId}/dashboard`}>Resumen</Link>
-      <Link to={`/projects/${projectId}/traceability`}>Trazabilidad</Link>
-      <Link to={`/projects/${projectId}/import`}>Importar</Link>
-      <Link to={`/projects/${projectId}/export`}>Exportar</Link>
-      <Link to={`/projects/${projectId}/history`}>Bitácora</Link>
-      <Link to={`/projects/${projectId}/editor`}>Editor</Link>
-    </nav>
+    <ProjectWorkbench
+      projectId={projectId}
+      projectName={project?.name ?? "Proyecto"}
+      role={project?.role}
+      compact
+    />
   );
 }
 export function Metric({
@@ -67,142 +71,126 @@ export function Dashboard() {
     queryFn: () => exchangeRequest(projectId, "dashboard", C.dashboardView),
     staleTime: 0,
   });
+  const projects = useQuery({
+    queryKey: ["projects"],
+    queryFn: () => api("projects"),
+  });
   const [dimension, setDimension] = useState("section");
-  if (q.isPending) return <LoadingState />;
-  if (q.error)
-    return <ErrorState error={q.error} retry={() => void q.refetch()} />;
+  if (q.isPending || projects.isPending) return <LoadingState />;
+  if (q.error || projects.error)
+    return (
+      <ErrorState
+        error={q.error ?? projects.error!}
+        retry={() => {
+          void q.refetch();
+          void projects.refetch();
+        }}
+      />
+    );
   const data = q.data,
-    filter = params.get("status") ?? "",
-    items = data.questions.filter((q) => !filter || q.status === filter);
+    filter = params.get("status") ?? "";
+  const project = projects.data?.find((p) => p.id === projectId);
+  if (!project)
+    return (
+      <ErrorState
+        error={new Error("El proyecto no está disponible.")}
+        retry={() => void projects.refetch()}
+      />
+    );
   return (
     <div className="av-scope">
-      <Link to="/" className="back">
-        ← Mis proyectos
-      </Link>
-      <h1>{data.projectName}</h1>
-      <ProjectTools projectId={projectId} />
-      <AttentionPanel data={data} projectId={projectId} />
-      <h2>Resumen</h2>
-      <p>
-        Preguntas publicadas y no archivadas. Una respuesta enviada aún requiere
-        revisión.
-      </p>
-      <MetricRow value={data.metrics} />
-      <h2>Estados</h2>
-      <ul className="state-summary av-status-summary">
-        {data.states.map((s) => (
-          <li key={s.status}>
-            <button
-              type="button"
-              aria-pressed={filter === s.status}
-              onClick={() => setParams({ status: s.status })}
-            >
-              <AnalystStatus status={s.status} /> <strong>{s.count}</strong>
-            </button>
-          </li>
-        ))}
-      </ul>
-      <h2>Desgloses</h2>
-      <Select
-        label="Desglosar por"
-        value={dimension}
-        onChange={(e) => setDimension(e.target.value)}
-      >
-        <option value="section">Tema</option>
-        <option value="priority">Prioridad</option>
-        <option value="area">Área responsable</option>
-        <option value="status">Estado</option>
-      </Select>
-      <div className="table-scroll">
-        <table>
-          <caption>
-            Métricas por{" "}
-            {dimension === "section"
-              ? "tema"
-              : dimension === "area"
-                ? "área"
-                : dimension === "priority"
-                  ? "prioridad"
-                  : "estado"}
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col">Grupo</th>
-              <th scope="col">Validación</th>
-              <th scope="col">Cierre</th>
-              <th scope="col">Con respuestas</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.breakdowns
-              .filter((b) => b.dimension === dimension)
-              .map((b) => (
-                <tr key={b.key}>
-                  <th scope="row">{b.label}</th>
-                  {(["validation", "closure", "submission"] as const).map(
-                    (k) => (
-                      <td key={k}>
-                        {b.metrics[k].numerator} / {b.metrics[k].denominator} ·{" "}
-                        {b.metrics[k].percentage ?? 0} %
-                      </td>
-                    ),
-                  )}
-                </tr>
-              ))}
-          </tbody>
-        </table>
-      </div>
-      <h2 id="dashboard-questions">Preguntas y pendientes</h2>
-      <Select
-        label="Filtrar estado"
-        value={filter}
-        onChange={(e) =>
-          setParams(e.target.value ? { status: e.target.value } : {})
-        }
-      >
-        <option value="">Todos los estados</option>
-        {C.reviewStates.map((s) => (
-          <option key={s} value={s}>
-            {reviewLabels[s]}
-          </option>
-        ))}
-      </Select>
-      <p role="status">{items.length} preguntas</p>
-      {!items.length ? (
-        <EmptyState
-          title={
-            data.questions.length
-              ? "Sin preguntas para este filtro"
-              : "Sin preguntas"
-          }
-        >
-          Publica preguntas para ver sus métricas.
-        </EmptyState>
-      ) : (
-        <ul className="review-inbox">
-          {items.map((x) => (
-            <li key={x.id}>
-              <Link to={`/projects/${projectId}/review/${x.id}`}>
-                {x.title}
-              </Link>
-              <p>
-                {x.sectionTitle} · {x.areaName} · {x.priority}
-              </p>
-              <AnalystStatus status={x.status} />
-              {x.conditionalWithoutCase && (
-                <p>Condicional · aún sin caso aplicable</p>
-              )}
-              {!!x.referenceIds.length && (
-                <Link
-                  to={`/projects/${projectId}/traceability?questionId=${x.id}`}
-                >
-                  Referencias de esta pregunta
-                </Link>
-              )}
+      <ProjectWorkbench
+        projectId={projectId}
+        projectName={data.projectName}
+        role={data.role}
+        active="attention"
+      />
+      <ProjectAttention
+        projectId={projectId}
+        data={data}
+        lifecycle={project.lifecycle}
+      />
+      <details className="pw-metrics">
+        <summary>Resumen y métricas</summary>
+        <h2>Resumen</h2>
+        <p>
+          Preguntas publicadas y no archivadas. Una respuesta enviada aún
+          requiere revisión.
+        </p>
+        <MetricRow value={data.metrics} />
+        <h2>Estados</h2>
+        <ul className="state-summary av-status-summary">
+          {data.states.map((s) => (
+            <li key={s.status}>
+              <button
+                type="button"
+                aria-pressed={filter === s.status}
+                onClick={() => {
+                  const next = new URLSearchParams(params);
+                  next.set("status", s.status);
+                  next.delete("task");
+                  setParams(next);
+                  document
+                    .getElementById("dashboard-questions")
+                    ?.scrollIntoView();
+                }}
+              >
+                <AnalystStatus status={s.status} /> <strong>{s.count}</strong>
+              </button>
             </li>
           ))}
         </ul>
-      )}
+        <h2>Desgloses</h2>
+        <Select
+          label="Desglosar por"
+          value={dimension}
+          onChange={(e) => setDimension(e.target.value)}
+        >
+          <option value="section">Tema</option>
+          <option value="priority">Prioridad</option>
+          <option value="area">Área responsable</option>
+          <option value="status">Estado</option>
+        </Select>
+        <div className="table-scroll">
+          <table>
+            <caption>
+              Métricas por{" "}
+              {dimension === "section"
+                ? "tema"
+                : dimension === "area"
+                  ? "área"
+                  : dimension === "priority"
+                    ? "prioridad"
+                    : "estado"}
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Grupo</th>
+                <th scope="col">Validación</th>
+                <th scope="col">Cierre</th>
+                <th scope="col">Con respuestas</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.breakdowns
+                .filter((b) => b.dimension === dimension)
+                .map((b) => (
+                  <tr key={b.key}>
+                    <th scope="row">{b.label}</th>
+                    {(["validation", "closure", "submission"] as const).map(
+                      (k) => (
+                        <td key={k}>
+                          {b.metrics[k].numerator} / {b.metrics[k].denominator}{" "}
+                          · {b.metrics[k].percentage ?? 0} %
+                        </td>
+                      ),
+                    )}
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+      </details>
     </div>
   );
 }

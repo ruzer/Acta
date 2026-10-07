@@ -352,7 +352,9 @@ it("VIS005: abre avanzado aunque el primer error sea de contenido", async () => 
 });
 
 it("VIS002: cerrar resolución devuelve el foco al botón que abrió el diálogo", async () => {
-  vi.spyOn(apiModule, "api").mockResolvedValue(conflict);
+  vi.spyOn(apiModule, "api").mockImplementation(
+    async (key) => (key === "projects" ? [] : conflict) as never,
+  );
   Object.defineProperty(HTMLDialogElement.prototype, "showModal", {
     configurable: true,
     value: function (this: HTMLDialogElement) {
@@ -430,7 +432,9 @@ it("el resumen de errores distingue destinos y activa el campo elegido", async (
 });
 
 it("volver a Revisión conserva los filtros de procedencia sin cambiar el destino", async () => {
-  vi.spyOn(apiModule, "api").mockResolvedValue(conflict);
+  vi.spyOn(apiModule, "api").mockImplementation(
+    async (key) => (key === "projects" ? [] : conflict) as never,
+  );
   render(
     <QueryClientProvider
       client={
@@ -450,6 +454,6 @@ it("volver a Revisión conserva los filtros de procedencia sin cambiar el destin
     </QueryClientProvider>,
   );
   expect(
-    await screen.findByRole("link", { name: "← Revisión" }),
+    await screen.findByRole("link", { name: "← Revisar respuestas" }),
   ).toHaveAttribute("href", "/review?projectId=demo&status=CONFLICT");
 });
