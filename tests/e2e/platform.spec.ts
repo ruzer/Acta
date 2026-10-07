@@ -196,6 +196,7 @@ test("administración, edición, guardado, publicación y contenido protegido", 
     path: "artifacts/editor-desktop.png",
     fullPage: true,
   });
+  await page.getByRole("tab", { name: "Escribir", exact: true }).click();
   await page
     .getByRole("button", { name: "+ Agregar pregunta", exact: true })
     .first()
@@ -277,12 +278,13 @@ test("cambios sin guardar se conservan al cancelar navegación y miembros funcio
     })
     .getByRole("link", { name: "Editar cuestionario" })
     .click();
-  await page.getByRole("link", { name: "Administrar miembros" }).click();
+  await page.getByRole("link", { name: "Miembros", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Miembros del proyecto" }),
   ).toBeVisible();
   await accessible(page);
   await page.getByRole("link", { name: "← Cuestionario" }).click();
+  await page.getByRole("tab", { name: "Escribir", exact: true }).click();
   const editorUrl = page.url();
   const trigger = page
     .getByRole("button", {

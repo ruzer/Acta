@@ -295,3 +295,36 @@ it("plegar un grupo de otra página conserva página y foco del control", async 
     }),
   ).not.toBeInTheDocument();
 });
+
+it("un cuestionario vacío explica cómo empezar, sin atribuir la ausencia a los filtros", () => {
+  render(<Organize {...handlers} data={{ ...dataFor(0), sections: [] }} />);
+  expect(
+    screen.getByRole("heading", { name: "Todavía no hay preguntas." }),
+  ).toBeVisible();
+  expect(
+    screen.getByText(
+      "Agrega un tema para crear la primera pregunta o importa una estructura.",
+    ),
+  ).toBeVisible();
+  expect(screen.getByRole("button", { name: "+ Agregar tema" })).toBeEnabled();
+  expect(screen.getByRole("button", { name: "Nueva pregunta" })).toBeDisabled();
+  expect(
+    screen.queryByText("Cambia el tema o elimina los filtros."),
+  ).not.toBeInTheDocument();
+});
+it("una búsqueda sin coincidencias conserva el mensaje de filtros, sin fingir un cuestionario vacío", async () => {
+  const user = userEvent.setup();
+  render(<Organize {...handlers} data={dataFor(12)} />);
+  await user.type(
+    screen.getByRole("searchbox", { name: "Buscar preguntas" }),
+    "sin coincidencias",
+  );
+  expect(
+    screen.getByRole("heading", {
+      name: "No encontramos preguntas con estos filtros.",
+    }),
+  ).toBeVisible();
+  expect(
+    screen.queryByRole("heading", { name: "Todavía no hay preguntas." }),
+  ).not.toBeInTheDocument();
+});

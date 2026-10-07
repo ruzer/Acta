@@ -6,7 +6,26 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
-Sin cambios adicionales por anunciar.
+### Changed
+
+- ACTA NEXT: Cuestionario operativo con enfoques Preparar/Analizar, jerarquía,
+  colapso, área, aportaciones vigentes y acción contextual. La selección masiva
+  conserva su alcance explícito y las reglas existentes.
+- Navegación por Atención, Cuestionario y Decisiones, con invitaciones accesibles
+  y retorno a filtros, posición y selección dentro de la sesión.
+- Conjunto de aportaciones, contraste simétrico de dos fuentes y decisión con
+  resultado, contexto, fuentes e historial. N aportaciones no implica consenso.
+- Invitaciones en cuatro pasos con resumen previo; contexto y guardado más
+  claros para invitados y evidencia compacta para participantes. Sin cambios
+  de backend, contratos, migraciones, permisos ni seguridad de invitaciones.
+
+### Fixed
+
+- Organizar distingue un cuestionario vacío de una búsqueda sin coincidencias
+  y explica el siguiente paso sin atribuir la ausencia de preguntas a filtros.
+
+Ver [alcance, verificación, capturas y límites](docs/design/ACTA-NEXT-IMPLEMENTATION.md).
+
 
 ## 0.4.0
 

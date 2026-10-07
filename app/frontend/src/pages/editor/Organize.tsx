@@ -806,8 +806,18 @@ export function Organize(props: EditorProps & { initialSelected?: string }) {
           })}
         </div>
         {!questions.length && (
-          <EmptyState title="No encontramos preguntas con estos filtros.">
-            Cambia el tema o elimina los filtros.
+          <EmptyState
+            title={
+              data.questions.length
+                ? "No encontramos preguntas con estos filtros."
+                : "Todavía no hay preguntas."
+            }
+          >
+            {data.questions.length
+              ? "Cambia el tema o elimina los filtros."
+              : data.sections.length
+                ? "Crea la primera con Nueva pregunta o importa una estructura."
+                : "Agrega un tema para crear la primera pregunta o importa una estructura."}
           </EmptyState>
         )}
         {pages > 1 && (

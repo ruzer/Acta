@@ -16,9 +16,9 @@ siguen siendo los de v0.4.0. Las pruebas usan datos ficticios y un stack aislado
 | 3          | Contraste y decisión documental                            | Implementado y verificado de forma focalizada |
 | 4          | Invitaciones, invitado y ajustes del participante          | Implementado y verificado de forma focalizada |
 
-El objetivo completo todavía no está terminado. Las capturas de un checkpoint
-no demuestran los siguientes; la revisión funcional completa y CI remoto quedan
-para la integración final.
+Los cuatro checkpoints y la regresión local completa están verificados. Las
+capturas no sustituyen pruebas funcionales; el PR y sus ejecuciones de CI remoto
+se verifican por separado antes de declarar lista la entrega.
 
 ## Datos y contratos
 
@@ -118,12 +118,29 @@ simulaciones técnicas, no estudios con personas ni mediciones de productividad.
 El checkpoint 2 elimina la repetición de la cabecera de preparación y añade la navegación del proyecto. La lista de 12 aportaciones requiere desplazamiento en móvil;
 el buscador permite acotar actor y área sin ocultar aportaciones silenciosamente.
 
-## Regresión final pendiente
+## Regresión local final
 
-- Pruebas funcionales completas, PostgreSQL, navegador y CI remoto.
-- Simulación integral de administrador, analista a escala, analista de
-  aportaciones/conflictos, participante e invitado móvil.
-- PR con DCO; sin release ni tag.
+| Gate | Resultado observado |
+| --- | --- |
+| Lint, typecheck y build de los tres paquetes | PASS |
+| Unit/component | 214/214, 29 archivos |
+| PostgreSQL | 113/113 casos comprobados; 102 iniciales + 11 de revisión en puerto libre |
+| API/evidencia con VersityGW real | 39/39, sin skips |
+| Playwright completo con demo inicial limpio | 61/61, sin retries ni skips |
+| Docker aislado | PostgreSQL, VersityGW, migraciones, backend y frontend saludables |
+| Enlaces relativos | 627 resuelven en el conjunto versionable |
+| Secret scan | Gitleaks sin hallazgos en archivos versionables y commits de esta evolución |
+| Separación funcional | Diff vacío en backend, contratos compartidos, Prisma y almacenamiento |
+
+Las pruebas funcionales cubren crear/editar, publicación y lotes, asignaciones,
+participante, invitaciones, borradores/concurrencia, aclaraciones, conflictos,
+decisiones, evidencia e importación/exportación. El frontend real se construyó
+con Docker sobre Linux ARM64; Chromium se ejecutó desde el host de verificación.
+El build mantiene el aviso existente de un chunk JavaScript mayor de 500 kB; no
+se silenció ni se usó como motivo para una refactorización ajena al alcance.
+
+Pendiente de esta rama: abrir PR con DCO y completar el CI remoto sobre su SHA
+exacto. No se crea release ni tag.
 
 ## Capturas del checkpoint 1
 
@@ -292,13 +309,15 @@ centradas en el contraste muestran las posturas después de desplazar la página
 - `invitations.spec.ts` + `next-workbench.spec.ts`: **18/18**, incluido el nuevo
   recorrido gestor → resumen → enlace → invitado móvil → borrador → envío →
   actividad observada en el gestor. Sin retries ni skips.
-- Participante y respuestas: **10/10** en la regresión focalizada previa;
-  las nuevas aserciones de posición, archivo resumido y proximidad del estado de
-  guardado quedan incluidas en la regresión completa pendiente.
+- Participante y respuestas: **10/10** en la regresión focalizada y en la suite
+  completa final; esta última incluye las nuevas aserciones de posición, archivo
+  resumido y proximidad del estado de guardado.
 - **36 comprobaciones** de interfaz real en 1440/1024/768/390: gestor, cuatro
   pasos, invitado, acciones y participante. Cero violaciones de axe, cero
   desbordamientos y cero errores JavaScript. Se comprobaron foco por paso,
   Escape/retorno, reduced motion y filas de selección de al menos 44 px.
+  Algunos nodos no visibles quedan como contraste incompleto en axe; las
+  capturas se revisaron visualmente y no se declara certificación WCAG.
 - Se revisaron las capturas reales de escritorio/móvil. El resumen móvil puede
   requerir desplazamiento vertical dentro del diálogo; conserva controles
   accesibles y el orden de lectura. No se interpreta como un estudio humano.
@@ -324,3 +343,45 @@ selección de capturas; los logs y fixtures de ejecución no se publican.
 - [Invitado: guardado y evidencia, móvil](acta-next-evidence/checkpoint-4/guest-actions-390.png).
 - [Participante, escritorio](acta-next-evidence/checkpoint-4/participant-actions-1440.png).
 - [Participante, móvil](acta-next-evidence/checkpoint-4/participant-actions-390.png).
+
+
+## Simulación técnica por perfil
+
+Recorridos ejecutados con cuentas y contenido ficticios; no participaron usuarios
+humanos ni se midieron tiempos de aprendizaje, satisfacción o productividad.
+
+| Perfil simulado | Tarea observada y evidencia reproducible | Fricción observada y tratamiento |
+| --- | --- | --- |
+| Administrador novato | Inicio, administración, membresías, editor vacío, primera pregunta y publicación protegida (`platform.spec.ts`) | Organizar vacío hablaba de filtros inexistentes. Se distingue ausencia real de preguntas y se orienta a tema/importación; tests conservan guardado, cancelación y protección del contenido. |
+| Analista con 304 preguntas | Buscar, filtrar área/publicación, plegar, seleccionar página/resultados/grupo, preview y confirmación (`next-questionnaire.spec.ts`, `bulk.spec.ts`) | Grupo fuera de página y seguimiento filtrado podían perder contexto; ya corregidos en checkpoint 1. El alcance oculto se comunica, no se selecciona por sorpresa. |
+| Analista con tres aportaciones | Abrir conjunto, elegir una, volver y contrastar dos; fixture real con historia, evidencia y borrador privado | La sucesión de respuestas completas ocultaba el conjunto. Se presenta lista compacta; N sigue siendo tres y no incluye historia/borrador. Evidencia visual en checkpoints 1 y 3. |
+| Analista con conflicto | Contrastar dos autores, pedir aclaración, resolver y después validar (`review.spec.ts`) | La resolución no debe parecer decisión ya validada. Se conserva esa separación; fuentes y acción secundaria de reapertura permanecen accesibles. |
+| Participante | Mi trabajo → continuar → guardar/salir → recuperar → evidencia → envío → aclaración → consulta de resultado (`participant.spec.ts`, `responses.spec.ts`) | Estado de guardado antes separado de las acciones; se aproxima y se conserva el nombre de evidencia incluso plegada. Ocho tipos, incluida MATRIX, sin rediseño del recorrido. |
+| Invitado externo móvil | Crear alcance, compartir manualmente, guardar, volver con enlace, adjuntar, enviar y aclarar (`invitations.spec.ts`) | No confundir guardar con enviar ni enlace con identidad. Se explican ambos; destinatario previsto permanece como CONTRACT GAP porque el acceso externo no lo entrega. |
+
+Las listas largas y los resúmenes móviles pueden requerir desplazamiento vertical;
+no se oculta contenido para simular una pantalla más corta. La API de revisión no
+expone un origen estructurado de cada actor: el frontend tampoco lo adivina.
+
+## Incidencias de la regresión completa
+
+La primera corrida de navegador dio 58/61: dos pruebas aún buscaban la pestaña o
+el nombre de membresías anterior; el tercer fallo descubrió el mensaje erróneo
+del editor vacío. Se actualizaron las rutas de prueba conservando sus aserciones
+y se corrigió la presentación vacía, con dos pruebas de componente adicionales.
+Una corrida focalizada posterior comprobó las tres correcciones; otro caso que
+requiere el demo inicial encontró una respuesta ya enviada por la corrida
+anterior. La verificación completa final partió otra vez de volúmenes descartables
+nuevos y pasó **61/61**, sin cambiar esa aserción ni usar retries.
+
+PostgreSQL: 102 casos pasaron inicialmente; el bloque de revisión respondió HTML
+porque su puerto predeterminado estaba ocupado por otra instalación Docker.
+Las 11 pruebas de ese bloque pasaron usando `ACTA_REVIEW_TEST_PORT` en un puerto
+libre. No se cambió backend ni la otra instalación. Resultado conjunto: 113 casos
+comprobados, cero omisiones. La suite adicional con VersityGW real pasó 39/39.
+
+## Versión recomendada
+
+**v0.5.0**: evolución visible del frontend y de la navegación, conservando los
+contratos de v0.4.0. Esta rama no cambia versiones, crea tags ni publica releases.
+El PR y su CI remoto son requisitos separados del resultado local.
