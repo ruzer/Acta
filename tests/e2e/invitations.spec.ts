@@ -282,10 +282,19 @@ test("analyst creates, renews and revokes a link from the editor without creatin
   await dialog
     .getByLabel("Nombre de la persona", { exact: true })
     .fill("Example Respondent");
+  await dialog.getByRole("button", { name: "Continuar", exact: true }).click();
   await dialog
     .getByLabel("Área de la aportación", { exact: true })
     .selectOption(fixture.areaId);
   await accessible(page);
+  await dialog.getByRole("button", { name: "Continuar", exact: true }).click();
+  await dialog.getByRole("button", { name: "Continuar", exact: true }).click();
+  await expect(
+    dialog.getByRole("heading", { name: "Resumen", exact: true }),
+  ).toBeFocused();
+  await expect(
+    dialog.getByText("1 pregunta publicada", { exact: true }),
+  ).toBeVisible();
   const creation = page.waitForResponse(
     (r) =>
       r.url().endsWith(`/projects/${fixture.projectId}/invitations`) &&
@@ -306,7 +315,7 @@ test("analyst creates, renews and revokes a link from the editor without creatin
   await page.getByRole("link", { name: "Invitaciones", exact: true }).click();
   const row = page
     .getByRole("listitem")
-    .filter({ has: page.getByRole("heading", { name: label, exact: true }) });
+    .filter({ has: page.getByText(label, { exact: true }) });
   await expect(row).toBeVisible();
   await row
     .getByRole("button", { name: "Renovar enlace", exact: true })
@@ -515,4 +524,156 @@ test("unavailable invitation exposes no account navigation or question content",
   } finally {
     await context.close();
   }
+});
+
+test("ACTA NEXT: crear desde el gestor conserva alcance explícito y el invitado móvil distingue guardar de enviar", async ({
+  page,
+  request,
+  browser,
+}) => {
+  test.setTimeout(120000);
+  const fixture = await invitation(request);
+  await loginPage(page, "analyst");
+  await page.goto(`/projects/${fixture.projectId}/invitations`);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page
+    .getByRole("button", { name: "Crear invitación", exact: true })
+    .click();
+  const dialog = page.getByRole("dialog", { name: "Invitar mediante enlace" });
+  const label = `Consulta ficticia desde el gestor ${randomUUID()}`;
+  await dialog
+    .getByLabel("Referencia de la invitación", { exact: true })
+    .fill(label);
+  await dialog
+    .getByLabel("Nombre de la persona", { exact: true })
+    .fill("Persona ficticia del gestor");
+  await dialog
+    .getByLabel("Organización (opcional)")
+    .fill("Example Organization");
+  await accessible(page);
+  await dialog.getByRole("button", { name: "Continuar", exact: true }).click();
+  await expect(
+    dialog.getByRole("heading", { name: "Preguntas", exact: true }),
+  ).toBeFocused();
+  await dialog
+    .getByRole("searchbox", { name: "Buscar preguntas publicadas" })
+    .fill(fixture.question.externalId);
+  await dialog
+    .getByRole("checkbox", {
+      name: `${fixture.question.externalId} · ${fixture.question.question}`,
+      exact: true,
+    })
+    .check();
+  await dialog
+    .getByLabel("Área de la aportación", { exact: true })
+    .selectOption(fixture.areaId);
+  await accessible(page);
+  await dialog.getByRole("button", { name: "Continuar", exact: true }).click();
+  await dialog
+    .getByLabel("Permitir adjuntar y descargar evidencia propia")
+    .check();
+  await accessible(page);
+  await dialog.getByRole("button", { name: "Continuar", exact: true }).click();
+  await expect(
+    dialog.getByRole("heading", { name: "Resumen", exact: true }),
+  ).toBeFocused();
+  await expect(
+    dialog.getByText("Persona ficticia del gestor", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    dialog.getByText("No se enviará ningún correo.", { exact: false }),
+  ).toBeVisible();
+  await accessible(page);
+  const creation = page.waitForResponse(
+    (r) =>
+      r.url().endsWith(`/projects/${fixture.projectId}/invitations`) &&
+      r.request().method() === "POST",
+  );
+  await dialog
+    .getByRole("button", { name: "Crear enlace privado", exact: true })
+    .click();
+  const created = await creation;
+  expect(created.status()).toBe(201);
+  const body = await created.json();
+  expect(body.invitation.questionIds).toEqual([fixture.question.id]);
+  expect(body.invitation.identity).toEqual({
+    name: "Persona ficticia del gestor",
+    organization: "Example Organization",
+  });
+  expect(body.invitation.allowEvidence).toBe(true);
+  const linkDialog = page.getByRole("dialog", {
+    name: "Enlace privado de respuesta",
+  });
+  const url = await linkDialog
+    .getByLabel("Enlace privado", { exact: true })
+    .inputValue();
+  await linkDialog.getByRole("button", { name: "Listo", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Crear invitación", exact: true }),
+  ).toBeFocused();
+  const row = page
+    .locator(".invitation-management > li")
+    .filter({ has: page.getByText(label, { exact: true }) });
+  await expect(
+    row.getByRole("heading", {
+      name: "Persona ficticia del gestor",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    row.getByText("0 de 1 preguntas con envío", { exact: true }),
+  ).toBeVisible();
+  await expect(row.getByText("Activo", { exact: true })).toBeVisible();
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+  });
+  try {
+    const guest = await context.newPage();
+    await guest.goto(url);
+    await expect(guest.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(
+      guest.locator(".invitation-content > .eyebrow"),
+    ).not.toBeEmpty();
+    await guest.getByRole("button", { name: "Responder", exact: true }).click();
+    await expect(
+      guest.getByText("Pregunta 1 de 1", { exact: true }),
+    ).toBeVisible();
+    await guest
+      .getByLabel("Tu respuesta", { exact: true })
+      .fill("Aportación ficticia desde el gestor");
+    await expect(guest.getByRole("status")).toHaveText("Cambios sin guardar");
+    await expect(
+      guest.getByText(/Enviar entrega esta respuesta para revisión/),
+    ).toBeVisible();
+    await guest
+      .getByRole("button", { name: "Guardar borrador", exact: true })
+      .click();
+    await expect(guest.getByRole("status")).toContainText("Borrador guardado");
+    await accessible(guest);
+    await guest
+      .getByRole("button", { name: "Enviar respuesta", exact: true })
+      .click();
+    await guest
+      .getByRole("dialog")
+      .getByRole("button", { name: "Confirmar envío", exact: true })
+      .click();
+    await expect(
+      guest.getByRole("region", { name: "Respuesta enviada", exact: true }),
+    ).toBeVisible();
+    await guest
+      .getByRole("button", { name: "← Todas las preguntas", exact: true })
+      .click();
+    await expect(guest.getByRole("status")).toHaveText(
+      "1 de 1 preguntas con respuesta enviada",
+    );
+  } finally {
+    await context.close();
+  }
+  await page.reload();
+  await expect(
+    row.getByText("1 de 1 preguntas con envío", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    row.getByText("Sin aperturas registradas", { exact: true }),
+  ).toHaveCount(0);
 });

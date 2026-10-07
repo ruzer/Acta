@@ -689,17 +689,17 @@ test("ACTA NEXT: vigencia de invitaciones incluye la segunda página y excluye r
   const list = page.locator("ul.invitation-management");
   await expect(list.getByRole("listitem")).toHaveCount(1);
   await expect(
-    list.getByRole("heading", { name: fixture.urgent.label, exact: true }),
+    list.getByText(fixture.urgent.label, { exact: true }),
   ).toBeVisible();
   await expect(
-    list.getByRole("heading", { name: fixture.revoked.label, exact: true }),
+    list.getByText(fixture.revoked.label, { exact: true }),
   ).toHaveCount(0);
   await page.getByLabel("Vigencia", { exact: true }).selectOption("");
   await expect(list.getByRole("listitem")).toHaveCount(25);
   await page.getByRole("button", { name: "Siguiente", exact: true }).click();
   await expect(list.getByRole("listitem")).toHaveCount(2);
   await expect(
-    list.getByRole("heading", { name: fixture.urgent.label, exact: true }),
+    list.getByText(fixture.urgent.label, { exact: true }),
   ).toBeVisible();
   await navigation(page)
     .getByRole("link", { name: "Atención", exact: true })
@@ -711,7 +711,7 @@ test("ACTA NEXT: vigencia de invitaciones incluye la segunda página y excluye r
   await page.getByLabel("Vigencia", { exact: true }).selectOption("7");
   await expect(list.getByRole("listitem")).toHaveCount(1);
   await expect(
-    list.getByRole("heading", { name: fixture.urgent.label, exact: true }),
+    list.getByText(fixture.urgent.label, { exact: true }),
   ).toBeVisible();
 });
 

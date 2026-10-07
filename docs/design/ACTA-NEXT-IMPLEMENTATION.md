@@ -14,7 +14,7 @@ siguen siendo los de v0.4.0. Las pruebas usan datos ficticios y un stack aislado
 | 1          | Cuestionario, Organizar, aportaciones y autoría contextual | Implementado y verificado de forma focalizada |
 | 2          | Atención, navegación y retorno al contexto                 | Implementado y verificado de forma focalizada |
 | 3          | Contraste y decisión documental                            | Implementado y verificado de forma focalizada |
-| 4          | Invitaciones, invitado y ajustes del participante          | Pendiente                                     |
+| 4          | Invitaciones, invitado y ajustes del participante          | Implementado y verificado de forma focalizada |
 
 El objetivo completo todavía no está terminado. Las capturas de un checkpoint
 no demuestran los siguientes; la revisión funcional completa y CI remoto quedan
@@ -48,7 +48,7 @@ El gestor autenticado sí tiene esos datos; la sesión de invitación no puede
 consultarlo. Se detiene únicamente la presentación del destinatario previsto:
 no se añade una API, se adivina una identidad ni se interpreta el enlace como
 prueba de identidad. Organización, proyecto, vigencia y progreso sí están
-expuestos y pueden utilizarse en el checkpoint 4.
+expuestos y se presentan en el checkpoint 4.
 
 El detalle de revisión tampoco entrega un origen estructurado independiente de
 `respondent.displayName`. Se muestra el actor que entrega el contrato; no se
@@ -120,7 +120,6 @@ el buscador permite acotar actor y área sin ocultar aportaciones silenciosament
 
 ## Regresión final pendiente
 
-- Completar checkpoint 4 y sus recorridos visuales.
 - Pruebas funcionales completas, PostgreSQL, navegador y CI remoto.
 - Simulación integral de administrador, analista a escala, analista de
   aportaciones/conflictos, participante e invitado móvil.
@@ -257,3 +256,71 @@ centradas en el contraste muestran las posturas después de desplazar la página
 - [Conflicto, móvil](acta-next-evidence/checkpoint-3/conflict-390.png).
 - [Decisión, escritorio](acta-next-evidence/checkpoint-3/decision-1440.png).
 - [Decisión, móvil](acta-next-evidence/checkpoint-3/decision-390.png).
+
+
+## Checkpoint 4
+
+- El gestor presenta destinatario previsto, alcance, envíos X/N, vigencia,
+  estado del enlace, actividad y primer acceso. El uso del enlace no acredita
+  identidad. No se muestran fragmentos de credenciales.
+- Creación en cuatro pasos: destinatario, preguntas, vigencia y resumen. El
+  comando real se ejecuta solo al confirmar el resumen; volver conserva los
+  campos. El foco acompaña cada paso y vuelve al botón de origen al cerrar.
+- Desde Organizar se conserva el alcance explícito de la selección. Desde el
+  gestor se eligen preguntas publicadas; buscar no incluye resultados ocultos
+  silenciosamente y se explican las seleccionadas fuera del filtro. Una
+  condición incompleta pide incluir su principal explícitamente. No publica
+  borradores ni agrega preguntas por cuenta propia.
+- Vigencia predeterminada, máximo, identidad y permiso no nominal proceden de la
+  política real. El servidor mantiene la autoridad de validación. No hay envío
+  automático de correo ni nuevo contrato.
+- El invitado ve organización, proyecto, vencimiento y posición X/N. Guardar y
+  enviar se explican junto a sus acciones; el estado visible distingue contenido
+  sin guardar, archivo pendiente y guardado confirmado. Se conserva el alcance
+  de su sesión y el flujo real de renovación, revocación y aclaraciones.
+- El participante conserva Mi trabajo y una tarea activa. Los nombres de archivos
+  aparecen en el resumen de evidencia; el estado de guardado queda junto a las
+  acciones. La posición indica explícitamente que no es el número de envíos.
+  No se incorpora autoguardado.
+
+### Verificación del checkpoint 4
+
+- `npm test`: **212/212**, 29 archivos; `typecheck`, `lint` y `build`: PASS.
+- Siete pruebas nuevas del asistente: contrato y único envío final, volver sin
+  pérdida, selección filtrada, condición incompleta, borrador, no nominal y
+  rechazo del servidor con foco y contenido conservados.
+- `invitations.spec.ts` + `next-workbench.spec.ts`: **18/18**, incluido el nuevo
+  recorrido gestor → resumen → enlace → invitado móvil → borrador → envío →
+  actividad observada en el gestor. Sin retries ni skips.
+- Participante y respuestas: **10/10** en la regresión focalizada previa;
+  las nuevas aserciones de posición, archivo resumido y proximidad del estado de
+  guardado quedan incluidas en la regresión completa pendiente.
+- **36 comprobaciones** de interfaz real en 1440/1024/768/390: gestor, cuatro
+  pasos, invitado, acciones y participante. Cero violaciones de axe, cero
+  desbordamientos y cero errores JavaScript. Se comprobaron foco por paso,
+  Escape/retorno, reduced motion y filas de selección de al menos 44 px.
+- Se revisaron las capturas reales de escritorio/móvil. El resumen móvil puede
+  requerir desplazamiento vertical dentro del diálogo; conserva controles
+  accesibles y el orden de lectura. No se interpreta como un estudio humano.
+
+Durante la verificación se corrigió una opción de Testing Library incompatible
+con TypeScript, se preservó la etiqueta existente «Respuesta mediante invitación»
+y se dio un nodo legible al conteo del resumen. No se ocultaron esos fallos con
+retries ni se eliminaron las comprobaciones. La revisión visual detectó además
+un selector CSS de casilla incorrecto y poco espacio junto al filtro del gestor;
+ambos se corrigieron antes de capturar la evidencia final.
+
+### Capturas del checkpoint 4
+
+Procedencia: aplicación real con proyecto, personas y PDF ficticios. No incluyen
+enlaces privados de invitación ni credenciales. Se conserva únicamente una
+selección de capturas; los logs y fixtures de ejecución no se publican.
+
+- [Gestor, escritorio](acta-next-evidence/checkpoint-4/invitations-1440.png).
+- [Gestor, móvil](acta-next-evidence/checkpoint-4/invitations-390.png).
+- [Resumen antes de crear, escritorio](acta-next-evidence/checkpoint-4/create-summary-1440.png).
+- [Resumen antes de crear, móvil](acta-next-evidence/checkpoint-4/create-summary-390.png).
+- [Invitado: guardado y evidencia, escritorio](acta-next-evidence/checkpoint-4/guest-actions-1440.png).
+- [Invitado: guardado y evidencia, móvil](acta-next-evidence/checkpoint-4/guest-actions-390.png).
+- [Participante, escritorio](acta-next-evidence/checkpoint-4/participant-actions-1440.png).
+- [Participante, móvil](acta-next-evidence/checkpoint-4/participant-actions-390.png).

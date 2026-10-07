@@ -196,6 +196,10 @@ test("guardar intacta, recuperar tras logout, prioridad borrador y consulta recu
 }) => {
   await login(page, "stakeholder");
   await open(page, 0);
+  await expect(page.getByRole("progressbar")).toHaveAttribute(
+    "aria-valuetext",
+    "Pregunta 1 de 8. La posición no indica cuántas respuestas has enviado.",
+  );
   await axe(page);
   await page
     .getByRole("button", { name: "Guardar y salir", exact: true })
@@ -264,6 +268,22 @@ test("P1 → P2 → P3 sin saltos, evidencia real y MATRIX completa", async ({
   await expect(
     page.getByRole("button", { name: "Descargar participante-ficticio.pdf" }),
   ).toBeVisible();
+  const evidenceSummary = page.locator(".next-participant-evidence > summary");
+  await expect(evidenceSummary).toContainText("participante-ficticio.pdf");
+  await evidenceSummary.click();
+  await expect(evidenceSummary).toBeVisible();
+  const saveStatus = page
+    .getByRole("status")
+    .filter({ hasText: "Evidencia adjunta" });
+  await expect(saveStatus).toBeVisible();
+  const statusBox = await saveStatus.boundingBox();
+  const actionsBox = await page.locator(".response-actions").boundingBox();
+  expect(statusBox).toBeTruthy();
+  expect(actionsBox).toBeTruthy();
+  expect(actionsBox!.y).toBeGreaterThanOrEqual(
+    statusBox!.y + statusBox!.height,
+  );
+  expect(actionsBox!.y - statusBox!.y - statusBox!.height).toBeLessThan(100);
   await send(page);
   await expect(page).toHaveURL(new RegExp(ids[2] + "$"));
   await page.getByLabel("Recibir", { exact: true }).selectOption("C1");

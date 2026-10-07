@@ -14,7 +14,7 @@ import {
   discardInvitationFragment,
 } from "../invitation-api";
 import { ApiFailure, saveDownload } from "../api";
-import { Brand, formatDate } from "../branding";
+import { Brand, formatDate, useBranding } from "../branding";
 import {
   Alert,
   Button,
@@ -44,6 +44,7 @@ const content = (v: ResponseView): ResponseContent => {
     : empty;
 };
 export function InvitedResponse() {
+  const branding = useBranding();
   const [access, setAccess] = useState<InvitationAccessView>();
   const [error, setError] = useState("");
   const [selected, setSelected] = useState("");
@@ -141,12 +142,15 @@ export function InvitedResponse() {
           )
         ) : (
           <>
-            <p className="eyebrow">Respuesta mediante invitación</p>
+            <p className="eyebrow">{branding.organizationName}</p>
             <h1>{access.work.projectName}</h1>
-            <p>
-              Responde las preguntas que te compartieron. Puedes guardar un
-              borrador y volver con tu enlace.
-            </p>
+            <p className="hint">Respuesta mediante invitación</p>
+            {!selected && (
+              <p>
+                Te invitaron a aportar información a este cuestionario. Puedes
+                guardar un borrador y volver con tu enlace.
+              </p>
+            )}
             <p className="hint">
               Disponible hasta {formatDate(access.expiresAt)}. El enlace permite
               acceder a tus respuestas: no lo reenvíes.
@@ -157,6 +161,13 @@ export function InvitedResponse() {
                 key={selected}
                 id={selected}
                 allowEvidence={access.allowEvidence}
+                expiresAt={access.expiresAt}
+                position={
+                  access.work.sections
+                    .flatMap((s) => s.questions)
+                    .findIndex((q) => q.id === selected) + 1
+                }
+                total={access.work.sections.flatMap((s) => s.questions).length}
                 onBack={() => {
                   setSelected("");
                   void refresh().catch((e: Error) => setError(e.message));
@@ -235,11 +246,17 @@ export function InvitedResponse() {
 function InvitedQuestion({
   id,
   allowEvidence,
+  expiresAt,
+  position,
+  total,
   onBack,
   onChange,
 }: {
   id: string;
   allowEvidence: boolean;
+  expiresAt: string;
+  position: number;
+  total: number;
   onBack: () => void;
   onChange: () => void;
 }) {
@@ -387,6 +404,11 @@ function InvitedQuestion({
       >
         ← Todas las preguntas
       </Button>
+      {position > 0 && (
+        <p className="invitation-position">
+          Pregunta {position} de {total}
+        </p>
+      )}
       <h2 ref={heading} tabIndex={-1}>
         {view.question.question}
       </h2>
@@ -394,7 +416,7 @@ function InvitedQuestion({
       <div ref={errorRef} tabIndex={-1}>
         {error && <Alert error>{error}</Alert>}
       </div>
-      {notice && <p role="status">{notice}</p>}
+      {!editable && notice && <p role="status">{notice}</p>}
       {conflict && (
         <Alert error>
           Esta respuesta cambió en otra pestaña. Copia tu texto antes de volver
@@ -512,6 +534,29 @@ function InvitedQuestion({
               </Button>
             </section>
           )}
+          <p
+            className="invitation-save-status"
+            role="status"
+            aria-live="polite"
+          >
+            {busy
+              ? "Procesando…"
+              : error
+                ? "No se completó la operación. Tu contenido permanece en esta pantalla."
+                : file || staged
+                  ? "Archivo pendiente de adjuntar"
+                  : dirty
+                    ? "Cambios sin guardar"
+                    : notice ||
+                      (view.draft
+                        ? `Borrador guardado · ${formatDate(view.draft.updatedAt)}`
+                        : "Todavía no has guardado un borrador.")}
+          </p>
+          <p className="hint">
+            Guardar conserva un borrador para continuar con este enlace hasta{" "}
+            {formatDate(expiresAt)}. Enviar entrega esta respuesta para
+            revisión.
+          </p>
           <div className="invitation-actions">
             <Button
               tone="secondary"
