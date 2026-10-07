@@ -14,15 +14,17 @@ Se prepara [Semantic Versioning](https://semver.org/lang/es/) en formato **MAJOR
 
 El contrato público incluye API documentada, configuración, formatos de intercambio y requisitos de actualización/persistencia. No basta con que TypeScript compile para afirmar compatibilidad. Antes de 1.0 no se promete estabilidad absoluta; los cambios incompatibles deben anunciarse, agruparse en un incremento MINOR de `0.x` y acompañarse de instrucciones de migración. PATCH seguirá reservado para cambios compatibles. Una corrección de seguridad que rompa compatibilidad debe decirlo y usar la versión apropiada.
 
-### Preparación de 0.4.0
+### Preparación de 0.5.0 — Acta Next
 
-La versión anterior es [v0.3.0](https://github.com/ruzer/Acta/releases/tag/v0.3.0), publicada el 6 de octubre de 2026. **0.4.0** incorpora una capacidad compatible nueva: invitaciones externas mediante enlaces privados. Un patch `0.3.x` no describe ese alcance.
+La base anterior es [v0.4.0](https://github.com/ruzer/Acta/releases/tag/v0.4.0). **0.5.0** corresponde a una evolución compatible y sustancial del frontend: Atención / Cuestionario / Decisiones, cuestionario operativo, aportaciones, contraste, resultado documental e invitaciones. Un patch `0.4.x` no describe ese alcance. No se documenta un cambio incompatible de API, configuración o formatos de intercambio.
 
-SemVer trata `0.y.z` como desarrollo inicial. La política de Acta adopta MINOR para funcionalidad compatible nueva y PATCH para correcciones compatibles, sin prometer estabilidad absoluta antes de 1.0. Los participantes con cuenta siguen disponibles; las nuevas invitaciones reutilizan respuestas, revisión y evidencia mediante una migración aditiva.
+SemVer trata `0.y.z` como desarrollo inicial. La política de Acta adopta MINOR para evolución compatible sustancial y PATCH para correcciones compatibles, sin prometer estabilidad absoluta antes de 1.0. Acta Next conserva backend, dominio, contratos, permisos, reglas de publicación, almacenamiento y seguridad de invitaciones; no añade migraciones.
 
-Raíz, frontend, backend, contracts, referencias internas y lockfile se preparan coherentemente en 0.4.0 mediante PR. La preparación no equivale a publicación: verificar CI del commit final, tag anotado y GitHub Release. Las releases publicadas son inmutables; no mover ni reemplazar tags.
+Raíz, frontend, backend, contracts, referencias internas y lockfile se preparan coherentemente en 0.5.0 mediante PR. La preparación no equivale a publicación: verificar CI del commit final antes de autorizar por separado el tag y la GitHub Release. Las releases publicadas son inmutables; no mover ni reemplazar tags.
 
-Los forks deben verificar el tag y commit de [v0.4.0](https://github.com/ruzer/Acta/releases/tag/v0.4.0) y probar la actualización en su propia rama. No actualizar instalaciones directamente desde `main`. Seguir [invitaciones](EXTERNAL-INVITATIONS.md), [configuración](CONFIGURATION.md) y [backup/restauración](BACKUP-RESTORE.md).
+Se conservan dos límites del contrato: el acceso del invitado no expone su destinatario previsto y la revisión no entrega un origen estructurado independiente del actor. La UI no inventa esos datos ni acredita identidad a partir del enlace. El [informe de Acta Next](design/ACTA-NEXT-IMPLEMENTATION.md) registra alcance, pruebas y límites; el [changelog](../CHANGELOG.md) resume los cambios para usuarios.
+
+Los forks permanecen en su base estable actual durante esta preparación. Después de publicar v0.5.0 deben verificar su tag y commit, probar la actualización en una rama propia y hacer backup antes de desplegar. No actualizar instalaciones directamente desde `main`. Seguir [invitaciones](EXTERNAL-INVITATIONS.md), [configuración](CONFIGURATION.md) y [backup/restauración](BACKUP-RESTORE.md).
 
 ## Preparar, verificar y autorizar
 
