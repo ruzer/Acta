@@ -1,3 +1,4 @@
+import { ContributionComparison } from "./ContributionComparison";
 import { Link } from "react-router-dom";
 import type {
   ReviewDetail,
@@ -43,17 +44,34 @@ export function DecisionRecord({
       aria-label={historical ? "Decisión histórica" : "Decisión vigente"}
     >
       <header>
-        <p className="av-kicker">
-          <ParticipantIcon name={historical ? "clock" : "check"} />
-          Decisión validada
-        </p>
+        {historical ? (
+          <p className="av-kicker">
+            <ParticipantIcon name="clock" />
+            Antecedente
+          </p>
+        ) : (
+          <AnalystStatus status="VALIDATED" />
+        )}
         <h3>{historical ? "Decisión histórica" : "Decisión vigente"}</h3>
+        <p className="next-decision-reference">
+          Referencia del registro: {v.id}
+        </p>
+        <div className="av-decision-author">
+          <p>
+            Validada por <strong>{v.validatedBy.displayName}</strong>
+          </p>
+          <p>Fecha: {dateText(v.validatedAt)}</p>
+        </div>
         {historical && (
           <p className="av-secondary">
             Se conserva como antecedente. Ya no es la decisión vigente.
           </p>
         )}
       </header>
+      <div className="next-decision-question">
+        <h4>Pregunta</h4>
+        <p className="answer-text">{data.question.question}</p>
+      </div>
       <h4>Qué se decidió</h4>
       <p className="av-decision-text">{v.decisionText}</p>
       <div className="av-decision-scope">
@@ -79,9 +97,21 @@ export function DecisionRecord({
             );
             return (
               <li key={source.id}>
-                {s
-                  ? `Respuesta de ${s.respondent.displayName} · ${s.area.name} · envío #${s.number}`
-                  : "Respuesta vinculada; detalle no disponible."}
+                {s ? (
+                  <details>
+                    <summary>
+                      Respuesta de {s.respondent.displayName} · {s.area.name} ·
+                      envío #{s.number}
+                    </summary>
+                    <SubmittedAnswer
+                      revision={s}
+                      question={data.question}
+                      projectId={data.projectId}
+                    />
+                  </details>
+                ) : (
+                  "Respuesta vinculada; detalle no disponible."
+                )}
               </li>
             );
           })}
@@ -107,12 +137,6 @@ export function DecisionRecord({
           ))}
         </ul>
       )}
-      <footer className="av-decision-author">
-        <p>
-          Validada por <strong>{v.validatedBy.displayName}</strong>
-        </p>
-        <p>Fecha: {dateText(v.validatedAt)}</p>
-      </footer>
       {historical && (
         <p className="av-history-reason">
           Volvió a revisión: {v.invalidationReason || "Sin motivo disponible."}{" "}
@@ -136,38 +160,13 @@ export function ConflictComparison({
   conflict: ReviewDetail["conflicts"][number];
 }) {
   return (
-    <div className="av-comparison">
-      {conflict.participants.map((p, index) => {
-        const s = data.submissions.find((s) => s.id === p.responseRevisionId);
-        return (
-          <section
-            className="av-posture"
-            key={p.id}
-            aria-label={`Postura ${index < 26 ? String.fromCharCode(65 + index) : index + 1}`}
-          >
-            <p className="av-kicker">
-              Postura {index < 26 ? String.fromCharCode(65 + index) : index + 1}
-            </p>
-            {s ? (
-              <>
-                <h4>{s.respondent.displayName}</h4>
-                <p className="av-secondary">{s.area.name}</p>
-                <SubmittedAnswer
-                  revision={s}
-                  question={data.question}
-                  projectId={data.projectId}
-                  comparison
-                />
-              </>
-            ) : (
-              <p>El detalle de esta respuesta no está disponible.</p>
-            )}
-          </section>
-        );
-      })}
-    </div>
+    <ContributionComparison
+      data={data}
+      revisionIds={conflict.participants.map((p) => p.responseRevisionId)}
+    />
   );
 }
+
 const attentionCopy: Partial<
   Record<State, { reason: string; action: string }>
 > = {

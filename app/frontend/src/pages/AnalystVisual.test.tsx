@@ -457,3 +457,83 @@ it("volver a Revisión conserva los filtros de procedencia sin cambiar el destin
     await screen.findByRole("link", { name: "← Revisar respuestas" }),
   ).toHaveAttribute("href", "/review?projectId=demo&status=CONFLICT");
 });
+
+it("la decisión usa la referencia real, sitúa autor antes del resultado y permite consultar la fuente", async () => {
+  const user = userEvent.setup();
+  const validation = decision.validations.find((v) => !v.invalidatedAt)!;
+  render(<DecisionRecord data={decision} validation={validation} />);
+  const article = screen.getByRole("article", { name: "Decisión vigente" });
+  expect(
+    within(article).getByText(`Referencia del registro: ${validation.id}`),
+  ).toBeVisible();
+  expect(
+    within(article)
+      .getAllByRole("heading")
+      .map((h) => h.textContent),
+  ).toEqual([
+    "Decisión vigente",
+    "Pregunta",
+    "Qué se decidió",
+    "Alcance",
+    "Excepciones",
+    "Fuentes utilizadas",
+  ]);
+  const author = within(article).getByText(validation.validatedBy.displayName);
+  expect(
+    author.compareDocumentPosition(
+      within(article).getByText(validation.decisionText),
+    ) & Node.DOCUMENT_POSITION_FOLLOWING,
+  ).toBeTruthy();
+  const source = decision.submissions.find((s) =>
+    validation.sources.some((v) => v.responseRevisionId === s.id),
+  )!;
+  const trigger = within(article).getByText(/^Respuesta de/);
+  expect(trigger.closest("details")).not.toHaveAttribute("open");
+  await user.click(trigger);
+  expect(trigger.closest("details")).toHaveAttribute("open");
+  expect(
+    within(trigger.closest("details")!).getByText(
+      new RegExp(`Envío #${source.number}`),
+    ),
+  ).toBeVisible();
+});
+
+it("la decisión vigente precede a Reabrir, que permanece secundaria y respeta canReview", async () => {
+  const api = vi
+    .spyOn(apiModule, "api")
+    .mockImplementation(
+      async (key) => (key === "projects" ? [] : decision) as never,
+    );
+  function page() {
+    return (
+      <QueryClientProvider
+        client={
+          new QueryClient({ defaultOptions: { queries: { retry: false } } })
+        }
+      >
+        <MemoryRouter>
+          <ReviewDetailPage />
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+  }
+  render(page());
+  const card = await screen.findByRole("article", { name: "Decisión vigente" });
+  const reopen = screen.getByRole("button", { name: "Reabrir pregunta" });
+  expect(
+    card.compareDocumentPosition(reopen) & Node.DOCUMENT_POSITION_FOLLOWING,
+  ).toBeTruthy();
+  expect(reopen).toHaveClass("secondary");
+  cleanup();
+  api.mockImplementation(
+    async (key) =>
+      (key === "projects" ? [] : { ...decision, canReview: false }) as never,
+  );
+  render(page());
+  expect(
+    await screen.findByRole("article", { name: "Decisión vigente" }),
+  ).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Reabrir pregunta" }),
+  ).not.toBeInTheDocument();
+});

@@ -301,3 +301,31 @@ it("volver enfoca el conjunto cuando la aportación dejó de coincidir con el fi
   );
   expect(screen.getByText("Sin aportaciones para estos filtros")).toBeVisible();
 });
+
+it("comparar y volver conserva el filtro del conjunto y devuelve foco al disparador", async () => {
+  const user = userEvent.setup();
+  render(<ContributionSet data={data(12)} />);
+  await user.type(screen.getByRole("searchbox"), "operacion");
+  await user.click(
+    screen.getByRole("button", { name: "Comparar aportaciones" }),
+  );
+  expect(
+    screen.getByRole("heading", { name: "Contrastar aportaciones" }),
+  ).toHaveFocus();
+  expect(screen.getByRole("status")).toHaveTextContent("Comparando 2 de 12");
+  await user.click(
+    screen.getByRole("button", { name: "← Volver a 12 aportaciones" }),
+  );
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "Comparar aportaciones" }),
+    ).toHaveFocus(),
+  );
+  expect(screen.getByRole("searchbox")).toHaveValue("operacion");
+  expect(
+    screen.getAllByRole("button", { name: /Abrir aportación de/ }),
+  ).toHaveLength(1);
+  expect(
+    screen.getByRole("button", { name: "Abrir aportación de Actor 10" }),
+  ).toBeVisible();
+});

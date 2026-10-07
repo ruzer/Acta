@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { ReviewDetail } from "@requirements/contracts";
 import { Button, EmptyState, Input, Select } from "../ui";
 import { answerText } from "./AnswerControl";
+import { ContributionComparison } from "./ContributionComparison";
 import { SubmittedAnswer } from "./ReviewShared";
 import "../next-contributions.css";
 
@@ -58,6 +59,12 @@ export function ContributionSet({ data }: { data: ReviewDetail }) {
   const current = data.submissions.filter((s) => s.current);
   const historical = data.submissions.filter((s) => !s.current);
   const [selectedId, setSelectedId] = useState("");
+  const [comparing, setComparing] = useState(false);
+  const comparisonHeading = useRef<HTMLHeadingElement>(null);
+  const comparisonTrigger = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (comparing) comparisonHeading.current?.focus();
+  }, [comparing]);
   const [search, setSearch] = useState("");
   const [situation, setSituation] = useState<Situation>("");
   const detailHeading = useRef<HTMLHeadingElement>(null);
@@ -119,6 +126,24 @@ export function ContributionSet({ data }: { data: ReviewDetail }) {
                 ? "Sin aportaciones enviadas. Esta pregunta no tiene participantes asignados en el contexto actual."
                 : "No hay aportaciones vigentes disponibles en esta consulta."}
         </EmptyState>
+      ) : comparing ? (
+        <div>
+          <Button
+            tone="secondary"
+            onClick={() => {
+              setComparing(false);
+              requestAnimationFrame(() =>
+                (comparisonTrigger.current ?? setHeading.current)?.focus(),
+              );
+            }}
+          >
+            ← Volver a {current.length} aportaciones
+          </Button>
+          <h3 ref={comparisonHeading} tabIndex={-1}>
+            Contrastar aportaciones
+          </h3>
+          <ContributionComparison data={data} />
+        </div>
       ) : selected ? (
         <article className="review-submission next-contribution-detail">
           {current.length > 1 && (
@@ -143,6 +168,13 @@ export function ContributionSet({ data }: { data: ReviewDetail }) {
             Abre una aportación para consultar la respuesta completa, sus
             archivos y su versión.
           </p>
+          <Button
+            tone="secondary"
+            ref={comparisonTrigger}
+            onClick={() => setComparing(true)}
+          >
+            Comparar aportaciones
+          </Button>
           {(current.length >= 10 || search || situation) && (
             <div className="next-contribution-filters">
               <Input

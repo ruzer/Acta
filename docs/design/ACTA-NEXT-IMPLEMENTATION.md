@@ -13,7 +13,7 @@ siguen siendo los de v0.4.0. Las pruebas usan datos ficticios y un stack aislado
 | ---------- | ---------------------------------------------------------- | --------------------------------------------- |
 | 1          | Cuestionario, Organizar, aportaciones y autoría contextual | Implementado y verificado de forma focalizada |
 | 2          | Atención, navegación y retorno al contexto                 | Implementado y verificado de forma focalizada |
-| 3          | Contraste y decisión documental                            | Pendiente                                     |
+| 3          | Contraste y decisión documental                            | Implementado y verificado de forma focalizada |
 | 4          | Invitaciones, invitado y ajustes del participante          | Pendiente                                     |
 
 El objetivo completo todavía no está terminado. Las capturas de un checkpoint
@@ -120,7 +120,7 @@ el buscador permite acotar actor y área sin ocultar aportaciones silenciosament
 
 ## Regresión final pendiente
 
-- Completar checkpoints 3–4 y sus recorridos visuales.
+- Completar checkpoint 4 y sus recorridos visuales.
 - Pruebas funcionales completas, PostgreSQL, navegador y CI remoto.
 - Simulación integral de administrador, analista a escala, analista de
   aportaciones/conflictos, participante e invitado móvil.
@@ -164,7 +164,7 @@ privilegiados sin un rol confirmado.
   Un error, cambio de total o conjunto incompleto muestra indisponibilidad, nunca
   un cero engañoso. La fecha se actualiza cada minuto en vistas abiertas.
 - Decisiones lista únicamente preguntas VALIDATED de la proyección existente,
-  con búsqueda, área y tema. La lectura documental se completa en checkpoint 3.
+  con búsqueda, área y tema. La lectura documental se completa en el checkpoint 3 descrito abajo.
 - El retorno conserva filtros, tema, selección, página, posición y foco según el
   destino. Los filtros/página de invitaciones están en la URL. La caché local de
   presentación se limpia al cerrar sesión o cambiar de cuenta.
@@ -203,3 +203,57 @@ privilegiados sin un rol confirmado.
 - [Cuestionario, móvil](acta-next-evidence/checkpoint-2/questionnaire-390.png).
 - [Decisiones, escritorio](acta-next-evidence/checkpoint-2/decisions-1440.png).
 - [Decisiones, móvil](acta-next-evidence/checkpoint-2/decisions-390.png).
+
+
+## Checkpoint 3
+
+El conjunto de aportaciones permite contrastar dos envíos vigentes sin crear un
+conflicto, una votación ni una decisión. Con tres o doce aportaciones se elige el
+par A/B; una misma fuente no puede ocupar las dos posturas. El contador expresa
+«Comparando 2 de N». El filtro del conjunto y el foco se conservan al volver.
+
+Un conflicto conserva exactamente sus fuentes registradas. Cuando estas son
+vigentes se informa su alcance dentro de N; si incluye fuentes históricas se
+identifica expresamente el conjunto histórico. Las fuentes no disponibles no se
+sustituyen silenciosamente. Actor/área, respuesta, contexto, evidencia y versión
+mantienen el mismo orden y peso visual en ambas posturas. El conflicto abierto
+precede al resto de aportaciones; resolverlo sigue siendo distinto de validar.
+
+La decisión muestra el identificador real del registro, estado, validador/fecha,
+pregunta contextual, resultado, alcance, excepciones y fuentes consultables.
+No crea un identificador oficial, documento nuevo ni efecto jurídico. Las fuentes
+abren el envío vinculado y conservan la descarga autorizada existente. El historial
+permanece después del resultado y «Reabrir pregunta» es secundaria. Los permisos
+de revisión y la vista de solo lectura no cambian.
+
+### Verificación del checkpoint 3
+
+- Componentes: **205/205**, incluidos ocho casos de contraste y tres pruebas
+  adicionales de retorno, fuentes y presentación de decisión/permisos.
+- Revisión E2E: **4/4**, aclaración, respuesta, cierre, decisión, reapertura,
+  conflicto, resolución y evidencia. La descarga desde una fuente de decisión
+  conserva exactamente los bytes descargados desde la postura original.
+- Galería real: **16 recorridos** a 1440/1024/768/390 con conjuntos de tres y doce,
+  conflicto y decisión. Sin violaciones axe, overflow, errores JavaScript ni
+  escrituras al backend durante el contraste. Teclado, foco, vuelta al filtro y
+  consulta desplegable de fuentes comprobados.
+- La revisión visual descubrió una colisión de cascada CSS al introducir el
+  separador A/B. Se corrigió el alcance del selector y se añadió una aserción
+  geométrica: misma altura inicial/ancho en escritorio, bloques consecutivos en
+  móvil. No se recorta ninguna respuesta para igualar alturas.
+- Lint, typecheck y build aprobados. La advertencia existente de tamaño del bundle
+  permanece visible. No se añadieron retries ni skips. La primera ejecución de
+  una prueba nueva corrigió su expectativa al rótulo real «Fuentes utilizadas»;
+  un ensayo de galería corrigió el nombre del buscador, sin cambios al producto.
+
+### Capturas del checkpoint 3
+
+Procedencia: aplicación real con datos exclusivamente ficticios. Las capturas
+centradas en el contraste muestran las posturas después de desplazar la página.
+
+- [Doce aportaciones, escritorio](acta-next-evidence/checkpoint-3/compare-12-1440.png).
+- [Doce aportaciones, móvil](acta-next-evidence/checkpoint-3/compare-12-390.png).
+- [Conflicto, escritorio](acta-next-evidence/checkpoint-3/conflict-1440.png).
+- [Conflicto, móvil](acta-next-evidence/checkpoint-3/conflict-390.png).
+- [Decisión, escritorio](acta-next-evidence/checkpoint-3/decision-1440.png).
+- [Decisión, móvil](acta-next-evidence/checkpoint-3/decision-390.png).
