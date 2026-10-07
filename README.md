@@ -7,7 +7,7 @@ Acta es una plataforma open source para convertir preguntas estructuradas, conoc
 ![Editor Escribir: temas y preguntas de un proyecto ficticio](docs/assets/01-editor-write.png)
 *Prepara un cuestionario por temas, con preguntas y seguimientos que se pueden leer de un vistazo.*
 
-Autor y titular: **Cristóbal Ruz Escobar**. Copyright (c) Cristóbal Ruz Escobar. Licencia: [AGPL-3.0-only](LICENSE). La publicación inicial sigue su revisión remota de seguridad.
+Autor y titular: **Cristóbal Ruz Escobar**. Copyright (c) Cristóbal Ruz Escobar. Licencia: [AGPL-3.0-only](LICENSE).
 
 ## Qué problema resuelve
 
@@ -128,7 +128,7 @@ También puedes ver [Organizar](docs/assets/02-editor-organize.png), [Responder]
 
 Acta está diseñado para instalarse en infraestructura propia y adaptarse mediante forks. Las organizaciones pueden mantener personalizaciones y sincronizarse con el upstream conforme a AGPL-3.0-only. Las mejoras genéricas son bienvenidas de regreso mediante Pull Requests: contribuir así ayuda a otras instalaciones y reduce divergencia; no es una obligación de enviar PR atribuida a la licencia.
 
-El upstream oficial es [github.com/ruzer/Acta](https://github.com/ruzer/Acta). El código está disponible públicamente. La release [v0.2.0](https://github.com/ruzer/Acta/releases/tag/v0.2.0) está publicada. La preparación de **v0.3.0** se describe en el [changelog](CHANGELOG.md) y su [informe de preparación](docs/releases/v0.3.0.md); aún no es una release publicada.
+El upstream oficial es [github.com/ruzer/Acta](https://github.com/ruzer/Acta). El código está disponible públicamente. Este checkout corresponde a **v0.4.0**, que incorpora invitaciones externas mediante enlaces privados. Consulta el [changelog](CHANGELOG.md) y la [release oficial v0.4.0](https://github.com/ruzer/Acta/releases/tag/v0.4.0) para verificar su publicación y commit antes de actualizar.
 
 [Gobernanza](GOVERNANCE.md) · [Forks y sincronización](docs/UPSTREAM-FORKS.md) · [Roadmap](ROADMAP.md) · [Soporte comunitario](SUPPORT.md).
 
