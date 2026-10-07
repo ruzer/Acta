@@ -1,13 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
+  dashboardView,
   priorities,
   referenceTypes,
   type QuestionnaireView,
   type QuestionView,
 } from "@requirements/contracts";
-import { api } from "../api";
+import { api, exchangeRequest } from "../api";
 import {
   Alert,
   Button,
@@ -22,6 +23,7 @@ import {
 import { ActionForm } from "./Administration";
 import { QuestionForm } from "./QuestionForm";
 import { EditorWorkspace } from "./editor/EditorWorkspace";
+import type { OrganizeContext } from "./editor/questionnaire-presentation";
 import "../editor.css";
 const refLabels = {
   QUESTION: "Pregunta",
@@ -36,6 +38,29 @@ const refLabels = {
 export function Editor() {
   const { projectId = "" } = useParams();
   const qc = useQueryClient();
+  const navigate = useNavigate();
+  const contextKey = ["questionnaire-context", projectId];
+  const savedContext = qc.getQueryData<{
+    mode?: number;
+    organize?: OrganizeContext;
+  }>(contextKey);
+  const rememberOrganize = useCallback(
+    (organize: OrganizeContext) => {
+      qc.setQueryData(
+        ["questionnaire-context", projectId],
+        (previous: { mode?: number } | undefined) => ({
+          ...previous,
+          organize,
+        }),
+      );
+    },
+    [qc, projectId],
+  );
+  const contributions = useQuery({
+    queryKey: ["dashboard", projectId],
+    queryFn: () => exchangeRequest(projectId, "dashboard", dashboardView),
+    staleTime: 0,
+  });
   const structureTrigger = useRef<HTMLElement | null>(null);
   const actionQuestionId = useRef<string | null>(null);
   const pendingFocusReturn = useRef(false);
@@ -120,6 +145,7 @@ export function Editor() {
     queryFn: () => api("projects"),
   });
   const refresh = () => {
+    void qc.invalidateQueries({ queryKey: ["dashboard", projectId] });
     void qc.invalidateQueries({ queryKey: ["questionnaire", projectId] });
     void qc.invalidateQueries({ queryKey: ["projects"] });
   };
@@ -308,6 +334,27 @@ export function Editor() {
         )}
       </div>
       <EditorWorkspace
+        initialMode={savedContext?.mode ?? 1}
+        onModeChange={(mode) =>
+          qc.setQueryData(
+            contextKey,
+            (previous: { organize?: OrganizeContext } | undefined) => ({
+              ...previous,
+              mode,
+            }),
+          )
+        }
+        organizeContext={savedContext?.organize}
+        onOrganizeContextChange={rememberOrganize}
+        contributionQuestions={contributions.data?.questions}
+        contributionsLoading={contributions.isPending}
+        contributionsError={contributions.isError}
+        onRetryContributions={() => void contributions.refetch()}
+        onOpenContributions={(id) =>
+          navigate(`/projects/${projectId}/review/${id}`, {
+            state: { questionnaireReturn: true },
+          })
+        }
         onRefresh={async () => {
           const result = await q.refetch();
           if (result.error) throw result.error;

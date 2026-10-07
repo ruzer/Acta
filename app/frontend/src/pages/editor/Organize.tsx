@@ -1,5 +1,12 @@
 import { CreateInvitation } from "../Invitations";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  Fragment,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   type QuestionView,
   type BulkOperation,
@@ -15,6 +22,12 @@ import {
 } from "./EditorWorkspace";
 import { BulkDialog } from "./BulkDialog";
 import { questionGroup } from "./bulk-selection";
+import { AnalystStatus } from "../AnalystVisual";
+import {
+  questionAncestors,
+  unfoldedQuestions,
+} from "./questionnaire-presentation";
+import "../../next-questionnaire.css";
 function InspectorFrame({
   children,
   onClose,
@@ -29,6 +42,7 @@ function InspectorFrame({
   );
   const ref = useRef<HTMLDialogElement>(null),
     heading = useRef<HTMLHeadingElement>(null);
+  const openingTrigger = useRef<HTMLElement | null>(null);
   useEffect(() => {
     const m = window.matchMedia?.("(min-width:1280px)");
     if (!m) return;
@@ -37,7 +51,9 @@ function InspectorFrame({
     return () => m.removeEventListener("change", update);
   }, []);
   useEffect(() => {
-    const trigger = document.activeElement as HTMLElement;
+    // Keep the original opener across Strict Mode effect replay and resize.
+    openingTrigger.current ??= document.activeElement as HTMLElement;
+    const trigger = openingTrigger.current;
     const dialog = ref.current;
     if (!wide) dialog?.showModal();
     else heading.current?.focus();
@@ -224,19 +240,76 @@ export function QuestionInspector({
 }
 export function Organize(props: EditorProps & { initialSelected?: string }) {
   const { data } = props;
-  const [topic, setTopic] = useState("");
-  const [search, setSearch] = useState("");
-  const [publication, setPublication] = useState("");
-  const [area, setArea] = useState("");
+  const [topicsExpanded, setTopicsExpanded] = useState(
+    () =>
+      typeof matchMedia !== "function" ||
+      matchMedia("(min-width:801px)").matches,
+  );
+  useEffect(() => {
+    const query = window.matchMedia?.("(min-width:801px)");
+    if (!query) return;
+    const update = () => setTopicsExpanded(query.matches);
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+  const [topic, setTopic] = useState(props.organizeContext?.topic ?? "");
+  const [search, setSearch] = useState(props.organizeContext?.search ?? "");
+  const [publication, setPublication] = useState(
+    props.organizeContext?.publication ?? "",
+  );
+  const [area, setArea] = useState(props.organizeContext?.area ?? "");
+  const [approach, setApproach] = useState<"prepare" | "analyze">(
+    props.organizeContext?.approach ?? "prepare",
+  );
+  const [collapsed, setCollapsed] = useState(
+    new Set(props.organizeContext?.collapsed ?? []),
+  );
+  const byId = useMemo(
+    () => new Map(data.questions.map((q) => [q.id, q])),
+    [data.questions],
+  );
+  const contributionById = useMemo(
+    () => new Map(props.contributionQuestions?.map((q) => [q.id, q])),
+    [props.contributionQuestions],
+  );
   const [inviting, setInviting] = useState(false);
-  const [bulkIds, setBulkIds] = useState<Set<string>>(new Set());
+  const [bulkIds, setBulkIds] = useState<Set<string>>(
+    new Set(
+      props.organizeContext?.selectedIds.filter(
+        (id) => byId.get(id)?.publication !== "ARCHIVED" && byId.has(id),
+      ) ?? [],
+    ),
+  );
   const [bulkOperation, setBulkOperation] = useState<BulkOperation | null>(
     null,
   );
   const [selectionNotice, setSelectionNotice] = useState("");
   const bulkTrigger = useRef<HTMLElement | null>(null);
   const selectionStatus = useRef<HTMLParagraphElement>(null);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(props.organizeContext?.page ?? 0);
+  const rememberContext = props.onOrganizeContextChange;
+  useEffect(() => {
+    rememberContext?.({
+      topic,
+      search,
+      publication,
+      area,
+      approach,
+      page,
+      collapsed: [...collapsed],
+      selectedIds: [...bulkIds],
+    });
+  }, [
+    rememberContext,
+    topic,
+    search,
+    publication,
+    area,
+    approach,
+    page,
+    collapsed,
+    bulkIds,
+  ]);
   const [selected, setSelected] = useState<string | null>(
     props.initialSelected ?? null,
   );
@@ -256,7 +329,13 @@ export function Organize(props: EditorProps & { initialSelected?: string }) {
           (data.sections.find((s) => s.id === b.sectionId)?.order ?? 0) ||
         a.order - b.order,
     );
-  const pages = Math.ceil(questions.length / 40);
+  const unfolded = unfoldedQuestions(
+    questions,
+    byId,
+    collapsed,
+    !!search.trim(),
+  );
+  const pages = Math.ceil(unfolded.length / 40);
   const currentPage = Math.min(page, Math.max(0, pages - 1));
   const selection = data.questions.find((q) => q.id === selected);
   const change = () => {
@@ -270,7 +349,8 @@ export function Organize(props: EditorProps & { initialSelected?: string }) {
   };
   const eligible = (rows: QuestionView[]) =>
     rows.filter((q) => q.publication !== "ARCHIVED");
-  const pageRows = questions.slice(currentPage * 40, (currentPage + 1) * 40);
+  const pageRows = unfolded.slice(currentPage * 40, (currentPage + 1) * 40);
+  const pageIds = new Set(pageRows.map((q) => q.id));
   const selectedQuestions = data.questions.filter((q) => bulkIds.has(q.id));
   function addSelection(rows: QuestionView[]) {
     setBulkIds(
@@ -290,9 +370,16 @@ export function Organize(props: EditorProps & { initialSelected?: string }) {
     setBulkOperation(operation);
   }
   return (
-    <div className={"qe-organize" + (selection ? " qe-has-inspector" : "")}>
+    <div
+      className={
+        "qe-organize an-questionnaire" + (selection ? " qe-has-inspector" : "")
+      }
+    >
       <nav className="qe-outline" aria-label="Temas del cuestionario">
-        <details open>
+        <details
+          open={topicsExpanded}
+          onToggle={(event) => setTopicsExpanded(event.currentTarget.open)}
+        >
           <summary>Temas</summary>
           <button
             aria-current={!topic ? "true" : undefined}
@@ -327,6 +414,37 @@ export function Organize(props: EditorProps & { initialSelected?: string }) {
         </Button>
       </nav>
       <section className="qe-compact" aria-label="Preguntas del cuestionario">
+        <div className="an-approach">
+          <div role="group" aria-label="Enfoque del cuestionario">
+            <Button
+              tone="secondary"
+              aria-pressed={approach === "prepare"}
+              onClick={() => setApproach("prepare")}
+            >
+              Preparar
+            </Button>
+            <Button
+              tone="secondary"
+              aria-pressed={approach === "analyze"}
+              onClick={() => setApproach("analyze")}
+            >
+              Analizar
+            </Button>
+          </div>
+          <Button
+            disabled={
+              !data.sections.length || !data.areas.some((a) => a.active)
+            }
+            onClick={() => props.onEdit(undefined, topic || undefined)}
+          >
+            Nueva pregunta
+          </Button>
+        </div>
+        <p className="hint an-approach-hint">
+          {approach === "prepare"
+            ? "Contenido, áreas, participantes y publicación."
+            : "Aportaciones enviadas, aclaraciones, conflictos y decisiones. El número de aportaciones no indica consenso."}
+        </p>
         <div className="qe-filters">
           <Input
             label="Buscar preguntas"
@@ -371,10 +489,28 @@ export function Organize(props: EditorProps & { initialSelected?: string }) {
         </div>
         <p role="status" className="hint">
           {questions.length} preguntas encontradas
-          {questions.length > 40
+          {unfolded.length > 40
             ? ` · Página ${currentPage + 1} de ${pages}`
             : ""}
         </p>
+        {collapsed.size > 0 && (
+          <p className="hint">
+            {search.trim()
+              ? "La búsqueda muestra también seguimientos de grupos plegados."
+              : `${questions.length - unfolded.length} preguntas en grupos plegados.`}{" "}
+            <Button tone="secondary" onClick={() => setCollapsed(new Set())}>
+              Expandir todos los grupos
+            </Button>
+          </p>
+        )}
+        {props.contributionsError && (
+          <p role="alert">
+            No se pudieron cargar las aportaciones.{" "}
+            <Button tone="secondary" onClick={props.onRetryContributions}>
+              Reintentar aportaciones
+            </Button>
+          </p>
+        )}
         <div
           className="qe-selection-controls"
           role="group"
@@ -389,6 +525,7 @@ export function Organize(props: EditorProps & { initialSelected?: string }) {
           </Button>
           <Button
             tone="secondary"
+            aria-describedby="an-selection-scope"
             disabled={!eligible(questions).length}
             onClick={() => addSelection(questions)}
           >
@@ -397,6 +534,7 @@ export function Organize(props: EditorProps & { initialSelected?: string }) {
           {topic && (
             <Button
               tone="secondary"
+              aria-describedby="an-selection-scope"
               onClick={() => {
                 const rows = eligible(
                   data.questions.filter((q) => q.sectionId === topic),
@@ -416,106 +554,257 @@ export function Organize(props: EditorProps & { initialSelected?: string }) {
             </Button>
           )}
         </div>
-        <p
-          ref={selectionStatus}
-          tabIndex={-1}
-          role="status"
-          className="qe-selection-status"
-        >
-          {bulkIds.size === 1
-            ? "1 pregunta seleccionada"
-            : `${bulkIds.size} preguntas seleccionadas`}
+        <p className="hint an-scope-note" id="an-selection-scope">
+          Todos los resultados incluye otras páginas y grupos plegados. Tema
+          completo incluye además las preguntas fuera de los filtros.
         </p>
-        {selectionNotice && (
-          <p role="status" className="hint">
-            {selectionNotice}
-          </p>
-        )}
-        {bulkIds.size > 0 && (
-          <div
-            className="qe-bulk-bar"
-            role="group"
-            aria-label="Acciones para las preguntas seleccionadas"
+        <div
+          className={
+            bulkIds.size ? "an-selection an-selection-active" : "an-selection"
+          }
+        >
+          <p
+            ref={selectionStatus}
+            tabIndex={-1}
+            role="status"
+            className="qe-selection-status"
           >
-            <Button tone="secondary" onClick={() => openBulk("ASSIGN_AREA")}>
-              Asignar área
-            </Button>
-            <Button
-              tone="secondary"
-              onClick={() => openBulk("ADD_PARTICIPANTS")}
+            {bulkIds.size === 1
+              ? "1 pregunta seleccionada"
+              : `${bulkIds.size} preguntas seleccionadas`}
+          </p>
+          {bulkIds.size > 0 && (
+            <p className="hint an-selection-scope">
+              {selectedQuestions.filter((q) => pageIds.has(q.id)).length} en
+              esta página ·{" "}
+              {selectedQuestions.filter((q) => !pageIds.has(q.id)).length} fuera
+              de esta página
+            </p>
+          )}
+          {selectionNotice && (
+            <p role="status" className="hint">
+              {selectionNotice}
+            </p>
+          )}
+          {bulkIds.size > 0 && (
+            <div
+              className="qe-bulk-bar"
+              role="group"
+              aria-label="Acciones para las preguntas seleccionadas"
             >
-              Agregar participantes
-            </Button>
-            <Button
-              tone="secondary"
-              onClick={() => {
-                bulkTrigger.current = document.activeElement as HTMLElement;
-                setInviting(true);
-              }}
-            >
-              Invitar mediante enlace
-            </Button>
-            <Button onClick={() => openBulk("PUBLISH")}>
-              Publicar seleccionadas
-            </Button>
-            <Button
-              tone="secondary"
-              onClick={() => {
-                setBulkIds(new Set());
-                setSelectionNotice("");
-                selectionStatus.current?.focus();
-              }}
-            >
-              Limpiar selección
-            </Button>
-          </div>
-        )}
-        {pageRows.map((q) => (
-          <div className="qe-selectable-row" key={q.id}>
-            <label className="qe-row-checkbox">
-              <input
-                type="checkbox"
-                aria-label={`Seleccionar pregunta: ${q.question}`}
-                checked={bulkIds.has(q.id)}
-                disabled={q.publication === "ARCHIVED"}
-                onChange={(e) => {
-                  setBulkIds((previous) => {
-                    const next = new Set(previous);
-                    if (e.target.checked) next.add(q.id);
-                    else next.delete(q.id);
-                    return next;
-                  });
-                  setSelectionNotice("");
+              <Button tone="secondary" onClick={() => openBulk("ASSIGN_AREA")}>
+                Asignar área
+              </Button>
+              <Button
+                tone="secondary"
+                onClick={() => openBulk("ADD_PARTICIPANTS")}
+              >
+                Agregar participantes
+              </Button>
+              <Button
+                tone="secondary"
+                onClick={() => {
+                  bulkTrigger.current = document.activeElement as HTMLElement;
+                  setInviting(true);
                 }}
-              />
-            </label>
-            <button
-              className="qe-compact-row"
-              data-question-id={q.id}
-              key={q.id}
-              aria-pressed={selected === q.id}
-              onClick={() => setSelected(q.id)}
-            >
-              <span>
-                <strong>{q.question}</strong>
-                {q.groupParentId && (
-                  <small>
-                    ↳ Seguimiento de{" "}
-                    {
-                      data.questions.find((p) => p.id === q.groupParentId)
-                        ?.title
-                    }
-                  </small>
+              >
+                Invitar mediante enlace
+              </Button>
+              <Button onClick={() => openBulk("PUBLISH")}>
+                Publicar seleccionadas
+              </Button>
+              <Button
+                tone="secondary"
+                onClick={() => {
+                  setBulkIds(new Set());
+                  setSelectionNotice("");
+                  selectionStatus.current?.focus();
+                }}
+              >
+                Limpiar selección
+              </Button>
+            </div>
+          )}
+        </div>
+        <div className="an-question-list">
+          {pageRows.map((q, index) => {
+            const section = data.sections.find((s) => s.id === q.sectionId);
+            const parents = questionAncestors(q, byId);
+            const children = data.questions.some(
+              (child) => child.groupParentId === q.id,
+            );
+            const contribution = contributionById.get(q.id);
+            const count =
+              q.publication === "DRAFT"
+                ? 0
+                : contribution?.submittedRespondents;
+            const groupCollapsed = collapsed.has(q.id);
+            const assigned = q.assignments.filter((a) => a.active).length;
+            return (
+              <Fragment key={q.id}>
+                {(index === 0 ||
+                  pageRows[index - 1]?.sectionId !== q.sectionId) && (
+                  <header className="an-topic-band">
+                    <h3>{section?.title}</h3>
+                    <span>
+                      {
+                        questions.filter((row) => row.sectionId === q.sectionId)
+                          .length
+                      }{" "}
+                      preguntas
+                    </span>
+                  </header>
                 )}
-                <small>
-                  {data.sections.find((s) => s.id === q.sectionId)?.title}
-                </small>
-              </span>
-              <span>{typeLabels[q.type]}</span>
-              <Publication question={q} />
-            </button>
-          </div>
-        ))}
+                {parents
+                  .filter((p) => !pageIds.has(p.id))
+                  .map((parent) => (
+                    <p className="an-parent-context" key={parent.id}>
+                      Seguimiento de{" "}
+                      <button onClick={() => setSelected(parent.id)}>
+                        {parent.question}
+                      </button>
+                      <span>Contexto · fuera de esta página o filtro</span>
+                    </p>
+                  ))}
+                <div
+                  className={
+                    "qe-selectable-row an-question-row" +
+                    (parents.length ? " an-followup" : "")
+                  }
+                  data-approach={approach}
+                >
+                  <label className="qe-row-checkbox">
+                    <input
+                      type="checkbox"
+                      aria-label={`Seleccionar pregunta: ${q.question}`}
+                      checked={bulkIds.has(q.id)}
+                      disabled={q.publication === "ARCHIVED"}
+                      onChange={(e) => {
+                        setBulkIds((previous) => {
+                          const next = new Set(previous);
+                          if (e.target.checked) next.add(q.id);
+                          else next.delete(q.id);
+                          return next;
+                        });
+                        setSelectionNotice("");
+                      }}
+                    />
+                  </label>
+                  <div className="an-question-content">
+                    <div className="an-question-heading">
+                      {children && (
+                        <button
+                          className="an-collapse"
+                          aria-expanded={!groupCollapsed || !!search.trim()}
+                          aria-label={`${groupCollapsed && !search.trim() ? "Expandir" : "Contraer"} seguimientos de ${q.title}`}
+                          disabled={!!search.trim()}
+                          onClick={() => {
+                            setCollapsed((previous) => {
+                              const next = new Set(previous);
+                              if (next.has(q.id)) next.delete(q.id);
+                              else next.add(q.id);
+                              return next;
+                            });
+                          }}
+                        >
+                          {groupCollapsed && !search.trim() ? "+" : "−"}
+                        </button>
+                      )}
+                      <button
+                        className="qe-compact-row"
+                        data-question-id={q.id}
+                        aria-pressed={selected === q.id}
+                        onClick={() => setSelected(q.id)}
+                      >
+                        <strong>{q.question}</strong>
+                      </button>
+                    </div>
+                    <div className="an-question-meta">
+                      <span>{q.externalId}</span>
+                      <span>{typeLabels[q.type]}</span>
+                      {parents.length > 0 && (
+                        <span>
+                          ↳ Seguimiento de {parents[parents.length - 1]?.title}
+                        </span>
+                      )}
+                      {approach === "prepare" && (
+                        <span>{assigned} participantes asignados</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="an-row-area">
+                    <span className="an-cell-label">Área</span>
+                    {data.areas.find((a) => a.id === q.responsibleAreaId)
+                      ?.name ?? "Área no disponible"}
+                  </div>
+                  <div className="an-row-contributions">
+                    <span className="an-cell-label">Aportaciones</span>
+                    {count === undefined ? (
+                      <span className="hint">
+                        {props.contributionsLoading
+                          ? "Cargando…"
+                          : "No disponible"}
+                      </span>
+                    ) : count === 0 ? (
+                      <span className="hint">Sin aportaciones enviadas</span>
+                    ) : (
+                      <button
+                        className="an-text-action"
+                        disabled={!props.onOpenContributions}
+                        onClick={() => props.onOpenContributions?.(q.id)}
+                        aria-label={`${count === 1 ? "1 aportación" : `${count} aportaciones`} de ${q.title}`}
+                      >
+                        {count === 1 ? "1 aportación" : `${count} aportaciones`}{" "}
+                        <span aria-hidden="true">→</span>
+                      </button>
+                    )}
+                  </div>
+                  <div className="an-row-state">
+                    <span className="an-cell-label">Estado</span>
+                    {q.publication === "PUBLISHED" ? (
+                      <>
+                        <AnalystStatus
+                          status={contribution?.status ?? q.status}
+                        />
+                        {approach === "prepare" && <Publication question={q} />}
+                      </>
+                    ) : (
+                      <Publication question={q} />
+                    )}
+                  </div>
+                  <div className="an-row-action">
+                    {q.publication === "DRAFT" ? (
+                      <Button
+                        tone="secondary"
+                        aria-label={`Editar borrador: ${q.title}`}
+                        onClick={() => props.onEdit(q, q.sectionId)}
+                      >
+                        Editar
+                      </Button>
+                    ) : q.publication === "PUBLISHED" &&
+                      props.onOpenContributions ? (
+                      <Button
+                        tone="secondary"
+                        aria-label={`Revisar respuestas de ${q.title}`}
+                        onClick={() => props.onOpenContributions?.(q.id)}
+                      >
+                        Revisar respuestas
+                      </Button>
+                    ) : (
+                      <Button
+                        tone="secondary"
+                        aria-label={`Ver detalle de ${q.title}`}
+                        onClick={() => setSelected(q.id)}
+                      >
+                        Ver detalle
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </Fragment>
+            );
+          })}
+        </div>
         {!questions.length && (
           <EmptyState title="No encontramos preguntas con estos filtros.">
             Cambia el tema o elimina los filtros.

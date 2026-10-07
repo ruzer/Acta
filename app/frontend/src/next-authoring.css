@@ -1,0 +1,129 @@
+/* The real question form, scoped to its dialog. */
+.next-authoring.av-question-dialog .av-composer-head {
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+}
+.next-authoring .next-authoring-prompt label {
+  font-size: 1rem;
+}
+.next-authoring .next-authoring-prompt textarea {
+  min-height: 7rem;
+  font-size: 1.125rem;
+  line-height: 1.55;
+}
+.next-authoring .av-help {
+  margin-bottom: 0.75rem;
+}
+.next-authoring .av-help > summary {
+  min-height: 44px;
+  padding-block: 0.5rem;
+}
+.next-authoring .next-authoring-context {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 1rem;
+}
+.next-authoring .next-authoring-context .field {
+  margin-bottom: 0;
+}
+.next-authoring.av-question-dialog .av-type-picker {
+  margin: 0.75rem 0 0;
+}
+.next-authoring.av-question-dialog .av-type-options {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.next-authoring.av-question-dialog .av-type-option {
+  min-height: 44px;
+  padding: 0.5rem 0.65rem;
+  gap: 0.5rem;
+  font-size: 0.9375rem;
+}
+.next-authoring .next-authoring-type-help {
+  margin-top: 0.5rem;
+}
+.next-authoring.av-question-dialog .next-authoring-response-config {
+  border-inline-start: 3px solid var(--av-line);
+  padding-inline-start: 1rem;
+}
+.next-authoring .next-authoring-response-config > .field-error {
+  margin-block: 0.5rem;
+}
+.next-authoring.av-question-dialog .next-authoring-identification {
+  border-top: 1px solid var(--av-line);
+  padding-top: 0.75rem;
+}
+.next-authoring .next-authoring-identification > legend {
+  padding-inline-start: 0;
+  font-size: 0.9375rem;
+}
+.next-authoring .next-authoring-identification > .hint {
+  margin-bottom: 0.75rem;
+}
+.next-authoring .next-authoring-identification .field {
+  margin-bottom: 0;
+}
+.next-authoring.av-scope .av-advanced {
+  background: transparent;
+  padding: 0.5rem 0.75rem;
+  margin: 0 0 1rem;
+}
+.next-authoring .next-authoring-summary {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--av-muted);
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.next-authoring .av-advanced-content > .hint {
+  margin-bottom: 0.75rem;
+}
+.next-authoring .av-advanced-content > .panel {
+  border: 0;
+  border-top: 1px solid var(--av-line);
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0.5rem 0;
+  margin: 0;
+}
+.next-authoring .av-advanced-content > .panel > summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding-block: 0.5rem;
+  font-weight: 600;
+}
+.next-authoring .av-advanced-content > .panel[open] > summary {
+  margin-bottom: 0.75rem;
+}
+.next-authoring :is(input, select, textarea, fieldset, summary) {
+  scroll-margin-block: 1rem 7rem;
+}
+.next-authoring [data-field][tabindex="-1"]:focus-visible {
+  outline: 3px solid var(--focus, #805508);
+  outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .next-authoring .next-authoring-context {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.25rem;
+  }
+  .next-authoring.av-question-dialog .av-type-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .next-authoring .option-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.25rem;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px solid var(--av-line);
+  }
+  .next-authoring .option-row .field,
+  .next-authoring .option-row button {
+    margin-bottom: 0.5rem;
+  }
+  .next-authoring .option-row button {
+    justify-self: start;
+  }
+}

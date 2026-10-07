@@ -132,6 +132,7 @@ test("editor: Escribir, alta de tema y pregunta contextual sin orden manual", as
 }) => {
   await login(page, "admin");
   await page.goto(`/projects/${projectId}/editor`);
+  await page.getByRole("tab", { name: "Escribir", exact: true }).click();
   await page
     .getByRole("button", { name: "+ Agregar tema", exact: true })
     .click();
@@ -354,6 +355,7 @@ test("editor: revisión vacía sin incidencias y error avanzado conserva foco y 
   await shot(page, "revisar-sin-problemas");
   await axe(page);
   await page.goto(`/projects/${projectId}/editor`);
+  await page.getByRole("tab", { name: "Escribir", exact: true }).click();
   await page
     .getByRole("button", { name: "+ Agregar pregunta", exact: true })
     .first()
@@ -400,6 +402,7 @@ test("editor: editar tema, cancelar, conflicto real conserva contenido y teclado
   await login(page, "admin");
   await page.setViewportSize({ width: 390, height: 1000 });
   await page.goto(`/projects/${largeId}/editor`);
+  await page.getByRole("tab", { name: "Escribir", exact: true }).click();
   const trigger = page.getByLabel("Acciones del tema Tema ficticio 1", {
     exact: true,
   });
@@ -451,6 +454,7 @@ test("editor: reorder temas/preguntas y traslado de 300 preguntas usa una petici
 }) => {
   await login(page, "admin");
   await page.goto(`/projects/${largeId}/editor`);
+  await page.getByRole("tab", { name: "Escribir", exact: true }).click();
   let snapshot = await call(page, `/projects/${largeId}/questionnaire`);
   const topic = snapshot.sections[0],
     second = snapshot.sections[1];

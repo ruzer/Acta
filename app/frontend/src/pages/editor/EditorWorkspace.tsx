@@ -1,9 +1,12 @@
-import { useRef, useState, type KeyboardEvent } from "react";
+import { useCallback, useRef, useState, type KeyboardEvent } from "react";
 import {
   type QuestionnaireView,
   type QuestionView,
   typeLabels,
+  type dashboardView,
 } from "@requirements/contracts";
+import type { z } from "zod";
+import type { OrganizeContext } from "./questionnaire-presentation";
 import { Button, EmptyState } from "../../ui";
 import { Preview } from "./Preview";
 import { ReadinessPanel } from "./ReadinessPanel";
@@ -14,6 +17,15 @@ export type EditorAction =
 export type EditorProps = {
   data: QuestionnaireView;
   projectId: string;
+  contributionQuestions?: z.infer<typeof dashboardView>["questions"];
+  contributionsLoading?: boolean;
+  contributionsError?: boolean;
+  onRetryContributions?: () => void;
+  onOpenContributions?: (questionId: string) => void;
+  organizeContext?: OrganizeContext;
+  onOrganizeContextChange?: (context: OrganizeContext) => void;
+  initialMode?: number;
+  onModeChange?: (mode: number) => void;
   onCreateTopic: () => void;
   onBulkComplete?: (message: string) => void;
   onRefresh?: () => Promise<QuestionnaireView>;
@@ -249,7 +261,20 @@ export function EditorModeSwitcher({
   );
 }
 export function EditorWorkspace(props: EditorProps) {
-  const [mode, setMode] = useState(0);
+  const organizeContext = useRef(props.organizeContext);
+  const onRemember = props.onOrganizeContextChange;
+  const rememberOrganize = useCallback(
+    (context: OrganizeContext) => {
+      organizeContext.current = context;
+      onRemember?.(context);
+    },
+    [onRemember],
+  );
+  const [mode, updateMode] = useState(props.initialMode ?? 0);
+  const setMode = (value: number) => {
+    updateMode(value);
+    props.onModeChange?.(value);
+  };
   const [preview, setPreview] = useState(false);
   const [inspectId, setInspectId] = useState<string>();
   const { data, onEdit, onCreateTopic } = props;
@@ -280,7 +305,12 @@ export function EditorWorkspace(props: EditorProps) {
           tabIndex={0}
         >
           {mode === i && i === 1 && (
-            <Organize {...props} initialSelected={inspectId} />
+            <Organize
+              {...props}
+              initialSelected={inspectId}
+              organizeContext={organizeContext.current}
+              onOrganizeContextChange={rememberOrganize}
+            />
           )}
           {mode === i && i === 2 && (
             <ReadinessPanel

@@ -7,24 +7,21 @@ import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams, useLocation } from "react-router-dom";
 import { api } from "../api";
-import {
-  Alert,
-  Button,
-  EmptyState,
-  ErrorState,
-  LoadingState,
-  Select,
-} from "../ui";
+import { ContributionSet } from "./ContributionSet";
+import { Alert, Button, ErrorState, LoadingState, Select } from "../ui";
 import {
   ReviewActionDialog,
   actionLabels,
   type ReviewAction,
 } from "./ReviewActions";
-import { dateText, SubmittedAnswer, ThreadMessages } from "./ReviewShared";
+import { dateText, ThreadMessages } from "./ReviewShared";
 export function ReviewDetail() {
   const location = useLocation();
   const savedSearch = (location.state as { reviewSearch?: unknown } | null)
     ?.reviewSearch;
+  const questionnaireReturn =
+    (location.state as { questionnaireReturn?: unknown } | null)
+      ?.questionnaireReturn === true;
   const { projectId = "", id = "" } = useParams();
   const reviewSearch =
     typeof savedSearch === "string"
@@ -59,7 +56,6 @@ export function ReviewDetail() {
     );
   const d = q.data,
     current = d.submissions.filter((s) => s.current),
-    historical = d.submissions.filter((s) => !s.current),
     openConflict = d.conflicts.find((c) => c.status === "OPEN"),
     openThread = d.threads.find((t) => t.status !== "CLOSED");
   const primary: ReviewAction =
@@ -78,14 +74,26 @@ export function ReviewDetail() {
     await client.invalidateQueries({ queryKey: ["review"] });
     await client.invalidateQueries({ queryKey: ["review-inbox"] });
     await client.invalidateQueries({ queryKey: ["my-work"] });
+    await client.invalidateQueries({ queryKey: ["dashboard", projectId] });
+    await client.invalidateQueries({ queryKey: ["questionnaire", projectId] });
   }
   return (
     <div className="review-page av-scope">
       <Link
         className="back"
-        to={d.canReview ? `/review?${reviewSearch}` : `/projects/${projectId}`}
+        to={
+          questionnaireReturn
+            ? `/projects/${projectId}/editor`
+            : d.canReview
+              ? `/review?${reviewSearch}`
+              : `/projects/${projectId}`
+        }
       >
-        {d.canReview ? "← Revisión" : "← Proyecto"}
+        {questionnaireReturn
+          ? "← Cuestionario"
+          : d.canReview
+            ? "← Revisión"
+            : "← Proyecto"}
       </Link>
       <p className="eyebrow">
         {d.projectName} · {d.question.sectionTitle}
@@ -169,44 +177,7 @@ export function ReviewDetail() {
           )}
         </section>
       )}
-      <section aria-labelledby="received">
-        <h2 id="received">Respuestas recibidas</h2>
-        {current.length === 0 ? (
-          <EmptyState title="Sin respuestas vigentes">
-            Las aportaciones aparecerán cuando los participantes las envíen.
-          </EmptyState>
-        ) : (
-          current.map((s) => (
-            <article className="review-submission" key={s.id}>
-              <h3>{s.respondent.displayName}</h3>
-              <p>{s.area.name}</p>
-              <SubmittedAnswer
-                revision={s}
-                question={d.question}
-                projectId={projectId}
-              />
-            </article>
-          ))
-        )}
-        {historical.length > 0 && (
-          <details>
-            <summary>Envíos históricos ({historical.length})</summary>
-            {historical.map((s) => (
-              <article className="review-submission" key={s.id}>
-                <h3>
-                  {s.respondent.displayName} · envío #{s.number}
-                </h3>
-                <p>{s.area.name}</p>
-                <SubmittedAnswer
-                  revision={s}
-                  question={d.question}
-                  projectId={projectId}
-                />
-              </article>
-            ))}
-          </details>
-        )}
-      </section>
+      <ContributionSet key={d.question.id} data={d} />
       {d.participants.length > 0 && (
         <section>
           <h2>Participantes</h2>

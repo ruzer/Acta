@@ -40,6 +40,8 @@ const client = new QueryClient({
     queries: { retry: false, refetchOnWindowFocus: false, staleTime: 30000 },
   },
 });
+// Presentation context lasts for this authenticated session; logout clears it.
+client.setQueryDefaults(["questionnaire-context"], { gcTime: Infinity });
 function RouteFocus() {
   const location = useLocation();
   useEffect(() => {
