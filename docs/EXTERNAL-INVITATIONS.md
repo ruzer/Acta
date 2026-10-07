@@ -1,6 +1,6 @@
 # Responder mediante una invitación privada
 
-> Funcionalidad posterior a v0.3.0, todavía sin una release que la incluya.
+> Disponible a partir de Acta v0.4.0.
 > Consulta el [changelog](../CHANGELOG.md) y la
 > [evidencia técnica](EXTERNAL-INVITATIONS-DESIGN.md) antes de actualizar una instalación.
 

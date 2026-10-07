@@ -14,15 +14,15 @@ Se prepara [Semantic Versioning](https://semver.org/lang/es/) en formato **MAJOR
 
 El contrato público incluye API documentada, configuración, formatos de intercambio y requisitos de actualización/persistencia. No basta con que TypeScript compile para afirmar compatibilidad. Antes de 1.0 no se promete estabilidad absoluta; los cambios incompatibles deben anunciarse, agruparse en un incremento MINOR de `0.x` y acompañarse de instrucciones de migración. PATCH seguirá reservado para cambios compatibles. Una corrección de seguridad que rompa compatibilidad debe decirlo y usar la versión apropiada.
 
-### Preparación de 0.3.0
+### Preparación de 0.4.0
 
-La primera versión publicada fue **0.2.0**. La siguiente versión recomendada es **0.3.0**, por las nuevas operaciones compatibles de área, participantes y publicación conjunta; el simplicity pass agrega correcciones y orientación sobre capacidades existentes. Un `0.2.x` comunicaría solo correcciones, por lo que no describe todo este alcance.
+La versión anterior es [v0.3.0](https://github.com/ruzer/Acta/releases/tag/v0.3.0), publicada el 6 de octubre de 2026. **0.4.0** incorpora una capacidad compatible nueva: invitaciones externas mediante enlaces privados. Un patch `0.3.x` no describe ese alcance.
 
-SemVer trata `0.y.z` como desarrollo inicial. La política de Acta adopta explícitamente MINOR para funcionalidad compatible nueva y PATCH para correcciones compatibles, sin prometer estabilidad absoluta antes de 1.0. Esta decisión no significa un cambio incompatible ni una certificación general de compatibilidad: la revisión de contratos, persistencia y pruebas se conserva en el [informe de preparación](releases/v0.3.0.md).
+SemVer trata `0.y.z` como desarrollo inicial. La política de Acta adopta MINOR para funcionalidad compatible nueva y PATCH para correcciones compatibles, sin prometer estabilidad absoluta antes de 1.0. Los participantes con cuenta siguen disponibles; las nuevas invitaciones reutilizan respuestas, revisión y evidencia mediante una migración aditiva.
 
-Raíz, frontend, backend, contracts, referencias internas y lockfile se preparan coherentemente en 0.3.0 mediante PR. Esto no crea una release. Las releases publicadas son inmutables: correcciones posteriores usan otra versión, sin mover tags existentes.
+Raíz, frontend, backend, contracts, referencias internas y lockfile se preparan coherentemente en 0.4.0 mediante PR. La preparación no equivale a publicación: verificar CI del commit final, tag anotado y GitHub Release. Las releases publicadas son inmutables; no mover ni reemplazar tags.
 
-Los forks institucionales y demás downstream **deben esperar al tag y release v0.3.0**, verificar su commit y probar la actualización en su propia rama; no deben desplegar esta preparación directamente desde `main`.
+Los forks deben verificar el tag y commit de [v0.4.0](https://github.com/ruzer/Acta/releases/tag/v0.4.0) y probar la actualización en su propia rama. No actualizar instalaciones directamente desde `main`. Seguir [invitaciones](EXTERNAL-INVITATIONS.md), [configuración](CONFIGURATION.md) y [backup/restauración](BACKUP-RESTORE.md).
 
 ## Preparar, verificar y autorizar
 
