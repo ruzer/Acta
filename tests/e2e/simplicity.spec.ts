@@ -131,7 +131,9 @@ for (const count of [50, 300])
     test.setTimeout(120000);
     const id = await fixture(page, count);
     await page.goto(`/projects/${id}/editor`);
-    await page.getByRole("tab", { name: "Revisar", exact: true }).click();
+    await page
+      .getByRole("tab", { name: "Revisar publicación", exact: true })
+      .click();
     await expect(page.getByText(/Para publicarla por separado/)).toBeVisible();
     await expect(
       page.getByRole("button", {
@@ -178,7 +180,9 @@ for (const count of [50, 300])
       .getByRole("button", { name: `Confirmar ${count} preguntas` })
       .click();
     await expect(page.getByRole("dialog")).toHaveCount(0);
-    await page.getByRole("tab", { name: "Revisar", exact: true }).click();
+    await page
+      .getByRole("tab", { name: "Revisar publicación", exact: true })
+      .click();
     await expect(
       page.getByText(
         `${count} preguntas publicadas. Su contenido está protegido; puedes consultar su detalle en Organizar.`,
@@ -201,6 +205,7 @@ test("simplicity: keyboard returns after cancel, assignment, publication and ins
   test.setTimeout(120000);
   const id = await fixture(page, 10);
   await page.goto(`/projects/${id}/editor`);
+  await page.getByRole("tab", { name: "Escribir", exact: true }).click();
   const trigger = page.getByLabel("Acciones de Consulta 0", { exact: true });
   for (const name of ["Asignar participantes", "Publicar"]) {
     await trigger.focus();
@@ -216,15 +221,13 @@ test("simplicity: keyboard returns after cancel, assignment, publication and ins
     .getByRole("button", { name: "Asignar participantes", exact: true })
     .focus();
   await page.keyboard.press("Enter");
-  await page
-    .getByLabel("Participante", { exact: true })
-    .selectOption({
-      label:
-        "Participante demo · " +
-        (await call(page, `/projects/${id}/questionnaire`)).members.find(
-          (m: { role: string }) => m.role === "STAKEHOLDER",
-        ).areaName,
-    });
+  await page.getByLabel("Participante", { exact: true }).selectOption({
+    label:
+      "Participante demo · " +
+      (await call(page, `/projects/${id}/questionnaire`)).members.find(
+        (m: { role: string }) => m.role === "STAKEHOLDER",
+      ).areaName,
+  });
   await page.getByRole("button", { name: "Guardar asignación" }).focus();
   await page.keyboard.press("Enter");
   await expect(trigger).toBeFocused();

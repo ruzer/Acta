@@ -1,13 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
+  dashboardView,
   priorities,
   referenceTypes,
   type QuestionnaireView,
   type QuestionView,
 } from "@requirements/contracts";
-import { api } from "../api";
+import { api, exchangeRequest } from "../api";
 import {
   Alert,
   Button,
@@ -22,7 +23,10 @@ import {
 import { ActionForm } from "./Administration";
 import { QuestionForm } from "./QuestionForm";
 import { EditorWorkspace } from "./editor/EditorWorkspace";
+import type { OrganizeContext } from "./editor/questionnaire-presentation";
 import "../editor.css";
+import { ProjectWorkbench } from "./ProjectWorkbench";
+import { rememberWorkbenchItem } from "../workbench-context";
 const refLabels = {
   QUESTION: "Pregunta",
   BUSINESS_RULE: "Regla de negocio",
@@ -36,6 +40,29 @@ const refLabels = {
 export function Editor() {
   const { projectId = "" } = useParams();
   const qc = useQueryClient();
+  const navigate = useNavigate();
+  const contextKey = ["questionnaire-context", projectId];
+  const savedContext = qc.getQueryData<{
+    mode?: number;
+    organize?: OrganizeContext;
+  }>(contextKey);
+  const rememberOrganize = useCallback(
+    (organize: OrganizeContext) => {
+      qc.setQueryData(
+        ["questionnaire-context", projectId],
+        (previous: { mode?: number } | undefined) => ({
+          ...previous,
+          organize,
+        }),
+      );
+    },
+    [qc, projectId],
+  );
+  const contributions = useQuery({
+    queryKey: ["dashboard", projectId],
+    queryFn: () => exchangeRequest(projectId, "dashboard", dashboardView),
+    staleTime: 0,
+  });
   const structureTrigger = useRef<HTMLElement | null>(null);
   const actionQuestionId = useRef<string | null>(null);
   const pendingFocusReturn = useRef(false);
@@ -120,6 +147,7 @@ export function Editor() {
     queryFn: () => api("projects"),
   });
   const refresh = () => {
+    void qc.invalidateQueries({ queryKey: ["dashboard", projectId] });
     void qc.invalidateQueries({ queryKey: ["questionnaire", projectId] });
     void qc.invalidateQueries({ queryKey: ["projects"] });
   };
@@ -256,15 +284,12 @@ export function Editor() {
   return (
     <div className="qe-shell av-scope">
       {composer}
-      <Link to="/" className="back">
-        ← Mis proyectos
-      </Link>
-      <p className="eyebrow">EDITOR DE CUESTIONARIO</p>
-      <h1>{project?.name || "Cuestionario del proyecto"}</h1>
-      <p>
-        Prepara las preguntas, asigna participantes y publica cuando el
-        contenido esté listo.
-      </p>
+      <ProjectWorkbench
+        projectId={projectId}
+        projectName={project?.name || "Cuestionario del proyecto"}
+        role={project?.role}
+        active="questionnaire"
+      />
       {notice && <Alert>{notice}</Alert>}
       {error && (
         <Alert error>
@@ -280,34 +305,39 @@ export function Editor() {
           </Button>
         </Alert>
       )}
-      <div className="actions">
-        <Link
-          className="button secondary"
-          to={`/projects/${projectId}/invitations`}
-        >
-          Invitaciones mediante enlace
-        </Link>
-        <Link className="button secondary" to={"/projects/" + projectId}>
-          Ver preguntas publicadas
-        </Link>
-        {!data.questions.length && (
+      {!data.questions.length && (
+        <p>
           <Link
             className="button secondary"
             to={`/projects/${projectId}/import`}
           >
             Importar estructura
           </Link>
-        )}
-        {project?.role === "ADMIN" && (
-          <Link
-            className="button secondary"
-            to={"/projects/" + projectId + "/members"}
-          >
-            Administrar miembros
-          </Link>
-        )}
-      </div>
+        </p>
+      )}
       <EditorWorkspace
+        initialMode={savedContext?.mode ?? 1}
+        onModeChange={(mode) =>
+          qc.setQueryData(
+            contextKey,
+            (previous: { organize?: OrganizeContext } | undefined) => ({
+              ...previous,
+              mode,
+            }),
+          )
+        }
+        organizeContext={savedContext?.organize}
+        onOrganizeContextChange={rememberOrganize}
+        contributionQuestions={contributions.data?.questions}
+        contributionsLoading={contributions.isPending}
+        contributionsError={contributions.isError}
+        onRetryContributions={() => void contributions.refetch()}
+        onOpenContributions={(id) => {
+          rememberWorkbenchItem(qc, projectId, "questionnaire", id);
+          navigate(`/projects/${projectId}/review/${id}`, {
+            state: { questionnaireReturn: true },
+          });
+        }}
         onRefresh={async () => {
           const result = await q.refetch();
           if (result.error) throw result.error;

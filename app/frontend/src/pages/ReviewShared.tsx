@@ -55,18 +55,21 @@ export function SubmittedAnswer({
   }
   return (
     <>
-      <p className="hint">
-        {participant ? (
-          `Tú · ${dateText(r.createdAt)}`
-        ) : (
-          <>
-            Envío #{r.number} · {dateText(r.createdAt)} ·{" "}
-            {r.current ? "Vigente" : "Histórico"}
-          </>
-        )}
-      </p>
+      {!comparison && (
+        <p className="hint">
+          {participant ? (
+            `Tú · ${dateText(r.createdAt)}`
+          ) : (
+            <>
+              Envío #{r.number} · {dateText(r.createdAt)} ·{" "}
+              {r.current ? "Vigente" : "Histórico"}
+            </>
+          )}
+        </p>
+      )}
       {comparison && <h5>Respuesta</h5>}
       <p className="answer-text">{answerText(question, r.answer)}</p>
+      {comparison && <h5>Contexto</h5>}
       {comparison && !r.comment && (
         <p className="av-secondary">Sin comentario adicional.</p>
       )}
@@ -104,6 +107,21 @@ export function SubmittedAnswer({
             </li>
           ))}
         </ul>
+      )}
+      {comparison && (
+        <div className="next-posture-revision">
+          <h5>Versión y fecha</h5>
+          <p className="hint">
+            {participant ? (
+              `Tú · ${dateText(r.createdAt)}`
+            ) : (
+              <>
+                Envío #{r.number} · {dateText(r.createdAt)} ·{" "}
+                {r.current ? "Vigente" : "Histórico"}
+              </>
+            )}
+          </p>
+        </div>
       )}
       {error && <Alert error>{error}</Alert>}
     </>

@@ -7,29 +7,48 @@ import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams, useLocation } from "react-router-dom";
 import { api } from "../api";
-import {
-  Alert,
-  Button,
-  EmptyState,
-  ErrorState,
-  LoadingState,
-  Select,
-} from "../ui";
+import { ProjectWorkbench } from "./ProjectWorkbench";
+import { workbenchPath } from "../workbench-context";
+import { ContributionSet } from "./ContributionSet";
+import { Alert, Button, ErrorState, LoadingState, Select } from "../ui";
 import {
   ReviewActionDialog,
   actionLabels,
   type ReviewAction,
 } from "./ReviewActions";
-import { dateText, SubmittedAnswer, ThreadMessages } from "./ReviewShared";
+import { dateText, ThreadMessages } from "./ReviewShared";
 export function ReviewDetail() {
   const location = useLocation();
   const savedSearch = (location.state as { reviewSearch?: unknown } | null)
     ?.reviewSearch;
+  const questionnaireReturn =
+    (location.state as { questionnaireReturn?: unknown } | null)
+      ?.questionnaireReturn === true;
   const { projectId = "", id = "" } = useParams();
   const reviewSearch =
     typeof savedSearch === "string"
       ? new URLSearchParams(savedSearch).toString()
       : new URLSearchParams({ projectId }).toString();
+  const source = (
+    location.state as {
+      workbenchReturn?: { view?: unknown; search?: unknown };
+    } | null
+  )?.workbenchReturn;
+  const sourceView =
+    source?.view === "decisions" || source?.view === "attention"
+      ? source.view
+      : null;
+  const sourcePath = sourceView
+    ? workbenchPath(
+        projectId,
+        sourceView,
+        typeof source?.search === "string" ? source.search : "",
+      )
+    : null;
+  const projects = useQuery({
+    queryKey: ["projects"],
+    queryFn: () => api("projects"),
+  });
   const client = useQueryClient();
   const q = useQuery({
     queryKey: ["review", projectId, id],
@@ -59,7 +78,6 @@ export function ReviewDetail() {
     );
   const d = q.data,
     current = d.submissions.filter((s) => s.current),
-    historical = d.submissions.filter((s) => !s.current),
     openConflict = d.conflicts.find((c) => c.status === "OPEN"),
     openThread = d.threads.find((t) => t.status !== "CLOSED");
   const primary: ReviewAction =
@@ -78,21 +96,151 @@ export function ReviewDetail() {
     await client.invalidateQueries({ queryKey: ["review"] });
     await client.invalidateQueries({ queryKey: ["review-inbox"] });
     await client.invalidateQueries({ queryKey: ["my-work"] });
+    await client.invalidateQueries({ queryKey: ["dashboard", projectId] });
+    await client.invalidateQueries({ queryKey: ["questionnaire", projectId] });
   }
+  const hasCurrentDecision = d.validations.some((v) => !v.invalidatedAt);
+  const reviewControls = d.canReview && (
+    <div className="review-toolbar">
+      {openThread?.status === "WAITING_STAKEHOLDER" && !openConflict ? (
+        <p>Esperando la aclaración del participante.</p>
+      ) : (
+        <Button
+          tone={primary === "reopenQuestion" ? "secondary" : "primary"}
+          onClick={() =>
+            setAction({
+              action: primary,
+              threadId:
+                primary === "closeClarification" ? openThread?.id : undefined,
+              conflictId: openConflict?.id,
+            })
+          }
+        >
+          {actionLabels[primary]}
+        </Button>
+      )}
+      <Select
+        label="Otras acciones"
+        value=""
+        onChange={(e) => {
+          if (e.target.value)
+            setAction({ action: e.target.value as ReviewAction });
+        }}
+      >
+        <option value="">Selecciona una acción</option>
+        {(
+          [
+            "requestClarification",
+            "markPartial",
+            "markPending",
+            "markConflict",
+            "markNotApplicable",
+          ] as ReviewAction[]
+        ).map((a) => (
+          <option key={a} value={a}>
+            {actionLabels[a]}
+          </option>
+        ))}
+      </Select>
+    </div>
+  );
+  const conflictsSection = d.conflicts.length > 0 && (
+    <section>
+      <h2>Conflictos</h2>
+      {d.conflicts.map((c) => (
+        <article key={c.id} className="review-submission">
+          <h3>
+            {c.status === "OPEN" ? "Conflicto abierto" : "Conflicto resuelto"}
+          </h3>
+          <p className="answer-text">{c.reason}</p>
+          <p className="hint">
+            Registrado por {c.openedBy.displayName} · {dateText(c.openedAt)}
+          </p>
+          <details open={c.status === "OPEN"}>
+            <summary>Comparar respuestas en conflicto</summary>
+            <ConflictComparison data={d} conflict={c} />
+          </details>
+          <p className="hint">
+            Resolver este conflicto no valida la pregunta. La decisión se
+            registra por separado.
+          </p>
+          {c.resolution ? (
+            <>
+              <p className="answer-text">
+                <strong>Resolución: </strong>
+                {c.resolution.resolutionText}
+              </p>
+              <p>
+                {c.resolution.resolvedBy.displayName} ·{" "}
+                {dateText(c.resolution.resolvedAt)}
+              </p>
+              <p>
+                Fuentes:{" "}
+                {c.resolution.sources
+                  .map((source) => {
+                    const s = d.submissions.find(
+                      (s) => s.id === source.responseRevisionId,
+                    );
+                    return `${s?.respondent.displayName} #${s?.number}`;
+                  })
+                  .join(", ")}
+              </p>
+            </>
+          ) : (
+            d.canReview && (
+              <Button
+                onClick={() =>
+                  setAction({ action: "resolveConflict", conflictId: c.id })
+                }
+              >
+                Resolver conflicto
+              </Button>
+            )
+          )}
+        </article>
+      ))}
+    </section>
+  );
   return (
     <div className="review-page av-scope">
+      <ProjectWorkbench
+        projectId={projectId}
+        projectName={d.projectName}
+        role={projects.data?.find((p) => p.id === projectId)?.role}
+        active={
+          questionnaireReturn ? "questionnaire" : (sourceView ?? "attention")
+        }
+        compact
+      />
       <Link
         className="back"
-        to={d.canReview ? `/review?${reviewSearch}` : `/projects/${projectId}`}
+        to={
+          sourcePath ??
+          (questionnaireReturn
+            ? `/projects/${projectId}/editor`
+            : d.canReview
+              ? `/review?${reviewSearch}`
+              : `/projects/${projectId}`)
+        }
       >
-        {d.canReview ? "← Revisión" : "← Proyecto"}
+        {sourceView
+          ? sourceView === "attention"
+            ? "← Atención"
+            : "← Decisiones"
+          : questionnaireReturn
+            ? "← Cuestionario"
+            : d.canReview
+              ? "← Revisar respuestas"
+              : "← Proyecto"}
       </Link>
-      <p className="eyebrow">
-        {d.projectName} · {d.question.sectionTitle}
-      </p>
+      <p className="eyebrow">{d.question.sectionTitle}</p>
       <h1>{d.question.title}</h1>
-      <p className="lead">{d.question.question}</p>
-      <AnalystStatus status={d.status} />
+      {!hasCurrentDecision && (
+        <>
+          <p className="lead">{d.question.question}</p>
+          <AnalystStatus status={d.status} />
+        </>
+      )}
       {message && <Alert>{message}</Alert>}
       {d.pendingReviewReason && (
         <Alert>Pendiente: {d.pendingReviewReason}</Alert>
@@ -100,51 +248,7 @@ export function ReviewDetail() {
       {d.partialReviewReason && (
         <Alert>Falta información: {d.partialReviewReason}</Alert>
       )}
-      {d.canReview && (
-        <div className="review-toolbar">
-          {openThread?.status === "WAITING_STAKEHOLDER" && !openConflict ? (
-            <p>Esperando la aclaración del participante.</p>
-          ) : (
-            <Button
-              onClick={() =>
-                setAction({
-                  action: primary,
-                  threadId:
-                    primary === "closeClarification"
-                      ? openThread?.id
-                      : undefined,
-                  conflictId: openConflict?.id,
-                })
-              }
-            >
-              {actionLabels[primary]}
-            </Button>
-          )}
-          <Select
-            label="Otras acciones"
-            value=""
-            onChange={(e) => {
-              if (e.target.value)
-                setAction({ action: e.target.value as ReviewAction });
-            }}
-          >
-            <option value="">Selecciona una acción</option>
-            {(
-              [
-                "requestClarification",
-                "markPartial",
-                "markPending",
-                "markConflict",
-                "markNotApplicable",
-              ] as ReviewAction[]
-            ).map((a) => (
-              <option key={a} value={a}>
-                {actionLabels[a]}
-              </option>
-            ))}
-          </Select>
-        </div>
-      )}
+      {!hasCurrentDecision && reviewControls}
       {!d.canReview && <p className="hint">Consulta de solo lectura.</p>}
       {d.validations.length > 0 && (
         <section aria-labelledby="decisions-title">
@@ -169,44 +273,9 @@ export function ReviewDetail() {
           )}
         </section>
       )}
-      <section aria-labelledby="received">
-        <h2 id="received">Respuestas recibidas</h2>
-        {current.length === 0 ? (
-          <EmptyState title="Sin respuestas vigentes">
-            Las aportaciones aparecerán cuando los participantes las envíen.
-          </EmptyState>
-        ) : (
-          current.map((s) => (
-            <article className="review-submission" key={s.id}>
-              <h3>{s.respondent.displayName}</h3>
-              <p>{s.area.name}</p>
-              <SubmittedAnswer
-                revision={s}
-                question={d.question}
-                projectId={projectId}
-              />
-            </article>
-          ))
-        )}
-        {historical.length > 0 && (
-          <details>
-            <summary>Envíos históricos ({historical.length})</summary>
-            {historical.map((s) => (
-              <article className="review-submission" key={s.id}>
-                <h3>
-                  {s.respondent.displayName} · envío #{s.number}
-                </h3>
-                <p>{s.area.name}</p>
-                <SubmittedAnswer
-                  revision={s}
-                  question={d.question}
-                  projectId={projectId}
-                />
-              </article>
-            ))}
-          </details>
-        )}
-      </section>
+      {hasCurrentDecision && reviewControls}
+      {openConflict && conflictsSection}
+      <ContributionSet key={d.question.id} data={d} />
       {d.participants.length > 0 && (
         <section>
           <h2>Participantes</h2>
@@ -272,65 +341,7 @@ export function ReviewDetail() {
           ))}
         </section>
       )}
-      {d.conflicts.length > 0 && (
-        <section>
-          <h2>Conflictos</h2>
-          {d.conflicts.map((c) => (
-            <article key={c.id} className="review-submission">
-              <h3>
-                {c.status === "OPEN"
-                  ? "Conflicto abierto"
-                  : "Conflicto resuelto"}
-              </h3>
-              <p className="answer-text">{c.reason}</p>
-              <p className="hint">
-                Registrado por {c.openedBy.displayName} · {dateText(c.openedAt)}
-              </p>
-              <details open={c.status === "OPEN"}>
-                <summary>Comparar respuestas en conflicto</summary>
-                <ConflictComparison data={d} conflict={c} />
-              </details>
-              <p className="hint">
-                Resolver este conflicto no valida la pregunta. La decisión se
-                registra por separado.
-              </p>
-              {c.resolution ? (
-                <>
-                  <p className="answer-text">
-                    <strong>Resolución: </strong>
-                    {c.resolution.resolutionText}
-                  </p>
-                  <p>
-                    {c.resolution.resolvedBy.displayName} ·{" "}
-                    {dateText(c.resolution.resolvedAt)}
-                  </p>
-                  <p>
-                    Fuentes:{" "}
-                    {c.resolution.sources
-                      .map((source) => {
-                        const s = d.submissions.find(
-                          (s) => s.id === source.responseRevisionId,
-                        );
-                        return `${s?.respondent.displayName} #${s?.number}`;
-                      })
-                      .join(", ")}
-                  </p>
-                </>
-              ) : (
-                d.canReview && (
-                  <Button
-                    onClick={() =>
-                      setAction({ action: "resolveConflict", conflictId: c.id })
-                    }
-                  >
-                    Resolver conflicto
-                  </Button>
-                )
-              )}
-            </article>
-          ))}
-        </section>
-      )}
+      {!openConflict && conflictsSection}
       {d.dispositions.length > 0 && (
         <details>
           <summary>Decisiones de no aplica</summary>

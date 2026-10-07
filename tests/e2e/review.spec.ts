@@ -206,7 +206,7 @@ test("2D-A: envío → aclaración → respuesta → cierre → decisión valida
   await login(analyst, "analyst");
   await analyst.goto(`/review?projectId=${projectId}`);
   await expect(
-    analyst.getByRole("heading", { name: "Revisión", exact: true }),
+    analyst.getByRole("heading", { name: "Revisar respuestas", exact: true }),
   ).toBeVisible();
   await expect(
     analyst.getByRole("link", { name: /procedimiento ficticio 1/ }),
@@ -385,6 +385,28 @@ test("2D-C: dos autores → comparación → resolución independiente → valid
   await expect(
     page.getByRole("heading", { name: "Decisión vigente", exact: true }),
   ).toHaveCount(0);
+  await expect(
+    page.getByRole("status").filter({ hasText: "Comparando" }),
+  ).toHaveText("Comparando 2 de 2 aportaciones vigentes.");
+  for (const width of [1440, 1024, 768, 390]) {
+    await page.setViewportSize({ width, height: 1000 });
+    const a = await page
+      .getByRole("region", { name: "Postura A", exact: true })
+      .boundingBox();
+    const b = await page
+      .getByRole("region", { name: "Postura B", exact: true })
+      .boundingBox();
+    expect(a).not.toBeNull();
+    expect(b).not.toBeNull();
+    if (width >= 768) {
+      expect(Math.abs(a!.y - b!.y)).toBeLessThan(2);
+      expect(Math.abs(a!.width - b!.width)).toBeLessThan(2);
+      expect(b!.x).toBeGreaterThan(a!.x + a!.width);
+    } else {
+      expect(b!.y).toBeGreaterThan(a!.y + a!.height);
+      expect(Math.abs(a!.x - b!.x)).toBeLessThan(2);
+    }
+  }
   await page.setViewportSize({ width: 390, height: 844 });
   for (const name of ["Postura A", "Postura B"])
     await expect(page.getByRole("region", { name, exact: true })).toBeVisible();
@@ -415,6 +437,48 @@ test("2D-C: dos autores → comparación → resolución independiente → valid
     page.getByRole("heading", { name: "Decisión vigente" }),
   ).toHaveCount(0);
   await decide(page);
+  const record = page.getByRole("article", {
+    name: "Decisión vigente",
+    exact: true,
+  });
+  await expect(record).toBeVisible();
+  const reopen = page.getByRole("button", {
+    name: "Reabrir pregunta",
+    exact: true,
+  });
+  await expect(reopen).toHaveClass(/secondary/);
+  expect(
+    await record.evaluate((el) => {
+      const button = Array.from(document.querySelectorAll("button")).find(
+        (b) => b.textContent === "Reabrir pregunta",
+      );
+      return (
+        !!button &&
+        !!(
+          el.compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING
+        )
+      );
+    }),
+  ).toBe(true);
+  const source = record
+    .locator("summary")
+    .filter({ hasText: "Respuesta de Participante demo" });
+  await source.focus();
+  await page.keyboard.press("Enter");
+  await expect(source.locator("..")).toHaveAttribute("open", "");
+  const [sourceDownload] = await Promise.all([
+    page.waitForEvent("download"),
+    record
+      .getByRole("button", {
+        name: "Descargar conflicto-ficticio.pdf",
+        exact: true,
+      })
+      .click(),
+  ]);
+  expect(await sourceDownload.failure()).toBeNull();
+  expect(await readFile((await sourceDownload.path())!)).toEqual(
+    await readFile((await download.path())!),
+  );
   await page.setViewportSize({ width: 390, height: 844 });
   await accessible(page);
   await page.screenshot({

@@ -1,0 +1,116 @@
+.next-invitation-create-trigger {
+  margin-bottom: 1rem;
+}
+.next-invitation-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  padding: 0;
+  margin-block: 1rem;
+  list-style: none;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+.next-invitation-steps [aria-current="step"] {
+  color: var(--primary);
+  font-weight: 700;
+}
+.next-invitation-question-picker {
+  max-height: 22rem;
+  overflow: auto;
+  padding: 0.5rem;
+  border: 1px solid var(--line);
+}
+.next-invitation-question-picker .check {
+  min-height: 44px;
+}
+.next-invitation-summary {
+  display: grid;
+  grid-template-columns: minmax(8rem, 1fr) minmax(0, 3fr);
+  gap: 0.5rem 1rem;
+}
+.next-invitation-summary dt {
+  font-weight: 650;
+}
+.next-invitation-summary dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.next-invitation-summary dd span {
+  display: block;
+}
+.next-invitation-summary details {
+  margin-block: 0.5rem;
+}
+.next-invitation-summary summary {
+  min-height: 44px;
+  cursor: pointer;
+}
+.next-invitation-step-actions {
+  margin-top: 1.5rem;
+}
+@media (max-width: 600px) {
+  .next-invitation-summary {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.25rem;
+  }
+  .next-invitation-summary dd {
+    margin-bottom: 0.75rem;
+  }
+}
+.invitation-management > li {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 2fr) minmax(0, 1.1fr) minmax(0, 1.3fr)
+    minmax(0, 1.3fr) auto;
+  align-items: start;
+  gap: 1rem;
+}
+.invitation-management > li h3 {
+  font-size: 1.05rem;
+  margin: 0 0 0.4rem;
+}
+.invitation-management > li p {
+  margin: 0 0 0.35rem;
+  overflow-wrap: anywhere;
+}
+.invitation-management > li dl {
+  margin: 0;
+}
+.invitation-management > li dt {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+.invitation-management > li dd {
+  margin: 0 0 0.7rem;
+  overflow-wrap: anywhere;
+}
+.invitation-management > li .actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin: 0;
+}
+@media (max-width: 1023px) {
+  .invitation-management > li {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .invitation-management .next-invitation-recipient {
+    grid-column: 1 / -1;
+  }
+  .invitation-management > li .actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 480px) {
+  .invitation-management > li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+  .invitation-management > li dl {
+    display: grid;
+    grid-template-columns: 7rem minmax(0, 1fr);
+    gap: 0.25rem 0.5rem;
+  }
+}

@@ -26,7 +26,7 @@ export function ReviewInbox() {
       <Link className="back" to="/">
         ← Mis proyectos
       </Link>
-      <h1>Revisión</h1>
+      <h1>Revisar respuestas</h1>
       <p className="lead">
         Consulta las aportaciones y decide qué necesita seguimiento.
       </p>

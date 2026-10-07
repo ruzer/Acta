@@ -1,20 +1,35 @@
 import { expect, type Page } from "@playwright/test";
 const temporary = process.env.DEMO_PASSWORD!;
 const changed = temporary + "-Reviewed2B";
-export async function login(page: Page, username: string) {
+export async function login(
+  page: Page,
+  username: string,
+  options: { temporary?: boolean } = {},
+) {
   await page.goto("/");
   await page.getByLabel("Usuario", { exact: true }).fill(username);
-  await page.getByLabel("Contraseña", { exact: true }).fill(changed);
+  await page
+    .getByLabel("Contraseña", { exact: true })
+    .fill(options.temporary ? temporary : changed);
   const first = page.waitForResponse((r) => r.url().endsWith("/auth/login"));
   await page
     .getByRole("button", { name: "Iniciar sesión", exact: true })
     .click();
-  if ((await first).status() !== 201) {
+  let response = await first;
+  if (response.status() === 401 && !options.temporary) {
     await page.getByLabel("Contraseña", { exact: true }).fill(temporary);
+    const fallback = page.waitForResponse((r) =>
+      r.url().endsWith("/auth/login"),
+    );
     await page
       .getByRole("button", { name: "Iniciar sesión", exact: true })
       .click();
+    response = await fallback;
   }
+  expect(
+    response.status(),
+    "El acceso de prueba debe autenticarse sin eludir límites",
+  ).toBe(201);
   await expect(
     page.getByRole("button", { name: "Cerrar sesión", hidden: true }),
   ).toBeAttached();

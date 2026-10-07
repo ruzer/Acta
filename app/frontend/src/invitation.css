@@ -80,3 +80,22 @@
   padding-block: 1.25rem;
   border-bottom: 1px solid var(--line, #d7dde3);
 }
+
+.invitation-position {
+  color: var(--muted);
+  font-weight: 600;
+  margin-block: 1rem 0.5rem;
+}
+.invitation-save-status {
+  margin-top: 1.25rem;
+  font-weight: 600;
+}
+.invitation-file {
+  gap: 0.5rem;
+  padding-block: 0.5rem;
+  margin-block: 0.5rem;
+  border-bottom: 1px solid var(--line);
+}
+.invitation-file span {
+  flex: 1 1 12rem;
+}

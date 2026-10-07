@@ -9,7 +9,11 @@ import {
   useNavigate,
   useParams,
 } from "react-router-dom";
-import { ResponseContent, ResponseView, EvidenceView } from "@requirements/contracts";
+import {
+  ResponseContent,
+  ResponseView,
+  EvidenceView,
+} from "@requirements/contracts";
 import { api, ApiFailure, uploadEvidence, downloadEvidence } from "../api";
 import {
   Alert,
@@ -377,6 +381,20 @@ function ResponseEditor({
       <p className="hint">Sin evidencias adjuntas.</p>
     );
   }
+  const saveStatus = (
+    <p className="save-status" role="status" aria-live="polite">
+      {busy
+        ? message || "Procesando…"
+        : error
+          ? "No se pudo guardar"
+          : dirty
+            ? "Cambios sin guardar"
+            : message ||
+              (server.draft
+                ? `Borrador guardado · ${date(server.draft.updatedAt)}`
+                : "")}
+    </p>
+  );
   return (
     <section className="response-page participant-page">
       <div className="participant-step-meta">
@@ -391,6 +409,7 @@ function ResponseEditor({
         className="participant-progress"
         role="progressbar"
         aria-label="Posición en el cuestionario"
+        aria-valuetext={`Pregunta ${server.question.position} de ${server.question.total}. La posición no indica cuántas respuestas has enviado.`}
         aria-valuemin={0}
         aria-valuemax={Math.max(1, server.question.total)}
         aria-valuenow={Math.max(0, server.question.position - 1)}
@@ -449,18 +468,7 @@ function ResponseEditor({
             </Alert>
           </div>
         )}
-        <p className="save-status" role="status" aria-live="polite">
-          {busy
-            ? message || "Procesando…"
-            : error
-              ? "No se pudo guardar"
-              : dirty
-                ? "Cambios sin guardar"
-                : message ||
-                  (server.draft
-                    ? `Borrador guardado · ${date(server.draft.updatedAt)}`
-                    : "")}
-        </p>
+        {!editing && saveStatus}
         {editing ? (
           <>
             <form
@@ -501,13 +509,20 @@ function ResponseEditor({
                     disabled={busy}
                   />
                 </details>
-                <details className="participant-disclosure evidence-section">
+                <details className="participant-disclosure evidence-section next-participant-evidence">
                   <summary>
                     <ParticipantIcon name="paperclip" />
                     Adjuntar evidencia
                     {server.draft?.evidence.length
                       ? ` (${server.draft.evidence.length})`
                       : ""}
+                    {!!server.draft?.evidence.length && (
+                      <span className="next-evidence-summary">
+                        {server.draft.evidence
+                          .map((link) => link.evidence.originalName)
+                          .join(" · ")}
+                      </span>
+                    )}
                   </summary>
                   {files(server.draft?.evidence ?? [], true)}
                   <Input
@@ -555,6 +570,7 @@ function ResponseEditor({
                     de continuar.
                   </p>
                 )}
+                {saveStatus}
                 <div className="response-actions">
                   <Button
                     className="participant-text-button"
