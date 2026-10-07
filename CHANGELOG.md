@@ -6,6 +6,15 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
+Sin cambios adicionales por anunciar.
+
+## 0.5.0
+
+### Acta Next
+
+Evolución del frontend compatible con los contratos de v0.4.0. Esta sección
+prepara la versión; su publicación se confirma por el tag y la release oficial.
+
 ### Changed
 
 - ACTA NEXT: Cuestionario operativo con enfoques Preparar/Analizar, jerarquía,
@@ -18,12 +27,16 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 - Invitaciones en cuatro pasos con resumen previo; contexto y guardado más
   claros para invitados y evidencia compacta para participantes. Sin cambios
   de backend, contratos, migraciones, permisos ni seguridad de invitaciones.
+- Presentación adaptable de preguntas y contraste en escritorio y móvil, con
+  bloques legibles a 390 px y autoría que mantiene opciones/MATRIX junto al tipo.
 
 ### Fixed
 
 - El retorno al cuestionario conserva su posición incluso cuando el cambio de
   ruta emite eventos de scroll antes de completar la navegación.
-
+- Retorno de foco, apertura y asociación de errores con sus campos, reflujo y
+  controles por teclado comprobados en los recorridos focalizados. Axe sin
+  violaciones en esas muestras no equivale a certificación WCAG.
 - Organizar distingue un cuestionario vacío de una búsqueda sin coincidencias
   y explica el siguiente paso sin atribuir la ausencia de preguntas a filtros.
 

@@ -128,7 +128,7 @@ También puedes ver [Organizar](docs/assets/02-editor-organize.png), [Responder]
 
 Acta está diseñado para instalarse en infraestructura propia y adaptarse mediante forks. Las organizaciones pueden mantener personalizaciones y sincronizarse con el upstream conforme a AGPL-3.0-only. Las mejoras genéricas son bienvenidas de regreso mediante Pull Requests: contribuir así ayuda a otras instalaciones y reduce divergencia; no es una obligación de enviar PR atribuida a la licencia.
 
-El upstream oficial es [github.com/ruzer/Acta](https://github.com/ruzer/Acta). El código está disponible públicamente. Este checkout corresponde a **v0.4.0**, que incorpora invitaciones externas mediante enlaces privados. Consulta el [changelog](CHANGELOG.md) y la [release oficial v0.4.0](https://github.com/ruzer/Acta/releases/tag/v0.4.0) para verificar su publicación y commit antes de actualizar.
+El upstream oficial es [github.com/ruzer/Acta](https://github.com/ruzer/Acta). El código está disponible públicamente. Este checkout prepara **v0.5.0 — Acta Next**, con cuestionario operativo, atención por tarea, contraste de aportaciones y decisiones documentadas. La preparación de la versión no implica que su tag o release ya estén publicados. Consulta el [changelog](CHANGELOG.md) y las [releases oficiales](https://github.com/ruzer/Acta/releases) para verificar la versión estable y su commit antes de actualizar; la release anterior es [v0.4.0](https://github.com/ruzer/Acta/releases/tag/v0.4.0).
 
 [Gobernanza](GOVERNANCE.md) · [Forks y sincronización](docs/UPSTREAM-FORKS.md) · [Roadmap](ROADMAP.md) · [Soporte comunitario](SUPPORT.md).
 
