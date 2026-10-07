@@ -54,11 +54,12 @@ async function asUser<T>(
   browser: Browser,
   username: string,
   work: (page: Page) => Promise<T>,
+  newAccount = false,
 ) {
   const context = await browser.newContext();
   try {
     const page = await context.newPage();
-    await login(page, username);
+    await login(page, username, { temporary: newAccount });
     return await work(page);
   } finally {
     await context.close();
@@ -276,31 +277,36 @@ async function prepare(browser: Browser): Promise<Fixture> {
   });
 
   for (const username of ["stakeholder", otherUsername]) {
-    await asUser(browser, username, async (page) => {
-      for (const question of username === otherUsername
-        ? fixture.questions.slice(0, 1)
-        : fixture.questions.slice(0, 4)) {
-        const path = `/projects/${fixture.project.id}/questions/${question.id}/response`;
-        const initial = await command<ResponseView>(page, path);
-        const draft = await command<ResponseView>(
-          page,
-          `${path}/draft`,
-          {
+    await asUser(
+      browser,
+      username,
+      async (page) => {
+        for (const question of username === otherUsername
+          ? fixture.questions.slice(0, 1)
+          : fixture.questions.slice(0, 4)) {
+          const path = `/projects/${fixture.project.id}/questions/${question.id}/response`;
+          const initial = await command<ResponseView>(page, path);
+          const draft = await command<ResponseView>(
+            page,
+            `${path}/draft`,
+            {
+              requestId: randomUUID(),
+              expectedVersion: initial.lockVersion,
+              answer: `Aportación ficticia de ${username} para ${question.title}`,
+              comment: "",
+              example: "",
+              consultationRequested: false,
+            },
+            "PUT",
+          );
+          await command(page, `${path}/submit`, {
             requestId: randomUUID(),
-            expectedVersion: initial.lockVersion,
-            answer: `Aportación ficticia de ${username} para ${question.title}`,
-            comment: "",
-            example: "",
-            consultationRequested: false,
-          },
-          "PUT",
-        );
-        await command(page, `${path}/submit`, {
-          requestId: randomUUID(),
-          expectedVersion: draft.lockVersion,
-        });
-      }
-    });
+            expectedVersion: draft.lockVersion,
+          });
+        }
+      },
+      username === otherUsername,
+    );
   }
   await asUser(browser, "analyst", async (page) => {
     const path = (index: number) =>
@@ -538,6 +544,10 @@ for (const width of [1440, 390]) {
   }) => {
     await page.setViewportSize({ width, height: 1000 });
     await login(page, "analyst");
+    // Exercise route commits under CPU pressure: late scroll events must not
+    // replace the list context. Keep the same strict position assertion.
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 6 });
     await page.goto(`/projects/${fixture.project.id}/editor`);
     await page.getByLabel("Buscar preguntas", { exact: true }).fill("NEXT-WB");
     await page
@@ -664,6 +674,8 @@ test("ACTA NEXT: vigencia de invitaciones incluye la segunda página y excluye r
   page,
 }) => {
   await login(page, "admin");
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 6 });
   const base = `/projects/${fixture.project.id}`;
   const first = await command<Invitations>(page, `${base}/invitations?page=1`);
   const second = await command<Invitations>(page, `${base}/invitations?page=2`);

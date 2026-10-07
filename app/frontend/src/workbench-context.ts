@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
 
@@ -50,7 +50,8 @@ export function useWorkbenchContext(projectId: string, view?: WorkbenchView) {
   const client = useQueryClient();
   const location = useLocation();
   const isList = !!view && location.pathname === workbenchPath(projectId, view);
-  useEffect(() => {
+  // Persist URL context before a subsequent navigation can read it.
+  useLayoutEffect(() => {
     if (!isList || !view) return;
     client.setQueryData<Context>(key(projectId, view), (old) => ({
       ...old,
@@ -58,7 +59,9 @@ export function useWorkbenchContext(projectId: string, view?: WorkbenchView) {
       scroll: old?.scroll ?? 0,
     }));
   }, [client, projectId, view, isList, location.search]);
-  useEffect(() => {
+  // Detach listeners in the navigation commit, before a shorter destination
+  // emits scroll and would overwrite the previous list position with zero.
+  useLayoutEffect(() => {
     // Compact navigation on a detail must never replace its source-list context.
     if (!isList || !view) return;
     const contextKey = key(projectId, view);

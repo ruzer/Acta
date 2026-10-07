@@ -123,7 +123,7 @@ el buscador permite acotar actor y área sin ocultar aportaciones silenciosament
 | Gate | Resultado observado |
 | --- | --- |
 | Lint, typecheck y build de los tres paquetes | PASS |
-| Unit/component | 214/214, 29 archivos |
+| Unit/component | 215/215, 30 archivos |
 | PostgreSQL | 113/113 casos comprobados; 102 iniciales + 11 de revisión en puerto libre |
 | API/evidencia con VersityGW real | 39/39, sin skips |
 | Playwright completo con demo inicial limpio | 61/61, sin retries ni skips |
@@ -139,8 +139,9 @@ con Docker sobre Linux ARM64; Chromium se ejecutó desde el host de verificació
 El build mantiene el aviso existente de un chunk JavaScript mayor de 500 kB; no
 se silenció ni se usó como motivo para una refactorización ajena al alcance.
 
-Pendiente de esta rama: abrir PR con DCO y completar el CI remoto sobre su SHA
-exacto. No se crea release ni tag.
+El [PR #16](https://github.com/ruzer/Acta/pull/16) reúne los commits con DCO.
+Sus checks remotos sobre el SHA vigente son la autoridad para el cierre del CI;
+los resultados locales no los sustituyen. No se crea release ni tag.
 
 ## Capturas del checkpoint 1
 
@@ -379,6 +380,41 @@ porque su puerto predeterminado estaba ocupado por otra instalación Docker.
 Las 11 pruebas de ese bloque pasaron usando `ACTA_REVIEW_TEST_PORT` en un puerto
 libre. No se cambió backend ni la otra instalación. Resultado conjunto: 113 casos
 comprobados, cero omisiones. La suite adicional con VersityGW real pasó 39/39.
+
+## Corrección detectada por CI remoto
+
+La primera ejecución de CI del PR pasó completa, pero la ejecución paralela del
+push mostró pérdida de scroll al regresar al cuestionario y un fallo de retorno
+a la segunda página de invitaciones. Las recreaciones del fixture después de
+fallos también alcanzaron el límite de intentos de acceso: no se redujo esa
+protección ni se añadieron retries.
+
+La pérdida de scroll se reprodujo en escritorio y móvil con CPU ralentizada. Al
+cambiar de ruta, la altura del documento disminuía y emitía un evento de scroll
+antes de retirar el listener anterior; este sobrescribía con cero la posición
+guardada. La regresión de componente falló con la implementación anterior. La
+persistencia del contexto y la retirada de listeners ahora se realizan durante
+el commit de navegación, antes de esos eventos, mediante `useLayoutEffect`.
+
+Después de la corrección pasaron cuatro repeticiones de escritorio, cuatro de
+móvil y doce de retorno de invitaciones bajo presión de CPU. El fallo aislado de
+paginación no se reprodujo en esas repeticiones; se conserva la comprobación
+estricta de página/conteo y se somete también a presión de CPU en la suite. No se
+presenta como una causa independiente demostrada. La regresión mantiene el
+mismo límite de diferencia de scroll y las mismas aserciones de filtros,
+selección y páginas.
+
+El fixture recién creado usa ahora explícitamente su contraseña temporal en el
+helper de login. Un 429 se reporta como fallo en lugar de probar otra contraseña.
+Se conserva la autenticación real, el cambio obligatorio inicial y los límites
+del servidor. No se modifica backend ni configuración de seguridad. La
+instrumentación temporal de diagnóstico se retiró.
+
+La corrección completa pasó lint, typecheck, build y **215/215** pruebas de
+unidad/componente. Una instalación de regresión nueva pasó **61/61** pruebas
+Playwright, incluidas las aserciones de retorno bajo presión de CPU, con cero
+omisiones, retries o casos flaky. El CI remoto debe comprobar el commit que
+contiene esta corrección antes de cerrar la entrega.
 
 ## Versión recomendada
 

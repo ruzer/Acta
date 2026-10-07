@@ -21,6 +21,9 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ### Fixed
 
+- El retorno al cuestionario conserva su posición incluso cuando el cambio de
+  ruta emite eventos de scroll antes de completar la navegación.
+
 - Organizar distingue un cuestionario vacío de una búsqueda sin coincidencias
   y explica el siguiente paso sin atribuir la ausencia de preguntas a filtros.
 
