@@ -1,5 +1,5 @@
 # Upstream Community is source-only. Keep source and AGPL license with the build.
-FROM golang:1.26.8-bookworm AS build
+FROM golang:1.27.0-bookworm AS build
 ENV CGO_ENABLED=0
 RUN go install github.com/minio/minio@RELEASE.2025-10-15T17-29-55Z
 RUN go install github.com/minio/mc@RELEASE.2025-08-13T08-35-41Z
