@@ -41,7 +41,13 @@ export function ProjectWorkbench({
           {projectName}
         </Link>
       ) : (
-        <h1>{active === "attention" ? "Atención" : projectName}</h1>
+        <h1>
+          {active === "attention"
+            ? "Atención"
+            : active === "questionnaire"
+              ? "Cuestionario"
+              : projectName}
+        </h1>
       )}
       {children}
     </header>

@@ -141,6 +141,7 @@ test("304 questions: area filter → all results → area; group → participant
   test.setTimeout(120000);
   await login(page, "analyst");
   await organize(page);
+  await page.getByText("Seleccionar preguntas", { exact: true }).click();
   await page
     .getByLabel("Área responsable", { exact: true })
     .selectOption(sourceAreaId);
@@ -181,6 +182,7 @@ test("304 questions: area filter → all results → area; group → participant
   expect(
     data.questions.every((q) => q.responsibleAreaId === targetAreaId),
   ).toBe(true);
+  await page.getByRole("button", { name: "Filtros", exact: true }).click();
   await page
     .getByLabel("Área responsable", { exact: true })
     .selectOption(targetAreaId);
@@ -236,6 +238,7 @@ test("stale confirmation shows an error and applies no partial area changes; rel
 }) => {
   await login(page, "analyst");
   await organize(page);
+  await page.getByText("Seleccionar preguntas", { exact: true }).click();
   await page
     .getByRole("button", { name: "Seleccionar esta página (40)" })
     .click();
@@ -284,6 +287,7 @@ test("responsive selection, keyboard, reduced motion and cancel retain individua
 }) => {
   await login(page, "analyst");
   await organize(page);
+  await page.getByText("Seleccionar preguntas", { exact: true }).click();
   for (const width of [1440, 1024, 768, 390]) {
     await page.setViewportSize({ width, height: 1000 });
     const checkbox = page

@@ -402,9 +402,11 @@ export function QuestionRow({ children, ...props }: ComponentProps<"tr">) {
 
 export function SelectionBar({
   summary,
+  summaryRef,
   children,
 }: {
   summary: string;
+  summaryRef?: ComponentProps<"p">["ref"];
   children: ReactNode;
 }) {
   return (
@@ -412,7 +414,9 @@ export function SelectionBar({
       className="ac-selection-bar"
       aria-label="Acciones sobre la selección"
     >
-      <p role="status">{summary}</p>
+      <p role="status" tabIndex={-1} ref={summaryRef}>
+        {summary}
+      </p>
       <div>{children}</div>
     </section>
   );

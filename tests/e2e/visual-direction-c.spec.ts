@@ -1,6 +1,6 @@
 import { login } from "./login-helper";
 import { prepare } from "./fixtures/workbench";
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { mkdir, writeFile, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
@@ -12,7 +12,9 @@ const widths = [
   [390, 844],
   [320, 640],
 ] as const;
-const output = "docs/design/acta-direction-c-evidence";
+const output =
+  process.env.ACTA_DIRECTION_C_EVIDENCE_DIR ??
+  "docs/design/acta-direction-c-evidence";
 const records: unknown[] = [];
 
 test.describe("Direction C · foundation", () => {
@@ -575,6 +577,499 @@ test.describe("Direction C · shell and attention", () => {
           await expect(page.locator(".participant-topbar")).toBeVisible();
         }
       }
+    });
+  }
+});
+
+// Measure the active surface, including content below a scrollable dialog fold.
+async function surfaceMetrics(page: Page, selector: string) {
+  const metrics = await page.locator(selector).evaluate((root) => {
+    const visible = (el: Element) =>
+      el.checkVisibility() &&
+      el.getBoundingClientRect().width > 0 &&
+      !el.closest('.sr-only,svg,[aria-hidden="true"]');
+    const controls = [
+      ...root.querySelectorAll("button,input,select,textarea,summary"),
+    ]
+      .filter(visible)
+      .filter((el) => !(el as HTMLInputElement).disabled);
+    const text = [...root.querySelectorAll("*")].filter(
+      (el) =>
+        visible(el) &&
+        !el.matches("option") &&
+        [...el.childNodes].some(
+          (n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim(),
+        ),
+    );
+    return {
+      scrollWidth: document.documentElement.scrollWidth,
+      width: innerWidth,
+      tooSmall: controls
+        .map((el) => {
+          const target = el.matches(
+            'input[type="radio"],input[type="checkbox"]',
+          )
+            ? (el.closest("label") ?? el)
+            : el;
+          const r = target.getBoundingClientRect();
+          return {
+            name: el.getAttribute("aria-label") ?? el.textContent?.trim(),
+            width: r.width,
+            height: r.height,
+          };
+        })
+        .filter(
+          (r) =>
+            r.width < (innerWidth < 900 ? 44 : 24) ||
+            r.height < (innerWidth < 900 ? 44 : 24),
+        ),
+      smallText: text
+        .filter((el) => parseFloat(getComputedStyle(el).fontSize) < 12.5)
+        .map((el) => el.textContent?.slice(0, 70)),
+      squeezedText: text
+        .filter((el) => el.getBoundingClientRect().width < 8)
+        .map((el) => el.textContent?.slice(0, 70)),
+      overflow: text
+        .filter((el) => {
+          const r = el.getBoundingClientRect();
+          return r.left < -1 || r.right > innerWidth + 1;
+        })
+        .map((el) => el.textContent?.slice(0, 70)),
+    };
+  });
+  expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.width + 1);
+  expect(metrics.tooSmall).toEqual([]);
+  expect(metrics.smallText).toEqual([]);
+  expect(metrics.squeezedText).toEqual([]);
+  expect(metrics.overflow).toEqual([]);
+  return metrics;
+}
+
+test.describe("Direction C · questionnaire", () => {
+  test.use({
+    locale: "es-MX",
+    timezoneId: "America/Mexico_City",
+    reducedMotion: "reduce",
+  });
+  let projectId: string;
+  let analyst: string;
+  const measurements: unknown[] = [];
+  test.beforeAll(async ({ browser }) => {
+    test.setTimeout(240000);
+    const file = process.env.ACTA_DIRECTION_C_VISUAL_FIXTURE;
+    if (file) {
+      const fixture = JSON.parse(await readFile(file, "utf8")) as {
+        projectId: string;
+        users: Record<string, { username: string }>;
+      };
+      projectId = fixture.projectId;
+      analyst = fixture.users.elena!.username;
+    } else {
+      const fixture = await prepare(browser, 304);
+      expect(fixture.questions).toHaveLength(304);
+      projectId = fixture.project.id;
+      analyst = "analyst";
+    }
+  });
+  test.afterAll(async () => {
+    if (!measurements.length) return;
+    await mkdir(output, { recursive: true });
+    await writeFile(
+      `${output}/metrics-cp3.json`,
+      JSON.stringify({ checkpoint: 3, records: measurements }, null, 2) + "\n",
+    );
+  });
+  for (const [width, height] of widths) {
+    test(`tabla Preparar y Analizar, densidad, filtros y teclado ${width}`, async ({
+      page,
+      baseURL,
+    }) => {
+      await page.setViewportSize({ width, height });
+      await login(page, analyst);
+      const path = `/projects/${projectId}/editor`;
+      await page.goto(path);
+      await expect(page).toHaveURL(new URL(path, baseURL!).href);
+      await expect(page.locator("main h1")).toHaveText("Cuestionario");
+      await page.getByRole("tab", { name: "Organizar", exact: true }).click();
+      await expect(
+        page.getByRole("checkbox", { name: /Seleccionar pregunta:/ }),
+      ).toHaveCount(40);
+      await expect(page.locator(".ac-questionnaire-total")).toContainText(
+        "304 preguntas",
+      );
+      for (const [lens, id] of [
+        ["Preparar", "V-02b"],
+        ["Analizar", "V-02"],
+      ] as const) {
+        await page.getByRole("button", { name: lens, exact: true }).click();
+        await expect(
+          page.getByRole("button", { name: lens, exact: true }),
+        ).toHaveAttribute("aria-pressed", "true");
+        await expect(
+          page.getByRole("columnheader", {
+            name: lens === "Preparar" ? "Participantes" : "Aportaciones",
+            exact: true,
+          }),
+        ).toBeAttached();
+        await page.evaluate(async () => {
+          await document.fonts.ready;
+          scrollTo(0, 0);
+        });
+        const metrics = await page.evaluate(() => {
+          const rows = [
+            ...document.querySelectorAll<HTMLElement>(".an-question-row"),
+          ];
+          const question = rows[0]!.querySelector("strong")!;
+          const q = getComputedStyle(question);
+          const visible = (el: Element) =>
+            el.checkVisibility() &&
+            el.getBoundingClientRect().width > 1 &&
+            el.getBoundingClientRect().height > 1;
+          const controls = [
+            ...document.querySelectorAll(
+              "main button,main input,main select,main summary",
+            ),
+          ]
+            .filter(visible)
+            .filter((el) => !(el as HTMLInputElement).disabled);
+          const tooSmall = controls
+            .map((el) => {
+              const target = el.matches(
+                'input[type="checkbox"],input[type="radio"]',
+              )
+                ? (el.closest("label") ?? el)
+                : el;
+              const r = target.getBoundingClientRect();
+              return {
+                name: el.getAttribute("aria-label") ?? el.textContent?.trim(),
+                width: r.width,
+                height: r.height,
+              };
+            })
+            .filter(
+              (r) =>
+                r.width < (innerWidth < 900 ? 44 : 24) ||
+                r.height < (innerWidth < 900 ? 44 : 24),
+            );
+          const text = [...document.querySelectorAll("main *")].filter(
+            (el) =>
+              visible(el) &&
+              !el.closest(".sr-only,svg,[aria-hidden=true],option") &&
+              !(innerWidth < 900 && el.closest("thead")) &&
+              [...el.childNodes].some(
+                (n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim(),
+              ),
+          );
+          return {
+            width: innerWidth,
+            height: innerHeight,
+            scrollWidth: document.documentElement.scrollWidth,
+            rows: rows.length,
+            fullyVisibleRows: rows.filter(
+              (el) =>
+                el.getBoundingClientRect().top >= 0 &&
+                el.getBoundingClientRect().bottom <= innerHeight,
+            ).length,
+            firstQuestionBottom: question.getBoundingClientRect().bottom,
+            rowDisplay: getComputedStyle(rows[0]!).display,
+            questionSize: parseFloat(q.fontSize),
+            questionWeight: q.fontWeight,
+            questionLines:
+              question.getBoundingClientRect().height /
+              parseFloat(q.lineHeight),
+            headerPosition: getComputedStyle(
+              document.querySelector("thead th")!,
+            ).position,
+            tooSmall,
+            smallText: text
+              .filter((el) => parseFloat(getComputedStyle(el).fontSize) < 12.5)
+              .map((el) => el.textContent?.slice(0, 70)),
+            squeezedText: text
+              .filter((el) => el.getBoundingClientRect().width < 8)
+              .map((el) => el.textContent?.slice(0, 70)),
+            overflow: text
+              .filter((el) => {
+                const r = el.getBoundingClientRect();
+                return r.left < -1 || r.right > innerWidth + 1;
+              })
+              .map((el) => el.textContent?.slice(0, 70)),
+          };
+        });
+        expect(metrics.scrollWidth).toBeLessThanOrEqual(width + 1);
+        expect(metrics.rows).toBe(40);
+        expect(metrics.questionSize).toBeGreaterThanOrEqual(15);
+        expect(metrics.smallText).toEqual([]);
+        expect(metrics.squeezedText).toEqual([]);
+        expect(metrics.overflow).toEqual([]);
+        expect(metrics.tooSmall).toEqual([]);
+        if (width === 1440) {
+          expect(metrics.fullyVisibleRows).toBeGreaterThanOrEqual(5);
+          expect(metrics.questionLines).toBeLessThanOrEqual(2.01);
+        }
+        if (width >= 900) {
+          expect(metrics.rowDisplay).toBe("table-row");
+          expect(metrics.headerPosition).toBe("sticky");
+          await page.evaluate(() => scrollTo(0, 600));
+          const header = await page.locator("thead th").first().boundingBox();
+          expect(header!.y).toBeGreaterThanOrEqual(0);
+          expect(header!.y).toBeLessThanOrEqual(5);
+          await page.evaluate(() => scrollTo(0, 0));
+        } else {
+          expect(metrics.rowDisplay).toBe("grid");
+          if (width >= 390)
+            expect(metrics.firstQuestionBottom).toBeLessThanOrEqual(
+              height - (width < 760 ? 76 : 0),
+            );
+        }
+        const axe = await new AxeBuilder({ page })
+          .withTags([
+            "wcag2a",
+            "wcag2aa",
+            "wcag21a",
+            "wcag21aa",
+            "wcag22aa",
+            "best-practice",
+          ])
+          .analyze();
+        expect(axe.violations).toEqual([]);
+        await mkdir(`${output}/cp3`, { recursive: true });
+        await page.screenshot({ path: `${output}/cp3/${id}-${width}.png` });
+        let reflowQuestionBounds;
+        if (width === 320) {
+          // Product-approved reflow check: retain all editor modes (DEV-16)
+          // and verify the complete question after scrolling, clear of fixed navigation.
+          const first = page
+            .locator(".an-question-row .qe-compact-row")
+            .first();
+          await first.evaluate((el) => el.scrollIntoView({ block: "center" }));
+          reflowQuestionBounds = await first.boundingBox();
+          expect(reflowQuestionBounds!.y).toBeGreaterThanOrEqual(0);
+          expect(
+            reflowQuestionBounds!.y + reflowQuestionBounds!.height,
+          ).toBeLessThanOrEqual(height - 76);
+          await page.screenshot({
+            path: `${output}/cp3/${id}-reflow-${width}.png`,
+          });
+          await page.evaluate(() => scrollTo(0, 0));
+        }
+        measurements.push({
+          id,
+          ...metrics,
+          reflowQuestionBounds,
+          axeViolations: axe.violations.length,
+        });
+      }
+      const filter = page.getByRole("button", { name: "Filtros", exact: true });
+      if (width < 900) {
+        await expect(
+          page.getByLabel("Área responsable", { exact: true }),
+        ).toBeHidden();
+        await filter.focus();
+        await page.keyboard.press("Enter");
+        await expect(
+          page.getByLabel("Área responsable", { exact: true }),
+        ).toBeVisible();
+      }
+      const topic = page.locator(".qe-outline > details > summary");
+      await topic.focus();
+      await page.keyboard.press("Enter");
+      await expect(
+        page.getByRole("button", { name: /^Todos los temas/ }),
+      ).toBeVisible();
+      await page.getByRole("button", { name: /^Todos los temas/ }).focus();
+      await page.keyboard.press("Escape");
+      await expect(topic).toBeFocused();
+      if (width < 900) {
+        await page.getByLabel("Área responsable", { exact: true }).focus();
+        await page.keyboard.press("Escape");
+        await expect(filter).toBeFocused();
+        await expect(
+          page.getByLabel("Área responsable", { exact: true }),
+        ).toBeHidden();
+      }
+    });
+    test(`selección y revisión del lote sin confirmar ${width}`, async ({
+      page,
+      baseURL,
+    }) => {
+      await page.setViewportSize({ width, height });
+      await login(page, analyst);
+      const path = `/projects/${projectId}/editor`;
+      await page.goto(path);
+      await expect(page).toHaveURL(new URL(path, baseURL!).href);
+      await expect(page.locator("main h1")).toHaveText("Cuestionario");
+      await page.getByRole("tab", { name: "Organizar", exact: true }).click();
+      await page.getByText("Seleccionar preguntas", { exact: true }).click();
+      await page
+        .getByRole("button", {
+          name: "Seleccionar esta página (40)",
+          exact: true,
+        })
+        .click();
+      await expect(
+        page.getByText("40 preguntas seleccionadas", { exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByText("40 en esta página · 0 fuera de esta página", {
+          exact: true,
+        }),
+      ).toBeVisible();
+      const bar = page.locator(".ac-selection-bar");
+      const bounds = await bar.boundingBox();
+      expect(bounds!.y).toBeGreaterThanOrEqual(0);
+      expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(height);
+      expect(await bar.getByRole("button").count()).toBeGreaterThanOrEqual(4);
+      const selectionMetrics = await surfaceMetrics(page, ".ac-selection-bar");
+      const selectionAxe = await new AxeBuilder({ page })
+        .withTags([
+          "wcag2a",
+          "wcag2aa",
+          "wcag21a",
+          "wcag21aa",
+          "wcag22aa",
+          "best-practice",
+        ])
+        .analyze();
+      expect(selectionAxe.violations).toEqual([]);
+      await page.screenshot({
+        path: `${output}/cp3/V-02c-selection-${width}.png`,
+      });
+      const trigger = page.getByRole("button", {
+        name: "Publicar seleccionadas",
+        exact: true,
+      });
+      await trigger.click();
+      const dialog = page.getByRole("dialog", {
+        name: "Publicar preguntas seleccionadas",
+      });
+      await expect(dialog).toBeVisible();
+      await page
+        .getByRole("button", { name: "Revisar lote", exact: true })
+        .click();
+      await expect(
+        page.getByRole("heading", { name: "Revisión del lote", exact: true }),
+      ).toBeFocused();
+      await expect(
+        page.getByRole("button", { name: /^Confirmar / }),
+      ).toBeDisabled();
+      await page.evaluate(() => document.fonts.ready);
+      const axe = await new AxeBuilder({ page })
+        .withTags([
+          "wcag2a",
+          "wcag2aa",
+          "wcag21a",
+          "wcag21aa",
+          "wcag22aa",
+          "best-practice",
+        ])
+        .analyze();
+      expect(axe.violations).toEqual([]);
+      const dialogMetrics = await surfaceMetrics(page, "dialog[open]");
+      await page.screenshot({ path: `${output}/cp3/V-02c-${width}.png` });
+      await page.keyboard.press("Escape");
+      await expect(trigger).toBeFocused();
+      await page
+        .getByRole("button", { name: "Limpiar selección", exact: true })
+        .click();
+      await expect(
+        page.getByText("0 preguntas seleccionadas", { exact: true }),
+      ).toBeFocused();
+      measurements.push({
+        id: "V-02c",
+        width,
+        height,
+        selectionBounds: bounds,
+        selectionMetrics,
+        selectionAxeViolations: selectionAxe.violations.length,
+        dialogMetrics,
+        axeViolations: axe.violations.length,
+        confirmed: false,
+      });
+    });
+    test(`autoría, campo principal, tipos y pie ${width}`, async ({
+      page,
+      baseURL,
+    }) => {
+      await page.setViewportSize({ width, height });
+      await login(page, analyst);
+      const path = `/projects/${projectId}/editor`;
+      await page.goto(path);
+      await expect(page).toHaveURL(new URL(path, baseURL!).href);
+      await expect(page.locator("main h1")).toHaveText("Cuestionario");
+      await page.getByRole("tab", { name: "Organizar", exact: true }).click();
+      await page
+        .getByRole("button", { name: "Nueva pregunta", exact: true })
+        .click();
+      const dialog = page.getByRole("dialog", {
+        name: "Agregar pregunta al cuestionario",
+      });
+      await expect(dialog).toBeVisible();
+      const question = page.getByRole("textbox", {
+        name: "Pregunta",
+        exact: true,
+      });
+      await expect(question).toBeFocused();
+      await question.fill(
+        "¿Se debe exigir garantía de anticipo cuando el proveedor solicita un pago adelantado?",
+      );
+      const hero = await question.evaluate((el) => ({
+        height: el.getBoundingClientRect().height,
+        size: parseFloat(getComputedStyle(el).fontSize),
+        family: getComputedStyle(el).fontFamily,
+      }));
+      expect(hero.height).toBeGreaterThanOrEqual(104);
+      expect(hero.size).toBeGreaterThanOrEqual(20);
+      expect(hero.family).toContain("Plex Sans");
+      await expect(page.getByRole("radio")).toHaveCount(8);
+      await page
+        .getByRole("radio", { name: "Una opción", exact: true })
+        .check();
+      for (const [index, label] of [
+        "Solo si el contrato supera 500 UMA",
+        "Siempre, sin importar el monto",
+        "Nunca: basta el visto bueno del área",
+      ].entries()) {
+        await page
+          .getByRole("button", { name: "Agregar opción", exact: true })
+          .click();
+        await page
+          .getByRole("textbox", {
+            name: `Texto de opción ${index + 1}`,
+            exact: true,
+          })
+          .fill(label);
+      }
+      await question.focus();
+      await dialog.evaluate((el) => (el.scrollTop = 0));
+      const footer = dialog.locator("footer");
+      await expect(
+        footer.getByRole("button", { name: "Crear pregunta", exact: true }),
+      ).toBeVisible();
+      const r = await footer.boundingBox();
+      expect(r!.y + r!.height).toBeLessThanOrEqual(height);
+      const axe = await new AxeBuilder({ page })
+        .withTags([
+          "wcag2a",
+          "wcag2aa",
+          "wcag21a",
+          "wcag21aa",
+          "wcag22aa",
+          "best-practice",
+        ])
+        .analyze();
+      expect(axe.violations).toEqual([]);
+      const formMetrics = await surfaceMetrics(page, "dialog[open]");
+      await page.screenshot({ path: `${output}/cp3/V-03-${width}.png` });
+      measurements.push({
+        id: "V-03",
+        width,
+        height,
+        hero,
+        footerBounds: r,
+        formMetrics,
+        axeViolations: axe.violations.length,
+        saved: false,
+      });
     });
   }
 });

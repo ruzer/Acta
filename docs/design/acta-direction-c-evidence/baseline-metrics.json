@@ -768,5 +768,230 @@
     "viewportWidth": 320,
     "bodyHeight": 77828,
     "file": "cp2/V-01b-admin-320-before.png"
+  },
+  {
+    "id": "V-02b",
+    "width": 1440,
+    "height": 900,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-02b-1440-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-02-analysis",
+    "width": 1440,
+    "height": 900,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-02-analysis-1440-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-02c-selection",
+    "width": 1440,
+    "height": 900,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-02c-selection-1440-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-02c",
+    "width": 1440,
+    "height": 900,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-02c-1440-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-03",
+    "width": 1440,
+    "height": 900,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-03-1440-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-02b",
+    "width": 1024,
+    "height": 768,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-02b-1024-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-02-analysis",
+    "width": 1024,
+    "height": 768,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-02-analysis-1024-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-02c-selection",
+    "width": 1024,
+    "height": 768,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-02c-selection-1024-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-02c",
+    "width": 1024,
+    "height": 768,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-02c-1024-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-03",
+    "width": 1024,
+    "height": 768,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-03-1024-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-02b",
+    "width": 768,
+    "height": 1024,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-02b-768-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-02-analysis",
+    "width": 768,
+    "height": 1024,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-02-analysis-768-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-02c-selection",
+    "width": 768,
+    "height": 1024,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-02c-selection-768-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-02c",
+    "width": 768,
+    "height": 1024,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-02c-768-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-03",
+    "width": 768,
+    "height": 1024,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-03-768-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-02b",
+    "width": 390,
+    "height": 844,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-02b-390-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-02-analysis",
+    "width": 390,
+    "height": 844,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-02-analysis-390-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-02c-selection",
+    "width": 390,
+    "height": 844,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-02c-selection-390-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-02c",
+    "width": 390,
+    "height": 844,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-02c-390-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-03",
+    "width": 390,
+    "height": 844,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-03-390-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-02b",
+    "width": 320,
+    "height": 640,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-02b-320-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-02-analysis",
+    "width": 320,
+    "height": 640,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-02-analysis-320-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-02c-selection",
+    "width": 320,
+    "height": 640,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-02c-selection-320-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-02c",
+    "width": 320,
+    "height": 640,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-02c-320-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
+  },
+  {
+    "id": "V-03",
+    "width": 320,
+    "height": 640,
+    "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/editor",
+    "file": "cp3/V-03-320-before.png",
+    "baselineCommit": "e76eead",
+    "note": "Después de CP2 y antes de cambios CP3; no es base v0.5.0 intacta."
   }
 ]

@@ -34,6 +34,9 @@ it.each([10, 50, 120, 304])(
   "selecciona los %i resultados manteniendo solo una página de controles",
   async (count) => {
     const user = setup(count);
+    await user.click(
+      screen.getByText("Seleccionar preguntas", { exact: true }),
+    );
     expect(
       screen.getAllByRole("checkbox", { name: /Seleccionar pregunta:/ }),
     ).toHaveLength(Math.min(40, count));
@@ -54,6 +57,7 @@ it.each([10, 50, 120, 304])(
 );
 it("distingue página y resultados; mantiene selección al paginar y la limpia al filtrar", async () => {
   const user = setup(120);
+  await user.click(screen.getByText("Seleccionar preguntas", { exact: true }));
   await user.click(
     screen.getByRole("button", { name: "Seleccionar esta página (40)" }),
   );
@@ -117,6 +121,8 @@ it("el grupo incluye seguimientos fuera de página sin confundir selección e in
 });
 it("selecciona el tema completo explícitamente; filtrar por área limpia la selección", async () => {
   const user = setup(50);
+  await user.click(screen.getByText("Temas", { exact: true }));
+  await user.click(screen.getByText("Seleccionar preguntas", { exact: true }));
   await user.click(
     within(
       screen.getByRole("navigation", { name: "Temas del cuestionario" }),

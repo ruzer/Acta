@@ -222,6 +222,8 @@ for (const width of [1440, 390]) {
     await cdp.send("Emulation.setCPUThrottlingRate", { rate: 6 });
     await page.goto(`/projects/${fixture.project.id}/editor`);
     await page.getByLabel("Buscar preguntas", { exact: true }).fill("NEXT-WB");
+    if (width < 900)
+      await page.getByRole("button", { name: "Filtros", exact: true }).click();
     await page
       .getByLabel("Área responsable", { exact: true })
       .selectOption(fixture.area.id);

@@ -11,6 +11,7 @@ import type {
 } from "@requirements/contracts";
 import { api, ApiFailure } from "../../api";
 import { Alert, Button, Checkbox, Dialog, Radio, Select } from "../../ui";
+import { StatusChip } from "../../ui/semantic";
 type Command = BulkAreaInput | BulkParticipantsInput | BulkPublishInput;
 const titles: Record<BulkOperation, string> = {
   ASSIGN_AREA: "Asignar área a las preguntas",
@@ -421,7 +422,22 @@ export function BulkDialog({
               <ul className="qe-bulk-items">
                 {preview.items.map((item) => (
                   <li key={item.questionId}>
-                    <strong>{item.title}</strong> · {states[item.state]}
+                    <div className="ac-bulk-item-heading">
+                      <strong>{item.title}</strong>
+                      <StatusChip
+                        tone={
+                          item.state === "BLOCKED"
+                            ? "danger"
+                            : item.state === "WARNING"
+                              ? "warning"
+                              : item.state === "READY"
+                                ? "success"
+                                : "neutral"
+                        }
+                      >
+                        {states[item.state]}
+                      </StatusChip>
+                    </div>
                     {item.errors.map((e, index) => (
                       <div className="qe-bulk-issue" key={index}>
                         <p>{e.message}</p>

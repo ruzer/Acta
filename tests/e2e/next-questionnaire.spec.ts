@@ -142,6 +142,7 @@ for (const count of [12, 54, 304]) {
         exact: true,
       }),
     ).toHaveCount(0);
+    await page.getByText("Seleccionar preguntas", { exact: true }).click();
     await page
       .getByRole("button", {
         name: `Seleccionar esta página (${Math.min(count - 1, 40)})`,

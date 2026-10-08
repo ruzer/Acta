@@ -469,16 +469,6 @@
   border: 1px solid var(--av-line);
   border-radius: 6px;
 }
-.qe-selectable-row {
-  display: flex;
-  align-items: stretch;
-  min-width: 0;
-}
-.qe-selectable-row > .qe-compact-row {
-  flex: 1;
-  min-width: 0;
-  width: auto;
-}
 .qe-row-checkbox {
   display: flex;
   align-items: center;

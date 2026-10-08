@@ -18,7 +18,7 @@ Solo presentación frontend. Se conservan contratos, autorización, dominio, bac
 | Preparación                               | EN CURSO                   | Base y árbol auditados; rama creada; PostgreSQL desechable nuevo; migraciones oficiales aplicadas                 |
 | 1. Tokens, tipografía, componentes        | LISTO PARA REVISIÓN        | Tipos/lint/build, 170 tests frontend, humo 7/7, visual 5/5 y axe 0; aceptación humana pendiente                   |
 | 2. Shell, navegación, Atención            | LISTO PARA REVISIÓN        | Gate visual 12/12, 231 unit/component, 11 workbench, 3 simplicity, humo 7 casos; límites ARCHIVED descritos abajo |
-| 3. Cuestionario / Organizar / lotes       | NO INICIADO                | Depende del checkpoint 2                                                                                          |
+| 3. Cuestionario / Organizar / lotes | LISTO PARA REVISIÓN | 174 unit, 28 E2E funcionales, 15 visuales, 3 de fixture independiente; cinco anchos y DEV-26 aprobada |
 | 4. Revisión / aportaciones / solo lectura | NO INICIADO                | Depende del checkpoint 3; después requiere revisión humana                                                        |
 | 5. Conflictos / aclaraciones / decisiones | ESPERA APROBACIÓN POST-CP4 | No implementar todavía                                                                                            |
 | 6. Participante / invitado                | ESPERA APROBACIÓN POST-CP4 | No implementar todavía                                                                                            |
@@ -60,13 +60,13 @@ Se sembraron por API, en una segunda base desechable aislada, los casos de 1 apo
 
 ## Matriz de aceptación
 
-Los checkpoints 1–2 tienen evidencia React. Las filas de los checkpoints 3–8 siguen pendientes. V-01b ADMIN se comprobó en navegador; ARCHIVED solo tiene cobertura de derivación unitaria (DEV-24), sin captura de un proyecto archivado real. No se atribuyen al producto resultados del prototipo.
+Los checkpoints 1–3 tienen evidencia React. Las filas de los checkpoints 4–8 siguen pendientes. V-01b ADMIN se comprobó en navegador; ARCHIVED solo tiene cobertura de derivación unitaria (DEV-24), sin captura de un proyecto archivado real. No se atribuyen al producto resultados del prototipo.
 
 | Filas                      | Pantallas / variantes                                      | Checkpoint | Estado                                                    |
 | -------------------------- | ---------------------------------------------------------- | ---------- | --------------------------------------------------------- |
 | V-00 base                  | Tokens y componentes                                       | 1          | LISTO PARA REVISIÓN                                       |
 | V-00, V-01, V-01b          | Shell; Atención analista y ADMIN; derivación ARCHIVED      | 2          | LISTO PARA REVISIÓN con DEV-03/19/20/24 y límite ARCHIVED |
-| V-02, V-02b, V-02c, V-03   | Organizar 304, Preparar, lote, autoría                     | 3          | PENDIENTE                                                 |
+| V-02, V-02b, V-02c, V-03 | Organizar 304, Preparar, lote, autoría | 3 | LISTO PARA REVISIÓN con DEV-09/16/26 |
 | V-04…V-08                  | Revisión 1, 3, 12, 50, 0 aportaciones                      | 4          | PENDIENTE                                                 |
 | V-13/V-14 composición base | ADMIN completo sin acciones; VIEWER filtrado               | 4          | PENDIENTE                                                 |
 | V-09…V-14 detalle          | Contraste, aclaraciones, decisiones y consulta             | 5          | POST-APROBACIÓN                                           |
@@ -98,7 +98,7 @@ Pendientes lector de pantalla, zoom real, colores forzados, modo oscuro, disposi
 
 ## Revisión de alcance y publicación
 
-Solo presentación frontend y verificación/documentación. Backend, contratos, Prisma y almacenamiento: diff vacío respecto de v0.5.0. No hay PR ni push. **READY FOR REVIEW: NO** para el conjunto; checkpoints 1–2 listos para revisión técnica, checkpoints 3–4 pendientes antes de la revisión humana obligatoria.
+Solo presentación frontend y verificación/documentación. Backend, contratos, Prisma y almacenamiento: diff vacío respecto de v0.5.0. No hay PR ni push. **READY FOR REVIEW: NO** para el conjunto; checkpoints 1–3 listos para revisión técnica, checkpoint 4 pendiente antes de la revisión humana obligatoria.
 
 ## Checkpoint 1 — base visual y componentes
 
@@ -249,3 +249,102 @@ Detectores 3 y 12: no se disparan; desaparecen las cuatro tarjetas antes de preg
 **Límites:** ARCHIVED cubierto en tabla de verdad, no en navegador; distribución 304 del fixture y conteos reales difieren de los orientativos de C; no se inventan avisos de actualización, extractos ni contadores de navegación. El menú móvil añade acceso explícito a la cuenta para conservar operaciones reales. Aceptación visual y editorial humana pendiente. DEV-25 sigue pendiente, no bloquea CP3.
 
 Cierre técnico CP2: Gitleaks 8.30.1 sobre los 662 archivos candidatos del snapshot: **0 hallazgos**. Enlaces relativos de este informe: **18/18** resueltos. `git diff --check`: PASS. Hashes de documentos ajenos y stash previo: sin cambios. El escaneo no incorpora `.env`, bases ni logs de prueba.
+
+
+## Checkpoint 3 — registro histórico de implementación (resultados finales más abajo)
+
+Base del checkpoint: `e76eead`. Se capturaron Preparar, Analizar, selección de 40, diálogo de publicación sin confirmar y autoría sin guardar a los cinco anchos antes de modificar estas pantallas; sus 25 registros están en `baseline-metrics.json`. Son capturas posteriores a CP2; la línea base original v0.5.0 se conserva aparte. Tabla semántica con columnas por enfoque, filtros móviles y barra de selección en implementación. Solo presentación y controles de foco; consultas, contratos y operaciones conservados. Aún no hay aceptación ni commit CP3: pendientes métricas, comparación visual, pruebas completas, autoría y diálogos.
+
+### Libro de aserciones CP3 (en curso)
+
+- `QuestionnairePresentation`: la prueba de 0/1/3/12 aportaciones debe elegir **Analizar**, porque Preparar ahora presenta participantes asignados. Cambio intencional exigido por las columnas por lente. Se conservan todas las aserciones de números, carga, error y navegación; se añaden aserciones de ambas cabeceras. Resultado inicial: 1 fallo por esa expectativa antigua y 6 archivos verdes; no era un cambio de contrato.
+- La primera medición visual encontró una colisión de cascada con `editor.css`: el contenedor mantenía 210 px de ancho. Se corrige la especificidad del contenedor completo; no se reduce tipografía. La medición se repetirá antes de aceptar.
+- En móvil, los tres alcances reales de selección y su explicación se conservan en un desplegable **Seleccionar preguntas**; las casillas individuales y el alcance de la selección activa permanecen visibles. C no representa esos tres alcances completos. Adaptación de composición para conservarlos sin desplazar toda la lista bajo controles; no cambia los conjuntos seleccionados. Pendiente revisión visual humana.
+
+- `BulkSelection`, `QuestionnairePresentation`, `bulk.spec` y `next-questionnaire.spec`: abren **Seleccionar preguntas** antes de comprobar los mismos alcances; no cambian los conteos, exclusiones, condiciones ni resultados. `next-workbench` abre Filtros bajo 900 px antes de elegir área/publicación y conserva las aserciones de retorno. Desde **Revisar publicación conjunta**, el alcance se abre automáticamente, conservando el acceso y foco ya probado por `simplicity`.
+- Autoría: pregunta → tipo → configuración dependiente → ubicación/obligatoriedad → identificación → avanzadas; pie Cancelar → Crear/Guardar, con las mismas acciones y etiquetas. Los identificadores reales siguen siendo obligatorios. DEV-09: vista previa en vivo opcional no implementada; Vista previa del cuestionario existente permanece. Pendiente comparación final.
+
+### Evidencia parcial CP3
+
+- Frontend unit/component: **174/174, 22 archivos**, tras los cambios de presentación y alcance. Lint PASS; tipos PASS después de corregir una opción exclusiva de Playwright usada por error en Testing Library. Build PASS, con el aviso preexistente de tamaño del bundle.
+- Medición exploratoria (no gate final): Preparar 1440×900 muestra **5 filas completas**, quinta termina en y=894.53; tabla sticky, 40 filas. Axe **0** en Preparar y autoría a los cinco anchos. Falta integrar todas las medidas en la suite visual y mirar cada comparación.
+- E2E en curso: `bulk` cambió a 390 px durante su inspección responsive y después intentó elegir área sin abrir el nuevo panel **Filtros**. Fallo intencional de recorrido; se añade abrir el panel, manteniendo la comprobación de las 304 áreas. Su siguiente caso depende del estado del primero y quedó sin cambios aplicables tras reiniciarse el worker; se repetirá el archivo completo una vez corregido el recorrido, sin retries ni cambios de timeout.
+- Los originales del fixture y las capturas previas permanecen sin cambios. No se confirmó ninguna publicación sobre el proyecto visual de referencia.
+
+
+## Checkpoint 3 — cuestionario, selección y autoría (LISTO PARA REVISIÓN)
+
+Base del checkpoint: `e76eead`. Las 25 capturas «before» se tomaron después de CP2 y antes de modificar estas pantallas; los registros identifican ese commit en `baseline-metrics.json`. La línea base original de v0.5.0 permanece separada. No hay aceptación visual humana del checkpoint todavía.
+
+- **VISUAL ONLY:** Organizar reemplaza las filas flex por una tabla de seis columnas; cada tema forma su propio `tbody` con encabezado de grupo. Se conserva el orden original de página. Pregunta primero, metadatos subordinados, contexto de seguimientos, columnas según Preparar/Analizar y cabecera fija. Bajo 900 px las mismas filas refluyen en tarjetas.
+- **FRONTEND BEHAVIOR CHANGE:** filtros accesibles mediante un botón en móvil y selección por página/resultados/tema dentro de «Seleccionar preguntas». Casillas individuales, avisos y alcances reales se conservan. La barra activa muestra cantidad, alcance y las cinco acciones existentes; publicar es la acción primaria. No cambia ninguna operación ni cálculo de selección.
+- **VISUAL ONLY:** autoría prioriza pregunta → tipo → configuración dependiente → ubicación/obligatoriedad → identificación → avanzadas. Ocho radios nativos en tarjetas, pie de acciones persistente, mismos handlers, Zod, campos técnicos, errores, bloqueo de salida y guardado. DEV-09: la vista previa en vivo opcional no se implementa; Vista previa del cuestionario permanece.
+- **Conservación:** 304 preguntas, paginación de 40, grupos, selección, filtros, contexto y scroll al volver, inspector, invitación desde selección, los tres modos reales del editor, MATRIX, condiciones, `previewHash`, atomicidad y conflictos de versión. No hay consultas nuevas ni cambios de contrato. El proyecto visual no recibió guardados ni confirmaciones de lote.
+
+### Pruebas y métricas observadas
+
+| Gate | Resultado final |
+| --- | --- |
+| Lint / typecheck / build | PASS; bundle frontend 743,64 kB con aviso preexistente >500 kB |
+| Unit/component frontend | 174/174, 22 archivos |
+| E2E editor/workbench/simplicity | 22/22 |
+| E2E bulk/next-questionnaire | 6/6 |
+| Suite visual CP3 | 15/15; 20 registros de métricas |
+| Suite CP3 con fixture propio desde API, sin fixture privado | 3/3, escritorio |
+| Axe | 0 en las vistas medidas, barra de selección y diálogos a los cinco anchos |
+| Teclado/foco | Escape devuelve foco en filtros/temas/lote; limpiar selección enfoca estado; controles existentes conservados |
+
+[Mediciones completas](acta-direction-c-evidence/metrics-cp3.json). La integración PostgreSQL de base permanece en 113/113; no se repitió esa suite completa porque no hay cambios backend. Los E2E sí usan API y PostgreSQL reales del entorno desechable.
+
+| Ancho | Filas completas inicialmente (Preparar / Analizar) | Lectura de primera pregunta | Reflujo/objetivos |
+| --- | --- | --- | --- |
+| 1440 | 5 / 5 | Completa, borde inferior y=535,78 | Sin overflow; ≥24 px |
+| 1024 | 3 / 3 | Completa, y=551,78 | Sin overflow; ≥24 px |
+| 768 | 1 / 1 | Completa, y=605,83 / 627,42 | Sin overflow; ≥44 px |
+| 390 | 1 / 1 | Completa, y=572,31 / 589,81 | Sin overflow; ≥44 px |
+| 320 | 0 / 0 | Completa tras desplazamiento; y=277,91…361,91 | Sin overflow; ≥44 px; DEV-26 |
+
+Pregunta de autoría: 20 px Plex Sans, campo de 113 px de alto, pie visible en todos los anchos. Textos medidos ≥12,5 px; sin texto comprimido. La densidad de cinco filas se exige a 1440×900, no en móvil.
+
+### Revisión visual comparada
+
+Se abrieron y observaron las 25 comparaciones finales, además de las dos capturas de reflujo a 320 px. Referencia izquierda, React derecha. A 320 se normaliza la altura de comparación a 640 px porque la referencia tiene escala de píxeles 2×; las capturas originales no se modifican. Las comparaciones restantes usan el límite de altura 900 px.
+
+- Analizar: [1440](acta-direction-c-evidence/cp3/V-02-compare-1440.png), [1024](acta-direction-c-evidence/cp3/V-02-compare-1024.png), [768](acta-direction-c-evidence/cp3/V-02-compare-768.png), [390](acta-direction-c-evidence/cp3/V-02-compare-390.png), [320](acta-direction-c-evidence/cp3/V-02-compare-320.png).
+- Preparar: [1440](acta-direction-c-evidence/cp3/V-02b-compare-1440.png), [1024](acta-direction-c-evidence/cp3/V-02b-compare-1024.png), [768](acta-direction-c-evidence/cp3/V-02b-compare-768.png), [390](acta-direction-c-evidence/cp3/V-02b-compare-390.png), [320](acta-direction-c-evidence/cp3/V-02b-compare-320.png).
+- Selección activa: [1440](acta-direction-c-evidence/cp3/V-02c-selection-compare-1440.png), [1024](acta-direction-c-evidence/cp3/V-02c-selection-compare-1024.png), [768](acta-direction-c-evidence/cp3/V-02c-selection-compare-768.png), [390](acta-direction-c-evidence/cp3/V-02c-selection-compare-390.png), [320](acta-direction-c-evidence/cp3/V-02c-selection-compare-320.png).
+- Preview de lote: [1440](acta-direction-c-evidence/cp3/V-02c-compare-1440.png), [1024](acta-direction-c-evidence/cp3/V-02c-compare-1024.png), [768](acta-direction-c-evidence/cp3/V-02c-compare-768.png), [390](acta-direction-c-evidence/cp3/V-02c-compare-390.png), [320](acta-direction-c-evidence/cp3/V-02c-compare-320.png).
+- Autoría: [1440](acta-direction-c-evidence/cp3/V-03-compare-1440.png), [1024](acta-direction-c-evidence/cp3/V-03-compare-1024.png), [768](acta-direction-c-evidence/cp3/V-03-compare-768.png), [390](acta-direction-c-evidence/cp3/V-03-compare-390.png), [320](acta-direction-c-evidence/cp3/V-03-compare-320.png).
+
+Reflujo autorizado: [Analizar 320](acta-direction-c-evidence/cp3/V-02-reflow-320.png), [Preparar 320](acta-direction-c-evidence/cp3/V-02b-reflow-320.png). No existe una captura específica de diálogo de lote abierto en C: V-02c contrasta la gramática del cuestionario y del diálogo compartido, conservando íntegro el preview real; no se afirma equivalencia de píxeles ni de datos.
+
+| Aspecto | V-02 Analizar | V-02b Preparar | V-02c selección/lote | V-03 autoría |
+| --- | --- | --- | --- | --- |
+| Jerarquía | PASA: pregunta antes de meta | PASA: pregunta antes de asignación | PASA: alcance → acciones → resultado | PASA: pregunta domina formulario |
+| Composición | PASA con DEV-16: modos reales conservados | PASA con DEV-16 | PASA: barra contextual + diálogo real | PASA con DEV-09: sin preview opcional |
+| Tipografía | PASA: Sans 15/12,5 px | PASA: Sans 15/12,5 px | PASA: etiquetas legibles | PASA: pregunta 20 px Sans |
+| Espaciado | PASA: columnas estables | PASA: filas y grupos | PASA: acciones separadas | PASA: secciones progresivas |
+| Densidad | PASA: 5 filas a 1440 | PASA: 5 filas a 1440 | PASA: datos y acciones sin recorte; barra móvil más alta por 5 acciones reales | PASA: contenido desplazable, pie fijo |
+| Agrupación | PASA: tema/seguimientos | PASA: `tbody` por tema | PASA: alcance explícito, resultados plegables | PASA: tipo y configuración asociados |
+| Acciones | PASA: una acción por fila | PASA: editar borrador o revisar publicada | PASA: publicar primario, otras acciones conservadas | PASA: Cancelar → Crear/Guardar |
+| Estados | PASA: glifo + palabra, carga/error ≠ cero | PASA: publicación separada de respuesta | PASA: NOOP no permite confirmar | PASA: selección de tipo y cambios sin guardar |
+| Responsive | PASA con DEV-26 a 320 | PASA con DEV-26 a 320 | PASA: controles ≥44; diálogo desplazable a 320 | PASA: dos columnas móviles, pregunta completa |
+
+Los datos orientativos de C (252 publicadas y avatares) se sustituyen por valores verdaderos del fixture (304 publicadas, conteos de asignación/aportaciones reales). No se inventan personas ni estados. La barra de selección móvil conserva las cinco operaciones y ocupa más altura que la referencia; no elimina el acceso por scroll a la lista. La aprobación visual humana sigue pendiente.
+
+### Libro de aserciones e incidencias CP3
+
+1. `QuestionnairePresentation.test.tsx`: Preparar presenta participantes; para verificar 0/1/3/12 aportaciones se activa Analizar. Se mantienen las assertions de números/carga/error/navegación y se añaden las dos cabeceras de columnas (V-02/V-02b).
+2. `BulkSelection.test.tsx`, `QuestionnairePresentation.test.tsx`, `bulk.spec.ts`, `next-questionnaire.spec.ts`: abrir «Seleccionar preguntas» antes de usar los mismos alcances. Mismos conteos, exclusiones, condiciones y resultados. Desde Revisar publicación conjunta el panel se abre automáticamente; `simplicity` conserva sus assertions.
+3. `next-workbench.spec.ts` y `bulk.spec.ts`: abrir Filtros a <900 px antes de elegir área/publicación; mismos valores y comprobación de contexto, selección y 304 preguntas. El primer pase bulk falló por no abrir el panel; el archivo completo pasó tras actualizar ese recorrido, sin retries.
+4. La primera medición reveló un contenedor reducido a 210 px por cascada antigua: se corrigió la implementación CSS, no los criterios. Se corrigió también el salto de palabra de «Requiere aclaración» en tablet.
+5. **DEV-26, autorizada por producto el 2026-10-08:** una assertion visual nueva pedía toda la primera pregunta sin scroll también a 320×640, requisito adicional al plan. El usuario autorizó comprobar a 320 el reflujo y la lectura completa después de desplazarse, conservando todos los controles, las pruebas previas y las cinco filas de escritorio. Se registra la posición inicial real y la posición tras scroll. Esta autorización no equivale a aceptación visual global del checkpoint.
+6. Un pase de 22 E2E obtuvo 21/22: la compilación simultánea de contratos disparó HMR y reinició el inspector mientras axe lo inspeccionaba. El registro de Vite confirmó las invalidaciones; la prueba aislada pasó sin cambios. Se repitió la suite secuencialmente, sin compilaciones simultáneas: 22/22. No se alteraron assertions, timeout ni retries para este fallo de ejecución.
+
+Copy añadido para revisión: «Seleccionar preguntas», «Ubicación y obligatoriedad», «Buscar por texto o código…». Se conservan las etiquetas reales de Crear pregunta, guardado, estados y operaciones. Detectores aplicables: no reaparece la ficha expandida antigua en Organizar; pregunta antes de identificadores; cinco filas de escritorio; autoría con campo protagonista; un primario; no estados solo por color. Los detectores de revisión/decisión siguen reservados a sus checkpoints.
+
+### Cierre de alcance CP3
+
+Backend, contratos, Prisma, almacenamiento y Compose sin diferencias respecto de v0.5.0. Documentos ajenos y stash preservados. Revisión humana de accesibilidad pendiente (lector de pantalla, zoom real, colores forzados, dispositivos táctiles, otros navegadores); axe no acredita conformidad WCAG.
+
+Cierre técnico CP3: Gitleaks 8.30.1 sobre 740 archivos candidatos: **0 hallazgos**. Enlaces relativos de este informe: **46/46** resueltos. Residual scan de los cambios: **0 coincidencias** privadas/institucionales. `git diff --check`: PASS. Hashes de archivos ajenos y stash previo: sin cambios.
