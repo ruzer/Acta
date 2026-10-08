@@ -40,6 +40,7 @@ function data(count: number): ReviewDetail {
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
 it("volver desde una aportación abierta en Cuestionario conserva el destino del editor", async () => {
@@ -328,4 +329,71 @@ it("comparar y volver conserva el filtro del conjunto y devuelve foco al dispara
   expect(
     screen.getByRole("button", { name: "Abrir aportación de Actor 10" }),
   ).toBeVisible();
+});
+
+it("C: en escritorio 50 aportaciones preselecciona una sola respuesta completa y conserva filtros e historia", async () => {
+  vi.stubGlobal("matchMedia", () => ({
+    matches: true,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  }));
+  const many = data(50);
+  many.submissions.push({
+    ...many.submissions[0]!,
+    id: "historical-50",
+    current: false,
+  });
+  const user = userEvent.setup();
+  render(<ContributionSet data={many} />);
+  const list = screen.getByRole("list", { name: "Aportaciones vigentes" });
+  expect(within(list).getAllByRole("listitem")).toHaveLength(50);
+  expect(screen.getByRole("status")).toHaveTextContent("50 de 50 aportaciones");
+  expect(screen.getByRole("article", { name: "Actor 1" })).toBeVisible();
+  expect(
+    screen.queryByText("Contexto completo 2", { exact: false }),
+  ).not.toBeInTheDocument();
+  const first = screen.getByRole("button", {
+    name: "Abrir aportación de Actor 1",
+  });
+  first.focus();
+  await user.keyboard("{ArrowDown}{Enter}");
+  expect(screen.getByRole("heading", { name: "Actor 2" })).toHaveFocus();
+  expect(
+    screen.getByRole("button", { name: "Abrir aportación de Actor 2" }),
+  ).toHaveAttribute("aria-pressed", "true");
+  expect(
+    screen.getByText("Contexto completo 2", { exact: false }),
+  ).toBeVisible();
+  await user.type(screen.getByRole("searchbox"), "operacion");
+  expect(screen.getByRole("status")).toHaveTextContent("1 de 50 aportaciones");
+  expect(within(list).getAllByRole("listitem")).toHaveLength(1);
+  // The selected detail remains available while filtering the rail.
+  expect(screen.getByRole("article", { name: "Actor 2" })).toBeVisible();
+  expect(screen.getByText("Envíos históricos (1)")).toBeVisible();
+});
+
+it("C: el envío histórico conserva número, fecha, área y contenido sin inflar N", async () => {
+  const historical = {
+    ...data(1).submissions[0]!,
+    id: "past",
+    number: 7,
+    current: false,
+  };
+  render(<ContributionSet data={{ ...data(0), submissions: [historical] }} />);
+  const user = userEvent.setup();
+  await user.click(screen.getByText("Envíos históricos (1)"));
+  const article = screen.getByRole("article");
+  expect(
+    within(article).getByRole("heading", { name: "Actor 1 · envío #7" }),
+  ).toBeVisible();
+  expect(within(article).getByText("Histórico")).toBeVisible();
+  expect(within(article).getByText(historical.area.name)).toBeVisible();
+  expect(article.querySelectorAll(".ac-meta li")).toHaveLength(3);
+  expect(article.querySelectorAll(".ac-meta li")[1]!.textContent).toMatch(
+    /2026/,
+  );
+  expect(
+    within(article).getByText("Contexto completo 1", { exact: false }),
+  ).toBeVisible();
+  expect(screen.getByRole("heading", { name: "0 aportaciones" })).toBeVisible();
 });

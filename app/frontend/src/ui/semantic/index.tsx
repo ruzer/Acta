@@ -189,7 +189,12 @@ export function ContributionRail({
   onSelect,
 }: {
   label: string;
-  items: { id: string; content: ReactNode }[];
+  items: {
+    id: string;
+    content: ReactNode;
+    label?: string;
+    buttonRef?: (element: HTMLButtonElement | null) => void;
+  }[];
   selected: string | null;
   onSelect: (id: string) => void;
 }) {
@@ -213,17 +218,19 @@ export function ContributionRail({
   }
   return (
     <aside className="ac-contribution-rail" aria-label={label}>
-      <ul>
+      <ul aria-label={label}>
         {items.map((item, index) => (
           <li key={item.id}>
             <button
               type="button"
+              aria-label={item.label}
               aria-pressed={selected === item.id}
               onKeyDown={(event) => navigate(event, index)}
               onClick={() => onSelect(item.id)}
               ref={(element) => {
                 if (element) refs.current.set(item.id, element);
                 else refs.current.delete(item.id);
+                item.buttonRef?.(element);
               }}
             >
               {item.content}

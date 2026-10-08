@@ -174,7 +174,7 @@ test("ACTA NEXT: atención conserva el solapamiento y el contexto al volver del 
   await page.keyboard.press("Enter");
   await expect(
     page.getByRole("heading", {
-      name: fixture.questions[0].title,
+      name: fixture.questions[0].question,
       exact: true,
       level: 1,
     }),
@@ -255,7 +255,7 @@ for (const width of [1440, 390]) {
     await page.keyboard.press("Enter");
     await expect(
       page.getByRole("heading", {
-        name: question.title,
+        name: question.question,
         exact: true,
         level: 1,
       }),
@@ -502,7 +502,7 @@ test("Direction C: listado completo conserva apertura, foco y retorno", async ({
   await link.focus();
   const scroll = await page.evaluate(() => window.scrollY);
   await page.keyboard.press("Enter");
-  await expect(page.locator("main h1")).toHaveText(question.title);
+  await expect(page.locator("main h1")).toHaveText(question.question);
   await page.getByRole("link", { name: "← Atención", exact: true }).click();
   await expect(page).toHaveURL(path);
   await expect(disclosure).toHaveAttribute("open");

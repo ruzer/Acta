@@ -69,7 +69,7 @@ async function review(page: Page, index = 0) {
   await page.goto(`/projects/${projectId}/review/${questionIds[index]}`);
   await expect(
     page.getByRole("heading", {
-      name: `Revisión ficticia ${index + 1}`,
+      name: `¿Cómo se realiza el procedimiento ficticio ${index + 1}?`,
       exact: true,
       level: 1,
     }),
@@ -98,8 +98,10 @@ async function decide(page: Page) {
   await dialog.getByRole("button", { name: "Registrar como validada" }).click();
   await expect(dialog).toHaveCount(0);
   await expect(
-    page.locator(".av-status").filter({ hasText: /^Validada$/ }),
+    page.locator(".ac-state-card .ac-status").filter({ hasText: /^Validada$/ }),
   ).toBeVisible();
+  // The primary action disappears after validation; focus must remain useful.
+  await expect(page.locator("main h1")).toBeFocused();
 }
 test.beforeAll(async ({ browser }) => {
   const page = await (await browser.newContext()).newPage();
@@ -284,7 +286,9 @@ test("2D-B: participante consulta validada sin corregir; decisión permanece vig
   await login(analyst, "analyst");
   await review(analyst);
   await expect(
-    analyst.locator(".av-status").filter({ hasText: /^Validada$/ }),
+    analyst
+      .locator(".ac-state-card .ac-status")
+      .filter({ hasText: /^Validada$/ }),
   ).toBeVisible();
   await analyst.close();
 });
@@ -431,7 +435,9 @@ test("2D-C: dos autores → comparación → resolución independiente → valid
     .click();
   await expect(dialog).toHaveCount(0);
   await expect(
-    page.locator(".av-status").filter({ hasText: /^Respondida$/ }),
+    page
+      .locator(".ac-state-card .ac-status")
+      .filter({ hasText: /^Respondida$/ }),
   ).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Decisión vigente" }),
@@ -505,7 +511,9 @@ test("2D-D: no aplica → reapertura y controles de solo lectura", async ({
     .click();
   await expect(dialog).toHaveCount(0);
   await expect(
-    page.locator(".av-status").filter({ hasText: /^No aplica$/ }),
+    page
+      .locator(".ac-state-card .ac-status")
+      .filter({ hasText: /^No aplica$/ }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Reabrir pregunta" }).click();
   dialog = page.getByRole("dialog");
@@ -515,8 +523,11 @@ test("2D-D: no aplica → reapertura y controles de solo lectura", async ({
     .click();
   await expect(dialog).toHaveCount(0);
   await expect(
-    page.locator(".av-status").filter({ hasText: /^Pendiente$/ }),
+    page
+      .locator(".ac-state-card .ac-status")
+      .filter({ hasText: /^Pendiente$/ }),
   ).toBeVisible();
+  await page.getByRole("tab", { name: "Historial", exact: true }).click();
   await page.getByText("Decisiones de no aplica", { exact: true }).click();
   await expect(
     page.getByText("Se incorporó el procedimiento", { exact: false }),
@@ -525,7 +536,9 @@ test("2D-D: no aplica → reapertura y controles de solo lectura", async ({
   await login(viewer, "viewer");
   await review(viewer, 1);
   await expect(
-    viewer.getByRole("heading", { name: "Decisión vigente" }),
+    viewer
+      .getByRole("article", { name: "Decisión vigente", exact: true })
+      .getByRole("heading", { name: "Decisión vigente", exact: true }),
   ).toBeVisible();
   await expect(viewer.getByLabel("Otras acciones")).toHaveCount(0);
   await expect(

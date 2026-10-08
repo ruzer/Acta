@@ -8,6 +8,7 @@ import type {
 } from "@requirements/contracts";
 import { downloadEvidence } from "../api";
 import { Alert, Button, StatusBadge } from "../ui";
+import { EvidenceFile } from "../ui/semantic";
 import { answerText } from "./AnswerControl";
 export const reviewLabels = {
   NOT_REVIEWED: "Sin revisar",
@@ -32,9 +33,11 @@ export function SubmittedAnswer({
   projectId,
   participant = false,
   comparison = false,
+  contribution = false,
 }: {
   participant?: boolean;
   comparison?: boolean;
+  contribution?: boolean;
   revision: ResponseView["revisions"][number];
   question: ResponseQuestionView;
   projectId: string;
@@ -53,6 +56,51 @@ export function SubmittedAnswer({
       setError((e as Error).message);
     }
   }
+  if (contribution)
+    return (
+      <div className="ac-submitted-answer">
+        <h3>Respuesta</h3>
+        <p
+          className={
+            "ac-answer" +
+            (["NUMBER", "YES_NO", "DATE"].includes(question.type)
+              ? " ac-value"
+              : "")
+          }
+        >
+          {answerText(question, r.answer)}
+        </p>
+        {r.comment && (
+          <section className="ac-answer-context">
+            <h3>Comentario</h3>
+            <p className="answer-text">{r.comment}</p>
+          </section>
+        )}
+        {r.example && (
+          <section className="ac-answer-context">
+            <h3>Ejemplo</h3>
+            <p className="answer-text">{r.example}</p>
+          </section>
+        )}
+        <section className="ac-answer-evidence">
+          <h3>Evidencia</h3>
+          {r.evidence.length ? (
+            r.evidence.map(({ id, evidence: e }) => (
+              <EvidenceFile
+                key={id}
+                name={e.originalName}
+                size={`${e.byteSize.toLocaleString()} bytes`}
+                disabled={e.status !== "READY"}
+                onDownload={() => void download(e)}
+              />
+            ))
+          ) : (
+            <p className="hint">Sin evidencia adjunta.</p>
+          )}
+        </section>
+        {error && <Alert error>{error}</Alert>}
+      </div>
+    );
   return (
     <>
       {!comparison && (

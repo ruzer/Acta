@@ -1,9 +1,10 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { ReviewDetail } from "@requirements/contracts";
 import { Button, EmptyState, Input, Select } from "../ui";
+import { ContributionRail, ContributionPane, MetaLine } from "../ui/semantic";
 import { answerText } from "./AnswerControl";
 import { ContributionComparison } from "./ContributionComparison";
-import { SubmittedAnswer } from "./ReviewShared";
+import { dateText, SubmittedAnswer } from "./ReviewShared";
 import "../next-contributions.css";
 
 type Submission = ReviewDetail["submissions"][number];
@@ -29,7 +30,7 @@ function SubmissionSignals({
 }) {
   const { threads, conflict } = signals(data, submission);
   return (
-    <div className="next-contribution-signals">
+    <span className="next-contribution-signals">
       <span>Enviada · vigente</span>
       <span>
         {submission.evidence.length
@@ -51,13 +52,33 @@ function SubmissionSignals({
       {conflict && (
         <span className="next-contribution-conflict">En conflicto abierto</span>
       )}
-    </div>
+    </span>
   );
 }
 
-export function ContributionSet({ data }: { data: ReviewDetail }) {
+export function ContributionSet({
+  data,
+  onCompare,
+  renderThreads,
+}: {
+  data: ReviewDetail;
+  onCompare?: () => void;
+  renderThreads?: (submissionId: string) => ReactNode;
+}) {
   const current = data.submissions.filter((s) => s.current);
   const historical = data.submissions.filter((s) => !s.current);
+  const [wide, setWide] = useState(
+    () =>
+      typeof matchMedia === "function" &&
+      matchMedia("(min-width:900px)").matches,
+  );
+  useEffect(() => {
+    const media = window.matchMedia?.("(min-width:900px)");
+    if (!media) return;
+    const update = () => setWide(media.matches);
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
   const [selectedId, setSelectedId] = useState("");
   const [comparing, setComparing] = useState(false);
   const comparisonHeading = useRef<HTMLHeadingElement>(null);
@@ -70,18 +91,6 @@ export function ContributionSet({ data }: { data: ReviewDetail }) {
   const detailHeading = useRef<HTMLHeadingElement>(null);
   const setHeading = useRef<HTMLHeadingElement>(null);
   const buttons = useRef(new Map<string, HTMLButtonElement>());
-  const id = useId();
-  const selected =
-    current.length === 1
-      ? current[0]
-      : current.find((s) => s.id === selectedId);
-  const displayedId = selected?.id;
-  useEffect(() => {
-    if (selectedId) {
-      if (displayedId) detailHeading.current?.focus();
-      else setHeading.current?.focus();
-    }
-  }, [selectedId, displayedId]);
   const normalize = (text: string) =>
     text
       .normalize("NFD")
@@ -100,6 +109,21 @@ export function ContributionSet({ data }: { data: ReviewDetail }) {
           : state.conflict))
     );
   });
+  const selected =
+    current.length === 1
+      ? current[0]
+      : selectedId
+        ? current.find((s) => s.id === selectedId)
+        : wide
+          ? visible[0]
+          : undefined;
+  const displayedId = selected?.id;
+  useEffect(() => {
+    if (selectedId) {
+      if (displayedId) detailHeading.current?.focus();
+      else setHeading.current?.focus();
+    }
+  }, [selectedId, displayedId]);
   function returnToSet() {
     const previous = selectedId;
     setSelectedId("");
@@ -107,15 +131,18 @@ export function ContributionSet({ data }: { data: ReviewDetail }) {
       (buttons.current.get(previous) ?? setHeading.current)?.focus(),
     );
   }
+  const listVisible = current.length > 1 && (wide || !selected);
+  const heading = (
+    <div className="next-contributions-heading">
+      <h2 id="received" ref={setHeading} tabIndex={-1}>
+        {current.length} {current.length === 1 ? "aportación" : "aportaciones"}
+      </h2>
+      <p>Envíos vigentes. La cantidad no significa consenso.</p>
+    </div>
+  );
   return (
     <section className="next-contributions" aria-labelledby="received">
-      <div className="next-contributions-heading">
-        <h2 id="received" ref={setHeading} tabIndex={-1}>
-          {current.length}{" "}
-          {current.length === 1 ? "aportación" : "aportaciones"}
-        </h2>
-        <p>Envíos vigentes. La cantidad no significa consenso.</p>
-      </div>
+      {!(listVisible && wide) && heading}
       {current.length === 0 ? (
         <EmptyState title="Sin aportaciones vigentes">
           {historical.length
@@ -144,111 +171,129 @@ export function ContributionSet({ data }: { data: ReviewDetail }) {
           </h3>
           <ContributionComparison data={data} />
         </div>
-      ) : selected ? (
-        <article className="review-submission next-contribution-detail">
-          {current.length > 1 && (
-            <Button tone="secondary" onClick={returnToSet}>
-              ← Volver a {current.length} aportaciones
-            </Button>
-          )}
-          <h3 ref={detailHeading} tabIndex={-1}>
-            {selected.respondent.displayName}
-          </h3>
-          <p>{selected.area.name}</p>
-          <SubmissionSignals data={data} submission={selected} />
-          <SubmittedAnswer
-            revision={selected}
-            question={data.question}
-            projectId={data.projectId}
-          />
-        </article>
       ) : (
-        <>
-          <p>
-            Abre una aportación para consultar la respuesta completa, sus
-            archivos y su versión.
-          </p>
-          <Button
-            tone="secondary"
-            ref={comparisonTrigger}
-            onClick={() => setComparing(true)}
-          >
-            Comparar aportaciones
-          </Button>
-          {(current.length >= 10 || search || situation) && (
-            <div className="next-contribution-filters">
-              <Input
-                label="Buscar por actor o área"
-                type="search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              <Select
-                label="Situación de la aportación"
-                value={situation}
-                onChange={(e) => setSituation(e.target.value as Situation)}
-              >
-                <option value="">Todas</option>
-                <option value="clarification">Con aclaración abierta</option>
-                <option value="conflict">En conflicto abierto</option>
-              </Select>
-              <p role="status">
+        <div
+          className={`ac-contribution-workspace${listVisible ? " ac-contribution-multiple" : ""}`}
+        >
+          {listVisible && (
+            <div className="ac-contribution-list-panel">
+              {wide && heading}
+              {(current.length >= 10 || search || situation) && (
+                <div className="next-contribution-filters">
+                  <Input
+                    label="Buscar por actor o área"
+                    type="search"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                  <Select
+                    label="Situación de la aportación"
+                    value={situation}
+                    onChange={(e) => setSituation(e.target.value as Situation)}
+                  >
+                    <option value="">Todas</option>
+                    <option value="clarification">
+                      Con aclaración abierta
+                    </option>
+                    <option value="conflict">En conflicto abierto</option>
+                  </Select>
+                </div>
+              )}
+              <p className="ac-contribution-count" role="status">
                 {visible.length} de {current.length} aportaciones
               </p>
-            </div>
-          )}
-          {visible.length ? (
-            <ul
-              className="next-contribution-list"
-              aria-label="Aportaciones vigentes"
-            >
-              {visible.map((s) => {
-                const text = answerText(data.question, s.answer)
-                  .replace(/\s+/g, " ")
-                  .trim();
-                return (
-                  <li key={s.id}>
-                    <div className="next-contribution-actor">
-                      <h3 id={`${id}-${s.id}`}>{s.respondent.displayName}</h3>
-                      <p>{s.area.name}</p>
-                    </div>
-                    <div className="next-contribution-summary">
-                      <p>
-                        {text.length > 180
-                          ? `${text.slice(0, 180).trimEnd()}…`
-                          : text}
-                      </p>
-                      <SubmissionSignals data={data} submission={s} />
-                    </div>
-                    <Button
-                      tone="secondary"
-                      aria-label={`Abrir aportación de ${s.respondent.displayName}`}
-                      ref={(node) => {
+              {visible.length ? (
+                <ContributionRail
+                  label="Aportaciones vigentes"
+                  selected={selected?.id ?? null}
+                  onSelect={setSelectedId}
+                  items={visible.map((s) => {
+                    const text = answerText(data.question, s.answer)
+                      .replace(/\s+/g, " ")
+                      .trim();
+                    return {
+                      id: s.id,
+                      label: `Abrir aportación de ${s.respondent.displayName}`,
+                      buttonRef: (node) => {
                         if (node) buttons.current.set(s.id, node);
                         else buttons.current.delete(s.id);
-                      }}
-                      onClick={() => setSelectedId(s.id)}
-                    >
-                      Abrir aportación
-                    </Button>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <EmptyState title="Sin aportaciones para estos filtros">
+                      },
+                      content: (
+                        <>
+                          <strong className="ac-contribution-person">
+                            {s.respondent.displayName}
+                          </strong>
+                          <span className="ac-contribution-area">
+                            {s.area.name}
+                          </span>
+                          <span className="ac-contribution-excerpt">
+                            {text.length > 180
+                              ? `${text.slice(0, 180).trimEnd()}…`
+                              : text}
+                          </span>
+                          <SubmissionSignals data={data} submission={s} />
+                        </>
+                      ),
+                    };
+                  })}
+                />
+              ) : (
+                <EmptyState title="Sin aportaciones para estos filtros">
+                  <Button
+                    tone="secondary"
+                    onClick={() => {
+                      setSearch("");
+                      setSituation("");
+                    }}
+                  >
+                    Limpiar filtros
+                  </Button>
+                </EmptyState>
+              )}
               <Button
                 tone="secondary"
-                onClick={() => {
-                  setSearch("");
-                  setSituation("");
-                }}
+                ref={comparisonTrigger}
+                onClick={() => (onCompare ? onCompare() : setComparing(true))}
               >
-                Limpiar filtros
+                Comparar aportaciones
               </Button>
-            </EmptyState>
+            </div>
           )}
-        </>
+          {selected && (
+            <div className="ac-contribution-selected">
+              {!wide && current.length > 1 && (
+                <Button tone="secondary" onClick={returnToSet}>
+                  ← Volver a {current.length} aportaciones
+                </Button>
+              )}
+              <ContributionPane
+                headingRef={detailHeading}
+                title={selected.respondent.displayName}
+                metadata={
+                  <>
+                    <MetaLine
+                      items={[
+                        selected.area.name,
+                        `Envío #${selected.number}`,
+                        dateText(selected.createdAt),
+                        selected.current ? "Vigente" : "Histórico",
+                      ]}
+                    />
+                    <SubmissionSignals data={data} submission={selected} />
+                  </>
+                }
+              >
+                <SubmittedAnswer
+                  revision={selected}
+                  question={data.question}
+                  projectId={data.projectId}
+                  contribution
+                />
+                {renderThreads?.(selected.id)}
+              </ContributionPane>
+            </div>
+          )}
+        </div>
       )}
       {historical.length > 0 && (
         <details className="next-contribution-history">
@@ -259,12 +304,16 @@ export function ContributionSet({ data }: { data: ReviewDetail }) {
               <h3>
                 {s.respondent.displayName} · envío #{s.number}
               </h3>
-              <p>{s.area.name}</p>
+              <MetaLine
+                items={[s.area.name, dateText(s.createdAt), "Histórico"]}
+              />
               <SubmittedAnswer
                 revision={s}
                 question={data.question}
                 projectId={data.projectId}
+                contribution
               />
+              {renderThreads?.(s.id)}
             </article>
           ))}
         </details>

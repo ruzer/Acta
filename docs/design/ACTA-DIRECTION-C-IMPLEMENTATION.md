@@ -11,6 +11,22 @@ Solo presentación frontend. Se conservan contratos, autorización, dominio, bac
 
 **Después del checkpoint 4 se entregará una comparación desktop/móvil y se detendrá el trabajo para aprobación explícita del producto. Los checkpoints 5–8 y el PR final no están autorizados antes de esa aprobación.**
 
+## Comparativas para la revisión humana
+
+Referencia aprobada a la izquierda; React implementado a la derecha. Cada fila del informe conserva además 1024, 768 y 320 px. La aceptación de producto todavía no está otorgada.
+
+| Pantalla | Escritorio 1440 | Móvil 390 |
+|---|---|---|
+| Revisión · 1 aportación | [Comparar](acta-direction-c-evidence/cp4/V-04-compare-1440.png) | [Comparar](acta-direction-c-evidence/cp4/V-04-compare-390.png) |
+| Revisión · 3 aportaciones | [Comparar](acta-direction-c-evidence/cp4/V-05-compare-1440.png) | [Comparar](acta-direction-c-evidence/cp4/V-05-compare-390.png) |
+| Revisión · 12 aportaciones | [Comparar](acta-direction-c-evidence/cp4/V-06-compare-1440.png) | [Comparar](acta-direction-c-evidence/cp4/V-06-compare-390.png) |
+| Revisión · 50 aportaciones, DEV-25 | [Comparar](acta-direction-c-evidence/cp4/V-07-compare-1440.png) | [Comparar](acta-direction-c-evidence/cp4/V-07-compare-390.png) |
+| Parcial separado, DEV-25 | [Comparar](acta-direction-c-evidence/cp4/V-07-partial-compare-1440.png) | [Comparar](acta-direction-c-evidence/cp4/V-07-partial-compare-390.png) |
+| ADMIN · consulta completa sin acciones | [Comparar](acta-direction-c-evidence/cp4/V-13-admin-compare-1440.png) | [Comparar](acta-direction-c-evidence/cp4/V-13-admin-compare-390.png) |
+| VIEWER · fuentes filtradas; documento final pendiente CP5 | [Comparar](acta-direction-c-evidence/cp4/V-14-viewer-compare-1440.png) | [Comparar](acta-direction-c-evidence/cp4/V-14-viewer-compare-390.png) |
+| Organizar · 304 preguntas | [Comparar](acta-direction-c-evidence/cp3/V-02b-compare-1440.png) | [Comparar](acta-direction-c-evidence/cp3/V-02b-compare-390.png) |
+| Atención · navegación y estados | [Comparar](acta-direction-c-evidence/cp2/V-01-compare-1440.png) | [Comparar](acta-direction-c-evidence/cp2/V-01-compare-390.png) |
+
 ## Estado real
 
 | Etapa                                     | Estado                     | Evidencia / siguiente comprobación                                                                                |
@@ -19,7 +35,7 @@ Solo presentación frontend. Se conservan contratos, autorización, dominio, bac
 | 1. Tokens, tipografía, componentes        | LISTO PARA REVISIÓN        | Tipos/lint/build, 170 tests frontend, humo 7/7, visual 5/5 y axe 0; aceptación humana pendiente                   |
 | 2. Shell, navegación, Atención            | LISTO PARA REVISIÓN        | Gate visual 12/12, 231 unit/component, 11 workbench, 3 simplicity, humo 7 casos; límites ARCHIVED descritos abajo |
 | 3. Cuestionario / Organizar / lotes | LISTO PARA REVISIÓN | 174 unit, 28 E2E funcionales, 15 visuales, 3 de fixture independiente; cinco anchos y DEV-26 aprobada |
-| 4. Revisión / aportaciones / solo lectura | NO INICIADO                | Depende del checkpoint 3; después requiere revisión humana                                                        |
+| 4. Revisión / aportaciones / solo lectura | LISTO PARA REVISIÓN | 264 unit, 15 E2E funcionales, 40 vistas + 1 gate de permisos; DEV-25 aplicada; requiere aceptación humana |
 | 5. Conflictos / aclaraciones / decisiones | ESPERA APROBACIÓN POST-CP4 | No implementar todavía                                                                                            |
 | 6. Participante / invitado                | ESPERA APROBACIÓN POST-CP4 | No implementar todavía                                                                                            |
 | 7. Administración / consistencia          | ESPERA APROBACIÓN POST-CP4 | No implementar todavía                                                                                            |
@@ -56,19 +72,19 @@ Los logs privados de ejecución no se incorporan al producto. Se agregarán resu
 
 Se sembraron por API, en una segunda base desechable aislada, los casos de 1 aportación (ANSWERED), 3 (CONFLICT), 12 (CLARIFICATION_REQUIRED), 0 (PENDING) y decisión validada (VALIDATED). Se conservaron versiones históricas, hilos abiertos/cerrados, conflictos resueltos y fuentes de validación. Los PDF son ficticios y su SHA-256 coincide con la metadata de evidencia.
 
-**DEV-25 propuesta, pendiente de decisión del producto:** el fixture de 50 aportaciones pide PARTIAL mientras contiene aclaraciones abiertas. La proyección real prioriza CLARIFICATION_REQUIRED. Se solicitó autorización para conservar los hilos y el estado real, con un caso parcial separado; ese caso no se ha sembrado ni se ha cambiado el backend. La preparación de los demás casos no depende de esa decisión.
+**DEV-25 aprobada por el producto (2026-10-08), de origen funcional:** conservar las aclaraciones del caso de 50 y mostrar `CLARIFICATION_REQUIRED` («Requiere aclaración»), según la proyección del backend. La captura `c-05-review-50` muestra «Parcial»; gana el comportamiento real. Se autoriza un caso separado `PARTIAL`: al menos una aportación enviada, personas requeridas pendientes, sin aclaraciones abiertas ni conflictos. No se fuerza ningún estado ni se cambia backend/contrato. Ejecución y resultados al cierre de CP4.
 
 ## Matriz de aceptación
 
-Los checkpoints 1–3 tienen evidencia React. Las filas de los checkpoints 4–8 siguen pendientes. V-01b ADMIN se comprobó en navegador; ARCHIVED solo tiene cobertura de derivación unitaria (DEV-24), sin captura de un proyecto archivado real. No se atribuyen al producto resultados del prototipo.
+Los checkpoints 1–4 tienen evidencia React. CP4 cubre 0/1/3/12/50 aportaciones, un caso parcial separado y solo lectura. Los checkpoints 5–8 no se han iniciado. V-01b ADMIN se comprobó en navegador; ARCHIVED solo tiene cobertura de derivación unitaria (DEV-24), sin captura de un proyecto archivado real. No se atribuyen al producto resultados del prototipo.
 
 | Filas                      | Pantallas / variantes                                      | Checkpoint | Estado                                                    |
 | -------------------------- | ---------------------------------------------------------- | ---------- | --------------------------------------------------------- |
 | V-00 base                  | Tokens y componentes                                       | 1          | LISTO PARA REVISIÓN                                       |
 | V-00, V-01, V-01b          | Shell; Atención analista y ADMIN; derivación ARCHIVED      | 2          | LISTO PARA REVISIÓN con DEV-03/19/20/24 y límite ARCHIVED |
 | V-02, V-02b, V-02c, V-03 | Organizar 304, Preparar, lote, autoría | 3 | LISTO PARA REVISIÓN con DEV-09/16/26 |
-| V-04…V-08                  | Revisión 1, 3, 12, 50, 0 aportaciones                      | 4          | PENDIENTE                                                 |
-| V-13/V-14 composición base | ADMIN completo sin acciones; VIEWER filtrado               | 4          | PENDIENTE                                                 |
+| V-04…V-08 + V-07-partial | Revisión 1, 3, 12, 50, 0 aportaciones y parcial real | 4 | LISTO PARA REVISIÓN con DEV-25 |
+| V-13/V-14 composición base | ADMIN completo sin acciones; VIEWER filtrado | 4 | LISTO PARA REVISIÓN con DEV-20/24; documento final en CP5 |
 | V-09…V-14 detalle          | Contraste, aclaraciones, decisiones y consulta             | 5          | POST-APROBACIÓN                                           |
 | V-15…V-22                  | Mi trabajo, responder, recibos, invitado                   | 6          | POST-APROBACIÓN                                           |
 | V-23…V-27                  | Administración, invitaciones, lector y pantallas restantes | 7          | POST-APROBACIÓN                                           |
@@ -90,7 +106,7 @@ CP1 no alteró aserciones existentes. CP2 adapta selectores y composición de na
 
 ## Copy nuevo para revisión de producto
 
-CP2 incorpora las etiquetas de turno y navegación listadas al final de su informe. Los textos de revisión/decisión/carta aún no se implementan. Confirmación editorial humana pendiente conforme a DEV-08; no se inventa identidad del invitado, consenso ni autoguardado.
+CP2 incorpora las etiquetas de turno y navegación listadas al final de su informe. CP4 incorpora los textos de revisión listados abajo; decisión y carta documental esperan sus checkpoints. Confirmación editorial humana pendiente conforme a DEV-08; no se inventa identidad del invitado, consenso ni autoguardado.
 
 ## Límites y pendientes humanos
 
@@ -98,7 +114,7 @@ Pendientes lector de pantalla, zoom real, colores forzados, modo oscuro, disposi
 
 ## Revisión de alcance y publicación
 
-Solo presentación frontend y verificación/documentación. Backend, contratos, Prisma y almacenamiento: diff vacío respecto de v0.5.0. No hay PR ni push. **READY FOR REVIEW: NO** para el conjunto; checkpoints 1–3 listos para revisión técnica, checkpoint 4 pendiente antes de la revisión humana obligatoria.
+Solo presentación frontend y verificación/documentación. Backend, contratos, Prisma y almacenamiento: diff vacío respecto de v0.5.0. No hay PR ni push. **READY FOR REVIEW: YES, exclusivamente checkpoints 1–4.** La implementación integral 1–8 no está terminada. Se hace la parada humana obligatoria; CP5–8, push y PR no están autorizados todavía por este gate.
 
 ## Checkpoint 1 — base visual y componentes
 
@@ -126,7 +142,7 @@ Solo presentación frontend y verificación/documentación. Backend, contratos, 
 | Build de producción          | No contiene la entrada de verificación                               |
 | Backend / contratos / Prisma | Sin diff                                                             |
 
-Métricas: [metrics-cp1.json](acta-direction-c-evidence/metrics-cp1.json). Líneas base de producto: [baseline-metrics.json](acta-direction-c-evidence/baseline-metrics.json), 50 capturas de 10 variantes × 5 anchos. El caso de 50 queda pendiente de DEV-25.
+Métricas: [metrics-cp1.json](acta-direction-c-evidence/metrics-cp1.json). Líneas base de producto: [baseline-metrics.json](acta-direction-c-evidence/baseline-metrics.json), 50 capturas de 10 variantes × 5 anchos. La línea base del caso de 50 se reconstruyó posteriormente desde CP3, después de autorizar DEV-25; está identificada expresamente.
 
 | Ancho | Ancho de página | Nombre de evidencia | Texto mínimo | Objetivos mínimos | Axe |
 | ----- | --------------- | ------------------- | ------------ | ----------------- | --- |
@@ -246,7 +262,7 @@ La referencia ADMIN se deriva de C ANALYST: no hay referencia específica en el 
 
 Detectores 3 y 12: no se disparan; desaparecen las cuatro tarjetas antes de preguntas y `pw-navigation`. En estas vistas también se verificaron meta subordinada, un CTA por fila, estados con glifo/palabra y ausencia de serif operativo. Los detectores de revisión/decisión/cuestionario/evidencia no se declaran resueltos por CP2.
 
-**Límites:** ARCHIVED cubierto en tabla de verdad, no en navegador; distribución 304 del fixture y conteos reales difieren de los orientativos de C; no se inventan avisos de actualización, extractos ni contadores de navegación. El menú móvil añade acceso explícito a la cuenta para conservar operaciones reales. Aceptación visual y editorial humana pendiente. DEV-25 sigue pendiente, no bloquea CP3.
+**Límites:** ARCHIVED cubierto en tabla de verdad, no en navegador; distribución 304 del fixture y conteos reales difieren de los orientativos de C; no se inventan avisos de actualización, extractos ni contadores de navegación. El menú móvil añade acceso explícito a la cuenta para conservar operaciones reales. Aceptación visual y editorial humana pendiente. En el cierre de CP3 DEV-25 seguía pendiente; la autorización posterior y su ejecución se documentan en CP4.
 
 Cierre técnico CP2: Gitleaks 8.30.1 sobre los 662 archivos candidatos del snapshot: **0 hallazgos**. Enlaces relativos de este informe: **18/18** resueltos. `git diff --check`: PASS. Hashes de documentos ajenos y stash previo: sin cambios. El escaneo no incorpora `.env`, bases ni logs de prueba.
 
@@ -348,3 +364,178 @@ Copy añadido para revisión: «Seleccionar preguntas», «Ubicación y obligato
 Backend, contratos, Prisma, almacenamiento y Compose sin diferencias respecto de v0.5.0. Documentos ajenos y stash preservados. Revisión humana de accesibilidad pendiente (lector de pantalla, zoom real, colores forzados, dispositivos táctiles, otros navegadores); axe no acredita conformidad WCAG.
 
 Cierre técnico CP3: Gitleaks 8.30.1 sobre 740 archivos candidatos: **0 hallazgos**. Enlaces relativos de este informe: **46/46** resueltos. Residual scan de los cambios: **0 coincidencias** privadas/institucionales. `git diff --check`: PASS. Hashes de archivos ajenos y stash previo: sin cambios.
+
+## Checkpoint 4 — revisión y aportaciones (LISTO PARA REVISIÓN)
+
+Base de trabajo: CP3 `ef37b4f`. Se conservaron las capturas previas de v0.5.0 y se añadieron 30 capturas inmediatamente anteriores a CP4 (incluyen shell/CP3). La revisión se reorganiza con pregunta completa, tarjeta de estado, pestañas y riel/panel. El cierre incluye V-07 y el caso parcial separado, ambos creados mediante API; las pruebas pasan y la aceptación visual humana sigue pendiente. Los conflictos, decisiones e hilos conservan por ahora su contenido existente; su rediseño completo pertenece a CP5 y espera autorización humana.
+
+DEV-25 autorizada y aplicada: no se fuerza PARTIAL en el caso de 50. El contrato público entrega la proyección como `ReviewDetail.status`, calculada por el backend (`projectedStatus`); el frontend conserva su autoridad.
+
+### Libro de aserciones CP4
+
+- `review.spec.ts`: h1 se verifica contra el texto completo de la pregunta, no su título abreviado (jerarquía autorizada V-04). Los selectores del estado apuntan a `StateCard/StatusChip`; se conserva la etiqueta exacta y su visibilidad. La consulta de decisiones históricas de no-aplica abre Historial antes de comprobar el mismo contenido.
+- Pruebas nuevas: la ruta de retorno correcta es `/dashboard`, no `/attention`; el fixture VIEWER tiene una única fuente vigente, por lo que debe decir “1 aportación”. Errores de preparación de pruebas corregidos conservando la comprobación del destino y del número real.
+- Primer E2E: 3/4. Regresión detectada en no-aplica: Reabrir quedaba en la pestaña Decisión mientras el estado no-aplica abría Aportaciones. Se corrige la pestaña predeterminada para ese estado terminal; no se retira ni debilita la aserción de reapertura.
+- La prueba pura nueva sigue la extensión `.test.tsx` de la configuración frontend existente; el primer intento `.test.ts` no fue descubierto por Vitest y no se contó como PASS.
+
+- `next-workbench.spec.ts`: cuatro verificaciones de encabezado siguen ahora la pregunta completa (mismo ID/ruta); permanecen las aserciones de filtros, selección, foco y scroll. La decisión vigente de VIEWER se comprueba dentro de su documento, distinguiéndola del resumen del estado que ahora comparte el mismo titular.
+- Primera suite visual CP4: 19/30. Detectó respuesta única a y=680,55 (>640) y texto heredado de aclaración inferior a 12,5 px. Se compacta la tarjeta de estado sin eliminar acciones y se corrige el tamaño de la etiqueta dentro de revisión. Segunda suite: 30/30 en 0/1/3/12 aportaciones y ADMIN/VIEWER. Tras aprobar DEV-25, el pase final llega a 40/40 vistas y 1/1 comprobación adicional de permisos.
+- Revisión de conservación detectó fecha ausente en el nuevo bloque histórico; se restituyó junto con número, área y marca Histórico y se añadió una prueba explícita.
+
+- La comprobación adicional de foco tras validar reprodujo una regresión: al desaparecer el botón primario, el foco quedaba en `body` (1 fallo; los otros 3 escenarios seriales no se ejecutaron). Se conserva la restauración del disparador al cancelar y, al terminar las invalidaciones, se enfoca el h1 solo si el foco se perdió. El E2E ahora exige h1 enfocado tras validar; los 15 recorridos pasan, sin retries ni aumento de tiempos.
+- Se corrigió únicamente la concordancia “1 aclaración abierta”; se prueban 0/1/2 sin cambiar la acción ni el estado.
+- Las mediciones nuevas comprueban hijos dentro de su contenedor, ausencia de texto colapsado y un máximo de tres apariciones por actor en el panel inicial de aportaciones. No se elimina ninguna aserción anterior.
+
+### Resultados CP4 ejecutados
+
+| Comprobación | Resultado real |
+|---|---|
+| Lint, tipos y build completo | PASS; contratos/backend solo se compilan, sin cambios de código |
+| Unit/component | 264/264, 34 archivos, sin skips; 207 frontend + 57 unitarias restantes; incluye 26 casos de derivación del turno |
+| Revisión y navegación/contexto E2E | 15/15 Chromium, después de corregir el foco; sin retries |
+| Matriz visual de revisión | 40/40: 8 variantes × 5 anchos; añade 50 aportaciones reales y parcial separado |
+| Permisos del caso de 50 | 1/1 gate: ADMIN 200/solo lectura, VIEWER 404, participante 403, anónimo 401 |
+| Axe | 0 violaciones en entrada predeterminada y panel de aportaciones de las 40 vistas |
+| Fixture autónomo de la suite | 6/6 a 1440; crea sus datos por API, verifica sus conteos reales 0/1/2 y no los presenta como 3/12/50 |
+| PostgreSQL / evidencia | Recorridos E2E con API/DB desechables y archivo ficticio: envío, descarga, aclaración, conflicto, decisión, reapertura y lectura filtrada |
+| Integración general | No se repite: línea base 113/113; no cambia backend/contratos/storage. Esto no constituye una nueva verificación S3 |
+| Build frontend | Advertencia preexistente de bundle >500 kB; resultado 753,71 kB sin comprimir. No se modifica el umbral |
+
+Los tests de componente de 50 aportaciones (selección, filtros, vigentes e históricos) se complementan con V-07: 50 envíos reales, cinco anchos, teclado hasta la última aportación, filtros por actor/área/situación y lectura del detalle. Se preserva la selección al filtrar en escritorio y se devuelve el foco al volver a la lista en móvil.
+
+### Métricas y comparativas CP4
+
+[Mediciones completas](acta-direction-c-evidence/metrics-cp4.json). Todos los valores siguientes son del viewport 1440×900 con Aportaciones activa. En las seis variantes, h1 a y=117,5, Plex Sans 23 px/600. No hay scroll horizontal, texto comprimido ni hijos fuera del contenedor en el panel medido. Objetivos ≥44 px bajo 900; texto ≥12,5 px.
+
+| Variante | Primera respuesta completa, y | Riel | Primarios visibles | Nombre repetido, máximo | Comparativa escritorio / móvil |
+|---|---:|---:|---:|---:|---|
+| V-04 · 1 | 627,63 | No | 1 | 1 | [1440](acta-direction-c-evidence/cp4/V-04-compare-1440.png) / [390](acta-direction-c-evidence/cp4/V-04-compare-390.png) |
+| V-05 · 3 | 586,44 | 295 px | 1 | 3 | [1440](acta-direction-c-evidence/cp4/V-05-compare-1440.png) / [390](acta-direction-c-evidence/cp4/V-05-compare-390.png) |
+| V-06 · 12 | 586,44 | 295 px | 1 | 2 | [1440](acta-direction-c-evidence/cp4/V-06-compare-1440.png) / [390](acta-direction-c-evidence/cp4/V-06-compare-390.png) |
+| V-08 · 0 | No hay respuesta | No | 0 | 0 | [1440](acta-direction-c-evidence/cp4/V-08-compare-1440.png) / [390](acta-direction-c-evidence/cp4/V-08-compare-390.png) |
+| V-13 · ADMIN | 559,17 | 295 px | 0 | 3 | [1440](acta-direction-c-evidence/cp4/V-13-admin-compare-1440.png) / [390](acta-direction-c-evidence/cp4/V-13-admin-compare-390.png) |
+| V-14 · VIEWER | 506,77 | 295 px | 0 | 2 | [1440, Decisión predeterminada](acta-direction-c-evidence/cp4/V-14-viewer-compare-1440.png) / [390](acta-direction-c-evidence/cp4/V-14-viewer-compare-390.png) |
+
+También se inspeccionaron las 30 comparativas a 1440, 1024, 768, 390 y 320. Las imágenes `-default` muestran la pestaña derivada del estado; `-after` muestra Aportaciones; `-detail` muestra el acceso al panel en tamaños menores de 900. Se mantienen las capturas originales v0.5.0 y las 30 `-before-cp4` posteriores a CP3.
+
+**Alcance de esta valoración:** solo composición CP4 y paneles de aportaciones. No certifica el diseño final de Contraste, hilos o documento de decisión, que siguen pendientes de CP5. En particular, V-14 mantiene el documento anterior; no se declara equivalente al documento serif de la referencia.
+
+| Aspecto | V-04 (1) | V-05 (3) | V-06 (12) | V-08 (0) | V-13 / V-14, base de solo lectura |
+|---|---|---|---|---|---|
+| Jerarquía | PASA: pregunta antes de respuesta | PASA | PASA | PASA: vacío sin riel | PASA: pregunta y estado; documento CP5 pendiente |
+| Composición | PASA: panel único | PASA: riel/panel ≥900 | PASA: filtros + riel/panel | PASA: texto vacío real | PASA: misma base sin controles de mutación |
+| Tipografía | PASA: 23/600; número 26 | PASA: cuerpo 17/meta ≤14 | PASA | PASA | PASA en base; voz documental final pendiente |
+| Espaciado | PASA: grupos diferenciados | PASA | PASA | PASA | PASA en base |
+| Densidad | PASA escritorio; móvil requiere scroll | PASA escritorio; móvil requiere scroll | PASA escritorio; filtros elevan la lista móvil | PASA vacío según datos reales | PASA escritorio; lectura móvil desplazable |
+| Agrupación | PASA: respuesta/contexto/evidencia | PASA: fuente seleccionada e hilo asociado | PASA | PASA: sin tarjetas de respuesta ficticias | PASA: datos del contrato por rol |
+| Ubicación de acciones | PASA: tarjeta de estado | PASA: tarjeta + hilo | PASA: tarjeta + hilo | PASA: menú real; no CTA inventada | PASA: sin acciones de revisión |
+| Estados | DEV-08/19: turno y estado reales | DEV-08/19 | DEV-08/19 | DEV-08/19: sin asignación | Decisión E: consulta, nunca “Te toca a ti” |
+| Responsive | PASA: reflujo cinco anchos | PASA: lista → detalle <900 | PASA: lista → detalle <900 | PASA: sin desbordamiento | PASA: composición según permiso real |
+
+**Diferencias visuales que deben revisarse expresamente:**
+
+1. En móvil se lee la pregunta completa, sin el truncamiento de la maqueta. La cabecera de contexto real, “Otras acciones” y las pestañas en dos filas mantienen navegación, permisos y controles táctiles. Ocupan más altura; no se afirma que la primera aportación sea visible sin desplazarse. La autorización DEV-26 se limita a Organizar a 320 px, no es una aprobación general de estas pantallas.
+2. A 1024 px se usa tarjeta de estado lateral y riel/panel, conforme al umbral ≥900 del Mapping §3.4. Algunas capturas del prototipo muestran la composición apilada a ese ancho.
+3. Se conserva el orden recibido del servidor: en 3 aportaciones Renata aparece primero; en 12, Alejandra. No se inventa una prioridad para reproducir la persona seleccionada en la maqueta. La aportación completa, evidencia e hilo permanecen disponibles al seleccionar otra persona.
+4. DEV-01/02: al entrar directamente, código y área responsable pueden faltar en la caché; se omiten sin añadir consultas. No se confunde área de quien responde con área responsable de la pregunta.
+5. El caso JSON `review-0` no declara asignaciones: el caso sembrado no tiene participantes y muestra el texto real correspondiente. La maqueta sí muestra tres; no se inventaron personas o asignaciones para copiarla. Las otras variantes de vacío tienen cobertura de componente.
+6. El riel usa bordes y espacios entre filas seleccionables, sin avatares decorativos. Comparte superficie con el panel en escritorio. Es una diferencia visual explícita, no una aceptación humana implícita.
+7. En V-13 la referencia disponible es la de analista; se retiran solo los controles no autorizados y se conserva el contenido. V-14 recibe únicamente fuentes de la decisión vigente, conforme al filtrado del servidor.
+
+### Conservación funcional y detectores
+
+- `ReviewActionDialog` permanece íntegro: campos, versiones, requestId, fuentes, 409 y descarte. Las mismas consultas se invalidan; se añadió solo el fallback de foco demostrado necesario tras una mutación que retira su disparador.
+- No se añaden endpoints ni consultas por pregunta. El test de presentación verifica que solo se invocan las consultas de proyecto y revisión existentes.
+- `?tab=` conserva otros parámetros y `location.state`; regreso desde Atención, Cuestionario y Decisiones mantiene contexto. Las pestañas responden a flechas/Home/End; móvil retorna al botón de la aportación.
+- Una aportación no se convierte en “consenso”. Vigentes e históricos se cuentan por separado. Al filtrar, la aportación ya elegida puede seguir abierta; al perder vigencia sale del panel y se conserva en historial.
+- Número/fecha/sí-no, texto, comentario, ejemplo, evidencia, hilos, participantes, no-aplica, conflictos resueltos y referencias tienen ubicación; no se eliminan por adoptar pestañas.
+- Detectores aplicables a CP4 (1,2,4,5,6,9,11,12,13,14): no observados en la superficie de aportaciones medida. Los detectores 7 y 8 del detalle de contraste/decisión **siguen pendientes de CP5**; no se declaran resueltos aquí. Cuestionario y Atención conservan su evidencia CP2/3.
+- No se vuelve a afirmar conformidad WCAG. Quedan lector de pantalla, zoom real, colores forzados, táctil, modo oscuro y otros navegadores sin verificar.
+
+### Copy nuevo CP4 para confirmación editorial (DEV-08)
+
+“Te toca a ti”, “En espera de aclaración”, “En espera de aportaciones”, “Hay diferencias por resolver”, “Llegó una respuesta a la aclaración”, “Lista para decidir”, “Faltan n de m personas asignadas”, “Sin participantes asignados”, “Consulta de la pregunta”, y sus frases explicativas derivan de datos reales. “La cantidad no significa consenso” y los cuatro vacíos conservan el significado existente. Las etiquetas de operaciones siguen `actionLabels`; no se renombra una operación del backend.
+
+### Estado de cierre CP4
+
+**LISTO PARA REVISIÓN.** DEV-25 resuelta por autorización explícita del producto; ambos casos sembrados y verificados mediante la API oficial. No hay aprobación visual humana global. Los cambios del checkpoint se consolidan en un commit local con DCO después del escaneo y la revisión del índice.
+
+CP1–4: listos para revisión. CP5–8: no iniciados. Sin push ni PR. Se detiene la implementación para la revisión humana obligatoria; DEV-25 y DEV-26 no equivalen a aceptación visual global.
+
+### Auditoría intermedia de CP4 (antes de aprobar DEV-25)
+
+- Exportación explícita de 877 archivos candidatos (tracked y novedades intencionales; fuera los documentos Claude/mockups ajenos): Gitleaks 8.30.1, **0 hallazgos**, sin nuevas exclusiones.
+- 688 destinos relativos de Markdown comprobados, **0 inexistentes**; capturas enlazadas presentes.
+- Residuos privados/institucionales en archivos nuevos/modificados de este checkpoint: **0 coincidencias**.
+- `git diff --check`: PASS. Diff desde v0.5.0 vacío en backend, contratos, Prisma y Docker; sin cambios en almacenamiento.
+- Documentos ajenos y stash conservados, comparados contra los hashes previos. No se accedió ni modificó Acta-FGEO.
+- En esa auditoría CP4 seguía sin staging/commit, con HEAD `ef37b4f`; el cierre posterior aparece abajo. No hubo push ni PR.
+
+
+### DEV-25 — evidencia final autorizada
+
+| Caso | Estado real | Enviadas / requeridas | Aclaraciones | Conflictos |
+|---|---|---|---|---|
+| V-07 · `ADQ-06.02` | CLARIFICATION_REQUIRED · Requiere aclaración | 50 / 50 | 2 abiertas, 1 cerrada | 0 |
+| V-07-partial · `ADQ-01.01.1` | PARTIAL · Respuesta parcial | 1 / 2; falta 1 | 0 | 0 |
+
+Se reutilizó una pregunta sin aportaciones del cuestionario ficticio para el caso separado: siguen siendo **304 preguntas**, sin modificar texto, tipos ni opciones del paquete. Las dos asignaciones son requeridas. No se llamó a `markPartial`, no se modificó SQL y no se cambió backend/contrato. En el primer caso se conservaron las tres aclaraciones y las cinco evidencias PDF ficticias del fixture.
+
+La captura `c-05-review-50` y la especificación ilustran PARTIAL y 50/62. Las personas faltantes adicionales no están declaradas en el JSON: no se inventaron doce asignaciones. El producto muestra 50/50 y las aclaraciones reales. El caso 1/2 demuestra por separado la cobertura incompleta. El orden de aportaciones es el recibido del servidor (primera Uriel), no una selección artificial para copiar la maqueta.
+
+Preparación del fixture, sin alterar el producto:
+
+1. La API rechazó con 422 una etiqueta de opción enviada como valor. Se usa correspondencia exacta y única `label → value` de las opciones importadas (`opt-1…opt-4`), conservando cada respuesta.
+2. La API rechazó con 409 cerrar un hilo todavía pendiente del participante. La especificación decía CLOSED con un solo mensaje del analista; se añadió una respuesta ficticia explícita por la API del participante y luego el cierre del analista. Se conserva el resultado autorizado (dos abiertos y uno cerrado), registrando ese evento intermedio necesario; nunca se fuerza el estado del hilo.
+3. Las aserciones nuevas esperaban «Parcial». La etiqueta existente del producto es «Respuesta parcial»: se corrigió la expectativa exacta, sin modificar la etiqueta ni relajar el estado esperado. Primer pase nuevo: 5/10; tras corregir la preparación, 10/10; matriz final: **41/41** (40 vistas + permisos).
+4. Se corrigió «Faltan 1…» en la explicación nueva de CP4: «Falta 1 de 2 personas asignadas». Dos tests adicionales cubren singular/plural sin cambiar estado, cálculo de cobertura ni acción.
+
+Las diez capturas «before-cp4» de estos dos casos se reconstruyeron desde el commit `ef37b4f` en un frontend temporal, después de sembrar los datos autorizados. No son capturas históricas de v0.5.0 ni una alteración del árbol de trabajo; `baseline-metrics.json` identifica el origen. El servidor temporal se detuvo después de capturarlas.
+
+### Comparativas de cierre y nueve aspectos
+
+Referencia a la izquierda; React a la derecha. Las 30 capturas de casos previos no cambiaron (SHA-256 idéntico tras el pase final); se revisaron las diez comparativas nuevas y los tres detalles móviles de 50.
+
+- 50 aportaciones, referencia c-05-review-50: [1440](acta-direction-c-evidence/cp4/V-07-compare-1440.png), [1024](acta-direction-c-evidence/cp4/V-07-compare-1024.png), [768](acta-direction-c-evidence/cp4/V-07-compare-768.png), [390](acta-direction-c-evidence/cp4/V-07-compare-390.png), [320](acta-direction-c-evidence/cp4/V-07-compare-320.png).
+- Parcial separado, referencia de composición de una aportación c-04-review-1: [1440](acta-direction-c-evidence/cp4/V-07-partial-compare-1440.png), [1024](acta-direction-c-evidence/cp4/V-07-partial-compare-1024.png), [768](acta-direction-c-evidence/cp4/V-07-partial-compare-768.png), [390](acta-direction-c-evidence/cp4/V-07-partial-compare-390.png), [320](acta-direction-c-evidence/cp4/V-07-partial-compare-320.png).
+
+El caso parcial separado no tiene una maqueta propia: la referencia de una aportación comprueba composición, no igualdad de contenido/estado. A 1024 la columna lateral sigue el umbral ≥900 del Mapping. En móvil se necesita más desplazamiento que en C por conservar la pregunta completa, contexto, acciones reales y cuatro pestañas alcanzables. No se afirma que la aportación quede visible sin desplazamiento a 320/390.
+
+| Aspecto | V-07 · 50 | V-07-partial |
+|---|---|---|
+| Jerarquía | PASA: pregunta → estado → aportaciones | PASA: pregunta → cobertura → respuesta |
+| Composición | PASA: riel/panel ≥900; lista/detalle <900 | PASA: una respuesta completa sin riel |
+| Tipografía | PASA: h1 23/600 Sans en escritorio; cuerpo 17; metadatos ≥12,5 | PASA: misma escala; pregunta y contenido diferenciados |
+| Espaciado | PASA: filtros y respuesta separados; tarjetas más espaciadas que C | PASA: comentario/ejemplo separados |
+| Densidad | PASA en alcance: respuesta a y=583,73 a 1440; móvil desplazable | PASA en alcance: respuesta a y=601,13 a 1440; móvil desplazable |
+| Agrupación | PASA: vigentes, detalle y participantes diferenciados | PASA: una aportación y una persona requerida pendiente |
+| Acciones | PASA: sin CTA que reclame turno mientras se esperan aclaraciones; otras acciones conservadas | PASA: espera de aportación, sin inventar tarea de analista |
+| Estados | DEV-25: Requiere aclaración gana a Parcial de C | DEV-25: parcial real, sin conflictos ni hilos abiertos |
+| Responsive | PASA: cinco anchos, cero overflow/axe; foco lista/detalle y filtros | PASA: cinco anchos, cero overflow/axe, lectura por scroll |
+
+A 1440: h1 y=117,5; tamaño 23 px/peso 600; riel 295 px en 50; cero acciones primarias en ambos estados de espera. Las métricas, incluyendo `backendStatus`, aclaraciones y respondientes faltantes, están en [metrics-cp4.json](acta-direction-c-evidence/metrics-cp4.json).
+
+### Parada de revisión humana tras CP4
+
+| Checkpoint | Gate técnico y evidencia | Aceptación visual humana |
+|---|---|---|
+| 1 | PASS · LISTO PARA REVISIÓN | Pendiente |
+| 2 | PASS · LISTO PARA REVISIÓN | Pendiente |
+| 3 | PASS · LISTO PARA REVISIÓN | Pendiente; DEV-26 aprobada no sustituye este gate |
+| 4 | PASS · LISTO PARA REVISIÓN | Pendiente; DEV-25 aprobada no sustituye este gate |
+| 5–8 | No iniciados | Requieren autorización después de esta revisión |
+
+**VISUAL REVIEW READY: YES. WAITING FOR PRODUCT APPROVAL: YES.** No se inicia CP5. No se abre PR ni se publica la rama. El registro/documento final de decisiones, contrastes e hilos corresponde a CP5; el aspecto heredado de su contenido no se presenta como rediseño terminado.
+
+Revisión humana solicitada: jerarquía y densidad de escritorio; altura y desplazamiento de móvil; riel de aportaciones; textos de espera/turno; lectura de evidencia; conservación de navegación y controles. Accesibilidad pendiente: lector de pantalla, zoom real, colores forzados, dispositivos táctiles y otros navegadores; axe no certifica WCAG.
+
+
+### Auditoría de cierre CP4
+
+- Gitleaks **8.30.1**, binario oficial con SHA-256 verificado: **0 hallazgos** sobre 920 archivos versionables candidatos; sin nuevas exclusiones.
+- Enlaces Markdown relativos: **717 comprobados, 0 destinos inexistentes**. Todas las comparativas y capturas enlazadas existen.
+- El escaneo amplio distingue 23 coincidencias: rutas API `/users/` (falsos positivos), mención del repositorio excluido en el alcance, e identificadores/migración institucionales ya presentes en v0.5.0. Se contrastaron con la base; no se introdujo contenido institucional ni se cambió esa migración por este trabajo. No se trata este pase frontend como saneamiento de historia o backend.
+- Cero residuos privados nuevos injustificados y cero secretos en el contenido versionable. Entorno, credenciales ficticias, siembra, bases y logs permanecen fuera del commit.
+- `git diff --check`: PASS. Backend, contratos, Prisma, Docker y almacenamiento: diff vacío desde v0.5.0. Los cinco archivos ajenos y el stash mantienen sus hashes/estado anteriores.
+- El commit de cierre incluye únicamente 192 rutas del checkpoint: presentación, pruebas, informe y evidencia visual solicitada. Los documentos Claude/mockups ajenos siguen sin seguimiento. No se incluye configuración privada ni salida temporal.
+- Commit previsto de cierre: `feat: reshape review and contributions for Direction C`, con DCO, en `feat/acta-direction-c-ui`. Sin push, PR, tag ni release.

@@ -6,28 +6,28 @@ import type {
   reviewStates,
 } from "@requirements/contracts";
 import type { z } from "zod";
+import { StatusChip, type StatusTone } from "../ui/semantic";
 import { ParticipantIcon } from "./ParticipantIcon";
 import { dateText, reviewLabels, SubmittedAnswer } from "./ReviewShared";
 import "../analyst-visual.css";
 
 type State = (typeof reviewStates)[number];
-const statePresentation: Record<State, { icon: string; tone: string }> = {
+const statePresentation: Record<State, { icon: string; tone: StatusTone }> = {
   NOT_REVIEWED: { icon: "info", tone: "neutral" },
   PENDING: { icon: "clock", tone: "neutral" },
-  PARTIAL: { icon: "edit", tone: "amber" },
-  ANSWERED: { icon: "send", tone: "teal" },
-  CLARIFICATION_REQUIRED: { icon: "help", tone: "amber" },
-  VALIDATED: { icon: "check", tone: "forest" },
+  PARTIAL: { icon: "edit", tone: "warning" },
+  ANSWERED: { icon: "send", tone: "info" },
+  CLARIFICATION_REQUIRED: { icon: "help", tone: "warning" },
+  VALIDATED: { icon: "check", tone: "success" },
   NOT_APPLICABLE: { icon: "info", tone: "neutral" },
-  CONFLICT: { icon: "flag", tone: "conflict" },
+  CONFLICT: { icon: "flag", tone: "danger" },
 };
 export function AnalystStatus({ status }: { status: State }) {
   const presentation = statePresentation[status];
   return (
-    <span className={`av-status av-${presentation.tone}`}>
-      <ParticipantIcon name={presentation.icon} />
-      <span>{reviewLabels[status]}</span>
-    </span>
+    <StatusChip tone={presentation.tone} icon={presentation.icon}>
+      {reviewLabels[status]}
+    </StatusChip>
   );
 }
 export function DecisionRecord({

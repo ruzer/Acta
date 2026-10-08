@@ -1073,3 +1073,643 @@ test.describe("Direction C · questionnaire", () => {
     });
   }
 });
+
+test.describe("Direction C · review", () => {
+  test.use({
+    locale: "es-MX",
+    timezoneId: "America/Mexico_City",
+    reducedMotion: "reduce",
+  });
+  type Case = {
+    id: string;
+    questionId: string;
+    count: number;
+    user: string;
+    readonly: boolean;
+    decision?: boolean;
+    expectedStatus?: "CLARIFICATION_REQUIRED" | "PARTIAL";
+  };
+  let projectId: string;
+  let cases: Case[];
+  let source: string;
+  const measurements: unknown[] = [];
+  test.beforeAll(async ({ browser }) => {
+    test.setTimeout(240000);
+    const file = process.env.ACTA_DIRECTION_C_VISUAL_FIXTURE;
+    if (file) {
+      const fixture = JSON.parse(await readFile(file, "utf8")) as {
+        projectId: string;
+        users: Record<string, { username: string }>;
+        cases: Record<string, { id: string }>;
+      };
+      projectId = fixture.projectId;
+      source = "Direction C · fixture importado por API";
+      cases = [
+        {
+          id: "V-04",
+          questionId: fixture.cases["review-1"]!.id,
+          count: 1,
+          user: fixture.users.elena!.username,
+          readonly: false,
+        },
+        {
+          id: "V-05",
+          questionId: fixture.cases["review-3-conflict"]!.id,
+          count: 3,
+          user: fixture.users.elena!.username,
+          readonly: false,
+        },
+        {
+          id: "V-06",
+          questionId: fixture.cases["review-12"]!.id,
+          count: 12,
+          user: fixture.users.elena!.username,
+          readonly: false,
+        },
+        {
+          id: "V-08",
+          questionId: fixture.cases["review-0"]!.id,
+          count: 0,
+          user: fixture.users.elena!.username,
+          readonly: false,
+        },
+        {
+          id: "V-13-admin",
+          questionId: fixture.cases["review-3-conflict"]!.id,
+          count: 3,
+          user: fixture.users.marco!.username,
+          readonly: true,
+        },
+        {
+          id: "V-14-viewer",
+          questionId: fixture.cases["decision-validated"]!.id,
+          count: 3,
+          user: fixture.users.gabriela!.username,
+          readonly: true,
+          decision: true,
+        },
+        {
+          id: "V-07",
+          questionId: fixture.cases["review-50"]!.id,
+          count: 50,
+          user: fixture.users.elena!.username,
+          readonly: false,
+          expectedStatus: "CLARIFICATION_REQUIRED",
+        },
+        {
+          id: "V-07-partial",
+          questionId: fixture.cases["review-partial"]!.id,
+          count: 1,
+          user: fixture.users.elena!.username,
+          readonly: false,
+          expectedStatus: "PARTIAL",
+        },
+      ];
+    } else {
+      // Autonomous API fixture for ordinary E2E runs; never mislabeled as the
+      // approved 3/12/50-person visual dataset. The report records its actual size.
+      const f = await prepare(browser);
+      projectId = f.project.id;
+      source = "Fixture autónomo de API · 0/1/2 aportaciones";
+      cases = [
+        {
+          id: "API-single",
+          questionId: f.questions[2]!.id,
+          count: 1,
+          user: "analyst",
+          readonly: false,
+        },
+        {
+          id: "API-conflict",
+          questionId: f.questions[0]!.id,
+          count: 2,
+          user: "analyst",
+          readonly: false,
+        },
+        {
+          id: "API-clarification",
+          questionId: f.questions[1]!.id,
+          count: 1,
+          user: "analyst",
+          readonly: false,
+        },
+        {
+          id: "API-empty",
+          questionId: f.questions[4]!.id,
+          count: 0,
+          user: "analyst",
+          readonly: false,
+        },
+        {
+          id: "API-admin",
+          questionId: f.questions[0]!.id,
+          count: 2,
+          user: "admin",
+          readonly: true,
+        },
+        {
+          id: "API-viewer",
+          questionId: f.questions[3]!.id,
+          count: 1,
+          user: "viewer",
+          readonly: true,
+          decision: true,
+        },
+      ];
+    }
+  });
+  if (process.env.ACTA_DIRECTION_C_VISUAL_FIXTURE)
+    test("DEV-25 · cincuenta aportaciones conservan los permisos reales", async ({
+      page,
+    }) => {
+      const fixture = JSON.parse(
+        await readFile(process.env.ACTA_DIRECTION_C_VISUAL_FIXTURE!, "utf8"),
+      ) as {
+        projectId: string;
+        users: Record<string, { username: string }>;
+        cases: Record<string, { id: string }>;
+      };
+      const id = fixture.cases["review-50"]!.id;
+      const apiPath = `/api/v1/projects/${fixture.projectId}/questions/${id}/review`;
+      await login(page, fixture.users.marco!.username);
+      const response = await page.request.get(apiPath);
+      expect(response.status()).toBe(200);
+      const data =
+        (await response.json()) as import("@requirements/contracts").ReviewDetail;
+      expect(data.status).toBe("CLARIFICATION_REQUIRED");
+      expect(data.canReview).toBe(false);
+      expect(data.submissions.filter((s) => s.current)).toHaveLength(50);
+      await page.goto(`/projects/${fixture.projectId}/review/${id}`);
+      await expect(page.locator("main h1")).toHaveText(data.question.question);
+      await expect(
+        page.getByText("Consulta de solo lectura.", { exact: true }),
+      ).toBeVisible();
+      await expect(page.getByLabel("Otras acciones")).toHaveCount(0);
+      await expect(page.getByText("Te toca a ti", { exact: true })).toHaveCount(
+        0,
+      );
+      // An account without access to unvalidated review data cannot obtain it.
+      await page.context().clearCookies();
+      await login(page, fixture.users.gabriela!.username);
+      expect((await page.request.get(apiPath)).status()).toBe(404);
+      await page.context().clearCookies();
+      await login(page, fixture.users.lucia!.username);
+      expect((await page.request.get(apiPath)).status()).toBe(403);
+      await page.context().clearCookies();
+      expect((await page.request.get(apiPath)).status()).toBe(401);
+    });
+  test.afterAll(async () => {
+    if (!measurements.length) return;
+    await mkdir(`${output}/cp4`, { recursive: true });
+    await writeFile(
+      `${output}/metrics-cp4.json`,
+      JSON.stringify(
+        { checkpoint: 4, source, records: measurements },
+        null,
+        2,
+      ) + "\n",
+    );
+  });
+  for (const [width, height] of widths)
+    for (
+      let index = 0;
+      index < (process.env.ACTA_DIRECTION_C_VISUAL_FIXTURE ? 8 : 6);
+      index++
+    ) {
+      test(`pregunta, aportaciones y permisos ${index} · ${width}`, async ({
+        page,
+        baseURL,
+      }) => {
+        const item = cases[index]!;
+        await page.setViewportSize({ width, height });
+        await login(page, item.user);
+        const response = await page.request.get(
+          `/api/v1/projects/${projectId}/questions/${item.questionId}/review`,
+        );
+        expect(response.status()).toBe(200);
+        const data =
+          (await response.json()) as import("@requirements/contracts").ReviewDetail;
+        expect(data.canReview).toBe(!item.readonly);
+        const current = data.submissions.filter((s) => s.current);
+        expect(current).toHaveLength(item.count);
+        if (item.expectedStatus) {
+          // DEV-25: use the backend projection, never the prototype's label.
+          expect(data.status).toBe(item.expectedStatus);
+          expect(
+            data.conflicts.filter((c) => c.status === "OPEN"),
+          ).toHaveLength(0);
+          const required = data.participants.filter(
+            (p) => p.required && p.applicability === "ENABLED",
+          );
+          if (item.count === 50) {
+            expect(data.threads).toHaveLength(3);
+            expect(
+              data.threads.filter((t) => t.status !== "CLOSED"),
+            ).toHaveLength(2);
+            expect(required).toHaveLength(50);
+            expect(required.filter((p) => !p.currentRevisionId)).toHaveLength(
+              0,
+            );
+          } else {
+            expect(required).toHaveLength(2);
+            expect(required.filter((p) => !p.currentRevisionId)).toHaveLength(
+              1,
+            );
+            expect(data.threads).toHaveLength(0);
+            expect(data.partialReviewReason).toBeNull();
+          }
+        }
+        const path = `/projects/${projectId}/review/${item.questionId}`;
+        await page.goto(path);
+        await expect(page).toHaveURL(new URL(path, baseURL!).href);
+        await expect(page.locator("main h1")).toHaveText(
+          data.question.question,
+        );
+        await expect(page.locator("main h1")).toHaveCount(1);
+        if (item.expectedStatus) {
+          await expect(page.locator(".ac-state-card .ac-status")).toHaveText(
+            item.expectedStatus === "PARTIAL"
+              ? "Respuesta parcial"
+              : "Requiere aclaración",
+          );
+          await expect(
+            page.getByText("Te toca a ti", { exact: true }),
+          ).toHaveCount(0);
+          await expect(
+            page.getByText(
+              item.expectedStatus === "PARTIAL"
+                ? "Falta 1 de 2 personas asignadas"
+                : "En espera de aclaración",
+              { exact: true },
+            ),
+          ).toBeVisible();
+        }
+        const initial = data.validations.some((v) => !v.invalidatedAt)
+          ? "Decisión"
+          : data.conflicts.some((c) => c.status === "OPEN")
+            ? "Contraste"
+            : `Aportaciones (${item.count})`;
+        await expect(
+          page.getByRole("tab", { name: initial, exact: true }),
+        ).toHaveAttribute("aria-selected", "true");
+        if (item.readonly) {
+          await expect(
+            page.getByText("Consulta de solo lectura.", { exact: true }),
+          ).toBeVisible();
+          await expect(
+            page.getByText("Te toca a ti", { exact: true }),
+          ).toHaveCount(0);
+          await expect(page.getByLabel("Otras acciones")).toHaveCount(0);
+          await expect(
+            page.getByRole("button", {
+              name: /^(Registrar decisión|Resolver conflicto|Reabrir pregunta|Cerrar aclaración|Preguntar nuevamente)$/,
+            }),
+          ).toHaveCount(0);
+        }
+        if (item.decision)
+          await expect(
+            page.getByRole("article", {
+              name: "Decisión vigente",
+              exact: true,
+            }),
+          ).toBeVisible();
+        await page.evaluate(async () => {
+          await document.fonts.ready;
+          scrollTo(0, 0);
+        });
+        await mkdir(`${output}/cp4`, { recursive: true });
+        await page.screenshot({
+          path: `${output}/cp4/${item.id}-${width}-default.png`,
+        });
+        const initialAxe = (
+          await new AxeBuilder({ page })
+            .withTags([
+              "wcag2a",
+              "wcag2aa",
+              "wcag21a",
+              "wcag21aa",
+              "wcag22aa",
+              "best-practice",
+            ])
+            .analyze()
+        ).violations;
+        expect(initialAxe).toEqual([]);
+        await page
+          .getByRole("tab", {
+            name: `Aportaciones (${item.count})`,
+            exact: true,
+          })
+          .click();
+        await expect(page).toHaveURL(
+          new URL(`${path}?tab=contributions`, baseURL!).href,
+        );
+        const panel = page.getByRole("tabpanel", {
+          name: `Aportaciones (${item.count})`,
+          exact: true,
+        });
+        await expect(
+          panel.getByRole("heading", {
+            name: `${item.count} ${item.count === 1 ? "aportación" : "aportaciones"}`,
+            exact: true,
+          }),
+        ).toBeVisible();
+        if (item.count === 0) {
+          await expect(page.locator(".ac-contribution-rail")).toHaveCount(0);
+          await expect(
+            page.getByRole("heading", { name: "Sin aportaciones vigentes" }),
+          ).toBeVisible();
+        } else if (item.count === 1) {
+          await expect(page.locator(".ac-contribution-rail")).toHaveCount(0);
+          await expect(panel.locator(".ac-answer").first()).toBeVisible();
+        } else {
+          await expect(
+            page
+              .getByRole("list", { name: "Aportaciones vigentes" })
+              .getByRole("listitem"),
+          ).toHaveCount(item.count);
+          if (width >= 900)
+            await expect(page.locator(".ac-contribution-pane")).toHaveCount(1);
+          else
+            await expect(page.locator(".ac-contribution-pane")).toHaveCount(0);
+        }
+        if (item.count >= 10) {
+          await page
+            .getByRole("searchbox", { name: "Buscar por actor o área" })
+            .fill(current[0]!.respondent.displayName);
+          await expect(page.locator(".ac-contribution-count")).toHaveText(
+            `1 de ${item.count} aportaciones`,
+          );
+          await expect(
+            page.getByRole("combobox", { name: "Situación de la aportación" }),
+          ).toBeVisible();
+          await page.getByRole("searchbox").clear();
+          await expect(page.locator(".ac-contribution-count")).toHaveText(
+            `${item.count} de ${item.count} aportaciones`,
+          );
+        }
+        await page.evaluate(() => scrollTo(0, 0));
+        const surface = await surfaceMetrics(page, ".ac-review");
+        const containment = await panel.evaluate(
+          (root, names) => {
+            const elements = [
+              ...root.querySelectorAll<HTMLElement>("*"),
+            ].filter(
+              (el) =>
+                el.checkVisibility() &&
+                !el.closest('.sr-only,svg,[aria-hidden="true"],option'),
+            );
+            const childOverflow = elements
+              .filter((el) => {
+                const parent = el.parentElement;
+                if (!parent || getComputedStyle(parent).display === "inline")
+                  return false;
+                const style = getComputedStyle(el);
+                if (style.position === "absolute" || style.position === "fixed")
+                  return false;
+                const r = el.getBoundingClientRect(),
+                  p = parent.getBoundingClientRect();
+                return (
+                  r.width > 0 &&
+                  p.width > 0 &&
+                  (r.right > p.right + 2 || r.left < p.left - 2)
+                );
+              })
+              .map((el) => ({
+                element: el.className || el.tagName,
+                parent: el.parentElement?.className,
+              }));
+            const squeezedText = elements
+              .filter(
+                (el) =>
+                  el.getBoundingClientRect().height > 0 &&
+                  el.getBoundingClientRect().width < 8 &&
+                  [...el.childNodes].some(
+                    (n) =>
+                      n.nodeType === Node.TEXT_NODE &&
+                      (n.textContent?.trim().length ?? 0) > 6,
+                  ),
+              )
+              .map((el) => el.className || el.tagName);
+            const text = elements
+              .flatMap((el) =>
+                [...el.childNodes]
+                  .filter((n) => n.nodeType === Node.TEXT_NODE)
+                  .map((n) => n.textContent ?? ""),
+              )
+              .join("\n");
+            const actorOccurrences = names.map((name) => ({
+              name,
+              count: text.split(name).length - 1,
+            }));
+            return { childOverflow, squeezedText, actorOccurrences };
+          },
+          current.map((s) => s.respondent.displayName),
+        );
+        expect(containment.childOverflow).toEqual([]);
+        expect(containment.squeezedText).toEqual([]);
+        for (const actor of containment.actorOccurrences)
+          expect(actor.count).toBeLessThanOrEqual(3);
+        const geometry = await page.locator(".ac-review").evaluate((root) => {
+          const h = root.querySelector("h1")!,
+            css = getComputedStyle(h);
+          const answer = [
+            ...root.querySelectorAll<HTMLElement>(".ac-answer"),
+          ].find((e) => e.checkVisibility());
+          const rail = root.querySelector<HTMLElement>(".ac-contribution-rail");
+          const primary = [
+            ...root.querySelectorAll<HTMLElement>(".button.primary"),
+          ].filter((e) => e.checkVisibility());
+          return {
+            questionY: h.getBoundingClientRect().y,
+            questionSize: parseFloat(css.fontSize),
+            questionWeight: Number(css.fontWeight),
+            questionFont: css.fontFamily,
+            answerY: answer?.getBoundingClientRect().y ?? null,
+            railWidth: rail?.getBoundingClientRect().width ?? null,
+            primaryCount: primary.length,
+          };
+        });
+        expect(geometry.primaryCount).toBeLessThanOrEqual(1);
+        if (width === 1440) {
+          expect(geometry.questionY).toBeLessThanOrEqual(140);
+          expect(geometry.questionSize).toBeGreaterThanOrEqual(22);
+          expect(geometry.questionSize).toBeLessThanOrEqual(24);
+          expect(geometry.questionWeight).toBeGreaterThanOrEqual(600);
+          expect(geometry.questionFont).toContain("Plex Sans");
+          if (item.count > 0) {
+            expect(geometry.answerY).not.toBeNull();
+            expect(geometry.answerY!).toBeLessThanOrEqual(640);
+          }
+        }
+        if (width >= 900 && item.count > 1) {
+          expect(geometry.railWidth!).toBeGreaterThanOrEqual(280);
+          expect(geometry.railWidth!).toBeLessThanOrEqual(340);
+        }
+        await page.screenshot({
+          path: `${output}/cp4/${item.id}-${width}-after.png`,
+        });
+        if (width < 900 && item.count > 1) {
+          const trigger = page.getByRole("button", {
+            name: `Abrir aportación de ${current[0]!.respondent.displayName}`,
+            exact: true,
+          });
+          await trigger.focus();
+          await page.keyboard.press("Enter");
+          await expect(
+            page.getByRole("heading", {
+              name: current[0]!.respondent.displayName,
+              exact: true,
+            }),
+          ).toBeFocused();
+          await expect(page.locator(".ac-contribution-rail")).toHaveCount(0);
+          await expect(panel.locator(".ac-answer").first()).toBeVisible();
+          await surfaceMetrics(page, ".ac-review");
+          await page.screenshot({
+            path: `${output}/cp4/${item.id}-${width}-detail.png`,
+          });
+        }
+        const evidence = await panel
+          .locator(".ac-evidence-name")
+          .evaluateAll((elements) =>
+            elements
+              .filter((e) => e.checkVisibility())
+              .map((el) => ({
+                name: el.querySelector("strong")?.textContent,
+                width: el.getBoundingClientRect().width,
+                size: el.querySelector("span")?.textContent,
+              })),
+          );
+        for (const file of evidence) {
+          expect(file.width).toBeGreaterThan(40);
+          expect(file.name).toBeTruthy();
+          expect(file.size).toMatch(/bytes$/);
+        }
+        const axe = (
+          await new AxeBuilder({ page })
+            .withTags([
+              "wcag2a",
+              "wcag2aa",
+              "wcag21a",
+              "wcag21aa",
+              "wcag22aa",
+              "best-practice",
+            ])
+            .analyze()
+        ).violations;
+        expect(axe).toEqual([]);
+        if (width < 900 && item.count > 1) {
+          await page
+            .getByRole("button", {
+              name: `← Volver a ${item.count} aportaciones`,
+              exact: true,
+            })
+            .click();
+          await expect(
+            page.getByRole("button", {
+              name: `Abrir aportación de ${current[0]!.respondent.displayName}`,
+              exact: true,
+            }),
+          ).toBeFocused();
+        }
+        if (item.count === 50) {
+          const search = page.getByRole("searchbox", {
+            name: "Buscar por actor o área",
+          });
+          const situation = page.getByRole("combobox", {
+            name: "Situación de la aportación",
+          });
+          const list = page.getByRole("list", {
+            name: "Aportaciones vigentes",
+          });
+          await situation.selectOption("clarification");
+          await expect(list.getByRole("listitem")).toHaveCount(2);
+          await expect(page.locator(".ac-contribution-count")).toHaveText(
+            "2 de 50 aportaciones",
+          );
+          await situation.selectOption("conflict");
+          await expect(list.getByRole("listitem")).toHaveCount(0);
+          await expect(page.locator(".ac-contribution-count")).toHaveText(
+            "0 de 50 aportaciones",
+          );
+          await situation.selectOption("");
+          const area = current[0]!.area.name;
+          const expectedAreaCount = current.filter(
+            (s) => s.area.name === area,
+          ).length;
+          await search.fill(area);
+          await expect(list.getByRole("listitem")).toHaveCount(
+            expectedAreaCount,
+          );
+          await search.clear();
+          const first = list.getByRole("button").first();
+          await first.focus();
+          await page.keyboard.press("End");
+          const last = list.getByRole("button").last();
+          await expect(last).toBeFocused();
+          await page.keyboard.press("Enter");
+          await expect(
+            page.getByRole("heading", {
+              name: current[49]!.respondent.displayName,
+              exact: true,
+            }),
+          ).toBeFocused();
+          await expect(panel.locator(".ac-answer").first()).toBeVisible();
+          if (width >= 900) {
+            await search.fill(current[0]!.respondent.displayName);
+            await expect(
+              page.getByRole("heading", {
+                name: current[49]!.respondent.displayName,
+                exact: true,
+              }),
+            ).toBeVisible();
+            await search.clear();
+          } else {
+            await page
+              .getByRole("button", {
+                name: "← Volver a 50 aportaciones",
+                exact: true,
+              })
+              .click();
+            await expect(list.getByRole("button").last()).toBeFocused();
+          }
+        }
+        const tabs = page.getByRole("tab", {
+          name: `Aportaciones (${item.count})`,
+          exact: true,
+        });
+        await tabs.focus();
+        await page.keyboard.press("End");
+        await expect(
+          page.getByRole("tab", { name: "Historial", exact: true }),
+        ).toBeFocused();
+        await expect(
+          page.getByRole("heading", { name: "Historial de la pregunta" }),
+        ).toBeVisible();
+        await page.keyboard.press("Home");
+        await expect(tabs).toBeFocused();
+        measurements.push({
+          id: item.id,
+          width,
+          height,
+          path,
+          contributions: item.count,
+          backendStatus: data.status,
+          openClarifications: data.threads.filter((t) => t.status !== "CLOSED")
+            .length,
+          missingRequiredRespondents: data.participants.filter(
+            (p) =>
+              p.required &&
+              p.applicability === "ENABLED" &&
+              !p.currentRevisionId,
+          ).length,
+          readonly: item.readonly,
+          containment,
+          surface,
+          geometry,
+          evidence,
+          axe: axe.length,
+          initialAxe: initialAxe.length,
+        });
+      });
+    }
+});
