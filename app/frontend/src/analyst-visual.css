@@ -87,7 +87,7 @@
 }
 .av-scope .av-decision h3 {
   font:
-    700 1.5rem/1.3 "Acta Manrope",
+    700 1.5rem/1.3 "Acta Plex Sans",
     sans-serif;
 }
 .av-scope .av-decision h4 {
@@ -145,7 +145,7 @@
 }
 .av-scope .av-posture h4 {
   margin: 0 0 0.25rem;
-  font-family: "Acta Manrope", sans-serif;
+  font-family: "Acta Plex Sans", sans-serif;
 }
 .av-scope .av-posture h5 {
   font-size: 0.9rem;
@@ -194,7 +194,7 @@
 .av-scope .av-attention h3 {
   margin: 0.7rem 0 0.4rem;
   font:
-    700 1rem/1.5 "Acta Manrope",
+    700 1rem/1.5 "Acta Plex Sans",
     sans-serif;
 }
 .av-scope .av-attention p {
@@ -299,7 +299,7 @@
 .av-question-dialog .av-composer-head h2 {
   margin: 0;
   font:
-    700 1.4rem/1.4 "Acta Manrope",
+    700 1.4rem/1.4 "Acta Plex Sans",
     sans-serif;
 }
 .av-question-dialog .av-composer-form > fieldset {

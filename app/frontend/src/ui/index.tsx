@@ -8,7 +8,9 @@ import {
 export function Button({
   tone = "primary",
   ...p
-}: ComponentProps<"button"> & { tone?: "primary" | "secondary" | "danger" }) {
+}: ComponentProps<"button"> & {
+  tone?: "primary" | "secondary" | "tertiary" | "danger";
+}) {
   return <button type="button" className={"button " + tone} {...p} />;
 }
 export function Field({

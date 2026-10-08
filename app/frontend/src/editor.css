@@ -7,7 +7,7 @@
 .qe-shell h2,
 .qe-shell h3,
 .qe-shell h4 {
-  font-family: "Acta Manrope", sans-serif;
+  font-family: "Acta Plex Sans", sans-serif;
 }
 .qe-shell h1 {
   font-size: clamp(1.5rem, 3vw, 2rem);
