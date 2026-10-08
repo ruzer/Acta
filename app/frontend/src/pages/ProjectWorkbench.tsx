@@ -32,86 +32,18 @@ export function ProjectWorkbench({
     : role === "STAKEHOLDER"
       ? `${projectPath}/work`
       : projectPath;
-  const destinations = [
-    { view: "attention", label: "Atención" },
-    { view: "questionnaire", label: "Cuestionario" },
-    { view: "decisions", label: "Decisiones" },
-  ] as const;
   return (
-    <div className="project-workbench">
-      <header className={`pw-header${compact ? " pw-header-compact" : ""}`}>
-        <div className="pw-project-row">
-          <div className="pw-project-name">
-            {compact ? (
-              <Link className="pw-project-link" to={home}>
-                {projectName}
-              </Link>
-            ) : (
-              <h1>{projectName}</h1>
-            )}
-          </div>
-          {(canManage || role === "VIEWER") && (
-            <nav className="pw-secondary" aria-label="Accesos del proyecto">
-              {canManage && (
-                <Link
-                  to={destination("invitations")}
-                  aria-current={active === "invitations" ? "page" : undefined}
-                >
-                  Invitaciones
-                </Link>
-              )}
-              {role === "ADMIN" && (
-                <Link to={`${projectPath}/members`}>Miembros</Link>
-              )}
-              <details
-                className="pw-tools"
-                onKeyDown={(event) => {
-                  if (event.key === "Escape") {
-                    event.preventDefault();
-                    event.currentTarget.open = false;
-                    event.currentTarget.querySelector("summary")?.focus();
-                  }
-                }}
-              >
-                <summary>Más herramientas</summary>
-                <nav aria-label="Otras herramientas del proyecto">
-                  <Link to={projectPath}>Preguntas publicadas</Link>
-                  {canManage && (
-                    <>
-                      <Link to={`${projectPath}/traceability`}>
-                        Trazabilidad
-                      </Link>
-                      <Link to={`${projectPath}/import`}>
-                        Importar estructura
-                      </Link>
-                      <Link to={`${projectPath}/history`}>Bitácora</Link>
-                    </>
-                  )}
-                  <Link to={`${projectPath}/export`}>
-                    {role === "VIEWER"
-                      ? "Exportar decisiones vigentes"
-                      : "Exportar"}
-                  </Link>
-                </nav>
-              </details>
-            </nav>
-          )}
-        </div>
-        {canManage && (
-          <nav className="pw-navigation" aria-label="Navegación del proyecto">
-            {destinations.map(({ view, label }) => (
-              <Link
-                key={view}
-                to={destination(view)}
-                aria-current={active === view ? "page" : undefined}
-              >
-                {label}
-              </Link>
-            ))}
-          </nav>
-        )}
-      </header>
+    <header
+      className={`project-workbench ac-workbench-heading${compact ? " ac-workbench-compact" : ""}`}
+    >
+      {compact ? (
+        <Link className="pw-project-link" to={home}>
+          {projectName}
+        </Link>
+      ) : (
+        <h1>{active === "attention" ? "Atención" : projectName}</h1>
+      )}
       {children}
-    </div>
+    </header>
   );
 }

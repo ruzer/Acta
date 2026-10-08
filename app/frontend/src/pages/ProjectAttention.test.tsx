@@ -282,10 +282,9 @@ it("entradas filtran casos, preservan otros parámetros y estado existente permi
   expect(screen.getByLabelText("Consulta actual")).toHaveTextContent(
     "keep=context&task=clarifications",
   );
-  expect(screen.getByRole("link", { name: "Caso 0" })).toHaveAttribute(
-    "data-workbench-id",
-    "q-0",
-  );
+  expect(
+    screen.getByRole("link", { name: "Revisar conflicto: Caso 0" }),
+  ).toHaveAttribute("data-workbench-id", "q-0");
   await user.selectOptions(screen.getByLabelText("Filtrar estado"), "ANSWERED");
   expect(
     within(

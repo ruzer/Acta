@@ -6,6 +6,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import "@testing-library/jest-dom/vitest";
 import { ProjectWorkbench } from "./ProjectWorkbench";
+import {
+  ProjectNavigation,
+  ProjectToolsMenu,
+} from "../shell/ProjectNavigation";
 
 afterEach(() => {
   cleanup();
@@ -20,7 +24,15 @@ function setup(
         new QueryClient({ defaultOptions: { queries: { retry: false } } })
       }
     >
-      <MemoryRouter initialEntries={["/projects/project-a/editor"]}>
+      <MemoryRouter
+        initialEntries={[
+          overrides.active === "invitations"
+            ? "/projects/project-a/invitations"
+            : "/projects/project-a/editor",
+        ]}
+      >
+        <ProjectNavigation projectId="project-a" role={overrides.role} />
+        <ProjectToolsMenu projectId="project-a" role={overrides.role} />
         <ProjectWorkbench
           projectId="project-a"
           projectName="Proyecto de prueba"
@@ -37,8 +49,8 @@ function setup(
 
 it.each(["ADMIN", "ANALYST"] as const)(
   "%s tiene navegación estable y acceso permanente a invitaciones",
-  (role) => {
-    setup({ role });
+  async (role) => {
+    const user = setup({ role });
     const nav = within(
       screen.getByRole("navigation", { name: "Navegación del proyecto" }),
     );
@@ -64,12 +76,13 @@ it.each(["ADMIN", "ANALYST"] as const)(
     );
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(screen.getByText("Contenido del proyecto.")).toBeVisible();
-    if (role === "ADMIN")
+    if (role === "ADMIN") {
+      await user.click(screen.getByText("Más herramientas"));
       expect(screen.getByRole("link", { name: "Miembros" })).toHaveAttribute(
         "href",
         "/projects/project-a/members",
       );
-    else
+    } else
       expect(
         screen.queryByRole("link", { name: "Miembros" }),
       ).not.toBeInTheDocument();
@@ -125,7 +138,7 @@ it("compacto mantiene nombre como enlace y no agrega otro h1 al detalle", () => 
 
 it("las herramientas secundarias se cierran con Escape y devuelven el foco", async () => {
   const user = setup({ role: "ADMIN" });
-  const summary = screen.getByText("Más herramientas");
+  const summary = screen.getByText("Más herramientas").closest("summary")!;
   await user.click(summary);
   const tool = screen.getByRole("link", { name: "Trazabilidad" });
   expect(tool).toBeVisible();
@@ -144,5 +157,6 @@ it("una invitación activa se identifica sin marcar otro destino principal", () 
   for (const link of within(
     screen.getByRole("navigation", { name: "Navegación del proyecto" }),
   ).getAllByRole("link"))
-    expect(link).not.toHaveAttribute("aria-current");
+    if (link.textContent !== "Invitaciones")
+      expect(link).not.toHaveAttribute("aria-current");
 });

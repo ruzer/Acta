@@ -13,17 +13,17 @@ Solo presentación frontend. Se conservan contratos, autorización, dominio, bac
 
 ## Estado real
 
-| Etapa                                     | Estado                     | Evidencia / siguiente comprobación                                                                |
-| ----------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------- |
-| Preparación                               | EN CURSO                   | Base y árbol auditados; rama creada; PostgreSQL desechable nuevo; migraciones oficiales aplicadas |
-| 1. Tokens, tipografía, componentes        | LISTO PARA REVISIÓN        | Tipos/lint/build, 170 tests frontend, humo 7/7, visual 5/5 y axe 0; aceptación humana pendiente   |
-| 2. Shell, navegación, Atención            | NO INICIADO                | Depende del checkpoint 1                                                                          |
-| 3. Cuestionario / Organizar / lotes       | NO INICIADO                | Depende del checkpoint 2                                                                          |
-| 4. Revisión / aportaciones / solo lectura | NO INICIADO                | Depende del checkpoint 3; después requiere revisión humana                                        |
-| 5. Conflictos / aclaraciones / decisiones | ESPERA APROBACIÓN POST-CP4 | No implementar todavía                                                                            |
-| 6. Participante / invitado                | ESPERA APROBACIÓN POST-CP4 | No implementar todavía                                                                            |
-| 7. Administración / consistencia          | ESPERA APROBACIÓN POST-CP4 | No implementar todavía                                                                            |
-| 8. Validación integral / PR borrador      | ESPERA APROBACIÓN POST-CP4 | No publicar todavía                                                                               |
+| Etapa                                     | Estado                     | Evidencia / siguiente comprobación                                                                                |
+| ----------------------------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Preparación                               | EN CURSO                   | Base y árbol auditados; rama creada; PostgreSQL desechable nuevo; migraciones oficiales aplicadas                 |
+| 1. Tokens, tipografía, componentes        | LISTO PARA REVISIÓN        | Tipos/lint/build, 170 tests frontend, humo 7/7, visual 5/5 y axe 0; aceptación humana pendiente                   |
+| 2. Shell, navegación, Atención            | LISTO PARA REVISIÓN        | Gate visual 12/12, 231 unit/component, 11 workbench, 3 simplicity, humo 7 casos; límites ARCHIVED descritos abajo |
+| 3. Cuestionario / Organizar / lotes       | NO INICIADO                | Depende del checkpoint 2                                                                                          |
+| 4. Revisión / aportaciones / solo lectura | NO INICIADO                | Depende del checkpoint 3; después requiere revisión humana                                                        |
+| 5. Conflictos / aclaraciones / decisiones | ESPERA APROBACIÓN POST-CP4 | No implementar todavía                                                                                            |
+| 6. Participante / invitado                | ESPERA APROBACIÓN POST-CP4 | No implementar todavía                                                                                            |
+| 7. Administración / consistencia          | ESPERA APROBACIÓN POST-CP4 | No implementar todavía                                                                                            |
+| 8. Validación integral / PR borrador      | ESPERA APROBACIÓN POST-CP4 | No publicar todavía                                                                                               |
 
 ## Preparación y aislamiento
 
@@ -60,25 +60,25 @@ Se sembraron por API, en una segunda base desechable aislada, los casos de 1 apo
 
 ## Matriz de aceptación
 
-La base del checkpoint 1 tiene evidencia React. Las filas de pantallas de los checkpoints 2–8 siguen pendientes. No se atribuyen al producto los resultados del prototipo.
+Los checkpoints 1–2 tienen evidencia React. Las filas de los checkpoints 3–8 siguen pendientes. V-01b ADMIN se comprobó en navegador; ARCHIVED solo tiene cobertura de derivación unitaria (DEV-24), sin captura de un proyecto archivado real. No se atribuyen al producto resultados del prototipo.
 
-| Filas                      | Pantallas / variantes                                      | Checkpoint | Estado              |
-| -------------------------- | ---------------------------------------------------------- | ---------- | ------------------- |
-| V-00 base                  | Tokens y componentes                                       | 1          | LISTO PARA REVISIÓN |
-| V-00, V-01, V-01b          | Shell; Atención analista, administración y archivado       | 2          | PENDIENTE           |
-| V-02, V-02b, V-02c, V-03   | Organizar 304, Preparar, lote, autoría                     | 3          | PENDIENTE           |
-| V-04…V-08                  | Revisión 1, 3, 12, 50, 0 aportaciones                      | 4          | PENDIENTE           |
-| V-13/V-14 composición base | ADMIN completo sin acciones; VIEWER filtrado               | 4          | PENDIENTE           |
-| V-09…V-14 detalle          | Contraste, aclaraciones, decisiones y consulta             | 5          | POST-APROBACIÓN     |
-| V-15…V-22                  | Mi trabajo, responder, recibos, invitado                   | 6          | POST-APROBACIÓN     |
-| V-23…V-27                  | Administración, invitaciones, lector y pantallas restantes | 7          | POST-APROBACIÓN     |
-| Matriz completa            | Todos los roles y cinco anchos                             | 8          | POST-APROBACIÓN     |
+| Filas                      | Pantallas / variantes                                      | Checkpoint | Estado                                                    |
+| -------------------------- | ---------------------------------------------------------- | ---------- | --------------------------------------------------------- |
+| V-00 base                  | Tokens y componentes                                       | 1          | LISTO PARA REVISIÓN                                       |
+| V-00, V-01, V-01b          | Shell; Atención analista y ADMIN; derivación ARCHIVED      | 2          | LISTO PARA REVISIÓN con DEV-03/19/20/24 y límite ARCHIVED |
+| V-02, V-02b, V-02c, V-03   | Organizar 304, Preparar, lote, autoría                     | 3          | PENDIENTE                                                 |
+| V-04…V-08                  | Revisión 1, 3, 12, 50, 0 aportaciones                      | 4          | PENDIENTE                                                 |
+| V-13/V-14 composición base | ADMIN completo sin acciones; VIEWER filtrado               | 4          | PENDIENTE                                                 |
+| V-09…V-14 detalle          | Contraste, aclaraciones, decisiones y consulta             | 5          | POST-APROBACIÓN                                           |
+| V-15…V-22                  | Mi trabajo, responder, recibos, invitado                   | 6          | POST-APROBACIÓN                                           |
+| V-23…V-27                  | Administración, invitaciones, lector y pantallas restantes | 7          | POST-APROBACIÓN                                           |
+| Matriz completa            | Todos los roles y cinco anchos                             | 8          | POST-APROBACIÓN                                           |
 
 Cada fila tendrá nueve aspectos: jerarquía, composición, tipografía, espaciado, densidad, agrupación, ubicación de acciones, estados y responsive. Capturas a 1440×900, 1024×768, 768×1024, 390×844 y 320×640. Se adjuntarán métricas, axe, teclado, foco y revisión de los 14 detectores de jerarquía antigua. Ninguna fila se declara aprobada por Codex.
 
 ## Libro de aserciones
 
-Sin cambios de aserciones de tests existentes. Se añadieron pruebas nuevas de componentes y métricas visuales. No hay skips, reintentos ni aumentos de timeout. Cada ajuste posterior de una aserción existente deberá justificar su equivalencia funcional.
+CP1 no alteró aserciones existentes. CP2 adapta selectores y composición de navegación; el libro detallado figura abajo. Se añadieron pruebas de componentes, retorno de contexto y métricas visuales. No hay skips, retries ni aumentos de timeout de pruebas existentes. El setup nuevo de la suite visual crea 304 preguntas por API en su beforeAll, con el límite explícito de 240 s.
 
 ## Adaptaciones y contrastación de fuentes
 
@@ -90,7 +90,7 @@ Sin cambios de aserciones de tests existentes. Se añadieron pruebas nuevas de c
 
 ## Copy nuevo para revisión de producto
 
-Todavía no incorporado. El registro final distinguirá textos existentes de textos nuevos: etiquetas de turno aprobadas, titulares de StateCard, pestañas de revisión y otros textos definidos en Acceptance §10. No se inventará identidad del invitado, consenso ni autoguardado.
+CP2 incorpora las etiquetas de turno y navegación listadas al final de su informe. Los textos de revisión/decisión/carta aún no se implementan. Confirmación editorial humana pendiente conforme a DEV-08; no se inventa identidad del invitado, consenso ni autoguardado.
 
 ## Límites y pendientes humanos
 
@@ -98,7 +98,7 @@ Pendientes lector de pantalla, zoom real, colores forzados, modo oscuro, disposi
 
 ## Revisión de alcance y publicación
 
-Solo presentación frontend y verificación/documentación. Backend, contratos, Prisma y almacenamiento: diff vacío respecto de v0.5.0. No hay PR ni push. **READY FOR REVIEW: NO** para el conjunto; checkpoint 1 listo para revisión técnica, checkpoints 2–4 pendientes antes de la revisión humana obligatoria.
+Solo presentación frontend y verificación/documentación. Backend, contratos, Prisma y almacenamiento: diff vacío respecto de v0.5.0. No hay PR ni push. **READY FOR REVIEW: NO** para el conjunto; checkpoints 1–2 listos para revisión técnica, checkpoints 3–4 pendientes antes de la revisión humana obligatoria.
 
 ## Checkpoint 1 — base visual y componentes
 
@@ -164,3 +164,88 @@ Detectores de jerarquía antigua: los aplicables a la **base** (metadato dominan
 4. Primer humo sobre la base usada por la suite anterior: 6/7. `Plazo de atención` ya estaba en borrador (el test anterior de respuestas lo guarda), por lo que aparecía `Continuar` en lugar de `Responder`. Clasificación: aislamiento de fixtures, no regresión visual. Se creó una base vacía adicional con migraciones/demo oficiales y el humo pasó 7/7, sin cambiar tests ni borrar datos existentes.
 
 Copy nuevo: únicamente texto ficticio de la hoja de pruebas. Las nuevas primitivas reciben etiquetas del llamador; no redefinen estados ni mensajes de dominio.
+
+## Checkpoint 2 — navegación y Atención (LISTO PARA REVISIÓN)
+
+- `FRONTEND BEHAVIOR CHANGE`: navegación del proyecto trasladada a sidebar ≥1100, riel 760–1099 y cuatro destinos inferiores <760. Miembros se encuentra en Más herramientas solo para ADMIN; VIEWER conserva únicamente consulta/exportación. Participante conserva su shell. No hay destinos del prototipo ni contadores inferidos.
+- `VISUAL ONLY`: Atención muestra primero las preguntas en grupos derivados y el resumen lateral con los cuatro conteos. Se conserva el listado completo en un desplegable cuyo estado permanece en la caché de contexto de sesión; ningún estado de negocio se modifica.
+- `FRONTEND BEHAVIOR CHANGE`: agrupación pura de CONFLICT/ANSWERED (solo ANALYST+ACTIVE tiene «Te toca a ti»), aclaraciones sin atribuir turno y cobertura pendiente calculada; ADMIN/archivado tienen encabezados neutros. PARTIAL/PENDING sin participantes no reciben etiqueta de turno.
+- DEV-03: el hook conserva y expone los textos de la bandeja que ya leía. ADMIN/archivado siguen usando el título disponible, sin nuevas lecturas. Paginación y concurrencia de lecturas permanecen iguales.
+- Reemplazo de presentación: se retiraron `pw-navigation` y las cuatro tarjetas previas. Se preservaron consultas, invalidaciones, temporizador, filtros combinados, retry independiente, `workbenchReturn`, sesión caducada y cierre cancelable.
+- Unit/component: **231/231** en 32 archivos, incluida agrupación por rol/estado y contexto. Gate final visual: **12/12**, diez capturas de Atención y dos recorridos de roles restringidos a cinco anchos.
+- E2E inicial: 10/13. Escape propagaba desde el desplegable interior al menú exterior; se corrigió el handler con `stopPropagation`, sin cambiar su assertion. Los fallos restantes correspondían a selectores de jerarquía documentados abajo. Los diez casos originales de workbench pasaron tras esas correcciones; se añadió y pasó un undécimo que conserva apertura, foco y scroll del listado completo.
+- Las diez comparaciones finales fueron abiertas y observadas; métricas, axe/teclado y humo pasan. Proyecto ARCHIVED no tiene comando público de transición en v0.5.0: se cubre su derivación con unit tests, sin modificar SQL ni API para fabricar evidencia. No se declara un recorrido visual ARCHIVED ni una prueba nueva de autorización backend.
+
+### Libro de aserciones CP2
+
+| Archivo                                                               | Antes                                          | Ahora                                                                           | Razón y garantía conservada                                                                                                         |
+| --------------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| ProjectWorkbench.test.tsx                                             | Navegación renderizada dentro del header       | Misma navegación probada con ProjectNavigation/ProjectToolsMenu junto al header | V-00: sidebar sustituye nav horizontal; roles, href, aria-current, encabezado único y children siguen verificados                   |
+| ProjectWorkbench.test.tsx                                             | Escape enfocaba el nodo de texto summary       | Escape enfoca summary real, ahora con icono y span                              | El elemento interactivo conserva el foco, no el span decorativo                                                                     |
+| ProjectWorkbench.test.tsx / next-workbench.spec.ts / platform.spec.ts | Miembros visible fuera de herramientas         | Abrir Más herramientas antes de verificar Miembros ADMIN, inexistente ANALYST   | Mapping §2.2 sitúa Miembros en Herramientas; no cambia permiso                                                                      |
+| next-workbench.spec.ts                                                | Tres destinos en nav; Invitaciones aparte      | Cuatro destinos, Invitaciones incluido                                          | C exige cuatro destinos; se mantienen href y navegación por teclado                                                                 |
+| ProjectAttention.test.tsx / next-workbench.spec.ts                    | Título de pregunta era enlace además del botón | Un enlace de acción por pregunta con nombre exacto «acción: título»             | V-01 exige CTA único; título y texto de pregunta siguen visibles; mismo destino, foco y workbenchReturn                             |
+| next-workbench.spec.ts                                                | Contar todos los listitem descendientes        | Contar hijos li directos de Casos de atención                                   | MetaLine añade una lista semántica de metadatos dentro de cada fila; conteo exacto de preguntas conserva 1/2/1 casos y solapamiento |
+| next-workbench.spec.ts                                                | Herramientas siempre en header                 | En riel/móvil abrir Menú, luego Más herramientas                                | V-00: misma ruta, Escape y retorno de foco, sin relajar assertions                                                                  |
+
+La preparación E2E de workbench se extrajo a `tests/e2e/fixtures/workbench.ts` para reutilizar la misma API real en el gate visual. Por defecto conserva 54 preguntas de las pruebas anteriores; el gate visual solicita 304 o usa el archivo de IDs ficticios sembrados. No hay SQL, nuevas APIs ni modificación de contratos.
+
+Copy añadido: «Te toca a ti», «En espera de otras personas», «Sin participantes asignados», «Faltan N de N aportaciones», «Consulta: las acciones corresponden al equipo analista», «Revisar y decidir», «Menú» y «Todas las preguntas (N)». Los textos de turno siguen las decisiones B/DEV-19. Revisión editorial humana pendiente; no se interpreta consenso ni asignación implícita.
+
+### Resultados finales CP2
+
+| Comprobación                         | Evidencia real                                                                                                                            |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Lint, typecheck, build completo      | PASS; continúa únicamente la advertencia preexistente de bundle >500 kB                                                                   |
+| Unit/component                       | 231/231, 32 archivos, sin skips                                                                                                           |
+| Workbench existente                  | Los 10 casos pasan: 9/10 en el pase completo y el caso restante 1/1 tras actualizar el nombre accesible del CTA; no se suman como 11      |
+| Retorno desde listado completo       | 1/1 nuevo: desplegable abierto, foco en la misma pregunta y scroll con diferencia <5 px                                                   |
+| Simplicity                           | 3/3 en el pase conjunto inicial                                                                                                           |
+| Humo plataforma sobre base vacía CP2 | 6/7 inicialmente; Miembros requiere abrir Más herramientas. Caso afectado 1/1 tras adaptar esa navegación; los 7 casos quedan verificados |
+| Preparación aislada del humo         | 10 migraciones oficiales y demo oficial; no se borraron bases existentes                                                                  |
+| Visual shell/Atención                | 12/12: ANALYST y ADMIN ×5 anchos + VIEWER y participante ×5 anchos sin accesos privilegiados                                              |
+| Fixture visual autónomo              | 1/1 adicional: crea 304 preguntas usando el helper de API, sin necesitar archivo privado de IDs                                           |
+| Axe                                  | 0 violaciones en las 10 vistas de Atención; no se atribuye este resultado a las pantallas VIEWER/participante aún no migradas             |
+| Teclado/foco                         | Menú, herramientas, Escape con retorno, rutas, cierre cancelable y regreso al listado                                                     |
+| Integración PostgreSQL/backend       | No repetida en CP2: 113/113 de línea base; backend/contratos/Prisma no cambiaron                                                          |
+
+**Incidencia de infraestructura:** el primer intento de migración del humo usando `node --run` no propagó la configuración aislada al subproceso. Prisma denegó acceso antes de aplicar migraciones. Se sustituyó solo el comando local de verificación por la ejecución directa de Prisma con ambas URL comprobadas contra la base desechable CP2; las 10 migraciones y el seed oficial se ejecutaron correctamente. No se modificó tooling del producto.
+
+### Métricas y comparación final CP2
+
+Datos completos: [metrics-cp2.json](acta-direction-c-evidence/metrics-cp2.json). Cada vista contiene medición de hijos fuera de su contenedor, texto comprimido, viewport, controles, texto principal/metadatos y un CTA de revisión por fila. Las referencias de trazabilidad siguen siendo enlaces auxiliares, como exige el contrato existente.
+
+| Ancho | Primera fila ANALYST | Primera fila ADMIN | Shell lateral  | Axe ANALYST/ADMIN | Overflow / texto comprimido |
+| ----- | -------------------- | ------------------ | -------------- | ----------------- | --------------------------- |
+| 1440  | 322,81 px            | 318,70 px          | 248 px         | 0 / 0             | 0 / 0                       |
+| 1024  | 338,81 px            | 334,70 px          | 64 px          | 0 / 0             | 0 / 0                       |
+| 768   | 342,81 px            | 362,70 px          | 64 px          | 0 / 0             | 0 / 0                       |
+| 390   | 372,66 px            | 392,55 px          | barra inferior | 0 / 0             | 0 / 0                       |
+| 320   | 393,58 px            | 413,47 px          | barra inferior | 0 / 0             | 0 / 0                       |
+
+El límite y≤400 corresponde a escritorio 1440×900: ambas variantes cumplen. La diferencia frente a y≈281 de C es <80 px y proviene de conservar el filtro de estado y conteo reales. En móvil se conserva la pregunta completa y se coloca la acción debajo, sin reducir el texto para imitar el truncado del prototipo. Las capturas de producto usan 320×640; algunas referencias del laboratorio tienen mayor altura, por eso la hoja pareada muestra un margen neutro inferior.
+
+Comparaciones vistas (referencia izquierda, React derecha):
+
+- ANALYST: [1440](acta-direction-c-evidence/cp2/V-01-compare-1440.png), [1024](acta-direction-c-evidence/cp2/V-01-compare-1024.png), [768](acta-direction-c-evidence/cp2/V-01-compare-768.png), [390](acta-direction-c-evidence/cp2/V-01-compare-390.png), [320](acta-direction-c-evidence/cp2/V-01-compare-320.png).
+- ADMIN: [1440](acta-direction-c-evidence/cp2/V-01b-admin-compare-1440.png), [1024](acta-direction-c-evidence/cp2/V-01b-admin-compare-1024.png), [768](acta-direction-c-evidence/cp2/V-01b-admin-compare-768.png), [390](acta-direction-c-evidence/cp2/V-01b-admin-compare-390.png), [320](acta-direction-c-evidence/cp2/V-01b-admin-compare-320.png).
+
+La referencia ADMIN se deriva de C ANALYST: no hay referencia específica en el laboratorio (DEV-20). Las cinco capturas ADMIN «before» se tomaron después de CP1, antes de CP2: incorporan los tokens globales; no se presentan como capturas intactas de v0.5.0. La base ANALYST sí corresponde al pase inicial.
+
+| Aspecto                | V-00 / V-01 ANALYST | V-01b ADMIN           | Evidencia y adaptación                                                                                                      |
+| ---------------------- | ------------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Jerarquía              | PASA                | PASA con DEV-03/20    | H1 Atención; pregunta 15 px/500 antes de metadatos 13,5 px; ADMIN usa título disponible                                     |
+| Composición            | PASA                | PASA con DEV-20       | Cola principal y resumen a la derecha en escritorio; resumen debajo ≤1099; consulta sin turno propio                        |
+| Tipografía             | PASA                | PASA                  | Plex Sans; no serif en navegación, controles o estados; mínimo 12,5 px                                                      |
+| Espaciado              | PASA                | PASA                  | Márgenes 48/32/16; ritmo por grupos; sidebar 248, riel 64; contexto sin margen heredado de details                          |
+| Densidad               | PASA                | PASA con DEV-03       | Primera fila <400 a 1440; no cuatro tarjetas previas. Texto completo, conteos y explicación reales; no extractos inventados |
+| Agrupación             | PASA con DEV-19     | PASA con DEV-19/20    | Conflictos primero, luego ANSWERED; aclaraciones preservan solapamiento; ADMIN usa títulos neutros                          |
+| Ubicación de acciones  | PASA                | PASA                  | Un CTA de revisión por fila, a la derecha/abajo según ancho; herramientas y cuenta accesibles                               |
+| Tratamiento de estados | PASA con DEV-19/22  | PASA con DEV-19/20/22 | Glifo + palabra, acento por instalación; no se atribuye turno de una aclaración sin dato                                    |
+| Responsive             | PASA                | PASA                  | Cinco anchos medidos y observados; sin overflow de página/hijos ni texto comprimido; controles ≥44 px a ≤899                |
+
+Detectores 3 y 12: no se disparan; desaparecen las cuatro tarjetas antes de preguntas y `pw-navigation`. En estas vistas también se verificaron meta subordinada, un CTA por fila, estados con glifo/palabra y ausencia de serif operativo. Los detectores de revisión/decisión/cuestionario/evidencia no se declaran resueltos por CP2.
+
+**Límites:** ARCHIVED cubierto en tabla de verdad, no en navegador; distribución 304 del fixture y conteos reales difieren de los orientativos de C; no se inventan avisos de actualización, extractos ni contadores de navegación. El menú móvil añade acceso explícito a la cuenta para conservar operaciones reales. Aceptación visual y editorial humana pendiente. DEV-25 sigue pendiente, no bloquea CP3.
+
+Cierre técnico CP2: Gitleaks 8.30.1 sobre los 662 archivos candidatos del snapshot: **0 hallazgos**. Enlaces relativos de este informe: **18/18** resueltos. `git diff --check`: PASS. Hashes de documentos ajenos y stash previo: sin cambios. El escaneo no incorpora `.env`, bases ni logs de prueba.

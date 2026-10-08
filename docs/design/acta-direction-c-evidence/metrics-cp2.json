@@ -1,0 +1,1145 @@
+{
+  "checkpoint": 2,
+  "measurements": [
+    {
+      "id": "V-01",
+      "role": "analyst",
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/dashboard",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "squeezedText": [],
+      "childOverflow": [],
+      "metadataSizes": [
+        13.5,
+        13.5,
+        13.5
+      ],
+      "rowActionCounts": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "queueBeforeSummary": true,
+      "firstRowY": 322.8125,
+      "questionSize": 15,
+      "questionWeight": 500,
+      "sidebar": 248,
+      "mobile": false,
+      "smallText": [],
+      "overflow": [],
+      "controls": [
+        {
+          "name": "Atención",
+          "width": 223,
+          "height": 40
+        },
+        {
+          "name": "Cuestionario",
+          "width": 223,
+          "height": 40
+        },
+        {
+          "name": "Decisiones",
+          "width": 223,
+          "height": 40
+        },
+        {
+          "name": "Invitaciones",
+          "width": 223,
+          "height": 40
+        },
+        {
+          "name": "Más herramientas",
+          "width": 223,
+          "height": 40
+        },
+        {
+          "name": "Cerrar sesión",
+          "width": 114.96875,
+          "height": 44
+        },
+        {
+          "name": "Todos los estadosSin revisarPendienteRespuesta parcialRespondidaRequiere aclaraciónValidadaNo aplicaConflicto",
+          "width": 260,
+          "height": 44
+        },
+        {
+          "name": "Resolver conflicto: Fianza de cumplimiento",
+          "width": 133.828125,
+          "height": 44
+        },
+        {
+          "name": "Revisar y decidir: Bienes rechazados",
+          "width": 125.390625,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaración: Documentos de alta",
+          "width": 111.046875,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaración: Fianza de cumplimiento",
+          "width": 111.046875,
+          "height": 44
+        },
+        {
+          "name": "Ver aportaciones: Evidencia para auditoría",
+          "width": 127.828125,
+          "height": 44
+        },
+        {
+          "name": "Todas las preguntas (304)",
+          "width": 736,
+          "height": 44
+        },
+        {
+          "name": "Ver conflictos",
+          "width": 117.25,
+          "height": 39.046875
+        },
+        {
+          "name": "Ver aclaraciones",
+          "width": 135.328125,
+          "height": 39.046875
+        },
+        {
+          "name": "Revisar para decidir",
+          "width": 156.671875,
+          "height": 39.046875
+        },
+        {
+          "name": "Resumen y métricas",
+          "width": 1054,
+          "height": 44
+        }
+      ],
+      "axeViolations": 0
+    },
+    {
+      "id": "V-01",
+      "role": "analyst",
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/dashboard",
+      "width": 1024,
+      "height": 768,
+      "pageWidth": 1024,
+      "squeezedText": [],
+      "childOverflow": [],
+      "metadataSizes": [
+        13.5,
+        13.5,
+        13.5
+      ],
+      "rowActionCounts": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "queueBeforeSummary": true,
+      "firstRowY": 338.8125,
+      "questionSize": 15,
+      "questionWeight": 500,
+      "sidebar": 64,
+      "mobile": false,
+      "smallText": [],
+      "overflow": [],
+      "controls": [
+        {
+          "name": "Atención",
+          "width": 48,
+          "height": 48
+        },
+        {
+          "name": "Cuestionario",
+          "width": 48,
+          "height": 48
+        },
+        {
+          "name": "Decisiones",
+          "width": 48,
+          "height": 48
+        },
+        {
+          "name": "Invitaciones",
+          "width": 48,
+          "height": 48
+        },
+        {
+          "name": "Menú",
+          "width": 88.453125,
+          "height": 40
+        },
+        {
+          "name": "Todos los estadosSin revisarPendienteRespuesta parcialRespondidaRequiere aclaraciónValidadaNo aplicaConflicto",
+          "width": 260,
+          "height": 44
+        },
+        {
+          "name": "Resolver conflicto: Fianza de cumplimiento",
+          "width": 133.828125,
+          "height": 44
+        },
+        {
+          "name": "Revisar y decidir: Bienes rechazados",
+          "width": 125.390625,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaración: Documentos de alta",
+          "width": 111.046875,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaración: Fianza de cumplimiento",
+          "width": 111.046875,
+          "height": 44
+        },
+        {
+          "name": "Ver aportaciones: Evidencia para auditoría",
+          "width": 127.828125,
+          "height": 44
+        },
+        {
+          "name": "Todas las preguntas (304)",
+          "width": 854,
+          "height": 44
+        },
+        {
+          "name": "Ver conflictos",
+          "width": 117.25,
+          "height": 39.046875
+        },
+        {
+          "name": "Ver aclaraciones",
+          "width": 135.328125,
+          "height": 39.046875
+        },
+        {
+          "name": "Revisar para decidir",
+          "width": 156.671875,
+          "height": 39.046875
+        },
+        {
+          "name": "Resumen y métricas",
+          "width": 854,
+          "height": 44
+        }
+      ],
+      "axeViolations": 0
+    },
+    {
+      "id": "V-01",
+      "role": "analyst",
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/dashboard",
+      "width": 768,
+      "height": 1024,
+      "pageWidth": 768,
+      "squeezedText": [],
+      "childOverflow": [],
+      "metadataSizes": [
+        13.5,
+        13.5,
+        13.5
+      ],
+      "rowActionCounts": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "queueBeforeSummary": true,
+      "firstRowY": 342.8125,
+      "questionSize": 15,
+      "questionWeight": 500,
+      "sidebar": 64,
+      "mobile": false,
+      "smallText": [],
+      "overflow": [],
+      "controls": [
+        {
+          "name": "Atención",
+          "width": 48,
+          "height": 48
+        },
+        {
+          "name": "Cuestionario",
+          "width": 48,
+          "height": 48
+        },
+        {
+          "name": "Decisiones",
+          "width": 48,
+          "height": 48
+        },
+        {
+          "name": "Invitaciones",
+          "width": 48,
+          "height": 48
+        },
+        {
+          "name": "Menú",
+          "width": 88.453125,
+          "height": 44
+        },
+        {
+          "name": "Todos los estadosSin revisarPendienteRespuesta parcialRespondidaRequiere aclaraciónValidadaNo aplicaConflicto",
+          "width": 260,
+          "height": 44
+        },
+        {
+          "name": "Resolver conflicto: Fianza de cumplimiento",
+          "width": 133.828125,
+          "height": 44
+        },
+        {
+          "name": "Revisar y decidir: Bienes rechazados",
+          "width": 125.390625,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaración: Documentos de alta",
+          "width": 111.046875,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaración: Fianza de cumplimiento",
+          "width": 111.046875,
+          "height": 44
+        },
+        {
+          "name": "Ver aportaciones: Evidencia para auditoría",
+          "width": 127.828125,
+          "height": 44
+        },
+        {
+          "name": "Todas las preguntas (304)",
+          "width": 598,
+          "height": 44
+        },
+        {
+          "name": "Ver conflictos",
+          "width": 117.25,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaraciones",
+          "width": 135.328125,
+          "height": 44
+        },
+        {
+          "name": "Revisar para decidir",
+          "width": 156.671875,
+          "height": 44
+        },
+        {
+          "name": "Resumen y métricas",
+          "width": 598,
+          "height": 44
+        }
+      ],
+      "axeViolations": 0
+    },
+    {
+      "id": "V-01",
+      "role": "analyst",
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/dashboard",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "squeezedText": [],
+      "childOverflow": [],
+      "metadataSizes": [
+        13.5,
+        13.5,
+        13.5
+      ],
+      "rowActionCounts": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "queueBeforeSummary": true,
+      "firstRowY": 372.65625,
+      "questionSize": 15,
+      "questionWeight": 500,
+      "sidebar": 0,
+      "mobile": true,
+      "smallText": [],
+      "overflow": [],
+      "controls": [
+        {
+          "name": "Menú",
+          "width": 66.453125,
+          "height": 44
+        },
+        {
+          "name": "Todos los estadosSin revisarPendienteRespuesta parcialRespondidaRequiere aclaraciónValidadaNo aplicaConflicto",
+          "width": 260,
+          "height": 44
+        },
+        {
+          "name": "Resolver conflicto: Fianza de cumplimiento",
+          "width": 133.828125,
+          "height": 44
+        },
+        {
+          "name": "Revisar y decidir: Bienes rechazados",
+          "width": 125.390625,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaración: Documentos de alta",
+          "width": 111.046875,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaración: Fianza de cumplimiento",
+          "width": 111.046875,
+          "height": 44
+        },
+        {
+          "name": "Ver aportaciones: Evidencia para auditoría",
+          "width": 127.828125,
+          "height": 44
+        },
+        {
+          "name": "Todas las preguntas (304)",
+          "width": 316,
+          "height": 44
+        },
+        {
+          "name": "Ver conflictos",
+          "width": 117.25,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaraciones",
+          "width": 135.328125,
+          "height": 44
+        },
+        {
+          "name": "Revisar para decidir",
+          "width": 156.671875,
+          "height": 44
+        },
+        {
+          "name": "Resumen y métricas",
+          "width": 316,
+          "height": 44
+        },
+        {
+          "name": "Atención",
+          "width": 95.5,
+          "height": 53.5
+        },
+        {
+          "name": "Cuestionario",
+          "width": 95.5,
+          "height": 53.5
+        },
+        {
+          "name": "Decisiones",
+          "width": 95.5,
+          "height": 53.5
+        },
+        {
+          "name": "Invitaciones",
+          "width": 95.5,
+          "height": 53.5
+        }
+      ],
+      "axeViolations": 0
+    },
+    {
+      "id": "V-01",
+      "role": "analyst",
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/dashboard",
+      "width": 320,
+      "height": 640,
+      "pageWidth": 320,
+      "squeezedText": [],
+      "childOverflow": [],
+      "metadataSizes": [
+        13.5,
+        13.5,
+        13.5
+      ],
+      "rowActionCounts": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "queueBeforeSummary": true,
+      "firstRowY": 393.578125,
+      "questionSize": 15,
+      "questionWeight": 500,
+      "sidebar": 0,
+      "mobile": true,
+      "smallText": [],
+      "overflow": [],
+      "controls": [
+        {
+          "name": "Menú",
+          "width": 66.453125,
+          "height": 44
+        },
+        {
+          "name": "Todos los estadosSin revisarPendienteRespuesta parcialRespondidaRequiere aclaraciónValidadaNo aplicaConflicto",
+          "width": 260,
+          "height": 44
+        },
+        {
+          "name": "Resolver conflicto: Fianza de cumplimiento",
+          "width": 133.828125,
+          "height": 44
+        },
+        {
+          "name": "Revisar y decidir: Bienes rechazados",
+          "width": 125.390625,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaración: Documentos de alta",
+          "width": 111.046875,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaración: Fianza de cumplimiento",
+          "width": 111.046875,
+          "height": 44
+        },
+        {
+          "name": "Ver aportaciones: Evidencia para auditoría",
+          "width": 127.828125,
+          "height": 44
+        },
+        {
+          "name": "Todas las preguntas (304)",
+          "width": 246,
+          "height": 44
+        },
+        {
+          "name": "Ver conflictos",
+          "width": 117.25,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaraciones",
+          "width": 135.328125,
+          "height": 44
+        },
+        {
+          "name": "Revisar para decidir",
+          "width": 156.671875,
+          "height": 44
+        },
+        {
+          "name": "Resumen y métricas",
+          "width": 246,
+          "height": 44
+        },
+        {
+          "name": "Atención",
+          "width": 78,
+          "height": 53.5
+        },
+        {
+          "name": "Cuestionario",
+          "width": 78,
+          "height": 53.5
+        },
+        {
+          "name": "Decisiones",
+          "width": 78,
+          "height": 53.5
+        },
+        {
+          "name": "Invitaciones",
+          "width": 78,
+          "height": 53.5
+        }
+      ],
+      "axeViolations": 0
+    },
+    {
+      "id": "V-01b-admin",
+      "role": "admin",
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/dashboard",
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "squeezedText": [],
+      "childOverflow": [],
+      "metadataSizes": [
+        13.5,
+        13.5,
+        13.5
+      ],
+      "rowActionCounts": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "queueBeforeSummary": true,
+      "firstRowY": 318.703125,
+      "questionSize": 15,
+      "questionWeight": 500,
+      "sidebar": 248,
+      "mobile": false,
+      "smallText": [],
+      "overflow": [],
+      "controls": [
+        {
+          "name": "Atención",
+          "width": 223,
+          "height": 40
+        },
+        {
+          "name": "Cuestionario",
+          "width": 223,
+          "height": 40
+        },
+        {
+          "name": "Decisiones",
+          "width": 223,
+          "height": 40
+        },
+        {
+          "name": "Invitaciones",
+          "width": 223,
+          "height": 40
+        },
+        {
+          "name": "Más herramientas",
+          "width": 223,
+          "height": 40
+        },
+        {
+          "name": "Cerrar sesión",
+          "width": 114.96875,
+          "height": 44
+        },
+        {
+          "name": "Todos los estadosSin revisarPendienteRespuesta parcialRespondidaRequiere aclaraciónValidadaNo aplicaConflicto",
+          "width": 260,
+          "height": 44
+        },
+        {
+          "name": "Revisar conflicto: Fianza de cumplimiento",
+          "width": 126.0625,
+          "height": 44
+        },
+        {
+          "name": "Revisar respuestas: Bienes rechazados",
+          "width": 140.78125,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaración: Documentos de alta",
+          "width": 111.046875,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaración: Fianza de cumplimiento",
+          "width": 111.046875,
+          "height": 44
+        },
+        {
+          "name": "Ver aportaciones: Evidencia para auditoría",
+          "width": 127.828125,
+          "height": 44
+        },
+        {
+          "name": "Todas las preguntas (304)",
+          "width": 736,
+          "height": 44
+        },
+        {
+          "name": "Ver conflictos",
+          "width": 117.25,
+          "height": 39.046875
+        },
+        {
+          "name": "Ver aclaraciones",
+          "width": 135.328125,
+          "height": 39.046875
+        },
+        {
+          "name": "Revisar para decidir",
+          "width": 156.671875,
+          "height": 39.046875
+        },
+        {
+          "name": "Resumen y métricas",
+          "width": 1054,
+          "height": 44
+        }
+      ],
+      "axeViolations": 0
+    },
+    {
+      "id": "V-01b-admin",
+      "role": "admin",
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/dashboard",
+      "width": 1024,
+      "height": 768,
+      "pageWidth": 1024,
+      "squeezedText": [],
+      "childOverflow": [],
+      "metadataSizes": [
+        13.5,
+        13.5,
+        13.5
+      ],
+      "rowActionCounts": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "queueBeforeSummary": true,
+      "firstRowY": 334.703125,
+      "questionSize": 15,
+      "questionWeight": 500,
+      "sidebar": 64,
+      "mobile": false,
+      "smallText": [],
+      "overflow": [],
+      "controls": [
+        {
+          "name": "Atención",
+          "width": 48,
+          "height": 48
+        },
+        {
+          "name": "Cuestionario",
+          "width": 48,
+          "height": 48
+        },
+        {
+          "name": "Decisiones",
+          "width": 48,
+          "height": 48
+        },
+        {
+          "name": "Invitaciones",
+          "width": 48,
+          "height": 48
+        },
+        {
+          "name": "Menú",
+          "width": 88.453125,
+          "height": 40
+        },
+        {
+          "name": "Todos los estadosSin revisarPendienteRespuesta parcialRespondidaRequiere aclaraciónValidadaNo aplicaConflicto",
+          "width": 260,
+          "height": 44
+        },
+        {
+          "name": "Revisar conflicto: Fianza de cumplimiento",
+          "width": 126.0625,
+          "height": 44
+        },
+        {
+          "name": "Revisar respuestas: Bienes rechazados",
+          "width": 140.78125,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaración: Documentos de alta",
+          "width": 111.046875,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaración: Fianza de cumplimiento",
+          "width": 111.046875,
+          "height": 44
+        },
+        {
+          "name": "Ver aportaciones: Evidencia para auditoría",
+          "width": 127.828125,
+          "height": 44
+        },
+        {
+          "name": "Todas las preguntas (304)",
+          "width": 854,
+          "height": 44
+        },
+        {
+          "name": "Ver conflictos",
+          "width": 117.25,
+          "height": 39.046875
+        },
+        {
+          "name": "Ver aclaraciones",
+          "width": 135.328125,
+          "height": 39.046875
+        },
+        {
+          "name": "Revisar para decidir",
+          "width": 156.671875,
+          "height": 39.046875
+        },
+        {
+          "name": "Resumen y métricas",
+          "width": 854,
+          "height": 44
+        }
+      ],
+      "axeViolations": 0
+    },
+    {
+      "id": "V-01b-admin",
+      "role": "admin",
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/dashboard",
+      "width": 768,
+      "height": 1024,
+      "pageWidth": 768,
+      "squeezedText": [],
+      "childOverflow": [],
+      "metadataSizes": [
+        13.5,
+        13.5,
+        13.5
+      ],
+      "rowActionCounts": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "queueBeforeSummary": true,
+      "firstRowY": 362.703125,
+      "questionSize": 15,
+      "questionWeight": 500,
+      "sidebar": 64,
+      "mobile": false,
+      "smallText": [],
+      "overflow": [],
+      "controls": [
+        {
+          "name": "Atención",
+          "width": 48,
+          "height": 48
+        },
+        {
+          "name": "Cuestionario",
+          "width": 48,
+          "height": 48
+        },
+        {
+          "name": "Decisiones",
+          "width": 48,
+          "height": 48
+        },
+        {
+          "name": "Invitaciones",
+          "width": 48,
+          "height": 48
+        },
+        {
+          "name": "Menú",
+          "width": 88.453125,
+          "height": 44
+        },
+        {
+          "name": "Todos los estadosSin revisarPendienteRespuesta parcialRespondidaRequiere aclaraciónValidadaNo aplicaConflicto",
+          "width": 260,
+          "height": 44
+        },
+        {
+          "name": "Revisar conflicto: Fianza de cumplimiento",
+          "width": 126.0625,
+          "height": 44
+        },
+        {
+          "name": "Revisar respuestas: Bienes rechazados",
+          "width": 140.78125,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaración: Documentos de alta",
+          "width": 111.046875,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaración: Fianza de cumplimiento",
+          "width": 111.046875,
+          "height": 44
+        },
+        {
+          "name": "Ver aportaciones: Evidencia para auditoría",
+          "width": 127.828125,
+          "height": 44
+        },
+        {
+          "name": "Todas las preguntas (304)",
+          "width": 598,
+          "height": 44
+        },
+        {
+          "name": "Ver conflictos",
+          "width": 117.25,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaraciones",
+          "width": 135.328125,
+          "height": 44
+        },
+        {
+          "name": "Revisar para decidir",
+          "width": 156.671875,
+          "height": 44
+        },
+        {
+          "name": "Resumen y métricas",
+          "width": 598,
+          "height": 44
+        }
+      ],
+      "axeViolations": 0
+    },
+    {
+      "id": "V-01b-admin",
+      "role": "admin",
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/dashboard",
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "squeezedText": [],
+      "childOverflow": [],
+      "metadataSizes": [
+        13.5,
+        13.5,
+        13.5
+      ],
+      "rowActionCounts": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "queueBeforeSummary": true,
+      "firstRowY": 392.546875,
+      "questionSize": 15,
+      "questionWeight": 500,
+      "sidebar": 0,
+      "mobile": true,
+      "smallText": [],
+      "overflow": [],
+      "controls": [
+        {
+          "name": "Menú",
+          "width": 66.453125,
+          "height": 44
+        },
+        {
+          "name": "Todos los estadosSin revisarPendienteRespuesta parcialRespondidaRequiere aclaraciónValidadaNo aplicaConflicto",
+          "width": 260,
+          "height": 44
+        },
+        {
+          "name": "Revisar conflicto: Fianza de cumplimiento",
+          "width": 126.0625,
+          "height": 44
+        },
+        {
+          "name": "Revisar respuestas: Bienes rechazados",
+          "width": 140.78125,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaración: Documentos de alta",
+          "width": 111.046875,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaración: Fianza de cumplimiento",
+          "width": 111.046875,
+          "height": 44
+        },
+        {
+          "name": "Ver aportaciones: Evidencia para auditoría",
+          "width": 127.828125,
+          "height": 44
+        },
+        {
+          "name": "Todas las preguntas (304)",
+          "width": 316,
+          "height": 44
+        },
+        {
+          "name": "Ver conflictos",
+          "width": 117.25,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaraciones",
+          "width": 135.328125,
+          "height": 44
+        },
+        {
+          "name": "Revisar para decidir",
+          "width": 156.671875,
+          "height": 44
+        },
+        {
+          "name": "Resumen y métricas",
+          "width": 316,
+          "height": 44
+        },
+        {
+          "name": "Atención",
+          "width": 95.5,
+          "height": 53.5
+        },
+        {
+          "name": "Cuestionario",
+          "width": 95.5,
+          "height": 53.5
+        },
+        {
+          "name": "Decisiones",
+          "width": 95.5,
+          "height": 53.5
+        },
+        {
+          "name": "Invitaciones",
+          "width": 95.5,
+          "height": 53.5
+        }
+      ],
+      "axeViolations": 0
+    },
+    {
+      "id": "V-01b-admin",
+      "role": "admin",
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/dashboard",
+      "width": 320,
+      "height": 640,
+      "pageWidth": 320,
+      "squeezedText": [],
+      "childOverflow": [],
+      "metadataSizes": [
+        13.5,
+        13.5,
+        13.5
+      ],
+      "rowActionCounts": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "queueBeforeSummary": true,
+      "firstRowY": 413.46875,
+      "questionSize": 15,
+      "questionWeight": 500,
+      "sidebar": 0,
+      "mobile": true,
+      "smallText": [],
+      "overflow": [],
+      "controls": [
+        {
+          "name": "Menú",
+          "width": 66.453125,
+          "height": 44
+        },
+        {
+          "name": "Todos los estadosSin revisarPendienteRespuesta parcialRespondidaRequiere aclaraciónValidadaNo aplicaConflicto",
+          "width": 260,
+          "height": 44
+        },
+        {
+          "name": "Revisar conflicto: Fianza de cumplimiento",
+          "width": 126.0625,
+          "height": 44
+        },
+        {
+          "name": "Revisar respuestas: Bienes rechazados",
+          "width": 140.78125,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaración: Documentos de alta",
+          "width": 111.046875,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaración: Fianza de cumplimiento",
+          "width": 111.046875,
+          "height": 44
+        },
+        {
+          "name": "Ver aportaciones: Evidencia para auditoría",
+          "width": 127.828125,
+          "height": 44
+        },
+        {
+          "name": "Todas las preguntas (304)",
+          "width": 246,
+          "height": 44
+        },
+        {
+          "name": "Ver conflictos",
+          "width": 117.25,
+          "height": 44
+        },
+        {
+          "name": "Ver aclaraciones",
+          "width": 135.328125,
+          "height": 44
+        },
+        {
+          "name": "Revisar para decidir",
+          "width": 156.671875,
+          "height": 44
+        },
+        {
+          "name": "Resumen y métricas",
+          "width": 246,
+          "height": 44
+        },
+        {
+          "name": "Atención",
+          "width": 78,
+          "height": 53.5
+        },
+        {
+          "name": "Cuestionario",
+          "width": 78,
+          "height": 53.5
+        },
+        {
+          "name": "Decisiones",
+          "width": 78,
+          "height": 53.5
+        },
+        {
+          "name": "Invitaciones",
+          "width": 78,
+          "height": 53.5
+        }
+      ],
+      "axeViolations": 0
+    }
+  ]
+}

@@ -278,6 +278,10 @@ test("cambios sin guardar se conservan al cancelar navegación y miembros funcio
     })
     .getByRole("link", { name: "Editar cuestionario" })
     .click();
+  await page
+    .locator("summary:visible")
+    .filter({ hasText: /^Más herramientas$/ })
+    .click();
   await page.getByRole("link", { name: "Miembros", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Miembros del proyecto" }),
