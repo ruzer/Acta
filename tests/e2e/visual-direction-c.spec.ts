@@ -1271,7 +1271,7 @@ test.describe("Direction C · review", () => {
       await expect(
         page.getByText("Consulta de solo lectura.", { exact: true }),
       ).toBeVisible();
-      await expect(page.getByLabel("Otras acciones")).toHaveCount(0);
+      await expect(page.getByText("Otras acciones")).toHaveCount(0);
       await expect(page.getByText("Te toca a ti", { exact: true })).toHaveCount(
         0,
       );
@@ -1386,7 +1386,7 @@ test.describe("Direction C · review", () => {
           await expect(
             page.getByText("Te toca a ti", { exact: true }),
           ).toHaveCount(0);
-          await expect(page.getByLabel("Otras acciones")).toHaveCount(0);
+          await expect(page.getByText("Otras acciones")).toHaveCount(0);
           await expect(
             page.getByRole("button", {
               name: /^(Registrar decisión|Resolver conflicto|Reabrir pregunta|Cerrar aclaración|Preguntar nuevamente)$/,

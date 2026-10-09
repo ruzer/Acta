@@ -100,9 +100,13 @@ for (const width of [1440, 390])
     page.on("pageerror", (e) => errors.push(e.name));
     try {
       await page.goto(link.url);
+      // CP6: the invitation opens as a letter (the organization asks, then the facts).
       await expect(
-        page.getByText("Respuesta mediante invitación", { exact: true }),
+        page.getByText("Invitación para aportar", { exact: true }),
       ).toBeVisible();
+      await expect(page.getByRole("heading", { level: 1 })).toContainText(
+        "te invita a responder",
+      );
       expect(new URL(page.url()).hash).toBe("");
       await expect(
         page.getByRole("button", { name: "Iniciar sesión" }),
@@ -631,9 +635,10 @@ test("ACTA NEXT: crear desde el gestor conserva alcance explícito y el invitado
     const guest = await context.newPage();
     await guest.goto(url);
     await expect(guest.getByRole("heading", { level: 1 })).toBeVisible();
-    await expect(
-      guest.locator(".invitation-content > .eyebrow"),
-    ).not.toBeEmpty();
+    // CP6: the organization that invites is the first thing the letter says.
+    await expect(guest.getByRole("heading", { level: 1 })).toContainText(
+      "te invita a responder",
+    );
     await guest.getByRole("button", { name: "Responder", exact: true }).click();
     await expect(
       guest.getByText("Pregunta 1 de 1", { exact: true }),

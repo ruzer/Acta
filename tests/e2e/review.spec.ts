@@ -75,8 +75,20 @@ async function review(page: Page, index = 0) {
     }),
   ).toBeVisible();
 }
+// CP5 (UX-05): the secondary actions are a disclosure menu, not a select.
+const menuLabels: Record<string, string> = {
+  requestClarification: "Solicitar aclaración",
+  markPartial: "Marcar respuesta parcial",
+  markPending: "Marcar pendiente",
+  markConflict: "Marcar conflicto",
+  markNotApplicable: "Marcar no aplica",
+};
 async function action(page: Page, key: string) {
-  await page.getByLabel("Otras acciones").selectOption(key);
+  await page.getByText(/^Otras acciones$/).click();
+  await page
+    .locator(".ac-action-menu")
+    .getByRole("button", { name: menuLabels[key], exact: true })
+    .click();
   await expect(page.getByRole("dialog")).toBeVisible();
 }
 async function decide(page: Page) {
@@ -280,7 +292,7 @@ test("2D-B: participante consulta validada sin corregir; decisión permanece vig
     }),
   ).toHaveCount(0);
   await expect(
-    page.locator(".participant-badge").filter({ hasText: "Validada" }),
+    page.locator(".ac-status").filter({ hasText: "Validada" }),
   ).toBeVisible();
   const analyst = await (await browser.newContext()).newPage();
   await login(analyst, "analyst");
@@ -315,41 +327,38 @@ test("2D-C: dos autores → comparación → resolución independiente → valid
     .getByRole("button", { name: "Marcar conflicto", exact: true })
     .click();
   await expect(dialog).toHaveCount(0);
-  const postures = page.getByRole("region", { name: /^Postura [AB]$/ });
-  await expect(postures).toHaveCount(2);
+  // CP5: the two postures are the two columns of one comparison table.
+  const columns = page.getByRole("columnheader", { name: /^Postura [AB]/ });
+  await expect(columns).toHaveCount(2);
   for (const name of ["Postura A", "Postura B"]) {
-    const posture = page.getByRole("region", { name, exact: true });
-    await expect(posture).toBeVisible();
+    const head = page.getByRole("columnheader", {
+      name: new RegExp(`^${name}`),
+    });
+    await expect(head).toBeVisible();
     await expect(
-      posture.getByText(participantArea, { exact: true }),
-    ).toBeVisible();
-    await expect(
-      posture.getByRole("heading", { name: "Respuesta", exact: true }),
-    ).toBeVisible();
-    await expect(
-      posture.getByRole("heading", { name: "Evidencia", exact: true }),
+      head.getByText(participantArea, { exact: true }),
     ).toBeVisible();
   }
-  const written = postures.filter({
-    has: page.getByRole("heading", { name: "Participante demo", exact: true }),
-  });
-  const spoken = postures.filter({
-    has: page.getByRole("heading", {
-      name: "Segundo participante 2D",
-      exact: true,
-    }),
-  });
-  await expect(written).toHaveCount(1);
-  await expect(spoken).toHaveCount(1);
+  for (const field of ["Respuesta", "Evidencia"])
+    await expect(
+      page.getByRole("rowheader", { name: field, exact: true }),
+    ).toHaveCount(1);
+  // The cells of a person's column, found through that person's header.
+  const column = async (person: string) => {
+    const label = await page
+      .getByRole("columnheader", { name: new RegExp(person) })
+      .getAttribute("aria-label");
+    expect(label, `columna de ${person}`).not.toBeNull();
+    return page.locator(`td[data-column="${label!.split(" · ")[0]}"]`);
+  };
   await expect(
-    written.getByRole("heading", { name: "Participante demo", exact: true }),
-  ).toBeVisible();
+    page.getByRole("columnheader", { name: /Participante demo/ }),
+  ).toHaveCount(1);
   await expect(
-    spoken.getByRole("heading", {
-      name: "Segundo participante 2D",
-      exact: true,
-    }),
-  ).toBeVisible();
+    page.getByRole("columnheader", { name: /Segundo participante 2D/ }),
+  ).toHaveCount(1);
+  const written = await column("Participante demo");
+  const spoken = await column("Segundo participante 2D");
   await expect(
     written.getByText("La atención inicia con solicitud escrita", {
       exact: true,
@@ -395,25 +404,29 @@ test("2D-C: dos autores → comparación → resolución independiente → valid
   for (const width of [1440, 1024, 768, 390]) {
     await page.setViewportSize({ width, height: 1000 });
     const a = await page
-      .getByRole("region", { name: "Postura A", exact: true })
+      .getByRole("columnheader", { name: /^Postura A/ })
       .boundingBox();
     const b = await page
-      .getByRole("region", { name: "Postura B", exact: true })
+      .getByRole("columnheader", { name: /^Postura B/ })
       .boundingBox();
     expect(a).not.toBeNull();
     expect(b).not.toBeNull();
     if (width >= 768) {
       expect(Math.abs(a!.y - b!.y)).toBeLessThan(2);
       expect(Math.abs(a!.width - b!.width)).toBeLessThan(2);
-      expect(b!.x).toBeGreaterThan(a!.x + a!.width);
+      // CP5: the columns of one table touch each other (no gap between cards).
+      expect(b!.x).toBeGreaterThanOrEqual(a!.x + a!.width);
     } else {
-      expect(b!.y).toBeGreaterThan(a!.y + a!.height);
+      // CP5: the stacked postures are adjacent rows of one table (no gap between them).
+      expect(b!.y).toBeGreaterThanOrEqual(a!.y + a!.height);
       expect(Math.abs(a!.x - b!.x)).toBeLessThan(2);
     }
   }
   await page.setViewportSize({ width: 390, height: 844 });
   for (const name of ["Postura A", "Postura B"])
-    await expect(page.getByRole("region", { name, exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("columnheader", { name: new RegExp(`^${name}`) }),
+    ).toBeVisible();
   await accessible(page);
   await page.setViewportSize({ width: 1440, height: 1000 });
   await accessible(page);
@@ -452,7 +465,8 @@ test("2D-C: dos autores → comparación → resolución independiente → valid
     name: "Reabrir pregunta",
     exact: true,
   });
-  await expect(reopen).toHaveClass(/secondary/);
+  // CP5: reopening is a tertiary action in the foot of the document.
+  await expect(reopen).toHaveClass(/tertiary/);
   expect(
     await record.evaluate((el) => {
       const button = Array.from(document.querySelectorAll("button")).find(
@@ -466,12 +480,12 @@ test("2D-C: dos autores → comparación → resolución independiente → valid
       );
     }),
   ).toBe(true);
-  const source = record
-    .locator("summary")
-    .filter({ hasText: "Respuesta de Participante demo" });
-  await source.focus();
-  await page.keyboard.press("Enter");
-  await expect(source.locator("..")).toHaveAttribute("open", "");
+  // CP5: the grounds are numbered, name the person and show their files without opening anything.
+  const ground = record.getByRole("listitem").filter({
+    hasText: "Participante demo",
+  });
+  await expect(ground.first()).toBeVisible();
+  await expect(ground.first()).toContainText(/envío #\d+/);
   const [sourceDownload] = await Promise.all([
     page.waitForEvent("download"),
     record
@@ -538,9 +552,9 @@ test("2D-D: no aplica → reapertura y controles de solo lectura", async ({
   await expect(
     viewer
       .getByRole("article", { name: "Decisión vigente", exact: true })
-      .getByRole("heading", { name: "Decisión vigente", exact: true }),
+      .getByRole("heading", { name: "Decisión validada", exact: true }),
   ).toBeVisible();
-  await expect(viewer.getByLabel("Otras acciones")).toHaveCount(0);
+  await expect(viewer.getByText("Otras acciones")).toHaveCount(0);
   await expect(
     viewer.getByRole("button", { name: "Registrar decisión" }),
   ).toHaveCount(0);

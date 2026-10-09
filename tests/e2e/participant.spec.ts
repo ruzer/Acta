@@ -405,7 +405,7 @@ test("aclaración tiene prioridad; al contestar ya no queda pendiente del partic
   await work(page);
   await answered.getByRole("link", { name: "Ver: P2" }).click();
   await expect(
-    page.locator(".participant-badge").filter({ hasText: "Validada" }),
+    page.locator(".ac-status").filter({ hasText: "Validada" }),
   ).toBeVisible();
   await expect(page.getByRole("textbox")).toHaveCount(0);
   await axe(page);

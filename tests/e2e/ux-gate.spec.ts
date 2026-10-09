@@ -1,6 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
-import AxeBuilder from "@axe-core/playwright";
 import { mkdir, writeFile } from "node:fs/promises";
+import { checkedPage, smallTargets } from "./fixtures/page-checks";
 import { login } from "./login-helper";
 import {
   seedReviewCases,
@@ -39,64 +39,7 @@ test.afterAll(async () => {
 });
 
 async function checked(page: Page, id: string, width: number) {
-  const axe = await new AxeBuilder({ page })
-    .withTags([
-      "wcag2a",
-      "wcag2aa",
-      "wcag21a",
-      "wcag21aa",
-      "wcag22aa",
-      "best-practice",
-    ])
-    .analyze();
-  expect(
-    axe.violations.map((v) => `${v.id}: ${v.nodes.length}`),
-    `axe en ${id} a ${width}px`,
-  ).toEqual([]);
-  const surface = await page.evaluate(() => ({
-    overflow: document.documentElement.scrollWidth > innerWidth + 1,
-    h1: document.querySelectorAll("main h1").length,
-  }));
-  expect(surface.overflow, `desborde horizontal en ${id} a ${width}px`).toBe(
-    false,
-  );
-  expect(surface.h1, `un único h1 en ${id}`).toBe(1);
-  await mkdir(evidence, { recursive: true });
-  await page.screenshot({ path: `${evidence}/${id}-${width}.png` });
-}
-/** Interactive targets of the shell and page below 44 px on small screens. */
-async function smallTargets(page: Page) {
-  return page.evaluate(() =>
-    [
-      ...document.querySelectorAll<HTMLElement>(
-        "a[href], button, summary, select, input:not([type=hidden])",
-      ),
-    ]
-      .filter(
-        (el) =>
-          el.checkVisibility() && !el.closest('.sr-only,[aria-hidden="true"]'),
-      )
-      // A link inside running text is exempt; a standalone link is not.
-      .filter(
-        (el) =>
-          !(
-            el.tagName === "A" &&
-            el.closest("p, li") &&
-            getComputedStyle(el).display === "inline"
-          ),
-      )
-      .map((el) => {
-        const r = el.getBoundingClientRect();
-        return {
-          name: (el.getAttribute("aria-label") ?? el.textContent ?? "")
-            .trim()
-            .slice(0, 40),
-          w: Math.round(r.width),
-          h: Math.round(r.height),
-        };
-      })
-      .filter((t) => t.w > 0 && (t.h < 44 || t.w < 44)),
-  );
+  await checkedPage(page, evidence, id, width);
 }
 
 for (const count of [12, 54, 304]) {
@@ -322,30 +265,21 @@ test.describe("revisión con 0, 1, 3, 12 y 50 aportaciones", () => {
           ).toBeLessThan(usable);
         }
         records.push({ id: `UX06-${key}`, width, ...geometry });
-        // Secondary actions: a select on desktop, an accessible menu on phones.
-        if (width < 760) {
-          await expect(
-            page.getByRole("combobox", { name: "Otras acciones" }),
-          ).toHaveCount(0);
-          await expect(page.getByText("Más acciones")).toBeVisible();
-        } else await expect(page.getByLabel("Otras acciones")).toBeVisible();
+        // Secondary actions: one accessible menu on every width (CP5, UX-05);
+        // its name is "Más acciones" on phones and "Otras acciones" elsewhere.
+        const menuName = width < 760 ? "Más acciones" : "Otras acciones";
+        await expect(
+          page.getByRole("combobox", { name: "Otras acciones" }),
+        ).toHaveCount(0);
+        await expect(page.getByText(menuName, { exact: true })).toBeVisible();
         // An open clarification blocks recording a decision (the server answers
-        // 409), so neither the select nor the menu offers it.
+        // 409), so the menu does not offer it.
         if (key !== "zero" && key !== "one") {
-          const offered =
-            width < 760
-              ? await (async () => {
-                  await page.getByText("Más acciones").click();
-                  const items = await page
-                    .locator(".ac-action-menu li button")
-                    .allTextContents();
-                  await page.keyboard.press("Escape");
-                  return items;
-                })()
-              : await page
-                  .getByLabel("Otras acciones")
-                  .locator("option")
-                  .allTextContents();
+          await page.getByText(menuName, { exact: true }).click();
+          const offered = await page
+            .locator(".ac-action-menu li button")
+            .allTextContents();
+          await page.keyboard.press("Escape");
           expect(
             offered.length,
             `acciones secundarias a ${width}px`,
@@ -434,7 +368,7 @@ test.describe("revisión con 0, 1, 3, 12 y 50 aportaciones", () => {
         ),
       ).toBeVisible();
       await expect(page.getByText("Te toca a ti")).toHaveCount(0);
-      await expect(page.getByLabel("Otras acciones")).toHaveCount(0);
+      await expect(page.getByText("Otras acciones")).toHaveCount(0);
       await expect(page.getByText("Más acciones")).toHaveCount(0);
       await expect(page.locator(".ac-state-actions")).toHaveCount(0);
       await checked(page, "UX09-admin", width);
@@ -470,7 +404,7 @@ test("UX-09: el lector solo ve las pestañas con contenido y entiende por qué n
         { exact: false },
       ),
     ).toBeVisible();
-    await expect(page.getByLabel("Otras acciones")).toHaveCount(0);
+    await expect(page.getByText("Otras acciones")).toHaveCount(0);
     await expect(page.getByText("Más acciones")).toHaveCount(0);
     await checked(page, "UX09-viewer", width);
   }

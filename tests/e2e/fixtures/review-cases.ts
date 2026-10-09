@@ -1,5 +1,6 @@
 import { expect, request } from "@playwright/test";
 import { randomUUID } from "node:crypto";
+import { PDFDocument } from "pdf-lib";
 import type {
   ProjectView,
   QuestionnaireView,
@@ -115,6 +116,7 @@ function template(
   project: ProjectView,
   area: Area,
   questions: { title: string; question: string }[],
+  type: "SHORT_TEXT" | "LONG_TEXT" = "SHORT_TEXT",
 ) {
   return {
     formatVersion: "1.0",
@@ -127,7 +129,7 @@ function template(
       sectionExternalId: "TEMA-RC",
       title: item.title,
       question: item.question,
-      type: "SHORT_TEXT",
+      type,
       required: true,
       priority: "P2",
       responsibleAreaCode: area.code,
@@ -191,26 +193,64 @@ async function publishAll(
 const sorted = (q: QuestionnaireView) =>
   [...q.questions].sort((a, b) => a.order - b.order);
 
+// A real one-page PDF: the server validates its structure.
+const pdf = async (label: string) => {
+  const document = await PDFDocument.create();
+  document.setTitle(label);
+  document.addPage([300, 200]);
+  return Buffer.from(await document.save());
+};
+async function attachEvidence(
+  api: Api,
+  projectId: string,
+  question: QuestionView,
+  names: string[],
+) {
+  const path = `/projects/${projectId}/questions/${question.id}`;
+  for (const name of names) {
+    const staged = await api.upload<{ id: string }>(
+      `${path}/evidence`,
+      await pdf(name),
+      {
+        "X-Evidence-Metadata": encodeURIComponent(
+          JSON.stringify({ requestId: randomUUID(), originalName: name }),
+        ),
+      },
+    );
+    const current = await api.call<ResponseView>(`${path}/response`);
+    await api.call(`${path}/response/evidence/attach`, {
+      requestId: randomUUID(),
+      expectedVersion: current.lockVersion,
+      evidenceId: staged.id,
+    });
+  }
+}
 async function submit(
   api: Api,
   projectId: string,
   question: QuestionView,
   text: string,
+  options: { comment?: string; evidence?: string[] } = {},
 ) {
   const path = `/projects/${projectId}/questions/${question.id}/response`;
   const initial = await api.call<ResponseView>(path);
-  const draft = await api.call<ResponseView>(
+  await api.call<ResponseView>(
     `${path}/draft`,
     {
       requestId: randomUUID(),
       expectedVersion: initial.lockVersion,
       answer: text,
-      comment: "Comentario ficticio que aporta contexto a la respuesta.",
+      comment:
+        options.comment ??
+        "Comentario ficticio que aporta contexto a la respuesta.",
       example: "",
       consultationRequested: false,
     },
     "PUT",
   );
+  if (options.evidence?.length)
+    await attachEvidence(api, projectId, question, options.evidence);
+  const draft = await api.call<ResponseView>(path);
   await api.call(`${path}/submit`, {
     requestId: randomUUID(),
     expectedVersion: draft.lockVersion,
@@ -430,6 +470,456 @@ export async function seedReviewCases(baseURL: string): Promise<ReviewCases> {
         fifty: questions[4]!,
       },
     };
+  } finally {
+    await admin.dispose();
+  }
+}
+
+export type DocumentCases = {
+  project: ProjectView;
+  /** Questions that exercise long answers, evidence, exchanges and decisions. */
+  questions: Record<
+    "conflict" | "decision" | "reopened" | "long",
+    QuestionView
+  >;
+};
+
+const longAnswer = (person: number) =>
+  `Criterio de la persona ${person}: ` +
+  "el procedimiento debe documentarse de forma completa, indicando el fundamento, el responsable de cada paso, los plazos aplicables y las excepciones admitidas; además, cualquier cambio posterior debe comunicarse por escrito a todas las áreas que participan en la operación. ".repeat(
+    3,
+  );
+
+/**
+ * Cases for the composition of conflicts, exchanges and decisions: a conflict
+ * with evidence on one side only, a decision with every kind of ground (two
+ * answers with files, a closed clarification and a resolved conflict), a
+ * decision that was reopened, and twelve long answers with files.
+ */
+export async function seedDocumentCases(
+  baseURL: string,
+): Promise<DocumentCases> {
+  const admin = await apiSession(baseURL, "admin");
+  try {
+    const { suffix, project, area } = await createProject(admin, "DOC");
+    const accounts =
+      await admin.call<{ id: string; username: string }[]>("/users");
+    const people = [] as { id: string; username: string; member: string }[];
+    for (let index = 0; index < 12; index++) {
+      const username = `dc_${suffix.replaceAll("-", "").slice(0, 10)}_${String(index).padStart(2, "0")}`;
+      const user = await admin.call<{ id: string }>("/users", {
+        username,
+        displayName: [
+          "Lucía Barrera",
+          "Mateo Ibarra",
+          "Paula Quintana",
+          "Héctor Villalobos",
+          "Renata Solís",
+          "Camilo Ortega",
+          "Inés Navarro",
+          "Tomás Aguirre",
+          "Valeria Rojas",
+          "Andrés Paredes",
+          "Julia Montes",
+          "Bruno Cárdenas",
+        ][index]!,
+        temporaryPassword: temporary(),
+      });
+      const member = await addMember(
+        admin,
+        project.id,
+        user.id,
+        "STAKEHOLDER",
+        area.id,
+      );
+      people.push({ id: user.id, username, member: member.id });
+    }
+    for (const [username, role] of [
+      ["analyst", "ANALYST"],
+      ["viewer", "VIEWER"],
+    ] as const) {
+      const user = accounts.find((a) => a.username === username);
+      expect(user, `La demo incluye ${username}`).toBeDefined();
+      await addMember(admin, project.id, user!.id, role, area.id);
+    }
+    const spec = [
+      ["conflict", 2, "Umbral de fianza de cumplimiento"],
+      ["decision", 3, "Plazo máximo de pago a proveedores"],
+      ["reopened", 2, "Comunicación del resultado"],
+      ["long", 12, "Criterios de adjudicación directa"],
+    ] as const;
+    await importQuestionnaire(
+      admin,
+      project.id,
+      template(
+        project,
+        area,
+        spec.map(([, , title]) => ({
+          title,
+          question: `¿Cuál es el criterio ficticio para «${title.toLowerCase()}» y qué excepciones por tipo de bien o de proveedor deben considerarse?`,
+        })),
+        "LONG_TEXT",
+      ),
+    );
+    let questions = sorted(
+      await admin.call<QuestionnaireView>(
+        `/projects/${project.id}/questionnaire`,
+      ),
+    );
+    for (const [index, [, count]] of spec.entries())
+      for (let person = 0; person < count; person++)
+        questions[index] = await admin.call<QuestionView>(
+          `/projects/${project.id}/questions/${questions[index]!.id}/assign`,
+          {
+            projectMemberId: people[person]!.member,
+            active: true,
+            required: true,
+            expectedVersion: questions[index]!.lockVersion,
+          },
+        );
+    await publishAll(admin, project.id, questions);
+    questions = sorted(
+      await admin.call<QuestionnaireView>(
+        `/projects/${project.id}/questionnaire`,
+      ),
+    );
+    const sessions = new Map<number, Api>();
+    try {
+      for (let person = 0; person < 12; person++) {
+        const api = await apiSession(baseURL, people[person]!.username, true);
+        sessions.set(person, api);
+        for (const [index, [key, count]] of spec.entries()) {
+          if (person >= count) continue;
+          const evidence =
+            key === "conflict" && person === 0
+              ? [
+                  "Manual_de_adquisiciones_art_48_version_vigente.pdf",
+                  "Dictamen_juridico_2023.pdf",
+                ]
+              : key === "decision" && person < 2
+                ? [`Acta_de_recepcion_documental_${person + 1}.pdf`]
+                : key === "long" && person < 4
+                  ? Array.from(
+                      { length: person },
+                      (_, n) => `Soporte_${person + 1}_${n + 1}.pdf`,
+                    )
+                  : [];
+          await submit(
+            api,
+            project.id,
+            questions[index]!,
+            key === "long" || key === "conflict"
+              ? longAnswer(person + 1)
+              : `Respuesta ficticia de la persona ${person + 1} para «${key}».`,
+            { evidence },
+          );
+        }
+      }
+      const analyst = await apiSession(baseURL, "analyst");
+      try {
+        const review = (index: number) =>
+          `/projects/${project.id}/questions/${questions[index]!.id}/review`;
+        const detail = (index: number) =>
+          analyst.call<ReviewDetail>(review(index));
+        const idsOf = (d: ReviewDetail, count: number) =>
+          d.submissions
+            .filter((s) =>
+              people.slice(0, count).some((p) => p.id === s.respondent.id),
+            )
+            .map((s) => s);
+        // conflict: open conflict between the first two.
+        const conflict = await detail(0);
+        await analyst.call(`${review(0)}/conflicts`, {
+          requestId: randomUUID(),
+          expectedVersion: conflict.lockVersion,
+          reason:
+            "Umbrales incompatibles: 500 UMA sin excepciones frente a 1,200 UMA con excepción por pago contra entrega.",
+          responseRevisionIds: idsOf(conflict, 2).map((s) => s.id),
+        });
+        // decision: conflict (1,2) + clarification (3) → resolved and closed → validated.
+        let decision = await detail(1);
+        await analyst.call(`${review(1)}/conflicts`, {
+          requestId: randomUUID(),
+          expectedVersion: decision.lockVersion,
+          reason: "Las dos primeras aportaciones fijan plazos distintos.",
+          responseRevisionIds: idsOf(decision, 2).map((s) => s.id),
+        });
+        await requestClarification(
+          analyst,
+          project.id,
+          questions[1]!.id,
+          people[2]!.id,
+          "¿El plazo aplica también a bienes de importación?",
+        );
+        const mine = await sessions.get(2)!.call<{
+          lockVersion: number;
+          threads: { id: string; lockVersion: number; status: string }[];
+        }>(`/projects/${project.id}/questions/${questions[1]!.id}/clarifications`);
+        const asked = mine.threads.find(
+          (t) => t.status === "WAITING_STAKEHOLDER",
+        )!;
+        await sessions.get(2)!.call(`${review(1)}/clarifications/reply`, {
+          requestId: randomUUID(),
+          expectedVersion: mine.lockVersion,
+          threadId: asked.id,
+          expectedThreadVersion: asked.lockVersion,
+          body: "Sí: para bienes de importación se admiten 30 días naturales.",
+        });
+        decision = await detail(1);
+        const thread = decision.threads[0]!;
+        await analyst.call(`${review(1)}/clarifications/close`, {
+          requestId: randomUUID(),
+          expectedVersion: decision.lockVersion,
+          threadId: thread.id,
+          expectedThreadVersion: thread.lockVersion,
+          reason: "Aclarado: el criterio queda documentado.",
+        });
+        decision = await detail(1);
+        const open = decision.conflicts.find((c) => c.status === "OPEN")!;
+        await analyst.call(`${review(1)}/conflicts/resolve`, {
+          requestId: randomUUID(),
+          expectedVersion: decision.lockVersion,
+          conflictId: open.id,
+          expectedConflictVersion: open.lockVersion,
+          resolutionText: "Se adopta el plazo de 20 días naturales.",
+          responseRevisionIds: [idsOf(decision, 1)[0]!.id],
+        });
+        decision = await detail(1);
+        await analyst.call(`${review(1)}/validate`, {
+          requestId: randomUUID(),
+          expectedVersion: decision.lockVersion,
+          decisionText:
+            "El plazo máximo de pago es de 20 días naturales contados desde la recepción de la factura validada por Almacén. Se admiten 30 días naturales únicamente para bienes de importación.",
+          scope:
+            "Todas las adquisiciones del Instituto con recurso propio, a partir de los contratos y convenios modificatorios firmados desde el 1 de enero de 2027.",
+          exceptions:
+            "No aplica a contratos plurianuales vigentes ni a pagos sujetos a recurso federal con calendario propio.",
+          validationComment: "Comentario interno ficticio del analista.",
+          responseRevisionIds: idsOf(decision, 3).map((s) => s.id),
+          clarificationMessageIds: decision.threads[0]!.messages.map(
+            (m) => m.id,
+          ),
+          conflictResolutionIds: [
+            decision.conflicts.find((c) => c.resolution)!.resolution!.id,
+          ],
+        });
+        // reopened: validated and then reopened, so the decision is historical.
+        let reopened = await detail(2);
+        await analyst.call(`${review(2)}/validate`, {
+          requestId: randomUUID(),
+          expectedVersion: reopened.lockVersion,
+          decisionText: "Se comunica el resultado por el canal registrado.",
+          scope: "Solicitudes del proyecto ficticio.",
+          exceptions: "",
+          validationComment: "Comentario interno ficticio.",
+          responseRevisionIds: idsOf(reopened, 2).map((s) => s.id),
+          clarificationMessageIds: [],
+          conflictResolutionIds: [],
+        });
+        reopened = await detail(2);
+        await analyst.call(`${review(2)}/reopen`, {
+          requestId: randomUUID(),
+          expectedVersion: reopened.lockVersion,
+          reason: "Cambió el alcance de la comunicación.",
+        });
+      } finally {
+        await analyst.dispose();
+      }
+    } finally {
+      for (const api of sessions.values()) await api.dispose();
+    }
+    questions = sorted(
+      await admin.call<QuestionnaireView>(
+        `/projects/${project.id}/questionnaire`,
+      ),
+    );
+    return {
+      project,
+      questions: {
+        conflict: questions[0]!,
+        decision: questions[1]!,
+        reopened: questions[2]!,
+        long: questions[3]!,
+      },
+    };
+  } finally {
+    await admin.dispose();
+  }
+}
+
+export type ParticipantCases = {
+  project: ProjectView;
+  /** What the demo participant sees in "Mi trabajo". */
+  questions: {
+    submitted: QuestionView;
+    clarification: QuestionView;
+    validated: QuestionView;
+    draft: QuestionView;
+    pending: QuestionView[];
+  };
+  /** An external invitation for three of the pending questions (the link is a secret: never log it). */
+  invitation: { url: string; questionIds: string[] };
+};
+
+/**
+ * The demo participant with every state of their own work: a submitted answer
+ * with a file, a clarification waiting on them, a validated decision, a saved
+ * draft and pending questions; plus an external invitation for three of those.
+ */
+export async function seedParticipantCases(
+  baseURL: string,
+): Promise<ParticipantCases> {
+  const admin = await apiSession(baseURL, "admin");
+  try {
+    const { project, area } = await createProject(admin, "PRT");
+    const accounts =
+      await admin.call<{ id: string; username: string }[]>("/users");
+    const uid = (name: string) => accounts.find((a) => a.username === name)!.id;
+    const stakeholder = await addMember(
+      admin,
+      project.id,
+      uid("stakeholder"),
+      "STAKEHOLDER",
+      area.id,
+    );
+    await addMember(admin, project.id, uid("analyst"), "ANALYST", area.id);
+    await addMember(admin, project.id, uid("viewer"), "VIEWER", area.id);
+    const titles = [
+      "Presentación de una requisición",
+      "Criterio de urgencia fuera de calendario",
+      "Plazo máximo de pago a proveedores",
+      "Estudio de mercado previo a la contratación",
+      "Datos de contacto del proveedor",
+      "Formato de entregas parciales",
+      "Responsable del finiquito de contratos",
+      "Revisión de garantías de cumplimiento",
+    ];
+    await importQuestionnaire(
+      admin,
+      project.id,
+      template(
+        project,
+        area,
+        titles.map((title) => ({
+          title,
+          question: `¿Cómo debe atenderse «${title.toLowerCase()}» para que el procedimiento pueda continuar con claridad y sin retrasos?`,
+        })),
+        "LONG_TEXT",
+      ),
+    );
+    let questions = sorted(
+      await admin.call<QuestionnaireView>(
+        `/projects/${project.id}/questionnaire`,
+      ),
+    );
+    for (const [index, question] of questions.entries())
+      questions[index] = await admin.call<QuestionView>(
+        `/projects/${project.id}/questions/${question.id}/assign`,
+        {
+          projectMemberId: stakeholder.id,
+          active: true,
+          required: true,
+          expectedVersion: question.lockVersion,
+        },
+      );
+    await publishAll(admin, project.id, questions);
+    questions = sorted(
+      await admin.call<QuestionnaireView>(
+        `/projects/${project.id}/questionnaire`,
+      ),
+    );
+    const person = await apiSession(baseURL, "stakeholder");
+    const analyst = await apiSession(baseURL, "analyst");
+    try {
+      await submit(
+        person,
+        project.id,
+        questions[0]!,
+        "Una requisición se considera completa cuando incluye la descripción del bien o servicio, la cantidad, el área usuaria, la justificación y la suficiencia presupuestaria validada por Finanzas.",
+        { evidence: ["Formato_requisicion_vigente.pdf"] },
+      );
+      await submit(
+        person,
+        project.id,
+        questions[1]!,
+        "Cualquier requisición urgente debe autorizarla la persona titular del área con la justificación escrita del hecho que la origina.",
+      );
+      await submit(
+        person,
+        project.id,
+        questions[2]!,
+        "El pago se realiza dentro de los veinte días naturales posteriores a la recepción de la factura validada.",
+      );
+      const draftPath = `/projects/${project.id}/questions/${questions[3]!.id}/response`;
+      const initial = await person.call<ResponseView>(draftPath);
+      await person.call(
+        `${draftPath}/draft`,
+        {
+          requestId: randomUUID(),
+          expectedVersion: initial.lockVersion,
+          answer:
+            "Borrador: el estudio de mercado se exige en los rubros de mayor monto.",
+          comment: "",
+          example: "",
+          consultationRequested: false,
+        },
+        "PUT",
+      );
+      await requestClarification(
+        analyst,
+        project.id,
+        questions[1]!.id,
+        accounts.find((a) => a.username === "stakeholder")!.id,
+        "¿Quién autoriza una requisición urgente fuera del calendario anual y con qué criterio se justifica?",
+      );
+      const validated = await analyst.call<ReviewDetail>(
+        `/projects/${project.id}/questions/${questions[2]!.id}/review`,
+      );
+      await analyst.call(
+        `/projects/${project.id}/questions/${questions[2]!.id}/review/validate`,
+        {
+          requestId: randomUUID(),
+          expectedVersion: validated.lockVersion,
+          decisionText: "El plazo máximo de pago es de 20 días naturales.",
+          scope: "Todas las adquisiciones con recurso propio.",
+          exceptions: "",
+          validationComment: "Comentario interno ficticio.",
+          responseRevisionIds: validated.submissions.map((s) => s.id),
+          clarificationMessageIds: [],
+          conflictResolutionIds: [],
+        },
+      );
+      const invited = questions.slice(4, 7);
+      const link = await analyst.call<{ url: string }>(
+        `/projects/${project.id}/invitations`,
+        {
+          requestId: randomUUID(),
+          label: "Invitación ficticia de verificación",
+          questionIds: invited.map((q) => q.id),
+          areaId: area.id,
+          identity: { name: "Persona invitada ficticia" },
+          nonNominal: false,
+          allowEvidence: true,
+        },
+      );
+      return {
+        project,
+        questions: {
+          submitted: questions[0]!,
+          clarification: questions[1]!,
+          validated: questions[2]!,
+          draft: questions[3]!,
+          pending: questions.slice(4),
+        },
+        invitation: {
+          url: link.url,
+          questionIds: invited.map((q) => q.id),
+        },
+      };
+    } finally {
+      await person.dispose();
+      await analyst.dispose();
+    }
   } finally {
     await admin.dispose();
   }

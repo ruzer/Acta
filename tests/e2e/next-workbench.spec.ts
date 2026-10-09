@@ -325,8 +325,9 @@ test("ACTA NEXT: decisiones conserva sus filtros al volver de la decisión vigen
     exact: true,
   });
   await detailLink.click();
+  // CP5: the decision is a document; there is no longer a "Decisiones registradas" heading above it.
   await expect(
-    page.getByRole("heading", { name: "Decisiones registradas", exact: true }),
+    page.getByRole("article", { name: "Decisión vigente", exact: true }),
   ).toBeVisible();
   await page.getByRole("link", { name: "← Decisiones", exact: true }).click();
   await expect(page).toHaveURL(
@@ -450,8 +451,9 @@ for (const username of ["admin", "analyst", "viewer", "stakeholder"] as const) {
       await expect(
         page.getByRole("button", { name: "Registrar decisión", exact: true }),
       ).toBeVisible();
+      // CP5 (UX-05): "Otras acciones" is a menu button, not a select.
       await expect(
-        page.getByLabel("Otras acciones", { exact: true }),
+        page.getByText("Otras acciones", { exact: true }),
       ).toBeVisible();
     } else {
       await expect(
@@ -461,14 +463,11 @@ for (const username of ["admin", "analyst", "viewer", "stakeholder"] as const) {
         page.getByRole("button", { name: "Registrar decisión", exact: true }),
       ).toHaveCount(0);
       await expect(
-        page.getByLabel("Otras acciones", { exact: true }),
+        page.getByText("Otras acciones", { exact: true }),
       ).toHaveCount(0);
       if (username === "viewer") {
         await expect(
-          page.getByRole("heading", {
-            name: "Decisiones registradas",
-            exact: true,
-          }),
+          page.getByRole("article", { name: "Decisión vigente", exact: true }),
         ).toBeVisible();
         await expect(navigation(page)).toHaveCount(0);
         await expect(

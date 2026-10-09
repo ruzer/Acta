@@ -20,6 +20,7 @@ import {
   ContributionPane,
   EvidenceFile,
   ThreadInset,
+  ThreadMessage,
   ComparisonTable,
   DecisionSheet,
   Receipt,
@@ -178,7 +179,13 @@ function Showcase() {
                 onDownload={() => setNotice("Descarga de ejemplo seleccionada")}
               />
               <ThreadInset title="Aclaración">
-                <p>Se solicita precisar quién conserva el registro.</p>
+                <ThreadMessage
+                  from="asks"
+                  author="Elena Rangel"
+                  date="8 oct 2026"
+                >
+                  Se solicita precisar quién conserva el registro.
+                </ThreadMessage>
               </ThreadInset>
             </ContributionPane>
           </div>
@@ -186,7 +193,10 @@ function Showcase() {
         <TabPanel id="check" value="comparison" active={tab === "comparison"}>
           <ComparisonTable
             caption="Contraste de aportaciones"
-            columns={["Postura A", "Postura B"]}
+            columns={[
+              { key: "Postura A", head: "Postura A" },
+              { key: "Postura B", head: "Postura B" },
+            ]}
             rows={[
               {
                 id: "answer",
@@ -201,7 +211,8 @@ function Showcase() {
         </TabPanel>
         <TabPanel id="check" value="decision" active={tab === "decision"}>
           <DecisionSheet
-            title="Decisión vigente"
+            label="Decisión vigente"
+            kicker="Decisión validada"
             footer="No es firma electrónica ni atribuye efectos jurídicos adicionales."
           >
             <p className="ac-document-decision">Se decide</p>
