@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import type { ProjectView } from "@requirements/contracts";
 import { Link, useLocation } from "react-router-dom";
 import { Brand } from "../branding";
+import { workbenchPath } from "../workbench-context";
 import { Button } from "../ui";
 import { AppShell } from "../ui/semantic";
 import { ParticipantIcon } from "../pages/ParticipantIcon";
@@ -27,6 +28,12 @@ export function ProjectShell({
   children: ReactNode;
 }) {
   const { pathname } = useLocation();
+  const canManage = project.role === "ADMIN" || project.role === "ANALYST";
+  // The root of the path is the project's home: Attention for the team that
+  // works the queue, the published questions for the read-only reader.
+  const home = canManage
+    ? workbenchPath(project.id, "attention")
+    : `/projects/${project.id}`;
   const segment = pathname.split("/")[3];
   const page =
     projectDestinations.find((item) => item.path === segment)?.label ??
@@ -61,7 +68,7 @@ export function ProjectShell({
             <Brand short />
           </Link>
           <Link className="ac-project-switch" to="/" title="Mis proyectos">
-            <ParticipantIcon name="layers" />
+            <ParticipantIcon name="folder" />
             <span>
               {project.name}
               <small>Mis proyectos</small>
@@ -75,7 +82,12 @@ export function ProjectShell({
       context={
         <>
           <nav className="ac-breadcrumb" aria-label="Contexto de página">
-            <Link to="/">{project.name}</Link>
+            <Link
+              to={home}
+              aria-label={`${project.name}: ir a ${canManage ? "Atención" : "Preguntas publicadas"}`}
+            >
+              {project.name}
+            </Link>
             <span aria-hidden="true">›</span>
             <span>{page}</span>
           </nav>
@@ -85,7 +97,7 @@ export function ProjectShell({
             onKeyDown={closeToolsOnEscape}
           >
             <summary title="Cuenta y herramientas">
-              <ParticipantIcon name="layers" />
+              <ParticipantIcon name="menu" />
               <span>Menú</span>
             </summary>
             <div className="ac-mobile-menu">

@@ -177,6 +177,15 @@
   .ac-sidebar .ac-brand {
     font-size: 15px;
     padding: 0;
+    min-width: 48px;
+    min-height: 48px;
+    justify-content: center;
+  }
+  .ac-sidebar .ac-project-switch {
+    width: 48px;
+    min-height: 48px;
+    justify-content: center;
+    padding: 0;
   }
   .ac-sidebar .ac-brand .installation-logo {
     max-width: 30px;
@@ -213,8 +222,16 @@
   .ac-project-tools > summary,
   .ac-mobile-account > summary,
   .ac-project-tools nav a,
-  .ac-mobile-menu nav a {
+  .ac-mobile-menu nav a,
+  .ac-breadcrumb a,
+  .ac-brand,
+  .ac-project-switch {
     min-height: 44px;
+  }
+  .ac-breadcrumb a {
+    display: inline-flex;
+    align-items: center;
+    padding-inline: 2px;
   }
 }
 @media (max-width: 759px) {
@@ -249,11 +266,24 @@
     height: 20px;
   }
   .ac-shell-context {
-    align-items: flex-start;
-    padding-block: 8px;
+    align-items: center;
+    padding-block: 0;
   }
+  /* One line: the project name gives way (ellipsis) to the page name. */
   .ac-breadcrumb {
+    flex: 1 1 0;
     min-height: 44px;
+    flex-wrap: nowrap;
+  }
+  .ac-breadcrumb a {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ac-breadcrumb > span:last-child {
+    flex: none;
+    white-space: nowrap;
   }
 }
 

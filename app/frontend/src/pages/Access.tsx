@@ -285,8 +285,10 @@ export function Participant() {
       <Link className="back" to="/">
         ← Mis proyectos
       </Link>
-      <p className="eyebrow">{data.roleLabel}</p>
-      <h1>{data.projectName}</h1>
+      <p className="eyebrow">
+        {data.roleLabel} · {data.projectName}
+      </p>
+      <h1>Preguntas publicadas</h1>
       <Alert>{data.phaseNotice}</Alert>
       {!data.sections.length ? (
         <EmptyState title="No hay preguntas disponibles">

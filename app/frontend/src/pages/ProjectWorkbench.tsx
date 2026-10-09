@@ -7,6 +7,14 @@ import "../project-workbench.css";
 export type WorkbenchView =
   "attention" | "questionnaire" | "decisions" | "invitations";
 
+// The project name lives in the shell; the page heading names the page.
+const pageTitles: Record<WorkbenchView, string> = {
+  attention: "Atención",
+  questionnaire: "Cuestionario",
+  decisions: "Decisiones",
+  invitations: "Invitaciones",
+};
+
 export type ProjectWorkbenchProps = {
   projectId: string;
   projectName: string;
@@ -41,13 +49,7 @@ export function ProjectWorkbench({
           {projectName}
         </Link>
       ) : (
-        <h1>
-          {active === "attention"
-            ? "Atención"
-            : active === "questionnaire"
-              ? "Cuestionario"
-              : projectName}
-        </h1>
+        <h1>{active ? pageTitles[active] : projectName}</h1>
       )}
       {children}
     </header>

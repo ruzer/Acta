@@ -5,12 +5,12 @@ import { useWorkbenchContext } from "../workbench-context";
 import { ParticipantIcon } from "../pages/ParticipantIcon";
 
 export const projectDestinations = [
-  { view: "attention", path: "dashboard", label: "Atención", icon: "info" },
+  { view: "attention", path: "dashboard", label: "Atención", icon: "inbox" },
   {
     view: "questionnaire",
     path: "editor",
     label: "Cuestionario",
-    icon: "layers",
+    icon: "list",
   },
   { view: "decisions", path: "decisions", label: "Decisiones", icon: "check" },
   {
@@ -95,7 +95,7 @@ export function ProjectToolsMenu({
       key={pathname}
     >
       <summary title="Más herramientas">
-        <ParticipantIcon name="layers" />
+        <ParticipantIcon name="menu" />
         <span>Más herramientas</span>
       </summary>
       <nav aria-label="Otras herramientas del proyecto">

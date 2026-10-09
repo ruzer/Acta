@@ -160,3 +160,19 @@ it("una invitación activa se identifica sin marcar otro destino principal", () 
     if (link.textContent !== "Invitaciones")
       expect(link).not.toHaveAttribute("aria-current");
 });
+
+it.each([
+  ["decisions", "Decisiones"],
+  ["invitations", "Invitaciones"],
+  ["attention", "Atención"],
+  ["questionnaire", "Cuestionario"],
+] as const)(
+  "UX-02: %s tiene un único h1 con el nombre de la página, no el del proyecto",
+  (active, title) => {
+    setup({ role: "ANALYST", active });
+    const headings = screen.getAllByRole("heading", { level: 1 });
+    expect(headings).toHaveLength(1);
+    expect(headings[0]).toHaveTextContent(title);
+    expect(headings[0]).not.toHaveTextContent("Proyecto de prueba");
+  },
+);

@@ -81,9 +81,8 @@ export function ProjectDecisions() {
       role={data.role}
       active="decisions"
     >
-      <section aria-labelledby="project-decisions-title">
+      <section aria-label="Decisiones vigentes">
         <div className="pw-decisions-heading">
-          <h2 id="project-decisions-title">Decisiones</h2>
           <p>
             Preguntas con una decisión vigente. Abre una para consultar qué se
             decidió, su alcance y sus fuentes.
