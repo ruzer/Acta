@@ -33,9 +33,10 @@ Referencia aprobada a la izquierda; React implementado a la derecha. Cada fila d
 | ----------------------------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | Preparación                               | EN CURSO                   | Base y árbol auditados; rama creada; PostgreSQL desechable nuevo; migraciones oficiales aplicadas                 |
 | 1. Tokens, tipografía, componentes        | LISTO PARA REVISIÓN        | Tipos/lint/build, 170 tests frontend, humo 7/7, visual 5/5 y axe 0; aceptación humana pendiente                   |
-| 2. Shell, navegación, Atención            | LISTO PARA REVISIÓN        | Gate visual 12/12, 231 unit/component, 11 workbench, 3 simplicity, humo 7 casos; límites ARCHIVED descritos abajo |
+| 2. Shell, navegación, Atención            | LISTO PARA REVISIÓN        | Gate visual 12/12, 231 unit/component, 11 workbench, 3 simplicity, humo 7 casos; límites ARCHIVED descritos abajo; UX-01/03/08/15 y parche UX-02 cerrados en la puerta UX (más abajo) |
 | 3. Cuestionario / Organizar / lotes | LISTO PARA REVISIÓN | 174 unit, 28 E2E funcionales, 15 visuales, 3 de fixture independiente; cinco anchos y DEV-26 aprobada |
-| 4. Revisión / aportaciones / solo lectura | LISTO PARA REVISIÓN, con correcciones posteriores a la auditoría | 284 unit tras las correcciones (264 al cierre), 15 E2E funcionales y 40 vistas + 1 gate de permisos al cierre; DEV-25 aplicada; **E2E pendiente de re-ejecución tras las correcciones**; requiere aceptación humana |
+| 4. Revisión / aportaciones / solo lectura | LISTO PARA REVISIÓN, con correcciones posteriores a la auditoría | 284 unit tras las correcciones (264 al cierre), 15 E2E funcionales y 40 vistas + 1 gate de permisos al cierre; DEV-25 aplicada; E2E re-ejecutado en la puerta UX: 138/138; UX-06/07/09 cerrados; requiere aceptación humana |
+| Puerta de correcciones UX antes de CP5 | CERRADA (8 hallazgos, con evidencia) | 332 unit, 113 integración, 138 E2E, axe 0; CP5 sin iniciar |
 | 5. Conflictos / aclaraciones / decisiones | ESPERA APROBACIÓN POST-CP4 | No implementar todavía                                                                                            |
 | 6. Participante / invitado                | ESPERA APROBACIÓN POST-CP4 | No implementar todavía                                                                                            |
 | 7. Administración / consistencia          | ESPERA APROBACIÓN POST-CP4 | No implementar todavía                                                                                            |
@@ -582,3 +583,218 @@ El tamaño del bundle conserva la advertencia preexistente de más de 500 kB; no
 4. La integración PostgreSQL no se repitió desde la línea base (113/113): backend, contratos y Prisma tienen diff vacío frente a v0.5.0.
 
 **Observaciones de la auditoría que siguen abiertas** (fuera del alcance autorizado; no se corrigieron): F3, el gate de permisos de DEV-25 y las vistas de 3/12/50 aportaciones dependen de `ACTA_DIRECTION_C_VISUAL_FIXTURE`, un fichero privado no versionado, por lo que otra persona no puede reproducirlos desde el repositorio; F4, la medición de objetivos táctiles solo mide `button`, `input`, `select`, `textarea` y `summary` dentro de `.ac-review` y excluye enlaces y shell (en la auditoría, con datos simulados: enlace de ruta de 21 px de alto a 768 y 390 px, marca de 32×32 y selector de proyecto de 40×40 a 768 px); F5, `it.each` de `ReviewPresentation.test.tsx` ignora su parámetro; F6, incoherencias menores de este informe y el libro de aserciones sin archivo:línea; F7, `PUBLIC-SNAPSHOT-FILES.txt` solo se actualizó para CP1; F8, el titular «Decisión vigente» aparece dos veces en la vista validada hasta CP5; F9, texto menor de 12,5 px en CSS heredado de pantallas aún no migradas; F10, OFL de Plex Serif con saltos de línea normalizados.
+
+## Puerta de correcciones UX antes de CP5
+
+Alcance autorizado (2026-10-08, tras la revisión integral UX/UI de CP1–4, `UX-REVIEW-CP1-4.md` del laboratorio): resolver los hallazgos **UX-01, UX-02 (parche mínimo), UX-03, UX-06, UX-07, UX-08, UX-09 y UX-15** sin iniciar CP5 y sin rediseñar Acta. Se conserva el lenguaje visual de la Dirección C. Solo frontend: backend, contratos, Prisma, Docker y paquetes tienen diff vacío frente a v0.5.0; no se tocó Acta-FGEO; sin endpoints nuevos; sin push, merge ni release. Los hallazgos no tratados quedan diferidos con su checkpoint.
+
+### Resultado por hallazgo
+
+| Hallazgo | Estado | Evidencia que lo sostiene |
+|---|---|---|
+| UX-01 Atención a escala | **CERRADO** | E2E 12/54/304 × 4 anchos, 7 pruebas de escala, métricas abajo |
+| UX-03 Una fila por pregunta | **CERRADO** | invariante «exactamente una vez» (unitaria, 2 variantes de rol) + E2E |
+| UX-06 Aportación relevante | **CERRADO**, con límite documentado | 6 pruebas unitarias de selección, E2E 0/1/3/12/50 × 4 anchos |
+| UX-07 Revisión móvil | **CERRADO**, con la observación de 320 px | CTA y «Más acciones» en la primera pantalla a 390 y 320; titular de la aportación a 390; E2E |
+| UX-08 Navegación | **CERRADO** | raíz → Atención, iconos distintos, foco; E2E y 3 pruebas unitarias |
+| UX-02 (parche mínimo) | **CERRADO solo el parche**; migración completa diferida a CP5–CP7 | h1 por página; el nombre del proyecto deja de repetirse como h1 |
+| UX-09 Solo lectura | **CERRADO** | pestañas con contenido y explicación; E2E ADMIN y VIEWER |
+| UX-15 Objetivos táctiles | **CERRADO en el shell y las pantallas tocadas** (≤899 px) | `smallTargets()` = [] en Atención, revisión y shell a 768/390/320 |
+
+Un hallazgo solo se marca cerrado cuando su comportamiento está probado en navegador real con datos reales de una base desechable, a los cuatro anchos pedidos, con axe sin violaciones y sin desbordes. Lo que no se pudo probar así se enumera en «Límites».
+
+#### UX-01 — Atención con cientos de preguntas
+
+- **Problema.** Con la distribución del conjunto de 304 preguntas la pantalla medía ~25 900 px a 1440 y ~45 500 px a 390 (7 434 nodos DOM): «En espera de otras personas» aportaba 124 filas no accionables antes de «Todas las preguntas».
+- **Causa raíz.** Cada grupo se pintaba completo y «Todas las preguntas» repetía la lista entera; el grupo de espera no tenía nada que el analista pudiera hacer, pero ocupaba el primer plano.
+- **Cambio.** «En espera de otras personas» y «Sin participantes asignados» se pliegan por defecto (`<details>`) con su conteo («124 preguntas») en el resumen. Los grupos con trabajo (te toca a ti, conflictos, aclaraciones) se muestran abiertos; cada lista revela por tramos: 25 filas y «Mostrar 25 más» (un grupo de hasta 30 filas se muestra entero); los grupos plegados, 50 y «Mostrar 50 más» (hasta 60 enteros). «Todas las preguntas (N)» es una sección plegada que solo pinta sus filas al abrirse, con el mismo tramo de 50. «Mostrando N de M» se anuncia con `aria-live="polite"`; al revelar, el foco pasa a la primera fila nueva. Se conservan los filtros (estado, tarea, resumen) y el contexto de proyecto. Abrir/plegar y los tramos revelados se guardan en el contexto del banco de trabajo, de modo que volver desde una revisión restaura la lista, el scroll y el foco en la fila de origen (sin abrir dos veces la misma fila). Sin endpoints nuevos: se parte de los mismos datos del panel.
+- **Pruebas.** `ProjectAttention.test.tsx` (304 preguntas: conteos plegados y filas iniciales; revelado de 50 en 50 (grupo de espera) y de 25 en 25 (grupo de trabajo de 94 filas) con foco en la primera fila nueva; fila única con conflicto + aclaración + evidencia; filtros + revelado + limpiar; restauración del estado abierto/revelado tras desmontar; foco guardado abre solo la primera sección que lista la fila), `attention-groups.test.tsx`, E2E `ux-gate.spec.ts` con 12, 54 y 304 preguntas × 4 anchos.
+- **Evidencia visual.** `acta-direction-c-evidence/ux-gate/UX01-n304-{1440,768,390,320}.png`; comparativas `compare-UX01-*.png`.
+- **Estado.** CERRADO.
+
+#### UX-03 — Una fila por pregunta
+
+- **Problema.** La misma pregunta aparecía en «Te toca a ti» y en «Aclaraciones abiertas» con CTAs distintos; el aviso de repetición estaba en letra pequeña.
+- **Causa raíz.** La agrupación admitía pertenencia múltiple (regla del Mapping §3.1.1).
+- **Cambio.** Pertenencia exclusiva por prioridad: acción / conflictos / respondidas → aclaraciones → espera → sin asignar. Las señales secundarias viajan en la misma fila como chips: «Aclaraciones abiertas» (si la pregunta también tiene aclaraciones) y «Con evidencia»; el conflicto y el estado ya los muestra la fila. No se pierde información de solapamiento: las tarjetas del Resumen siguen contando las preguntas con conflicto y las con aclaración, también si coinciden.
+- **Pruebas.** `attention-groups.test.tsx` («cada pregunta aparece una sola vez y ninguna se pierde», 2 variantes de rol, mismas preguntas y prioridad); `ProjectAttention.test.tsx`; E2E: enlaces de revisión únicos y la pregunta solapada una vez con su chip.
+- **Estado.** CERRADO.
+
+#### UX-06 — La aportación relevante primero
+
+- **Problema.** La aportación abierta por defecto seguía el orden del servidor y «Contraste» no avisaba del conflicto.
+- **Cambio.** Al abrir la revisión se muestra primero la aportación de la aclaración pendiente (la que espera al analista antes que cualquier otra abierta), si no hay, la del conflicto abierto, si no hay, el comportamiento anterior (primera visible en escritorio; el conjunto en pantallas estrechas). Una elección explícita de la persona no se deshace; «← Volver a N aportaciones» muestra el conjunto sin volver a saltar. Un filtro que oculta la aportación relevante abre la primera visible. «Contraste» muestra un indicador (bandera) y `aria-description` «Conflicto abierto» cuando hay un conflicto abierto.
+- **Límite documentado.** La relación se toma solo de los vínculos que ya entrega el contrato (`thread.responseRevisionId`, `conflict.participants[].responseRevisionId`) y solo si esa revisión es vigente; no se infiere ni se inventa ninguna asociación. Si el vínculo no apunta a una revisión vigente, no se preselecciona.
+- **Pruebas.** `review-turn.test.tsx` (`relevantSubmissionId`, tabla de casos), `ContributionSet.test.tsx` (6 pruebas UX-06; dos pruebas existentes pasan a pedir primero el conjunto con «← Volver», véase libro de aserciones), `ReviewPresentation.test.tsx` (indicador y descripción de la pestaña), `semantic.test.tsx` (indicador de `TabNav`), E2E 0/1/3/12/50 × 4 anchos (persona preseleccionada, indicador en Contraste), foco de comparar/volver con ratón y teclado a 1440 y 390.
+- **Estado.** CERRADO.
+
+#### UX-07 — Revisión en móvil
+
+- **Problema.** Primera respuesta a y ≈ 990 (390) y ≈ 1 100 (320): más de una pantalla; «Otras acciones» desplegado siempre.
+- **Cambio.** En < 760 px las acciones secundarias están en un menú «Más acciones» (disclosure accesible con Escape, retorno de foco y cierre al hacer clic fuera; los elementos de 44 px abren los mismos diálogos que el `select` de escritorio). Se compacta el resto del cromo (márgenes, tarjeta de estado, encabezado); a ≤ 420 px las dos acciones se apilan; a ≤ 359 px el titular de la pregunta pasa a 20 px. Con una aportación abierta en pantallas < 900 px, el titular «N aportaciones / Envíos vigentes…» queda solo para lectores de pantalla (el conteo sigue en «← Volver a N aportaciones»; el titular reaparece en la lista). No se retiró ninguna función. En escritorio permanece el `select` «Otras acciones» (UX-05 queda en CP5). Las pestañas conservan la rejilla 2×2 de CP4 a ≤ 479 px: una tira desplazable habría sustituido esa decisión de reflujo.
+- **Pruebas.** `semantic.test.tsx` (`ActionMenu`, 4), `ReviewPresentation.test.tsx` (menú móvil; diálogo abre/cancela con el foco de regreso; `select` en escritorio; sin menú en solo lectura), `ContributionSet.test.tsx` (titular solo para lectores en pantalla estrecha con aportación abierta y visible en escritorio/lista), E2E: CTA y «Más acciones» dentro de la primera pantalla útil a 390 y 320; a 390 el titular de la aportación abierta empieza dentro de la primera pantalla; menú con teclado, Escape y diálogo.
+- **Resultado medido** (`metrics-ux-gate.json`, y de la persona abierta): 
+
+| Caso | Ancho | CTA termina en y | Titular de la aportación en y | Respuesta empieza en y |
+|---|---|---|---|---|
+| 1 aportación | 390 | 465 | 745 | 906 |
+| 1 aportación | 320 | 497 | 798 | 984 |
+| 3 (conflicto + aclaración) | 390 | 485 | 756 | 939 |
+| 3 (conflicto + aclaración) | 320 | 515 | 786 | 994 |
+| 12 (aclaración respondida) | 390 | 485 | 756 | 939 |
+| 12 (aclaración respondida) | 320 | 539 | 810 | 1018 |
+| 50 (dos aclaraciones) | 390 | — | 728 | 911 |
+| 50 (dos aclaraciones) | 320 | — | 783 | 992 |
+
+Pantalla útil: 780 px a 390×844 y 576 px a 320×640 (menos la barra inferior de 64 px). Antes de este cambio la primera respuesta empezaba en y ≈ 990 (390) y ≈ 1 100 (320). La mejora de la posición de la respuesta es moderada (≈ 50–110 px); lo que cambia de fondo es que la acción principal y «Más acciones» ya no ocupan una pantalla propia y que se abre la aportación pendiente.
+- **Límite.** A 320×640 la aportación queda a un desplazamiento (el titular empieza en y ≈ 783–833 con 576 px útiles); lo que se mantiene a la vista es la pregunta, el estado y la acción principal. A 390 el titular de la persona queda al pie de la primera pantalla y su respuesta empieza justo debajo.
+- **Estado.** CERRADO para el alcance pedido (cromo reducido, acción principal y «Más acciones» a la vista); mejorar la lectura inmediata de la respuesta en 320 queda como observación.
+
+#### UX-08 — Navegación del proyecto
+
+- **Problema.** La raíz del breadcrumb llevaba el nombre del proyecto pero no a su inicio; el icono `layers` servía para proyecto, Cuestionario y Menú; Atención usaba un icono de información.
+- **Cambio.** La raíz del breadcrumb lleva a Atención del proyecto (a «Preguntas publicadas» para el rol de solo lectura sin gestión) y su nombre accesible lo dice («Proyecto: ir a Atención»). Iconos distintos: Atención `inbox`, Cuestionario `list`, selector de proyecto `folder`, Menú `menu`. El orden de tabulación y el anillo de foco no cambian.
+- **Pruebas.** `ProjectShell.test.tsx` (destino por rol, nombre accesible, ningún enlace de raíz a «/», iconos distintos), E2E (`href` de la raíz, iconos únicos, anillo de foco).
+- **Estado.** CERRADO.
+
+#### UX-02 — Parche mínimo de títulos
+
+- **Problema.** Dentro del shell nuevo, las pantallas heredadas tenían como `h1` el nombre del proyecto y el título de la página como `h2`.
+- **Cambio.** Cada página del banco de trabajo nombra su `h1` («Atención», «Cuestionario», «Decisiones», «Invitaciones»; «Preguntas publicadas» para el rol de solo lectura); el nombre del proyecto queda en el breadcrumb, la barra lateral y el eyebrow. Jerarquía sin saltos. Rediseño de las pantallas heredadas: CP5–CP7.
+- **Residual corregido: la página se montaba dos veces.** Mientras cargaba la lista de proyectos el contenido se pintaba con la cabecera antigua y, al aparecer el shell, se volvía a montar (se perdían el archivo elegido y lo escrito; por eso `exchange.spec.ts:76` fallaba en este entorno también sobre `HEAD` sin cambios). La página se monta una sola vez, dentro del shell; mientras tanto se muestra el estado «Cargando información…». Prueba E2E determinista: con la lista de proyectos retrasada 1,5 s, el archivo elegido sigue seleccionado cuando aparece el shell; falla sin el cambio (0 archivos) y pasa con él.
+- **Pruebas.** `ProjectWorkbench.test.tsx`, `ProjectDecisions.test.tsx`, `ParticipantHome.test.tsx`; E2E de títulos por página.
+- **Estado.** CERRADO solo el parche; UX-02 completo diferido.
+
+#### UX-09 — Solo lectura
+
+- **Problema.** El VIEWER veía cuatro pestañas aunque Contraste e Historial casi nunca tienen contenido; el ADMIN leía «Consulta de solo lectura.» sin saber por qué.
+- **Cambio.** En solo lectura solo hay pestañas con contenido (con lo que el servidor ya entrega para ese rol): Contraste si hay conflictos o ≥ 2 aportaciones vigentes; Decisión si hay validaciones o disposiciones; Historial si hay hilos, disposiciones o referencias. Un `?tab=` a una pestaña no disponible vuelve a la preferida. El equipo analista conserva las cuatro. La tarjeta de estado explica el motivo («Las acciones de revisión corresponden al equipo analista…», o la del proyecto archivado). No cambia ningún permiso ni dato visible.
+- **Pruebas.** `ReviewPresentation.test.tsx` (analista 4 pestañas; VIEWER; ADMIN; `?tab=history` sin disponibilidad; explicación por rol y archivado), `review-turn.test.tsx`, E2E ADMIN (`Aportaciones (3)`, `Contraste`, `Historial`, sin controles) y VIEWER (`Aportaciones (1)`, `Decisión`).
+- **Estado.** CERRADO.
+
+#### UX-15 — Objetivos táctiles
+
+- **Cambio.** A ≤ 899 px: marca, selector de proyecto y enlaces del breadcrumb de 44 px (48 en el riel), «Mostrar N más» de 44 px, elementos del menú de 44 px; el breadcrumb queda en una línea con elipsis a ≤ 759 px.
+- **Pruebas.** E2E: `smallTargets()` (enlaces independientes, botones, `summary`, `select` e `input` visibles con alguna dimensión < 44 px) es `[]` en el shell a 768, 390 y 320 px, en Atención y en la revisión.
+- **Estado.** CERRADO para el alcance indicado; la medición táctil completa de pantallas heredadas queda para CP7.
+
+### Atención a escala
+
+Medido en Chromium con la API real y una base desechable, a los cuatro anchos (`metrics-ux-gate.json`). El conjunto de la prueba E2E tiene 2 filas de trabajo y 1 de aclaración sola; el resto está en espera (120 con 304 preguntas) o sin asignar (180), plegado y sin filas en el DOM. El número de nodos y el alto **no crecen con el total de preguntas**: son iguales con 12, 54 y 304 (la diferencia de 31 px a 390 px con 304 es el texto «120 preguntas»). Antes de la corrección, la revisión UX midió con la distribución real de 304 preguntas ~25 900 px a 1440, ~45 500 px a 390 y 7 434 nodos.
+
+| Preguntas | Ancho | Filas pintadas (grupos + aclaraciones) | Nodos DOM | Alto de página | Primera fila (y) |
+|---|---|---|---|---|---|
+| 12 | 1440 | 3 | 352 | 1159 px | 323 |
+| 12 | 768 | 3 | 352 | 2069 px | 343 |
+| 12 | 390 | 3 | 352 | 2506 px | 343 |
+| 12 | 320 | 3 | 352 | 2659 px | 367 |
+| 54 | 1440 | 3 | 352 | 1159 px | 323 |
+| 54 | 768 | 3 | 352 | 2069 px | 343 |
+| 54 | 390 | 3 | 352 | 2506 px | 343 |
+| 54 | 320 | 3 | 352 | 2659 px | 367 |
+| 304 | 1440 | 3 | 352 | 1159 px | 323 |
+| 304 | 768 | 3 | 352 | 2069 px | 343 |
+| 304 | 390 | 3 | 352 | 2537 px | 343 |
+| 304 | 320 | 3 | 352 | 2659 px | 367 |
+
+Con la distribución del conjunto de 304 preguntas del laboratorio (2 conflictos, 22 respondidas, 12 aclaraciones, 124 en espera, 144 sin asignar) la prueba unitaria `ProjectAttention.test.tsx` mide 24 filas de trabajo + 12 de aclaración al entrar (36 filas, frente a 304 + 160 de la cola anterior); revelar el grupo de espera pinta 50, 100 y 124 filas; un grupo de trabajo de 94 filas revela de 25 en 25. Esa distribución solo se verificó con datos simulados en jsdom; el navegador real se verificó con el conjunto de la tabla.
+
+### Comparativas con la Dirección C
+
+Referencia aprobada a la izquierda; React a la derecha (capturas reales de la corrida E2E; 1440×900, 768×1024, 390×844 y 320×640). El «antes/después» de Atención compara la captura de la revisión UX (distribución de 304 preguntas con 24 filas de trabajo) con el conjunto E2E de 304.
+
+| Pantalla | 1440 | 768 | 390 | 320 |
+|---|---|---|---|---|
+| Atención · 304 preguntas | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX01-attention-1440.png) | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX01-attention-768.png) | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX01-attention-390.png) | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX01-attention-320.png) |
+| Revisión · 0 aportaciones | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX06-zero-1440.png) | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX06-zero-768.png) | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX06-zero-390.png) | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX06-zero-320.png) |
+| Revisión · 1 aportación | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX06-one-1440.png) | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX06-one-768.png) | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX06-one-390.png) | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX06-one-320.png) |
+| Revisión · 3 aportaciones | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX06-three-1440.png) | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX06-three-768.png) | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX06-three-390.png) | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX06-three-320.png) |
+| Revisión · 12 aportaciones | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX06-twelve-1440.png) | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX06-twelve-768.png) | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX06-twelve-390.png) | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX06-twelve-320.png) |
+| Revisión · 50 aportaciones | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX06-fifty-1440.png) | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX06-fifty-768.png) | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX06-fifty-390.png) | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX06-fifty-320.png) |
+| Atención 304 · antes / después | [Comparar](acta-direction-c-evidence/ux-gate/compare-UX01-before-after-1440.png) | | | |
+| Solo lectura · ADMIN y VIEWER | [ADMIN](acta-direction-c-evidence/ux-gate/UX09-admin-1440.png) · [VIEWER](acta-direction-c-evidence/ux-gate/UX09-viewer-1440.png) | [ADMIN](acta-direction-c-evidence/ux-gate/UX09-admin-768.png) · [VIEWER](acta-direction-c-evidence/ux-gate/UX09-viewer-768.png) | [ADMIN](acta-direction-c-evidence/ux-gate/UX09-admin-390.png) · [VIEWER](acta-direction-c-evidence/ux-gate/UX09-viewer-390.png) | [ADMIN](acta-direction-c-evidence/ux-gate/UX09-admin-320.png) · [VIEWER](acta-direction-c-evidence/ux-gate/UX09-viewer-320.png) |
+
+Lectura de la comparación (la aceptación visual corresponde a producto): se conservan la gramática de contenedores, los tokens, la tipografía y la jerarquía de CP2 y CP4; los pliegues de Atención usan la misma tarjeta con un indicador de despliegue y su conteo, y la revisión en móvil conserva el estado, la acción principal y «Más acciones» en la primera pantalla. Diferencias con el prototipo que no son objeto de esta puerta: el prototipo agrupa Atención con encabezados propios y una barra superior móvil distinta; el separador «·» queda huérfano al inicio de una línea cuando el meta se parte (UX-13, diferido); las pestañas de la revisión móvil siguen en rejilla 2×2 (CP4).
+
+### Libro de aserciones — cambios intencionales de esta puerta
+
+Ninguna aserción se debilitó: cada una se reemplazó por una equivalente sobre el nuevo comportamiento, y el comportamiento antiguo queda cubierto por una prueba que falla si regresa.
+
+| Archivo | Antes | Ahora | Motivo |
+|---|---|---|---|
+| `attention-groups.test.tsx` | El grupo de aclaraciones contenía `["conflict-1", "clarification"]` | Contiene `["clarification"]`; `conflict-1` aparece una vez en su grupo de mayor prioridad y la prueba nueva «exactamente una vez» exige que ninguna pregunta se pierda | UX-03 |
+| `ContributionSet.test.tsx` (2 pruebas existentes) | Con 3 y 10 aportaciones en pantalla estrecha asumían que se abría el conjunto | Piden primero el conjunto con «← Volver a N aportaciones» y conservan el resto de aserciones | UX-06: con un conflicto o una aclaración se abre la aportación relevante |
+| `ReviewPresentation.test.tsx` | `page(detail, search)` | `page(detail, search, projects)` para modelar el rol de lectura; mismas aserciones | UX-09 necesita saber si el proyecto es ADMIN/ANALYST/VIEWER |
+| `visual-direction-c.spec.ts` (CP4, ancho < 900, casos con aclaración o conflicto sobre una vigente) | Lista de N aportaciones y ningún panel al entrar | Se comprueba primero el panel de la persona relevante (nombre, sin riel) y se captura; luego «← Volver» y **se ejecutan intactas** las aserciones previas de lista, 50 aportaciones, contención, geometría y axe | UX-06 |
+| `visual-direction-c.spec.ts` (todas las vistas, final) | `End` enfoca «Historial» y se ve «Historial de la pregunta» | Analista: las cuatro pestañas exactas y `End` → «Historial» como antes. Solo lectura: lista exacta de pestañas derivada de los datos del API, `End` → la última disponible | UX-09 |
+| `exchange.spec.ts:172` | `heading` con el nombre del proyecto | `main h1` = «Atención» y el nombre del proyecto visible en el breadcrumb | UX-02 |
+| `exchange.spec.ts:213` | `link` «Pregunta ficticia» | `link` «Revisar respuestas: Pregunta ficticia» | Aserción heredada de CP2 (la pregunta es un titular y la fila abre la revisión con ese enlace); la prueba estaba tras un fallo en serie y nunca se había ejecutado en este entorno |
+
+### Copy nuevo (confirmación editorial pendiente, DEV-08)
+
+«Más acciones»; «Mostrando N de M»; «Mostrar N más»; «N preguntas» en el resumen de grupos plegados; «Con evidencia»; «Conflicto abierto» (indicador de Contraste); breadcrumb «Proyecto: ir a Atención» / «ir a Preguntas publicadas»; «Preguntas publicadas» como `h1` del rol de solo lectura; «Hay un conflicto abierto entre aportaciones.» y la frase de solo lectura de la tarjeta de estado.
+
+### Diferidos
+
+| Hallazgo | Destino |
+|---|---|
+| UX-04 texto repetido por fila | CP5 (hilo de aclaraciones) |
+| UX-05 acciones por aportación; `select` → menú en escritorio | CP5 |
+| UX-10 cromo del cuestionario | CP7 |
+| UX-11 Contraste y Decisión | CP5 |
+| UX-12 glosario de copy | CP5 |
+| UX-13 separador huérfano, glifo de plegado | CP7 |
+| UX-14 diálogo de lote sin cambios | CP7 |
+| UX-16 «Mis proyectos» | CP7 |
+| UX-17 vacío de Revisión con siguiente paso | CP5 |
+| UX-02 completo (login, Mis proyectos, Administración, Invitaciones, Miembros, Importación) | CP5–CP7 |
+| Botón «Crear invitación» heredado de aspecto nativo | CP7 |
+
+### Límites de esta verificación
+
+Chromium en macOS con base y API desechables propias; sin lector de pantalla real, dispositivos táctiles reales, zoom del navegador, colores forzados ni Windows/Linux (el comportamiento de `select` cerrado con flechas no se verificó). El `Más acciones` se probó con ratón, teclado y emulación de viewport, no con gestos táctiles. axe sin violaciones no certifica WCAG. La aceptación visual y funcional pertenece a producto.
+
+### Resultados de verificación de la puerta
+
+Entorno propio y desechable (proyecto Compose `acta-ux-gate-20261008`, PostgreSQL en loopback, API y Vite en puertos libres; no se usó ni se tocó la infraestructura de otras instalaciones). Node 26.7.0, Chromium de Playwright.
+
+| Comprobación | Resultado observado |
+|---|---|
+| `lint` (`--max-warnings 0`) | PASS |
+| `typecheck` | PASS |
+| `build` | PASS, 759,33 kB (la advertencia de más de 500 kB es preexistente) |
+| `prisma validate` | PASS |
+| Unit/component | **332/332 · 36 archivos** (284/34 al cierre de las correcciones de CP4: +48 pruebas, +2 archivos) |
+| Integración PostgreSQL | **113/113**, sin skips (la suite de revisión usa `ACTA_REVIEW_TEST_PORT=4453`: el puerto por defecto 4330 está ocupado por otra instalación; la primera corrida sin el override dio 102/113 por ese conflicto, ajeno al código) |
+| E2E Chromium, suite completa, base recién creada | **138/138**, sin skips ni reintentos |
+| `ux-gate.spec.ts` | 14/14 (parte de los 138) |
+| axe (wcag2a/2aa/21a/21aa/22aa/best-practice) | 0 violaciones en cada captura del gate (4 anchos) y en la matriz CP4 |
+| Desbordes horizontales; un único `h1` por pantalla | 0 desbordes; 1 `h1` en todas las capturas |
+| Objetivos < 44 px a ≤ 899 px | 0 en shell, Atención y revisión |
+| Backend, contratos, Prisma, Docker y paquetes frente a v0.5.0 | diff vacío |
+| Archivos ajenos (`CLAUDE-UX-CONTEXT.md`, `CLAUDE-UX-FILES.json`, `mockups/`) y stash previo | sin cambios |
+
+La primera corrida completa de esta puerta dio 123 correctas, 13 fallos y 2 sin ejecutar. Su atribución: 12 fallos eran aserciones de la matriz CP4 que codificaban el comportamiento reemplazado a propósito (libro de aserciones); 1 era `exchange.spec.ts:76` (pérdida del archivo elegido al remontarse la página; corregido en `App.tsx`) que, al estar en serie, ocultaba otras 2 pruebas de `exchange.spec.ts` que nunca se habían ejecutado en este entorno y que tenían dos aserciones heredadas de CP2 (también adaptadas). Con esos cambios la suite completa pasa y la última corrida es la de la tabla.
+
+**Observaciones.** (1) `visual-direction-c.spec.ts` se ejecutó con el fixture autónomo de API (0/1/2 aportaciones); las vistas de 3/12/50 del conjunto aprobado dependen de `ACTA_DIRECTION_C_VISUAL_FIXTURE`, un fichero privado no disponible aquí (hallazgo F3 de la auditoría, sin cambios). Para esta puerta se sembró por API un conjunto propio de 0/1/3/12/50 aportaciones (`fixtures/review-cases.ts`), que sí es reproducible desde el repositorio. (2) Una vez, tras un arranque en frío de Vite, `componentes, tipografía y accesibilidad 1440` falló porque cuenta los chips sin esperar a que rendericen; pasó al repetirla y en las dos corridas completas siguientes; no se modificó (aserción de CP1). (3) `prettier --check` avisa en `Clarifications.tsx`, `editor/Preview.tsx` y `editor/simulation.ts`, que esta puerta no tocó.
+
+### Actualización de los «Pendientes E2E» de la auditoría de CP4
+
+1. Suite E2E completa re-ejecutada tras las correcciones de F1/F2/F11–F13 y esta puerta: 138/138 (fixture autónomo; véase la observación 1).
+2. `review.spec.ts` (2D-C) «Comparando 2 de 2 aportaciones vigentes.»: pasa sin cambios.
+3. Cobertura E2E añadida: foco de «Comparar aportaciones» y «← Volver» (1440 y 390, ratón y teclado); «Registrar decisión» ausente con una aclaración abierta (3, 12 y 50 aportaciones, 4 anchos); pestañas y contenido por rol (analista, ADMIN, VIEWER); sin filas duplicadas; paginación y filtros. Comparar con un conflicto y una aportación ajena a él y el alcance del texto de comparación siguen cubiertos solo por pruebas de componente (`ReviewPresentation.test.tsx`, `ContributionComparison.test.tsx`).
+4. Integración PostgreSQL repetida: 113/113.
+
+### Commits de la puerta (rama `feat/acta-direction-c-ui`, DCO, sin push)
+
+| Commit | Contenido |
+|---|---|
+| `4c9a0a6` | UX-08, UX-02 (parche) y UX-15: breadcrumb → Atención, iconos distintos, `h1` por página, objetivos del shell |
+| `6752499` | Residual de UX-02: la página se monta una sola vez dentro del shell |
+| `b78680d` | UX-01 y UX-03: Atención a escala y una fila por pregunta |
+| `7cd4722` | UX-06, UX-07 y UX-09: aportación relevante, menú «Más acciones», solo lectura |
+| `c269b95` | Pruebas E2E de la puerta y aserciones adaptadas |
+| `d85a0b5` | Aserción E2E: una aclaración abierta bloquea «Registrar decisión» |
+| (este) | Documentación y evidencia visual de la puerta |
+
+**Estado de la puerta.** Los ocho hallazgos tienen su evidencia (tabla de arriba). CP5 no se inició y no está autorizado hasta nueva aprobación explícita del producto.
