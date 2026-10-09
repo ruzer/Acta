@@ -77,14 +77,18 @@ it.each(["ADMIN", "ANALYST"] as const)(
         expect(groups.every((group) => !group.turn)).toBe(true);
       }
       const threads = groups.find((group) => group.id === "clarifications")!;
-      expect(threads.questions.map((q) => q.id)).toEqual([
-        "conflict-1",
-        "clarification",
-      ]);
+      // UX-03: "conflict-1" also has an open clarification, but it appears once,
+      // in the group it belongs to first; the row carries the second signal.
+      expect(threads.questions.map((q) => q.id)).toEqual(["clarification"]);
       expect(threads.explanation).toContain(
         "Consulta el hilo para saber a quién corresponde continuar",
       );
+      expect(groups.find((group) => group.id === "action")?.collapsed).not.toBe(
+        true,
+      );
+      expect(threads.collapsed).not.toBe(true);
       const waiting = groups.find((group) => group.id === "waiting")!;
+      expect(waiting.collapsed).toBe(true);
       expect(waiting.questions.map((q) => q.id)).toEqual([
         "partial",
         "pending",
@@ -93,6 +97,7 @@ it.each(["ADMIN", "ANALYST"] as const)(
         "Faltan 2 de 4 aportaciones",
       );
       const unassigned = groups.find((group) => group.id === "unassigned")!;
+      expect(unassigned.collapsed).toBe(true);
       expect(unassigned.questions.map((q) => q.id)).toEqual(["unassigned"]);
       expect(unassigned.turn).toBeUndefined();
       expect(unassigned.reason(unassigned.questions[0]!)).toBe(
@@ -111,3 +116,33 @@ it("la agrupación no modifica el orden o los datos del dashboard", () => {
   attentionGroups(source, ["conflict-1"], true);
   expect(source).toEqual(questions);
 });
+
+it.each([true, false])(
+  "UX-03: cada pregunta aparece una sola vez y ninguna se pierde (canReview=%s)",
+  (canReview) => {
+    const overlapping = ["conflict-1", "answer-1", "clarification", "partial"];
+    const groups = attentionGroups(questions, overlapping, canReview);
+    const ids = groups.flatMap((group) => group.questions.map((q) => q.id));
+    expect(new Set(ids).size).toBe(ids.length);
+    // Same questions as before the de-duplication: only their repetition changes.
+    expect([...ids].sort()).toEqual(
+      [
+        "answer-1",
+        "answer-2",
+        "clarification",
+        "conflict-1",
+        "conflict-2",
+        "partial",
+        "pending",
+        "unassigned",
+      ].sort(),
+    );
+    // Priority: conflict / ready to decide win over clarification and waiting.
+    const home = (id: string) =>
+      groups.find((group) => group.questions.some((q) => q.id === id))!.id;
+    expect(home("conflict-1")).toBe(canReview ? "action" : "conflicts");
+    expect(home("answer-1")).toBe(canReview ? "action" : "answered");
+    expect(home("clarification")).toBe("clarifications");
+    expect(home("partial")).toBe("clarifications");
+  },
+);

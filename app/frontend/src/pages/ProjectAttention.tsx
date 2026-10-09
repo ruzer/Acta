@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { reviewStates } from "@requirements/contracts";
@@ -37,6 +37,16 @@ const taskCopy = {
   },
 };
 
+// Rows are revealed on demand so the DOM only holds what has been asked for.
+// Short lists are shown whole; long ones start at `step` and grow by `step`.
+const primaryPaging = { step: 25, whole: 30 };
+const secondaryPaging = { step: 50, whole: 60 };
+type Paging = typeof primaryPaging;
+type AttentionUi = {
+  open: Record<string, boolean>;
+  limit: Record<string, number>;
+};
+
 export function ProjectAttention({
   projectId,
   data,
@@ -49,12 +59,30 @@ export function ProjectAttention({
   const [params, setParams] = useSearchParams();
   const location = useLocation();
   const client = useQueryClient();
-  const disclosureKey = [
+  // Session-only presentation state, kept with the rest of the workbench
+  // context so returning from a review restores what was open and revealed.
+  const uiKey = ["workbench-context", projectId, "attention", "ui"];
+  const savedFocus = client.getQueryData<{ focusId?: string }>([
     "workbench-context",
     projectId,
     "attention",
-    "all-questions",
-  ];
+  ])?.focusId;
+  const [ui, setUi] = useState<AttentionUi>(
+    () => client.getQueryData<AttentionUi>(uiKey) ?? { open: {}, limit: {} },
+  );
+  const revealFocus = useRef<string | null>(null);
+  function rememberUi(next: AttentionUi) {
+    setUi(next);
+    client.setQueryData(uiKey, next);
+  }
+  useEffect(() => {
+    const id = revealFocus.current;
+    revealFocus.current = null;
+    if (id)
+      document
+        .querySelector<HTMLElement>(`[data-workbench-id="${id}"]`)
+        ?.focus();
+  }, [ui]);
   const clarifications = useAttentionClarifications(projectId, data, lifecycle);
   const invitations = useQuery(invitationQueryOptions(projectId));
   const [now, setNow] = useState(Date.now);
@@ -102,6 +130,11 @@ export function ProjectAttention({
     items,
     clarifications.data?.clarificationIds ?? [],
     canReview,
+  );
+  const evidenceIds = new Set(
+    clarifications.data?.reviewItems
+      .filter((item) => item.hasEvidence)
+      .map((item) => item.questionId),
   );
   const questionText = new Map(
     clarifications.data?.reviewItems.map((item) => [
@@ -155,8 +188,15 @@ export function ProjectAttention({
           </span>
           {clarificationReady &&
             clarifications.data?.clarificationIds.includes(q.id) && (
-              <span>Aclaraciones abiertas</span>
+              <StatusChip tone="warning" icon="help">
+                Aclaraciones abiertas
+              </StatusChip>
             )}
+          {evidenceIds.has(q.id) && (
+            <StatusChip tone="neutral" icon="paperclip">
+              Con evidencia
+            </StatusChip>
+          )}
         </div>
         {reason && <p className="ac-attention-reason">{reason}</p>}
         {q.conditionalWithoutCase && (
@@ -171,6 +211,70 @@ export function ProjectAttention({
           </Link>
         )}
       </QueueRow>
+    );
+  }
+  // The row the review was opened from lives in the first section that lists
+  // it; only that section is forced open / long enough, never the full list too.
+  const focusHome = savedFocus
+    ? [
+        ...groups.map((group) => ({ id: group.id, list: group.questions })),
+        { id: `filtered:${task ?? ""}:${status}`, list: items },
+        { id: "all", list: items },
+      ].find((section) => section.list.some((q) => q.id === savedFocus))?.id
+    : undefined;
+  function shownRows(id: string, list: typeof items, paging: Paging) {
+    const base =
+      ui.limit[id] ?? (list.length <= paging.whole ? list.length : paging.step);
+    // The row to restore focus to must be rendered when returning from a review.
+    const needed =
+      id === focusHome ? list.findIndex((q) => q.id === savedFocus) + 1 : 0;
+    return Math.min(list.length, Math.max(base, needed));
+  }
+  function isOpen(id: string, fallback: boolean) {
+    return ui.open[id] ?? (fallback || id === focusHome);
+  }
+  function setOpen(id: string, open: boolean, current: boolean) {
+    if (open !== current)
+      rememberUi({ ...ui, open: { ...ui.open, [id]: open } });
+  }
+  function reveal(
+    id: string,
+    list: typeof items,
+    shown: number,
+    paging: Paging,
+  ) {
+    revealFocus.current = list[shown]?.id ?? null;
+    rememberUi({
+      ...ui,
+      limit: { ...ui.limit, [id]: Math.min(list.length, shown + paging.step) },
+    });
+  }
+  function rowList(
+    id: string,
+    label: string,
+    list: typeof items,
+    paging: Paging,
+    render: (q: (typeof items)[number]) => ReactNode,
+  ) {
+    const shown = shownRows(id, list, paging);
+    const more = list.length - shown;
+    return (
+      <>
+        <ul aria-label={label}>{list.slice(0, shown).map(render)}</ul>
+        {more > 0 && (
+          <div className="ac-attention-more">
+            <p aria-live="polite">
+              Mostrando {shown} de {list.length}
+            </p>
+            <Button
+              tone="secondary"
+              onClick={() => reveal(id, list, shown, paging)}
+            >
+              Mostrar {Math.min(paging.step, more)} más
+            </Button>
+          </div>
+        )}
+      </>
     );
   }
   const allRows = (list: typeof items) =>
@@ -266,55 +370,109 @@ export function ProjectAttention({
                       ? taskLabels[task]
                       : reviewLabels[status as keyof typeof reviewLabels]}
                   </h2>
-                  <ul aria-label="Casos de atención">{allRows(items)}</ul>
+                  {rowList(
+                    `filtered:${task ?? ""}:${status}`,
+                    "Casos de atención",
+                    items,
+                    secondaryPaging,
+                    (q) => allRows([q])[0],
+                  )}
                 </section>
               ) : (
                 <>
-                  {groups.map((group) => (
-                    <section
-                      key={group.id}
-                      className={`ac-attention-group ac-attention-${group.id}`}
-                      aria-labelledby={`queue-${group.id}`}
-                    >
-                      <header>
-                        <h2 id={`queue-${group.id}`}>
-                          {group.turn ? (
-                            <StatusChip
-                              tone={group.id === "action" ? "info" : "warning"}
-                            >
-                              {group.label}
-                            </StatusChip>
-                          ) : (
-                            group.label
-                          )}
-                        </h2>
-                        <span>
-                          {group.questions.length}{" "}
-                          {group.questions.length === 1
-                            ? "pregunta"
-                            : "preguntas"}
-                        </span>
-                        {group.explanation && <p>{group.explanation}</p>}
-                      </header>
-                      <ul aria-label={group.label}>
-                        {group.questions.map((q) =>
-                          row(q, group.action(q), group.reason(q)),
+                  {groups.map((group) => {
+                    const open = isOpen(group.id, !group.collapsed);
+                    const paging = group.collapsed
+                      ? secondaryPaging
+                      : primaryPaging;
+                    const total = `${group.questions.length} ${
+                      group.questions.length === 1 ? "pregunta" : "preguntas"
+                    }`;
+                    const title = group.turn ? (
+                      <StatusChip
+                        tone={group.id === "action" ? "info" : "warning"}
+                      >
+                        {group.label}
+                      </StatusChip>
+                    ) : (
+                      group.label
+                    );
+                    const rows = (
+                      <>
+                        {group.explanation && (
+                          <p className="ac-attention-group-note">
+                            {group.explanation}
+                          </p>
                         )}
-                      </ul>
-                    </section>
-                  ))}
+                        {rowList(
+                          group.id,
+                          group.label,
+                          group.questions,
+                          paging,
+                          (q) => row(q, group.action(q), group.reason(q)),
+                        )}
+                      </>
+                    );
+                    return group.collapsed ? (
+                      <details
+                        key={group.id}
+                        className={`ac-attention-group ac-attention-fold ac-attention-${group.id}`}
+                        open={open}
+                        onToggle={(event) =>
+                          setOpen(group.id, event.currentTarget.open, open)
+                        }
+                      >
+                        <summary>
+                          <span className="ac-attention-fold-title">
+                            {title}
+                          </span>
+                          <span className="ac-attention-fold-count">
+                            {total}
+                          </span>
+                        </summary>
+                        {open && rows}
+                      </details>
+                    ) : (
+                      <section
+                        key={group.id}
+                        className={`ac-attention-group ac-attention-${group.id}`}
+                        aria-labelledby={`queue-${group.id}`}
+                      >
+                        <header>
+                          <h2 id={`queue-${group.id}`}>{title}</h2>
+                          <span>{total}</span>
+                          {group.explanation && <p>{group.explanation}</p>}
+                        </header>
+                        {rowList(
+                          group.id,
+                          group.label,
+                          group.questions,
+                          paging,
+                          (q) => row(q, group.action(q), group.reason(q)),
+                        )}
+                      </section>
+                    );
+                  })}
                   <details
-                    className="ac-attention-all"
-                    open={client.getQueryData<boolean>(disclosureKey) ?? false}
-                    onToggle={(event) => {
-                      client.setQueryData(
-                        disclosureKey,
+                    className="ac-attention-all ac-attention-fold"
+                    open={isOpen("all", false)}
+                    onToggle={(event) =>
+                      setOpen(
+                        "all",
                         event.currentTarget.open,
-                      );
-                    }}
+                        isOpen("all", false),
+                      )
+                    }
                   >
                     <summary>Todas las preguntas ({items.length})</summary>
-                    <ul aria-label="Casos de atención">{allRows(items)}</ul>
+                    {isOpen("all", false) &&
+                      rowList(
+                        "all",
+                        "Casos de atención",
+                        items,
+                        secondaryPaging,
+                        (q) => allRows([q])[0],
+                      )}
                   </details>
                 </>
               )}

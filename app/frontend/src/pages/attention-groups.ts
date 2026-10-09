@@ -9,14 +9,24 @@ export type AttentionGroup = {
   questions: Question[];
   action: (question: Question) => string;
   reason: (question: Question) => string;
+  /** Not actionable now: folded until asked for, but its count stays visible. */
+  collapsed?: boolean;
 };
 
-/** Presentation only: projected states and coverage remain authoritative. */
+/**
+ * Presentation only: projected states and coverage remain authoritative.
+ * Every question appears in exactly one group, the first that applies
+ * (conflict or answered, then open clarification, then waiting on others).
+ * Overlapping signals stay visible in the row and in the summary counts.
+ */
 export function attentionGroups(
   questions: Question[],
   clarificationIds: readonly string[],
   canReview: boolean,
 ): AttentionGroup[] {
+  const taken = new Set<string>();
+  const claim = (list: Question[]) =>
+    list.filter((q) => !taken.has(q.id) && !!taken.add(q.id));
   const conflicts = questions.filter((q) => q.status === "CONFLICT");
   const answered = questions.filter((q) => q.status === "ANSWERED");
   const pending = questions.filter(
@@ -40,7 +50,7 @@ export function attentionGroups(
           id: "action",
           label: "Te toca a ti",
           turn: "Te toca a ti",
-          questions: [...conflicts, ...answered],
+          questions: claim([...conflicts, ...answered]),
           action,
           reason,
         },
@@ -49,14 +59,14 @@ export function attentionGroups(
         {
           id: "conflicts",
           label: "Conflictos abiertos",
-          questions: conflicts,
+          questions: claim(conflicts),
           action,
           reason,
         },
         {
           id: "answered",
           label: "Listas para decidir",
-          questions: answered,
+          questions: claim(answered),
           action,
           reason,
         },
@@ -67,7 +77,9 @@ export function attentionGroups(
       label: "Aclaraciones abiertas",
       explanation:
         "Hay aclaraciones abiertas. Consulta el hilo para saber a quién corresponde continuar.",
-      questions: questions.filter((q) => clarificationIds.includes(q.id)),
+      questions: claim(
+        questions.filter((q) => clarificationIds.includes(q.id)),
+      ),
       action: () => "Ver aclaración",
       reason: () => "",
     },
@@ -77,8 +89,9 @@ export function attentionGroups(
         ? "En espera de otras personas"
         : "Aportaciones pendientes",
       ...(canReview ? { turn: "En espera de otras personas" as const } : {}),
-      questions: pending.filter(
-        (q) => q.requiredRespondents > q.submittedRespondents,
+      collapsed: true,
+      questions: claim(
+        pending.filter((q) => q.requiredRespondents > q.submittedRespondents),
       ),
       action: () => "Ver aportaciones",
       reason: (q) =>
@@ -87,7 +100,8 @@ export function attentionGroups(
     {
       id: "unassigned",
       label: "Sin participantes asignados",
-      questions: pending.filter((q) => q.requiredRespondents === 0),
+      collapsed: true,
+      questions: claim(pending.filter((q) => q.requiredRespondents === 0)),
       action: () => "Ver aportaciones",
       reason: () => "Sin participantes asignados",
     },
