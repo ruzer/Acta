@@ -318,7 +318,7 @@ test.describe("revisión con 0, 1, 3, 12 y 50 aportaciones", () => {
           expect(geometry.pane, "hay una aportación abierta").not.toBeNull();
           expect(
             geometry.pane!.top,
-            `la aportación relevante empieza dentro de la primera pantalla a 390px`,
+            "la aportación relevante empieza dentro de la primera pantalla a 390px",
           ).toBeLessThan(usable);
         }
         records.push({ id: `UX06-${key}`, width, ...geometry });
@@ -329,6 +329,29 @@ test.describe("revisión con 0, 1, 3, 12 y 50 aportaciones", () => {
           ).toHaveCount(0);
           await expect(page.getByText("Más acciones")).toBeVisible();
         } else await expect(page.getByLabel("Otras acciones")).toBeVisible();
+        // An open clarification blocks recording a decision (the server answers
+        // 409), so neither the select nor the menu offers it.
+        if (key !== "zero" && key !== "one") {
+          const offered =
+            width < 760
+              ? await (async () => {
+                  await page.getByText("Más acciones").click();
+                  const items = await page
+                    .locator(".ac-action-menu li button")
+                    .allTextContents();
+                  await page.keyboard.press("Escape");
+                  return items;
+                })()
+              : await page
+                  .getByLabel("Otras acciones")
+                  .locator("option")
+                  .allTextContents();
+          expect(
+            offered.length,
+            `acciones secundarias a ${width}px`,
+          ).toBeGreaterThan(0);
+          expect(offered.join(" | ")).not.toContain("Registrar decisión");
+        }
         await checked(page, `UX06-${key}`, width);
         if (width <= 899)
           expect(
