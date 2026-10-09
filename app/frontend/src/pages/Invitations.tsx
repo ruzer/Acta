@@ -1,3 +1,5 @@
+import { StatusChip } from "../ui/semantic";
+import { ParticipantIcon } from "./ParticipantIcon";
 import { ProjectWorkbench } from "./ProjectWorkbench";
 import { expiringInvitations, invitationQueryOptions } from "./invitation-data";
 import { useEffect, useRef, useState } from "react";
@@ -268,7 +270,7 @@ export function CreateInvitation({
                   />
                 </>
               )}
-              <p className="hint">
+              <p className="ac-note">
                 Los datos describen al destinatario previsto. El enlace no
                 verifica su identidad ni se envía por correo automáticamente.
               </p>
@@ -471,7 +473,7 @@ export function CreateInvitation({
                     : "Sin acceso a archivos"}
                 </dd>
               </dl>
-              <p>
+              <p className="ac-note">
                 Se creará un enlace privado para compartir manualmente con esta
                 persona. No se enviará ningún correo.
               </p>
@@ -484,6 +486,9 @@ export function CreateInvitation({
             </>
           )}
           <div className="actions next-invitation-step-actions">
+            <Button tone="secondary" disabled={busy} onClick={onClose}>
+              Cancelar
+            </Button>
             {step > 0 && (
               <Button
                 tone="secondary"
@@ -508,9 +513,6 @@ export function CreateInvitation({
                 : step === 3
                   ? "Crear enlace privado"
                   : "Continuar"}
-            </Button>
-            <Button tone="secondary" disabled={busy} onClick={onClose}>
-              Cancelar
             </Button>
           </div>
         </form>
@@ -587,27 +589,29 @@ export function Invitations() {
         projectName={project?.name ?? "Proyecto"}
         role={project?.role}
         active="invitations"
+        lead="Enlaces para que personas externas respondan preguntas concretas."
+        actions={
+          canCreate && (
+            <Button ref={createTrigger} onClick={() => setCreating(true)}>
+              <ParticipantIcon name="plus" />
+              Crear invitación
+            </Button>
+          )
+        }
       />
-      <h2>Invitaciones mediante enlace</h2>
-      <p>
-        Una invitación reúne preguntas para una persona externa. Sus envíos se
-        conservan por separado de otras invitaciones y de participantes con
-        cuenta.
-      </p>
-      <p>
-        «Abrió» registra el uso del enlace, no una comprobación de identidad.
-        Renovar cambia el enlace y cierra los accesos anteriores; revocar
-        conserva las respuestas enviadas.
-      </p>
-      {canCreate && (
-        <Button
-          className="next-invitation-create-trigger"
-          ref={createTrigger}
-          onClick={() => setCreating(true)}
-        >
-          Crear invitación
-        </Button>
-      )}
+      <details className="ac-help">
+        <summary>Cómo leer el estado</summary>
+        <p>
+          Una invitación reúne preguntas para una persona externa. Sus envíos se
+          conservan por separado de otras invitaciones y de participantes con
+          cuenta.
+        </p>
+        <p>
+          «Abrió» registra el uso del enlace, no una comprobación de identidad.
+          Renovar cambia el enlace y cierra los accesos anteriores; revocar
+          conserva las respuestas enviadas.
+        </p>
+      </details>
       {error && <Alert error>{error}</Alert>}
       {admin && policy.data && (
         <section aria-label="Permiso para invitaciones no nominales">
@@ -646,20 +650,22 @@ export function Invitations() {
           />
         </section>
       )}
-      <Select
-        label="Vigencia"
-        value={expires ? "7" : ""}
-        onChange={(e) => {
-          const next = new URLSearchParams(params);
-          if (e.target.value) next.set("expiresWithin", "7");
-          else next.delete("expiresWithin");
-          next.delete("page");
-          setParams(next);
-        }}
-      >
-        <option value="">Todas las invitaciones</option>
-        <option value="7">Vencen en los próximos 7 días</option>
-      </Select>
+      <div className="ac-list-toolbar">
+        <Select
+          label="Vigencia"
+          value={expires ? "7" : ""}
+          onChange={(e) => {
+            const next = new URLSearchParams(params);
+            if (e.target.value) next.set("expiresWithin", "7");
+            else next.delete("expiresWithin");
+            next.delete("page");
+            setParams(next);
+          }}
+        >
+          <option value="">Todas las invitaciones</option>
+          <option value="7">Vencen en los próximos 7 días</option>
+        </Select>
+      </div>
       {rows.isPending ? (
         <LoadingState />
       ) : rows.error ? (
@@ -675,13 +681,13 @@ export function Invitations() {
             {items.map((row) => (
               <li key={row.id}>
                 <div className="next-invitation-recipient">
-                  <h3>
+                  <h2>
                     {row.nonNominal
                       ? "Invitación no nominal"
                       : row.identity.name ||
                         row.identity.email ||
                         "Destinatario previsto"}
-                  </h3>
+                  </h2>
                   <p>{row.label}</p>
                   {row.identity.name && row.identity.email && (
                     <p>{row.identity.email}</p>
@@ -696,6 +702,13 @@ export function Invitations() {
                   <dt>Envíos</dt>
                   <dd>
                     {row.submitted} de {row.total} preguntas con envío
+                    <span className="ac-mini-bar" aria-hidden="true">
+                      <span
+                        style={{
+                          width: `${row.total ? (row.submitted / row.total) * 100 : 0}%`,
+                        }}
+                      />
+                    </span>
                   </dd>
                 </dl>
                 <dl>
@@ -703,16 +716,28 @@ export function Invitations() {
                   <dd>{formatDate(row.expiresAt)}</dd>
                   <dt>Estado del enlace</dt>
                   <dd>
-                    {row.revokedAt
-                      ? "Revocado"
-                      : new Date(row.expiresAt).getTime() <= now
-                        ? "Expirado"
-                        : "Activo"}
+                    {row.revokedAt ? (
+                      <StatusChip tone="neutral" icon="info">
+                        Revocado
+                      </StatusChip>
+                    ) : new Date(row.expiresAt).getTime() <= now ? (
+                      <StatusChip tone="neutral" icon="clock">
+                        Expirado
+                      </StatusChip>
+                    ) : (
+                      <StatusChip tone="success" icon="check">
+                        Activo
+                      </StatusChip>
+                    )}
                   </dd>
                 </dl>
                 <dl>
                   <dt>Actividad</dt>
-                  <dd>{labels[row.status]}</dd>
+                  <dd>
+                    <StatusChip tone="info" icon="send">
+                      {labels[row.status]}
+                    </StatusChip>
+                  </dd>
                   <dt>Primer acceso</dt>
                   <dd>
                     {row.firstOpenedAt
@@ -739,23 +764,25 @@ export function Invitations() {
               </li>
             ))}
           </ul>
-          <div className="actions">
-            <Button
-              tone="secondary"
-              disabled={currentPage === 1}
-              onClick={() => setPage(currentPage - 1)}
-            >
-              Anterior
-            </Button>
-            <span>Página {currentPage}</span>
-            <Button
-              tone="secondary"
-              disabled={currentPage * 25 >= filtered.length}
-              onClick={() => setPage(currentPage + 1)}
-            >
-              Siguiente
-            </Button>
-          </div>
+          {filtered.length > 25 && (
+            <div className="actions">
+              <Button
+                tone="secondary"
+                disabled={currentPage === 1}
+                onClick={() => setPage(currentPage - 1)}
+              >
+                Anterior
+              </Button>
+              <span>Página {currentPage}</span>
+              <Button
+                tone="secondary"
+                disabled={currentPage * 25 >= filtered.length}
+                onClick={() => setPage(currentPage + 1)}
+              >
+                Siguiente
+              </Button>
+            </div>
+          )}
         </>
       )}
       {creating &&

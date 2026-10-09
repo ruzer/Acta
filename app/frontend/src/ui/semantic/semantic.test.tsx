@@ -15,6 +15,13 @@ import {
   ContributionPane,
   EvidenceFile,
   ThreadInset,
+  ThreadMessage,
+  Timeline,
+  ProgressCard,
+  Callout,
+  NextSteps,
+  FactGrid,
+  RegisterRow,
   ComparisonTable,
   DecisionSheet,
   QueueRow,
@@ -183,7 +190,10 @@ it("la comparación tiene campos únicos y encabezados explícitos", () => {
   render(
     <ComparisonTable
       caption="Contraste de aportaciones"
-      columns={["Postura A", "Postura B"]}
+      columns={[
+        { key: "Postura A", head: "Postura A", label: "Postura A · Lucía" },
+        { key: "Postura B", head: "Postura B" },
+      ]}
       rows={[
         { id: "answer", label: "Respuesta", values: ["Primera", "Segunda"] },
         {
@@ -202,6 +212,14 @@ it("la comparación tiene campos únicos y encabezados explícitos", () => {
     within(table).getByRole("rowheader", { name: "Respuesta" }),
   ).toHaveAttribute("scope", "row");
   expect(within(table).getAllByText("Respuesta")).toHaveLength(1);
+  // The columns carry their own names; each value knows its column for the stacked phone layout.
+  expect(
+    within(table).getByRole("columnheader", { name: "Postura A · Lucía" }),
+  ).toBeVisible();
+  expect(within(table).getByText("Segunda")).toHaveAttribute(
+    "data-column",
+    "Postura B",
+  );
 });
 it("contenedores documentales y de soporte conservan contenido y nombres semánticos", () => {
   render(
@@ -212,10 +230,14 @@ it("contenedores documentales y de soporte conservan contenido y nombres semánt
       >
         <p>Respuesta completa</p>
         <ThreadInset title="Aclaración">
-          <p>Intercambio conservado</p>
+          <li>Intercambio conservado</li>
         </ThreadInset>
       </ContributionPane>
-      <DecisionSheet title="Decisión vigente" footer="Fuentes conservadas">
+      <DecisionSheet
+        label="Decisión vigente"
+        kicker="Decisión validada"
+        footer="Fuentes conservadas"
+      >
         <p>Resultado</p>
       </DecisionSheet>
       <Receipt title="Respuesta enviada">Envío registrado</Receipt>
@@ -384,4 +406,189 @@ it("UX-06: un indicador de pestaña es decorativo y no cambia el nombre accesibl
   expect(
     screen.getByRole("tab", { name: "Aportaciones (3)" }),
   ).not.toHaveAttribute("aria-description");
+});
+
+it("un hilo distingue quién pregunta y quién responde con palabras y muestra el turno", () => {
+  render(
+    <ThreadInset
+      title="Aclaración · envío #1"
+      status={<span>Lista para revisar</span>}
+      turn="Te toca a ti: cierra la aclaración o pregunta de nuevo."
+      actions={<button type="button">Cerrar aclaración</button>}
+    >
+      <ThreadMessage
+        from="asks"
+        author="Elena Rangel"
+        date="26 sep 2026"
+        dateTime="2026-09-26T11:00:00.000Z"
+      >
+        ¿Aplica a bienes de importación?
+      </ThreadMessage>
+      <ThreadMessage from="answers" author="Paula Quintana" date="27 sep 2026">
+        Sí, aplica.
+      </ThreadMessage>
+    </ThreadInset>,
+  );
+  const region = screen.getByRole("region", { name: "Aclaración · envío #1" });
+  const messages = within(region).getAllByRole("listitem");
+  expect(messages).toHaveLength(2);
+  expect(within(messages[0]!).getByText("Pregunta")).toBeVisible();
+  expect(within(messages[1]!).getByText("Respuesta")).toBeVisible();
+  expect(within(region).getByText(/Te toca a ti/)).toBeVisible();
+  expect(
+    within(region).getByRole("button", { name: "Cerrar aclaración" }),
+  ).toBeVisible();
+});
+it("la cronología es una lista ordenada con actor, texto y fecha", () => {
+  render(
+    <Timeline
+      label="Cronología de la pregunta"
+      events={[
+        {
+          id: "1",
+          icon: "send",
+          actor: "Mateo Ibarra",
+          text: "envió su aportación.",
+          date: "22 sep 2026",
+          dateTime: "2026-09-22T10:15:00.000Z",
+        },
+        {
+          id: "2",
+          icon: "flag",
+          tone: "danger",
+          actor: "Elena Rangel",
+          text: "registró un conflicto entre aportaciones.",
+          date: "27 sep 2026",
+          dateTime: "2026-09-27T12:00:00.000Z",
+        },
+      ]}
+    />,
+  );
+  const list = screen.getByRole("list", { name: "Cronología de la pregunta" });
+  const items = within(list).getAllByRole("listitem");
+  expect(items).toHaveLength(2);
+  expect(items[0]).toHaveTextContent("Mateo Ibarra envió su aportación.");
+  expect(within(items[1]!).getByText("27 sep 2026")).toHaveAttribute(
+    "datetime",
+    "2026-09-27T12:00:00.000Z",
+  );
+});
+it("la hoja de decisión nombra el registro y deja el pie para identificadores", () => {
+  render(
+    <DecisionSheet
+      label="Decisión vigente"
+      kicker="Decisión validada"
+      header={<span>Vigente</span>}
+      footer={<p>Referencia del registro: abc</p>}
+    >
+      <p>Se decide algo</p>
+    </DecisionSheet>,
+  );
+  const sheet = screen.getByRole("article", { name: "Decisión vigente" });
+  expect(
+    within(sheet).getByRole("heading", { name: "Decisión validada" }),
+  ).toBeVisible();
+  const foot = sheet.querySelector("footer")!;
+  expect(foot).toHaveTextContent("Referencia del registro: abc");
+  // The identifier is below the result, never above it.
+  expect(
+    sheet.textContent!.indexOf("Se decide algo") <
+      sheet.textContent!.indexOf("Referencia del registro"),
+  ).toBe(true);
+});
+
+it("el avance se dice con palabras y la barra lo repite con su nombre; los borradores no cuentan como enviados", () => {
+  render(
+    <ProgressCard sent={3} total={8} drafts={1}>
+      Guardar solo conserva un borrador.
+    </ProgressCard>,
+  );
+  expect(screen.getByText("3")).toBeVisible();
+  expect(screen.getByText(/de 8 preguntas enviadas/)).toBeVisible();
+  expect(
+    screen.getByRole("img", {
+      name: "3 de 8 preguntas enviadas; 1 en borrador",
+    }),
+  ).toBeVisible();
+  expect(screen.getByText("Guardar solo conserva un borrador.")).toBeVisible();
+});
+it("la tarjeta de atención es un solo enlace a donde se atiende", () => {
+  render(
+    <Callout
+      title="Una aclaración espera tu respuesta"
+      action={
+        <a href="/aclaracion" aria-label="Responder aclaración">
+          →
+        </a>
+      }
+    >
+      ¿Quién autoriza?
+    </Callout>,
+  );
+  expect(
+    screen.getByRole("link", { name: "Responder aclaración" }),
+  ).toHaveAttribute("href", "/aclaracion");
+  expect(
+    screen.getByRole("heading", { name: "Una aclaración espera tu respuesta" }),
+  ).toBeVisible();
+});
+it("«Qué sigue» numera los pasos y anuncia su estado sin depender del color", () => {
+  render(
+    <NextSteps
+      steps={[
+        {
+          id: "a",
+          state: "done",
+          title: "Enviaste tu respuesta",
+          detail: "1 oct",
+        },
+        { id: "b", state: "current", title: "Pidieron una aclaración" },
+        { id: "c", state: "todo", title: "Decisión validada" },
+      ]}
+    >
+      <p>Vuelve a esta página para ver novedades.</p>
+    </NextSteps>,
+  );
+  const region = screen.getByRole("complementary", { name: "Qué sigue" });
+  const items = within(region).getAllByRole("listitem");
+  expect(items).toHaveLength(3);
+  expect(items[0]).toHaveTextContent("Enviaste tu respuesta (hecho)");
+  expect(items[1]).toHaveTextContent("Pidieron una aclaración (ahora)");
+  expect(items[2]).toHaveTextContent("Decisión validada (pendiente)");
+  expect(
+    within(region).getByText("Vuelve a esta página para ver novedades."),
+  ).toBeVisible();
+});
+it("los datos de un vistazo son pares etiqueta/valor, cada uno con su glifo", () => {
+  render(
+    <FactGrid
+      facts={[
+        { id: "q", icon: "list", label: "Preguntas", value: 3 },
+        { id: "v", icon: "clock", label: "Vence", value: "14 oct 2026" },
+      ]}
+    />,
+  );
+  expect(screen.getByText("Preguntas").closest("div")).toHaveTextContent("3");
+  expect(screen.getByText("Vence").closest("div")).toHaveTextContent(
+    "14 oct 2026",
+  );
+});
+it("una línea de registro lee como documento: referencia, título con su nivel, meta y estado", () => {
+  render(
+    <ul>
+      <RegisterRow
+        level={2}
+        reference="ADQ-05.01"
+        title={<a href="/decision">Plazo máximo de pago</a>}
+        meta="Pagos · Finanzas"
+        status={<span>Vigente</span>}
+      />
+    </ul>,
+  );
+  expect(
+    screen.getByRole("heading", { level: 2, name: "Plazo máximo de pago" }),
+  ).toBeVisible();
+  expect(screen.getByText("ADQ-05.01")).toBeVisible();
+  expect(screen.getByText("Pagos · Finanzas")).toBeVisible();
+  expect(screen.getByText("Vigente")).toBeVisible();
 });

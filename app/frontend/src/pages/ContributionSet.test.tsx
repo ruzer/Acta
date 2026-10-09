@@ -12,7 +12,11 @@ import { reviewDetailView, type ReviewDetail } from "@requirements/contracts";
 import fixture from "../../../../tests/fixtures/analyst-visual.json";
 import { ContributionSet } from "./ContributionSet";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createMemoryRouter, RouterProvider } from "react-router-dom";
+import {
+  MemoryRouter,
+  createMemoryRouter,
+  RouterProvider,
+} from "react-router-dom";
 import * as apiModule from "../api";
 import { ReviewDetail as ReviewDetailPage } from "./ReviewDetail";
 
@@ -83,24 +87,63 @@ it("volver desde una aportación abierta en Cuestionario conserva el destino del
 
 it("0 aportaciones distingue espera, ausencia de asignación e historia", () => {
   const empty = data(0);
-  const { rerender } = render(<ContributionSet data={empty} />);
-  expect(screen.getByRole("heading", { name: "0 aportaciones" })).toBeVisible();
+  const set = (detail: ReviewDetail) => (
+    <MemoryRouter>
+      <ContributionSet data={detail} />
+    </MemoryRouter>
+  );
+  const { rerender } = render(set(empty));
+  // CP5: the empty state says it once; the count heading is left to assistive technology.
+  const heading = screen.getByRole("heading", { name: "0 aportaciones" });
+  expect(heading.closest(".next-contributions-heading")).toHaveClass("sr-only");
   expect(
     screen.getByText(/Los borradores privados no se muestran/),
   ).toBeVisible();
-  rerender(<ContributionSet data={{ ...empty, participants: [] }} />);
+  rerender(set({ ...empty, participants: [] }));
   expect(screen.getByText(/no tiene participantes asignados/)).toBeVisible();
   rerender(
-    <ContributionSet
-      data={{
-        ...empty,
-        submissions: [{ ...data(1).submissions[0]!, current: false }],
-      }}
-    />,
+    set({
+      ...empty,
+      submissions: [{ ...data(1).submissions[0]!, current: false }],
+    }),
   );
   expect(screen.getByText(/Hay envíos históricos/)).toBeVisible();
   expect(screen.getByText("Envíos históricos (1)")).toBeVisible();
   expect(screen.getByText("Contexto completo 1")).not.toBeVisible();
+});
+it("UX-17: sin aportaciones el equipo analista ve el siguiente paso, con enlaces a capacidades existentes; el lector no", () => {
+  const empty = data(0);
+  const { rerender } = render(
+    <MemoryRouter>
+      <ContributionSet data={{ ...empty, participants: [] }} />
+    </MemoryRouter>,
+  );
+  expect(
+    screen.getByRole("link", {
+      name: "Asignar participantes en el cuestionario",
+    }),
+  ).toHaveAttribute("href", `/projects/${empty.projectId}/editor`);
+  expect(
+    screen.getByRole("link", { name: "Crear invitación" }),
+  ).toHaveAttribute("href", `/projects/${empty.projectId}/invitations`);
+  // With people assigned there is nobody to assign: only the invitation remains.
+  rerender(
+    <MemoryRouter>
+      <ContributionSet data={empty} />
+    </MemoryRouter>,
+  );
+  expect(
+    screen.queryByRole("link", {
+      name: "Asignar participantes en el cuestionario",
+    }),
+  ).not.toBeInTheDocument();
+  // A read-only reader cannot act on either.
+  rerender(
+    <MemoryRouter>
+      <ContributionSet data={{ ...empty, canReview: false }} />
+    </MemoryRouter>,
+  );
+  expect(screen.queryByRole("link")).not.toBeInTheDocument();
 });
 
 it("1 aportación abre directamente el envío vigente y conserva evidencia", () => {
@@ -535,4 +578,17 @@ it("UX-06: sin relación con una aportación vigente nada cambia en pantallas es
     screen.getByRole("list", { name: "Aportaciones vigentes" }),
   ).toBeVisible();
   expect(screen.queryByRole("article")).not.toBeInTheDocument();
+});
+
+it("CP7: junto a la aportación abierta no se repite que está vigente ni que no tiene archivos", () => {
+  wide();
+  render(<ContributionSet data={data(1)} />);
+  const pane = screen.getByRole("article", { name: "Actor 1" });
+  // «Vigente» is said once, in the meta line; the evidence section says the rest.
+  expect(within(pane).getAllByText(/vigente/i)).toHaveLength(1);
+  expect(within(pane).queryByText(/Enviada · vigente/)).not.toBeInTheDocument();
+  expect(
+    within(pane).queryByText("Sin archivos adjuntos"),
+  ).not.toBeInTheDocument();
+  expect(within(pane).getByText("Sin evidencia adjunta.")).toBeVisible();
 });

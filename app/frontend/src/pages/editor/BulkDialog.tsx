@@ -378,8 +378,9 @@ export function BulkDialog({
                 </p>
               </>
             )}
+            {/* UX-14: nothing to apply is information, not an error; only blocks are errors. */}
             {!preview.canConfirm && (
-              <Alert error>
+              <Alert error={preview.counts.blocked > 0}>
                 {preview.counts.blocked
                   ? "Hay errores que debes resolver. No se aplicará ningún cambio."
                   : "No hay cambios que aplicar."}

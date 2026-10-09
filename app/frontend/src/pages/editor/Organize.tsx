@@ -1,3 +1,4 @@
+import { ParticipantIcon } from "../ParticipantIcon";
 import { CreateInvitation } from "../Invitations";
 import {
   Fragment,
@@ -770,10 +771,11 @@ export function Organize(
                           <div className="an-question-heading">
                             {children && (
                               <button
-                                className="an-collapse"
+                                className={`an-collapse${groupCollapsed && !search.trim() ? "" : " an-collapse-open"}`}
                                 aria-expanded={
                                   !groupCollapsed || !!search.trim()
                                 }
+                                title={`${groupCollapsed && !search.trim() ? "Expandir" : "Contraer"} seguimientos`}
                                 aria-label={`${groupCollapsed && !search.trim() ? "Expandir" : "Contraer"} seguimientos de ${q.title}`}
                                 disabled={!!search.trim()}
                                 onClick={() => {
@@ -785,7 +787,7 @@ export function Organize(
                                   });
                                 }}
                               >
-                                {groupCollapsed && !search.trim() ? "+" : "−"}
+                                <ParticipantIcon name="chevron" />
                               </button>
                             )}
                             <button

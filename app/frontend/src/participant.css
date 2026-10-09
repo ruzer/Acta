@@ -1,80 +1,76 @@
-/* Acta participant variant. These tokens and selectors never restyle other roles. */
+/*
+ * Participant screens (Direction C). They use the shared tokens and semantic
+ * components; this sheet only holds what is specific to the participant
+ * journey: the top bar, the reading column and the answer card. It never
+ * restyles other roles.
+ */
 .acta-participant {
-  --ink: #1b1d22;
-  --ink-2: #5b5f6b;
-  --muted: #5b5f6b;
-  --paper: #f5f3f0;
-  --surface: #fff;
-  --surface-2: #edebe7;
-  --border: #dedbd5;
-  --border-strong: #c7c3bc;
-  --line: var(--border);
-  --accent: var(--installation-accent, #2b4d7c);
-  --primary: var(--accent);
-  --accent-strong: #1e3a5c;
-  --accent-soft: #e4eaf1;
-  --on-accent: #ffffff;
-  --teal: #18675f;
-  --teal-soft: #dceeec;
-  --amber: #805508;
-  --amber-soft: #f6ecd4;
-  --forest: #356842;
-  --forest-soft: #e4efe6;
-  --terracotta: #a8503b;
-  --font-display: var(--ac-font-ui);
-  --font-body: var(--ac-font-ui);
-  --motion-fast: 120ms;
-  --motion-base: 180ms;
-  --motion-slow: 240ms;
-  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ink: var(--ac-ink);
+  --ink-2: var(--ac-ink-2);
+  --muted: var(--ac-muted);
+  --paper: var(--ac-bg);
+  --surface: var(--ac-surface);
+  --surface-2: var(--ac-surface-2);
+  --border: var(--ac-line);
+  --border-strong: var(--ac-line-2);
+  --line: var(--ac-line);
+  --accent: var(--ac-accent);
+  --primary: var(--ac-accent);
+  --accent-strong: var(--ac-accent-hover);
+  --accent-soft: var(--ac-accent-weak);
+  --on-accent: #fff;
   min-height: 100vh;
-  background: var(--paper);
-  color: var(--ink);
-  font: 14px/1.5 var(--font-body);
+  background: var(--ac-bg);
+  color: var(--ac-ink);
+  font: var(--ac-text-body) / 1.55 var(--ac-font-ui);
   -webkit-font-smoothing: antialiased;
 }
 .acta-participant h1,
 .acta-participant h2,
 .acta-participant h3 {
-  font-family: var(--font-display);
-  letter-spacing: -0.01em;
-  text-wrap: balance;
+  font-family: var(--ac-font-ui);
 }
 .acta-participant h1 {
-  font-size: 22px;
-  font-weight: 800;
-  line-height: 1.4;
-  margin: 0 0 4px;
+  margin: 0 0 8px;
+  font-size: var(--ac-text-title);
+  font-weight: 600;
+  line-height: 1.25;
 }
 .acta-participant h2 {
-  font-size: 16px;
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 600;
   line-height: 1.4;
-  font-weight: 800;
 }
 .acta-participant h3 {
-  font-size: 13.5px;
-}
-.acta-participant p {
-  line-height: 1.5;
+  font-size: var(--ac-text-body);
 }
 .acta-participant a {
-  color: var(--accent);
+  color: var(--ac-accent);
 }
 .acta-participant .hint,
 .acta-participant .muted {
-  font-size: 12px;
-  color: var(--ink-2);
+  color: var(--ac-muted);
+  font-size: var(--ac-text-meta);
 }
 .acta-participant .participant-content {
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto;
-  padding: 28px 20px 80px;
+  padding: 32px 20px 80px;
   min-height: calc(100vh - 56px);
 }
+.acta-participant .participant-content:has(.participant-wide) {
+  max-width: 1008px;
+}
 .acta-participant .participant-page {
+  display: grid;
+  gap: 16px;
   width: 100%;
   max-width: none;
   margin: 0;
+}
+.acta-participant .participant-page > * {
+  margin-block: 0;
 }
 .participant-icon {
   width: 16px;
@@ -82,261 +78,368 @@
   flex: none;
   vertical-align: middle;
 }
+
+/* ---- Top bar ---- */
 .acta-participant .participant-topbar {
   min-height: 56px;
   display: flex;
   align-items: center;
-  padding: 0 20px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-  gap: 14px;
+  gap: 16px;
+  padding: 0 24px;
+  background: var(--ac-surface);
+  border-bottom: 1px solid var(--ac-line);
 }
 .participant-brand,
 .participant-back {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 13.5px;
-  min-height: 44px;
   flex-shrink: 0;
+  min-height: 44px;
+  font-size: var(--ac-text-ui);
+  font-weight: 600;
+  text-decoration: none;
+}
+.participant-back {
+  padding-right: 16px;
+  border-right: 1px solid var(--ac-line);
 }
 .participant-brand > span {
   display: grid;
   place-items: center;
   width: 28px;
   height: 28px;
-  background: var(--accent);
-  color: var(--on-accent);
+  color: #fff;
+  background: var(--ac-ink);
   border-radius: 6px;
 }
 .acta-participant .participant-brand {
-  font-family: var(--font-display);
-  font-weight: 800;
-  color: var(--ink);
+  color: var(--ac-ink);
+  font-weight: 700;
 }
 .participant-project-name {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--ac-text-body);
+  font-weight: 600;
   overflow-wrap: anywhere;
 }
 .participant-header-context {
   margin-left: auto;
-  color: var(--ink-2);
-  font-size: 12px;
+  color: var(--ac-muted);
+  font-size: var(--ac-text-meta);
 }
 .participant-account {
-  margin-left: auto;
   position: relative;
-  font-size: 13px;
+  margin: 0 0 0 auto;
+  padding: 0;
+  font-size: var(--ac-text-ui);
 }
 .participant-account > summary {
   display: flex;
-  gap: 10px;
   align-items: center;
-  cursor: pointer;
+  gap: 10px;
+  min-width: 44px;
   min-height: 44px;
+  padding: 0;
   font-weight: 600;
+  cursor: pointer;
 }
 .participant-avatar {
   display: grid;
   place-items: center;
-  background: var(--surface-2);
-  border-radius: 50%;
   width: 28px;
   height: 28px;
-  font-size: 11px;
+  background: var(--ac-accent-weak);
+  border-radius: 50%;
+  font-size: var(--ac-text-overline);
 }
 .participant-account > div {
   position: absolute;
   right: 0;
   top: 46px;
   z-index: 10;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow: 0 4px 14px -2px #1414191a;
-  padding: 12px;
-  min-width: 180px;
   display: grid;
   gap: 12px;
-  border-radius: 8px;
+  min-width: 180px;
+  padding: 12px;
+  background: var(--ac-surface);
+  border: 1px solid var(--ac-line);
+  border-radius: var(--ac-radius-control);
+  box-shadow: var(--ac-shadow-dialog);
 }
-.participant-subtitle {
-  font-size: 13px;
-  color: var(--ink-2);
-  margin: 0 0 20px;
-}
-.participant-welcome {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 22px;
-  margin-bottom: 20px;
-}
-.participant-summary {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
-  margin: 0 0 16px;
-}
-.participant-summary > div {
-  display: flex;
-  flex-direction: column-reverse;
-}
-.participant-summary dt {
-  font-size: 11px;
-  color: var(--ink-2);
-  line-height: 1.3;
-  margin-top: 2px;
-}
-.participant-summary dd {
-  margin: 0;
-  font: 800 22px/1.5 var(--font-display);
-  font-variant-numeric: tabular-nums;
-}
-.participant-summary > div:nth-child(2) dd {
-  color: var(--accent);
-}
-.participant-summary > div:nth-child(3) dd {
-  color: var(--amber);
-}
-.participant-summary > div:nth-child(4) dd {
-  color: var(--teal);
-}
+
+/* ---- Buttons and controls ---- */
 .acta-participant .button {
-  font: 600 13.5px/1.2 var(--font-body);
-  min-height: 36px;
-  padding: 8px 14px;
-  border-radius: 6px;
-  gap: 7px;
+  min-height: 44px;
+  padding: 8px 16px;
+  border-radius: var(--ac-radius-control);
+  font: 600 var(--ac-text-ui) / 1.2 var(--ac-font-ui);
   box-shadow: none;
-  transition:
-    background var(--motion-fast) var(--ease),
-    border-color var(--motion-fast) var(--ease);
   text-decoration: none;
 }
 .acta-participant .button.primary {
-  background: var(--accent);
-  color: var(--on-accent);
+  color: #fff;
+  background: var(--ac-accent);
   border: 1px solid transparent;
 }
 .acta-participant .button.primary:hover:not(:disabled) {
-  background: var(--accent-strong);
+  background: var(--ac-accent-hover);
 }
 .acta-participant .button.secondary {
-  background: var(--surface);
-  color: var(--ink);
-  border: 1px solid var(--border-strong);
-}
-.acta-participant .button.secondary:hover:not(:disabled) {
-  background: var(--surface-2);
-}
-.acta-participant .participant-continue {
-  width: 100%;
-}
-.acta-participant .participant-save-hint {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  font-size: 12px;
-  color: var(--ink-2);
-  margin: 14px 0 0;
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
-}
-.participant-all-done {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--forest);
-  font-size: 13px;
-  margin: 0;
-}
-.participant-project {
-  margin-top: 28px;
-}
-.participant-project h2 {
-  margin: 0 0 10px;
-}
-.participant-project h2 a {
-  color: inherit;
-  text-decoration: none;
+  color: var(--ac-ink);
+  background: var(--ac-surface);
+  border: 1px solid var(--ac-line-2);
 }
 .acta-participant .participant-text-button {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-height: 44px;
+  padding: 0;
+  color: var(--ac-accent);
   background: none;
   border: 0;
-  color: var(--accent);
-  font: 600 13.5px var(--font-body);
-  padding: 0;
-  min-height: 36px;
+  font: 600 var(--ac-text-ui) var(--ac-font-ui);
   text-align: left;
 }
-.participant-tools-toggle {
+.acta-participant .field {
+  margin: 0 0 16px;
+}
+.acta-participant .field > label {
+  margin-bottom: 6px;
+  color: var(--ac-ink);
+  font-size: var(--ac-text-ui);
+  font-weight: 600;
+}
+.acta-participant .field .hint {
+  margin: 6px 0 0;
+}
+.acta-participant input:not([type="checkbox"]):not([type="radio"]),
+.acta-participant textarea,
+.acta-participant select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  color: var(--ac-ink);
+  background: var(--ac-surface);
+  border: 1px solid var(--ac-line-2);
+  border-radius: var(--ac-radius-control);
+  font: 400 var(--ac-text-body) / 1.5 var(--ac-font-ui);
+}
+.acta-participant textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+.acta-participant input[type="date"],
+.acta-participant input[inputmode="decimal"] {
+  max-width: 240px;
+}
+.acta-participant fieldset {
+  min-width: 0;
+  margin: 0 0 16px;
+  padding: 0;
+  border: 0;
+}
+.acta-participant .formal-contribution {
+  margin: 0;
+}
+.acta-participant legend {
+  margin-bottom: 6px;
+  padding: 0;
+  color: var(--ac-ink);
+  font-size: var(--ac-text-ui);
+  font-weight: 600;
+}
+.acta-participant .check {
+  display: flex;
+  gap: 10px;
+  min-height: 44px;
+  margin: 0 0 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--ac-line-2);
+  border-radius: var(--ac-radius-control);
+  background: var(--ac-surface);
+  font-size: var(--ac-text-body);
+  cursor: pointer;
+}
+.acta-participant .check:has(input:checked) {
+  color: var(--ac-accent);
+  background: var(--ac-accent-weak);
+  border-color: var(--ac-accent);
+  font-weight: 600;
+}
+.acta-participant input[type="radio"],
+.acta-participant input[type="checkbox"] {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--ac-accent);
+}
+.acta-participant .help {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  color: var(--ac-info);
+  background: var(--ac-info-weak);
+  border-left: 3px solid var(--ac-info);
+  border-radius: 0 var(--ac-radius-row) var(--ac-radius-row) 0;
+  font-size: var(--ac-text-ui);
+}
+.acta-participant .participant-disclosure {
+  margin: 12px 0;
+  padding: 0;
+  border: 0;
+  font-size: var(--ac-text-ui);
+}
+.participant-disclosure > summary {
+  min-height: 44px;
+  padding: 4px 0;
+  color: var(--ac-accent);
+  font-weight: 600;
+  cursor: pointer;
+}
+.participant-disclosure > summary .participant-icon {
+  margin-right: 6px;
+}
+.participant-disclosure[open] > summary {
   margin-bottom: 8px;
 }
+.acta-participant .alert {
+  padding: 12px 14px;
+  color: var(--ac-info);
+  background: var(--ac-info-weak);
+  border-color: var(--ac-info-line);
+  font-size: var(--ac-text-ui);
+}
+.acta-participant .alert.error {
+  color: var(--ac-danger);
+  background: var(--ac-danger-weak);
+  border-color: var(--ac-danger-line);
+}
+.acta-participant
+  :is(button, a, input, select, textarea, summary):focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--ac-focus);
+}
+.acta-participant h1[tabindex="-1"]:focus {
+  outline: none;
+}
+
+/* ---- The question is the page: document voice ---- */
+.acta-participant .participant-answer-card h1,
+.acta-participant .participant-wide h1 {
+  margin: 0 0 12px;
+  font: 700 28px / 1.3 var(--ac-font-document);
+  letter-spacing: -0.01em;
+}
+.participant-overline {
+  margin: 0 0 8px;
+  color: var(--ac-muted);
+  font: 600 var(--ac-text-overline) / 1.4 var(--ac-font-ui);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* ---- Mi trabajo ---- */
+.participant-subtitle {
+  margin: 0;
+  color: var(--ac-muted);
+  font-size: var(--ac-text-body);
+}
+.participant-welcome {
+  display: grid;
+  gap: 16px;
+}
+.participant-progress-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  align-items: center;
+  margin-top: 16px;
+}
+.participant-all-done {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 0;
+  color: var(--ac-success);
+  font-size: var(--ac-text-ui);
+}
+.participant-project {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+.participant-project h2 {
+  margin: 0;
+}
+.participant-project h2 a {
+  color: inherit;
+  text-decoration: none;
+}
+.participant-project-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
 .participant-topic {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
-  margin-bottom: 10px;
   overflow: hidden;
+  margin-bottom: 8px;
+  background: var(--ac-surface);
+  border: 1px solid var(--ac-line);
+  border-radius: var(--ac-radius-surface);
 }
 .participant-topic h3 {
   margin: 0;
 }
 .participant-topic h3 button {
-  width: 100%;
   display: flex;
   align-items: center;
-  gap: 9px;
-  border: 0;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 16px;
+  color: var(--ac-ink);
   background: none;
-  padding: 12px 14px;
+  border: 0;
+  font: 600 var(--ac-text-body) var(--ac-font-ui);
   text-align: left;
-  font: 700 13.5px var(--font-body);
-  color: var(--ink);
-  min-height: 44px;
 }
 .participant-topic h3 button:disabled {
   cursor: default;
   opacity: 1;
 }
 .participant-chevron {
-  color: var(--ink-2);
-  transition: transform var(--motion-fast) var(--ease);
+  color: var(--ac-muted);
 }
 .participant-chevron.open {
   transform: rotate(90deg);
 }
 .participant-topic-count {
   margin-left: auto;
-  font-size: 11.5px;
-  color: var(--ink-2);
-  font-weight: 600;
+  color: var(--ac-muted);
+  font-size: var(--ac-text-meta);
+  font-weight: 500;
 }
 .participant-topic ul {
-  list-style: none;
   margin: 0;
   padding: 0;
-  border-top: 1px solid var(--border);
+  list-style: none;
+  border-top: 1px solid var(--ac-line);
 }
 .participant-work-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 13px 14px;
-  border-bottom: 1px solid var(--border);
+  gap: 16px;
   min-height: 44px;
+  padding: 16px;
+  border-bottom: 1px solid var(--ac-line);
 }
 .participant-work-row:last-child {
   border-bottom: 0;
-}
-.participant-work-row:hover {
-  background: var(--surface-2);
 }
 .participant-work-row > div {
   flex: 1;
@@ -344,480 +447,369 @@
 }
 .participant-work-row > .button {
   flex-shrink: 0;
-  padding: 5px 10px;
-  min-height: 30px;
-  font-size: 12.5px;
-  border-radius: 4px;
 }
 .acta-participant .participant-row-question {
-  font-size: 13.5px;
-  font-weight: 500;
-  line-height: 1.5;
-  margin: 0 0 6px;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  margin: 0 0 8px;
   overflow: hidden;
   overflow-wrap: anywhere;
-}
-.participant-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border-left: 3px solid var(--ink-2);
-  background: var(--surface-2);
-  border-radius: 2px;
-  padding: 2px 7px;
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--ink-2);
-  line-height: 1.5;
-}
-.participant-badge .participant-icon {
-  width: 13px;
-  height: 13px;
-}
-.participant-badge.draft {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  color: var(--accent-strong);
-}
-.participant-badge.clarification {
-  border-color: var(--amber);
-  background: var(--amber-soft);
-  color: var(--amber);
-}
-.participant-badge.sent,
-.participant-badge.review {
-  border-color: var(--teal);
-  background: var(--teal-soft);
-  color: var(--teal);
-}
-.participant-badge.validated {
-  border-color: var(--forest);
-  background: var(--forest-soft);
-  color: var(--forest);
+  font: 600 17px / 1.45 var(--ac-font-document);
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 .acta-participant .participant-condition-hint {
-  font-size: 12px;
-  color: var(--ink-2);
-  margin: 6px 0 0;
+  margin: 8px 0 0;
+  color: var(--ac-muted);
+  font-size: var(--ac-text-meta);
 }
 .participant-toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 12px;
   align-items: end;
 }
 .participant-toolbar .field {
   flex: 1;
-  min-width: 160px;
+  min-width: 180px;
   margin: 0;
 }
 .participant-filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 .participant-filters button {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 6px 10px;
-  color: var(--ink-2);
-  font-size: 12px;
+  min-height: 44px;
+  padding: 8px 14px;
+  color: var(--ac-ink-2);
+  background: var(--ac-surface);
+  border: 1px solid var(--ac-line-2);
+  border-radius: 99px;
+  font-size: var(--ac-text-ui);
   font-weight: 600;
-  min-height: 32px;
 }
 .participant-filters button[aria-pressed="true"] {
-  background: var(--accent-soft);
-  border-color: var(--accent-soft);
-  color: var(--accent-strong);
+  color: var(--ac-accent);
+  background: var(--ac-accent-weak);
+  border-color: var(--ac-accent-line);
 }
+.acta-participant .participant-more {
+  margin: 8px 16px;
+}
+
+/* ---- Answering ---- */
 .participant-step-meta {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  color: var(--ink-2);
-  font-size: 12px;
-  margin-bottom: 12px;
+  display: none;
 }
 .participant-progress {
-  height: 5px;
-  background: var(--surface-2);
-  border-radius: 99px;
+  height: 4px;
+  margin-bottom: 16px;
   overflow: hidden;
-  margin-bottom: 20px;
+  background: var(--ac-line);
+  border-radius: 99px;
 }
 .participant-progress > span {
   display: block;
   height: 100%;
-  background: var(--accent);
-  transition: width var(--motion-slow) var(--ease);
+  background: var(--ac-accent);
 }
 .participant-answer-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 26px;
-  margin-bottom: 16px;
-  animation: participant-enter 160ms var(--ease);
-}
-.acta-participant .participant-answer-card h1 {
-  font-size: 17px;
-  font-weight: 800;
-  margin: 0 0 16px;
-  line-height: 1.5;
+  padding: 32px;
+  background: var(--ac-surface);
+  border: 1px solid var(--ac-line);
+  border-radius: 16px;
 }
 .acta-participant .participant-answer-card h2 {
-  font-size: 13px;
   margin: 16px 0 8px;
-}
-.acta-participant .participant-answer-card h3 {
-  font-size: 12.5px;
-}
-.acta-participant .field {
-  margin: 0 0 14px;
-}
-.acta-participant .field > label {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--ink-2);
-  margin-bottom: 6px;
-}
-.acta-participant input:not([type="checkbox"]):not([type="radio"]),
-.acta-participant textarea,
-.acta-participant select {
-  border: 1px solid var(--border-strong);
-  border-radius: 6px;
-  background: var(--surface);
-  padding: 9px 11px;
-  font: 400 13.5px/1.5 var(--font-body);
-  color: var(--ink);
-  min-height: 38px;
-  width: 100%;
-}
-.acta-participant textarea {
-  min-height: 60px;
-  resize: vertical;
-}
-.acta-participant input[type="date"],
-.acta-participant input[inputmode="decimal"] {
-  max-width: 220px;
-}
-.acta-participant .field .hint {
-  margin: 5px 0 0;
-}
-.acta-participant fieldset {
-  border: 0;
-  padding: 0;
-  margin: 0 0 16px;
-  min-width: 0;
-}
-.acta-participant .formal-contribution {
-  margin: 0;
-  padding: 0;
-}
-.acta-participant legend {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--ink-2);
-  padding: 0;
-  margin-bottom: 6px;
-}
-.acta-participant .check {
-  display: flex;
-  gap: 10px;
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  padding: 14px;
-  min-height: 44px;
-  font-size: 14px;
-  font-weight: 500;
-  margin: 0 0 8px;
-  cursor: pointer;
-  transition:
-    background var(--motion-fast) var(--ease),
-    border-color var(--motion-fast) var(--ease);
-}
-.acta-participant .check:has(input:checked) {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  color: var(--accent-strong);
-  font-weight: 700;
-}
-.acta-participant input[type="radio"],
-.acta-participant input[type="checkbox"] {
-  accent-color: var(--accent);
-  width: 18px;
-  height: 18px;
-  flex: none;
-}
-.acta-participant .help {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  border-left: 3px solid var(--accent);
-  background: var(--accent-soft);
-  color: var(--accent-strong);
-  padding: 10px 13px;
-  border-radius: 0 6px 6px 0;
-  font-size: 12.5px;
-  margin: 0 0 16px;
-}
-.acta-participant .participant-disclosure {
-  border: 0;
-  margin: 10px 0;
-  padding: 0;
-  font-size: 12.5px;
-}
-.participant-disclosure > summary {
-  color: var(--accent);
-  font-weight: 600;
-  min-height: 32px;
-  cursor: pointer;
-}
-.participant-disclosure > summary .participant-icon {
-  margin-right: 6px;
-}
-.participant-disclosure[open] > summary {
-  margin-bottom: 12px;
+  font-size: var(--ac-text-body);
 }
 .acta-participant .response-actions {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin: 22px 0 10px;
   flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 24px 0 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ac-line);
 }
 .acta-participant .response-actions .actions {
   display: flex;
-  gap: 8px;
   flex-wrap: wrap;
+  gap: 8px;
 }
 .acta-participant .response-actions > .participant-text-button {
-  color: var(--ink-2);
+  color: var(--ac-ink-2);
 }
 .acta-participant .save-status {
-  min-height: 0;
-  font-size: 12px;
   margin: 0 0 12px;
+  color: var(--ac-success);
+  font-size: var(--ac-text-meta);
 }
 .acta-participant .save-status:empty {
   display: none;
 }
-.acta-participant .alert {
-  background: var(--accent-soft);
-  border-color: var(--accent);
-  color: var(--accent-strong);
-  font-size: 13px;
-  padding: 12px 14px;
+.acta-participant .participant-yesno {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
-.acta-participant .alert.error {
-  background: #f3e2db;
-  border-color: var(--terracotta);
-  color: #833a29;
+.acta-participant .participant-yesno > legend,
+.acta-participant .participant-yesno > p,
+.acta-participant .participant-yesno > .participant-clear {
+  grid-column: 1 / -1;
 }
-.acta-participant .review-submission {
-  border: 0;
-  border-radius: 0;
-  padding: 0;
-  margin: 0 0 20px;
-  background: none;
+.acta-participant .participant-yesno > .check {
+  justify-content: center;
+  margin: 0;
 }
-.acta-participant .thread-messages {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 16px;
+.acta-participant .participant-clear {
+  min-height: 44px;
+  font-size: var(--ac-text-meta);
 }
-.acta-participant .thread-messages > li {
-  border: 0;
-  padding: 0;
-  margin: 0 0 12px;
-}
-.acta-participant .thread-messages > li > p:first-child {
-  font-size: 11px;
-  color: var(--ink-2);
-  margin: 0 0 3px;
-}
-.acta-participant .thread-messages .answer-text {
-  background: var(--accent-soft);
-  border-radius: 8px;
-  padding: 10px 13px;
-  font-size: 13px;
-  max-width: 92%;
-}
-.acta-participant .participant-submission > .answer-text {
-  background: var(--surface-2);
-  border-radius: 8px;
-  padding: 16px;
-  font-size: 15px;
-  font-weight: 600;
-  white-space: pre-wrap;
+.acta-participant .next-evidence-summary {
+  display: block;
+  flex-basis: 100%;
+  font-size: var(--ac-text-meta);
+  font-weight: 400;
   overflow-wrap: anywhere;
 }
-.acta-participant .participant-readonly h1 {
-  font-size: 17px;
-  margin: 14px 0;
+.acta-participant .next-participant-evidence .evidence-list li {
+  padding: 12px;
+  gap: 8px;
 }
-.participant-readonly h2 {
-  font: 600 12.5px var(--font-body);
-  color: var(--ink-2);
-  margin-bottom: 6px;
+.acta-participant .next-participant-evidence .evidence-list .actions {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ---- What was sent, and what follows ---- */
+.participant-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+@media (min-width: 900px) {
+  .participant-columns {
+    grid-template-columns: minmax(0, 1fr) 288px;
+  }
+}
+.participant-main {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.participant-submission {
+  min-width: 0;
+  padding-top: 12px;
+  border-top: 2px solid var(--ac-ink);
+}
+.participant-submission-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin-bottom: 12px;
+}
+.participant-submission-head > * {
+  margin: 0;
+}
+.participant-submission-head h2 {
+  color: var(--ac-muted);
+  font: 600 var(--ac-text-overline) / 1.4 var(--ac-font-ui);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.participant-submission-head p {
+  color: var(--ac-muted);
+  font-size: var(--ac-text-meta);
+}
+.participant-answer {
+  margin: 0 0 16px;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  font: 400 var(--ac-text-answer) / 1.65 var(--ac-font-document);
+}
+.participant-aside-label {
+  margin: 16px 0 4px;
+  color: var(--ac-muted);
+  font: 600 var(--ac-text-overline) / 1.4 var(--ac-font-ui);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.participant-comment {
+  margin: 0;
+  font: 400 var(--ac-text-body) / 1.6 var(--ac-font-document);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 .participant-readonly .view-meta {
-  font-size: 12.5px;
-  color: var(--ink-2);
   display: flex;
-  gap: 8px;
   align-items: center;
-  margin: 10px 0 18px;
+  gap: 8px;
+  margin: 0;
+  color: var(--ac-muted);
+  font-size: var(--ac-text-meta);
 }
+.acta-participant .review-submission {
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+.participant-exchange {
+  padding: 16px;
+  background: var(--ac-surface);
+  border: 1px solid var(--ac-line);
+  border-radius: var(--ac-radius-surface);
+}
+.participant-exchange .ac-thread-inset {
+  margin-top: 0;
+  padding-left: 0;
+  border-left: 0;
+}
+.participant-exchange .ac-thread-message {
+  max-width: none;
+}
+.participant-exchange form {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ac-line);
+}
+.acta-participant .review-submission form > .button {
+  display: flex;
+  margin-left: auto;
+}
+
+/* ---- Receipt ---- */
 .participant-receipt .participant-success {
+  padding: 24px 0 8px;
   text-align: center;
-  padding: 24px 0 20px;
 }
 .participant-success-icon {
   display: grid;
   place-items: center;
-  background: var(--forest-soft);
-  color: var(--forest);
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
+  color: var(--ac-success);
+  background: var(--ac-success-weak);
   border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  margin: 0 auto 14px;
 }
 .participant-success-icon svg {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
 }
 .participant-receipt .participant-subtitle {
-  margin-top: 12px;
+  margin-top: 8px;
 }
 .participant-receipt .receipt-card {
-  max-width: 420px;
-  margin: 0 auto 24px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  max-width: 480px;
+  margin: 0 auto;
   padding: 20px;
+  background: var(--ac-surface);
+  border: 1px solid var(--ac-line);
+  border-radius: var(--ac-radius-surface);
 }
 .participant-receipt .receipt-card ul {
-  list-style: none;
+  display: grid;
+  gap: 12px;
   margin: 0;
   padding: 0;
-  display: grid;
-  gap: 8px;
-  font-size: 13.5px;
+  list-style: none;
 }
 .participant-receipt .receipt-card li {
   display: flex;
-  gap: 9px;
   align-items: center;
+  gap: 10px;
 }
 .participant-receipt > .actions {
-  max-width: 420px;
-  margin: auto;
   display: grid;
-  gap: 10px;
+  gap: 8px;
+  max-width: 480px;
+  margin: 0 auto;
 }
 .participant-feedback {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
-  background: var(--forest-soft);
-  color: var(--forest);
-  border-radius: 6px;
-  font-size: 12.5px;
-  margin-bottom: 16px;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  color: var(--ac-success);
+  background: var(--ac-success-weak);
+  border-radius: var(--ac-radius-control);
+  font-size: var(--ac-text-ui);
 }
-.acta-participant
-  :is(button, a, input, select, textarea, summary):focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
-  box-shadow: 0 0 0 3px var(--accent-soft);
-}
-@keyframes participant-enter {
-  from {
-    opacity: 0;
-    transform: translateY(3px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-@media (max-width: 768px) {
-  .acta-participant .button,
-  .acta-participant .participant-text-button,
-  .participant-filters button {
-    min-height: 44px;
+
+/* ---- Narrow screens ---- */
+@media (max-width: 899px) {
+  .acta-participant .participant-topbar {
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    padding: 4px 16px;
   }
   .participant-header-context {
     display: none;
-  }
-  .acta-participant .participant-topbar {
-    padding: 6px 16px;
-    flex-wrap: wrap;
   }
   .participant-project-name {
     flex: 1;
     min-width: 0;
   }
-  .participant-account > summary > span:last-child {
-    max-width: 130px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .participant-step-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 4px 12px;
+    margin-bottom: 8px;
+    color: var(--ac-muted);
+    font-size: var(--ac-text-meta);
+  }
+  .participant-answer-card {
+    padding: 24px;
+  }
+  .acta-participant .participant-content {
+    padding: 24px 16px 80px;
   }
 }
 @media (max-width: 600px) {
+  .acta-participant .participant-answer-card h1,
+  .acta-participant .participant-wide h1 {
+    font-size: 23px;
+  }
   .acta-participant .response-actions {
     flex-direction: column-reverse;
     align-items: stretch;
   }
   .acta-participant .response-actions .actions {
-    display: flex;
     flex-direction: column;
   }
   .acta-participant .response-actions .button {
     width: 100%;
   }
-  .acta-participant .participant-answer-card {
+  .participant-answer-card {
     padding: 20px;
   }
   .acta-participant .matrix-fields {
     grid-template-columns: 1fr;
   }
-}
-@media (max-width: 480px) {
-  .participant-summary {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    row-gap: 18px;
-  }
   .participant-work-row {
     flex-wrap: wrap;
-  }
-  .participant-work-row > .button {
-    width: 100%;
+    gap: 12px;
   }
   .participant-work-row > div {
     flex-basis: 100%;
   }
-  .acta-participant .participant-topbar {
-    gap: 10px;
+  .participant-work-row > .button {
+    width: 100%;
   }
   .participant-account > summary > span:last-child {
     display: none;
   }
-  .participant-step-meta {
-    flex-wrap: wrap;
-  }
-  .participant-welcome {
-    padding: 22px;
+  .ac-progress-card {
+    padding: 20px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -829,131 +821,39 @@
     scroll-behavior: auto !important;
   }
 }
-
-/* Participant-specific density and native keyboard controls. */
-.acta-participant .participant-step-meta {
-  display: none;
-}
-.acta-participant .participant-yesno {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-.acta-participant .participant-yesno > legend,
-.acta-participant .participant-yesno > p,
-.acta-participant .participant-yesno > .participant-clear {
-  grid-column: 1/-1;
-}
-.acta-participant .participant-yesno > .check {
-  justify-content: center;
-  margin: 0;
-}
-.acta-participant .participant-clear {
-  font-size: 12px;
-  min-height: 28px;
-}
-@media (max-width: 768px) {
-  .acta-participant .participant-step-meta {
-    display: flex;
-  }
-  .acta-participant .participant-clear {
-    min-height: 44px;
-  }
-}
 @media (prefers-color-scheme: dark) {
   .acta-participant {
-    --ink: #edeef0;
-    --ink-2: #aeb2bc;
-    --muted: #aeb2bc;
-    --paper: #14161a;
-    --surface: #1b1e23;
-    --surface-2: #232730;
-    --border: #323740;
-    --border-strong: #454b56;
-    --accent: #7fa3d6;
-    --accent-strong: #a9c4e8;
-    --accent-soft: #233246;
-    --on-accent: #0d1520;
-    --teal: #5fc2b6;
-    --teal-soft: #17322f;
-    --amber: #e0ae55;
-    --amber-soft: #3a2e17;
-    --forest: #7fbf8f;
-    --forest-soft: #1e3324;
-    --terracotta: #e1917e;
+    --ac-bg: #14161a;
+    --ac-surface: #1b1e23;
+    --ac-surface-2: #232730;
+    --ac-sunken: #232730;
+    --ac-line: #323740;
+    --ac-line-2: #454b56;
+    --ac-ink: #edeef0;
+    --ac-ink-2: #cfd2d8;
+    --ac-muted: #aeb2bc;
+    --ac-accent: #7fa3d6;
+    --ac-accent-hover: #a9c4e8;
+    --ac-accent-weak: #233246;
+    --ac-accent-line: #3b5472;
+    --ac-danger: #f19a8e;
+    --ac-danger-weak: #3a1f1c;
+    --ac-danger-line: #6b3a35;
+    --ac-warning: #e0ae55;
+    --ac-warning-weak: #3a2e17;
+    --ac-warning-line: #6b5530;
+    --ac-success: #7fbf8f;
+    --ac-success-weak: #1e3324;
+    --ac-success-line: #3d6a4a;
+    --ac-info: #a9c4e8;
+    --ac-info-weak: #1e2a3a;
+    --ac-info-line: #3b5472;
   }
-}
-
-/* Corrections verified against the Acta reference screenshots. */
-.acta-participant .participant-account {
-  margin: 0 0 0 auto;
-  padding: 0;
-}
-.acta-participant .participant-account > summary {
-  padding: 0;
-}
-.acta-participant h1[tabindex="-1"]:focus {
-  outline: none;
-}
-.participant-project-heading {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-.acta-participant .participant-project-heading h2 {
-  margin: 0;
-}
-.acta-participant .participant-project-heading .participant-tools-toggle {
-  margin: 0;
-  font-size: 12px;
-  min-height: 28px;
-}
-.acta-participant .participant-disclosure > summary {
-  padding: 4px 0;
-}
-.acta-participant .review-submission > .badge {
-  display: none;
-}
-.acta-participant .review-submission > .answer-text {
-  background: var(--surface-2);
-  padding: 10px 13px;
-  border-radius: 8px;
-  max-width: 88%;
-  font-size: 13px;
-}
-.acta-participant .review-submission form > .button {
-  display: flex;
-  margin-left: auto;
-}
-@media (max-width: 768px) {
-  .acta-participant .participant-project-heading .participant-tools-toggle {
-    min-height: 44px;
+  .acta-participant .button.primary,
+  .acta-participant .participant-brand > span {
+    color: #0d1520;
   }
-}
-
-.acta-participant .participant-more {
-  margin: 8px 14px;
-  min-height: 44px;
-}
-
-/* ACTA NEXT: file summary and save state stay beside the existing response actions. */
-.acta-participant .next-evidence-summary {
-  display: block;
-  flex-basis: 100%;
-  font-size: 0.9rem;
-  font-weight: 400;
-  overflow-wrap: anywhere;
-}
-.acta-participant .next-participant-evidence .evidence-list li {
-  padding: 0.75rem;
-  gap: 0.5rem;
-}
-.acta-participant .next-participant-evidence .evidence-list .actions {
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-.acta-participant .response-actions {
-  margin-top: 0.5rem;
+  .acta-participant .ac-step-done .ac-step-mark {
+    color: #0d1520;
+  }
 }

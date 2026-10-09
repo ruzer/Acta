@@ -28,6 +28,7 @@ export function ReviewActionDialog({
   action,
   threadId,
   conflictId,
+  responseRevisionId,
   onClose,
   onDone,
   refresh,
@@ -36,6 +37,8 @@ export function ReviewActionDialog({
   action: ReviewAction;
   threadId?: string;
   conflictId?: string;
+  /** Contribution the clarification is about, when the action starts from one. */
+  responseRevisionId?: string;
   onClose: () => void;
   onDone: () => void;
   refresh: () => Promise<unknown>;
@@ -45,6 +48,9 @@ export function ReviewActionDialog({
     [dirty, setDirty] = useState(false),
     [conflict, setConflict] = useState(false);
   const request = useRef({ key: "", id: "" });
+  const aboutSubmission = responseRevisionId
+    ? d.submissions.find((s) => s.id === responseRevisionId && s.current)
+    : undefined;
   const t = d.threads.find((t) => t.id === threadId),
     c = d.conflicts.find((c) => c.id === conflictId);
   const sources =
@@ -79,7 +85,10 @@ export function ReviewActionDialog({
       ...(action === "requestClarification"
         ? {
             body: v.body,
-            responseRevisionId: t?.responseRevisionId ?? v.responseRevisionId,
+            responseRevisionId:
+              t?.responseRevisionId ??
+              responseRevisionId ??
+              v.responseRevisionId,
             threadId: t?.id ?? null,
             expectedThreadVersion: t?.lockVersion ?? null,
           }
@@ -179,7 +188,13 @@ export function ReviewActionDialog({
           </legend>
           {action === "requestClarification" && (
             <>
-              {!t && (
+              {!t && aboutSubmission && (
+                <p className="hint">
+                  Aportación de {aboutSubmission.respondent.displayName} · envío
+                  #{aboutSubmission.number}
+                </p>
+              )}
+              {!t && !aboutSubmission && (
                 <Select
                   name="responseRevisionId"
                   label="Respuesta sobre la que necesitas aclaración"

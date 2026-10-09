@@ -4,6 +4,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { priorities, reviewStates } from "@requirements/contracts";
 import { api } from "../api";
 import { Button, EmptyState, ErrorState, LoadingState, Select } from "../ui";
+import { PageHeader } from "../ui/semantic";
 import { dateText, reviewLabels } from "./ReviewShared";
 export function ReviewInbox() {
   const [params, setParams] = useSearchParams();
@@ -26,10 +27,10 @@ export function ReviewInbox() {
       <Link className="back" to="/">
         ← Mis proyectos
       </Link>
-      <h1>Revisar respuestas</h1>
-      <p className="lead">
-        Consulta las aportaciones y decide qué necesita seguimiento.
-      </p>
+      <PageHeader
+        title="Revisar respuestas"
+        lead="Consulta las aportaciones y decide qué necesita seguimiento."
+      />
       <div className="review-filters">
         <Select
           label="Estado"

@@ -202,3 +202,22 @@ it("UX-02: la página tiene un único h1 «Decisiones» y no repite el título c
     screen.getByRole("region", { name: "Decisiones vigentes" }),
   ).toBeVisible();
 });
+
+it("CP5: cada decisión es una línea de registro: referencia, título como enlace, tema · área y la marca Vigente", async () => {
+  vi.mocked(exchangeRequest).mockResolvedValue(data);
+  setup();
+  await screen.findByRole("link", { name: first.title });
+  const items = screen.getAllByRole("listitem");
+  expect(items.length).toBeGreaterThan(0);
+  const entry = items[0]!;
+  expect(within(entry).getByRole("link")).toBeVisible();
+  expect(within(entry).getByText("Vigente")).toBeVisible();
+  expect(entry.querySelector(".ac-register-reference")).not.toBeNull();
+  // Technical identifiers are secondary: smaller and never above the title.
+  expect(
+    entry
+      .querySelector(".ac-register-reference")!
+      .compareDocumentPosition(entry.querySelector(".ac-register-title")!) &
+      Node.DOCUMENT_POSITION_FOLLOWING,
+  ).toBeTruthy();
+});

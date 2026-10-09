@@ -21,6 +21,10 @@ export type ProjectWorkbenchProps = {
   role?: ProjectView["role"];
   active?: WorkbenchView;
   compact?: boolean;
+  /** One line that says what the page is for. */
+  lead?: ReactNode;
+  /** The page's main action, at the end of the heading. */
+  actions?: ReactNode;
   children?: ReactNode;
 };
 
@@ -30,6 +34,8 @@ export function ProjectWorkbench({
   role,
   active,
   compact = false,
+  lead,
+  actions,
   children,
 }: ProjectWorkbenchProps) {
   const { destination } = useWorkbenchContext(projectId, active);
@@ -40,17 +46,24 @@ export function ProjectWorkbench({
     : role === "STAKEHOLDER"
       ? `${projectPath}/work`
       : projectPath;
+  const heading = active ? pageTitles[active] : projectName;
   return (
     <header
-      className={`project-workbench ac-workbench-heading${compact ? " ac-workbench-compact" : ""}`}
+      className={`project-workbench ac-workbench-heading${compact ? " ac-workbench-compact" : ""}${lead || actions ? " ac-page-header" : ""}`}
     >
       {compact ? (
         <Link className="pw-project-link" to={home}>
           {projectName}
         </Link>
+      ) : lead || actions ? (
+        <div>
+          <h1>{heading}</h1>
+          {lead && <p className="lead">{lead}</p>}
+        </div>
       ) : (
-        <h1>{active ? pageTitles[active] : projectName}</h1>
+        <h1>{heading}</h1>
       )}
+      {actions && <div className="ac-page-actions">{actions}</div>}
       {children}
     </header>
   );

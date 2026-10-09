@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Link } from "react-router-dom";
 import type { ReviewDetail } from "@requirements/contracts";
 import { Button, EmptyState, Input, Select } from "../ui";
 import { ContributionRail, ContributionPane, MetaLine } from "../ui/semantic";
@@ -22,22 +23,31 @@ function signals(data: ReviewDetail, submission: Submission) {
     ),
   };
 }
+/**
+ * What is pending around a submission. In the list it also says whether it has
+ * files; next to the open contribution the evidence section already says it,
+ * so only the situation (clarification, conflict) is repeated there.
+ */
 function SubmissionSignals({
   data,
   submission,
+  inList = false,
 }: {
   data: ReviewDetail;
   submission: Submission;
+  inList?: boolean;
 }) {
   const { threads, conflict } = signals(data, submission);
+  if (!inList && !threads.length && !conflict) return null;
   return (
     <span className="next-contribution-signals">
-      <span>Enviada · vigente</span>
-      <span>
-        {submission.evidence.length
-          ? `${submission.evidence.length} ${submission.evidence.length === 1 ? "archivo adjunto" : "archivos adjuntos"}`
-          : "Sin archivos adjuntos"}
-      </span>
+      {inList && (
+        <span>
+          {submission.evidence.length
+            ? `${submission.evidence.length} ${submission.evidence.length === 1 ? "archivo adjunto" : "archivos adjuntos"}`
+            : "Sin archivos adjuntos"}
+        </span>
+      )}
       {threads.length > 0 && (
         <span className="next-contribution-clarification">
           {threads.length}{" "}
@@ -61,10 +71,16 @@ export function ContributionSet({
   data,
   onCompare,
   renderThreads,
+  renderActions,
+  openId,
 }: {
   data: ReviewDetail;
   onCompare?: () => void;
   renderThreads?: (submissionId: string) => ReactNode;
+  /** Actions about the open contribution, next to it. */
+  renderActions?: (submissionId: string) => ReactNode;
+  /** Contribution a link asked to open (for example from a decision's grounds). */
+  openId?: string;
 }) {
   const current = data.submissions.filter((s) => s.current);
   const historical = data.submissions.filter((s) => !s.current);
@@ -114,9 +130,22 @@ export function ContributionSet({
   // conflict points to; otherwise keep the server order. Asking for the list
   // (narrow screens) is respected and not undone by the preference.
   const [listRequested, setListRequested] = useState(false);
+  // A new request to open a contribution replaces what was chosen before.
+  const [seenOpenId, setSeenOpenId] = useState(openId);
+  if (openId !== seenOpenId) {
+    setSeenOpenId(openId);
+    setSelectedId("");
+    setListRequested(false);
+  }
   const relevant = relevantSubmissionId(data);
+  const requested = openId
+    ? (visible.find((s) => s.id === openId) ??
+      current.find((s) => s.id === openId))
+    : undefined;
   const preferred =
-    visible.find((s) => s.id === relevant) ?? (wide ? visible[0] : undefined);
+    requested ??
+    visible.find((s) => s.id === relevant) ??
+    (wide ? visible[0] : undefined);
   const selected =
     current.length === 1
       ? current[0]
@@ -146,7 +175,9 @@ export function ContributionSet({
   // On a narrow screen the open contribution replaces the list: the count is
   // already in "← Volver a N aportaciones", so the heading only stays for
   // assistive technology and as the section's name.
-  const headingHidden = !wide && current.length > 1 && !!selected && !comparing;
+  const headingHidden =
+    current.length === 0 ||
+    (!wide && current.length > 1 && !!selected && !comparing);
   const heading = (
     <div
       className={`next-contributions-heading${headingHidden ? " sr-only" : ""}`}
@@ -169,6 +200,24 @@ export function ContributionSet({
               : data.canReview
                 ? "Sin aportaciones enviadas. Esta pregunta no tiene participantes asignados en el contexto actual."
                 : "No hay aportaciones vigentes disponibles en esta consulta."}
+          {data.canReview && !historical.length && (
+            <p className="ac-empty-next">
+              {!data.participants.length && (
+                <Link
+                  className="button secondary"
+                  to={`/projects/${data.projectId}/editor`}
+                >
+                  Asignar participantes en el cuestionario
+                </Link>
+              )}
+              <Link
+                className="button secondary"
+                to={`/projects/${data.projectId}/invitations`}
+              >
+                Crear invitación
+              </Link>
+            </p>
+          )}
         </EmptyState>
       ) : comparing ? (
         <div>
@@ -248,7 +297,11 @@ export function ContributionSet({
                               ? `${text.slice(0, 180).trimEnd()}…`
                               : text}
                           </span>
-                          <SubmissionSignals data={data} submission={s} />
+                          <SubmissionSignals
+                            data={data}
+                            submission={s}
+                            inList
+                          />
                         </>
                       ),
                     };
@@ -285,6 +338,7 @@ export function ContributionSet({
               )}
               <ContributionPane
                 headingRef={detailHeading}
+                actions={renderActions?.(selected.id)}
                 title={selected.respondent.displayName}
                 metadata={
                   <>

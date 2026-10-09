@@ -13,10 +13,11 @@ import {
   Input,
   LoadingState,
   Select,
-  StatusBadge,
-  Table,
+  DataTable,
   Textarea,
 } from "../ui";
+import { Avatar, PageHeader, StatusChip } from "../ui/semantic";
+import { ParticipantIcon } from "./ParticipantIcon";
 export function ActionForm({
   children,
   onSubmit,
@@ -68,6 +69,10 @@ export function Administration({ me }: { me: Me }) {
     active: boolean;
   } | null>(null);
   const [error, setError] = useState("");
+  const [creating, setCreating] = useState<
+    "users" | "areas" | "projects" | null
+  >(null);
+  const [saved, setSaved] = useState("");
   const qc = useQueryClient();
   const users = useQuery({
     queryKey: ["users"],
@@ -88,21 +93,45 @@ export function Administration({ me }: { me: Me }) {
     );
   return (
     <>
-      <p className="eyebrow">{me.organization.name}</p>
-      <h1>Administración</h1>
-      <p>Gestiona el acceso y los espacios de trabajo de tu institución.</p>
+      <PageHeader
+        overline={me.organization.name}
+        title="Administración"
+        lead="Gestiona el acceso y los espacios de trabajo de tu institución."
+        actions={
+          <Button
+            onClick={() => setCreating(tab as "users" | "areas" | "projects")}
+          >
+            <ParticipantIcon name="plus" />
+            {
+              {
+                users: "Crear usuario",
+                areas: "Crear área",
+                projects: "Crear proyecto",
+              }[tab as "users" | "areas" | "projects"]
+            }
+          </Button>
+        }
+      />
       <div className="tabs" aria-label="Administración">
         {[
           ["users", "Usuarios"],
           ["areas", "Áreas"],
           ["projects", "Proyectos"],
         ].map(([k, label]) => (
-          <button key={k} aria-pressed={tab === k} onClick={() => setTab(k!)}>
+          <button
+            key={k}
+            aria-pressed={tab === k}
+            onClick={() => {
+              setTab(k!);
+              setSaved("");
+            }}
+          >
             {label}
           </button>
         ))}
       </div>
       {error && <Alert error>{error}</Alert>}
+      {saved && <Alert>{saved}</Alert>}
       {tab === "users" && (
         <>
           {users.isPending ? (
@@ -110,69 +139,115 @@ export function Administration({ me }: { me: Me }) {
           ) : users.error ? (
             <ErrorState error={users.error} />
           ) : (
-            <Table caption="Usuarios de la institución">
-              <thead>
-                <tr>
-                  <th>Persona / cuenta</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.data?.map((u) => (
-                  <tr key={u.id}>
-                    <td>
-                      {u.displayName}
-                      <br />
-                      <span className="muted">
+            <DataTable
+              caption="Usuarios de la institución"
+              columns={[
+                { label: "Persona / cuenta", bare: true },
+                { label: "Estado" },
+                { label: "Acciones", bare: true, end: true },
+              ]}
+              rows={(users.data ?? []).map((u) => ({
+                key: u.id,
+                cells: [
+                  <div className="ac-person" key="p">
+                    <Avatar name={u.displayName} />
+                    <div>
+                      <strong>{u.displayName}</strong>
+                      <small>
                         {u.username}
                         {u.isOrganizationAdmin ? " · Administración" : ""}
-                      </span>
-                    </td>
-                    <td>
-                      <StatusBadge>
-                        {u.active ? "Activo" : "Desactivado"}
-                      </StatusBadge>
-                      {u.mustChangePassword && (
-                        <p className="hint">Debe cambiar contraseña</p>
-                      )}
-                    </td>
-                    <td>
-                      <div className="actions">
-                        <Button
-                          tone="secondary"
-                          onClick={() =>
-                            setReset({ id: u.id, name: u.displayName })
-                          }
-                        >
-                          Contraseña temporal
-                        </Button>
-                        {u.id !== me.user.id && (
-                          <Button
-                            tone="secondary"
-                            onClick={() =>
-                              setDeactivate({
-                                id: u.id,
-                                name: u.displayName,
-                                active: !u.active,
-                              })
-                            }
-                          >
-                            {u.active ? "Desactivar" : "Activar"}
-                          </Button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
+                      </small>
+                    </div>
+                  </div>,
+                  <span className="ac-cell-status" key="s">
+                    <StatusChip
+                      tone={u.active ? "success" : "neutral"}
+                      icon={u.active ? "check" : "info"}
+                    >
+                      {u.active ? "Activo" : "Desactivado"}
+                    </StatusChip>
+                    {u.mustChangePassword && (
+                      <small>Debe cambiar contraseña</small>
+                    )}
+                  </span>,
+                  <div className="actions" key="a">
+                    <Button
+                      tone="tertiary"
+                      onClick={() =>
+                        setReset({ id: u.id, name: u.displayName })
+                      }
+                    >
+                      Contraseña temporal
+                    </Button>
+                    {u.id !== me.user.id && (
+                      <Button
+                        tone="danger"
+                        onClick={() =>
+                          setDeactivate({
+                            id: u.id,
+                            name: u.displayName,
+                            active: !u.active,
+                          })
+                        }
+                      >
+                        {u.active ? "Desactivar" : "Activar"}
+                      </Button>
+                    )}
+                  </div>,
+                ],
+              }))}
+            />
           )}
-          <details className="panel">
-            <summary>Crear usuario</summary>
+        </>
+      )}
+      {tab === "areas" && (
+        <>
+          {areas.isPending ? (
+            <LoadingState />
+          ) : areas.error ? (
+            <ErrorState error={areas.error} />
+          ) : areas.data?.length ? (
+            <DataTable
+              caption="Áreas registradas"
+              columns={[{ label: "Área", bare: true }, { label: "Código" }]}
+              rows={areas.data.map((a) => ({
+                key: a.id,
+                cells: [<strong key="n">{a.name}</strong>, a.code],
+              }))}
+            />
+          ) : (
+            <EmptyState title="Todavía no hay áreas" />
+          )}
+        </>
+      )}
+      {tab === "projects" && (
+        <section className="panel">
+          <h2>Proyectos</h2>
+          <p>
+            Los proyectos disponibles y sus miembros se consultan desde{" "}
+            <Link to="/">Mis proyectos</Link>.
+          </p>
+        </section>
+      )}
+      {creating && (
+        <Dialog
+          title={
+            {
+              users: "Crear usuario",
+              areas: "Crear área",
+              projects: "Crear proyecto",
+            }[creating]
+          }
+          onClose={() => setCreating(null)}
+        >
+          {creating === "users" && (
             <ActionForm
               label="Crear usuario"
-              onDone={refresh}
+              onDone={() => {
+                setCreating(null);
+                setSaved("Usuario creado.");
+                refresh();
+              }}
               onSubmit={(d) =>
                 api(
                   "createUser",
@@ -209,40 +284,15 @@ export function Administration({ me }: { me: Me }) {
                 name="isOrganizationAdmin"
               />
             </ActionForm>
-          </details>
-        </>
-      )}
-      {tab === "areas" && (
-        <>
-          {areas.isPending ? (
-            <LoadingState />
-          ) : areas.error ? (
-            <ErrorState error={areas.error} />
-          ) : areas.data?.length ? (
-            <Table caption="Áreas registradas">
-              <thead>
-                <tr>
-                  <th>Área</th>
-                  <th>Código</th>
-                </tr>
-              </thead>
-              <tbody>
-                {areas.data.map((a) => (
-                  <tr key={a.id}>
-                    <td>{a.name}</td>
-                    <td>{a.code}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          ) : (
-            <EmptyState title="Todavía no hay áreas" />
           )}
-          <section className="panel">
-            <h2>Crear área</h2>
+          {creating === "areas" && (
             <ActionForm
               label="Crear área"
-              onDone={refresh}
+              onDone={() => {
+                setCreating(null);
+                setSaved("Área creada.");
+                refresh();
+              }}
               onSubmit={(d) => api("createArea", {}, d)}
             >
               <div className="grid2">
@@ -250,31 +300,28 @@ export function Administration({ me }: { me: Me }) {
                 <Input label="Código del área" name="code" required />
               </div>
             </ActionForm>
-          </section>
-        </>
-      )}
-      {tab === "projects" && (
-        <section className="panel">
-          <h2>Crear proyecto</h2>
-          <ActionForm
-            label="Crear proyecto"
-            onDone={refresh}
-            onSubmit={(d) => api("createProject", {}, d)}
-          >
-            <Input label="Nombre del proyecto" name="name" required />
-            <Input
-              label="Identificador externo"
-              name="externalId"
-              required
-              hint="Se conservará exactamente como lo escribas."
-            />
-            <Textarea label="Descripción" name="description" />
-          </ActionForm>
-          <p className="hint">
-            Los proyectos disponibles y sus miembros se consultan desde{" "}
-            <Link to="/">Mis proyectos</Link>.
-          </p>
-        </section>
+          )}
+          {creating === "projects" && (
+            <ActionForm
+              label="Crear proyecto"
+              onDone={() => {
+                setCreating(null);
+                setSaved("Proyecto creado.");
+                refresh();
+              }}
+              onSubmit={(d) => api("createProject", {}, d)}
+            >
+              <Input label="Nombre del proyecto" name="name" required />
+              <Input
+                label="Identificador externo"
+                name="externalId"
+                required
+                hint="Se conservará exactamente como lo escribas."
+              />
+              <Textarea label="Descripción" name="description" />
+            </ActionForm>
+          )}
+        </Dialog>
       )}
       {reset && (
         <Dialog
@@ -357,33 +404,44 @@ export function Members() {
       <Link to={"/projects/" + projectId + "/editor"} className="back">
         ← Cuestionario
       </Link>
-      <h1>Miembros del proyecto</h1>
-      <p>
-        La membresía da acceso al proyecto. Para que un participante pueda
-        responder, asígnale preguntas en{" "}
-        <Link to={`/projects/${projectId}/editor`}>Organizar</Link> y
-        publícalas. El área no asigna personas automáticamente.
-      </p>
-      <Table caption="Acceso al proyecto">
-        <thead>
-          <tr>
-            <th>Miembro</th>
-            <th>Rol</th>
-            <th>Área</th>
-            <th>Estado</th>
-          </tr>
-        </thead>
-        <tbody>
-          {members.data.map((m) => (
-            <tr key={m.id}>
-              <td>{m.displayName}</td>
-              <td>{roleLabels[m.role]}</td>
-              <td>{m.areaName || "Sin área"}</td>
-              <td>{m.active ? "Activo" : "Inactivo"}</td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+      <PageHeader
+        title="Miembros del proyecto"
+        lead={
+          <>
+            La membresía da acceso al proyecto. Para que un participante pueda
+            responder, asígnale preguntas en{" "}
+            <Link to={`/projects/${projectId}/editor`}>Organizar</Link> y
+            publícalas. El área no asigna personas automáticamente.
+          </>
+        }
+      />
+      <DataTable
+        caption="Acceso al proyecto"
+        columns={[
+          { label: "Miembro", bare: true },
+          { label: "Rol" },
+          { label: "Área" },
+          { label: "Estado" },
+        ]}
+        rows={members.data.map((m) => ({
+          key: m.id,
+          cells: [
+            <div className="ac-person" key="p">
+              <Avatar name={m.displayName} />
+              <strong>{m.displayName}</strong>
+            </div>,
+            roleLabels[m.role],
+            m.areaName || "Sin área",
+            <StatusChip
+              key="s"
+              tone={m.active ? "success" : "neutral"}
+              icon={m.active ? "check" : "info"}
+            >
+              {m.active ? "Activo" : "Inactivo"}
+            </StatusChip>,
+          ],
+        }))}
+      />
       <section className="panel">
         <h2>Asignar o actualizar membresía</h2>
         {users.error && (

@@ -7,7 +7,11 @@ import {
   useBlocker,
   useBeforeUnload,
 } from "react-router-dom";
-import { contracts, type ClarificationThreadView } from "@requirements/contracts";
+import {
+  contracts,
+  type ClarificationThreadView,
+  type MyClarifications,
+} from "@requirements/contracts";
 import { api } from "../api";
 import {
   Dialog,
@@ -18,9 +22,64 @@ import {
   LoadingState,
   Textarea,
 } from "../ui";
+import {
+  NextSteps,
+  StatusChip,
+  ThreadInset,
+  ThreadMessage,
+} from "../ui/semantic";
 import { nextParticipantPath, ParticipantFocus } from "./ParticipantFlow";
-import { ParticipantIcon } from "./ParticipantIcon";
-import { SubmittedAnswer, ThreadMessages } from "./ReviewShared";
+import { dateText, SubmittedAnswer, ThreadStatus } from "./ReviewShared";
+
+/** "Qué sigue" from the threads and submissions the server returned; nothing is promised. */
+function clarificationSteps(d: MyClarifications) {
+  const waiting = d.threads.some((t) => t.status === "WAITING_STAKEHOLDER");
+  const answered = d.threads.some((t) => t.status === "WAITING_ANALYST");
+  const sentAt = d.submissions[0]?.createdAt;
+  const steps: {
+    id: string;
+    state: "done" | "current" | "todo";
+    title: string;
+    detail?: string;
+  }[] = [
+    {
+      id: "sent",
+      state: "done",
+      title: "Enviaste tu respuesta",
+      detail: sentAt ? dateText(sentAt) : undefined,
+    },
+    waiting
+      ? {
+          id: "clarification",
+          state: "current",
+          title: "Pidieron una aclaración",
+          detail: "Te toca responder.",
+        }
+      : {
+          id: "clarification",
+          state: "done",
+          title: answered
+            ? "Respondiste la aclaración"
+            : "Se pidió una aclaración",
+          detail: answered
+            ? "Espera la revisión del equipo analista."
+            : "Ya no está pendiente de tu parte.",
+        },
+  ];
+  if (!waiting)
+    steps.push({
+      id: "review",
+      state: "current",
+      title: "El equipo analista revisa tu respuesta",
+    });
+  steps.push({
+    id: "decision",
+    state: "todo",
+    title: "Decisión validada",
+    detail: "Verás el estado «Validada» en esta pregunta.",
+  });
+  return steps;
+}
 function Reply({
   thread: t,
   version,
@@ -167,8 +226,9 @@ export function Clarifications() {
       }
     }
   }
+  const waiting = d.threads.some((t) => t.status === "WAITING_STAKEHOLDER");
   return (
-    <div className="participant-page">
+    <div className="participant-page participant-wide">
       <ParticipantFocus />
       {(blocker.state === "blocked" || leave) && (
         <Dialog
@@ -203,51 +263,109 @@ export function Clarifications() {
           </div>
         </Dialog>
       )}
-      <div className="participant-answer-card">
-        <p className="participant-badge clarification">
-          <ParticipantIcon name="help" />
-          {d.threads.some((t) => t.status === "WAITING_STAKEHOLDER")
+      <div>
+        <p className="participant-overline">{d.question.sectionTitle}</p>
+        <h1>{d.question.question}</h1>
+        <StatusChip
+          tone={waiting ? "warning" : "info"}
+          icon={waiting ? "help" : "send"}
+        >
+          {waiting
             ? "Necesitamos que aclares esta respuesta"
             : "Aclaración enviada para revisión"}
-        </p>
-        <h1>{d.question.question}</h1>
-        {message && <Alert>{message}</Alert>}
-        {d.threads.length === 0 ? (
-          <EmptyState title="No hay aclaraciones solicitadas">
-            Puedes continuar con tus respuestas.
-          </EmptyState>
-        ) : (
-          d.threads.map((t) => {
-            const s = d.submissions.find((s) => s.id === t.responseRevisionId);
-            return (
-              <section className="review-submission" key={t.id}>
-                <h2>Tu respuesta original</h2>
-                {s && (
-                  <SubmittedAnswer
-                    participant
-                    revision={s}
-                    question={d.question}
-                    projectId={projectId}
-                  />
-                )}
-                <h3>Aclaración solicitada</h3>
-                <ThreadMessages thread={t} />
-                {t.status === "WAITING_STAKEHOLDER" && (
-                  <Reply
-                    thread={t}
-                    version={d.lockVersion}
-                    projectId={projectId}
-                    id={id}
-                    onDirty={(dirty) =>
-                      setPending((previous) => ({ ...previous, [t.id]: dirty }))
-                    }
-                    onDone={() => void done()}
-                    refresh={() => q.refetch()}
-                  />
-                )}
-              </section>
-            );
-          })
+        </StatusChip>
+      </div>
+      {message && <Alert>{message}</Alert>}
+      <div className="participant-columns">
+        <div className="participant-main">
+          {d.threads.length === 0 ? (
+            <EmptyState title="No hay aclaraciones solicitadas">
+              Puedes continuar con tus respuestas.
+            </EmptyState>
+          ) : (
+            d.threads.map((t) => {
+              const s = d.submissions.find(
+                (s) => s.id === t.responseRevisionId,
+              );
+              return (
+                <section className="review-submission" key={t.id}>
+                  <div className="participant-submission">
+                    <div className="participant-submission-head">
+                      <h2>Tu respuesta original</h2>
+                    </div>
+                    {s && (
+                      <SubmittedAnswer
+                        participant
+                        revision={s}
+                        question={d.question}
+                        projectId={projectId}
+                      />
+                    )}
+                  </div>
+                  <div className="participant-exchange">
+                    <ThreadInset
+                      title="Aclaración solicitada"
+                      status={<ThreadStatus status={t.status} />}
+                      turn={
+                        t.status === "WAITING_STAKEHOLDER"
+                          ? "Te toca responder."
+                          : t.status === "WAITING_ANALYST"
+                            ? "Tu aclaración espera la revisión del equipo analista."
+                            : null
+                      }
+                    >
+                      {t.messages.map((m) => (
+                        <ThreadMessage
+                          key={m.id}
+                          from={
+                            m.author.id === t.respondentId ? "answers" : "asks"
+                          }
+                          author={
+                            m.author.id === t.respondentId
+                              ? "Tú"
+                              : m.author.displayName
+                          }
+                          date={dateText(m.createdAt)}
+                          dateTime={m.createdAt}
+                        >
+                          {m.body}
+                        </ThreadMessage>
+                      ))}
+                      {t.closedAt && (
+                        <li className="ac-thread-closed">
+                          <p className="hint">
+                            Cerrada por {t.closedBy?.displayName} ·{" "}
+                            {dateText(t.closedAt)}. {t.closeReason}
+                          </p>
+                        </li>
+                      )}
+                    </ThreadInset>
+                    {t.status === "WAITING_STAKEHOLDER" && (
+                      <Reply
+                        thread={t}
+                        version={d.lockVersion}
+                        projectId={projectId}
+                        id={id}
+                        onDirty={(dirty) =>
+                          setPending((previous) => ({
+                            ...previous,
+                            [t.id]: dirty,
+                          }))
+                        }
+                        onDone={() => void done()}
+                        refresh={() => q.refetch()}
+                      />
+                    )}
+                  </div>
+                </section>
+              );
+            })
+          )}
+        </div>
+        {d.submissions.length > 0 && (
+          <NextSteps steps={clarificationSteps(d)}>
+            <p>Vuelve a esta página para ver novedades.</p>
+          </NextSteps>
         )}
       </div>
       <Link className="participant-back" to={`/projects/${projectId}/work`}>

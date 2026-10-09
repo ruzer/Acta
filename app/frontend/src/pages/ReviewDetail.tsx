@@ -1,7 +1,7 @@
 import {
   AnalystStatus,
-  ConflictComparison,
   DecisionRecord,
+  DispositionRecord,
 } from "./AnalystVisual";
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -21,29 +21,34 @@ import {
   StateCard,
   TabNav,
   TabPanel,
+  Timeline,
 } from "../ui/semantic";
 import { useMediaQuery } from "../ui/useMediaQuery";
 import { ParticipantIcon } from "./ParticipantIcon";
 import { deriveTurn } from "./review-turn";
-import { ContributionComparison } from "./ContributionComparison";
+import { ReviewContrast } from "./ReviewContrast";
+import { ClarificationThread } from "./ReviewThreads";
+import { buildTimeline } from "./review-timeline";
 import "../direction-c-review.css";
 import { workbenchPath } from "../workbench-context";
 import { ContributionSet } from "./ContributionSet";
-import { Alert, Button, ErrorState, LoadingState, Select } from "../ui";
+import { Alert, Button, ErrorState, LoadingState } from "../ui";
 import {
   ReviewActionDialog,
   actionLabels,
   type ReviewAction,
 } from "./ReviewActions";
-import { dateText, ThreadMessages } from "./ReviewShared";
+import { dateText } from "./ReviewShared";
 export function ReviewDetail() {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const contrastHeading = useRef<HTMLHeadingElement>(null);
   const questionHeading = useRef<HTMLHeadingElement>(null);
-  function changeTab(value: string) {
+  function changeTab(value: string, contribution?: string) {
     const next = new URLSearchParams(searchParams);
     next.set("tab", value);
+    if (contribution) next.set("aportacion", contribution);
+    else next.delete("aportacion");
     setSearchParams(next, {
       replace: true,
       state: location.state,
@@ -91,22 +96,35 @@ export function ReviewDetail() {
       action: ReviewAction;
       threadId?: string;
       conflictId?: string;
+      responseRevisionId?: string;
     } | null>(null),
     [message, setMessage] = useState("");
   const [freeComparisonOpen, setFreeComparisonOpen] = useState(false);
+  const [compareFrom, setCompareFrom] = useState<string | undefined>();
   // < 760 px: secondary actions live in a "Más acciones" menu, not a select.
   const compact = useMediaQuery("(max-width: 759px)");
   // Moving between "Aportaciones" and "Contraste" changes the tab; the target
   // can only take focus once its panel is rendered visible, so the request is
   // recorded here and fulfilled after the commit that selects the tab instead
   // of guessing with a timer. It is one-shot: any later tab change clears it.
-  const focusOnTab = useRef<"contrast" | "contributions" | null>(null);
+  const focusOnTab = useRef<"contrast" | "contributions" | "pane" | null>(null);
   const requestedTab = searchParams.get("tab");
   useEffect(() => {
     const wanted = focusOnTab.current;
     focusOnTab.current = null;
-    if (!wanted || wanted !== requestedTab) return;
+    // "pane" is the open contribution, which lives in the Aportaciones tab.
+    if (
+      !wanted ||
+      (wanted === "pane" ? "contributions" : wanted) !== requestedTab
+    )
+      return;
     if (wanted === "contrast") contrastHeading.current?.focus();
+    else if (wanted === "pane")
+      document
+        .querySelector<HTMLElement>(
+          "#review-tabs-panel-contributions .ac-contribution-pane h2",
+        )
+        ?.focus();
     else
       (
         document.querySelector<HTMLButtonElement>(
@@ -210,13 +228,6 @@ export function ReviewDetail() {
   // v0.5.0 withheld "Registrar decisión" while a clarification was open; the
   // backend refuses to validate until every thread is closed.
   const validationBlocked = primary === "validateQuestion" && !!openThread;
-  // Comparing never depends on conflicts: offer every current pair unless one
-  // conflict comparison already lets the analyst pick among all of them.
-  const conflictCoversCurrent = d.conflicts.some((c) =>
-    current.every((s) =>
-      c.participants.some((p) => p.responseRevisionId === s.id),
-    ),
-  );
   const otherActions = [
     ...new Set<ReviewAction>([
       ...((!turn.action || primary !== turn.action) &&
@@ -238,34 +249,16 @@ export function ReviewDetail() {
       conflictId: value === "resolveConflict" ? openConflict?.id : undefined,
     });
   }
-  const otherControls =
-    d.canReview &&
-    (compact ? (
-      <ActionMenu
-        label="Más acciones"
-        items={otherActions.map((item) => ({
-          value: item,
-          label: actionLabels[item],
-        }))}
-        onSelect={(value) => chooseAction(value as ReviewAction)}
-      />
-    ) : (
-      <Select
-        label="Otras acciones"
-        value=""
-        onChange={(event) => {
-          const value = event.target.value as ReviewAction;
-          if (value) chooseAction(value);
-        }}
-      >
-        <option value="">Selecciona una acción</option>
-        {otherActions.map((item) => (
-          <option key={item} value={item}>
-            {actionLabels[item]}
-          </option>
-        ))}
-      </Select>
-    ));
+  const otherControls = d.canReview && (
+    <ActionMenu
+      label={compact ? "Más acciones" : "Otras acciones"}
+      items={otherActions.map((item) => ({
+        value: item,
+        label: actionLabels[item],
+      }))}
+      onSelect={(value) => chooseAction(value as ReviewAction)}
+    />
+  );
   const participants = d.participants.length > 0 && (
     <details className="ac-review-participants">
       <summary>Participantes ({d.participants.length})</summary>
@@ -284,115 +277,39 @@ export function ReviewDetail() {
       </ul>
     </details>
   );
+  const openThreadAction = (
+    next: ReviewAction,
+    options: {
+      threadId?: string;
+      conflictId?: string;
+      responseRevisionId?: string;
+    },
+  ) => setAction({ action: next, ...options });
   function threadsFor(submissionId?: string) {
     return d.threads
       .filter(
         (thread) => !submissionId || thread.responseRevisionId === submissionId,
       )
       .map((thread) => (
-        <article key={thread.id} className="ac-review-thread">
-          <h3>
-            Aclaración sobre{" "}
-            {
-              d.submissions.find(
-                (submission) => submission.id === thread.responseRevisionId,
-              )?.respondent.displayName
-            }{" "}
-            · envío #
-            {
-              d.submissions.find(
-                (submission) => submission.id === thread.responseRevisionId,
-              )?.number
-            }
-          </h3>
-          <ThreadMessages thread={thread} />
-          {d.canReview && thread.status === "WAITING_ANALYST" && (
-            <div className="actions">
-              <Button
-                tone="secondary"
-                onClick={() =>
-                  setAction({
-                    action: "closeClarification",
-                    threadId: thread.id,
-                  })
-                }
-              >
-                Cerrar aclaración
-              </Button>
-              <Button
-                tone="secondary"
-                onClick={() =>
-                  setAction({
-                    action: "requestClarification",
-                    threadId: thread.id,
-                  })
-                }
-              >
-                Preguntar nuevamente
-              </Button>
-            </div>
-          )}
-        </article>
+        <ClarificationThread
+          key={thread.id}
+          thread={thread}
+          data={d}
+          onAction={openThreadAction}
+          showTarget={!submissionId}
+        />
       ));
   }
-  const conflictsSection = d.conflicts.length > 0 && (
-    <section>
-      <h2>Conflictos</h2>
-      {d.conflicts.map((c) => (
-        <article key={c.id} className="review-submission">
-          <h3>
-            {c.status === "OPEN" ? "Conflicto abierto" : "Conflicto resuelto"}
-          </h3>
-          <p className="answer-text">{c.reason}</p>
-          <p className="hint">
-            Registrado por {c.openedBy.displayName} · {dateText(c.openedAt)}
-          </p>
-          <details open={c.status === "OPEN"}>
-            <summary>Comparar respuestas en conflicto</summary>
-            <ConflictComparison data={d} conflict={c} />
-          </details>
-          <p className="hint">
-            Resolver este conflicto no valida la pregunta. La decisión se
-            registra por separado.
-          </p>
-          {c.resolution ? (
-            <>
-              <p className="answer-text">
-                <strong>Resolución: </strong>
-                {c.resolution.resolutionText}
-              </p>
-              <p>
-                {c.resolution.resolvedBy.displayName} ·{" "}
-                {dateText(c.resolution.resolvedAt)}
-              </p>
-              <p>
-                Fuentes:{" "}
-                {c.resolution.sources
-                  .map((source) => {
-                    const s = d.submissions.find(
-                      (s) => s.id === source.responseRevisionId,
-                    );
-                    return `${s?.respondent.displayName} #${s?.number}`;
-                  })
-                  .join(", ")}
-              </p>
-            </>
-          ) : (
-            d.canReview && (
-              <Button
-                tone="secondary"
-                onClick={() =>
-                  setAction({ action: "resolveConflict", conflictId: c.id })
-                }
-              >
-                Resolver conflicto
-              </Button>
-            )
-          )}
-        </article>
-      ))}
-    </section>
-  );
+  const timeline = buildTimeline(d).map((event) => ({
+    ...event,
+    date: dateText(event.at),
+    dateTime: event.at,
+  }));
+  const currentDecisions = d.validations.filter((v) => !v.invalidatedAt);
+  const historicalDecisions = d.validations.filter((v) => v.invalidatedAt);
+  const currentDispositions = d.dispositions.filter((n) => !n.revokedAt);
+  const historicalDispositions = d.dispositions.filter((n) => n.revokedAt);
+  const reopen = () => setAction({ action: "reopenQuestion" });
   return (
     <div className="review-page av-scope ac-review">
       <div className="ac-review-back">
@@ -517,7 +434,49 @@ export function ReviewDetail() {
           key={d.question.id}
           data={d}
           renderThreads={threadsFor}
+          openId={searchParams.get("aportacion") ?? undefined}
+          renderActions={(submissionId) => {
+            const submission = d.submissions.find((s) => s.id === submissionId);
+            const asking = d.threads.some(
+              (t) =>
+                t.responseRevisionId === submissionId && t.status !== "CLOSED",
+            );
+            if (!submission?.current) return undefined;
+            return (
+              <>
+                {d.canReview && !asking && (
+                  <Button
+                    tone="secondary"
+                    aria-label={`Pedir aclaración a ${submission.respondent.displayName}`}
+                    onClick={() =>
+                      setAction({
+                        action: "requestClarification",
+                        responseRevisionId: submissionId,
+                      })
+                    }
+                  >
+                    Pedir aclaración
+                  </Button>
+                )}
+                {current.length >= 2 && (
+                  <Button
+                    tone="secondary"
+                    aria-label={`Contrastar la aportación de ${submission.respondent.displayName} con otra`}
+                    onClick={() => {
+                      setCompareFrom(submissionId);
+                      setFreeComparisonOpen(true);
+                      focusOnTab.current = "contrast";
+                      changeTab("contrast");
+                    }}
+                  >
+                    Contrastar con otra
+                  </Button>
+                )}
+              </>
+            );
+          }}
           onCompare={() => {
+            setCompareFrom(undefined);
             setFreeComparisonOpen(true);
             focusOnTab.current = "contrast";
             changeTab("contrast");
@@ -527,107 +486,94 @@ export function ReviewDetail() {
       </TabPanel>
       {available.contrast && (
         <TabPanel id="review-tabs" value="contrast" active={tab === "contrast"}>
-          <div className="ac-contrast-heading">
-            <h2 ref={contrastHeading} tabIndex={-1}>
-              Contrastar aportaciones
-            </h2>
-            <Button
-              tone="secondary"
-              onClick={() => {
-                focusOnTab.current = "contributions";
-                changeTab("contributions");
-              }}
-            >
-              ← Volver a {current.length} aportaciones
-            </Button>
-          </div>
-          {conflictsSection}
-          {current.length < 2 ? (
-            !conflictsSection && (
-              <p>Se necesitan al menos dos aportaciones para comparar.</p>
-            )
-          ) : !conflictsSection ? (
-            <ContributionComparison data={d} />
-          ) : (
-            !conflictCoversCurrent && (
-              <details
-                className="ac-free-comparison"
-                open={freeComparisonOpen}
-                onToggle={(event) =>
-                  setFreeComparisonOpen(event.currentTarget.open)
-                }
-              >
-                <summary>
-                  Comparar otras aportaciones vigentes ({current.length})
-                </summary>
-                <ContributionComparison
-                  data={d}
-                  labelSuffix=" (comparación libre)"
-                />
-              </details>
-            )
-          )}
+          <ReviewContrast
+            compareFrom={compareFrom}
+            data={d}
+            headingRef={contrastHeading}
+            onBack={() => {
+              focusOnTab.current = "contributions";
+              changeTab("contributions");
+            }}
+            freeOpen={freeComparisonOpen}
+            setFreeOpen={setFreeComparisonOpen}
+            onAction={openThreadAction}
+          />
         </TabPanel>
       )}
       {available.decision && (
         <TabPanel id="review-tabs" value="decision" active={tab === "decision"}>
-          {d.validations.length > 0 && (
-            <section aria-labelledby="decisions-title">
-              <h2 id="decisions-title">Decisiones registradas</h2>
-              {d.validations
-                .filter((v) => !v.invalidatedAt)
-                .map((v) => (
-                  <DecisionRecord key={v.id} data={d} validation={v} />
+          <div
+            className={`ac-decision-layout${timeline.length ? " ac-decision-layout-with-aside" : ""}`}
+          >
+            <div className="ac-decision-main">
+              {currentDecisions.map((v) => (
+                <DecisionRecord
+                  key={v.id}
+                  data={d}
+                  validation={v}
+                  onReopen={d.canReview ? reopen : undefined}
+                  onOpenContribution={(submissionId) => {
+                    focusOnTab.current = "pane";
+                    changeTab("contributions", submissionId);
+                  }}
+                />
+              ))}
+              {d.status === "NOT_APPLICABLE" &&
+                currentDispositions.map((n) => (
+                  <DispositionRecord key={n.id} disposition={n} />
                 ))}
-              {d.validations.some((v) => v.invalidatedAt) && (
-                <details>
+              {d.canReview &&
+                d.status === "NOT_APPLICABLE" &&
+                currentDispositions.length > 0 && (
+                  <Button tone="tertiary" onClick={reopen}>
+                    Reabrir pregunta
+                  </Button>
+                )}
+              {!d.validations.length && d.status !== "NOT_APPLICABLE" && (
+                <p>No hay decisiones registradas.</p>
+              )}
+              {(historicalDecisions.length > 0 ||
+                (d.status === "NOT_APPLICABLE" &&
+                  historicalDispositions.length > 0)) && (
+                <details className="ac-decision-history">
                   <summary>
                     Decisiones históricas (
-                    {d.validations.filter((v) => v.invalidatedAt).length})
+                    {historicalDecisions.length +
+                      (d.status === "NOT_APPLICABLE"
+                        ? historicalDispositions.length
+                        : 0)}
+                    )
                   </summary>
-                  {d.validations
-                    .filter((v) => v.invalidatedAt)
-                    .map((v) => (
-                      <DecisionRecord key={v.id} data={d} validation={v} />
+                  {historicalDecisions.map((v) => (
+                    <DecisionRecord key={v.id} data={d} validation={v} />
+                  ))}
+                  {d.status === "NOT_APPLICABLE" &&
+                    historicalDispositions.map((n) => (
+                      <DispositionRecord key={n.id} disposition={n} />
                     ))}
                 </details>
               )}
-            </section>
-          )}
-
-          {!d.validations.length && <p>No hay decisiones registradas.</p>}
-          {d.status === "NOT_APPLICABLE" && d.dispositions.length > 0 && (
-            <details>
-              <summary>Decisiones de no aplica</summary>
-              {d.dispositions.map((n) => (
-                <article key={n.id}>
-                  <h3>
-                    {n.revokedAt ? "Decisión histórica" : "No aplica vigente"}
-                  </h3>
-                  <p>{n.reason}</p>
-                  <p>Alcance: {n.scope}</p>
-                  <p>
-                    {n.markedBy.displayName} · {dateText(n.markedAt)}
-                  </p>
-                  {n.revokedAt && <p>Reabierta: {n.revokeReason}</p>}
-                </article>
-              ))}
-            </details>
-          )}
-          {d.canReview &&
-            (d.status === "VALIDATED" || d.status === "NOT_APPLICABLE") && (
-              <Button
-                tone="secondary"
-                onClick={() => setAction({ action: "reopenQuestion" })}
-              >
-                Reabrir pregunta
-              </Button>
+            </div>
+            {timeline.length > 0 && (
+              <aside className="ac-decision-aside">
+                <h2>Cómo se llegó aquí</h2>
+                <Timeline
+                  label="Cómo se llegó a esta decisión"
+                  events={timeline}
+                />
+              </aside>
             )}
+          </div>
         </TabPanel>
       )}
       {available.history && (
         <TabPanel id="review-tabs" value="history" active={tab === "history"}>
           <h2>Historial de la pregunta</h2>
+          {timeline.length > 0 && (
+            <section className="ac-history-timeline">
+              <Timeline label="Cronología de la pregunta" events={timeline} />
+            </section>
+          )}
           {d.threads.length > 0 && (
             <section>
               <h3>Aclaraciones</h3>
@@ -638,17 +584,7 @@ export function ReviewDetail() {
             <details>
               <summary>Decisiones de no aplica</summary>
               {d.dispositions.map((n) => (
-                <article key={n.id}>
-                  <h3>
-                    {n.revokedAt ? "Decisión histórica" : "No aplica vigente"}
-                  </h3>
-                  <p>{n.reason}</p>
-                  <p>Alcance: {n.scope}</p>
-                  <p>
-                    {n.markedBy.displayName} · {dateText(n.markedAt)}
-                  </p>
-                  {n.revokedAt && <p>Reabierta: {n.revokeReason}</p>}
-                </article>
+                <DispositionRecord key={n.id} disposition={n} />
               ))}
             </details>
           )}

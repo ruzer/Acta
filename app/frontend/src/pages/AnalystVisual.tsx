@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ContributionComparison } from "./ContributionComparison";
 import { Link } from "react-router-dom";
 import type {
@@ -6,9 +7,16 @@ import type {
   reviewStates,
 } from "@requirements/contracts";
 import type { z } from "zod";
-import { StatusChip, type StatusTone } from "../ui/semantic";
+import { Button } from "../ui";
+import { DecisionSheet, StatusChip, type StatusTone } from "../ui/semantic";
 import { ParticipantIcon } from "./ParticipantIcon";
-import { dateText, reviewLabels, SubmittedAnswer } from "./ReviewShared";
+import { answerText } from "./AnswerControl";
+import {
+  dateText,
+  EvidenceList,
+  reviewLabels,
+  SubmittedAnswer,
+} from "./ReviewShared";
 import "../analyst-visual.css";
 
 type State = (typeof reviewStates)[number];
@@ -30,113 +38,214 @@ export function AnalystStatus({ status }: { status: State }) {
     </StatusChip>
   );
 }
+const excerptLimit = 320;
+function CopyRecord({ value }: { value: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <>
+      <Button
+        tone="tertiary"
+        onClick={() => {
+          void navigator.clipboard
+            ?.writeText(value)
+            .then(() => setCopied(true))
+            .catch(() => setCopied(false));
+        }}
+      >
+        Copiar referencia
+      </Button>
+      <span role="status" className="ac-copy-status">
+        {copied ? "Referencia copiada" : ""}
+      </span>
+    </>
+  );
+}
+/**
+ * A decision as a document: the result is the content (serif, dominant), scope
+ * and exceptions follow, then the numbered grounds with their verifiable
+ * sources. The record identifier is only in the foot. It documents the review;
+ * it does not create any legal effect.
+ */
 export function DecisionRecord({
   data,
   validation: v,
+  onReopen,
+  onOpenContribution,
 }: {
   data: ReviewDetail;
   validation: ReviewDetail["validations"][number];
+  /** Present only when the viewer may reopen the question (`canReview`). */
+  onReopen?: () => void;
+  /** Opens a source contribution in the Aportaciones tab. */
+  onOpenContribution?: (submissionId: string) => void;
 }) {
   const historical = !!v.invalidatedAt;
-  return (
-    <article
-      className={`av-decision ${historical ? "av-historical" : "av-current"}`}
-      aria-label={historical ? "Decisión histórica" : "Decisión vigente"}
-    >
-      <header>
-        {historical ? (
-          <p className="av-kicker">
-            <ParticipantIcon name="clock" />
-            Antecedente
+  const grounds = [
+    ...v.sources.map((source) => ({
+      id: source.id,
+      node: (() => {
+        const s = data.submissions.find(
+          (s) => s.id === source.responseRevisionId,
+        );
+        if (!s)
+          return (
+            <p className="ac-foundation-text">
+              Respuesta vinculada; detalle no disponible.
+            </p>
+          );
+        const text = answerText(data.question, s.answer).replace(/\s+/g, " ");
+        return (
+          <>
+            <p className="ac-foundation-byline">
+              <strong>{s.respondent.displayName}</strong> · {s.area.name} ·
+              envío #{s.number} · {dateText(s.createdAt)}
+            </p>
+            <p className="ac-foundation-text">
+              {text.length > excerptLimit
+                ? `${text.slice(0, excerptLimit).trimEnd()}…`
+                : text}
+            </p>
+            {(text.length > excerptLimit || s.comment || s.example) && (
+              <details>
+                <summary>
+                  Respuesta completa de {s.respondent.displayName}
+                </summary>
+                <SubmittedAnswer
+                  revision={s}
+                  question={data.question}
+                  projectId={data.projectId}
+                />
+              </details>
+            )}
+            <EvidenceList
+              revision={s}
+              projectId={data.projectId}
+              empty="Sin evidencia adjunta."
+            />
+            {onOpenContribution && (
+              <Button
+                tone="tertiary"
+                className="button tertiary ac-foundation-open"
+                aria-label={`Abrir la aportación de ${s.respondent.displayName}, envío #${s.number}`}
+                onClick={() => onOpenContribution(s.id)}
+              >
+                Abrir la aportación
+              </Button>
+            )}
+          </>
+        );
+      })(),
+    })),
+    ...v.messages.map((source) => {
+      const m = data.threads
+        .flatMap((t) => t.messages)
+        .find((m) => m.id === source.clarificationMessageId);
+      return {
+        id: source.id,
+        node: (
+          <p className="ac-foundation-text">
+            {m
+              ? `Aclaración de ${m.author.displayName}: ${m.body}`
+              : "Aclaración vinculada; detalle no disponible."}
           </p>
-        ) : (
-          <AnalystStatus status="VALIDATED" />
-        )}
-        <h3>{historical ? "Decisión histórica" : "Decisión vigente"}</h3>
-        <p className="next-decision-reference">
-          Referencia del registro: {v.id}
+        ),
+      };
+    }),
+    ...v.resolutions.map((source) => ({
+      id: source.id,
+      node: (
+        <p className="ac-foundation-text">
+          Resolución:{" "}
+          {data.conflicts.find(
+            (c) => c.resolution?.id === source.conflictResolutionId,
+          )?.resolution?.resolutionText ?? "Detalle no disponible."}
         </p>
-        <div className="av-decision-author">
+      ),
+    })),
+  ];
+  return (
+    <DecisionSheet
+      label={historical ? "Decisión histórica" : "Decisión vigente"}
+      kicker={historical ? "Decisión histórica" : "Decisión validada"}
+      header={
+        <>
+          {historical ? (
+            <StatusChip tone="neutral" icon="clock">
+              Antecedente
+            </StatusChip>
+          ) : (
+            <StatusChip tone="success" icon="check">
+              Vigente
+            </StatusChip>
+          )}
+          <p className="ac-decision-by">
+            Validada por <strong>{v.validatedBy.displayName}</strong> ·{" "}
+            {dateText(v.validatedAt)}
+          </p>
+        </>
+      }
+      footer={
+        <>
+          <p className="ac-decision-record">
+            <span>
+              Referencia del registro: <code>{v.id}</code>
+            </span>
+            <CopyRecord value={v.id} />
+          </p>
           <p>
-            Validada por <strong>{v.validatedBy.displayName}</strong>
+            Documenta el resultado de la revisión del equipo analista. No
+            equivale a una firma electrónica ni tiene un efecto jurídico
+            adicional. Esto no significa que cada aportación individual haya
+            sido validada.
           </p>
-          <p>Fecha: {dateText(v.validatedAt)}</p>
-        </div>
-        {historical && (
-          <p className="av-secondary">
-            Se conserva como antecedente. Ya no es la decisión vigente.
-          </p>
-        )}
-      </header>
-      <div className="next-decision-question">
-        <h4>Pregunta</h4>
-        <p className="answer-text">{data.question.question}</p>
-      </div>
-      <h4>Qué se decidió</h4>
-      <p className="av-decision-text">{v.decisionText}</p>
-      <div className="av-decision-scope">
-        <div>
-          <h4>Alcance</h4>
-          <p className="answer-text">{v.scope}</p>
-        </div>
-        <div>
-          <h4>Excepciones</h4>
-          <p className="answer-text">
-            {v.exceptions || "No se registraron excepciones."}
-          </p>
-        </div>
-      </div>
-      <h4>Fuentes utilizadas</h4>
-      {v.sources.length + v.messages.length + v.resolutions.length === 0 ? (
-        <p>Sin fuentes disponibles para mostrar.</p>
-      ) : (
-        <ul className="av-sources">
-          {v.sources.map((source) => {
-            const s = data.submissions.find(
-              (s) => s.id === source.responseRevisionId,
-            );
-            return (
-              <li key={source.id}>
-                {s ? (
-                  <details>
-                    <summary>
-                      Respuesta de {s.respondent.displayName} · {s.area.name} ·
-                      envío #{s.number}
-                    </summary>
-                    <SubmittedAnswer
-                      revision={s}
-                      question={data.question}
-                      projectId={data.projectId}
-                    />
-                  </details>
-                ) : (
-                  "Respuesta vinculada; detalle no disponible."
-                )}
-              </li>
-            );
-          })}
-          {v.messages.map((source) => {
-            const m = data.threads
-              .flatMap((t) => t.messages)
-              .find((m) => m.id === source.clarificationMessageId);
-            return (
-              <li key={source.id}>
-                {m
-                  ? `Aclaración de ${m.author.displayName}: ${m.body}`
-                  : "Aclaración vinculada; detalle no disponible."}
-              </li>
-            );
-          })}
-          {v.resolutions.map((source) => (
-            <li key={source.id}>
-              Resolución:{" "}
-              {data.conflicts.find(
-                (c) => c.resolution?.id === source.conflictResolutionId,
-              )?.resolution?.resolutionText ?? "Detalle no disponible."}
-            </li>
-          ))}
-        </ul>
+          {onReopen && !historical && (
+            <div>
+              <Button tone="tertiary" onClick={onReopen}>
+                Reabrir pregunta
+              </Button>
+            </div>
+          )}
+        </>
+      }
+    >
+      {historical && (
+        <p className="av-secondary">
+          Se conserva como antecedente. Ya no es la decisión vigente.
+        </p>
       )}
+      <div className="ac-decision-quote">
+        <p className="ac-decision-label">Pregunta</p>
+        <p>{data.question.question}</p>
+      </div>
+      <h3 className="ac-decision-label ac-decision-label-result">Se decide</h3>
+      <p className="ac-decision-result">{v.decisionText}</p>
+      <div className="ac-decision-grid">
+        <div>
+          <h3 className="ac-decision-label">Alcance</h3>
+          <p>{v.scope}</p>
+        </div>
+        <div>
+          <h3 className="ac-decision-label">Excepciones</h3>
+          <p>{v.exceptions || "No se registraron excepciones."}</p>
+        </div>
+      </div>
+      <section className="ac-decision-section">
+        <h3 className="ac-decision-label">Fundamentos</h3>
+        {grounds.length === 0 ? (
+          <p>Sin fuentes disponibles para mostrar.</p>
+        ) : (
+          <ol className="ac-foundations">
+            {grounds.map((ground, index) => (
+              <li key={ground.id}>
+                <span className="ac-foundation-index" aria-hidden="true">
+                  [{index + 1}]
+                </span>
+                <div>{ground.node}</div>
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
       {historical && (
         <p className="av-history-reason">
           Volvió a revisión: {v.invalidationReason || "Sin motivo disponible."}{" "}
@@ -144,12 +253,45 @@ export function DecisionRecord({
         </p>
       )}
       {v.validationComment && (
-        <details>
+        <details className="ac-decision-section">
           <summary>Comentario interno</summary>
           <p className="answer-text">{v.validationComment}</p>
         </details>
       )}
-    </article>
+    </DecisionSheet>
+  );
+}
+/** A "No aplica" disposition keeps the same document grammar as a decision. */
+export function DispositionRecord({
+  disposition: n,
+}: {
+  disposition: ReviewDetail["dispositions"][number];
+}) {
+  const historical = !!n.revokedAt;
+  return (
+    <DecisionSheet
+      label={historical ? "Decisión histórica" : "No aplica vigente"}
+      kicker={historical ? "Decisión histórica" : "Marcada como No aplica"}
+      header={
+        <p className="ac-decision-by">
+          <strong>{n.markedBy.displayName}</strong> · {dateText(n.markedAt)}
+        </p>
+      }
+    >
+      <h3 className="ac-decision-label ac-decision-label-result">Motivo</h3>
+      <p className="ac-decision-result">{n.reason}</p>
+      <div className="ac-decision-grid">
+        <div>
+          <h3 className="ac-decision-label">Alcance</h3>
+          <p>{n.scope}</p>
+        </div>
+      </div>
+      {n.revokedAt && (
+        <p className="av-history-reason">
+          Reabierta: {n.revokeReason} · {dateText(n.revokedAt)}
+        </p>
+      )}
+    </DecisionSheet>
   );
 }
 export function ConflictComparison({

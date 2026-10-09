@@ -334,6 +334,13 @@
   color: var(--ac-muted);
   cursor: default;
 }
+.an-collapse .participant-icon {
+  width: 16px;
+  height: 16px;
+}
+.an-collapse-open .participant-icon {
+  transform: rotate(90deg);
+}
 .an-text-action {
   min-height: 24px;
   padding: 0;
@@ -686,5 +693,60 @@
 @media (max-width: 374px) {
   .ac-questionnaire-results .ac-selection-scope:not([open]) {
     max-width: 120px;
+  }
+}
+
+/*
+ * UX-10: on wide screens the controls take two rows, not four. The mode and
+ * the main action share the first; search and the three filters share the
+ * second. The markup keeps its reading order (mode, search, action, filters);
+ * the grid only places it.
+ */
+@media (min-width: 900px) {
+  .an-questionnaire .qe-compact {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
+    column-gap: var(--ac-space-3);
+    row-gap: var(--ac-space-3);
+    align-items: end;
+  }
+  .an-questionnaire .qe-compact > * {
+    grid-column: 1 / -1;
+  }
+  .an-questionnaire .qe-compact > .an-approach,
+  .an-questionnaire .qe-compact > .qe-filters:not([hidden]) {
+    display: contents;
+  }
+  .an-approach > [role="group"] {
+    grid-row: 1;
+    grid-column: 1;
+    justify-self: start;
+  }
+  .an-questionnaire .qe-compact > .an-approach-hint {
+    grid-row: 1;
+    grid-column: 2 / 4;
+    margin: 0;
+    align-self: center;
+  }
+  .an-approach > .button:not(.ac-filter-toggle) {
+    grid-row: 1;
+    grid-column: 4;
+    justify-self: end;
+  }
+  .an-approach > .field {
+    grid-row: 2;
+    grid-column: 1;
+  }
+  .an-questionnaire .qe-filters > .qe-outline {
+    grid-row: 2;
+    grid-column: 2;
+  }
+  .an-questionnaire .qe-filters > .field:nth-of-type(1) {
+    grid-row: 2;
+    grid-column: 3;
+  }
+  .an-questionnaire .qe-filters > .field:nth-of-type(2) {
+    grid-row: 2;
+    grid-column: 4;
   }
 }

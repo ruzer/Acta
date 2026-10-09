@@ -255,11 +255,14 @@ export function ContributionRail({
 export function ContributionPane({
   title,
   metadata,
+  actions,
   children,
   headingRef,
 }: {
   title: ReactNode;
   metadata?: ReactNode;
+  /** Actions about this contribution, next to it (for example "Pedir aclaración"). */
+  actions?: ReactNode;
   children: ReactNode;
   headingRef?: Ref<HTMLHeadingElement>;
 }) {
@@ -267,9 +270,12 @@ export function ContributionPane({
   return (
     <article className="ac-contribution-pane" aria-labelledby={id}>
       <header>
-        <h2 id={id} ref={headingRef} tabIndex={-1}>
-          {title}
-        </h2>
+        <div className="ac-contribution-title">
+          <h2 id={id} ref={headingRef} tabIndex={-1}>
+            {title}
+          </h2>
+          {actions && <div className="ac-contribution-actions">{actions}</div>}
+        </div>
         {metadata}
       </header>
       <div className="ac-contribution-body">{children}</div>
@@ -313,81 +319,183 @@ export function EvidenceFile({
   );
 }
 
+/** An exchange glued to the contribution it is about: who asks, who answers, whose turn it is. */
 export function ThreadInset({
   title,
+  status,
+  turn,
   children,
+  actions,
 }: {
   title: string;
+  status?: ReactNode;
+  /** Whose turn it is, in words (the chip alone is never the only cue). */
+  turn?: ReactNode;
   children: ReactNode;
+  actions?: ReactNode;
 }) {
   const id = useId();
   return (
     <section className="ac-thread-inset" aria-labelledby={id}>
-      <h3 id={id}>{title}</h3>
-      {children}
+      <header>
+        <h3 id={id}>{title}</h3>
+        {status}
+      </header>
+      {turn && <p className="ac-thread-turn">{turn}</p>}
+      <ol className="ac-thread-messages">{children}</ol>
+      {actions && <div className="ac-thread-actions">{actions}</div>}
     </section>
   );
 }
 
+export function ThreadMessage({
+  from,
+  author,
+  date,
+  dateTime,
+  children,
+}: {
+  /** "asks" is the review team's question; "answers" is the participant's reply. */
+  from: "asks" | "answers";
+  author: ReactNode;
+  date: ReactNode;
+  dateTime?: string;
+  children: ReactNode;
+}) {
+  return (
+    <li className={`ac-thread-message ac-thread-${from}`}>
+      <p className="ac-thread-byline">
+        <strong>{author}</strong>
+        <span className="ac-thread-role">
+          {from === "asks" ? "Pregunta" : "Respuesta"}
+        </span>
+        <time dateTime={dateTime}>{date}</time>
+      </p>
+      <p className="ac-thread-body">{children}</p>
+    </li>
+  );
+}
+
+/**
+ * Two equal columns aligned by field: each label appears once per row, the
+ * columns carry no per-side colour and below 760 px every field stacks its two
+ * values (explicit roles keep the table semantics when the layout changes).
+ */
 export function ComparisonTable({
   caption,
   columns,
   rows,
 }: {
   caption: string;
-  columns: [ReactNode, ReactNode];
-  rows: { id: string; label: string; values: [ReactNode, ReactNode] }[];
+  columns: { key: string; head: ReactNode; label?: string }[];
+  rows: { id: string; label: string; values: ReactNode[] }[];
 }) {
   return (
-    <div
-      className="ac-comparison-scroll"
-      role="region"
-      aria-label={caption}
-      tabIndex={0}
-    >
-      <table className="ac-comparison">
-        <caption>{caption}</caption>
-        <thead>
-          <tr>
-            <th scope="col">Campo</th>
-            {columns.map((column, index) => (
-              <th key={index} scope="col">
-                {column}
-              </th>
+    <table className="ac-comparison" role="table">
+      <caption className="sr-only">{caption}</caption>
+      <thead role="rowgroup">
+        <tr role="row">
+          <td className="ac-comparison-corner" role="columnheader">
+            <span className="sr-only">Campo</span>
+          </td>
+          {columns.map((column) => (
+            <th
+              key={column.key}
+              scope="col"
+              role="columnheader"
+              aria-label={column.label}
+            >
+              {column.head}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody role="rowgroup">
+        {rows.map((row) => (
+          <tr key={row.id} role="row">
+            <th scope="row" role="rowheader">
+              {row.label}
+            </th>
+            {row.values.map((value, index) => (
+              <td key={index} role="cell" data-column={columns[index]?.key}>
+                {value}
+              </td>
             ))}
           </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.id}>
-              <th scope="row">{row.label}</th>
-              {row.values.map((value, index) => (
-                <td key={index}>{value}</td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+        ))}
+      </tbody>
+    </table>
   );
 }
 
+/** A decision as a document: the result is the content, identifiers stay at the foot. */
 export function DecisionSheet({
-  title,
+  label,
+  kicker,
+  header,
   children,
   footer,
 }: {
-  title: string;
+  /** Accessible name of the whole record. */
+  label: string;
+  kicker: string;
+  header?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
 }) {
   const id = useId();
   return (
-    <article className="ac-decision-sheet" aria-labelledby={id}>
-      <h2 id={id}>{title}</h2>
+    <article
+      className="ac-decision-sheet"
+      aria-label={label}
+      aria-describedby={id}
+    >
+      <header className="ac-decision-head">
+        <h2 id={id} className="ac-decision-kicker">
+          {kicker}
+        </h2>
+        {header}
+      </header>
       {children}
       {footer && <footer>{footer}</footer>}
     </article>
+  );
+}
+
+/** Chronological reading of what happened; each event has an actor, a text and a date. */
+export function Timeline({
+  label,
+  events,
+}: {
+  label: string;
+  events: {
+    id: string;
+    icon: string;
+    tone?: "danger" | "warning" | "success";
+    actor: string;
+    text: string;
+    date: string;
+    dateTime: string;
+  }[];
+}) {
+  return (
+    <ol className="ac-timeline" aria-label={label}>
+      {events.map((event) => (
+        <li key={event.id}>
+          <span
+            className={`ac-timeline-icon${event.tone ? ` ac-timeline-${event.tone}` : ""}`}
+          >
+            <ParticipantIcon name={event.icon} />
+          </span>
+          <div>
+            <p>
+              <strong>{event.actor}</strong> {event.text}
+            </p>
+            <time dateTime={event.dateTime}>{event.date}</time>
+          </div>
+        </li>
+      ))}
+    </ol>
   );
 }
 
@@ -403,6 +511,241 @@ export function QueueRow({
       <div>{children}</div>
       <div className="ac-row-action">{action}</div>
     </li>
+  );
+}
+
+/** A register entry read as a document line: reference, title, where it belongs, and its status. */
+export function RegisterRow({
+  reference,
+  title,
+  meta,
+  status,
+  level = 3,
+}: {
+  reference?: ReactNode;
+  title: ReactNode;
+  meta?: ReactNode;
+  status?: ReactNode;
+  /** Heading level of the title: 2 directly under the page's h1, 3 under a section. */
+  level?: 2 | 3;
+}) {
+  const Heading = level === 2 ? "h2" : "h3";
+  return (
+    <li className="ac-register-row">
+      <div>
+        {reference && <p className="ac-register-reference">{reference}</p>}
+        <Heading className="ac-register-title">{title}</Heading>
+        {meta && <p className="ac-register-meta">{meta}</p>}
+      </div>
+      {status}
+    </li>
+  );
+}
+
+/** How far along someone is: a count in words, a segmented bar and one honest note. */
+export function ProgressCard({
+  sent,
+  total,
+  drafts = 0,
+  noun = "preguntas enviadas",
+  children,
+}: {
+  sent: number;
+  total: number;
+  drafts?: number;
+  noun?: string;
+  children?: ReactNode;
+}) {
+  const share = (value: number) =>
+    total > 0 ? `${Math.min(100, (value / total) * 100)}%` : "0%";
+  return (
+    <section className="ac-progress-card" aria-label="Avance">
+      <p className="ac-progress-count">
+        <strong>{sent}</strong> de {total} {noun}
+      </p>
+      <div
+        className="ac-progress-bar"
+        role="img"
+        aria-label={`${sent} de ${total} ${noun}${drafts ? `; ${drafts} en borrador` : ""}`}
+      >
+        <span style={{ width: share(sent) }} />
+        <span className="ac-progress-drafts" style={{ width: share(drafts) }} />
+      </div>
+      {children && <div className="ac-progress-note">{children}</div>}
+    </section>
+  );
+}
+
+/** A card that asks for attention and leads to the place where it is attended. */
+export function Callout({
+  tone = "warning",
+  icon = "help",
+  title,
+  children,
+  action,
+}: {
+  tone?: "warning" | "info";
+  icon?: string;
+  title: string;
+  children?: ReactNode;
+  /** The whole card is this link. */
+  action: ReactNode;
+}) {
+  return (
+    <section className={`ac-callout ac-callout-${tone}`}>
+      <ParticipantIcon name={icon} />
+      <div>
+        <h2>{title}</h2>
+        {children && <p>{children}</p>}
+      </div>
+      <div className="ac-callout-action">{action}</div>
+    </section>
+  );
+}
+
+/** What happens next, in order, derived only from states that exist. */
+export function NextSteps({
+  title = "Qué sigue",
+  steps,
+  children,
+  variant = "card",
+}: {
+  title?: string;
+  /** "guide" numbers the steps without states and drops the card (a "how it works" list). */
+  variant?: "card" | "guide";
+  steps: {
+    id: string;
+    state: "done" | "current" | "todo";
+    title: string;
+    detail?: string;
+  }[];
+  children?: ReactNode;
+}) {
+  const id = useId();
+  return (
+    <aside
+      className={`ac-next-steps${variant === "guide" ? " ac-next-steps-guide" : ""}`}
+      aria-labelledby={id}
+    >
+      <h2 id={id}>{title}</h2>
+      <ol>
+        {steps.map((step, index) => (
+          <li key={step.id} className={`ac-step-${step.state}`}>
+            <span className="ac-step-mark" aria-hidden="true">
+              {step.state === "done" ? (
+                <ParticipantIcon name="check" />
+              ) : (
+                index + 1
+              )}
+            </span>
+            <div>
+              <p className="ac-step-title">
+                {step.title}
+                <span className="sr-only">
+                  {step.state === "done"
+                    ? " (hecho)"
+                    : step.state === "current"
+                      ? " (ahora)"
+                      : " (pendiente)"}
+                </span>
+              </p>
+              {step.detail && <p className="ac-step-detail">{step.detail}</p>}
+            </div>
+          </li>
+        ))}
+      </ol>
+      {children}
+    </aside>
+  );
+}
+
+/** A few facts side by side: what, how much, until when. Each one has a label and a value. */
+export function FactGrid({
+  facts,
+}: {
+  facts: { id: string; icon: string; label: string; value: ReactNode }[];
+}) {
+  return (
+    <dl className="ac-facts">
+      {facts.map((fact) => (
+        <div key={fact.id}>
+          <dt>
+            <ParticipantIcon name={fact.icon} />
+            {fact.label}
+          </dt>
+          <dd>{fact.value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+/** The head of a page: what it is, a line that says what it is for, and its one main action. */
+export function PageHeader({
+  overline,
+  title,
+  lead,
+  actions,
+}: {
+  overline?: ReactNode;
+  title: string;
+  lead?: ReactNode;
+  actions?: ReactNode;
+}) {
+  return (
+    <header className="ac-page-header">
+      <div>
+        {overline && <p className="eyebrow">{overline}</p>}
+        <h1>{title}</h1>
+        {lead && <p className="lead">{lead}</p>}
+      </div>
+      {actions && <div className="ac-page-actions">{actions}</div>}
+    </header>
+  );
+}
+
+/** Two letters for a person, never as the only name: the name is always next to it. */
+export function Avatar({ name }: { name: string }) {
+  const initials = name
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part[0]!)
+    .slice(0, 2)
+    .join("")
+    .toLocaleUpperCase("es");
+  return (
+    <span className="ac-avatar" aria-hidden="true">
+      {initials}
+    </span>
+  );
+}
+
+/** Filters as chips with their counts; each is a real toggle button. */
+export function FilterChips({
+  label,
+  items,
+  value,
+  onChange,
+}: {
+  label: string;
+  items: { value: string; label: string; count?: number }[];
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="ac-filter-chips" role="group" aria-label={label}>
+      {items.map((item) => (
+        <button
+          key={item.value}
+          type="button"
+          aria-pressed={value === item.value}
+          onClick={() => onChange(item.value)}
+        >
+          {item.label}
+          {item.count !== undefined && <span>{item.count}</span>}
+        </button>
+      ))}
+    </div>
   );
 }
 

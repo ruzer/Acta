@@ -1,4 +1,6 @@
 import { ProjectShell } from "./shell/ProjectShell";
+import { OrganizationShell } from "./shell/OrganizationShell";
+import { PageHeader } from "./ui/semantic";
 import { ProjectDecisions } from "./pages/ProjectDecisions";
 import { Invitations } from "./pages/Invitations";
 import { InvitedResponse } from "./pages/InvitedResponse";
@@ -157,6 +159,11 @@ function Session() {
     location.pathname.startsWith("/projects/")
   )
     return <LoadingState />;
+  // Every page outside a project shares the same frame as the project pages.
+  // Only the forced password change (no navigation until it is done) keeps the
+  // minimal legacy header.
+  const organizationPage =
+    !participant && !project && !me.user.mustChangePassword;
   const content = (
     <main
       id="main"
@@ -253,8 +260,15 @@ function Session() {
             path="*"
             element={
               <>
-                <h1>Página no encontrada</h1>
-                <Link to="/">Volver a mis proyectos</Link>
+                <PageHeader
+                  title="Página no encontrada"
+                  lead="La dirección no existe o no tienes acceso a ella."
+                />
+                <p>
+                  <Link className="button primary" to="/">
+                    Volver a mis proyectos
+                  </Link>
+                </p>
               </>
             }
           />
@@ -267,7 +281,7 @@ function Session() {
       <a className="skip" href="#main">
         Ir al contenido
       </a>
-      {project ? null : participant ? (
+      {project || organizationPage ? null : participant ? (
         <ParticipantHeader
           displayName={me.user.displayName}
           onLogout={logout}
@@ -319,10 +333,18 @@ function Session() {
         >
           {content}
         </ProjectShell>
+      ) : organizationPage ? (
+        <OrganizationShell
+          displayName={me.user.displayName}
+          organizationAdmin={me.user.isOrganizationAdmin}
+          onLogout={logout}
+        >
+          {content}
+        </OrganizationShell>
       ) : (
         content
       )}
-      {!participant && !project && (
+      {!participant && !project && !organizationPage && (
         <footer className="footer">
           <Brand /> · Questions. Evidence. Decisions.
         </footer>

@@ -24,7 +24,9 @@ import {
   LoadingState,
   Textarea,
 } from "../ui";
+import { FactGrid, NextSteps, StatusChip } from "../ui/semantic";
 import { AnswerControl, answerText } from "./AnswerControl";
+import { ParticipantIcon } from "./ParticipantIcon";
 import "../invitation.css";
 const empty: ResponseContent = {
   answer: null,
@@ -87,7 +89,7 @@ export function InvitedResponse() {
     setAccess(v);
   }
   return (
-    <div className="invitation-shell">
+    <div className="invitation-shell acta-participant">
       <a className="skip" href="#main">
         Ir al contenido
       </a>
@@ -142,19 +144,6 @@ export function InvitedResponse() {
           )
         ) : (
           <>
-            <p className="eyebrow">{branding.organizationName}</p>
-            <h1>{access.work.projectName}</h1>
-            <p className="hint">Respuesta mediante invitación</p>
-            {!selected && (
-              <p>
-                Te invitaron a aportar información a este cuestionario. Puedes
-                guardar un borrador y volver con tu enlace.
-              </p>
-            )}
-            <p className="hint">
-              Disponible hasta {formatDate(access.expiresAt)}. El enlace permite
-              acceder a tus respuestas: no lo reenvíes.
-            </p>
             {error && <Alert error>{error}</Alert>}
             {selected ? (
               <InvitedQuestion
@@ -177,69 +166,241 @@ export function InvitedResponse() {
                 }}
               />
             ) : (
-              <>
-                <p role="status">
-                  {
-                    access.work.sections
-                      .flatMap((s) => s.questions)
-                      .filter((q) => q.hasSubmission).length
-                  }{" "}
-                  de {access.work.sections.flatMap((s) => s.questions).length}{" "}
-                  preguntas con respuesta enviada
-                </p>
-                {access.work.sections.map((section) => (
-                  <section
-                    key={section.id}
-                    className="invitation-section"
-                    aria-label={section.title}
-                  >
-                    <h2>{section.title}</h2>
-                    <ul>
-                      {section.questions.map((q) => (
-                        <li key={q.id}>
-                          <div>
-                            <strong>{q.title || q.question}</strong>
-                            <p>
-                              {q.clarificationWaiting > 0
-                                ? "Tienes una aclaración por responder"
-                                : q.hasSubmission
-                                  ? "Enviada"
-                                  : q.state === "DRAFT"
-                                    ? "Borrador guardado"
-                                    : q.applicability === "ENABLED"
-                                      ? "Por responder"
-                                      : "Depende de otra respuesta"}
-                            </p>
-                          </div>
-                          <Button
-                            tone="secondary"
-                            onClick={() => setSelected(q.id)}
-                          >
-                            {q.hasSubmission
-                              ? "Consultar respuesta"
-                              : "Responder"}
-                          </Button>
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-                ))}
-                <Button
-                  tone="secondary"
-                  onClick={() => {
-                    void client
-                      .request("invitationLogout")
-                      .then(() => setClosed(true))
-                      .catch((e: Error) => setError(e.message));
-                  }}
-                >
-                  Salir
-                </Button>
-              </>
+              <InvitationHome
+                access={access}
+                organization={branding.organizationName}
+                onSelect={setSelected}
+                onExit={() => {
+                  void client
+                    .request("invitationLogout")
+                    .then(() => setClosed(true))
+                    .catch((e: Error) => setError(e.message));
+                }}
+              />
             )}
           </>
         )}
       </main>
+    </div>
+  );
+}
+function daysUntil(date: string) {
+  return Math.ceil((Date.parse(date) - Date.now()) / 86_400_000);
+}
+const invitationStatus = (
+  q: InvitationAccessView["work"]["sections"][number]["questions"][number],
+) =>
+  q.clarificationWaiting > 0
+    ? {
+        text: "Tienes una aclaración por responder",
+        tone: "warning" as const,
+        icon: "help",
+      }
+    : q.hasSubmission
+      ? { text: "Enviada", tone: "success" as const, icon: "check" }
+      : q.state === "DRAFT"
+        ? { text: "Borrador guardado", tone: "info" as const, icon: "edit" }
+        : q.applicability === "ENABLED"
+          ? { text: "Por responder", tone: "neutral" as const, icon: "clock" }
+          : {
+              text: "Depende de otra respuesta",
+              tone: "neutral" as const,
+              icon: "info",
+            };
+/**
+ * The invitation as a letter: who writes, what is asked, until when, and the
+ * truth about the link. It says nothing about who the recipient is (the
+ * contract has no recipient or purpose): only the organization, the project,
+ * the number of questions, the expiry and whether files are allowed.
+ */
+export function InvitationHome({
+  access,
+  organization,
+  onSelect,
+  onExit,
+}: {
+  access: InvitationAccessView;
+  organization: string;
+  onSelect: (id: string) => void;
+  onExit: () => void;
+}) {
+  const questions = access.work.sections.flatMap((s) => s.questions);
+  const sent = questions.filter((q) => q.hasSubmission).length;
+  const drafts = questions.filter((q) => q.state === "DRAFT").length;
+  const complete = questions.length > 0 && sent === questions.length;
+  const start =
+    questions.find((q) => q.clarificationWaiting > 0) ??
+    questions.find((q) => !q.hasSubmission && q.applicability === "ENABLED");
+  const days = daysUntil(access.expiresAt);
+  const noun = questions.length === 1 ? "pregunta" : "preguntas";
+  return (
+    <div className="invitation-home">
+      {complete ? (
+        <>
+          <div className="invitation-done">
+            <span className="participant-success-icon">
+              <ParticipantIcon />
+            </span>
+            <h1>Gracias. Recibimos tus respuestas</h1>
+            <p className="participant-subtitle">
+              Enviaste {sent} de {questions.length} {noun}.
+            </p>
+          </div>
+          <NextSteps
+            steps={[
+              {
+                id: "review",
+                state: "todo",
+                title: "El equipo analista revisará tus respuestas.",
+              },
+              {
+                id: "clarify",
+                state: "todo",
+                title: `Si necesitan precisión, verás una aclaración al volver a abrir este enlace antes de que venza (${formatDate(access.expiresAt)}).`,
+              },
+              {
+                id: "close",
+                state: "todo",
+                title:
+                  "Puedes cerrar esta página. No hace falta hacer nada más.",
+              },
+            ]}
+            variant="guide"
+          />
+        </>
+      ) : (
+        <>
+          <div>
+            <p className="participant-overline">Invitación para aportar</p>
+            <h1>
+              {organization} te invita a responder {questions.length} {noun}
+            </h1>
+            <p className="participant-subtitle">
+              Proyecto: <strong>{access.work.projectName}</strong>
+            </p>
+          </div>
+          <FactGrid
+            facts={[
+              {
+                id: "questions",
+                icon: "list",
+                label: "Preguntas",
+                value: questions.length,
+              },
+              {
+                id: "expires",
+                icon: "clock",
+                label: "Vence",
+                value: (
+                  <>
+                    {formatDate(access.expiresAt)}
+                    {days >= 1 && (
+                      <span className="hint">
+                        {" "}
+                        · en {days} {days === 1 ? "día" : "días"}
+                      </span>
+                    )}
+                  </>
+                ),
+              },
+              {
+                id: "files",
+                icon: "paperclip",
+                label: "Archivos",
+                value: access.allowEvidence
+                  ? "Puedes adjuntar evidencia"
+                  : "No se piden archivos",
+              },
+              {
+                id: "account",
+                icon: "info",
+                label: "Cuenta",
+                value: "No necesitas crear una",
+              },
+            ]}
+          />
+          <p className="invitation-notice">
+            <ParticipantIcon name="info" />
+            <span>
+              <strong>Este enlace es personal.</strong> Permite acceder a tus
+              respuestas: no lo reenvíes.
+            </span>
+          </p>
+          {start && (
+            <div className="participant-progress-actions">
+              <Button onClick={() => onSelect(start.id)}>
+                {sent === 0 && drafts === 0 ? "Comenzar" : "Continuar"}{" "}
+                <ParticipantIcon name="arrow" />
+              </Button>
+              <span className="hint">
+                Puedes guardar un borrador y volver con tu enlace.
+              </span>
+            </div>
+          )}
+          <NextSteps
+            title="Cómo funciona"
+            variant="guide"
+            steps={[
+              {
+                id: "answer",
+                state: "todo",
+                title: "Responde con calma",
+                detail: `Cada pregunta se responde por separado.${access.allowEvidence ? " Puedes adjuntar archivos de respaldo." : ""}`,
+              },
+              {
+                id: "save",
+                state: "todo",
+                title: "Guarda tu avance",
+                detail: `“Guardar borrador” lo conserva con este enlace hasta que venza (${formatDate(access.expiresAt)}).`,
+              },
+              {
+                id: "send",
+                state: "todo",
+                title: "Envía cada respuesta",
+                detail:
+                  "“Enviar” la entrega para revisión. Si necesitan precisión, te pedirán una aclaración aquí mismo.",
+              },
+            ]}
+          />
+        </>
+      )}
+      <p role="status">
+        {sent} de {questions.length} preguntas con respuesta enviada
+      </p>
+      {access.work.sections.map((section) => (
+        <section
+          key={section.id}
+          className="invitation-section"
+          aria-label={section.title}
+        >
+          <h2>{section.title}</h2>
+          <ul>
+            {section.questions.map((q) => {
+              const status = invitationStatus(q);
+              return (
+                <li key={q.id}>
+                  <div>
+                    <strong>{q.title || q.question}</strong>
+                    <p>
+                      <StatusChip tone={status.tone} icon={status.icon}>
+                        {status.text}
+                      </StatusChip>
+                    </p>
+                  </div>
+                  <Button tone="secondary" onClick={() => onSelect(q.id)}>
+                    {q.hasSubmission ? "Consultar respuesta" : "Responder"}
+                  </Button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ))}
+      <div>
+        <Button tone="secondary" onClick={onExit}>
+          Salir
+        </Button>
+      </div>
     </div>
   );
 }
@@ -392,7 +553,7 @@ function InvitedQuestion({
     view.reviewStatus !== "NOT_APPLICABLE";
   const latest = view.revisions[0];
   return (
-    <article className="invitation-question">
+    <article className="invitation-question participant-answer-card">
       <Button
         tone="secondary"
         disabled={busy}
@@ -405,13 +566,13 @@ function InvitedQuestion({
         ← Todas las preguntas
       </Button>
       {position > 0 && (
-        <p className="invitation-position">
+        <p className="participant-overline">
           Pregunta {position} de {total}
         </p>
       )}
-      <h2 ref={heading} tabIndex={-1}>
+      <h1 ref={heading} tabIndex={-1}>
         {view.question.question}
-      </h2>
+      </h1>
       {view.question.helpText && <p>{view.question.helpText}</p>}
       <div ref={errorRef} tabIndex={-1}>
         {error && <Alert error>{error}</Alert>}
@@ -481,7 +642,7 @@ function InvitedQuestion({
           />
           {allowEvidence && (
             <section aria-label="Evidencia">
-              <h3>Archivos de respaldo</h3>
+              <h2>Archivos de respaldo</h2>
               <p>
                 Adjunta solo información necesaria. Los archivos se revisan
                 antes de aceptarse.
@@ -583,7 +744,7 @@ function InvitedQuestion({
       ) : (
         latest && (
           <section aria-label="Respuesta enviada">
-            <h3>Respuesta enviada</h3>
+            <h2>Respuesta enviada</h2>
             <p>{formatDate(latest.createdAt)}</p>
             <p className="invitation-answer">
               {answerText(view.question, latest.answer)}
@@ -651,7 +812,7 @@ function InvitedQuestion({
         ))}
       {!!threads?.threads.length && (
         <section aria-label="Aclaraciones">
-          <h3>Aclaraciones</h3>
+          <h2>Aclaraciones</h2>
           {threads.threads.map((t) => (
             <section key={t.id} className="invitation-thread">
               {t.messages.map((m) => (

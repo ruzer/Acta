@@ -200,8 +200,67 @@ export function Table({
   return (
     <div className="table-scroll">
       <table>
-        <caption>{caption}</caption>
+        <caption className="sr-only">{caption}</caption>
         {children}
+      </table>
+    </div>
+  );
+}
+export type DataColumn = {
+  label: string;
+  /** The first column (who/what the row is) and actions need no label when stacked. */
+  bare?: boolean;
+  /** Right-aligned, for actions. */
+  end?: boolean;
+};
+/**
+ * A data table that stacks into labelled cards on narrow screens. The roles
+ * are explicit because changing `display` drops table semantics in some
+ * browsers, and the stacked layout must keep them.
+ */
+export function DataTable({
+  caption,
+  columns,
+  rows,
+}: {
+  caption: string;
+  columns: DataColumn[];
+  rows: { key: string; cells: ReactNode[] }[];
+}) {
+  return (
+    <div className="table-scroll data-table">
+      <table role="table">
+        <caption className="sr-only">{caption}</caption>
+        <thead role="rowgroup">
+          <tr role="row">
+            {columns.map((c) => (
+              <th
+                key={c.label}
+                role="columnheader"
+                scope="col"
+                data-end={c.end ? "" : undefined}
+              >
+                {c.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody role="rowgroup">
+          {rows.map((row) => (
+            <tr key={row.key} role="row">
+              {row.cells.map((cell, i) => (
+                <td
+                  key={columns[i]!.label}
+                  role="cell"
+                  data-label={columns[i]!.bare ? undefined : columns[i]!.label}
+                  data-end={columns[i]!.end ? "" : undefined}
+                >
+                  {cell}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
       </table>
     </div>
   );
@@ -219,8 +278,19 @@ export function Dialog({
   const id = useId();
   useEffect(() => {
     const el = ref.current;
+    const opener = document.activeElement as HTMLElement | null;
     el?.showModal();
-    return () => el?.close();
+    return () => {
+      el?.close();
+      // A dialog React removes from the page does not hand focus back by
+      // itself: return it to what opened it, unless the caller already moved it.
+      const active = document.activeElement;
+      if (
+        opener?.isConnected &&
+        (!active || active === document.body || el?.contains(active))
+      )
+        opener.focus();
+    };
   }, []);
   return (
     <dialog
@@ -237,7 +307,7 @@ export function Dialog({
           Cerrar
         </Button>
       </div>
-      {children}
+      <div className="dialog-body">{children}</div>
     </dialog>
   );
 }

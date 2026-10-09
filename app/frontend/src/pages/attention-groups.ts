@@ -40,10 +40,9 @@ export function attentionGroups(
       : q.status === "CONFLICT"
         ? "Revisar conflicto"
         : "Revisar respuestas";
-  const reason = (q: Question) =>
-    q.status === "CONFLICT"
-      ? "Hay un conflicto registrado entre aportaciones que necesita revisión."
-      : "Se recibieron respuestas; todavía no hay una decisión validada vigente.";
+  // The state chip and the contribution count already say this; a fixed
+  // sentence repeated in every row only added noise (UX-04).
+  const reason = () => "";
   const groups: AttentionGroup[] = canReview
     ? [
         {

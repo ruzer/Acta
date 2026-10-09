@@ -384,6 +384,7 @@ function scaleInbox(data: AttentionDashboard, page: number): ReviewInbox {
     openClarifications:
       q.id === "q-0" || q.status === "CLARIFICATION_REQUIRED" ? 1 : 0,
     hasEvidence: q.id === "q-0" || q.id === "q-24",
+    lastContributionAt: q.id === "q-0" ? "2026-10-05T16:30:00.000Z" : null,
   }));
   return { ...all, items, total: data.questions.length, page, pageSize: 100 };
 }
@@ -507,6 +508,29 @@ it("UX-01: un grupo de trabajo largo se revela de 25 en 25, con el foco en la pr
   ).not.toBeInTheDocument();
 });
 
+it("UX-04: la fila ya no repite una frase fija: da la fecha de la última aportación cuando se conoce", async () => {
+  const data = mockScale();
+  renderScale(client(), data);
+  await screen.findByRole("list", { name: "Te toca a ti" });
+  await settled();
+  expect(
+    screen.queryByText(/Hay un conflicto registrado entre aportaciones/),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByText(/Se recibieron respuestas; todavía no hay una decisión/),
+  ).not.toBeInTheDocument();
+  const row = screen
+    .getByRole("link", { name: "Resolver conflicto: Caso 0" })
+    .closest(".ac-queue-row") as HTMLElement;
+  expect(within(row).getByText(/^Última aportación /)).toBeVisible();
+  // A row without that fact says nothing instead of inventing it.
+  const other = screen
+    .getByRole("link", { name: /^Revisar y decidir: Caso 5$/ })
+    .closest(".ac-queue-row") as HTMLElement;
+  expect(
+    within(other).queryByText(/Última aportación/),
+  ).not.toBeInTheDocument();
+});
 it("UX-03: una pregunta con conflicto y aclaración abierta aparece una vez y la fila conserva ambas señales", async () => {
   const data = mockScale();
   renderScale(client(), data);

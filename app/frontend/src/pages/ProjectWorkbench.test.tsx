@@ -176,3 +176,23 @@ it.each([
     expect(headings[0]).not.toHaveTextContent("Proyecto de prueba");
   },
 );
+it("CP7: la página puede decir para qué sirve y ofrecer su acción principal sin otro h1", () => {
+  setup({
+    role: "ANALYST",
+    active: "invitations",
+    lead: "Enlaces para que personas externas respondan preguntas concretas.",
+    actions: <button type="button">Crear invitación</button>,
+  });
+  const headings = screen.getAllByRole("heading", { level: 1 });
+  expect(headings).toHaveLength(1);
+  expect(headings[0]).toHaveTextContent("Invitaciones");
+  const header = headings[0]!.closest("header")!;
+  expect(
+    within(header).getByText(
+      "Enlaces para que personas externas respondan preguntas concretas.",
+    ),
+  ).toBeVisible();
+  expect(
+    within(header).getByRole("button", { name: "Crear invitación" }),
+  ).toBeVisible();
+});

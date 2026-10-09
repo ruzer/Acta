@@ -1,5 +1,6 @@
 import { ProjectAttention } from "./ProjectAttention";
 import { ProjectWorkbench } from "./ProjectWorkbench";
+import { PageHeader } from "../ui/semantic";
 import { AnalystStatus } from "./AnalystVisual";
 import { useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
@@ -10,27 +11,13 @@ import { api, exchangeRequest } from "../api";
 import {
   Alert,
   Button,
+  DataTable,
   EmptyState,
   ErrorState,
   Input,
   LoadingState,
   Select,
 } from "../ui";
-export function ProjectTools({ projectId }: { projectId: string }) {
-  const projects = useQuery({
-    queryKey: ["projects"],
-    queryFn: () => api("projects"),
-  });
-  const project = projects.data?.find((p) => p.id === projectId);
-  return (
-    <ProjectWorkbench
-      projectId={projectId}
-      projectName={project?.name ?? "Proyecto"}
-      role={project?.role}
-      compact
-    />
-  );
-}
 export function Metric({
   label,
   value,
@@ -213,12 +200,10 @@ export function Traceability() {
   );
   return (
     <>
-      <h1>Trazabilidad</h1>
-      <ProjectTools projectId={projectId} />
-      <p>
-        La validación corresponde a una pregunta. Nunca se propaga a sus
-        referencias.
-      </p>
+      <PageHeader
+        title="Trazabilidad"
+        lead="La validación corresponde a una pregunta. Nunca se propaga a sus referencias."
+      />
       <p>
         Preguntas publicadas con referencias: {q.data.questionsWithReferences}.
         Sin referencias: {q.data.questionsWithoutReferences}. Referencias
@@ -294,12 +279,10 @@ export function History() {
   };
   return (
     <>
-      <h1>Bitácora del proyecto</h1>
-      <ProjectTools projectId={projectId} />
-      <p>
-        Historial de solo lectura. Los datos privados de borradores y archivos
-        no se muestran.
-      </p>
+      <PageHeader
+        title="Bitácora del proyecto"
+        lead="Historial de solo lectura. Los datos privados de borradores y archivos no se muestran."
+      />
       <div className="review-filters">
         <Input
           label="Objeto"
@@ -362,39 +345,32 @@ export function History() {
           {!q.data.items.length ? (
             <EmptyState title="No hay eventos para estos filtros" />
           ) : (
-            <div className="table-scroll">
-              <table>
-                <caption>Eventos registrados</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Fecha</th>
-                    <th scope="col">Actor</th>
-                    <th scope="col">Acción</th>
-                    <th scope="col">Objeto</th>
-                    <th scope="col">Detalle</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {q.data.items.map((e) => (
-                    <tr key={e.id}>
-                      <td>{new Date(e.occurredAt).toLocaleString("es-MX")}</td>
-                      <td>{e.actorName}</td>
-                      <td>{e.action}</td>
-                      <td>
-                        {e.objectType}
-                        <details>
-                          <summary>Identificador</summary>
-                          {e.objectId}
-                        </details>
-                      </td>
-                      <td>
-                        {e.exportType ?? "—"} {e.scope ?? ""}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <DataTable
+              caption="Eventos registrados"
+              columns={[
+                { label: "Fecha", bare: true },
+                { label: "Actor" },
+                { label: "Acción" },
+                { label: "Objeto" },
+                { label: "Detalle" },
+              ]}
+              rows={q.data.items.map((e) => ({
+                key: e.id,
+                cells: [
+                  new Date(e.occurredAt).toLocaleString("es-MX"),
+                  e.actorName,
+                  e.action,
+                  <span key="o">
+                    {e.objectType}
+                    <details>
+                      <summary>Identificador</summary>
+                      {e.objectId}
+                    </details>
+                  </span>,
+                  `${e.exportType ?? "—"} ${e.scope ?? ""}`.trim(),
+                ],
+              }))}
+            />
           )}
           <div className="actions">
             <Button

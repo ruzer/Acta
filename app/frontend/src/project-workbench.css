@@ -40,52 +40,10 @@
 .project-workbench .pw-decision-results p {
   margin: 0;
 }
-.project-workbench .pw-decisions-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  border-top: 1px solid var(--line);
-}
-.project-workbench .pw-decisions-list li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding-block: 1rem;
-  border-bottom: 1px solid var(--line);
-}
-.project-workbench .pw-decisions-list li > div {
-  min-width: 0;
-}
-.project-workbench .pw-decisions-list h3 {
-  margin: 0.25rem 0;
-  font-size: 1.0625rem;
-  line-height: 1.5;
-  overflow-wrap: anywhere;
-}
-.project-workbench .pw-decisions-list h3 a {
-  display: inline-block;
-  min-height: 44px;
-  padding-block: 0.5rem;
-}
-.project-workbench .pw-decisions-list p {
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-.project-workbench .pw-decision-reference {
-  font-size: 0.875rem;
-  color: var(--muted);
-}
 @media (max-width: 767px) {
   .project-workbench .pw-decision-filters {
     grid-template-columns: minmax(0, 1fr);
     gap: 0;
-  }
-  .project-workbench .pw-decisions-list li {
-    display: block;
-  }
-  .project-workbench .pw-decisions-list .av-status {
-    margin-top: 0.75rem;
   }
 }
 

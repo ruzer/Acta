@@ -20,6 +20,18 @@ function data(count: number): ReviewDetail {
     })),
   };
 }
+// CP5: the two postures are the columns of one table aligned by field.
+type Posture = "Postura A" | "Postura B";
+const cell = (name: Posture, field = "Respuesta") => {
+  const row = within(screen.getByRole("table"))
+    .getByRole("rowheader", { name: field })
+    .closest("tr")!;
+  return within(row.querySelector<HTMLElement>(`[data-column="${name}"]`)!);
+};
+const head = (name: Posture) =>
+  within(screen.getByRole("table")).getByRole("columnheader", {
+    name: new RegExp(`^${name}`),
+  });
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
@@ -31,6 +43,7 @@ it.each([0, 1])("%i fuentes no aparentan una comparación posible", (count) => {
     screen.getByText("No hay dos aportaciones disponibles para comparar."),
   ).toBeVisible();
   expect(screen.queryAllByRole("region")).toHaveLength(0);
+  expect(screen.queryAllByRole("table")).toHaveLength(0);
 });
 it.each([3, 12])(
   "contrasta dos de %i vigentes sin contar historia ni escribir",
@@ -48,7 +61,8 @@ it.each([3, 12])(
     expect(screen.getByRole("status")).toHaveTextContent(
       `Comparando 2 de ${count} aportaciones vigentes.`,
     );
-    expect(screen.getAllByRole("region")).toHaveLength(2);
+    // The corner cell plus one column per posture.
+    expect(screen.getAllByRole("columnheader")).toHaveLength(3);
     const a = screen.getByRole("combobox", {
       name: "Aportación para postura A",
     });
@@ -57,21 +71,15 @@ it.each([3, 12])(
     });
     expect(within(a).getAllByRole("option")).toHaveLength(count);
     await user.selectOptions(a, `source-${count - 1}`);
-    expect(
-      within(screen.getByRole("region", { name: "Postura A" })).getByRole(
-        "heading",
-        { name: `Actor ${count}` },
-      ),
-    ).toBeVisible();
+    expect(head("Postura A")).toHaveAccessibleName(
+      `Postura A · Actor ${count}`,
+    );
+    expect(cell("Postura A").getByText(`Aportación ${count}`)).toBeVisible();
     expect(
       within(b).getByRole("option", { name: new RegExp(`^Actor ${count} ·`) }),
     ).toBeDisabled();
     await user.selectOptions(b, "source-0");
-    expect(
-      within(screen.getByRole("region", { name: "Postura B" })).getByText(
-        "Aportación 1",
-      ),
-    ).toBeVisible();
+    expect(cell("Postura B").getByText("Aportación 1")).toBeVisible();
     expect(
       within(a).getByRole("option", { name: /^Actor 1 ·/ }),
     ).toBeDisabled();
@@ -92,16 +100,8 @@ it("el conflicto explica sus dos fuentes sin atribuirlo a las doce aportaciones"
   expect(screen.getByRole("status")).not.toHaveTextContent("12");
   expect(screen.getByText(/Este conflicto vincula 2 fuentes/)).toBeVisible();
   expect(screen.queryAllByRole("combobox")).toHaveLength(0);
-  expect(
-    within(screen.getByRole("region", { name: "Postura A" })).getByText(
-      "Aportación 3",
-    ),
-  ).toBeVisible();
-  expect(
-    within(screen.getByRole("region", { name: "Postura B" })).getByText(
-      "Aportación 8",
-    ),
-  ).toBeVisible();
+  expect(cell("Postura A").getByText("Aportación 3")).toBeVisible();
+  expect(cell("Postura B").getByText("Aportación 8")).toBeVisible();
 });
 it("un conflicto con tres de doce fuentes describe su propio alcance", () => {
   render(
@@ -138,30 +138,33 @@ it("las fuentes históricas permanecen explícitas y no se sustituyen por otras 
   expect(screen.getByRole("status")).toHaveTextContent(
     "Comparando 2 de 3 fuentes registradas en este conflicto.",
   );
+  expect(cell("Postura A", "Versión").getByText(/Histórico/)).toBeVisible();
   expect(
-    within(screen.getByRole("region", { name: "Postura A" })).getByText(
-      /Histórico/,
-    ),
-  ).toBeVisible();
-  expect(
-    within(screen.getByRole("region", { name: "Postura B" })).getByText(
+    cell("Postura B").getByText(
       "El detalle de esta respuesta no está disponible.",
     ),
   ).toBeVisible();
 });
 it("ambas posturas mantienen actor, respuesta, contexto, evidencia y versión en el mismo orden", () => {
   render(<ContributionComparison data={data(2)} />);
-  for (const name of ["Postura A", "Postura B"]) {
-    const headings = within(screen.getByRole("region", { name })).getAllByRole(
-      "heading",
-    );
-    expect(headings.slice(1).map((h) => h.textContent)).toEqual([
+  // One row per field, in this order; each label appears once for both postures.
+  expect(
+    within(screen.getByRole("table"))
+      .getAllByRole("rowheader")
+      .map((h) => h.textContent),
+  ).toEqual(["Respuesta", "Comentario", "Ejemplo", "Evidencia", "Versión"]);
+  for (const name of ["Postura A", "Postura B"] as Posture[])
+    for (const field of [
       "Respuesta",
-      "Contexto",
+      "Comentario",
+      "Ejemplo",
       "Evidencia",
-      "Versión y fecha",
-    ]);
-  }
+      "Versión",
+    ])
+      // Every field says something for each posture: content or an explicit absence.
+      expect(cell(name, field).queryAllByText(/./).length).toBeGreaterThan(0);
+  expect(head("Postura A")).toHaveAccessibleName("Postura A · Actor 1");
+  expect(head("Postura B")).toHaveAccessibleName("Postura B · Actor 2");
 });
 it("un refresco que retira una fuente seleccionada mantiene dos fuentes distintas disponibles", async () => {
   const user = userEvent.setup(),
@@ -176,14 +179,6 @@ it("un refresco que retira una fuente seleccionada mantiene dos fuentes distinta
       data={{ ...d, submissions: d.submissions.slice(0, 2) }}
     />,
   );
-  expect(
-    within(screen.getByRole("region", { name: "Postura A" })).getByText(
-      "Aportación 1",
-    ),
-  ).toBeVisible();
-  expect(
-    within(screen.getByRole("region", { name: "Postura B" })).getByText(
-      "Aportación 2",
-    ),
-  ).toBeVisible();
+  expect(cell("Postura A").getByText("Aportación 1")).toBeVisible();
+  expect(cell("Postura B").getByText("Aportación 2")).toBeVisible();
 });

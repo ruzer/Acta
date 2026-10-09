@@ -1,56 +1,138 @@
+/*
+ * The external invitation (no account). It borrows the participant reading
+ * column; what is specific here is the header, the letter and the answer
+ * list. Colours and sizes come from the shared tokens.
+ */
 .invitation-shell {
   min-height: 100vh;
-  background: var(--bg, #f7f8f9);
 }
 .invitation-header {
-  padding: 1.25rem max(1rem, calc((100vw - 52rem) / 2));
-  border-bottom: 1px solid var(--line, #d7dde3);
-  font-size: 1.25rem;
-  font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 12px;
+  min-height: 56px;
+  padding: 0 max(16px, calc((100vw - 720px) / 2));
+  background: var(--ac-surface);
+  border-bottom: 1px solid var(--ac-line);
+  font-size: var(--ac-text-body);
+  font-weight: 700;
 }
 .invitation-content {
-  max-width: 52rem;
-  margin: auto;
-  padding: 2rem 1rem 4rem;
+  display: grid;
+  gap: 16px;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+}
+.invitation-content > * {
+  margin-block: 0;
 }
 .invitation-content h1,
 .invitation-content h2,
 .invitation-content p {
   overflow-wrap: anywhere;
 }
+.invitation-shell .invitation-content > h1,
+.invitation-shell .invitation-home h1 {
+  margin: 0 0 8px;
+  font: 700 28px / 1.3 var(--ac-font-document);
+}
+.invitation-home {
+  display: grid;
+  gap: 16px;
+}
+.invitation-home > * {
+  margin-block: 0;
+}
+.invitation-done {
+  padding: 8px 0;
+  text-align: center;
+}
+.invitation-done h1 {
+  margin-bottom: 8px;
+}
+.invitation-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  color: var(--ac-ink);
+  background: var(--ac-info-weak);
+  border: 1px solid var(--ac-info-line);
+  border-radius: var(--ac-radius-surface);
+}
+.invitation-notice .participant-icon {
+  margin-top: 3px;
+  color: var(--ac-info);
+}
 .invitation-section {
-  margin-block: 2rem;
+  display: grid;
+  gap: 8px;
+  margin-block: 8px;
+}
+.invitation-section h2 {
+  margin: 0;
 }
 .invitation-section ul {
-  list-style: none;
+  margin: 0;
   padding: 0;
+  list-style: none;
+  background: var(--ac-surface);
+  border: 1px solid var(--ac-line);
+  border-radius: var(--ac-radius-surface);
 }
 .invitation-section li {
   display: flex;
-  gap: 1rem;
-  justify-content: space-between;
   align-items: center;
-  padding: 1rem 0;
-  border-bottom: 1px solid var(--line, #d7dde3);
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border-bottom: 1px solid var(--ac-line);
+}
+.invitation-section li:last-child {
+  border-bottom: 0;
+}
+.invitation-section li > div {
+  min-width: 0;
+}
+.invitation-section li strong {
+  display: block;
+  margin-bottom: 8px;
+  font: 600 17px / 1.45 var(--ac-font-document);
+}
+.invitation-section li p {
+  margin: 0;
 }
 .invitation-question {
-  margin-block: 2rem;
+  margin-block: 0;
+}
+.invitation-question > button:first-child {
+  margin-bottom: 16px;
 }
 .invitation-question .field {
-  margin-block: 1rem;
+  margin-block: 16px;
 }
 .invitation-actions,
 .invitation-file {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 12px;
   align-items: center;
-  margin-block: 1.5rem;
+  margin-block: 16px;
+}
+.invitation-actions {
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid var(--ac-line);
+}
+.invitation-file {
+  gap: 8px;
+  margin-block: 8px;
+  padding-block: 8px;
+  border-bottom: 1px solid var(--ac-line);
 }
 .invitation-file span {
+  flex: 1 1 12rem;
   overflow-wrap: anywhere;
 }
 .invitation-answer,
@@ -58,44 +140,44 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+.invitation-answer {
+  font: 400 var(--ac-text-answer) / 1.65 var(--ac-font-document);
+}
 .invitation-thread {
-  padding-block: 1rem;
-  border-bottom: 1px solid var(--line, #d7dde3);
+  padding-block: 16px;
+  border-bottom: 1px solid var(--ac-line);
 }
-@media (max-width: 600px) {
-  .invitation-section li {
-    align-items: stretch;
-    flex-direction: column;
-  }
-  .invitation-actions > button {
-    width: 100%;
-  }
+.invitation-save-status {
+  margin-top: 16px;
+  color: var(--ac-success);
+  font-size: var(--ac-text-meta);
+  font-weight: 600;
 }
-
 .invitation-management {
   padding: 0;
   list-style: none;
 }
 .invitation-management li {
-  padding-block: 1.25rem;
-  border-bottom: 1px solid var(--line, #d7dde3);
+  padding-block: 20px;
+  border-bottom: 1px solid var(--ac-line);
 }
-
-.invitation-position {
-  color: var(--muted);
-  font-weight: 600;
-  margin-block: 1rem 0.5rem;
-}
-.invitation-save-status {
-  margin-top: 1.25rem;
-  font-weight: 600;
-}
-.invitation-file {
-  gap: 0.5rem;
-  padding-block: 0.5rem;
-  margin-block: 0.5rem;
-  border-bottom: 1px solid var(--line);
-}
-.invitation-file span {
-  flex: 1 1 12rem;
+@media (max-width: 600px) {
+  .invitation-content {
+    padding: 24px 16px 64px;
+  }
+  .invitation-shell .invitation-content > h1,
+  .invitation-shell .invitation-home h1 {
+    font-size: 23px;
+  }
+  .invitation-section li {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .invitation-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+  .invitation-actions > button {
+    width: 100%;
+  }
 }

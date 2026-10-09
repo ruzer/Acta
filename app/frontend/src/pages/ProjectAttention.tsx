@@ -5,7 +5,7 @@ import { reviewStates } from "@requirements/contracts";
 import { Alert, Button, EmptyState, LoadingState, Select } from "../ui";
 import { MetaLine, QueueRow, StatusChip } from "../ui/semantic";
 import { attentionGroups } from "./attention-groups";
-import { reviewLabels } from "./ReviewShared";
+import { dateText, reviewLabels } from "./ReviewShared";
 import {
   attentionQuestions,
   attentionTask,
@@ -136,6 +136,12 @@ export function ProjectAttention({
       .filter((item) => item.hasEvidence)
       .map((item) => item.questionId),
   );
+  const lastContribution = new Map(
+    clarifications.data?.reviewItems.map((item) => [
+      item.questionId,
+      item.lastContributionAt,
+    ]),
+  );
   const questionText = new Map(
     clarifications.data?.reviewItems.map((item) => [
       item.questionId,
@@ -192,6 +198,11 @@ export function ProjectAttention({
                 Aclaraciones abiertas
               </StatusChip>
             )}
+          {lastContribution.get(q.id) && (
+            <span>
+              Última aportación {dateText(lastContribution.get(q.id) ?? null)}
+            </span>
+          )}
           {evidenceIds.has(q.id) && (
             <StatusChip tone="neutral" icon="paperclip">
               Con evidencia
