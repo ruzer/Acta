@@ -582,6 +582,33 @@ test.describe("Direction C · shell and attention", () => {
 });
 
 // Measure the active surface, including content below a scrollable dialog fold.
+/**
+ * UX-06 contract: the contribution the review opens on when something is
+ * pending — the clarification waiting for the analyst, then any open
+ * clarification, then the open conflict. Returns that person's display name,
+ * or null when nothing is pending on a current contribution.
+ */
+function relevantContribution(
+  data: import("@requirements/contracts").ReviewDetail,
+): string | null {
+  const current = data.submissions.filter((s) => s.current);
+  const byId = new Map(current.map((s) => [s.id, s]));
+  const open = data.threads.filter(
+    (t) => t.status !== "CLOSED" && byId.has(t.responseRevisionId),
+  );
+  const thread =
+    open.find((t) => t.status === "WAITING_ANALYST") ?? open[0] ?? null;
+  if (thread)
+    return byId.get(thread.responseRevisionId)!.respondent.displayName;
+  const conflict = data.conflicts.find((c) => c.status === "OPEN");
+  const linked = conflict?.participants.find((p) =>
+    byId.has(p.responseRevisionId),
+  );
+  return linked
+    ? byId.get(linked.responseRevisionId)!.respondent.displayName
+    : null;
+}
+
 async function surfaceMetrics(page: Page, selector: string) {
   const metrics = await page.locator(selector).evaluate((root) => {
     const visible = (el: Element) =>
@@ -1422,6 +1449,30 @@ test.describe("Direction C · review", () => {
           await expect(page.locator(".ac-contribution-rail")).toHaveCount(0);
           await expect(panel.locator(".ac-answer").first()).toBeVisible();
         } else {
+          // UX-06: with an open clarification or conflict on a current
+          // contribution the narrow layout opens on that contribution (the
+          // desktop layout already shows the list and the pane together).
+          // The list stays one step away and every check below still runs on it.
+          const relevantName = relevantContribution(data);
+          if (width < 900 && relevantName) {
+            await expect(page.locator(".ac-contribution-pane")).toHaveCount(1);
+            await expect(page.locator(".ac-contribution-rail")).toHaveCount(0);
+            await expect(
+              page.locator(".ac-contribution-pane").getByRole("heading", {
+                name: relevantName,
+                exact: true,
+              }),
+            ).toBeVisible();
+            await page.screenshot({
+              path: `${output}/cp4/${item.id}-${width}-relevant.png`,
+            });
+            await page
+              .getByRole("button", {
+                name: `← Volver a ${item.count} aportaciones`,
+                exact: true,
+              })
+              .click();
+          }
           await expect(
             page
               .getByRole("list", { name: "Aportaciones vigentes" })
@@ -1677,14 +1728,42 @@ test.describe("Direction C · review", () => {
           name: `Aportaciones (${item.count})`,
           exact: true,
         });
+        // UX-09: the review team always has the four tabs; a read-only
+        // reader only gets the ones that have something to show.
+        const readOnlyTabs = [
+          `Aportaciones (${item.count})`,
+          ...(data.conflicts.length > 0 || current.length >= 2
+            ? ["Contraste"]
+            : []),
+          ...(data.validations.length > 0 || data.dispositions.length > 0
+            ? ["Decisión"]
+            : []),
+          ...(data.threads.length > 0 ||
+          data.dispositions.length > 0 ||
+          data.references.length > 0
+            ? ["Historial"]
+            : []),
+        ];
+        await expect(page.getByRole("tab")).toHaveText(
+          item.readonly
+            ? readOnlyTabs
+            : [
+                `Aportaciones (${item.count})`,
+                "Contraste",
+                "Decisión",
+                "Historial",
+              ],
+        );
+        const lastTab = page.getByRole("tab").last();
         await tabs.focus();
         await page.keyboard.press("End");
-        await expect(
-          page.getByRole("tab", { name: "Historial", exact: true }),
-        ).toBeFocused();
-        await expect(
-          page.getByRole("heading", { name: "Historial de la pregunta" }),
-        ).toBeVisible();
+        await expect(lastTab).toBeFocused();
+        if (!item.readonly || (await lastTab.innerText()) === "Historial") {
+          await expect(lastTab).toHaveText("Historial");
+          await expect(
+            page.getByRole("heading", { name: "Historial de la pregunta" }),
+          ).toBeVisible();
+        }
         await page.keyboard.press("Home");
         await expect(tabs).toBeFocused();
         measurements.push({
