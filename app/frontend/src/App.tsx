@@ -147,6 +147,16 @@ function Session() {
     ["ADMIN", "ANALYST", "VIEWER"].includes(currentProject.role)
       ? currentProject
       : undefined;
+  // The page mounts once, inside the shell. Without the project list the
+  // content would first mount in the legacy layout and remount (losing what
+  // was typed or chosen) the moment the shell appears.
+  if (
+    !participant &&
+    !me.user.mustChangePassword &&
+    projects.isLoading &&
+    location.pathname.startsWith("/projects/")
+  )
+    return <LoadingState />;
   const content = (
     <main
       id="main"
