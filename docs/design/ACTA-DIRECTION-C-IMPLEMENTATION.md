@@ -35,7 +35,7 @@ Referencia aprobada a la izquierda; React implementado a la derecha. Cada fila d
 | 1. Tokens, tipografía, componentes        | LISTO PARA REVISIÓN        | Tipos/lint/build, 170 tests frontend, humo 7/7, visual 5/5 y axe 0; aceptación humana pendiente                   |
 | 2. Shell, navegación, Atención            | LISTO PARA REVISIÓN        | Gate visual 12/12, 231 unit/component, 11 workbench, 3 simplicity, humo 7 casos; límites ARCHIVED descritos abajo |
 | 3. Cuestionario / Organizar / lotes | LISTO PARA REVISIÓN | 174 unit, 28 E2E funcionales, 15 visuales, 3 de fixture independiente; cinco anchos y DEV-26 aprobada |
-| 4. Revisión / aportaciones / solo lectura | LISTO PARA REVISIÓN | 264 unit, 15 E2E funcionales, 40 vistas + 1 gate de permisos; DEV-25 aplicada; requiere aceptación humana |
+| 4. Revisión / aportaciones / solo lectura | LISTO PARA REVISIÓN, con correcciones posteriores a la auditoría | 284 unit tras las correcciones (264 al cierre), 15 E2E funcionales y 40 vistas + 1 gate de permisos al cierre; DEV-25 aplicada; **E2E pendiente de re-ejecución tras las correcciones**; requiere aceptación humana |
 | 5. Conflictos / aclaraciones / decisiones | ESPERA APROBACIÓN POST-CP4 | No implementar todavía                                                                                            |
 | 6. Participante / invitado                | ESPERA APROBACIÓN POST-CP4 | No implementar todavía                                                                                            |
 | 7. Administración / consistencia          | ESPERA APROBACIÓN POST-CP4 | No implementar todavía                                                                                            |
@@ -385,6 +385,7 @@ DEV-25 autorizada y aplicada: no se fuerza PARTIAL en el caso de 50. El contrato
 - La comprobación adicional de foco tras validar reprodujo una regresión: al desaparecer el botón primario, el foco quedaba en `body` (1 fallo; los otros 3 escenarios seriales no se ejecutaron). Se conserva la restauración del disparador al cancelar y, al terminar las invalidaciones, se enfoca el h1 solo si el foco se perdió. El E2E ahora exige h1 enfocado tras validar; los 15 recorridos pasan, sin retries ni aumento de tiempos.
 - Se corrigió únicamente la concordancia “1 aclaración abierta”; se prueban 0/1/2 sin cambiar la acción ni el estado.
 - Las mediciones nuevas comprueban hijos dentro de su contenedor, ausencia de texto colapsado y un máximo de tres apariciones por actor en el panel inicial de aportaciones. No se elimina ninguna aserción anterior.
+- Correcciones posteriores a la auditoría independiente: el único cambio de una aserción existente (`ContributionComparison.test.tsx`) y sus pruebas figuran en «Auditoría independiente y correcciones posteriores de CP4», al final de esta sección.
 
 ### Resultados CP4 ejecutados
 
@@ -522,7 +523,7 @@ A 1440: h1 y=117,5; tamaño 23 px/peso 600; riel 295 px en 50; cero acciones pri
 | 1 | PASS · LISTO PARA REVISIÓN | Pendiente |
 | 2 | PASS · LISTO PARA REVISIÓN | Pendiente |
 | 3 | PASS · LISTO PARA REVISIÓN | Pendiente; DEV-26 aprobada no sustituye este gate |
-| 4 | PASS · LISTO PARA REVISIÓN | Pendiente; DEV-25 aprobada no sustituye este gate |
+| 4 | PASS · LISTO PARA REVISIÓN (con correcciones posteriores a la auditoría; E2E pendiente de re-ejecución) | Pendiente; DEV-25 aprobada no sustituye este gate |
 | 5–8 | No iniciados | Requieren autorización después de esta revisión |
 
 **VISUAL REVIEW READY: YES. WAITING FOR PRODUCT APPROVAL: YES.** No se inicia CP5. No se abre PR ni se publica la rama. El registro/documento final de decisiones, contrastes e hilos corresponde a CP5; el aspecto heredado de su contenido no se presenta como rediseño terminado.
@@ -539,3 +540,45 @@ Revisión humana solicitada: jerarquía y densidad de escritorio; altura y despl
 - `git diff --check`: PASS. Backend, contratos, Prisma, Docker y almacenamiento: diff vacío desde v0.5.0. Los cinco archivos ajenos y el stash mantienen sus hashes/estado anteriores.
 - El commit de cierre incluye únicamente 192 rutas del checkpoint: presentación, pruebas, informe y evidencia visual solicitada. Los documentos Claude/mockups ajenos siguen sin seguimiento. No se incluye configuración privada ni salida temporal.
 - Commit previsto de cierre: `feat: reshape review and contributions for Direction C`, con DCO, en `feat/acta-direction-c-ui`. Sin push, PR, tag ni release.
+
+
+### Auditoría independiente y correcciones posteriores de CP4
+
+Una auditoría independiente de solo lectura sobre `a80486d` (2026-10-08) concluyó **NO APTO (corrección acotada)** para aprobar CP4 tal cual: dos regresiones funcionales frente a v0.5.0 (F1, F2). El responsable de producto autorizó, en tres pasos, corregir exclusivamente los defectos listados abajo. Las correcciones no equivalen a aprobación de CP4: la aceptación visual y funcional sigue pendiente de producto y la verificación E2E sigue pendiente (véase más abajo). La numeración F11–F13 es solo de seguimiento.
+
+| Hallazgo | Defecto observado | Corrección | Commit |
+|---|---|---|---|
+| F1 (alto) | Con cualquier conflicto, Contraste solo comparaba las fuentes del conflicto; una aportación vigente ajena a él no se podía comparar (v0.5.0 sí lo permitía) | Contraste conserva la comparación del conflicto y ofrece la comparación libre de las vigentes; plegada bajo el conflicto y abierta por «Comparar aportaciones», no se muestra si un conflicto ya abarca todas las vigentes, y se muestra directa sin conflictos. Nombres de región y de controles únicos con `labelSuffix` | `8e4c143` |
+| F2 (medio) | «Registrar decisión» aparecía en «Otras acciones» con una aclaración abierta; el backend lo rechaza (409, `noBlocks`) y v0.5.0 no lo ofrecía | Se retira mientras exista un hilo no cerrado; no cambian las demás acciones ni el CTA principal | `8e4c143` |
+| F11 (medio) | «Comparar aportaciones» pedía el foco con `requestAnimationFrame` antes de que el panel Contraste fuera visible; el foco caía en `BODY` | La petición se registra en un `ref` de un solo uso y se cumple en un efecto posterior al commit que selecciona la pestaña | `e38af04` |
+| F12 (bajo) | «Comparando 2 de N aportaciones vigentes» sugería que un conflicto que enlaza 2 de N abarcaba las N | El número es lo comparable en esa vista: «aportaciones vigentes» si abarca todas; «fuentes registradas en este conflicto» si solo abarca las del conflicto | `e38af04` |
+| F13 (medio) | «← Volver a N aportaciones» tenía el mismo defecto de foco que F11 | El mismo mecanismo, generalizado a `"contrast" \| "contributions"`; el destino no cambia (botón de comparar o, sin él, la pestaña Aportaciones) | `ebdf061` |
+
+No se tocaron backend, contratos, Prisma, permisos ni almacenamiento. Los tres commits tocan solo `ReviewDetail.tsx`, `ContributionComparison.tsx` y sus pruebas.
+
+**Libro de aserciones (cambio intencional).** `ContributionComparison.test.tsx`, «el conflicto explica sus dos fuentes sin atribuirlo a las doce aportaciones»: antes exigía «Comparando 2 de 12 aportaciones vigentes.» para un conflicto que enlaza 2 de 12; ahora exige «Comparando 2 de 2 fuentes registradas en este conflicto.» y que el texto no mencione 12, que es lo que el título de la prueba ya pedía. El comportamiento protegido queda cubierto además por «un conflicto con tres de doce fuentes describe su propio alcance», por «si el conflicto abarca exactamente todas las aportaciones vigentes el alcance sigue siendo vigente» y por la prueba de integración de `ReviewPresentation.test.tsx`. Además, la prueba propia de F11 que modela un fotograma anterior al commit pasó a compartir un asistente con las de F13 (misma conducta). El resto de aserciones existentes no se modificó.
+
+**Pruebas añadidas: 20** (`ReviewPresentation.test.tsx`: 9 de F1/F2, 4 de F11/F12 y 5 de F13; `ContributionComparison.test.tsx`: 2 de F12). Sobre el código previo a cada corrección fallan 10 de las pruebas nuevas (6 de F1/F2, 2 de F12, 1 de F11 y 1 de F13) y la aserción actualizada de F12; las demás son controles de paridad con v0.5.0 que pasan antes y después. Para F11 y F13, jsdom no reproduce la carrera real del navegador (no impide enfocar un elemento oculto); la regresión se protege con una prueba que modela un fotograma anterior al commit y un foco como el de un navegador, que falla sobre el código previo, y se confirmó en Chromium.
+
+| Verificación (copia aislada, sin base de datos) | `a80486d` | `8e4c143` | `e38af04` | `ebdf061` |
+|---|---|---|---|---|
+| Lint (`--max-warnings 0`), typecheck, `prisma validate` | PASS | PASS | PASS | PASS |
+| Build | PASS, 753,71 kB | PASS, 754,17 kB | PASS, 754,28 kB | PASS, 754,30 kB |
+| Unit/component | 264/264 · 34 archivos | 273/273 | 279/279 | **284/284 · 34 archivos** |
+
+El tamaño del bundle conserva la advertencia preexistente de más de 500 kB; no se modificó el umbral.
+
+**Verificación en Chromium** con la interfaz construida y una API simulada con datos válidos según el contrato (`reviewDetailView`), sin backend ni base de datos; **no sustituye al E2E**. axe (wcag2a/2aa/21a/21aa/22aa/best-practice) con 0 violaciones en todos los casos:
+
+- F11, anchos 1440, 1024, 390 y 320, ratón y teclado (8 casos): antes el foco quedaba en `BODY` (8/8) y, a 1024, 390 y 320 px, el encabezado quedaba fuera del viewport; ahora el foco queda en el encabezado «Contrastar aportaciones», visible y dentro del viewport (8/8).
+- F13, mismos anchos y entradas (8 casos): antes `BODY` (8/8); ahora «Comparar aportaciones», visible y dentro del viewport (8/8). Control con una sola aportación (sin botón de comparar; 6 casos): el foco ya iba a la pestaña Aportaciones y sigue yendo.
+- F1 con las dos comparaciones abiertas: nombres de región únicos, desplegable de 44 px de alto (62,5 px a 320 px), sin desbordes. Con nombres repetidos axe marcaba `landmark-unique`; se corrigió con `labelSuffix`.
+- La espera del foco fue por evento (`waitForFunction`), sin retardos fijos.
+
+**Pendientes E2E (no ejecutados tras las correcciones).** La auditoría y las correcciones no ejecutaron E2E ni integración porque escriben en PostgreSQL; las cifras E2E de este informe (15 funcionales, 40 vistas + 1 gate) son las del cierre de CP4, previas a estas correcciones.
+1. Re-ejecutar la suite E2E completa y el gate visual con el entorno desechable y el fixture de CP4, y registrar los resultados observados.
+2. Revisar expresamente `review.spec.ts` (2D-C): su aserción «Comparando 2 de 2 aportaciones vigentes.» corresponde a un conflicto que enlaza todas las vigentes y, por el razonamiento de este informe, no debería cambiar; no está verificado.
+3. Añadir cobertura E2E que hoy no existe: comparar con un conflicto existente y una aportación ajena a él; ausencia de «Registrar decisión» con una aclaración abierta; foco tras «Comparar aportaciones» y «← Volver» en Chromium; alcance del texto de comparación. No se añadieron porque no se pueden ejecutar en este entorno.
+4. La integración PostgreSQL no se repitió desde la línea base (113/113): backend, contratos y Prisma tienen diff vacío frente a v0.5.0.
+
+**Observaciones de la auditoría que siguen abiertas** (fuera del alcance autorizado; no se corrigieron): F3, el gate de permisos de DEV-25 y las vistas de 3/12/50 aportaciones dependen de `ACTA_DIRECTION_C_VISUAL_FIXTURE`, un fichero privado no versionado, por lo que otra persona no puede reproducirlos desde el repositorio; F4, la medición de objetivos táctiles solo mide `button`, `input`, `select`, `textarea` y `summary` dentro de `.ac-review` y excluye enlaces y shell (en la auditoría, con datos simulados: enlace de ruta de 21 px de alto a 768 y 390 px, marca de 32×32 y selector de proyecto de 40×40 a 768 px); F5, `it.each` de `ReviewPresentation.test.tsx` ignora su parámetro; F6, incoherencias menores de este informe y el libro de aserciones sin archivo:línea; F7, `PUBLIC-SNAPSHOT-FILES.txt` solo se actualizó para CP1; F8, el titular «Decisión vigente» aparece dos veces en la vista validada hasta CP5; F9, texto menor de 12,5 px en CSS heredado de pantallas aún no migradas; F10, OFL de Plex Serif con saltos de línea normalizados.
