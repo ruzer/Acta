@@ -24,15 +24,19 @@ export function ContributionComparison({
       ? chosen[1]
       : ids.find((id) => id !== a);
   const pair = [a, b];
-  const allCurrent = ids.every((id) => current.some((s) => s.id === id));
-  const total = allCurrent ? current.length : ids.length;
+  // The scope is what can be compared here: every current contribution, or
+  // only the sources a conflict links (which may be a subset of the current
+  // ones or include historical sources).
+  const coversCurrent =
+    ids.length === current.length &&
+    ids.every((id) => current.some((s) => s.id === id));
   if (ids.length < 2)
     return <p>No hay dos aportaciones disponibles para comparar.</p>;
   return (
     <div className="next-comparison">
       <p className="next-comparison-count" role="status">
-        Comparando 2 de {total}{" "}
-        {allCurrent
+        Comparando 2 de {ids.length}{" "}
+        {coversCurrent
           ? "aportaciones vigentes"
           : "fuentes registradas en este conflicto"}
         .

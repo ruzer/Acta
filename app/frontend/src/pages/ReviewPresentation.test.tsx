@@ -1,5 +1,11 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import {
+  cleanup,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -450,4 +456,86 @@ it("F2: sin aclaraciones pendientes «Registrar decisión» sigue disponible (pr
   page(partial);
   await screen.findByRole("heading", { level: 1 });
   expect(otherActionLabels()).toContain("Registrar decisión");
+});
+
+it("F3: «Comparar aportaciones» traslada el foco al encabezado de Contraste ya visible", async () => {
+  page(withUnlinkedContribution(conflict), "?tab=contributions");
+  const user = userEvent.setup();
+  await user.click(
+    await screen.findByRole("button", { name: "Comparar aportaciones" }),
+  );
+  const heading = await screen.findByRole("heading", {
+    name: "Contrastar aportaciones",
+  });
+  await waitFor(() => expect(heading).toHaveFocus());
+  expect(heading.closest("[role=tabpanel]")).not.toHaveAttribute("hidden");
+  expect(screen.getByRole("tab", { name: "Contraste" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+});
+it("F3: el foco no se solicita mientras el panel de Contraste sigue oculto", async () => {
+  const realFocus = HTMLElement.prototype.focus;
+  const requested: { text: string; hidden: boolean }[] = [];
+  // Like a browser: an element inside a hidden panel cannot take focus.
+  vi.spyOn(HTMLElement.prototype, "focus").mockImplementation(function (
+    this: HTMLElement,
+    options?: FocusOptions,
+  ) {
+    const hidden = !!this.closest("[hidden]");
+    requested.push({ text: this.textContent ?? "", hidden });
+    if (!hidden) realFocus.call(this, options);
+  });
+  // An animation frame that fires before React commits the tab change.
+  vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+    callback(0);
+    return 0;
+  });
+  try {
+    page(withUnlinkedContribution(conflict), "?tab=contributions");
+    const user = userEvent.setup();
+    await user.click(
+      await screen.findByRole("button", { name: "Comparar aportaciones" }),
+    );
+    const heading = await screen.findByRole("heading", {
+      name: "Contrastar aportaciones",
+    });
+    await waitFor(() => expect(heading).toHaveFocus());
+    const asked = requested.filter((r) => r.text === "Contrastar aportaciones");
+    expect(asked.length).toBeGreaterThan(0);
+    expect(asked.every((r) => !r.hidden)).toBe(true);
+  } finally {
+    vi.unstubAllGlobals();
+  }
+});
+it("F3: el traslado de foco ocurre una sola vez y no se apropia de cambios de pestaña posteriores", async () => {
+  page(withUnlinkedContribution(conflict), "?tab=contributions");
+  const user = userEvent.setup();
+  await user.click(
+    await screen.findByRole("button", { name: "Comparar aportaciones" }),
+  );
+  const heading = await screen.findByRole("heading", {
+    name: "Contrastar aportaciones",
+  });
+  await waitFor(() => expect(heading).toHaveFocus());
+  await user.click(screen.getByRole("tab", { name: "Historial" }));
+  await user.click(screen.getByRole("tab", { name: "Contraste" }));
+  expect(screen.getByRole("tab", { name: "Contraste" })).toHaveFocus();
+  expect(heading).not.toHaveFocus();
+});
+it("F4: cada comparación describe su propio alcance sin atribuir el conflicto a todas las aportaciones", async () => {
+  page(withUnlinkedContribution(conflict), "?tab=contributions");
+  const user = userEvent.setup();
+  await user.click(
+    await screen.findByRole("button", { name: "Comparar aportaciones" }),
+  );
+  const panel = await screen.findByRole("tabpanel", { name: "Contraste" });
+  expect(
+    within(panel)
+      .getAllByRole("status")
+      .map((status) => status.textContent),
+  ).toEqual([
+    "Comparando 2 de 2 fuentes registradas en este conflicto.",
+    "Comparando 2 de 3 aportaciones vigentes.",
+  ]);
 });

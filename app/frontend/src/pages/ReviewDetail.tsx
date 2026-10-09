@@ -3,7 +3,7 @@ import {
   ConflictComparison,
   DecisionRecord,
 } from "./AnalystVisual";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Link,
@@ -91,6 +91,16 @@ export function ReviewDetail() {
     } | null>(null),
     [message, setMessage] = useState("");
   const [freeComparisonOpen, setFreeComparisonOpen] = useState(false);
+  // "Comparar aportaciones" changes the tab; the heading can only take focus
+  // once the Contraste panel is rendered visible, so move it after the commit
+  // that selects the tab instead of guessing with a timer.
+  const focusContrastOnTab = useRef(false);
+  const requestedTab = searchParams.get("tab");
+  useEffect(() => {
+    const wanted = focusContrastOnTab.current;
+    focusContrastOnTab.current = false;
+    if (wanted && requestedTab === "contrast") contrastHeading.current?.focus();
+  }, [requestedTab]);
   const returnFocus = useRef<HTMLElement | null>(null);
   function setAction(next: typeof action) {
     if (next && !action)
@@ -446,8 +456,8 @@ export function ReviewDetail() {
           renderThreads={threadsFor}
           onCompare={() => {
             setFreeComparisonOpen(true);
+            focusContrastOnTab.current = true;
             changeTab("contrast");
-            requestAnimationFrame(() => contrastHeading.current?.focus());
           }}
         />
         {participants}

@@ -85,9 +85,11 @@ it("el conflicto explica sus dos fuentes sin atribuirlo a las doce aportaciones"
       revisionIds={["source-2", "source-7"]}
     />,
   );
+  // The scope is the conflict's own sources, never "2 of the 12 current".
   expect(screen.getByRole("status")).toHaveTextContent(
-    "Comparando 2 de 12 aportaciones vigentes.",
+    "Comparando 2 de 2 fuentes registradas en este conflicto.",
   );
+  expect(screen.getByRole("status")).not.toHaveTextContent("12");
   expect(screen.getByText(/Este conflicto vincula 2 fuentes/)).toBeVisible();
   expect(screen.queryAllByRole("combobox")).toHaveLength(0);
   expect(
@@ -100,6 +102,29 @@ it("el conflicto explica sus dos fuentes sin atribuirlo a las doce aportaciones"
       "Aportación 8",
     ),
   ).toBeVisible();
+});
+it("un conflicto con tres de doce fuentes describe su propio alcance", () => {
+  render(
+    <ContributionComparison
+      data={data(12)}
+      revisionIds={["source-1", "source-4", "source-9"]}
+    />,
+  );
+  expect(screen.getByRole("status")).toHaveTextContent(
+    "Comparando 2 de 3 fuentes registradas en este conflicto.",
+  );
+  expect(screen.getByText(/Este conflicto vincula 3 fuentes/)).toBeVisible();
+});
+it("si el conflicto abarca exactamente todas las aportaciones vigentes el alcance sigue siendo vigente", () => {
+  render(
+    <ContributionComparison
+      data={data(2)}
+      revisionIds={["source-0", "source-1"]}
+    />,
+  );
+  expect(screen.getByRole("status")).toHaveTextContent(
+    "Comparando 2 de 2 aportaciones vigentes.",
+  );
 });
 it("las fuentes históricas permanecen explícitas y no se sustituyen por otras vigentes", () => {
   const d = data(3);
