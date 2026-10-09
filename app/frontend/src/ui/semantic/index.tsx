@@ -1,4 +1,5 @@
 import {
+  useEffect,
   useId,
   useRef,
   type ComponentProps,
@@ -100,7 +101,14 @@ export function StateCard({
   );
 }
 
-type Tab = { value: string; label: string };
+type Tab = {
+  value: string;
+  label: string;
+  /** Decorative cue shown inside the tab; the name stays the label. */
+  indicator?: ReactNode;
+  /** Announced as the tab's description, never part of its name. */
+  description?: string;
+};
 export function TabNav({
   id,
   label,
@@ -143,6 +151,7 @@ export function TabNav({
           role="tab"
           aria-selected={value === item.value}
           aria-controls={`${id}-panel-${item.value}`}
+          aria-description={item.description}
           tabIndex={value === item.value ? 0 : -1}
           ref={(element) => {
             if (element) buttons.current.set(item.value, element);
@@ -152,6 +161,7 @@ export function TabNav({
           onClick={() => onChange(item.value)}
         >
           {item.label}
+          {item.indicator}
         </button>
       ))}
     </div>
@@ -482,5 +492,65 @@ export function AppShell({
         <div className="ac-shell-mobile">{mobileNavigation}</div>
       )}
     </div>
+  );
+}
+
+/**
+ * Secondary actions as a disclosure menu: a real button that opens a list of
+ * buttons. It closes with Escape (focus returns to the trigger), on outside
+ * click, and when an item is chosen; the chosen action gets the trigger as the
+ * element to return focus to.
+ */
+export function ActionMenu({
+  label,
+  items,
+  onSelect,
+}: {
+  label: string;
+  items: { value: string; label: string }[];
+  onSelect: (value: string) => void;
+}) {
+  const menu = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    const away = (event: MouseEvent) => {
+      const node = menu.current;
+      if (node?.open && !node.contains(event.target as Node)) node.open = false;
+    };
+    document.addEventListener("click", away);
+    return () => document.removeEventListener("click", away);
+  }, []);
+  return (
+    <details
+      ref={menu}
+      className="ac-action-menu"
+      onKeyDown={(event) => {
+        const node = menu.current;
+        if (event.key !== "Escape" || !node?.open) return;
+        event.preventDefault();
+        event.stopPropagation();
+        node.open = false;
+        node.querySelector("summary")?.focus();
+      }}
+    >
+      <summary className="button secondary">{label}</summary>
+      <ul>
+        {items.map((item) => (
+          <li key={item.value}>
+            <button
+              type="button"
+              onClick={() => {
+                const node = menu.current;
+                // Move focus to the trigger first so the chosen action returns here.
+                node?.querySelector("summary")?.focus();
+                if (node) node.open = false;
+                onSelect(item.value);
+              }}
+            >
+              {item.label}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </details>
   );
 }

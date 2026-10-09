@@ -143,7 +143,7 @@ it.each([3, 10, 12])(
   },
 );
 
-it("las señales corresponden a la revisión vinculada, sin atribuir el conflicto a todas", () => {
+it("las señales corresponden a la revisión vinculada, sin atribuir el conflicto a todas", async () => {
   const many = data(3);
   many.conflicts = [
     {
@@ -168,6 +168,10 @@ it("las señales corresponden a la revisión vinculada, sin atribuir el conflict
     },
   ];
   render(<ContributionSet data={many} />);
+  // UX-06: a narrow screen opens on the relevant contribution; ask for the set.
+  await userEvent.click(
+    screen.getByRole("button", { name: "← Volver a 3 aportaciones" }),
+  );
   const rows = within(
     screen.getByRole("list", { name: "Aportaciones vigentes" }),
   ).getAllByRole("listitem");
@@ -284,6 +288,10 @@ it("volver enfoca el conjunto cuando la aportación dejó de coincidir con el fi
     },
   ];
   const { rerender } = render(<ContributionSet data={many} />);
+  // UX-06: a narrow screen opens on the relevant contribution; ask for the set.
+  await user.click(
+    screen.getByRole("button", { name: "← Volver a 10 aportaciones" }),
+  );
   await user.selectOptions(
     screen.getByRole("combobox", { name: "Situación de la aportación" }),
     "conflict",
@@ -396,4 +404,135 @@ it("C: el envío histórico conserva número, fecha, área y contenido sin infla
     within(article).getByText("Contexto completo 1", { exact: false }),
   ).toBeVisible();
   expect(screen.getByRole("heading", { name: "0 aportaciones" })).toBeVisible();
+});
+
+// ---- UX-06: open on the contribution the clarification or conflict is about ----
+function wide() {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: /min-width:\s*900px/.test(query),
+    media: query,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  }));
+}
+function withThread(
+  many: ReviewDetail,
+  index: number,
+  status: "WAITING_ANALYST" | "WAITING_STAKEHOLDER",
+): ReviewDetail {
+  return {
+    ...many,
+    threads: [
+      {
+        id: `thread-${index}`,
+        responseRevisionId: many.submissions[index]!.id,
+        respondentId: `actor-${index}`,
+        status,
+        lockVersion: 0,
+        createdAt: "2026-10-01T00:00:00.000Z",
+        closedAt: null,
+        closedBy: null,
+        closeReason: null,
+        messages: [],
+      },
+    ],
+  };
+}
+const openName = () =>
+  screen.getByRole("article").getAttribute("aria-labelledby");
+const shownPerson = () => document.getElementById(openName()!)!.textContent;
+it("UX-06: en escritorio abre la aportación con la aclaración pendiente, no la primera", () => {
+  wide();
+  render(<ContributionSet data={withThread(data(12), 7, "WAITING_ANALYST")} />);
+  expect(shownPerson()).toBe("Actor 8");
+  expect(
+    screen.getByRole("button", { name: "Abrir aportación de Actor 8" }),
+  ).toHaveAttribute("aria-pressed", "true");
+});
+it("UX-06: sin aclaración usa el conflicto abierto, y sin ninguno conserva el orden actual", () => {
+  wide();
+  const conflicted = data(5);
+  conflicted.conflicts = [
+    {
+      ...original.conflicts[0]!,
+      participants: [
+        { id: "p1", responseRevisionId: conflicted.submissions[3]!.id },
+        { id: "p2", responseRevisionId: conflicted.submissions[4]!.id },
+      ],
+    },
+  ];
+  const { unmount } = render(<ContributionSet data={conflicted} />);
+  expect(shownPerson()).toBe("Actor 4");
+  unmount();
+  render(<ContributionSet data={data(5)} />);
+  expect(shownPerson()).toBe("Actor 1");
+});
+it("UX-06: si un filtro oculta la aportación relevante, se abre la primera visible", async () => {
+  wide();
+  const user = userEvent.setup();
+  render(<ContributionSet data={withThread(data(12), 7, "WAITING_ANALYST")} />);
+  await user.type(screen.getByRole("searchbox"), "Actor 2");
+  expect(shownPerson()).toBe("Actor 2");
+});
+it("UX-06: una elección explícita de la persona se respeta y no la deshace la preferencia", async () => {
+  wide();
+  const user = userEvent.setup();
+  render(<ContributionSet data={withThread(data(12), 7, "WAITING_ANALYST")} />);
+  await user.click(
+    screen.getByRole("button", { name: "Abrir aportación de Actor 3" }),
+  );
+  expect(shownPerson()).toBe("Actor 3");
+});
+it("UX-06: en pantallas estrechas abre directo en la aportación relevante y «← Volver» muestra el conjunto sin volver a saltar", async () => {
+  const user = userEvent.setup();
+  render(<ContributionSet data={withThread(data(12), 7, "WAITING_ANALYST")} />);
+  expect(shownPerson()).toBe("Actor 8");
+  expect(
+    screen.queryByRole("list", { name: "Aportaciones vigentes" }),
+  ).not.toBeInTheDocument();
+  await user.click(
+    screen.getByRole("button", { name: "← Volver a 12 aportaciones" }),
+  );
+  expect(
+    screen.getByRole("list", { name: "Aportaciones vigentes" }),
+  ).toBeVisible();
+  expect(screen.queryByRole("article")).not.toBeInTheDocument();
+  // The way back lands on the contribution that was open.
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "Abrir aportación de Actor 8" }),
+    ).toHaveFocus(),
+  );
+});
+it("UX-07: con la aportación abierta en pantalla estrecha el titular del conjunto solo queda para lectores de pantalla", async () => {
+  const user = userEvent.setup();
+  render(<ContributionSet data={withThread(data(12), 7, "WAITING_ANALYST")} />);
+  const heading = screen.getByRole("heading", { name: "12 aportaciones" });
+  // The count is still in "← Volver a 12 aportaciones"; the section keeps its name.
+  expect(heading.closest(".next-contributions-heading")).toHaveClass("sr-only");
+  expect(screen.getByRole("region", { name: "12 aportaciones" })).toBeVisible();
+  await user.click(
+    screen.getByRole("button", { name: "← Volver a 12 aportaciones" }),
+  );
+  expect(
+    screen
+      .getByRole("heading", { name: "12 aportaciones" })
+      .closest(".next-contributions-heading"),
+  ).not.toHaveClass("sr-only");
+});
+it("UX-07: en escritorio el titular del conjunto sigue visible junto a la lista", () => {
+  wide();
+  render(<ContributionSet data={withThread(data(12), 7, "WAITING_ANALYST")} />);
+  expect(
+    screen
+      .getByRole("heading", { name: "12 aportaciones" })
+      .closest(".next-contributions-heading"),
+  ).not.toHaveClass("sr-only");
+});
+it("UX-06: sin relación con una aportación vigente nada cambia en pantallas estrechas (lista primero)", () => {
+  render(<ContributionSet data={data(4)} />);
+  expect(
+    screen.getByRole("list", { name: "Aportaciones vigentes" }),
+  ).toBeVisible();
+  expect(screen.queryByRole("article")).not.toBeInTheDocument();
 });

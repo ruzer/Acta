@@ -19,12 +19,22 @@ const conflict = reviewDetailView.parse(fixture.conflict),
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
-function page(detail: ReviewDetail, search = "") {
+/** Desktop layout: the contribution rail (with its compare button) is always shown. */
+function wideViewport() {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: /min-width:\s*900px/.test(query),
+    media: query,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  }));
+}
+function page(detail: ReviewDetail, search = "", projects: unknown[] = []) {
   const api = vi
     .spyOn(apiModule, "api")
     .mockImplementation(
-      async (key) => (key === "projects" ? [] : detail) as never,
+      async (key) => (key === "projects" ? projects : detail) as never,
     );
   const router = createMemoryRouter(
     [{ path: "/projects/:projectId/review/:id", element: <ReviewPage /> }],
@@ -246,6 +256,7 @@ const comparisonOptions = (panel: HTMLElement) =>
   ).map((option) => option.textContent ?? "");
 
 it("F1 (PROBE-1): con un conflicto abierto, «Comparar aportaciones» permite elegir una aportación ajena al conflicto", async () => {
+  wideViewport();
   const detail = withUnlinkedContribution(conflict);
   expect(detail.conflicts[0]!.participants).toHaveLength(2);
   expect(detail.submissions.filter((s) => s.current)).toHaveLength(3);
@@ -312,6 +323,7 @@ it("F1: al llegar directamente a Contraste el conflicto va primero y la comparac
   ).toBe(true);
 });
 it("F1: con un conflicto resuelto también se pueden comparar aportaciones vigentes ajenas a él", async () => {
+  wideViewport();
   const detail = resolved(withUnlinkedContribution(conflict));
   expect(detail.conflicts.every((item) => item.status === "RESOLVED")).toBe(
     true,
@@ -365,6 +377,7 @@ it("F1: sin conflictos la comparación libre sigue mostrándose directamente, co
   expect(comparisonOptions(panel)).toHaveLength(3);
 });
 it("F1: en solo lectura la comparación libre está disponible sin ninguna acción de revisión", async () => {
+  wideViewport();
   page({ ...withUnlinkedContribution(conflict), canReview: false });
   const user = userEvent.setup();
   await user.click(await screen.findByRole("tab", { name: /^Aportaciones/ }));
@@ -481,6 +494,7 @@ function earlyFrameWithBrowserFocus() {
   return requested;
 }
 it("F3: «Comparar aportaciones» traslada el foco al encabezado de Contraste ya visible", async () => {
+  wideViewport();
   page(withUnlinkedContribution(conflict), "?tab=contributions");
   const user = userEvent.setup();
   await user.click(
@@ -497,6 +511,7 @@ it("F3: «Comparar aportaciones» traslada el foco al encabezado de Contraste ya
   );
 });
 it("F3: el foco no se solicita mientras el panel de Contraste sigue oculto", async () => {
+  wideViewport();
   const requested = earlyFrameWithBrowserFocus();
   try {
     page(withUnlinkedContribution(conflict), "?tab=contributions");
@@ -516,6 +531,7 @@ it("F3: el foco no se solicita mientras el panel de Contraste sigue oculto", asy
   }
 });
 it("F3: el traslado de foco ocurre una sola vez y no se apropia de cambios de pestaña posteriores", async () => {
+  wideViewport();
   page(withUnlinkedContribution(conflict), "?tab=contributions");
   const user = userEvent.setup();
   await user.click(
@@ -531,6 +547,7 @@ it("F3: el traslado de foco ocurre una sola vez y no se apropia de cambios de pe
   expect(heading).not.toHaveFocus();
 });
 it("F4: cada comparación describe su propio alcance sin atribuir el conflicto a todas las aportaciones", async () => {
+  wideViewport();
   page(withUnlinkedContribution(conflict), "?tab=contributions");
   const user = userEvent.setup();
   await user.click(
@@ -550,6 +567,7 @@ it("F4: cada comparación describe su propio alcance sin atribuir el conflicto a
 const backButton = () =>
   screen.findByRole("button", { name: /^← Volver a \d+ aportaciones/ });
 it("F5: «← Volver a N aportaciones» devuelve el foco a «Comparar aportaciones» ya visible", async () => {
+  wideViewport();
   page(withUnlinkedContribution(conflict), "?tab=contrast");
   const user = userEvent.setup();
   await user.click(await backButton());
@@ -564,6 +582,7 @@ it("F5: «← Volver a N aportaciones» devuelve el foco a «Comparar aportacion
   );
 });
 it("F5: con teclado, Enter en «← Volver» también devuelve el foco al botón de comparar", async () => {
+  wideViewport();
   page(withUnlinkedContribution(conflict), "?tab=contrast");
   const user = userEvent.setup();
   const back = await backButton();
@@ -575,6 +594,7 @@ it("F5: con teclado, Enter en «← Volver» también devuelve el foco al botón
   await waitFor(() => expect(compare).toHaveFocus());
 });
 it("F5: el foco no se solicita mientras el panel de Aportaciones sigue oculto", async () => {
+  wideViewport();
   const requested = earlyFrameWithBrowserFocus();
   try {
     page(withUnlinkedContribution(conflict), "?tab=contrast");
@@ -601,6 +621,7 @@ it("F5: sin botón de comparar (una sola aportación) el foco vuelve a la pesta�
   expect(tab).toHaveAttribute("aria-selected", "true");
 });
 it("F5: ida y vuelta a Contraste no deja peticiones de foco pendientes que roben cambios de pestaña posteriores", async () => {
+  wideViewport();
   page(withUnlinkedContribution(conflict), "?tab=contributions");
   const user = userEvent.setup();
   await user.click(
@@ -620,4 +641,212 @@ it("F5: ida y vuelta a Contraste no deja peticiones de foco pendientes que roben
   await user.click(screen.getByRole("tab", { name: "Contraste" }));
   expect(screen.getByRole("tab", { name: "Contraste" })).toHaveFocus();
   expect(heading).not.toHaveFocus();
+});
+
+// ---- UX-06 / UX-07 / UX-09 -------------------------------------------------
+function narrowViewport() {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: /max-width:\s*759px/.test(query),
+    media: query,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  }));
+}
+const tabNames = () =>
+  screen.getAllByRole("tab").map((tab) => tab.textContent?.trim());
+
+it("UX-06: con un conflicto abierto la pestaña Contraste lo avisa desde cualquier pestaña, sin cambiar su nombre", async () => {
+  page(conflict, "?tab=contributions");
+  const tab = await screen.findByRole("tab", { name: "Contraste" });
+  expect(tab.querySelector('[data-icon="flag"]')).toBeInTheDocument();
+  expect(tab).toHaveAttribute("aria-description", "Conflicto abierto");
+  expect(tab).toHaveAttribute("aria-selected", "false");
+  cleanup();
+  // Without an open conflict there is no cue.
+  page(
+    reviewDetailView.parse({ ...conflict, status: "ANSWERED", conflicts: [] }),
+    "?tab=contributions",
+  );
+  const plain = await screen.findByRole("tab", { name: "Contraste" });
+  expect(plain.querySelector("[data-icon]")).not.toBeInTheDocument();
+  expect(plain).not.toHaveAttribute("aria-description");
+});
+
+it("UX-09: quien revisa conserva siempre las cuatro pestañas, aunque alguna esté vacía", async () => {
+  page(
+    reviewDetailView.parse({ ...conflict, status: "ANSWERED", conflicts: [] }),
+  );
+  await screen.findByRole("heading", { level: 1 });
+  expect(tabNames()).toEqual([
+    "Aportaciones (2)",
+    "Contraste",
+    "Decisión",
+    "Historial",
+  ]);
+});
+
+const asViewer = () => {
+  const current = decision.validations.filter((v) => !v.invalidatedAt);
+  const sourceIds = new Set(
+    current.flatMap((v) => v.sources.map((s) => s.responseRevisionId)),
+  );
+  return reviewDetailView.parse({
+    ...decision,
+    canReview: false,
+    validations: current,
+    submissions: decision.submissions.filter((s) => sourceIds.has(s.id)),
+    threads: [],
+    conflicts: [],
+    participants: [],
+    dispositions: [],
+    references: [],
+  });
+};
+it("UX-09: el lector solo ve las pestañas con contenido y la decisión vigente sigue siendo la predeterminada", async () => {
+  page(asViewer());
+  await screen.findByRole("heading", { level: 1 });
+  expect(tabNames()).toEqual(["Aportaciones (1)", "Decisión"]);
+  expect(screen.getByRole("tab", { name: "Decisión" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+  expect(
+    screen.getByRole("article", { name: "Decisión vigente" }),
+  ).toBeVisible();
+  // Every shown tab controls a panel that exists; hidden ones have none.
+  for (const tab of screen.getAllByRole("tab"))
+    expect(
+      document.getElementById(tab.getAttribute("aria-controls")!),
+    ).toBeInTheDocument();
+  expect(screen.getAllByRole("tabpanel", { hidden: true })).toHaveLength(2);
+});
+it("UX-09: pedir por URL una pestaña sin contenido para el lector cae en la predeterminada", async () => {
+  page(asViewer(), "?tab=history");
+  await screen.findByRole("heading", { level: 1 });
+  expect(screen.getByRole("tab", { name: "Decisión" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+  expect(
+    screen.queryByRole("tab", { name: "Historial" }),
+  ).not.toBeInTheDocument();
+});
+it("UX-09: ADMIN conserva todo lo que el servidor le entrega: conflicto, aportaciones y comparación, sin controles", async () => {
+  page({ ...conflict, canReview: false });
+  await screen.findByRole("heading", { level: 1 });
+  expect(tabNames()).toEqual(["Aportaciones (2)", "Contraste"]);
+  expect(screen.getByRole("tab", { name: "Contraste" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+  expect(screen.getAllByRole("region", { name: /Postura [AB]/ })).toHaveLength(
+    2,
+  );
+  expect(
+    screen.queryByRole("combobox", { name: "Otras acciones" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: /Resolver conflicto|Más acciones/ }),
+  ).not.toBeInTheDocument();
+});
+it("UX-09: la tarjeta de estado dice por qué no hay acciones: equipo analista para ADMIN/VIEWER, archivo para un analista", async () => {
+  page(asViewer(), "", [
+    { id: asViewer().projectId, role: "VIEWER", lifecycle: "ACTIVE" },
+  ]);
+  expect(
+    await screen.findByText(
+      /Las acciones de revisión corresponden al equipo analista\./,
+    ),
+  ).toBeVisible();
+  expect(screen.getByText("Consulta de solo lectura.")).toBeVisible();
+  cleanup();
+  page({ ...conflict, canReview: false }, "", [
+    { id: conflict.projectId, role: "ANALYST", lifecycle: "ARCHIVED" },
+  ]);
+  expect(
+    await screen.findByText(
+      /El proyecto está archivado: no admite acciones de revisión\./,
+    ),
+  ).toBeVisible();
+  expect(screen.queryByText(/equipo analista/)).not.toBeInTheDocument();
+  expect(screen.queryByText("Te toca a ti")).not.toBeInTheDocument();
+});
+
+it("UX-07: en pantallas estrechas el CTA principal queda a la vista y las demás acciones van en «Más acciones»", async () => {
+  narrowViewport();
+  page(
+    reviewDetailView.parse({ ...conflict, status: "ANSWERED", conflicts: [] }),
+  );
+  await screen.findByRole("heading", { level: 1 });
+  expect(
+    screen.getByRole("button", { name: "Registrar decisión" }),
+  ).toBeVisible();
+  expect(
+    screen.queryByRole("combobox", { name: "Otras acciones" }),
+  ).not.toBeInTheDocument();
+  const user = userEvent.setup();
+  await user.click(screen.getByText("Más acciones"));
+  // Same actions, same labels as the desktop select (primary excluded).
+  expect(
+    screen
+      .getAllByRole("button")
+      .map((b) => b.textContent)
+      .filter(
+        (text) =>
+          /aclaración|parcial|pendiente|conflicto|aplica/i.test(text ?? "") &&
+          !/Resolver/.test(text ?? ""),
+      ),
+  ).toEqual([
+    "Solicitar aclaración",
+    "Marcar respuesta parcial",
+    "Marcar pendiente",
+    "Marcar conflicto",
+    "Marcar no aplica",
+  ]);
+});
+it("UX-07: elegir una acción del menú abre su diálogo y, al cancelar, el foco vuelve a «Más acciones»", async () => {
+  // jsdom has no modal dialogs; the app code under test is unchanged.
+  for (const [name, open] of [
+    ["showModal", true],
+    ["close", false],
+  ] as const)
+    Object.defineProperty(HTMLDialogElement.prototype, name, {
+      configurable: true,
+      value(this: HTMLDialogElement) {
+        if (open) this.setAttribute("open", "");
+        else this.removeAttribute("open");
+      },
+    });
+  narrowViewport();
+  page(
+    reviewDetailView.parse({ ...conflict, status: "ANSWERED", conflicts: [] }),
+  );
+  await screen.findByRole("heading", { level: 1 });
+  const user = userEvent.setup();
+  const trigger = screen.getByText("Más acciones");
+  await user.click(trigger);
+  await user.click(
+    screen.getByRole("button", { name: "Solicitar aclaración" }),
+  );
+  const dialog = await screen.findByRole("dialog");
+  expect(within(dialog).getByText("Solicitar aclaración")).toBeVisible();
+  await user.click(within(dialog).getByRole("button", { name: "Cancelar" }));
+  await waitFor(() => expect(trigger).toHaveFocus());
+});
+it("UX-07: en escritorio sigue el selector «Otras acciones» y no aparece el menú móvil", async () => {
+  wideViewport();
+  page(
+    reviewDetailView.parse({ ...conflict, status: "ANSWERED", conflicts: [] }),
+  );
+  await screen.findByRole("heading", { level: 1 });
+  expect(
+    screen.getByRole("combobox", { name: "Otras acciones" }),
+  ).toBeVisible();
+  expect(screen.queryByText("Más acciones")).not.toBeInTheDocument();
+});
+it("UX-07: solo lectura no ofrece menú de acciones en pantallas estrechas", async () => {
+  narrowViewport();
+  page({ ...conflict, canReview: false });
+  await screen.findByRole("heading", { level: 1 });
+  expect(screen.queryByText("Más acciones")).not.toBeInTheDocument();
 });

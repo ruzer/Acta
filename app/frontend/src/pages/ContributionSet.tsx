@@ -4,6 +4,7 @@ import { Button, EmptyState, Input, Select } from "../ui";
 import { ContributionRail, ContributionPane, MetaLine } from "../ui/semantic";
 import { answerText } from "./AnswerControl";
 import { ContributionComparison } from "./ContributionComparison";
+import { relevantSubmissionId } from "./review-turn";
 import { dateText, SubmittedAnswer } from "./ReviewShared";
 import "../next-contributions.css";
 
@@ -109,14 +110,23 @@ export function ContributionSet({
           : state.conflict))
     );
   });
+  // UX-06: open on the contribution the pending clarification or the open
+  // conflict points to; otherwise keep the server order. Asking for the list
+  // (narrow screens) is respected and not undone by the preference.
+  const [listRequested, setListRequested] = useState(false);
+  const relevant = relevantSubmissionId(data);
+  const preferred =
+    visible.find((s) => s.id === relevant) ?? (wide ? visible[0] : undefined);
   const selected =
     current.length === 1
       ? current[0]
       : selectedId
         ? current.find((s) => s.id === selectedId)
-        : wide
-          ? visible[0]
-          : undefined;
+        : listRequested
+          ? wide
+            ? visible[0]
+            : undefined
+          : preferred;
   const displayedId = selected?.id;
   useEffect(() => {
     if (selectedId) {
@@ -125,15 +135,22 @@ export function ContributionSet({
     }
   }, [selectedId, displayedId]);
   function returnToSet() {
-    const previous = selectedId;
+    const previous = selectedId || selected?.id || "";
+    setListRequested(true);
     setSelectedId("");
     requestAnimationFrame(() =>
       (buttons.current.get(previous) ?? setHeading.current)?.focus(),
     );
   }
   const listVisible = current.length > 1 && (wide || !selected);
+  // On a narrow screen the open contribution replaces the list: the count is
+  // already in "← Volver a N aportaciones", so the heading only stays for
+  // assistive technology and as the section's name.
+  const headingHidden = !wide && current.length > 1 && !!selected && !comparing;
   const heading = (
-    <div className="next-contributions-heading">
+    <div
+      className={`next-contributions-heading${headingHidden ? " sr-only" : ""}`}
+    >
       <h2 id="received" ref={setHeading} tabIndex={-1}>
         {current.length} {current.length === 1 ? "aportación" : "aportaciones"}
       </h2>

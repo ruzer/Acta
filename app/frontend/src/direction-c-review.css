@@ -173,3 +173,68 @@
     font-size: var(--ac-text-overline);
   }
 }
+
+/* The page-level details rules (margin, rule under) are for disclosures, not
+   for the actions menu. */
+.ac-review .ac-action-menu {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.ac-review .ac-action-menu > summary {
+  display: inline-flex;
+  padding: 0 12px;
+}
+
+/* UX-07: less vertical chrome on phones; the question, state, primary action
+   and the contribution stay easy to find, secondary actions sit in a menu. */
+@media (max-width: 759px) {
+  .ac-review-back {
+    margin-bottom: 0;
+  }
+  .ac-review .ac-question-band .ac-overline {
+    margin-bottom: 4px;
+  }
+  .ac-review-heading {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .ac-review .ac-question-help {
+    margin-top: 4px;
+  }
+  .ac-review .ac-state-card {
+    padding: 12px;
+    gap: 8px;
+  }
+  .ac-review .ac-state-copy h2 {
+    margin: 4px 0 2px;
+  }
+  .ac-review .ac-state-actions {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+  .ac-review .ac-state-actions .ac-action-menu > summary {
+    width: auto;
+  }
+  .ac-review > [role="tabpanel"] {
+    margin-top: 12px;
+  }
+}
+
+@media (max-width: 420px) {
+  /* Too narrow for two buttons side by side: stack them, both full width. */
+  .ac-review .ac-state-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ac-review .ac-state-actions .ac-action-menu > summary {
+    width: 100%;
+  }
+}
+
+@media (max-width: 359px) {
+  /* Compact phones: a long question must not push the state and its action off the first screen. */
+  .ac-review .ac-question-band h1 {
+    font-size: 20px;
+    line-height: 1.3;
+  }
+}

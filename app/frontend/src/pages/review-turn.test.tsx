@@ -1,7 +1,7 @@
 import { expect, it } from "vitest";
 import { reviewDetailView, type ReviewDetail } from "@requirements/contracts";
 import fixture from "../../../../tests/fixtures/analyst-visual.json";
-import { deriveTurn } from "./review-turn";
+import { deriveTurn, relevantSubmissionId } from "./review-turn";
 const original = reviewDetailView.parse(fixture.conflict);
 const decision = reviewDetailView.parse(fixture.decision);
 const plain = (): ReviewDetail => ({
@@ -206,3 +206,92 @@ it.each([
     expect(detail.status).toBe("PARTIAL");
   },
 );
+
+// ---- UX-06: which contribution a reviewer came for -------------------------
+const second = () => original.submissions[1]!.id;
+const first = () => original.submissions[0]!.id;
+const onSecond = (
+  status: "WAITING_ANALYST" | "WAITING_STAKEHOLDER",
+  id: string,
+) => ({
+  ...thread(status, id),
+  responseRevisionId: second(),
+});
+it("UX-06: la aclaración pendiente manda sobre el conflicto, y la que espera al analista sobre la que espera al participante", () => {
+  const base = { ...plain(), conflicts: original.conflicts };
+  expect(relevantSubmissionId(base)).toBe(
+    original.conflicts[0]!.participants[0]!.responseRevisionId,
+  );
+  expect(
+    relevantSubmissionId({
+      ...base,
+      threads: [thread("WAITING_STAKEHOLDER", "a")],
+    }),
+  ).toBe(first());
+  expect(
+    relevantSubmissionId({
+      ...base,
+      threads: [
+        thread("WAITING_STAKEHOLDER", "a"),
+        onSecond("WAITING_ANALYST", "b"),
+      ],
+    }),
+  ).toBe(second());
+});
+it("UX-06: sin aclaración ni conflicto no se prefiere ninguna aportación", () => {
+  expect(relevantSubmissionId(plain())).toBeUndefined();
+  expect(
+    relevantSubmissionId({
+      ...plain(),
+      threads: [{ ...thread("WAITING_ANALYST"), status: "CLOSED" }],
+    }),
+  ).toBeUndefined();
+});
+it("UX-06: una relación que apunta a una revisión histórica no se inventa como aportación vigente", () => {
+  const historical = {
+    ...plain(),
+    submissions: plain().submissions.map((s, i) =>
+      i === 0 ? { ...s, current: false } : s,
+    ),
+    threads: [thread("WAITING_ANALYST")], // points at submissions[0], now historical
+  };
+  expect(relevantSubmissionId(historical)).toBeUndefined();
+  // …and it falls through to the conflict when that one links a current revision.
+  expect(
+    relevantSubmissionId({ ...historical, conflicts: original.conflicts }),
+  ).toBe(original.conflicts[0]!.participants[1]!.responseRevisionId);
+  // A conflict that is already resolved never makes a contribution relevant.
+  expect(
+    relevantSubmissionId({
+      ...plain(),
+      conflicts: original.conflicts.map((c) => ({
+        ...c,
+        status: "RESOLVED" as const,
+      })),
+    }),
+  ).toBeUndefined();
+});
+
+// ---- UX-09: say why there are no actions -----------------------------------
+it("UX-09: solo lectura explica quién actúa, sin cambiar el rótulo ni el acceso", () => {
+  const readOnly = { ...plain(), canReview: false };
+  const turn = deriveTurn(readOnly);
+  expect(turn.label).toBe("Consulta de solo lectura.");
+  expect(turn.detail).toContain(
+    "Las acciones de revisión corresponden al equipo analista.",
+  );
+  expect(turn.action).toBeUndefined();
+  expect(
+    deriveTurn({ ...readOnly, conflicts: original.conflicts }).detail,
+  ).toBe(
+    "Hay un conflicto abierto entre aportaciones. Las acciones de revisión corresponden al equipo analista.",
+  );
+});
+it("UX-09: un analista en proyecto archivado lee el motivo real, no «equipo analista»", () => {
+  const turn = deriveTurn({ ...plain(), canReview: false }, { archived: true });
+  expect(turn.detail).toContain(
+    "El proyecto está archivado: no admite acciones de revisión.",
+  );
+  expect(turn.detail).not.toContain("equipo analista");
+  expect(turn.action).toBeUndefined();
+});

@@ -407,3 +407,65 @@
   outline-offset: 2px;
   box-shadow: var(--ac-focus);
 }
+
+.ac-action-menu {
+  position: relative;
+}
+.ac-action-menu > summary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  list-style: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.ac-action-menu > summary::-webkit-details-marker {
+  display: none;
+}
+.ac-action-menu > summary::after {
+  content: "⌄";
+}
+.ac-action-menu[open] > summary::after {
+  content: "⌃";
+}
+.ac-action-menu > ul {
+  position: absolute;
+  z-index: 20;
+  right: 0;
+  margin: 4px 0 0;
+  padding: 4px;
+  min-width: min(260px, calc(100vw - 32px));
+  list-style: none;
+  background: var(--ac-surface);
+  border: 1px solid var(--ac-line-2);
+  border-radius: var(--ac-radius-control);
+  box-shadow: var(--ac-shadow-dialog);
+}
+.ac-action-menu li button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  background: transparent;
+  color: var(--ac-ink);
+  border: 0;
+  border-radius: var(--ac-radius-row);
+  font: 500 var(--ac-text-ui)/1.4 var(--ac-font-ui);
+  text-align: left;
+}
+.ac-action-menu li button:hover {
+  background: var(--ac-sunken);
+}
+.ac-tabs .ac-tab-indicator {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-left: 6px;
+  color: var(--ac-danger);
+}
+.ac-tabs .ac-tab-indicator .participant-icon {
+  width: 16px;
+  height: 16px;
+}

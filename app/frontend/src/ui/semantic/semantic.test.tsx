@@ -23,6 +23,7 @@ import {
   Receipt,
   Letter,
   AppShell,
+  ActionMenu,
   type StatusTone,
 } from "./index";
 
@@ -279,4 +280,108 @@ it("shell y filas no duplican landmarks ni cambian navegación del llamador", ()
   expect(
     screen.getByRole("cell", { name: "Pregunta conservada" }),
   ).toBeVisible();
+});
+
+// ---- UX-07: accessible "Más acciones" menu ---------------------------------
+function Menu({ onSelect }: { onSelect: (value: string) => void }) {
+  return (
+    <>
+      <button type="button">Fuera del menú</button>
+      <ActionMenu
+        label="Más acciones"
+        items={[
+          { value: "clarify", label: "Solicitar aclaración" },
+          { value: "pending", label: "Marcar pendiente" },
+        ]}
+        onSelect={onSelect}
+      />
+    </>
+  );
+}
+it("UX-07: el menú es un botón real que abre una lista de botones con objetivo táctil de 44 px", async () => {
+  const user = userEvent.setup();
+  render(<Menu onSelect={vi.fn()} />);
+  const trigger = screen.getByText("Más acciones");
+  expect(trigger.closest("details")).not.toHaveAttribute("open");
+  expect(
+    screen.getByRole("button", { name: "Solicitar aclaración" }),
+  ).not.toBeVisible();
+  await user.click(trigger);
+  expect(trigger.closest("details")).toHaveAttribute("open");
+  expect(
+    screen.getAllByRole("button", { name: /Solicitar|Marcar/ }),
+  ).toHaveLength(2);
+});
+it("UX-07: elegir una acción la entrega, cierra el menú y deja el foco en el disparador", async () => {
+  const onSelect = vi.fn();
+  const user = userEvent.setup();
+  render(<Menu onSelect={onSelect} />);
+  await user.click(screen.getByText("Más acciones"));
+  await user.click(screen.getByRole("button", { name: "Marcar pendiente" }));
+  expect(onSelect).toHaveBeenCalledWith("pending");
+  expect(
+    screen.getByText("Más acciones").closest("details"),
+  ).not.toHaveAttribute("open");
+  expect(screen.getByText("Más acciones")).toHaveFocus();
+});
+it("UX-07: Escape cierra el menú, devuelve el foco al disparador y no propaga", async () => {
+  const outer = vi.fn();
+  const user = userEvent.setup();
+  render(
+    <div onKeyDown={(event) => event.key === "Escape" && outer()}>
+      <Menu onSelect={vi.fn()} />
+    </div>,
+  );
+  const trigger = screen.getByText("Más acciones");
+  await user.click(trigger);
+  screen.getByRole("button", { name: "Marcar pendiente" }).focus();
+  await user.keyboard("{Escape}");
+  expect(trigger.closest("details")).not.toHaveAttribute("open");
+  expect(trigger).toHaveFocus();
+  expect(outer).not.toHaveBeenCalled();
+});
+it("UX-07: se maneja solo con teclado (Enter abre, Tab recorre, Enter elige) y un clic fuera lo cierra", async () => {
+  const onSelect = vi.fn();
+  const user = userEvent.setup();
+  render(<Menu onSelect={onSelect} />);
+  await user.tab(); // "Fuera del menú"
+  await user.tab(); // trigger
+  expect(screen.getByText("Más acciones")).toHaveFocus();
+  await user.keyboard("{Enter}");
+  await user.tab();
+  expect(
+    screen.getByRole("button", { name: "Solicitar aclaración" }),
+  ).toHaveFocus();
+  await user.keyboard("{Enter}");
+  expect(onSelect).toHaveBeenCalledWith("clarify");
+  await user.click(screen.getByText("Más acciones"));
+  await user.click(screen.getByRole("button", { name: "Fuera del menú" }));
+  expect(
+    screen.getByText("Más acciones").closest("details"),
+  ).not.toHaveAttribute("open");
+});
+it("UX-06: un indicador de pestaña es decorativo y no cambia el nombre accesible; su descripción se anuncia aparte", () => {
+  render(
+    <TabNav
+      id="t"
+      label="Pestañas"
+      value="a"
+      onChange={() => undefined}
+      items={[
+        { value: "a", label: "Aportaciones (3)" },
+        {
+          value: "b",
+          label: "Contraste",
+          indicator: <span data-testid="flag" />,
+          description: "Conflicto abierto",
+        },
+      ]}
+    />,
+  );
+  const tab = screen.getByRole("tab", { name: "Contraste" });
+  expect(tab).toHaveAttribute("aria-description", "Conflicto abierto");
+  expect(within(tab).getByTestId("flag")).toBeInTheDocument();
+  expect(
+    screen.getByRole("tab", { name: "Aportaciones (3)" }),
+  ).not.toHaveAttribute("aria-description");
 });

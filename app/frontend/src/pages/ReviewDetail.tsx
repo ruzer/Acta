@@ -15,12 +15,15 @@ import { api } from "../api";
 import { typeLabels, type dashboardView } from "@requirements/contracts";
 import type { z } from "zod";
 import {
+  ActionMenu,
   QuestionBand,
   MetaLine,
   StateCard,
   TabNav,
   TabPanel,
 } from "../ui/semantic";
+import { useMediaQuery } from "../ui/useMediaQuery";
+import { ParticipantIcon } from "./ParticipantIcon";
 import { deriveTurn } from "./review-turn";
 import { ContributionComparison } from "./ContributionComparison";
 import "../direction-c-review.css";
@@ -91,6 +94,8 @@ export function ReviewDetail() {
     } | null>(null),
     [message, setMessage] = useState("");
   const [freeComparisonOpen, setFreeComparisonOpen] = useState(false);
+  // < 760 px: secondary actions live in a "Más acciones" menu, not a select.
+  const compact = useMediaQuery("(max-width: 759px)");
   // Moving between "Aportaciones" and "Contraste" changes the tab; the target
   // can only take focus once its panel is rendered visible, so the request is
   // recorded here and fulfilled after the commit that selects the tab instead
@@ -154,20 +159,47 @@ export function ReviewDetail() {
     });
   }
   const hasCurrentDecision = d.validations.some((v) => !v.invalidatedAt);
-  const turn = deriveTurn(d);
-  const selectedTab = searchParams.get("tab");
-  const tab =
-    selectedTab &&
-    ["contributions", "contrast", "decision", "history"].includes(selectedTab)
-      ? selectedTab
-      : hasCurrentDecision || d.status === "NOT_APPLICABLE"
-        ? "decision"
-        : openConflict
-          ? "contrast"
-          : "contributions";
-  const projectRole = projects.data?.find(
+  const currentProject = projects.data?.find(
     (project) => project.id === projectId,
-  )?.role;
+  );
+  // An analyst is read-only only because the project is archived; every other
+  // role simply does not review.
+  const turn = deriveTurn(d, {
+    archived:
+      currentProject?.role === "ANALYST" &&
+      currentProject.lifecycle === "ARCHIVED",
+  });
+  // UX-09: the team that reviews always gets the four tabs; a read-only
+  // reader only gets the ones that have something to show (with what the
+  // server already filters for that role).
+  const readOnly = !d.canReview;
+  const available = {
+    contributions: true,
+    contrast: !readOnly || d.conflicts.length > 0 || current.length >= 2,
+    decision:
+      !readOnly || d.validations.length > 0 || d.dispositions.length > 0,
+    history:
+      !readOnly ||
+      d.threads.length > 0 ||
+      d.dispositions.length > 0 ||
+      d.references.length > 0,
+  };
+  type TabKey = keyof typeof available;
+  const isAvailable = (value: string | null): value is TabKey =>
+    !!value && Object.hasOwn(available, value) && available[value as TabKey];
+  const selectedTab = searchParams.get("tab");
+  const preferredTab: TabKey =
+    hasCurrentDecision || d.status === "NOT_APPLICABLE"
+      ? "decision"
+      : openConflict
+        ? "contrast"
+        : "contributions";
+  const tab: TabKey = isAvailable(selectedTab)
+    ? selectedTab
+    : isAvailable(preferredTab)
+      ? preferredTab
+      : "contributions";
+  const projectRole = currentProject?.role;
   // DEV-01/02: reuse only an existing dashboard cache, never fetch per question.
   const cached =
     projectRole === "ADMIN" || projectRole === "ANALYST"
@@ -199,30 +231,41 @@ export function ReviewDetail() {
       "markNotApplicable",
     ]),
   ];
-  const otherControls = d.canReview && (
-    <Select
-      label="Otras acciones"
-      value=""
-      onChange={(event) => {
-        const value = event.target.value as ReviewAction;
-        if (value)
-          setAction({
-            action: value,
-            threadId:
-              value === "closeClarification" ? openThread?.id : undefined,
-            conflictId:
-              value === "resolveConflict" ? openConflict?.id : undefined,
-          });
-      }}
-    >
-      <option value="">Selecciona una acción</option>
-      {otherActions.map((item) => (
-        <option key={item} value={item}>
-          {actionLabels[item]}
-        </option>
-      ))}
-    </Select>
-  );
+  function chooseAction(value: ReviewAction) {
+    setAction({
+      action: value,
+      threadId: value === "closeClarification" ? openThread?.id : undefined,
+      conflictId: value === "resolveConflict" ? openConflict?.id : undefined,
+    });
+  }
+  const otherControls =
+    d.canReview &&
+    (compact ? (
+      <ActionMenu
+        label="Más acciones"
+        items={otherActions.map((item) => ({
+          value: item,
+          label: actionLabels[item],
+        }))}
+        onSelect={(value) => chooseAction(value as ReviewAction)}
+      />
+    ) : (
+      <Select
+        label="Otras acciones"
+        value=""
+        onChange={(event) => {
+          const value = event.target.value as ReviewAction;
+          if (value) chooseAction(value);
+        }}
+      >
+        <option value="">Selecciona una acción</option>
+        {otherActions.map((item) => (
+          <option key={item} value={item}>
+            {actionLabels[item]}
+          </option>
+        ))}
+      </Select>
+    ));
   const participants = d.participants.length > 0 && (
     <details className="ac-review-participants">
       <summary>Participantes ({d.participants.length})</summary>
@@ -448,10 +491,22 @@ export function ReviewDetail() {
         onChange={changeTab}
         items={[
           { value: "contributions", label: `Aportaciones (${current.length})` },
-          { value: "contrast", label: "Contraste" },
+          {
+            value: "contrast",
+            label: "Contraste",
+            // UX-06: the conflict is visible from any tab, not only inside it.
+            ...(openConflict && {
+              indicator: (
+                <span className="ac-tab-indicator" title="Conflicto abierto">
+                  <ParticipantIcon name="flag" />
+                </span>
+              ),
+              description: "Conflicto abierto",
+            }),
+          },
           { value: "decision", label: "Decisión" },
           { value: "history", label: "Historial" },
-        ]}
+        ].filter((item) => available[item.value as TabKey])}
       />
       <TabPanel
         id="review-tabs"
@@ -470,143 +525,149 @@ export function ReviewDetail() {
         />
         {participants}
       </TabPanel>
-      <TabPanel id="review-tabs" value="contrast" active={tab === "contrast"}>
-        <div className="ac-contrast-heading">
-          <h2 ref={contrastHeading} tabIndex={-1}>
-            Contrastar aportaciones
-          </h2>
-          <Button
-            tone="secondary"
-            onClick={() => {
-              focusOnTab.current = "contributions";
-              changeTab("contributions");
-            }}
-          >
-            ← Volver a {current.length} aportaciones
-          </Button>
-        </div>
-        {conflictsSection}
-        {current.length < 2 ? (
-          !conflictsSection && (
-            <p>Se necesitan al menos dos aportaciones para comparar.</p>
-          )
-        ) : !conflictsSection ? (
-          <ContributionComparison data={d} />
-        ) : (
-          !conflictCoversCurrent && (
-            <details
-              className="ac-free-comparison"
-              open={freeComparisonOpen}
-              onToggle={(event) =>
-                setFreeComparisonOpen(event.currentTarget.open)
-              }
-            >
-              <summary>
-                Comparar otras aportaciones vigentes ({current.length})
-              </summary>
-              <ContributionComparison
-                data={d}
-                labelSuffix=" (comparación libre)"
-              />
-            </details>
-          )
-        )}
-      </TabPanel>
-      <TabPanel id="review-tabs" value="decision" active={tab === "decision"}>
-        {d.validations.length > 0 && (
-          <section aria-labelledby="decisions-title">
-            <h2 id="decisions-title">Decisiones registradas</h2>
-            {d.validations
-              .filter((v) => !v.invalidatedAt)
-              .map((v) => (
-                <DecisionRecord key={v.id} data={d} validation={v} />
-              ))}
-            {d.validations.some((v) => v.invalidatedAt) && (
-              <details>
-                <summary>
-                  Decisiones históricas (
-                  {d.validations.filter((v) => v.invalidatedAt).length})
-                </summary>
-                {d.validations
-                  .filter((v) => v.invalidatedAt)
-                  .map((v) => (
-                    <DecisionRecord key={v.id} data={d} validation={v} />
-                  ))}
-              </details>
-            )}
-          </section>
-        )}
-
-        {!d.validations.length && <p>No hay decisiones registradas.</p>}
-        {d.status === "NOT_APPLICABLE" && d.dispositions.length > 0 && (
-          <details>
-            <summary>Decisiones de no aplica</summary>
-            {d.dispositions.map((n) => (
-              <article key={n.id}>
-                <h3>
-                  {n.revokedAt ? "Decisión histórica" : "No aplica vigente"}
-                </h3>
-                <p>{n.reason}</p>
-                <p>Alcance: {n.scope}</p>
-                <p>
-                  {n.markedBy.displayName} · {dateText(n.markedAt)}
-                </p>
-                {n.revokedAt && <p>Reabierta: {n.revokeReason}</p>}
-              </article>
-            ))}
-          </details>
-        )}
-        {d.canReview &&
-          (d.status === "VALIDATED" || d.status === "NOT_APPLICABLE") && (
+      {available.contrast && (
+        <TabPanel id="review-tabs" value="contrast" active={tab === "contrast"}>
+          <div className="ac-contrast-heading">
+            <h2 ref={contrastHeading} tabIndex={-1}>
+              Contrastar aportaciones
+            </h2>
             <Button
               tone="secondary"
-              onClick={() => setAction({ action: "reopenQuestion" })}
+              onClick={() => {
+                focusOnTab.current = "contributions";
+                changeTab("contributions");
+              }}
             >
-              Reabrir pregunta
+              ← Volver a {current.length} aportaciones
             </Button>
-          )}
-      </TabPanel>
-      <TabPanel id="review-tabs" value="history" active={tab === "history"}>
-        <h2>Historial de la pregunta</h2>
-        {d.threads.length > 0 && (
-          <section>
-            <h3>Aclaraciones</h3>
-            {threadsFor()}
-          </section>
-        )}
-        {d.dispositions.length > 0 && (
-          <details>
-            <summary>Decisiones de no aplica</summary>
-            {d.dispositions.map((n) => (
-              <article key={n.id}>
-                <h3>
-                  {n.revokedAt ? "Decisión histórica" : "No aplica vigente"}
-                </h3>
-                <p>{n.reason}</p>
-                <p>Alcance: {n.scope}</p>
-                <p>
-                  {n.markedBy.displayName} · {dateText(n.markedAt)}
-                </p>
-                {n.revokedAt && <p>Reabierta: {n.revokeReason}</p>}
-              </article>
-            ))}
-          </details>
-        )}
-        <details>
-          <summary>Ver trazabilidad</summary>
-          {d.references.length ? (
-            <ul>
-              {d.references.map((r) => (
-                <li key={r.id}>
-                  {r.externalId} · {r.label} · {r.scopeNote}
-                </li>
-              ))}
-            </ul>
+          </div>
+          {conflictsSection}
+          {current.length < 2 ? (
+            !conflictsSection && (
+              <p>Se necesitan al menos dos aportaciones para comparar.</p>
+            )
+          ) : !conflictsSection ? (
+            <ContributionComparison data={d} />
           ) : (
-            <p>Esta pregunta no tiene referencias vinculadas.</p>
+            !conflictCoversCurrent && (
+              <details
+                className="ac-free-comparison"
+                open={freeComparisonOpen}
+                onToggle={(event) =>
+                  setFreeComparisonOpen(event.currentTarget.open)
+                }
+              >
+                <summary>
+                  Comparar otras aportaciones vigentes ({current.length})
+                </summary>
+                <ContributionComparison
+                  data={d}
+                  labelSuffix=" (comparación libre)"
+                />
+              </details>
+            )
           )}
-        </details>
-      </TabPanel>
+        </TabPanel>
+      )}
+      {available.decision && (
+        <TabPanel id="review-tabs" value="decision" active={tab === "decision"}>
+          {d.validations.length > 0 && (
+            <section aria-labelledby="decisions-title">
+              <h2 id="decisions-title">Decisiones registradas</h2>
+              {d.validations
+                .filter((v) => !v.invalidatedAt)
+                .map((v) => (
+                  <DecisionRecord key={v.id} data={d} validation={v} />
+                ))}
+              {d.validations.some((v) => v.invalidatedAt) && (
+                <details>
+                  <summary>
+                    Decisiones históricas (
+                    {d.validations.filter((v) => v.invalidatedAt).length})
+                  </summary>
+                  {d.validations
+                    .filter((v) => v.invalidatedAt)
+                    .map((v) => (
+                      <DecisionRecord key={v.id} data={d} validation={v} />
+                    ))}
+                </details>
+              )}
+            </section>
+          )}
+
+          {!d.validations.length && <p>No hay decisiones registradas.</p>}
+          {d.status === "NOT_APPLICABLE" && d.dispositions.length > 0 && (
+            <details>
+              <summary>Decisiones de no aplica</summary>
+              {d.dispositions.map((n) => (
+                <article key={n.id}>
+                  <h3>
+                    {n.revokedAt ? "Decisión histórica" : "No aplica vigente"}
+                  </h3>
+                  <p>{n.reason}</p>
+                  <p>Alcance: {n.scope}</p>
+                  <p>
+                    {n.markedBy.displayName} · {dateText(n.markedAt)}
+                  </p>
+                  {n.revokedAt && <p>Reabierta: {n.revokeReason}</p>}
+                </article>
+              ))}
+            </details>
+          )}
+          {d.canReview &&
+            (d.status === "VALIDATED" || d.status === "NOT_APPLICABLE") && (
+              <Button
+                tone="secondary"
+                onClick={() => setAction({ action: "reopenQuestion" })}
+              >
+                Reabrir pregunta
+              </Button>
+            )}
+        </TabPanel>
+      )}
+      {available.history && (
+        <TabPanel id="review-tabs" value="history" active={tab === "history"}>
+          <h2>Historial de la pregunta</h2>
+          {d.threads.length > 0 && (
+            <section>
+              <h3>Aclaraciones</h3>
+              {threadsFor()}
+            </section>
+          )}
+          {d.dispositions.length > 0 && (
+            <details>
+              <summary>Decisiones de no aplica</summary>
+              {d.dispositions.map((n) => (
+                <article key={n.id}>
+                  <h3>
+                    {n.revokedAt ? "Decisión histórica" : "No aplica vigente"}
+                  </h3>
+                  <p>{n.reason}</p>
+                  <p>Alcance: {n.scope}</p>
+                  <p>
+                    {n.markedBy.displayName} · {dateText(n.markedAt)}
+                  </p>
+                  {n.revokedAt && <p>Reabierta: {n.revokeReason}</p>}
+                </article>
+              ))}
+            </details>
+          )}
+          <details>
+            <summary>Ver trazabilidad</summary>
+            {d.references.length ? (
+              <ul>
+                {d.references.map((r) => (
+                  <li key={r.id}>
+                    {r.externalId} · {r.label} · {r.scopeNote}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>Esta pregunta no tiene referencias vinculadas.</p>
+            )}
+          </details>
+        </TabPanel>
+      )}
       {action && (
         <ReviewActionDialog
           {...action}
