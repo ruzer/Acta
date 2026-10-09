@@ -8,9 +8,12 @@ import "../next-comparison.css";
 export function ContributionComparison({
   data,
   revisionIds,
+  labelSuffix = "",
 }: {
   data: ReviewDetail;
   revisionIds?: readonly string[];
+  /** Keeps landmark and control names unique when two comparisons share a page. */
+  labelSuffix?: string;
 }) {
   const current = data.submissions.filter((s) => s.current);
   const ids = revisionIds ?? current.map((s) => s.id);
@@ -43,7 +46,7 @@ export function ContributionComparison({
           {([0, 1] as const).map((position) => (
             <Select
               key={position}
-              label={`Aportación para postura ${position === 0 ? "A" : "B"}`}
+              label={`Aportación para postura ${position === 0 ? "A" : "B"}${labelSuffix}`}
               value={pair[position]}
               onChange={(e) =>
                 setChosen(
@@ -80,7 +83,10 @@ export function ContributionComparison({
                   VS
                 </span>
               )}
-              <section className="av-posture" aria-label={label}>
+              <section
+                className="av-posture"
+                aria-label={`${label}${labelSuffix}`}
+              >
                 <p className="av-kicker">{label}</p>
                 {s ? (
                   <>

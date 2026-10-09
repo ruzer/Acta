@@ -90,6 +90,7 @@ export function ReviewDetail() {
       conflictId?: string;
     } | null>(null),
     [message, setMessage] = useState("");
+  const [freeComparisonOpen, setFreeComparisonOpen] = useState(false);
   const returnFocus = useRef<HTMLElement | null>(null);
   function setAction(next: typeof action) {
     if (next && !action)
@@ -156,10 +157,21 @@ export function ReviewDetail() {
           .getQueryData<z.infer<typeof dashboardView>>(["dashboard", projectId])
           ?.questions.find((question) => question.id === id)
       : undefined;
+  // v0.5.0 withheld "Registrar decisión" while a clarification was open; the
+  // backend refuses to validate until every thread is closed.
+  const validationBlocked = primary === "validateQuestion" && !!openThread;
+  // Comparing never depends on conflicts: offer every current pair unless one
+  // conflict comparison already lets the analyst pick among all of them.
+  const conflictCoversCurrent = d.conflicts.some((c) =>
+    current.every((s) =>
+      c.participants.some((p) => p.responseRevisionId === s.id),
+    ),
+  );
   const otherActions = [
     ...new Set<ReviewAction>([
       ...((!turn.action || primary !== turn.action) &&
-      primary !== "reopenQuestion"
+      primary !== "reopenQuestion" &&
+      !validationBlocked
         ? [primary]
         : []),
       "requestClarification",
@@ -433,6 +445,7 @@ export function ReviewDetail() {
           data={d}
           renderThreads={threadsFor}
           onCompare={() => {
+            setFreeComparisonOpen(true);
             changeTab("contrast");
             requestAnimationFrame(() => contrastHeading.current?.focus());
           }}
@@ -462,12 +475,32 @@ export function ReviewDetail() {
             ← Volver a {current.length} aportaciones
           </Button>
         </div>
-        {conflictsSection ||
-          (current.length >= 2 ? (
-            <ContributionComparison data={d} />
-          ) : (
+        {conflictsSection}
+        {current.length < 2 ? (
+          !conflictsSection && (
             <p>Se necesitan al menos dos aportaciones para comparar.</p>
-          ))}
+          )
+        ) : !conflictsSection ? (
+          <ContributionComparison data={d} />
+        ) : (
+          !conflictCoversCurrent && (
+            <details
+              className="ac-free-comparison"
+              open={freeComparisonOpen}
+              onToggle={(event) =>
+                setFreeComparisonOpen(event.currentTarget.open)
+              }
+            >
+              <summary>
+                Comparar otras aportaciones vigentes ({current.length})
+              </summary>
+              <ContributionComparison
+                data={d}
+                labelSuffix=" (comparación libre)"
+              />
+            </details>
+          )
+        )}
       </TabPanel>
       <TabPanel id="review-tabs" value="decision" active={tab === "decision"}>
         {d.validations.length > 0 && (

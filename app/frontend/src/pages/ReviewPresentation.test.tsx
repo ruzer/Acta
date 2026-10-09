@@ -136,3 +136,318 @@ it("C: VIEWER abre la decisión vigente y usa solo las fuentes entregadas por el
     }),
   ).toBeVisible();
 });
+
+// Regression coverage for the v0.5.0 behaviours that the Direction C review
+// restructuring had dropped (audit findings F1 and F2).
+const uuid = (n: number) =>
+  `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
+function copy<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
+}
+/** A third current contribution that no conflict links to. */
+function withUnlinkedContribution(detail: ReviewDetail): ReviewDetail {
+  const third = copy(detail.submissions[0]!);
+  third.id = uuid(3);
+  third.number = 9;
+  third.answer = "Respuesta de la tercera persona.";
+  third.respondent = { id: uuid(30), displayName: "Tercera Persona" };
+  return reviewDetailView.parse({
+    ...detail,
+    submissions: [...detail.submissions, third],
+    participants: [
+      ...detail.participants,
+      {
+        memberId: uuid(31),
+        person: third.respondent,
+        area: third.area.name,
+        required: true,
+        applicability: "ENABLED",
+        currentRevisionId: third.id,
+      },
+    ],
+  });
+}
+function resolved(detail: ReviewDetail): ReviewDetail {
+  const [first] = detail.conflicts;
+  return reviewDetailView.parse({
+    ...detail,
+    status: "ANSWERED",
+    conflicts: [
+      {
+        ...first!,
+        status: "RESOLVED",
+        resolution: {
+          id: uuid(40),
+          resolutionText: "Se adopta el criterio de la primera aportación.",
+          resolvedAt: "2026-10-01T10:00:00.000Z",
+          resolvedBy: first!.openedBy,
+          sources: [
+            {
+              id: uuid(41),
+              responseRevisionId: first!.participants[0]!.responseRevisionId,
+            },
+          ],
+        },
+      },
+    ],
+  });
+}
+function thread(
+  detail: ReviewDetail,
+  status: "WAITING_STAKEHOLDER" | "WAITING_ANALYST",
+  index: number,
+) {
+  const submission = detail.submissions[index]!;
+  return {
+    id: uuid(50 + index),
+    responseRevisionId: submission.id,
+    respondentId: submission.respondent.id,
+    status,
+    lockVersion: 1,
+    createdAt: "2026-10-01T10:00:00.000Z",
+    closedAt: null,
+    closedBy: null,
+    closeReason: null,
+    messages: [],
+  };
+}
+function withThreads(
+  detail: ReviewDetail,
+  statuses: ("WAITING_STAKEHOLDER" | "WAITING_ANALYST")[],
+): ReviewDetail {
+  return reviewDetailView.parse({
+    ...detail,
+    status: "CLARIFICATION_REQUIRED",
+    conflicts: [],
+    threads: statuses.map((status, index) => thread(detail, status, index)),
+  });
+}
+const otherActionLabels = () =>
+  Array.from(
+    (
+      screen.getByRole("combobox", {
+        name: "Otras acciones",
+      }) as HTMLSelectElement
+    ).options,
+  ).map((option) => option.textContent);
+const comparisonOptions = (panel: HTMLElement) =>
+  Array.from(
+    (
+      within(panel).getByLabelText(
+        /Aportación para postura A/,
+      ) as HTMLSelectElement
+    ).options,
+  ).map((option) => option.textContent ?? "");
+
+it("F1 (PROBE-1): con un conflicto abierto, «Comparar aportaciones» permite elegir una aportación ajena al conflicto", async () => {
+  const detail = withUnlinkedContribution(conflict);
+  expect(detail.conflicts[0]!.participants).toHaveLength(2);
+  expect(detail.submissions.filter((s) => s.current)).toHaveLength(3);
+  page(detail);
+  const user = userEvent.setup();
+  await user.click(await screen.findByRole("tab", { name: /^Aportaciones/ }));
+  await user.click(
+    screen.getByRole("button", { name: "Comparar aportaciones" }),
+  );
+  const panel = screen.getByRole("tabpanel", { name: "Contraste" });
+  // The conflict comparison stays visible…
+  expect(
+    within(panel).getByRole("heading", { name: "Conflicto abierto" }),
+  ).toBeVisible();
+  // …and any current pair can be compared, including the unlinked contribution.
+  expect(
+    comparisonOptions(panel).filter((text) => text.includes("Tercera Persona")),
+  ).toHaveLength(1);
+  expect(
+    within(panel).getByLabelText(/Aportación para postura A/),
+  ).toBeVisible();
+  const postureB = within(panel).getByLabelText(/Aportación para postura B/);
+  await user.selectOptions(
+    postureB,
+    within(postureB).getByRole("option", { name: /Tercera Persona/ }),
+  );
+  expect(
+    within(panel).getByText("Respuesta de la tercera persona.", {
+      exact: false,
+    }),
+  ).toBeVisible();
+  // Both comparisons can be open together without duplicating landmark names.
+  const regions = within(panel)
+    .getAllByRole("region", { name: /Postura [AB]/ })
+    .map((region) => region.getAttribute("aria-label"));
+  expect(regions).toHaveLength(4);
+  expect(new Set(regions).size).toBe(4);
+  // Comparing never records a conflict or a decision.
+  expect(
+    within(panel).getByRole("heading", { name: "Conflicto abierto" }),
+  ).toBeVisible();
+});
+it("F1: al llegar directamente a Contraste el conflicto va primero y la comparación libre está disponible", async () => {
+  page(withUnlinkedContribution(conflict));
+  const user = userEvent.setup();
+  expect(await screen.findByRole("tab", { name: "Contraste" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+  const panel = screen.getByRole("tabpanel", { name: "Contraste" });
+  expect(
+    within(panel).getByRole("heading", { name: "Conflicto abierto" }),
+  ).toBeVisible();
+  const summary = within(panel).getByText(
+    /Comparar otras aportaciones vigentes \(3\)/,
+  );
+  expect(summary.closest("details")).not.toHaveAttribute("open");
+  await user.click(summary);
+  expect(
+    within(panel).getByLabelText(/Aportación para postura A/),
+  ).toBeVisible();
+  expect(
+    comparisonOptions(panel).some((text) => text.includes("Tercera Persona")),
+  ).toBe(true);
+});
+it("F1: con un conflicto resuelto también se pueden comparar aportaciones vigentes ajenas a él", async () => {
+  const detail = resolved(withUnlinkedContribution(conflict));
+  expect(detail.conflicts.every((item) => item.status === "RESOLVED")).toBe(
+    true,
+  );
+  page(detail);
+  const user = userEvent.setup();
+  await user.click(await screen.findByRole("tab", { name: /^Aportaciones/ }));
+  await user.click(
+    screen.getByRole("button", { name: "Comparar aportaciones" }),
+  );
+  const panel = screen.getByRole("tabpanel", { name: "Contraste" });
+  expect(
+    within(panel).getByRole("heading", { name: "Conflicto resuelto" }),
+  ).toBeVisible();
+  expect(
+    within(panel).getByLabelText(/Aportación para postura A/),
+  ).toBeVisible();
+  expect(
+    comparisonOptions(panel).some((text) => text.includes("Tercera Persona")),
+  ).toBe(true);
+});
+it("F1: si el conflicto ya abarca todas las aportaciones vigentes no se duplica la comparación", async () => {
+  page(conflict);
+  const panel = await screen.findByRole("tabpanel", { name: "Contraste" });
+  expect(
+    within(panel).getByRole("heading", { name: "Conflicto abierto" }),
+  ).toBeVisible();
+  expect(
+    within(panel).queryByText(/Comparar otras aportaciones vigentes/),
+  ).not.toBeInTheDocument();
+  expect(
+    within(panel).getAllByRole("region", { name: /Postura [AB]/ }),
+  ).toHaveLength(2);
+});
+it("F1: sin conflictos la comparación libre sigue mostrándose directamente, como en v0.5.0", async () => {
+  page(
+    reviewDetailView.parse({
+      ...withUnlinkedContribution(conflict),
+      status: "ANSWERED",
+      conflicts: [],
+    }),
+    "?tab=contrast",
+  );
+  const panel = await screen.findByRole("tabpanel", { name: "Contraste" });
+  expect(
+    within(panel).queryByText(/Comparar otras aportaciones vigentes/),
+  ).not.toBeInTheDocument();
+  expect(
+    within(panel).getByLabelText(/Aportación para postura A/),
+  ).toBeVisible();
+  expect(comparisonOptions(panel)).toHaveLength(3);
+});
+it("F1: en solo lectura la comparación libre está disponible sin ninguna acción de revisión", async () => {
+  page({ ...withUnlinkedContribution(conflict), canReview: false });
+  const user = userEvent.setup();
+  await user.click(await screen.findByRole("tab", { name: /^Aportaciones/ }));
+  await user.click(
+    screen.getByRole("button", { name: "Comparar aportaciones" }),
+  );
+  const panel = screen.getByRole("tabpanel", { name: "Contraste" });
+  expect(
+    comparisonOptions(panel).some((text) => text.includes("Tercera Persona")),
+  ).toBe(true);
+  expect(
+    screen.queryByRole("combobox", { name: "Otras acciones" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", {
+      name: /Resolver conflicto|Registrar decisión|Cerrar aclaración|Preguntar nuevamente/,
+    }),
+  ).not.toBeInTheDocument();
+});
+
+it("F2 (PROBE-2): con una aclaración esperando al participante no se ofrece «Registrar decisión»", async () => {
+  page(withThreads(conflict, ["WAITING_STAKEHOLDER"]));
+  await screen.findByRole("heading", { level: 1 });
+  expect(
+    screen.getByText(/Esperando la aclaración/, { selector: "h2" }),
+  ).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Registrar decisión" }),
+  ).not.toBeInTheDocument();
+  // Exactly the secondary actions that v0.5.0 offered in this state.
+  expect(otherActionLabels()).toEqual([
+    "Selecciona una acción",
+    "Solicitar aclaración",
+    "Marcar respuesta parcial",
+    "Marcar pendiente",
+    "Marcar conflicto",
+    "Marcar no aplica",
+  ]);
+});
+it("F2: con una aclaración esperando al participante y otra al analista, la acción principal es cerrar la aclaración", async () => {
+  page(withThreads(conflict, ["WAITING_STAKEHOLDER", "WAITING_ANALYST"]));
+  const card = (
+    await screen.findByText("Llegó una respuesta a la aclaración", {
+      selector: "h2",
+    })
+  ).closest("section")!;
+  expect(
+    within(card).getByRole("button", { name: "Cerrar aclaración" }),
+  ).toBeVisible();
+  expect(
+    within(card).queryByRole("button", { name: "Registrar decisión" }),
+  ).not.toBeInTheDocument();
+  expect(otherActionLabels()).not.toContain("Registrar decisión");
+});
+it("F2: sin aclaraciones pendientes «Registrar decisión» sigue disponible (principal o en Otras acciones)", async () => {
+  // ANSWERED: it is the state's primary action and is not duplicated in the menu.
+  const answered = reviewDetailView.parse({
+    ...conflict,
+    status: "ANSWERED",
+    conflicts: [],
+    threads: [],
+  });
+  page(answered);
+  const card = (
+    await screen.findByText("Lista para decidir", { selector: "h2" })
+  ).closest("section")!;
+  expect(
+    within(card).getByRole("button", { name: "Registrar decisión" }),
+  ).toBeVisible();
+  expect(otherActionLabels()).not.toContain("Registrar decisión");
+  cleanup();
+  // PARTIAL with a required person still missing: v0.5.0 kept it as a primary
+  // action; Direction C keeps it reachable from «Otras acciones».
+  const partial = reviewDetailView.parse({
+    ...answered,
+    status: "PARTIAL",
+    participants: [
+      ...answered.participants,
+      {
+        memberId: uuid(60),
+        person: { id: uuid(61), displayName: "Persona pendiente" },
+        area: "Fictional team",
+        required: true,
+        applicability: "ENABLED",
+        currentRevisionId: null,
+      },
+    ],
+  });
+  page(partial);
+  await screen.findByRole("heading", { level: 1 });
+  expect(otherActionLabels()).toContain("Registrar decisión");
+});
