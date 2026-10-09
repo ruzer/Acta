@@ -91,15 +91,23 @@ export function ReviewDetail() {
     } | null>(null),
     [message, setMessage] = useState("");
   const [freeComparisonOpen, setFreeComparisonOpen] = useState(false);
-  // "Comparar aportaciones" changes the tab; the heading can only take focus
-  // once the Contraste panel is rendered visible, so move it after the commit
-  // that selects the tab instead of guessing with a timer.
-  const focusContrastOnTab = useRef(false);
+  // Moving between "Aportaciones" and "Contraste" changes the tab; the target
+  // can only take focus once its panel is rendered visible, so the request is
+  // recorded here and fulfilled after the commit that selects the tab instead
+  // of guessing with a timer. It is one-shot: any later tab change clears it.
+  const focusOnTab = useRef<"contrast" | "contributions" | null>(null);
   const requestedTab = searchParams.get("tab");
   useEffect(() => {
-    const wanted = focusContrastOnTab.current;
-    focusContrastOnTab.current = false;
-    if (wanted && requestedTab === "contrast") contrastHeading.current?.focus();
+    const wanted = focusOnTab.current;
+    focusOnTab.current = null;
+    if (!wanted || wanted !== requestedTab) return;
+    if (wanted === "contrast") contrastHeading.current?.focus();
+    else
+      (
+        document.querySelector<HTMLButtonElement>(
+          "#review-tabs-panel-contributions .ac-contribution-list-panel > .button",
+        ) ?? document.getElementById("review-tabs-tab-contributions")
+      )?.focus();
   }, [requestedTab]);
   const returnFocus = useRef<HTMLElement | null>(null);
   function setAction(next: typeof action) {
@@ -456,7 +464,7 @@ export function ReviewDetail() {
           renderThreads={threadsFor}
           onCompare={() => {
             setFreeComparisonOpen(true);
-            focusContrastOnTab.current = true;
+            focusOnTab.current = "contrast";
             changeTab("contrast");
           }}
         />
@@ -470,16 +478,8 @@ export function ReviewDetail() {
           <Button
             tone="secondary"
             onClick={() => {
+              focusOnTab.current = "contributions";
               changeTab("contributions");
-              requestAnimationFrame(() => {
-                const button = document.querySelector<HTMLButtonElement>(
-                  "#review-tabs-panel-contributions .ac-contribution-list-panel > .button",
-                );
-                (
-                  button ??
-                  document.getElementById("review-tabs-tab-contributions")
-                )?.focus();
-              });
             }}
           >
             ← Volver a {current.length} aportaciones

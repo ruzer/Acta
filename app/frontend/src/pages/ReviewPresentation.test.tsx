@@ -458,6 +458,28 @@ it("F2: sin aclaraciones pendientes «Registrar decisión» sigue disponible (pr
   expect(otherActionLabels()).toContain("Registrar decisión");
 });
 
+/**
+ * Models what Chromium does and jsdom does not: an element inside a hidden
+ * panel cannot take focus, and a frame can fire before React has committed the
+ * tab change. Returns every focus request with whether its panel was hidden.
+ */
+function earlyFrameWithBrowserFocus() {
+  const realFocus = HTMLElement.prototype.focus;
+  const requested: { text: string; hidden: boolean }[] = [];
+  vi.spyOn(HTMLElement.prototype, "focus").mockImplementation(function (
+    this: HTMLElement,
+    options?: FocusOptions,
+  ) {
+    const hidden = !!this.closest("[hidden]");
+    requested.push({ text: this.textContent ?? "", hidden });
+    if (!hidden) realFocus.call(this, options);
+  });
+  vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+    callback(0);
+    return 0;
+  });
+  return requested;
+}
 it("F3: «Comparar aportaciones» traslada el foco al encabezado de Contraste ya visible", async () => {
   page(withUnlinkedContribution(conflict), "?tab=contributions");
   const user = userEvent.setup();
@@ -475,22 +497,7 @@ it("F3: «Comparar aportaciones» traslada el foco al encabezado de Contraste ya
   );
 });
 it("F3: el foco no se solicita mientras el panel de Contraste sigue oculto", async () => {
-  const realFocus = HTMLElement.prototype.focus;
-  const requested: { text: string; hidden: boolean }[] = [];
-  // Like a browser: an element inside a hidden panel cannot take focus.
-  vi.spyOn(HTMLElement.prototype, "focus").mockImplementation(function (
-    this: HTMLElement,
-    options?: FocusOptions,
-  ) {
-    const hidden = !!this.closest("[hidden]");
-    requested.push({ text: this.textContent ?? "", hidden });
-    if (!hidden) realFocus.call(this, options);
-  });
-  // An animation frame that fires before React commits the tab change.
-  vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
-    callback(0);
-    return 0;
-  });
+  const requested = earlyFrameWithBrowserFocus();
   try {
     page(withUnlinkedContribution(conflict), "?tab=contributions");
     const user = userEvent.setup();
@@ -538,4 +545,79 @@ it("F4: cada comparación describe su propio alcance sin atribuir el conflicto a
     "Comparando 2 de 2 fuentes registradas en este conflicto.",
     "Comparando 2 de 3 aportaciones vigentes.",
   ]);
+});
+
+const backButton = () =>
+  screen.findByRole("button", { name: /^← Volver a \d+ aportaciones/ });
+it("F5: «← Volver a N aportaciones» devuelve el foco a «Comparar aportaciones» ya visible", async () => {
+  page(withUnlinkedContribution(conflict), "?tab=contrast");
+  const user = userEvent.setup();
+  await user.click(await backButton());
+  const compare = await screen.findByRole("button", {
+    name: "Comparar aportaciones",
+  });
+  await waitFor(() => expect(compare).toHaveFocus());
+  expect(compare.closest("[role=tabpanel]")).not.toHaveAttribute("hidden");
+  expect(screen.getByRole("tab", { name: /^Aportaciones/ })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+});
+it("F5: con teclado, Enter en «← Volver» también devuelve el foco al botón de comparar", async () => {
+  page(withUnlinkedContribution(conflict), "?tab=contrast");
+  const user = userEvent.setup();
+  const back = await backButton();
+  back.focus();
+  await user.keyboard("{Enter}");
+  const compare = await screen.findByRole("button", {
+    name: "Comparar aportaciones",
+  });
+  await waitFor(() => expect(compare).toHaveFocus());
+});
+it("F5: el foco no se solicita mientras el panel de Aportaciones sigue oculto", async () => {
+  const requested = earlyFrameWithBrowserFocus();
+  try {
+    page(withUnlinkedContribution(conflict), "?tab=contrast");
+    const user = userEvent.setup();
+    await user.click(await backButton());
+    const compare = await screen.findByRole("button", {
+      name: "Comparar aportaciones",
+    });
+    await waitFor(() => expect(compare).toHaveFocus());
+    const asked = requested.filter((r) => r.text === "Comparar aportaciones");
+    expect(asked.length).toBeGreaterThan(0);
+    expect(asked.every((r) => !r.hidden)).toBe(true);
+  } finally {
+    vi.unstubAllGlobals();
+  }
+});
+it("F5: sin botón de comparar (una sola aportación) el foco vuelve a la pestaña Aportaciones", async () => {
+  page(reviewDetailView.parse(decision), "?tab=contrast");
+  expect(decision.submissions.filter((s) => s.current)).toHaveLength(1);
+  const user = userEvent.setup();
+  await user.click(await backButton());
+  const tab = screen.getByRole("tab", { name: /^Aportaciones/ });
+  await waitFor(() => expect(tab).toHaveFocus());
+  expect(tab).toHaveAttribute("aria-selected", "true");
+});
+it("F5: ida y vuelta a Contraste no deja peticiones de foco pendientes que roben cambios de pestaña posteriores", async () => {
+  page(withUnlinkedContribution(conflict), "?tab=contributions");
+  const user = userEvent.setup();
+  await user.click(
+    await screen.findByRole("button", { name: "Comparar aportaciones" }),
+  );
+  const heading = await screen.findByRole("heading", {
+    name: "Contrastar aportaciones",
+  });
+  await waitFor(() => expect(heading).toHaveFocus());
+  await user.click(await backButton());
+  const compare = await screen.findByRole("button", {
+    name: "Comparar aportaciones",
+  });
+  await waitFor(() => expect(compare).toHaveFocus());
+  await user.click(screen.getByRole("tab", { name: "Historial" }));
+  expect(screen.getByRole("tab", { name: "Historial" })).toHaveFocus();
+  await user.click(screen.getByRole("tab", { name: "Contraste" }));
+  expect(screen.getByRole("tab", { name: "Contraste" })).toHaveFocus();
+  expect(heading).not.toHaveFocus();
 });
