@@ -7,6 +7,7 @@ import { dashboardView, questionnaireView } from "@requirements/contracts";
 import type { z } from "zod";
 import fixture from "../../../../../tests/fixtures/analyst-visual.json";
 import { Organize } from "./Organize";
+import { EditorWorkspace } from "./EditorWorkspace";
 import {
   questionAncestors,
   type OrganizeContext,
@@ -37,6 +38,170 @@ const handlers = {
   onCreateTopic: vi.fn(),
   onCreateReference: vi.fn(),
 };
+it.each([12, 54, 304])(
+  "plegado global conserva filtros, selección y jerarquía con %i preguntas",
+  async (count) => {
+    const user = userEvent.setup();
+    const data = dataFor(count);
+    data.questions[1]!.groupParentId = "q-0";
+    data.questions[2]!.groupParentId = "q-1";
+    data.questions[count - 1]!.groupParentId = `q-${count - 2}`;
+    const original = JSON.stringify(data);
+    const context: OrganizeContext = {
+      topic: data.sections[0]!.id,
+      area: data.questions[0]!.responsibleAreaId,
+      publication: "DRAFT",
+      search: "",
+      approach: "prepare",
+      page: 0,
+      collapsed: [],
+      selectedIds: ["q-2", `q-${count - 1}`],
+    };
+    render(<Organize {...handlers} data={data} organizeContext={context} />);
+    const controls = screen.getByRole("group", {
+      name: "Presentación de grupos",
+    });
+    const collapse = within(controls).getByRole("button", {
+      name: "Contraer todos los grupos",
+    });
+    const expand = within(controls).getByRole("button", {
+      name: "Expandir todos los grupos",
+    });
+    expect(collapse).toBeVisible();
+    expect(expand).toBeVisible();
+    collapse.focus();
+    await user.keyboard("{Enter}");
+    expect(collapse).toHaveFocus();
+    expect(screen.getByText("3 preguntas en grupos plegados.")).toBeVisible();
+    expect(screen.getByText("2 preguntas seleccionadas")).toBeVisible();
+    expect(
+      screen.queryByRole("checkbox", {
+        name: "Seleccionar pregunta: Consulta de ejemplo 1",
+      }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Área responsable")).toHaveValue(context.area);
+    expect(screen.getByLabelText("Estado de publicación")).toHaveValue("DRAFT");
+    expect(
+      screen.getByRole("navigation", { name: "Temas del cuestionario" }),
+    ).toHaveTextContent(data.sections[0]!.title);
+    const parent = screen.getByRole("button", {
+      name: "Expandir seguimientos de Pregunta 0",
+    });
+    expect(parent).toHaveAttribute("aria-expanded", "false");
+    parent.focus();
+    await user.keyboard(" ");
+    expect(parent).toHaveAttribute("aria-expanded", "true");
+    expect(
+      screen.getByRole("button", {
+        name: "Expandir seguimientos de Pregunta 1",
+      }),
+    ).toHaveAttribute("aria-expanded", "false");
+    expect(
+      screen.queryByRole("checkbox", {
+        name: "Seleccionar pregunta: Consulta de ejemplo 2",
+      }),
+    ).not.toBeInTheDocument();
+    expand.focus();
+    await user.keyboard(" ");
+    expect(expand).toHaveFocus();
+    expect(
+      screen.getByRole("checkbox", {
+        name: "Seleccionar pregunta: Consulta de ejemplo 2",
+      }),
+    ).toBeChecked();
+    expect(
+      screen.getByRole("button", {
+        name: "Contraer seguimientos de Pregunta 1",
+      }),
+    ).toHaveAttribute("aria-expanded", "true");
+    if (count > 40) {
+      const next = screen.getByRole("button", { name: "Página siguiente" });
+      while (!next.hasAttribute("disabled")) await user.click(next);
+    }
+    expect(
+      screen.getByRole("checkbox", {
+        name: `Seleccionar pregunta: Consulta de ejemplo ${count - 1}`,
+      }),
+    ).toBeChecked();
+    expect(
+      screen.getByRole("button", {
+        name: `Contraer seguimientos de Pregunta ${count - 2}`,
+      }),
+    ).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByText("2 preguntas seleccionadas")).toBeVisible();
+    expect(JSON.stringify(data)).toBe(original);
+  },
+);
+
+it("buscar conserva los seguimientos visibles y explica por qué no se pliegan", async () => {
+  const user = userEvent.setup();
+  render(<Organize {...handlers} data={dataFor(12)} />);
+  await user.click(
+    screen.getByRole("button", { name: "Contraer todos los grupos" }),
+  );
+  const search = screen.getByRole("searchbox", { name: "Buscar preguntas" });
+  await user.type(search, "Consulta de ejemplo");
+  expect(screen.getAllByRole("checkbox")).toHaveLength(12);
+  expect(
+    screen.getByRole("button", { name: "Contraer todos los grupos" }),
+  ).toBeDisabled();
+  expect(
+    screen.getByRole("button", { name: "Contraer seguimientos de Pregunta 0" }),
+  ).toBeDisabled();
+  expect(
+    screen.getByText(
+      "La búsqueda muestra también seguimientos de grupos plegados.",
+    ),
+  ).toBeVisible();
+  const child = screen.getByRole("checkbox", {
+    name: "Seleccionar pregunta: Consulta de ejemplo 11",
+  });
+  await user.click(child);
+  await user.click(
+    screen.getByRole("button", { name: "Expandir todos los grupos" }),
+  );
+  expect(search).toHaveValue("Consulta de ejemplo");
+  expect(child).toBeChecked();
+  await user.clear(search);
+  expect(screen.getAllByRole("checkbox")).toHaveLength(12);
+  expect(
+    screen.getByRole("button", { name: "Contraer todos los grupos" }),
+  ).toBeEnabled();
+});
+
+it("Organizar conserva plegado y selección al cambiar de modo y volver", async () => {
+  const user = userEvent.setup();
+  render(<EditorWorkspace {...handlers} data={dataFor(12)} initialMode={1} />);
+  await user.click(
+    screen.getByRole("checkbox", {
+      name: "Seleccionar pregunta: Consulta de ejemplo 11",
+    }),
+  );
+  await user.click(
+    screen.getByRole("button", { name: "Contraer todos los grupos" }),
+  );
+  await user.click(screen.getByRole("tab", { name: "Escribir" }));
+  await user.click(screen.getByRole("tab", { name: "Organizar" }));
+  expect(screen.getByText("1 preguntas en grupos plegados.")).toBeVisible();
+  expect(screen.getByText("1 pregunta seleccionada")).toBeVisible();
+  await user.click(
+    screen.getByRole("button", { name: "Expandir todos los grupos" }),
+  );
+  expect(
+    screen.getByRole("checkbox", {
+      name: "Seleccionar pregunta: Consulta de ejemplo 11",
+    }),
+  ).toBeChecked();
+});
+
+it("sin seguimientos no muestra controles de grupos sin efecto", () => {
+  const data = dataFor(3);
+  for (const question of data.questions) question.groupParentId = null;
+  render(<Organize {...handlers} data={data} />);
+  expect(
+    screen.queryByRole("group", { name: "Presentación de grupos" }),
+  ).not.toBeInTheDocument();
+});
 it.each([12, 54, 304])(
   "mantiene identidades, contexto y selección con %i preguntas al plegar y buscar",
   async (count) => {
