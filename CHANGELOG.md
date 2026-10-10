@@ -8,6 +8,121 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 Sin cambios adicionales por anunciar.
 
+## 0.6.0 — 2026-10-10
+
+### Dirección C
+
+Rediseño visual y de presentación del frontend, sin funcionalidad nueva de
+dominio. Es compatible con los contratos, el backend y la persistencia de v0.5.0:
+el código de backend, los contratos, Prisma, las migraciones, los permisos y las
+reglas de publicación no cambian. Las únicas modificaciones fuera del frontend y
+la documentación son las de la compilación de VersityGW descritas en *Security*.
+
+### Added / Improved
+
+- **Dirección C.** Sistema de diseño común (tokens, tipografía operativa y
+  documental, estados con glifo y palabra, tema oscuro en la experiencia del
+  participante) y componentes compartidos para todas las pantallas. No quedan
+  pantallas con la presentación de la generación anterior.
+- **Jerarquía visual.** Cada pantalla tiene un único encabezado propio con una
+  línea de propósito y, cuando corresponde, una acción principal. La pregunta, la
+  respuesta o la decisión dominan sobre los metadatos.
+- **Navegación.** Barra lateral, riel o barra inferior según el ancho, con los
+  destinos reales del proyecto y de la organización. Los diálogos devuelven el
+  foco a quien los abrió.
+- **Atención.** Agrupa por lo que requiere acción y no pinta una fila por cada
+  pregunta: el tamaño de la página no crece con el número de preguntas; los
+  grupos extensos se revelan por tramos.
+- **Cuestionario.** Tabla con la pregunta en primer lugar y metadatos
+  subordinados, controles reducidos a dos filas en escritorio, filtros accesibles
+  en móvil, selección por página, resultados o tema, y autoría reordenada. Las
+  operaciones masivas conservan sus alcances y validaciones.
+- **Aportaciones.** Conjunto de aportaciones vigentes con detalle e historial
+  separados, y acciones por aportación en un menú accesible único.
+- **Conflictos.** Comparación simétrica en una tabla: una columna por postura y
+  una fila por campo, sin color propio por bando; en pantallas estrechas se
+  intercala por campo. «Contraste» permite comparar dos aportaciones cualesquiera.
+- **Aclaraciones.** Intercambio cronológico junto a la aportación, con quién
+  pregunta, quién responde, de quién es el turno y el estado.
+- **Decisiones.** Presentación como documento: resultado, alcance y excepciones,
+  fundamentos numerados con persona, envío y archivos, y la línea «Cómo se llegó
+  aquí» derivada de los datos existentes. El registro de decisiones usa filas
+  con estado; los roles de solo lectura no ven controles de edición.
+- **Participantes.** Mi trabajo con avance en palabras, aclaración pendiente
+  destacada y estado de cada pregunta con glifo y palabra; respuesta enviada con
+  recibo y «Qué sigue» basado solo en estados reales. El borrador se conserva al
+  guardar y salir; la interfaz no simula un autoguardado.
+- **Invitaciones.** Invitación externa que abre con la organización que invita,
+  vigencia y aviso de identidad visibles al inicio en móvil; gestor con estado,
+  actividad y vigencia en días; asistente de cuatro pasos con pie fijo.
+- **Administración y tablas.** Pestañas de Usuarios, Áreas y Proyectos, una
+  acción principal por pestaña y una tabla de datos común que se apila en
+  tarjetas con etiquetas por debajo de 760 px. La Bitácora nombra los eventos en
+  lenguaje claro y conserva el código original debajo de cada uno.
+- **Responsive y accesibilidad.** Recorridos revisados a 1440, 1024, 768, 390 y
+  320 px, teclado, foco, nombres accesibles y reflujo. Las comprobaciones
+  automáticas con axe no detectaron violaciones en las pantallas y anchos
+  medidos; no equivalen a certificación.
+
+### Security
+
+- VersityGW 1.8.0 se compila desde el código fuente oficial de la release
+  (commit `fd04bc1df2656298577b82667a4195c77f8c7563`, verificado en el build)
+  con Go 1.27.2 y `golang.org/x/net` v0.60.0, en lugar de usar el binario
+  publicado, que `govulncheck` reportaba como afectado. La imagen base de
+  compilación está fijada por digest y no se modifica ningún archivo fuente de
+  VersityGW: solo sus manifiestos de dependencias.
+- El gate de vulnerabilidades del almacenamiento se conserva sin excepciones ni
+  desactivaciones y se ejecuta sobre el binario resultante: 0 vulnerabilidades
+  que afecten al código (`govulncheck` en modo binario).
+- Procedencia, licencia Apache-2.0, avisos y modificaciones quedan documentados
+  en `docker/versity/UPSTREAM-MODIFICATIONS` y en
+  [proveedores S3](docs/S3-PROVIDERS.md). Cuando exista una imagen oficial
+  corregida podrá reevaluarse; hoy no se publica ninguna imagen.
+
+### Fixed
+
+- Composición: Importar, Exportar, Trazabilidad, Bitácora, Miembros e
+  Invitaciones dejan de usar el nombre del proyecto como título y de repetir un
+  segundo encabezado; en la decisión, los identificadores técnicos pasan al pie.
+- Duplicación de información: Atención ya no repite el motivo en cada fila y las
+  acciones por aportación pasan de un selector a un único menú accesible.
+- Navegación y foco: los diálogos devuelven el foco a quien los abrió, el
+  enlace «Abrir la aportación» enfoca la aportación citada y volver desde la
+  comparación restituye el foco.
+- Estados y acciones contextuales: una revisión sin aportaciones explica el
+  siguiente paso, un lote sin cambios se presenta como información y no como
+  error, y las acciones aparecen según el estado y el rol.
+- Responsive: tablas apiladas sin perder semántica ni nombre accesible,
+  controles táctiles de al menos 44 px en las pantallas medidas y sin
+  desbordes horizontales en los anchos probados.
+
+### Known limitations
+
+- Proyecto pre-1.0, con soporte comunitario de mejor esfuerzo y sin SLA.
+- Las comprobaciones de accesibilidad son focalizadas y no equivalen a
+  certificación ni a declaración de conformidad WCAG. No se realizaron pruebas
+  con lector de pantalla real, dispositivos táctiles reales ni colores forzados.
+- La interfaz no acredita identidad mediante enlaces: un enlace de invitación es
+  una credencial compartible y el nombre mostrado no implica identidad
+  verificada. El contrato no entrega el destinatario previsto y la interfaz no lo
+  inventa.
+- Un conflicto resuelto o una decisión validada no producen por sí solos efectos
+  jurídicos ni sustituyen las reglas de autorización de la organización.
+- El registro de decisiones no muestra el texto del resultado: el contrato
+  actual no lo entrega en el listado.
+- La documentación de self-hosting acredita Linux ARM64. No se extiende esa
+  afirmación a una validación integral de Linux AMD64, multi-node o alta
+  disponibilidad. VersityGW sigue siendo el proveedor S3 predeterminado
+  verificado; MinIO es legacy, Garage no está soportado con el contrato actual
+  y los demás endpoints S3 no se declaran ensayados.
+- El build conserva la advertencia conocida de un bundle JavaScript mayor de
+  500 kB.
+- El texto nuevo de la interfaz está pendiente de revisión editorial.
+
+Ver [alcance, verificación, capturas y límites](docs/design/ACTA-DIRECTION-C-IMPLEMENTATION.md)
+y las [notas de la versión](docs/releases/v0.6.0.md).
+
 ## 0.5.0
 
 ### Acta Next
