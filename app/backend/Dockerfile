@@ -1,4 +1,4 @@
-FROM node:24.21.0-bookworm-slim AS build
+FROM node:26.10.0-bookworm-slim AS build
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY package.json package-lock.json ./
@@ -8,7 +8,7 @@ COPY app/frontend/package.json app/frontend/package.json
 RUN npm ci
 COPY . .
 RUN DATABASE_URL=postgresql://unused:unused@localhost/unused npm run prisma:generate && npm run build -w @requirements/contracts && npm run build -w @requirements/backend
-FROM node:24.21.0-bookworm-slim AS runtime
+FROM node:26.10.0-bookworm-slim AS runtime
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY --from=build --chown=node:node /app/node_modules /app/node_modules
