@@ -86,9 +86,13 @@ export function BulkDialog({
     setBusy(true);
     setError("");
     try {
-      const current = reload
-        ? await (onRefresh ? onRefresh() : api("questionnaire", { projectId }))
-        : snapshot;
+      // A previous bulk operation may still be refreshing the shared editor.
+      // Build the preview from current versions, not the dialog's opening snapshot.
+      const current = onRefresh
+        ? await onRefresh()
+        : reload
+          ? await api("questionnaire", { projectId })
+          : snapshot;
       setSnapshot(current);
       const common = {
         requestId: crypto.randomUUID(),

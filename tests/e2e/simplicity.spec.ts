@@ -161,6 +161,24 @@ for (const count of [50, 300])
     await page.getByRole("checkbox", { name: /Participante demo/ }).check();
     await page.getByLabel("Las nuevas asignaciones serán").selectOption("yes");
     await page.getByRole("button", { name: "Revisar lote" }).click();
+    // Open the next operation while the assignment's questionnaire reload is pending.
+    // Gate only transport completion; the real backend still validates every version.
+    let releaseRefresh!: () => void;
+    const refreshGate = new Promise<void>((resolve) => {
+      releaseRefresh = resolve;
+    });
+    const questionnairePath = `/api/v1/projects/${id}/questionnaire`;
+    await page.route(
+      `**${questionnairePath}`,
+      async (route) => {
+        await refreshGate;
+        await route.continue();
+      },
+      { times: 1 },
+    );
+    const refreshed = page.waitForResponse((response) =>
+      response.url().endsWith(questionnairePath),
+    );
     await page
       .getByRole("button", { name: `Confirmar ${count} preguntas` })
       .click();
@@ -171,6 +189,8 @@ for (const count of [50, 300])
       })
       .click();
     await page.getByRole("button", { name: "Publicar seleccionadas" }).click();
+    releaseRefresh();
+    await (await refreshed).finished();
     await page.getByRole("button", { name: "Revisar lote" }).click();
     await expect(
       page.getByRole("button", { name: `Confirmar ${count} preguntas` }),

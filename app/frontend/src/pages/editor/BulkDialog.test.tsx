@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { act, cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 import {
@@ -107,6 +107,58 @@ it("preview does not confirm; cancel preserves data; result and focus are explic
   expect(complete).not.toHaveBeenCalled();
   expect(calls).toHaveLength(1);
 });
+it("initial preview waits for the editor refresh and uses its current versions", async () => {
+  const refreshed = structuredClone(data);
+  refreshed.questions[0]!.lockVersion += 1;
+  let resolveRefresh!: (value: typeof data) => void;
+  const refresh = vi.fn(
+    () =>
+      new Promise<typeof data>((resolve) => {
+        resolveRefresh = resolve;
+      }),
+  );
+  const fetch = vi.fn(async (_url, options) =>
+    Response.json(preview("PUBLISH", JSON.parse(options.body))),
+  );
+  vi.stubGlobal("fetch", fetch);
+  const { user, complete } = mount("PUBLISH", refresh);
+  await user.click(screen.getByRole("button", { name: "Revisar lote" }));
+  expect(refresh).toHaveBeenCalledOnce();
+  expect(screen.getByRole("button", { name: "Revisando…" })).toBeDisabled();
+  expect(fetch).not.toHaveBeenCalled();
+  expect(
+    screen.queryByRole("button", { name: /Confirmar/ }),
+  ).not.toBeInTheDocument();
+  await act(async () => resolveRefresh(refreshed));
+  expect(fetch).toHaveBeenCalledOnce();
+  expect(JSON.parse(fetch.mock.calls[0]![1].body).questions).toEqual([
+    { id: question.id, expectedVersion: question.lockVersion + 1 },
+  ]);
+  expect(
+    await screen.findByRole("button", { name: "Confirmar 1 pregunta" }),
+  ).toBeEnabled();
+  expect(complete).not.toHaveBeenCalled();
+});
+
+it("a failed initial refresh cannot send a preview with stale versions", async () => {
+  const refresh = vi.fn(async () => {
+    throw new Error("No se pudo actualizar el cuestionario.");
+  });
+  const fetch = vi.fn();
+  vi.stubGlobal("fetch", fetch);
+  const { user, complete } = mount("PUBLISH", refresh);
+  await user.click(screen.getByRole("button", { name: "Revisar lote" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "No se pudo actualizar el cuestionario.",
+  );
+  expect(fetch).not.toHaveBeenCalled();
+  expect(complete).not.toHaveBeenCalled();
+  expect(screen.getByRole("button", { name: "Revisar lote" })).toBeEnabled();
+  expect(
+    screen.queryByRole("button", { name: /Confirmar/ }),
+  ).not.toBeInTheDocument();
+});
+
 it("confirm retries exact idempotency payload after connection loss; success only after response", async () => {
   const confirms: Record<string, unknown>[] = [];
   vi.stubGlobal(
@@ -206,8 +258,11 @@ it("refresh uses the shared editor reload and reviews fresh versions with a new 
       name: "Actualizar y revisar nuevamente",
     }),
   );
-  expect(refresh).toHaveBeenCalledOnce();
+  expect(refresh).toHaveBeenCalledTimes(2);
   expect(commands).toHaveLength(2);
+  expect(commands[0]!.questions).toEqual([
+    { id: question.id, expectedVersion: question.lockVersion + 1 },
+  ]);
   expect(commands[1]!.questions).toEqual([
     { id: question.id, expectedVersion: question.lockVersion + 1 },
   ]);
