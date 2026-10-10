@@ -95,6 +95,11 @@ export function InvitedResponse() {
       </a>
       <header className="invitation-header">
         <Brand />
+        {branding.organizationName && (
+          <span className="invitation-organization">
+            {branding.organizationName}
+          </span>
+        )}
       </header>
       <main id="main" className="invitation-content">
         {pendingLink && (

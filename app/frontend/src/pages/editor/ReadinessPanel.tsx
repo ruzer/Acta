@@ -1,4 +1,5 @@
 import { Button, EmptyState, Alert } from "../../ui";
+import { FactGrid } from "../../ui/semantic";
 import { type EditorProps } from "./EditorWorkspace";
 import { readiness, type ReadinessIssue } from "./readiness";
 export function ReadinessPanel(
@@ -30,15 +31,51 @@ export function ReadinessPanel(
   return (
     <section className="qe-readiness" aria-label="Revisar antes de publicar">
       <h3>Revisar antes de publicar</h3>
-      <p>
+      <p className="lead">
         Revisa la definición del cuestionario. Las respuestas de participantes
         se revisan en la bandeja de revisión.
       </p>
-      <p className="hint">
-        Esta revisión orienta sobre el contenido. Para publicar varias
-        preguntas, selecciónalas en Organizar y revisa el conjunto antes de
-        confirmar. Si alguna está bloqueada, no se publica ninguna del conjunto.
-      </p>
+      <FactGrid
+        facts={[
+          {
+            id: "drafts",
+            icon: "edit",
+            label: "En borrador",
+            value: data.questions.filter((q) => q.publication === "DRAFT")
+              .length,
+          },
+          {
+            id: "published",
+            icon: "check",
+            label: "Publicadas",
+            value: data.questions.filter((q) => q.publication === "PUBLISHED")
+              .length,
+          },
+          {
+            id: "errors",
+            icon: "flag",
+            label: "Errores",
+            value: issues.filter(
+              (i) => i.level === "ERROR" && i.field !== "publication",
+            ).length,
+          },
+          {
+            id: "warnings",
+            icon: "info",
+            label: "Advertencias",
+            value: issues.filter((i) => i.level === "ADVERTENCIA").length,
+          },
+        ]}
+      />
+      <details className="ac-help">
+        <summary>Cómo se publica</summary>
+        <p>
+          Esta revisión orienta sobre el contenido. Para publicar varias
+          preguntas, selecciónalas en Organizar y revisa el conjunto antes de
+          confirmar. Si alguna está bloqueada, no se publica ninguna del
+          conjunto.
+        </p>
+      </details>
       {data.questions.length >= 2000 && (
         <Alert>
           El cuestionario puede superar el límite de información cargada. Esta
@@ -105,37 +142,42 @@ export function ReadinessPanel(
       )}
       <section className="qe-publication">
         <h4>Publicar preguntas</h4>
+        <p>
+          Para publicar varias a la vez, selecciónalas en Organizar. También
+          puedes publicar una pregunta por separado: cada confirmación conserva
+          las publicaciones anteriores.
+        </p>
+        {data.questions.some((q) => q.publication === "DRAFT") ? (
+          <ul className="qe-drafts">
+            {data.questions
+              .filter((q) => q.publication === "DRAFT")
+              .map((q) => (
+                <li key={q.id}>
+                  <span>{q.question}</span>
+                  <Button
+                    tone="secondary"
+                    disabled={issues.some(
+                      (i) =>
+                        i.questionId === q.id &&
+                        (i.level === "ERROR" ||
+                          (!!i.targetId &&
+                            (i.field === "groupParentId" ||
+                              i.field === "condition"))),
+                    )}
+                    onClick={() => props.onAction("publish", q)}
+                    aria-label={"Publicar: " + q.title}
+                  >
+                    Publicar
+                  </Button>
+                </li>
+              ))}
+          </ul>
+        ) : (
+          <p className="hint">No hay preguntas en borrador.</p>
+        )}
         <Button tone="secondary" onClick={props.onOrganize}>
           Seleccionar preguntas en Organizar
         </Button>
-        <p>
-          También puedes publicar una pregunta por separado. Cada confirmación
-          conserva las publicaciones anteriores.
-        </p>
-        {data.questions
-          .filter((q) => q.publication === "DRAFT")
-          .map((q) => (
-            <div key={q.id}>
-              <span>{q.question}</span>
-              <Button
-                disabled={issues.some(
-                  (i) =>
-                    i.questionId === q.id &&
-                    (i.level === "ERROR" ||
-                      (!!i.targetId &&
-                        (i.field === "groupParentId" ||
-                          i.field === "condition"))),
-                )}
-                onClick={() => props.onAction("publish", q)}
-                aria-label={"Publicar: " + q.title}
-              >
-                Publicar
-              </Button>
-            </div>
-          ))}
-        {!data.questions.some((q) => q.publication === "DRAFT") && (
-          <p className="hint">No hay preguntas en borrador.</p>
-        )}
       </section>
     </section>
   );

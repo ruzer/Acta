@@ -172,3 +172,13 @@
   color: var(--ac-muted);
   font-size: var(--ac-text-meta);
 }
+.next-invitation-recipient-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 16px;
+}
+@media (max-width: 600px) {
+  .next-invitation-recipient-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

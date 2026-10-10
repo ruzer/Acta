@@ -241,27 +241,29 @@ export function CreateInvitation({
                 )}
               {!nonNominal && (
                 <>
-                  <Input
-                    label="Nombre de la persona"
-                    required={
-                      ["NAME", "BOTH"].includes(
+                  <div className="next-invitation-recipient-fields">
+                    <Input
+                      label="Nombre de la persona"
+                      required={
+                        ["NAME", "BOTH"].includes(
+                          policy.data.identityRequirement,
+                        ) || !email.trim()
+                      }
+                      value={name}
+                      maxLength={200}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                    <Input
+                      label="Correo"
+                      type="email"
+                      required={["EMAIL", "BOTH"].includes(
                         policy.data.identityRequirement,
-                      ) || !email.trim()
-                    }
-                    value={name}
-                    maxLength={200}
-                    onChange={(e) => setName(e.target.value)}
-                  />
-                  <Input
-                    label="Correo"
-                    type="email"
-                    required={["EMAIL", "BOTH"].includes(
-                      policy.data.identityRequirement,
-                    )}
-                    value={email}
-                    maxLength={254}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
+                      )}
+                      value={email}
+                      maxLength={254}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
                   <Input
                     label="Organización (opcional)"
                     value={organization}

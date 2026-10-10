@@ -17,6 +17,12 @@
   font-size: var(--ac-text-body);
   font-weight: 700;
 }
+.invitation-organization {
+  padding-left: 12px;
+  color: var(--ac-muted);
+  border-left: 1px solid var(--ac-line);
+  font-weight: 600;
+}
 .invitation-content {
   display: grid;
   gap: 16px;

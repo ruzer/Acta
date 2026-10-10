@@ -328,10 +328,16 @@ test.describe("revisión con 0, 1, 3, 12 y 50 aportaciones", () => {
       await page.goto(
         `/projects/${cases.project.id}/review/${cases.questions.twelve.id}?tab=contributions`,
       );
-      if (width < 900)
+      if (width < 900) {
         await page
           .getByRole("button", { name: /^← Volver a 12 aportaciones/ })
           .click();
+        // Returning to the list hands focus back to the contribution it came
+        // from on the next frame; wait for that before moving focus ourselves.
+        await expect(
+          page.locator(".ac-contribution-rail button:focus, h2#received:focus"),
+        ).toBeVisible();
+      }
       const compare = page.getByRole("button", {
         name: "Comparar aportaciones",
       });
