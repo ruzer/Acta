@@ -282,6 +282,15 @@ export function Organize(
     () => new Map(data.questions.map((q) => [q.id, q])),
     [data.questions],
   );
+  const groupIds = useMemo(
+    () =>
+      new Set(
+        data.questions.flatMap((q) =>
+          q.groupParentId && byId.has(q.groupParentId) ? [q.groupParentId] : [],
+        ),
+      ),
+    [data.questions, byId],
+  );
   const contributionById = useMemo(
     () => new Map(props.contributionQuestions?.map((q) => [q.id, q])),
     [props.contributionQuestions],
@@ -562,14 +571,36 @@ export function Organize(
             ))}
           </Select>
         </div>
-        {collapsed.size > 0 && (
-          <p className="hint">
+        {groupIds.size > 0 && (
+          <>
+            <div
+              className="actions"
+              role="group"
+              aria-label="Presentación de grupos"
+              aria-describedby={`group-scope-${props.projectId}`}
+            >
+              <Button tone="secondary" onClick={() => setCollapsed(new Set())}>
+                Expandir todos los grupos
+              </Button>
+              <Button
+                tone="secondary"
+                disabled={!!search.trim()}
+                onClick={() => setCollapsed(new Set(groupIds))}
+              >
+                Contraer todos los grupos
+              </Button>
+            </div>
+            <p className="hint" id={`group-scope-${props.projectId}`}>
+              Todos los grupos, incluso fuera de los filtros y de esta página.
+              Se conserva la selección.
+            </p>
+          </>
+        )}
+        {(collapsed.size > 0 || (groupIds.size > 0 && search.trim())) && (
+          <p className="hint" role="status">
             {search.trim()
               ? "La búsqueda muestra también seguimientos de grupos plegados."
-              : `${questions.length - unfolded.length} preguntas en grupos plegados.`}{" "}
-            <Button tone="secondary" onClick={() => setCollapsed(new Set())}>
-              Expandir todos los grupos
-            </Button>
+              : `${questions.length - unfolded.length} preguntas en grupos plegados.`}
           </p>
         )}
         {props.contributionsError && (
