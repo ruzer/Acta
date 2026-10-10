@@ -11,9 +11,11 @@ Solo presentación frontend. Se conservan contratos, autorización, dominio, bac
 
 **Después del checkpoint 4 se entregará una comparación desktop/móvil y se detendrá el trabajo para aprobación explícita del producto. Los checkpoints 5–8 y el PR final no están autorizados antes de esa aprobación.**
 
+**Actualización 2026-10-09:** el producto aprobó la validación funcional y autorizó CP5, CP6 y CP7 (secciones al final). **CP8, el PR final, el push y el release siguen sin autorizarse.**
+
 ## Comparativas para la revisión humana
 
-Referencia aprobada a la izquierda; React implementado a la derecha. Cada fila del informe conserva además 1024, 768 y 320 px. La aceptación de producto todavía no está otorgada.
+Referencia aprobada a la izquierda; React implementado a la derecha. Cada fila del informe conserva además 1024, 768 y 320 px. La aceptación de producto todavía no está otorgada para ninguno de los checkpoints.
 
 | Pantalla | Escritorio 1440 | Móvil 390 |
 |---|---|---|
@@ -26,6 +28,15 @@ Referencia aprobada a la izquierda; React implementado a la derecha. Cada fila d
 | VIEWER · fuentes filtradas; documento final pendiente CP5 | [Comparar](acta-direction-c-evidence/cp4/V-14-viewer-compare-1440.png) | [Comparar](acta-direction-c-evidence/cp4/V-14-viewer-compare-390.png) |
 | Organizar · 304 preguntas | [Comparar](acta-direction-c-evidence/cp3/V-02b-compare-1440.png) | [Comparar](acta-direction-c-evidence/cp3/V-02b-compare-390.png) |
 | Atención · navegación y estados | [Comparar](acta-direction-c-evidence/cp2/V-01-compare-1440.png) | [Comparar](acta-direction-c-evidence/cp2/V-01-compare-390.png) |
+| Conflicto / Contraste (CP5) | [Comparar](acta-direction-c-evidence/cp5/compare-V09-conflicto-1440.png) | [Comparar](acta-direction-c-evidence/cp5/compare-V09-conflicto-390.png) |
+| Decisión (CP5) | [Comparar](acta-direction-c-evidence/cp5/compare-V11-decision-1440.png) | [Comparar](acta-direction-c-evidence/cp5/compare-V11-decision-390.png) |
+| Mi trabajo (CP6) | [Comparar](acta-direction-c-evidence/cp6/compare-V15-mi-trabajo-1440.png) | [Comparar](acta-direction-c-evidence/cp6/compare-V15-mi-trabajo-390.png) |
+| Responder (CP6) | [Comparar](acta-direction-c-evidence/cp6/compare-V16-responder-1440.png) | [Comparar](acta-direction-c-evidence/cp6/compare-V16-responder-390.png) |
+| Invitación (CP6) | [Comparar](acta-direction-c-evidence/cp6/compare-V20-invitacion-1440.png) | [Comparar](acta-direction-c-evidence/cp6/compare-V20-invitacion-390.png) |
+| Administración (CP7) | [Comparar](acta-direction-c-evidence/cp7/compare-V23-administracion-1440.png) | [Comparar](acta-direction-c-evidence/cp7/compare-V23-administracion-390.png) |
+| Invitaciones (CP7) | [Comparar](acta-direction-c-evidence/cp7/compare-V24-invitaciones-1440.png) | [Comparar](acta-direction-c-evidence/cp7/compare-V24-invitaciones-390.png) |
+| Asistente de invitación (CP7) | [Comparar](acta-direction-c-evidence/cp7/compare-V25-asistente-1440.png) | [Comparar](acta-direction-c-evidence/cp7/compare-V25-asistente-390.png) |
+| Lector de consulta (CP7) | [Comparar](acta-direction-c-evidence/cp7/compare-V26-lector-1440.png) | [Comparar](acta-direction-c-evidence/cp7/compare-V26-lector-390.png) |
 
 ## Estado real
 
@@ -37,10 +48,10 @@ Referencia aprobada a la izquierda; React implementado a la derecha. Cada fila d
 | 3. Cuestionario / Organizar / lotes | LISTO PARA REVISIÓN | 174 unit, 28 E2E funcionales, 15 visuales, 3 de fixture independiente; cinco anchos y DEV-26 aprobada |
 | 4. Revisión / aportaciones / solo lectura | LISTO PARA REVISIÓN, con correcciones posteriores a la auditoría | 284 unit tras las correcciones (264 al cierre), 15 E2E funcionales y 40 vistas + 1 gate de permisos al cierre; DEV-25 aplicada; E2E re-ejecutado en la puerta UX: 138/138; UX-06/07/09 cerrados; requiere aceptación humana |
 | Puerta de correcciones UX antes de CP5 | CERRADA (8 hallazgos, con evidencia) | 332 unit, 113 integración, 138 E2E, axe 0; CP5 sin iniciar |
-| 5. Conflictos / aclaraciones / decisiones | ESPERA APROBACIÓN POST-CP4 | No implementar todavía                                                                                            |
-| 6. Participante / invitado                | ESPERA APROBACIÓN POST-CP4 | No implementar todavía                                                                                            |
-| 7. Administración / consistencia          | ESPERA APROBACIÓN POST-CP4 | No implementar todavía                                                                                            |
-| 8. Validación integral / PR borrador      | ESPERA APROBACIÓN POST-CP4 | No publicar todavía                                                                                               |
+| 5. Conflictos / aclaraciones / decisiones | LISTO PARA REVISIÓN | UX-04/05/11/12/17 cerrados; E2E `cp5` 10/10; comparativas con la Dirección C; adaptaciones listadas; requiere aceptación humana |
+| 6. Participante / invitado                | LISTO PARA REVISIÓN | E2E `cp6` 7/7 con axe y tema oscuro; sin guardado automático simulado; requiere aceptación humana |
+| 7. Administración / consistencia          | LISTO PARA REVISIÓN | UX-02 completo, UX-10/13/14/16 cerrados; E2E `cp7` 9/9 (14 pantallas × 5 anchos); requiere aceptación humana |
+| 8. Validación integral / PR borrador      | NO INICIADO | Espera aceptación humana de CP1–CP7; no publicar |
 
 ## Preparación y aislamiento
 
@@ -77,7 +88,7 @@ Se sembraron por API, en una segunda base desechable aislada, los casos de 1 apo
 
 ## Matriz de aceptación
 
-Los checkpoints 1–4 tienen evidencia React. CP4 cubre 0/1/3/12/50 aportaciones, un caso parcial separado y solo lectura. Los checkpoints 5–8 no se han iniciado. V-01b ADMIN se comprobó en navegador; ARCHIVED solo tiene cobertura de derivación unitaria (DEV-24), sin captura de un proyecto archivado real. No se atribuyen al producto resultados del prototipo.
+Los checkpoints 1–4 tienen evidencia React. CP4 cubre 0/1/3/12/50 aportaciones, un caso parcial separado y solo lectura. Los checkpoints 5–7 tienen evidencia React (secciones al final); el 8 no se ha iniciado. V-01b ADMIN se comprobó en navegador; ARCHIVED solo tiene cobertura de derivación unitaria (DEV-24), sin captura de un proyecto archivado real. No se atribuyen al producto resultados del prototipo.
 
 | Filas                      | Pantallas / variantes                                      | Checkpoint | Estado                                                    |
 | -------------------------- | ---------------------------------------------------------- | ---------- | --------------------------------------------------------- |
@@ -86,9 +97,9 @@ Los checkpoints 1–4 tienen evidencia React. CP4 cubre 0/1/3/12/50 aportaciones
 | V-02, V-02b, V-02c, V-03 | Organizar 304, Preparar, lote, autoría | 3 | LISTO PARA REVISIÓN con DEV-09/16/26 |
 | V-04…V-08 + V-07-partial | Revisión 1, 3, 12, 50, 0 aportaciones y parcial real | 4 | LISTO PARA REVISIÓN con DEV-25 |
 | V-13/V-14 composición base | ADMIN completo sin acciones; VIEWER filtrado | 4 | LISTO PARA REVISIÓN con DEV-20/24; documento final en CP5 |
-| V-09…V-14 detalle          | Contraste, aclaraciones, decisiones y consulta             | 5          | POST-APROBACIÓN                                           |
-| V-15…V-22                  | Mi trabajo, responder, recibos, invitado                   | 6          | POST-APROBACIÓN                                           |
-| V-23…V-27                  | Administración, invitaciones, lector y pantallas restantes | 7          | POST-APROBACIÓN                                           |
+| V-09…V-14 detalle          | Contraste, aclaraciones, decisiones y consulta             | 5          | LISTO PARA REVISIÓN con adaptaciones de CP5               |
+| V-15…V-22                  | Mi trabajo, responder, recibos, invitado                   | 6          | LISTO PARA REVISIÓN                                       |
+| V-23…V-27                  | Administración, invitaciones, lector y pantallas restantes | 7          | LISTO PARA REVISIÓN con las diferencias de CP7            |
 | Matriz completa            | Todos los roles y cinco anchos                             | 8          | POST-APROBACIÓN                                           |
 
 Cada fila tendrá nueve aspectos: jerarquía, composición, tipografía, espaciado, densidad, agrupación, ubicación de acciones, estados y responsive. Capturas a 1440×900, 1024×768, 768×1024, 390×844 y 320×640. Se adjuntarán métricas, axe, teclado, foco y revisión de los 14 detectores de jerarquía antigua. Ninguna fila se declara aprobada por Codex.
@@ -115,7 +126,7 @@ Pendientes lector de pantalla, zoom real, colores forzados, modo oscuro, disposi
 
 ## Revisión de alcance y publicación
 
-Solo presentación frontend y verificación/documentación. Backend, contratos, Prisma y almacenamiento: diff vacío respecto de v0.5.0. No hay PR ni push. **READY FOR REVIEW: YES, exclusivamente checkpoints 1–4.** La implementación integral 1–8 no está terminada. Se hace la parada humana obligatoria; CP5–8, push y PR no están autorizados todavía por este gate.
+Solo presentación frontend y verificación/documentación. Backend, contratos, Prisma y almacenamiento: diff vacío respecto de v0.5.0. No hay PR ni push. **READY FOR REVIEW: YES, checkpoints 1–7 (CP5–CP7 según las secciones finales).** La implementación integral 1–8 no está terminada. Se hace la parada humana obligatoria; CP5–8, push y PR no están autorizados todavía por este gate.
 
 ## Checkpoint 1 — base visual y componentes
 
@@ -798,3 +809,251 @@ La primera corrida completa de esta puerta dio 123 correctas, 13 fallos y 2 sin 
 | (este) | Documentación y evidencia visual de la puerta |
 
 **Estado de la puerta.** Los ocho hallazgos tienen su evidencia (tabla de arriba). CP5 no se inició y no está autorizado hasta nueva aprobación explícita del producto.
+
+
+## Checkpoints 5, 6 y 7 — conflictos, participantes y consistencia global (LISTOS PARA REVISIÓN)
+
+Autorización (2026-10-09): continuar la Dirección C con **CP5, CP6 y CP7** tras la puerta de correcciones UX y la validación funcional aprobada por producto. **CP8 no se inició** y no está autorizado. Alcance: solo presentación frontend. Backend, contratos, Prisma, Docker, paquetes, permisos, almacenamiento y reglas funcionales tienen diff vacío frente a v0.5.0; no se tocó Acta-FGEO ni ninguna instalación persistente; sin endpoints nuevos; sin push, PR, tag ni release. Cada checkpoint se validó con pruebas, capturas a cinco anchos y comparación con la Dirección C; **no se declara PASS solo por tests**: las diferencias que se aceptaron están listadas por checkpoint y esperan la aceptación visual humana.
+
+Los documentos sin seguimiento ajenos (`CLAUDE-UX-CONTEXT.md`, `CLAUDE-UX-FILES.json`, `mockups/`) y el stash previo siguen sin cambios; cada commit se preparó añadiendo rutas explícitas.
+
+### Qué cambió en el sistema compartido
+
+Todo se apoya en los mismos componentes semánticos (`ui/semantic`) y tokens (`ui/tokens.css`); no hay CSS propio por pantalla salvo las hojas de feature que ya existían (`participant.css`, `invitation.css`, `next-*.css`), reescritas sobre tokens.
+
+| Componente | Para qué se creó o cambió | Dónde se usa |
+|---|---|---|
+| `ComparisonTable` (roles explícitos) | Comparación simétrica: una columna por postura, una fila por campo, etiquetas una vez; en < 760 px se intercala por campo con la etiqueta de columna visual | Contraste, conflicto |
+| `ThreadInset` / `ThreadMessage` | Intercambio cronológico pegado a la aportación: quién pregunta, quién responde, turno y estado | Revisión, Aclaraciones del participante |
+| `DecisionSheet` | La decisión como documento: resultado en voz documental, alcance y excepciones, fundamentos numerados, pie con identificadores | Decisión, historial, registro de decisiones |
+| `Timeline` + `review-timeline.ts` | «Cómo se llegó aquí»: línea de tiempo solo de presentación derivada de `ReviewDetail` (envíos, aclaraciones, conflicto, validación, disposiciones); sin endpoints | Pestañas Decisión e Historial |
+| `RegisterRow`, `ProgressCard`, `Callout`, `NextSteps`, `FactGrid` | Filas del registro, tarjeta de avance, avisos, «Qué sigue» derivado de estados reales y hechos en rejilla | Decisiones, Mi trabajo, Enviada, invitación |
+| `PageHeader`, `Avatar`, `FilterChips` | Cabecera de página (título, una línea de propósito, acción principal), persona con iniciales (nunca como único nombre) y filtros como chips | Todas las pantallas de organización |
+| `DataTable` (en `ui/index.tsx`) | Tabla de datos con roles explícitos que se apila en tarjetas con etiqueta en < 760 px | Administración, Miembros, Bitácora |
+| `OrganizationShell` | El marco de las páginas que no están dentro de un proyecto: barra lateral, riel y barra inferior con los destinos de la organización; sin inventar destinos | Mis proyectos, Administración, contraseña, bandeja, 404 |
+| `Dialog` | Devuelve el foco a quien lo abrió cuando React lo retira de la página; pie de acciones fijo | Todos los diálogos |
+
+### Checkpoint 5 — conflictos, aclaraciones y decisiones
+
+**Qué se hizo.**
+
+- **Contraste y conflicto.** La comparación es una sola tabla simétrica: la respuesta es el contenido, el actor y el área quedan como contexto en el encabezado de cada columna, la evidencia y la versión son filas, ningún bando tiene color propio. Las acciones («Pedir aclaración a A/B», resolver, registrar) están junto al par y la barra de acciones es fija; en un viewport de 1440×900 el encabezado de la tabla empieza en y = 629 (límite del Acceptance: 700). En móvil se intercala por campo. «Contraste» sin conflicto permite comparar dos aportaciones cualesquiera con selectores y abre el diálogo de aclaración con la persona preseleccionada.
+- **Aclaraciones.** Hilo cronológico pegado a la aportación: cada mensaje dice quién pregunta o responde, de quién es el turno y en qué estado está; las acciones (responder, cerrar, preguntar de nuevo) viven dentro del hilo y aparecen según el estado del hilo y el rol, como en v0.5.0. Sin repetir encabezados.
+- **Decisiones.** La decisión es un documento: «Se decide» (resultado) en Plex Serif de 28–30 px a y = 556 a 1440; alcance y excepciones; fundamentos numerados con persona, envío y archivos visibles sin abrir nada y un enlace «Abrir la aportación» que enfoca la aportación; los identificadores técnicos quedan solo en el pie. Una decisión reabierta se muestra como antecedente. «Cómo se llegó aquí» es la línea de tiempo derivada de los mismos datos.
+- **Registro de decisiones** con filas `RegisterRow` y chip «Vigente»; ADMIN y VIEWER leen sin controles.
+
+**Hallazgos de la revisión UX resueltos en CP5.**
+
+| Hallazgo | Estado | Qué se hizo |
+|---|---|---|
+| UX-04 texto repetido por fila | **CERRADO** | Atención ya no repite el motivo en cada fila (`reason = ""`); la fila dice «Última aportación {fecha}» y los chips llevan la señal |
+| UX-05 acciones por aportación; `select` → menú en escritorio | **CERRADO** | «Otras acciones» (escritorio) / «Más acciones» (móvil) es el mismo menú accesible en todas las vistas; «Pedir aclaración» y «Contrastar con otra» viven en cada aportación; no queda ningún `select` de acciones |
+| UX-11 Contraste y Decisión | **CERRADO**, con las adaptaciones listadas abajo | Composición descrita arriba |
+| UX-12 glosario de copy | **CERRADO** | aportación = lo que aporta una persona; envío = el número de versión de esa aportación; respuesta = el contenido; vigente = el envío que cuenta ahora. Se aplicó en etiquetas, encabezados y mensajes de Revisión, Atención y Decisiones |
+| UX-17 vacío de Revisión con siguiente paso | **CERRADO** | Sin aportaciones: «Sin aportaciones vigentes» con «Asignar participantes en el cuestionario» (si no hay participantes) y «Crear invitación» |
+
+**Adaptaciones aceptadas en CP5 (para confirmar por producto).**
+
+1. Las acciones de la barra de Contraste son secundarias para conservar ≤ 1 primario por vista (la tarjeta de estado conserva el primario).
+2. A 390 y 320 px la tabla comparativa no está en el primer viewport (y = 1 144 y 1 218): se conserva el estado y la acción principal arriba; la tabla va después, intercalada por campo. El criterio de y ≤ 700 solo se exige en escritorio.
+3. El texto de la decisión no está disponible en el registro (DEV-04, contract gap): el registro muestra pregunta, estado y fecha, no el resultado.
+4. «Qué sigue» omite la frase «Acta no envía avisos por correo»: no hay una garantía observable que la respalde en todas las vistas; solo se muestran estados reales.
+5. El copy nuevo de «Se decide» y del pie documental está listado en «Copy nuevo CP5–CP7» y espera confirmación editorial.
+
+**Pruebas.** `review-timeline.test.tsx`, `semantic.test.tsx`, `AnalystVisual.test.tsx`, `ContributionComparison.test.tsx`, `ReviewPresentation.test.tsx`, `ProjectDecisions.test.tsx`, `ProjectAttention.test.tsx`; E2E `cp5-conflicts-decisions.spec.ts` (10 pruebas, datos y API reales, cinco anchos, axe, desbordes, objetivos): métricas de Contraste, preguntar a A/B con diálogo preseleccionado, hilo, métricas de la hoja de decisión, orden de la línea de tiempo, foco de «Abrir la aportación», reabierta como antecedente, registro, ADMIN/VIEWER de solo lectura y respuestas largas con evidencia. Métricas en `acta-direction-c-evidence/metrics-cp5.json`.
+
+| Medida (1440 / 390) | Resultado |
+|---|---|
+| Tabla comparativa, y de su encabezado | 629 / 1 144 |
+| Tamaño de la respuesta · de la etiqueta de campo | 17 px · 12,5 px |
+| «Se decide»: tamaño · y | 29 px · 556 (1440); 22 px · 920 (390) |
+| Fundamentos de la decisión visibles sin abrir nada | 6 |
+
+### Checkpoint 6 — participantes e invitados
+
+**Qué se hizo.** La pregunta y la respuesta dominan; la persona entiende qué debe hacer, qué respondió, qué quedó guardado, qué se envió y qué sigue. `participant.css` e `invitation.css` se reescribieron sobre tokens (con bloque de paleta oscura); la pregunta es un `h1` en voz documental de 28 px (23 px ≤ 600 px).
+
+- **Mi trabajo.** Saludo, tarjeta de avance en palabras y barra, aclaración pendiente destacada sobre la lista; la pregunta es el texto principal de cada fila; chip de estado con glifo y palabra.
+- **Responder.** La pregunta como `h1`, la nota «guardar y salir / enviar» a 8 px de los botones, **un** primario («Enviar respuesta»). **Sin guardado automático falso**: Acta no guarda sola; el borrador privado se conserva al pulsar «Guardar y salir» y la pantalla no simula ningún autoguardado; lo guardado y lo enviado se dicen con palabras.
+- **Respuesta enviada y recibo.** Regla superior, hechos en rejilla y «Qué sigue» solo con estados reales; **sin texto de decisión**. Evidencia con descarga si el servidor la autoriza.
+- **Aclaraciones.** El intercambio (quién pregunta, quién responde), el turno y la acción contextual.
+- **Invitación externa.** La carta abre con la organización que invita («{organización} te invita a responder»); la vigencia y el aviso sobre la identidad están en el primer viewport a 390×844 (y = 327 y 532 de 844); la lista de preguntas, la pantalla de respuesta y la confirmación comparten la columna del participante. **No se inventan destinatarios**: solo se muestra lo que el servidor entrega.
+
+**Corrección de la revisión visual.** En la confirmación del invitado los tres pasos de «Qué sigue» salían todos en negrita (un título sin detalle se leía como encabezado); ahora son texto normal y el peso se verifica en el navegador.
+
+**Conservación funcional.** Visibilidad de decisiones sin ampliar (la persona participante no ve texto de decisión); contratos, rutas y límites de invitación de v0.5.0 intactos; `requestId`, versiones esperadas y foco como antes.
+
+**Pruebas.** `ParticipantFlow.test.tsx`, `MyWork.test.tsx` y las suites E2E existentes (`participant`, `responses`, `invitations`, `exchange`) adaptadas (libro de aserciones); E2E nuevo `cp6-participants.spec.ts` (7 pruebas): Mi trabajo, responder, enviada/validada, recibo, aclaración, invitación (carta y primer viewport) y confirmación, más tema oscuro con axe. Métricas en `acta-direction-c-evidence/metrics-cp6.json`.
+
+| Medida | Resultado |
+|---|---|
+| Mi trabajo: aviso · lista (y, 1440 / 390) | 322 · 567 / 335 · 602 |
+| Responder: `h1` · separación nota→botones | 28 px (23 px en 390) · 8 px |
+| Respuesta enviada: tamaño de la respuesta | 17 px a todos los anchos |
+| Invitación: vigencia · aviso · inicio (y, 1440 / 390) | 273 · 402 · 488 / 327 · 532 · 642 |
+
+### Checkpoint 7 — consistencia global
+
+**Qué se hizo.** El mismo sistema en todas las pantallas de organización y herramientas; ninguna pantalla conserva el aspecto de otra generación.
+
+- **Marco.** `OrganizationShell` para Mis proyectos, Administración, contraseña, bandeja y 404.
+- **Cabecera única.** Todas las pantallas usan `PageHeader` (o `ProjectWorkbench` con `lead`/`actions`): un `h1` propio, una línea de propósito y, si hay, la acción principal a la derecha. Login, Importar, Exportar, Trazabilidad, Bitácora, Miembros, Invitaciones y la bandeja dejaron de tener el nombre del proyecto como título, un enlace «volver» al proyecto y un `h2` repetido (**UX-02 completo**).
+- **Mis proyectos (UX-16).** Una acción principal por proyecto según el rol (Atención del proyecto / Abrir proyecto / Consultar preguntas) y acciones secundarias; el rol como chip.
+- **Administración (V-23).** Pestañas reales (Usuarios, Áreas, Proyectos; DEV-06), una acción principal por pestaña («Crear usuario/área/proyecto») que abre un diálogo con su formulario; filas con avatar, chip de estado y acciones por fila; tablas con `caption`. Miembros usa la misma tabla.
+- **Tablas (nuevo `DataTable`).** Columnas con encabezados en escritorio y tarjetas con etiqueta en < 760 px, con roles ARIA explícitos para no perder semántica; la etiqueta apilada es solo visual.
+- **Invitaciones (V-24/V-25).** Cabecera con «Crear invitación», ayuda «Cómo leer el estado» plegada, estado del enlace y actividad como chips con glifo y palabra, avance con barra decorativa y texto, vigencia dicha en días mientras el enlace sirve («Vence en 7 días», en color de advertencia si faltan 3 o menos) con la fecha debajo, paginación solo si hay más de una página. El asistente conserva sus cuatro pasos y validaciones; el pie del diálogo es fijo (Cancelar a un extremo, Atrás y la acción principal juntas) y las notas de contexto usan un aviso informativo.
+- **Lector de consulta (V-26).** La pregunta en voz documental, el estado como el mismo chip que ve el analista y el enlace «Consultar decisión y fuentes» como única acción; solo lo que `participantView` entrega (DEV-05).
+- **Cuestionario (UX-10, UX-13).** Los controles pasan de cuatro filas a dos en escritorio (modo y «Nueva pregunta»; búsqueda y filtros); la tabla empieza a y ≤ 430 a 1440. El control de plegado de grupos tiene glifo y título (UX-13b) y el separador de la línea de metadatos ya no queda huérfano (UX-13a).
+- **Diálogos (UX-14).** El diálogo de lote distingue «sin cambios» (informativo) de error; todos los diálogos devuelven el foco al botón que los abrió.
+- **Estados.** Cargando, vacío y error comparten tipografía, contraste y «Volver a intentar»; la sesión caducada reutiliza el acceso compacto dentro del diálogo.
+- **Sin colores heredados.** Los últimos valores fijos del CSS antiguo (`#fff`, `white`, verde de la barra de secciones) pasaron a tokens.
+
+**Hallazgos resueltos en CP7.**
+
+| Hallazgo | Estado | Evidencia |
+|---|---|---|
+| UX-02 completo | **CERRADO** | 14 pantallas × 5 anchos: un `h1` propio, Plex Sans 24–26 px / ≥ 600, distinto del nombre del proyecto (`cp7-global.spec.ts`, V-27) |
+| UX-10 cromo del cuestionario | **CERRADO** | modo y acción en una fila, búsqueda y filtros en otra, tabla a y ≤ 430 (1440) |
+| UX-13 separador huérfano y glifo de plegado | **CERRADO** | CSS del separador; control de plegado con chevrón y título |
+| UX-14 diálogo de lote sin cambios | **CERRADO** | aviso informativo distinto del error; `BulkDialog.test.tsx` |
+| UX-16 «Mis proyectos» | **CERRADO** | V-27 Mis proyectos: una acción principal por proyecto |
+| Botón «Crear invitación» de aspecto nativo | **CERRADO** | acción principal de la cabecera de Invitaciones |
+
+**Pruebas.** `OrganizationShell.test.tsx`, `ui.test.tsx` (DataTable, retorno de foco del diálogo), `ProjectWorkbench.test.tsx`, `ParticipantHome.test.tsx`, `ContributionSet.test.tsx`; E2E nuevo `cp7-global.spec.ts` (9 pruebas): V-27 cabecera y escala en 14 pantallas × 5 anchos con axe, desbordes y texto colapsado; V-23 tablas y diálogos; V-24 Invitaciones; V-25 asistente; V-26 lector; V-27 cuestionario (UX-10), Mis proyectos y login. Métricas en `acta-direction-c-evidence/metrics-cp7.json`.
+
+### Consistencia visual
+
+- **Una voz, una escala.** Todas las pantallas de organización usan Plex Sans de 26 px / 600 para el `h1`; la voz documental (Plex Serif) solo aparece donde hay una pregunta, una respuesta o una decisión (revisión, participante, invitado, lector).
+- **Un primario por vista.** Excepción documentada: «Mis proyectos» tiene una acción principal **por tarjeta de proyecto** (no por página).
+- **Estados.** El mismo `StatusChip` (glifo + palabra) para revisión, publicación, participante, hilo e invitación; el color nunca es el único portador.
+- **Tablas.** Una sola implementación de tabla de datos con tarjeta móvil.
+- **Diferencia de generaciones eliminada.** No quedan pantallas con la cabecera antigua, botones de aspecto nativo ni paleta verde heredada; la medición `V-27` recorre 14 pantallas con la misma comprobación.
+
+
+### Revisión visual comparada con la Dirección C
+
+Cada pantalla se comparó lado a lado (referencia a la izquierda, React a la derecha) a 1440 y 390 px, y las demás anchuras donde existe captura. Se miró jerarquía, proporciones, densidad, alineación, ubicación de acciones, legibilidad, estados y responsive, no solo desbordes.
+
+| Pantalla | 1440 | 768 | 390 | 320 |
+|---|---|---|---|---|
+| Conflicto / Contraste (V-09) | [Comparar](acta-direction-c-evidence/cp5/compare-V09-conflicto-1440.png) | [Comparar](acta-direction-c-evidence/cp5/compare-V09-conflicto-768.png) | [Comparar](acta-direction-c-evidence/cp5/compare-V09-conflicto-390.png) | [Comparar](acta-direction-c-evidence/cp5/compare-V09-conflicto-320.png) |
+| Decisión (V-11) | [Comparar](acta-direction-c-evidence/cp5/compare-V11-decision-1440.png) | [Comparar](acta-direction-c-evidence/cp5/compare-V11-decision-768.png) | [Comparar](acta-direction-c-evidence/cp5/compare-V11-decision-390.png) | [Comparar](acta-direction-c-evidence/cp5/compare-V11-decision-320.png) |
+| Registro de decisiones (V-12) | [Comparar](acta-direction-c-evidence/cp5/compare-V12-decisiones-1440.png) | [Comparar](acta-direction-c-evidence/cp5/compare-V12-decisiones-768.png) | [Comparar](acta-direction-c-evidence/cp5/compare-V12-decisiones-390.png) | [Comparar](acta-direction-c-evidence/cp5/compare-V12-decisiones-320.png) |
+| Mi trabajo (V-15) | [Comparar](acta-direction-c-evidence/cp6/compare-V15-mi-trabajo-1440.png) | [Comparar](acta-direction-c-evidence/cp6/compare-V15-mi-trabajo-768.png) | [Comparar](acta-direction-c-evidence/cp6/compare-V15-mi-trabajo-390.png) | [Comparar](acta-direction-c-evidence/cp6/compare-V15-mi-trabajo-320.png) |
+| Responder (V-16) | [Comparar](acta-direction-c-evidence/cp6/compare-V16-responder-1440.png) | [Comparar](acta-direction-c-evidence/cp6/compare-V16-responder-768.png) | [Comparar](acta-direction-c-evidence/cp6/compare-V16-responder-390.png) | [Comparar](acta-direction-c-evidence/cp6/compare-V16-responder-320.png) |
+| Enviada (V-17) | [Comparar](acta-direction-c-evidence/cp6/compare-V17-enviada-1440.png) | [Comparar](acta-direction-c-evidence/cp6/compare-V17-enviada-768.png) | [Comparar](acta-direction-c-evidence/cp6/compare-V17-enviada-390.png) | [Comparar](acta-direction-c-evidence/cp6/compare-V17-enviada-320.png) |
+| Aclaración del participante (V-19) | [Comparar](acta-direction-c-evidence/cp6/compare-V19-aclaracion-1440.png) | [Comparar](acta-direction-c-evidence/cp6/compare-V19-aclaracion-768.png) | [Comparar](acta-direction-c-evidence/cp6/compare-V19-aclaracion-390.png) | [Comparar](acta-direction-c-evidence/cp6/compare-V19-aclaracion-320.png) |
+| Invitación (V-20) | [Comparar](acta-direction-c-evidence/cp6/compare-V20-invitacion-1440.png) | [Comparar](acta-direction-c-evidence/cp6/compare-V20-invitacion-768.png) | [Comparar](acta-direction-c-evidence/cp6/compare-V20-invitacion-390.png) | [Comparar](acta-direction-c-evidence/cp6/compare-V20-invitacion-320.png) |
+| Confirmación del invitado (V-22) | [Comparar](acta-direction-c-evidence/cp6/compare-V22-confirmacion-1440.png) | [Comparar](acta-direction-c-evidence/cp6/compare-V22-confirmacion-768.png) | [Comparar](acta-direction-c-evidence/cp6/compare-V22-confirmacion-390.png) | [Comparar](acta-direction-c-evidence/cp6/compare-V22-confirmacion-320.png) |
+| Administración (V-23) | [Comparar](acta-direction-c-evidence/cp7/compare-V23-administracion-1440.png) | | [Comparar](acta-direction-c-evidence/cp7/compare-V23-administracion-390.png) | |
+| Invitaciones (V-24) | [Comparar](acta-direction-c-evidence/cp7/compare-V24-invitaciones-1440.png) | | [Comparar](acta-direction-c-evidence/cp7/compare-V24-invitaciones-390.png) | |
+| Asistente de invitación (V-25) | [Comparar](acta-direction-c-evidence/cp7/compare-V25-asistente-1440.png) | [Comparar](acta-direction-c-evidence/cp7/compare-V25-asistente-768.png) | [Comparar](acta-direction-c-evidence/cp7/compare-V25-asistente-390.png) | [Comparar](acta-direction-c-evidence/cp7/compare-V25-asistente-320.png) |
+| Lector de consulta (V-26) | [Comparar](acta-direction-c-evidence/cp7/compare-V26-lector-1440.png) | | [Comparar](acta-direction-c-evidence/cp7/compare-V26-lector-390.png) | |
+| Cuestionario (V-27, UX-10) | [Comparar](acta-direction-c-evidence/cp7/compare-V27-cuestionario-1440.png) | | [Comparar](acta-direction-c-evidence/cp7/compare-V27-cuestionario-390.png) | |
+
+Capturas de las demás pantallas heredadas de V-27 (Mis proyectos, bandeja, Atención, Decisiones, Miembros, Importar, Exportar, Bitácora, Trazabilidad, contraseña, 404, login) en `acta-direction-c-evidence/cp7/V-27-*.png` (1440 y 390; el login a cinco anchos), y capturas finales de los conjuntos grandes en `acta-direction-c-evidence/transversal/`.
+
+**Lo que se corrigió a partir de esta revisión** (no lo detectaban los tests de desborde):
+
+1. Confirmación del invitado: los tres pasos de «Qué sigue» estaban en negrita; ahora texto normal (prueba E2E del peso).
+2. Invitaciones: el fin del enlace no destacaba; ahora «Vence en N días» (advertencia si faltan 3 o menos) con la fecha debajo (prueba E2E).
+3. Antes: el contenido de la respuesta en la revisión quedaba 8 px por debajo del límite de y ≤ 640 por texto repetido («Enviada · vigente», «Sin archivos adjuntos»); se retiró la repetición y la métrica del Acceptance se cumple.
+
+**Diferencias con la Dirección C que se aceptan** (registradas para la aceptación humana; ninguna cambia una función):
+
+| Pantalla | Diferencia | Motivo |
+|---|---|---|
+| Contraste | Las columnas no tienen selector de persona en su encabezado | En un conflicto las dos fuentes las fija el conflicto; la comparación libre sí tiene selectores |
+| Decisión | La tarjeta de estado es más sencilla («Decisión vigente» + «Otras acciones») | El estado «Sin acción pendiente» del prototipo no existe como dato |
+| Registro de decisiones | Muestra la pregunta, no el texto de la decisión | DEV-04: el contrato no lo entrega |
+| Mi trabajo | La lista se agrupa por tema, no por «Para responder» | La proyección real del API agrupa por tema |
+| Responder | La evidencia y el ejemplo son disclosures | Comportamiento real de v0.5.0 |
+| Invitación | La barra superior dice «Acta», no el nombre de la organización; la organización abre el título | El nombre de la organización sale del contexto de la instalación, no de la invitación |
+| Confirmación | Los pasos van sin tarjeta y con números, no con glifos | «Qué sigue» no puede marcar como hechos pasos que no lo están |
+| Administración | Pestañas reales (Usuarios, Áreas, Proyectos) | DEV-06 |
+| Invitaciones | Tarjetas con etiquetas en lugar de tabla con encabezados únicos; sin chips de filtro derivados | El filtro real «Vigencia» se conserva; los chips son «SHOULD» del Acceptance §3.13 |
+| Asistente | Pasos como píldoras; cuatro campos en el primer paso | Los datos del destinatario son los reales de v0.5.0 |
+| Cuestionario | Sin «Ocultar seguimientos», «Vista compacta» ni paginación de 8 páginas del prototipo | No existen como función en v0.5.0 |
+
+### Revisión transversal del producto
+
+Recorrido como una sola experiencia (navegación, proporciones, jerarquía, densidad, consistencia, estados, acciones, responsive) con datos reales a cinco anchos, incluyendo los conjuntos grandes: 304 preguntas (Atención y Organizar), 50 aportaciones, respuestas largas con evidencia, conflictos y decisiones. Capturas finales en `acta-direction-c-evidence/cp3`, `cp4`, `cp5`, `cp6`, `cp7` y `ux-gate`.
+
+| Aspecto | Observación |
+|---|---|
+| Navegación | Una sola estructura (barra lateral / riel / barra inferior) en proyecto y organización; los destinos son los reales; el nombre del proyecto no es título |
+| Jerarquía | En cada pantalla manda el objeto (pregunta, aportación, decisión, persona); los metadatos van después; los identificadores técnicos solo en el pie |
+| Densidad | Las pantallas con cientos de elementos pliegan y revelan por tramos; Organizar y Atención no crecen con el total de preguntas |
+| Estados y acciones | Una acción principal por vista; secundarias en menú accesible; estados con glifo y palabra |
+| Responsive | Sin desborde horizontal ni texto colapsado a 1440, 1024, 768, 390 y 320 en las 14 pantallas de V-27 y en las matrices de CP3–CP6 |
+
+**Pendiente de producto (no de código):** la aceptación visual humana de CP1–CP7 y la confirmación editorial del copy nuevo.
+
+### Libro de aserciones CP5–CP7
+
+Ninguna aserción se debilitó: cada una se reemplazó por una equivalente sobre el nuevo comportamiento. Se enumeran **todas** las que se adaptaron.
+
+| Archivo | Antes | Ahora | Motivo |
+|---|---|---|---|
+| `review.spec.ts` | `getByLabel("Otras acciones").selectOption(key)` | abrir el menú «Otras acciones» y pulsar el botón por etiqueta (`menuLabels`) | UX-05: menú, no `select` |
+| `review.spec.ts`, `next-workbench.spec.ts`, `visual-direction-c.spec.ts`, `ux-gate.spec.ts` | `getByLabel("Otras acciones")` como `select` (presencia/ausencia, opciones) | `getByText("Otras acciones")` / `.ac-action-menu li button` | UX-05; en `ux-gate.spec.ts` ya no hay rama `select` en escritorio |
+| `review.spec.ts` (2D-C) | dos `region` «Postura A/B» con encabezados «Respuesta»/«Evidencia» | dos `columnheader` «Postura A/B» y `rowheader` «Respuesta»/«Evidencia»; celdas localizadas por `data-column` | CP5: una tabla comparativa |
+| `review.spec.ts` (geometría) | `b.x > a.x + a.width`; `b.y > a.y + a.height` | `>=` (columnas contiguas; filas adyacentes) | CP5: ya no hay hueco entre tarjetas |
+| `review.spec.ts` (reapertura) | el botón de reabrir es `secondary` | `tertiary` | CP5: acción terciaria al pie del documento |
+| `review.spec.ts` (fuentes) | abrir un `<details>` «Respuesta de …» | fundamento numerado visible con persona y «envío #n» | CP5: fundamentos sin abrir nada |
+| `review.spec.ts` (VIEWER) | encabezado «Decisión vigente» | encabezado «Decisión validada» (la etiqueta «Decisión vigente» es el nombre accesible de la hoja) | CP5 |
+| `review.spec.ts`, `participant.spec.ts`, `responses.spec.ts` | `.participant-badge` | `.ac-status` | CP6: un solo chip de estado |
+| `next-workbench.spec.ts` | encabezado «Decisiones registradas» | `article` «Decisión vigente» | CP5: la decisión es un documento |
+| `invitations.spec.ts` | texto «Respuesta mediante invitación»; eyebrow no vacío | «Invitación para aportar»; `h1` con «te invita a responder» | CP6: la invitación se abre como carta |
+| `platform.spec.ts` | encabezado con el nombre de la institución | `h1` «Iniciar sesión» y el nombre de la institución visible como texto | CP7 (UX-02): la página trata de entrar |
+| `ui.test.tsx` | encabezado con el nombre de la institución | `h1` «Iniciar sesión» y nombre visible | CP7 (UX-02) |
+| `ContributionSet.test.tsx` | `heading "0 aportaciones"` (vacío) y varios renders | encabezado solo para lectores y enlaces de siguiente paso (UX-17) | CP5 |
+| `AnalystVisual.test.tsx`, `ContributionComparison.test.tsx`, `ReviewPresentation.test.tsx`, `semantic.test.tsx` | `region` «Postura A/B», `select` «Otras acciones», `DecisionSheet title/footer`, `ComparisonTable columns` como cadenas | columnas con `key`/`head`, menú de acciones, `DecisionSheet label/kicker`, `ThreadMessage` | CP5: nuevas APIs de los componentes |
+| `MyWork.test.tsx` | `ParticipantSummary` | `Welcome` | CP6 |
+| `tests/visual/direction-c.tsx` | APIs anteriores de `ComparisonTable`, `DecisionSheet`, `ThreadInset` | las nuevas | CP5; el gate de fundamentos pasa a ser la prueba de las nuevas APIs |
+| `ux-gate.spec.ts` | axe, desbordes y objetivos en una función local | `fixtures/page-checks.ts` (`checkedPage`, `smallTargets`) | Reutilizar la misma comprobación en CP5–CP7; sin cambiar su contenido |
+| `fixtures/page-checks.ts` (`containment`) | todo elemento visible cuenta | se excluye el patrón «visualmente oculto» (caja de 1 px recortada) | Es intencional para lectores de pantalla; se descubrió con la etiqueta de búsqueda del cuestionario y el `thead` apilado |
+| `next-workbench.spec.ts` (vigencia de invitaciones) | tras pulsar «Atención» se pulsaba «Invitaciones» sin más | se espera el `h1` «Atención» antes de volver a usar la navegación | Con la CPU limitada ×6 la URL cambia antes de que el shell pinte el contexto recordado; la prueba hacía clic en el enlace anterior (falló 1 de cada 4 en aislamiento con la página de invitaciones nueva y pasa 8/8 con la espera; con la página anterior pasa 8/8 sin ella). Es sincronización, no una aserción más débil |
+| `login-helper.ts` | `getByRole("button", { name: "Cerrar sesión", hidden: true })` | `includeHidden: true` y `.first()` | `hidden` no es una opción de Playwright y no hacía nada; con el marco de organización el botón de sesión está en dos sitios y a anchos estrechos solo en un menú |
+
+### Copy nuevo CP5–CP7 (confirmación editorial pendiente, DEV-08)
+
+«Se decide»; el pie documental de la decisión («Fuentes conservadas…», referencias técnicas); «Cómo se llegó aquí»; «Abrir la aportación»; «Pedir aclaración a A/B», «Contrastar con otra»; «Otras acciones» / «Más acciones»; «Última aportación {fecha}»; «Qué sigue» (Enviada, Aclaración); «Aclaración pendiente»; «{organización} te invita a responder»; «Invitación para aportar»; «Cómo leer el estado»; «Crear usuario / área / proyecto» como acciones de la cabecera; «Atención del proyecto / Abrir proyecto / Consultar preguntas» en Mis proyectos; «La dirección no existe o no tienes acceso a ella.»; «Enlaces para que personas externas respondan preguntas concretas.»; «Descarga el estado funcional de este proyecto.».
+
+### Límites de esta verificación
+
+Chromium en macOS, con base y API desechables propias; sin lector de pantalla real, dispositivos táctiles reales, zoom del navegador, colores forzados ni Windows/Linux. axe sin violaciones no certifica WCAG. El tema oscuro solo se midió en la pantalla del participante. Quedan **fuera de alcance de CP7** y se declaran: (1) la Bitácora muestra los códigos de acción y los tipos de objeto tal como los entrega el servidor (`QUESTION_REOPENED`, `Question`), sin traducirlos; (2) los filtros de Invitaciones como chips derivados del Acceptance §3.13 («SHOULD») no se implementaron: se conserva el filtro real «Vigencia» (`expiresWithin=7`); (3) «Escribir», «Revisar publicación» y «Vista previa» conservan la composición de CP3 sin cambios; (4) la jerarquía de la primera aportación a 320 px sigue a un desplazamiento (UX-07, observación previa).
+
+### Resultados de verificación de CP5–CP7
+
+Entorno propio y desechable (proyecto Compose `acta-ux-gate-20261008`, PostgreSQL y API en loopback, Vite en puerto libre; no se usó ni se tocó la infraestructura de otras instalaciones). Node 26.7.0, Chromium de Playwright.
+
+| Comprobación | Resultado observado |
+|---|---|
+| `lint` (`--max-warnings 0`) | PASS |
+| `typecheck` | PASS |
+| `build` | PASS, 784,24 kB (la advertencia de más de 500 kB es preexistente) |
+| `prisma validate` | PASS |
+| Unit/component | **373/373 · 39 archivos** |
+| Integración PostgreSQL | **113/113**, sin skips (`ACTA_REVIEW_TEST_PORT=4453`) |
+| E2E Chromium, suite completa, base recién creada | **159/164 en la última corrida completa (1 fallo intermitente preexistente y 4 pruebas en serie sin ejecutar; esas 5 pasan 14/14 al repetir `ux-gate.spec.ts`); 164/164 en la corrida completa anterior a las dos correcciones de la revisión visual**, sin skips ni reintentos |
+| `cp5-conflicts-decisions.spec.ts` · `cp6-participants.spec.ts` · `cp7-global.spec.ts` | 10 · 7 · 9, todos pasan (parte del total anterior) |
+| axe (wcag2a/2aa/21a/21aa/22aa/best-practice) | 0 violaciones en las 14 pantallas de V-27 × 5 anchos, en las matrices de CP5 y CP6 y en el tema oscuro del participante |
+| Desbordes horizontales; un único `h1` por pantalla; texto colapsado | 0; 1; 0 (el patrón «visualmente oculto» se excluye de la medida, véase libro de aserciones) |
+| Objetivos < 44 px a ≤ 899 px | 0 en las pantallas medidas (shell, Atención, revisión y lector) |
+| Backend, contratos, Prisma, Docker y paquetes frente a v0.5.0 | diff vacío |
+| Archivos ajenos (`CLAUDE-UX-CONTEXT.md`, `CLAUDE-UX-FILES.json`, `mockups/`) y stash previo | sin cambios |
+
+**Incidencias de la verificación.** (1) La primera suite completa dio 113 correctas y 48 fallos: 46 por el `login-helper` (su opción `hidden: true` no existía en Playwright; con el marco de organización el botón de sesión solo está en un menú a anchos estrechos), 1 por el encabezado del login y 1 por el nombre accesible de las celdas de la tabla apilada (la etiqueta visual se leía como parte del nombre; ahora es solo visual); todos atribuidos y corregidos sin debilitar aserciones. (2) `next-workbench.spec.ts` «vigencia de invitaciones» falló 1 de 4 veces con la página de invitaciones nueva por una carrera de la propia prueba bajo CPU limitada (véase libro de aserciones); con la espera pasa 8/8 y con la página anterior pasa 8/8 sin ella. (3) En la última corrida completa (13,5 min) falló una vez `ux-gate.spec.ts:322` («Comparar aportaciones» / «← Volver» llevan el foco, a 390 px) y las 4 pruebas que le siguen en serie no se ejecutaron; al repetir `ux-gate.spec.ts` pasan 14/14. La causa es una carrera intermitente que **ya existía**: un bucle de 56 repeticiones del mismo flujo contra el frontend de la base `8c68d32` (antes de CP5) falló 1 vez, y contra HEAD 1 de 28; no se modificó. Otra repetición de `ux-gate.spec.ts` se detuvo en el sembrado con un 500 del API de mi base desechable (backend sin cambios), sin relación con el frontend. (4) `prettier --check` sigue avisando en archivos preexistentes que estos checkpoints no tocaron (`editor/Preview.tsx`, `editor/simulation.ts`, `tests/unit/responses.test.ts`).
+
+### Commits de CP5–CP7 (rama `feat/acta-direction-c-ui`, DCO, sin push)
+
+| Commit | Contenido |
+|---|---|
+| `898393c` | Frontend de CP5–CP7: conflictos, decisiones, participantes, marco de organización, tablas, invitaciones, lector y controles del cuestionario (con pruebas unitarias) |
+| `0d5d19e` | Pruebas E2E de CP5–CP7, comprobaciones de página compartidas y aserciones adaptadas |
+| `9c5590d` | Correcciones de la revisión visual (pasos de la confirmación, vigencia en días) y sincronización de una prueba bajo CPU limitada |
+| `539d9cf` | Prueba unitaria de UX-14 (un lote sin cambios es información; solo los bloqueos son error) |
+| (este commit) | Documentación, métricas, capturas y comparativas de CP5–CP7 |
+
+**Estado.** CP5, CP6 y CP7 están implementados, verificados y comparados con la Dirección C; las diferencias aceptadas, el copy nuevo y los límites están arriba. **Falta la aceptación visual y editorial humana.** CP8, el PR final, el push y el release no se iniciaron.
