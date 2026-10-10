@@ -28,6 +28,7 @@ import {
   nextParticipantPath,
   SubmittedResponseContent,
 } from "./ParticipantFlow";
+import { StatusChip } from "../ui/semantic";
 import { ParticipantIcon } from "./ParticipantIcon";
 import { AnswerControl, answerText } from "./AnswerControl";
 const empty: ResponseContent = {
@@ -398,10 +399,9 @@ function ResponseEditor({
   return (
     <section className="response-page participant-page">
       <div className="participant-step-meta">
-        <span>{server.question.sectionTitle}</span>
         <span>
           {server.question.position
-            ? `Pregunta ${server.question.position} de ${server.question.total}`
+            ? `Pregunta ${server.question.position} de ${server.question.total} · no es el número de envíos`
             : "Fuera del recorrido actual"}
         </span>
       </div>
@@ -421,17 +421,19 @@ function ResponseEditor({
         />
       </div>
       <div className="participant-answer-card">
+        <p className="participant-overline">{server.question.sectionTitle}</p>
+        <h1>{server.question.question}</h1>
         {server.question.helpText && (
           <p className="help">
             <ParticipantIcon name="info" />
             {server.question.helpText}
           </p>
         )}
-        <h1>{server.question.question}</h1>
         {values.consultationRequested && (
-          <p className="participant-badge consultation">
-            <ParticipantIcon name="flag" />
-            Por consultar
+          <p>
+            <StatusChip tone="warning" icon="flag">
+              Por consultar
+            </StatusChip>
           </p>
         )}
         {server.reviewStatus === "NOT_APPLICABLE" && (

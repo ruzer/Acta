@@ -25,12 +25,14 @@ test("login accesible con teclado, escritorio y móvil", async ({ page }) => {
       loginPayloads.push(request.postDataJSON());
   });
   await page.goto("/");
+  // CP7: the page is about signing in (h1); the institution stays the first
+  // line of the page, as text, instead of being its title.
   await expect(
-    page.getByRole("heading", { name: "Iniciar sesión" }),
+    page.getByRole("heading", { level: 1, name: "Iniciar sesión" }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", {
-      name: process.env.ORGANIZATION_NAME || "My organization",
+    page.getByText(process.env.ORGANIZATION_NAME || "My organization", {
+      exact: true,
     }),
   ).toBeVisible();
   await expect(
@@ -277,6 +279,10 @@ test("cambios sin guardar se conservan al cancelar navegación y miembros funcio
       }),
     })
     .getByRole("link", { name: "Editar cuestionario" })
+    .click();
+  await page
+    .locator("summary:visible")
+    .filter({ hasText: /^Más herramientas$/ })
     .click();
   await page.getByRole("link", { name: "Miembros", exact: true }).click();
   await expect(

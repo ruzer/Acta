@@ -57,6 +57,9 @@ it.each([12, 54, 304])(
     expect(screen.getByText("1 preguntas en grupos plegados.")).toBeVisible();
     expect(screen.getByText("1 pregunta seleccionada")).toBeVisible();
     await user.click(
+      screen.getByText("Seleccionar preguntas", { exact: true }),
+    );
+    await user.click(
       screen.getByRole("button", {
         name: "Seleccionar todos los resultados (" + count + ")",
       }),
@@ -103,6 +106,7 @@ it("al plegar, seleccionar esta página no incluye descendientes ocultos", async
   await user.click(
     screen.getByRole("button", { name: "Contraer seguimientos de Pregunta 0" }),
   );
+  await user.click(screen.getByText("Seleccionar preguntas", { exact: true }));
   await user.click(
     screen.getByRole("button", { name: "Seleccionar esta página (11)" }),
   );
@@ -150,6 +154,16 @@ it("N usa únicamente submittedRespondents de la proyección y distingue carga/e
       onOpenContributions={open}
     />,
   );
+  expect(
+    screen.getByRole("columnheader", { name: "Participantes" }),
+  ).toBeVisible();
+  expect(
+    screen.queryByRole("columnheader", { name: "Aportaciones" }),
+  ).not.toBeInTheDocument();
+  await user.click(screen.getByRole("button", { name: "Analizar" }));
+  expect(
+    screen.getByRole("columnheader", { name: "Aportaciones" }),
+  ).toBeVisible();
   expect(screen.getByText("Sin aportaciones enviadas")).toBeVisible();
   await user.click(
     screen.getByRole("button", { name: "1 aportación de Pregunta 1" }),

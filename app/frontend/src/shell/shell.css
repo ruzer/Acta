@@ -1,0 +1,293 @@
+.ac-shell main.container {
+  width: auto;
+  max-width: none;
+  padding: 8px 48px 48px;
+  margin: 0;
+}
+.ac-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+.ac-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ac-ink);
+  text-decoration: none;
+  padding-inline: 8px;
+}
+.ac-brand .installation-logo {
+  max-width: 120px;
+  height: 28px;
+  object-fit: contain;
+}
+.ac-project-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--ac-line);
+  border-radius: 8px;
+  background: var(--ac-surface-2);
+  color: var(--ac-ink);
+  font-size: var(--ac-text-meta);
+  font-weight: 600;
+  line-height: 1.3;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.ac-project-switch small {
+  display: block;
+  font-size: var(--ac-text-meta);
+  font-weight: 400;
+  color: var(--ac-muted);
+  margin-top: 4px;
+}
+.ac-project-navigation {
+  display: grid;
+  gap: 4px;
+}
+.ac-project-navigation a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--ac-ink-2);
+  font-weight: 500;
+  line-height: 1.4;
+}
+.ac-project-navigation a[aria-current="page"] {
+  background: var(--ac-accent-weak);
+  color: var(--ac-accent);
+  font-weight: 600;
+}
+.ac-project-navigation a:hover {
+  background: var(--ac-sunken);
+}
+.ac-sidebar .participant-icon,
+.ac-mobile-account .participant-icon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+.ac-project-tools > summary,
+.ac-mobile-account > summary {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  min-height: 40px;
+  color: var(--ac-muted);
+}
+.ac-project-tools > summary::after {
+  content: "⌄";
+  margin-left: auto;
+}
+.ac-project-tools > nav {
+  display: grid;
+  padding: 8px;
+  gap: 4px;
+}
+.ac-project-tools nav a,
+.ac-sidebar-account nav a,
+.ac-mobile-menu nav a {
+  display: flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 4px 8px;
+  font-size: var(--ac-text-meta);
+  color: var(--ac-ink-2);
+}
+.ac-sidebar-account {
+  margin-top: auto;
+  border-top: 1px solid var(--ac-line);
+  padding: 12px 8px 0;
+}
+.ac-account-name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  margin: 0 0 8px;
+}
+.ac-sidebar-account .button {
+  font-size: var(--ac-text-meta);
+  margin-top: 8px;
+}
+.ac-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.ac-breadcrumb a {
+  color: var(--ac-ink-2);
+  font-weight: 600;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.ac-shell-context {
+  justify-content: space-between;
+  gap: 12px;
+}
+.ac-mobile-account {
+  display: none;
+}
+.ac-mobile-menu {
+  max-height: calc(100dvh - 144px);
+  overflow-y: auto;
+  position: absolute;
+  z-index: 30;
+  right: 12px;
+  width: min(300px, calc(100vw - 24px));
+  padding: 16px;
+  background: var(--ac-surface);
+  border: 1px solid var(--ac-line);
+  border-radius: 12px;
+  box-shadow: var(--ac-shadow-dialog);
+}
+.ac-mobile-menu > a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+.ac-mobile-menu .ac-account-name {
+  border-top: 1px solid var(--ac-line);
+  margin-top: 12px;
+  padding-top: 12px;
+}
+@media (max-width: 1099px) and (min-width: 760px) {
+  .ac-sidebar {
+    padding-inline: 8px;
+    align-items: center;
+    overflow: visible;
+  }
+  .ac-sidebar .ac-brand {
+    font-size: 15px;
+    padding: 0;
+    min-width: 48px;
+    min-height: 48px;
+    justify-content: center;
+  }
+  .ac-sidebar .ac-project-switch {
+    width: 48px;
+    min-height: 48px;
+    justify-content: center;
+    padding: 0;
+  }
+  .ac-sidebar .ac-brand .installation-logo {
+    max-width: 30px;
+  }
+  .ac-sidebar .ac-project-navigation a {
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+  }
+  .ac-sidebar .ac-project-navigation span,
+  .ac-sidebar .ac-project-switch span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .ac-sidebar .ac-project-tools,
+  .ac-sidebar-account {
+    display: none;
+  }
+  .ac-mobile-account {
+    display: block;
+  }
+  .ac-shell main.container {
+    padding-inline: 32px;
+  }
+}
+@media (max-width: 899px) {
+  .ac-project-navigation a,
+  .ac-project-tools > summary,
+  .ac-mobile-account > summary,
+  .ac-project-tools nav a,
+  .ac-mobile-menu nav a,
+  .ac-breadcrumb a,
+  .ac-brand,
+  .ac-project-switch {
+    min-height: 44px;
+  }
+  .ac-breadcrumb a {
+    display: inline-flex;
+    align-items: center;
+    padding-inline: 2px;
+  }
+}
+@media (max-width: 759px) {
+  .ac-shell main.container {
+    padding: 8px 16px 32px;
+  }
+  .ac-mobile-account {
+    display: block;
+    flex-shrink: 0;
+  }
+  .ac-mobile-account > summary {
+    padding-inline: 4px;
+    gap: 6px;
+    font-size: var(--ac-text-meta);
+  }
+  .ac-shell-mobile .ac-project-navigation {
+    display: flex;
+    gap: 0;
+    padding: 4px;
+  }
+  .ac-shell-mobile .ac-project-navigation a {
+    flex: 1 1 0;
+    min-width: 0;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    padding: 6px 2px;
+    font-size: 12.5px;
+  }
+  .ac-shell-mobile .participant-icon {
+    width: 20px;
+    height: 20px;
+  }
+  .ac-shell-context {
+    align-items: center;
+    padding-block: 0;
+  }
+  /* One line: the project name gives way (ellipsis) to the page name. */
+  .ac-breadcrumb {
+    flex: 1 1 0;
+    min-height: 44px;
+    flex-wrap: nowrap;
+  }
+  .ac-breadcrumb a {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ac-breadcrumb > span:last-child {
+    flex: none;
+    white-space: nowrap;
+  }
+}
+
+.ac-mobile-account,
+.ac-project-tools {
+  margin: 0;
+}

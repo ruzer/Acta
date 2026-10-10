@@ -122,7 +122,9 @@ test("B/C/F admin imports fictitious JSON after preview; invalid file writes not
   await page.goto(`/projects/${projectId}/history`);
   await page.getByLabel("Acción", { exact: true }).fill("PROJECT_IMPORTED");
   await expect(
-    page.getByRole("cell", { name: "PROJECT_IMPORTED", exact: true }),
+    page.getByRole("cell", {
+      name: /Cuestionario importado\s*PROJECT_IMPORTED/,
+    }),
   ).toBeVisible();
   await axe(page);
   // Prepare a submitted source and decision through real authenticated APIs for export scenarios.
@@ -190,11 +192,13 @@ test("A/D analyst dashboard filters and opens review; Markdown includes current 
   });
   await login(page, "analyst");
   await page.goto(`/projects/${projectId}/dashboard`);
+  // UX-02: inside the project shell the page names itself (h1 "Atención") and
+  // the project stays visible in the page context instead of repeating as h1.
+  await expect(page.locator("main h1")).toHaveText("Atención");
   await expect(
-    page.getByRole("heading", {
-      name: "Cuestionario ficticio de intercambio",
-      exact: true,
-    }),
+    page
+      .getByRole("navigation", { name: "Contexto de página" })
+      .getByRole("link", { name: /Cuestionario ficticio de intercambio/ }),
   ).toBeVisible();
   await page.screenshot({
     path: "/tmp/requirements-2e-dashboard-desktop.png",
@@ -208,13 +212,15 @@ test("A/D analyst dashboard filters and opens review; Markdown includes current 
   });
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.getByLabel("Filtrar estado").selectOption("ANSWERED");
-  await expect(
-    page.getByRole("link", { name: "Pregunta ficticia", exact: true }),
-  ).toBeVisible();
+  // Direction C (CP2): the question is a heading and its row opens the review
+  // through the "Revisar respuestas" link that names the question.
+  const open = page.getByRole("link", {
+    name: "Revisar respuestas: Pregunta ficticia",
+    exact: true,
+  });
+  await expect(open).toBeVisible();
   await axe(page);
-  await page
-    .getByRole("link", { name: "Pregunta ficticia", exact: true })
-    .click();
+  await open.click();
   await expect(page).toHaveURL(new RegExp("/review/" + questionId));
   const detail = await call(page, base + "/review");
   await call(page, base + "/review/validate", "POST", {
@@ -256,7 +262,8 @@ test("A/D analyst dashboard filters and opens review; Markdown includes current 
   await page.goto(`/projects/${projectId}/history`);
   await page.getByLabel("Acción", { exact: true }).fill("EXPORT_CREATED");
   await expect(
-    page.getByRole("cell", { name: "EXPORT_CREATED", exact: true }),
+    // The cell says it in words and keeps the raw code under it.
+    page.getByRole("cell", { name: /Exportación creada\s*EXPORT_CREATED/ }),
   ).toBeVisible();
   await axe(page);
 });

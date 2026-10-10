@@ -1,0 +1,2971 @@
+{
+  "checkpoint": 4,
+  "source": "Direction C · fixture importado por API",
+  "records": [
+    {
+      "id": "V-04",
+      "width": 1440,
+      "height": 900,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/f67074ac-baf7-4f39-bb16-f5be2daa628e",
+      "contributions": 1,
+      "backendStatus": "ANSWERED",
+      "openClarifications": 0,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Renata Solís",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 1440,
+        "width": 1440,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 117.5,
+        "questionSize": 23,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": 627.625,
+        "railWidth": null,
+        "primaryCount": 1
+      },
+      "evidence": [
+        {
+          "name": "Plano_bodega_rechazos.pdf",
+          "width": 911.65625,
+          "size": "903 bytes"
+        }
+      ],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-05",
+      "width": 1440,
+      "height": 900,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/c31b28b9-1ac8-4f73-a181-2e18fe8fce77",
+      "contributions": 3,
+      "backendStatus": "CONFLICT",
+      "openClarifications": 1,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Renata Solís",
+            "count": 3
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          },
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 1440,
+        "width": 1440,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 117.5,
+        "questionSize": 23,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": 586.4375,
+        "railWidth": 295,
+        "primaryCount": 1
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-06",
+      "width": 1440,
+      "height": 900,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/1d06ebc4-23b0-4812-b9fb-36c1d71bd82d",
+      "contributions": 12,
+      "backendStatus": "CLARIFICATION_REQUIRED",
+      "openClarifications": 1,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Alejandra Navarro",
+            "count": 2
+          },
+          {
+            "name": "Daniela Fuentes",
+            "count": 1
+          },
+          {
+            "name": "Marisol Ortega",
+            "count": 1
+          },
+          {
+            "name": "Tomás Aguirre",
+            "count": 1
+          },
+          {
+            "name": "Ramiro Téllez",
+            "count": 1
+          },
+          {
+            "name": "Inés Beltrán",
+            "count": 1
+          },
+          {
+            "name": "Joaquín Peña",
+            "count": 1
+          },
+          {
+            "name": "Renata Solís",
+            "count": 1
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          },
+          {
+            "name": "Paula Quintana",
+            "count": 1
+          },
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          },
+          {
+            "name": "Andrés Calderón",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 1440,
+        "width": 1440,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 117.5,
+        "questionSize": 23,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": 586.4375,
+        "railWidth": 295,
+        "primaryCount": 1
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-08",
+      "width": 1440,
+      "height": 900,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/8911a14e-dd04-43fc-a401-e4a651a95340",
+      "contributions": 0,
+      "backendStatus": "PENDING",
+      "openClarifications": 0,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": []
+      },
+      "surface": {
+        "scrollWidth": 1440,
+        "width": 1440,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 117.5,
+        "questionSize": 23,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": null,
+        "railWidth": null,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-13-admin",
+      "width": 1440,
+      "height": 900,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/c31b28b9-1ac8-4f73-a181-2e18fe8fce77",
+      "contributions": 3,
+      "backendStatus": "CONFLICT",
+      "openClarifications": 1,
+      "missingRequiredRespondents": 0,
+      "readonly": true,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Renata Solís",
+            "count": 3
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          },
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 1440,
+        "width": 1440,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 117.5,
+        "questionSize": 23,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": 559.171875,
+        "railWidth": 295,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-14-viewer",
+      "width": 1440,
+      "height": 900,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/f9a1b8d4-9d98-460f-913b-25fdf78f3119",
+      "contributions": 3,
+      "backendStatus": "VALIDATED",
+      "openClarifications": 0,
+      "missingRequiredRespondents": 0,
+      "readonly": true,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Héctor Villalobos",
+            "count": 2
+          },
+          {
+            "name": "Paula Quintana",
+            "count": 1
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 1440,
+        "width": 1440,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 117.5,
+        "questionSize": 23,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": 506.765625,
+        "railWidth": 295,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-07",
+      "width": 1440,
+      "height": 900,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/0de417b6-4e76-4e81-a99d-3197a55fe243",
+      "contributions": 50,
+      "backendStatus": "CLARIFICATION_REQUIRED",
+      "openClarifications": 2,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Uriel Urbina",
+            "count": 2
+          },
+          {
+            "name": "Teresa Trejo",
+            "count": 1
+          },
+          {
+            "name": "Samuel Serrano",
+            "count": 1
+          },
+          {
+            "name": "Rocío Reyes",
+            "count": 1
+          },
+          {
+            "name": "Quetzal Quiroz",
+            "count": 1
+          },
+          {
+            "name": "Pablo Pacheco",
+            "count": 1
+          },
+          {
+            "name": "Olivia Olvera",
+            "count": 1
+          },
+          {
+            "name": "Nicolás Nájera",
+            "count": 1
+          },
+          {
+            "name": "Lorena Maldonado",
+            "count": 1
+          },
+          {
+            "name": "Kevin Lara",
+            "count": 1
+          },
+          {
+            "name": "Jimena Jiménez",
+            "count": 1
+          },
+          {
+            "name": "Iván Ibáñez",
+            "count": 1
+          },
+          {
+            "name": "Hilda Herrera",
+            "count": 1
+          },
+          {
+            "name": "Gael Galván",
+            "count": 1
+          },
+          {
+            "name": "Fabiola Figueroa",
+            "count": 1
+          },
+          {
+            "name": "Ernesto Espinosa",
+            "count": 1
+          },
+          {
+            "name": "Diana Delgado",
+            "count": 1
+          },
+          {
+            "name": "Cristóbal Carrillo",
+            "count": 1
+          },
+          {
+            "name": "Itzel Benítez",
+            "count": 1
+          },
+          {
+            "name": "Sebastián Aranda",
+            "count": 1
+          },
+          {
+            "name": "Regina Vargas",
+            "count": 1
+          },
+          {
+            "name": "Julián Rosales",
+            "count": 1
+          },
+          {
+            "name": "Abril Mejía",
+            "count": 1
+          },
+          {
+            "name": "Octavio Salazar",
+            "count": 1
+          },
+          {
+            "name": "Natalia Ochoa",
+            "count": 1
+          },
+          {
+            "name": "Bruno Guerrero",
+            "count": 1
+          },
+          {
+            "name": "Elisa Ledesma",
+            "count": 1
+          },
+          {
+            "name": "Patricio Valdez",
+            "count": 1
+          },
+          {
+            "name": "Mariana Cabrera",
+            "count": 1
+          },
+          {
+            "name": "Leonardo Sandoval",
+            "count": 1
+          },
+          {
+            "name": "Sofía Paredes",
+            "count": 1
+          },
+          {
+            "name": "Ignacio Escobar",
+            "count": 1
+          },
+          {
+            "name": "Alejandra Navarro",
+            "count": 1
+          },
+          {
+            "name": "Gustavo Lozano",
+            "count": 1
+          },
+          {
+            "name": "Fernanda Zamora",
+            "count": 1
+          },
+          {
+            "name": "Rodrigo Cordero",
+            "count": 1
+          },
+          {
+            "name": "Daniela Fuentes",
+            "count": 1
+          },
+          {
+            "name": "Emilio Robles",
+            "count": 1
+          },
+          {
+            "name": "Camila Montes",
+            "count": 1
+          },
+          {
+            "name": "Tomás Aguirre",
+            "count": 1
+          },
+          {
+            "name": "Inés Beltrán",
+            "count": 1
+          },
+          {
+            "name": "Ramiro Téllez",
+            "count": 1
+          },
+          {
+            "name": "Marisol Ortega",
+            "count": 1
+          },
+          {
+            "name": "Joaquín Peña",
+            "count": 1
+          },
+          {
+            "name": "Andrés Calderón",
+            "count": 1
+          },
+          {
+            "name": "Paula Quintana",
+            "count": 1
+          },
+          {
+            "name": "Héctor Villalobos",
+            "count": 1
+          },
+          {
+            "name": "Renata Solís",
+            "count": 1
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          },
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 1440,
+        "width": 1440,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 117.5,
+        "questionSize": 23,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": 583.734375,
+        "railWidth": 295,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-07-partial",
+      "width": 1440,
+      "height": 900,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/84fa03ca-59eb-4470-9c51-67c2bfb20be2",
+      "contributions": 1,
+      "backendStatus": "PARTIAL",
+      "openClarifications": 0,
+      "missingRequiredRespondents": 1,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 1440,
+        "width": 1440,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 117.5,
+        "questionSize": 23,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": 601.125,
+        "railWidth": null,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-04",
+      "width": 1024,
+      "height": 768,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/f67074ac-baf7-4f39-bb16-f5be2daa628e",
+      "contributions": 1,
+      "backendStatus": "ANSWERED",
+      "openClarifications": 0,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Renata Solís",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 1024,
+        "width": 1024,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 133.5,
+        "questionSize": 23,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": 643.625,
+        "railWidth": null,
+        "primaryCount": 1
+      },
+      "evidence": [
+        {
+          "name": "Plano_bodega_rechazos.pdf",
+          "width": 711.65625,
+          "size": "903 bytes"
+        }
+      ],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-05",
+      "width": 1024,
+      "height": 768,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/c31b28b9-1ac8-4f73-a181-2e18fe8fce77",
+      "contributions": 3,
+      "backendStatus": "CONFLICT",
+      "openClarifications": 1,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Renata Solís",
+            "count": 3
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          },
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 1024,
+        "width": 1024,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 151,
+        "questionSize": 23,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": 602.4375,
+        "railWidth": 295,
+        "primaryCount": 1
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-06",
+      "width": 1024,
+      "height": 768,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/1d06ebc4-23b0-4812-b9fb-36c1d71bd82d",
+      "contributions": 12,
+      "backendStatus": "CLARIFICATION_REQUIRED",
+      "openClarifications": 1,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Alejandra Navarro",
+            "count": 2
+          },
+          {
+            "name": "Daniela Fuentes",
+            "count": 1
+          },
+          {
+            "name": "Marisol Ortega",
+            "count": 1
+          },
+          {
+            "name": "Tomás Aguirre",
+            "count": 1
+          },
+          {
+            "name": "Ramiro Téllez",
+            "count": 1
+          },
+          {
+            "name": "Inés Beltrán",
+            "count": 1
+          },
+          {
+            "name": "Joaquín Peña",
+            "count": 1
+          },
+          {
+            "name": "Renata Solís",
+            "count": 1
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          },
+          {
+            "name": "Paula Quintana",
+            "count": 1
+          },
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          },
+          {
+            "name": "Andrés Calderón",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 1024,
+        "width": 1024,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 151,
+        "questionSize": 23,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": 602.4375,
+        "railWidth": 295,
+        "primaryCount": 1
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-08",
+      "width": 1024,
+      "height": 768,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/8911a14e-dd04-43fc-a401-e4a651a95340",
+      "contributions": 0,
+      "backendStatus": "PENDING",
+      "openClarifications": 0,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": []
+      },
+      "surface": {
+        "scrollWidth": 1024,
+        "width": 1024,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 151,
+        "questionSize": 23,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": null,
+        "railWidth": null,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-13-admin",
+      "width": 1024,
+      "height": 768,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/c31b28b9-1ac8-4f73-a181-2e18fe8fce77",
+      "contributions": 3,
+      "backendStatus": "CONFLICT",
+      "openClarifications": 1,
+      "missingRequiredRespondents": 0,
+      "readonly": true,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Renata Solís",
+            "count": 3
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          },
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 1024,
+        "width": 1024,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 151,
+        "questionSize": 23,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": 592.671875,
+        "railWidth": 295,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-14-viewer",
+      "width": 1024,
+      "height": 768,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/f9a1b8d4-9d98-460f-913b-25fdf78f3119",
+      "contributions": 3,
+      "backendStatus": "VALIDATED",
+      "openClarifications": 0,
+      "missingRequiredRespondents": 0,
+      "readonly": true,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Héctor Villalobos",
+            "count": 2
+          },
+          {
+            "name": "Paula Quintana",
+            "count": 1
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 1024,
+        "width": 1024,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 133.5,
+        "questionSize": 23,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": 522.765625,
+        "railWidth": 295,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-07",
+      "width": 1024,
+      "height": 768,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/0de417b6-4e76-4e81-a99d-3197a55fe243",
+      "contributions": 50,
+      "backendStatus": "CLARIFICATION_REQUIRED",
+      "openClarifications": 2,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Uriel Urbina",
+            "count": 2
+          },
+          {
+            "name": "Teresa Trejo",
+            "count": 1
+          },
+          {
+            "name": "Samuel Serrano",
+            "count": 1
+          },
+          {
+            "name": "Rocío Reyes",
+            "count": 1
+          },
+          {
+            "name": "Quetzal Quiroz",
+            "count": 1
+          },
+          {
+            "name": "Pablo Pacheco",
+            "count": 1
+          },
+          {
+            "name": "Olivia Olvera",
+            "count": 1
+          },
+          {
+            "name": "Nicolás Nájera",
+            "count": 1
+          },
+          {
+            "name": "Lorena Maldonado",
+            "count": 1
+          },
+          {
+            "name": "Kevin Lara",
+            "count": 1
+          },
+          {
+            "name": "Jimena Jiménez",
+            "count": 1
+          },
+          {
+            "name": "Iván Ibáñez",
+            "count": 1
+          },
+          {
+            "name": "Hilda Herrera",
+            "count": 1
+          },
+          {
+            "name": "Gael Galván",
+            "count": 1
+          },
+          {
+            "name": "Fabiola Figueroa",
+            "count": 1
+          },
+          {
+            "name": "Ernesto Espinosa",
+            "count": 1
+          },
+          {
+            "name": "Diana Delgado",
+            "count": 1
+          },
+          {
+            "name": "Cristóbal Carrillo",
+            "count": 1
+          },
+          {
+            "name": "Itzel Benítez",
+            "count": 1
+          },
+          {
+            "name": "Sebastián Aranda",
+            "count": 1
+          },
+          {
+            "name": "Regina Vargas",
+            "count": 1
+          },
+          {
+            "name": "Julián Rosales",
+            "count": 1
+          },
+          {
+            "name": "Abril Mejía",
+            "count": 1
+          },
+          {
+            "name": "Octavio Salazar",
+            "count": 1
+          },
+          {
+            "name": "Natalia Ochoa",
+            "count": 1
+          },
+          {
+            "name": "Bruno Guerrero",
+            "count": 1
+          },
+          {
+            "name": "Elisa Ledesma",
+            "count": 1
+          },
+          {
+            "name": "Patricio Valdez",
+            "count": 1
+          },
+          {
+            "name": "Mariana Cabrera",
+            "count": 1
+          },
+          {
+            "name": "Leonardo Sandoval",
+            "count": 1
+          },
+          {
+            "name": "Sofía Paredes",
+            "count": 1
+          },
+          {
+            "name": "Ignacio Escobar",
+            "count": 1
+          },
+          {
+            "name": "Alejandra Navarro",
+            "count": 1
+          },
+          {
+            "name": "Gustavo Lozano",
+            "count": 1
+          },
+          {
+            "name": "Fernanda Zamora",
+            "count": 1
+          },
+          {
+            "name": "Rodrigo Cordero",
+            "count": 1
+          },
+          {
+            "name": "Daniela Fuentes",
+            "count": 1
+          },
+          {
+            "name": "Emilio Robles",
+            "count": 1
+          },
+          {
+            "name": "Camila Montes",
+            "count": 1
+          },
+          {
+            "name": "Tomás Aguirre",
+            "count": 1
+          },
+          {
+            "name": "Inés Beltrán",
+            "count": 1
+          },
+          {
+            "name": "Ramiro Téllez",
+            "count": 1
+          },
+          {
+            "name": "Marisol Ortega",
+            "count": 1
+          },
+          {
+            "name": "Joaquín Peña",
+            "count": 1
+          },
+          {
+            "name": "Andrés Calderón",
+            "count": 1
+          },
+          {
+            "name": "Paula Quintana",
+            "count": 1
+          },
+          {
+            "name": "Héctor Villalobos",
+            "count": 1
+          },
+          {
+            "name": "Renata Solís",
+            "count": 1
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          },
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 1024,
+        "width": 1024,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 151,
+        "questionSize": 23,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": 599.734375,
+        "railWidth": 295,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-07-partial",
+      "width": 1024,
+      "height": 768,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/84fa03ca-59eb-4470-9c51-67c2bfb20be2",
+      "contributions": 1,
+      "backendStatus": "PARTIAL",
+      "openClarifications": 0,
+      "missingRequiredRespondents": 1,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 1024,
+        "width": 1024,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 151,
+        "questionSize": 23,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": 617.125,
+        "railWidth": null,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-04",
+      "width": 768,
+      "height": 1024,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/f67074ac-baf7-4f39-bb16-f5be2daa628e",
+      "contributions": 1,
+      "backendStatus": "ANSWERED",
+      "openClarifications": 0,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Renata Solís",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 768,
+        "width": 768,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 157.5,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": 871.328125,
+        "railWidth": null,
+        "primaryCount": 1
+      },
+      "evidence": [
+        {
+          "name": "Plano_bodega_rechazos.pdf",
+          "width": 578,
+          "size": "903 bytes"
+        }
+      ],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-05",
+      "width": 768,
+      "height": 1024,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/c31b28b9-1ac8-4f73-a181-2e18fe8fce77",
+      "contributions": 3,
+      "backendStatus": "CONFLICT",
+      "openClarifications": 1,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Renata Solís",
+            "count": 1
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          },
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 768,
+        "width": 768,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 157.5,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": null,
+        "railWidth": 640,
+        "primaryCount": 1
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-06",
+      "width": 768,
+      "height": 1024,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/1d06ebc4-23b0-4812-b9fb-36c1d71bd82d",
+      "contributions": 12,
+      "backendStatus": "CLARIFICATION_REQUIRED",
+      "openClarifications": 1,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Alejandra Navarro",
+            "count": 1
+          },
+          {
+            "name": "Daniela Fuentes",
+            "count": 1
+          },
+          {
+            "name": "Marisol Ortega",
+            "count": 1
+          },
+          {
+            "name": "Tomás Aguirre",
+            "count": 1
+          },
+          {
+            "name": "Ramiro Téllez",
+            "count": 1
+          },
+          {
+            "name": "Inés Beltrán",
+            "count": 1
+          },
+          {
+            "name": "Joaquín Peña",
+            "count": 1
+          },
+          {
+            "name": "Renata Solís",
+            "count": 1
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          },
+          {
+            "name": "Paula Quintana",
+            "count": 1
+          },
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          },
+          {
+            "name": "Andrés Calderón",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 768,
+        "width": 768,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 157.5,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": null,
+        "railWidth": 640,
+        "primaryCount": 1
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-08",
+      "width": 768,
+      "height": 1024,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/8911a14e-dd04-43fc-a401-e4a651a95340",
+      "contributions": 0,
+      "backendStatus": "PENDING",
+      "openClarifications": 0,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": []
+      },
+      "surface": {
+        "scrollWidth": 768,
+        "width": 768,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 175,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": null,
+        "railWidth": null,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-13-admin",
+      "width": 768,
+      "height": 1024,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/c31b28b9-1ac8-4f73-a181-2e18fe8fce77",
+      "contributions": 3,
+      "backendStatus": "CONFLICT",
+      "openClarifications": 1,
+      "missingRequiredRespondents": 0,
+      "readonly": true,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Renata Solís",
+            "count": 1
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          },
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 768,
+        "width": 768,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 157.5,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": null,
+        "railWidth": 640,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-14-viewer",
+      "width": 768,
+      "height": 1024,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/f9a1b8d4-9d98-460f-913b-25fdf78f3119",
+      "contributions": 3,
+      "backendStatus": "VALIDATED",
+      "openClarifications": 0,
+      "missingRequiredRespondents": 0,
+      "readonly": true,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Héctor Villalobos",
+            "count": 1
+          },
+          {
+            "name": "Paula Quintana",
+            "count": 1
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 768,
+        "width": 768,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 157.5,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": null,
+        "railWidth": 640,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-07",
+      "width": 768,
+      "height": 1024,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/0de417b6-4e76-4e81-a99d-3197a55fe243",
+      "contributions": 50,
+      "backendStatus": "CLARIFICATION_REQUIRED",
+      "openClarifications": 2,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Uriel Urbina",
+            "count": 1
+          },
+          {
+            "name": "Teresa Trejo",
+            "count": 1
+          },
+          {
+            "name": "Samuel Serrano",
+            "count": 1
+          },
+          {
+            "name": "Rocío Reyes",
+            "count": 1
+          },
+          {
+            "name": "Quetzal Quiroz",
+            "count": 1
+          },
+          {
+            "name": "Pablo Pacheco",
+            "count": 1
+          },
+          {
+            "name": "Olivia Olvera",
+            "count": 1
+          },
+          {
+            "name": "Nicolás Nájera",
+            "count": 1
+          },
+          {
+            "name": "Lorena Maldonado",
+            "count": 1
+          },
+          {
+            "name": "Kevin Lara",
+            "count": 1
+          },
+          {
+            "name": "Jimena Jiménez",
+            "count": 1
+          },
+          {
+            "name": "Iván Ibáñez",
+            "count": 1
+          },
+          {
+            "name": "Hilda Herrera",
+            "count": 1
+          },
+          {
+            "name": "Gael Galván",
+            "count": 1
+          },
+          {
+            "name": "Fabiola Figueroa",
+            "count": 1
+          },
+          {
+            "name": "Ernesto Espinosa",
+            "count": 1
+          },
+          {
+            "name": "Diana Delgado",
+            "count": 1
+          },
+          {
+            "name": "Cristóbal Carrillo",
+            "count": 1
+          },
+          {
+            "name": "Itzel Benítez",
+            "count": 1
+          },
+          {
+            "name": "Sebastián Aranda",
+            "count": 1
+          },
+          {
+            "name": "Regina Vargas",
+            "count": 1
+          },
+          {
+            "name": "Julián Rosales",
+            "count": 1
+          },
+          {
+            "name": "Abril Mejía",
+            "count": 1
+          },
+          {
+            "name": "Octavio Salazar",
+            "count": 1
+          },
+          {
+            "name": "Natalia Ochoa",
+            "count": 1
+          },
+          {
+            "name": "Bruno Guerrero",
+            "count": 1
+          },
+          {
+            "name": "Elisa Ledesma",
+            "count": 1
+          },
+          {
+            "name": "Patricio Valdez",
+            "count": 1
+          },
+          {
+            "name": "Mariana Cabrera",
+            "count": 1
+          },
+          {
+            "name": "Leonardo Sandoval",
+            "count": 1
+          },
+          {
+            "name": "Sofía Paredes",
+            "count": 1
+          },
+          {
+            "name": "Ignacio Escobar",
+            "count": 1
+          },
+          {
+            "name": "Alejandra Navarro",
+            "count": 1
+          },
+          {
+            "name": "Gustavo Lozano",
+            "count": 1
+          },
+          {
+            "name": "Fernanda Zamora",
+            "count": 1
+          },
+          {
+            "name": "Rodrigo Cordero",
+            "count": 1
+          },
+          {
+            "name": "Daniela Fuentes",
+            "count": 1
+          },
+          {
+            "name": "Emilio Robles",
+            "count": 1
+          },
+          {
+            "name": "Camila Montes",
+            "count": 1
+          },
+          {
+            "name": "Tomás Aguirre",
+            "count": 1
+          },
+          {
+            "name": "Inés Beltrán",
+            "count": 1
+          },
+          {
+            "name": "Ramiro Téllez",
+            "count": 1
+          },
+          {
+            "name": "Marisol Ortega",
+            "count": 1
+          },
+          {
+            "name": "Joaquín Peña",
+            "count": 1
+          },
+          {
+            "name": "Andrés Calderón",
+            "count": 1
+          },
+          {
+            "name": "Paula Quintana",
+            "count": 1
+          },
+          {
+            "name": "Héctor Villalobos",
+            "count": 1
+          },
+          {
+            "name": "Renata Solís",
+            "count": 1
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          },
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 768,
+        "width": 768,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 175,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": null,
+        "railWidth": 640,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-07-partial",
+      "width": 768,
+      "height": 1024,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/84fa03ca-59eb-4470-9c51-67c2bfb20be2",
+      "contributions": 1,
+      "backendStatus": "PARTIAL",
+      "openClarifications": 0,
+      "missingRequiredRespondents": 1,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 768,
+        "width": 768,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 175,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": 773.828125,
+        "railWidth": null,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-04",
+      "width": 390,
+      "height": 844,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/f67074ac-baf7-4f39-bb16-f5be2daa628e",
+      "contributions": 1,
+      "backendStatus": "ANSWERED",
+      "openClarifications": 0,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Renata Solís",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 390,
+        "width": 390,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 180.84375,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": 1021.984375,
+        "railWidth": null,
+        "primaryCount": 1
+      },
+      "evidence": [
+        {
+          "name": "Plano_bodega_rechazos.pdf",
+          "width": 296,
+          "size": "903 bytes"
+        }
+      ],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-05",
+      "width": 390,
+      "height": 844,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/c31b28b9-1ac8-4f73-a181-2e18fe8fce77",
+      "contributions": 3,
+      "backendStatus": "CONFLICT",
+      "openClarifications": 1,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Renata Solís",
+            "count": 1
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          },
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 390,
+        "width": 390,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 180.84375,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": null,
+        "railWidth": 358,
+        "primaryCount": 1
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-06",
+      "width": 390,
+      "height": 844,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/1d06ebc4-23b0-4812-b9fb-36c1d71bd82d",
+      "contributions": 12,
+      "backendStatus": "CLARIFICATION_REQUIRED",
+      "openClarifications": 1,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Alejandra Navarro",
+            "count": 1
+          },
+          {
+            "name": "Daniela Fuentes",
+            "count": 1
+          },
+          {
+            "name": "Marisol Ortega",
+            "count": 1
+          },
+          {
+            "name": "Tomás Aguirre",
+            "count": 1
+          },
+          {
+            "name": "Ramiro Téllez",
+            "count": 1
+          },
+          {
+            "name": "Inés Beltrán",
+            "count": 1
+          },
+          {
+            "name": "Joaquín Peña",
+            "count": 1
+          },
+          {
+            "name": "Renata Solís",
+            "count": 1
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          },
+          {
+            "name": "Paula Quintana",
+            "count": 1
+          },
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          },
+          {
+            "name": "Andrés Calderón",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 390,
+        "width": 390,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 180.84375,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": null,
+        "railWidth": 358,
+        "primaryCount": 1
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-08",
+      "width": 390,
+      "height": 844,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/8911a14e-dd04-43fc-a401-e4a651a95340",
+      "contributions": 0,
+      "backendStatus": "PENDING",
+      "openClarifications": 0,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": []
+      },
+      "surface": {
+        "scrollWidth": 390,
+        "width": 390,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 180.84375,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": null,
+        "railWidth": null,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-13-admin",
+      "width": 390,
+      "height": 844,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/c31b28b9-1ac8-4f73-a181-2e18fe8fce77",
+      "contributions": 3,
+      "backendStatus": "CONFLICT",
+      "openClarifications": 1,
+      "missingRequiredRespondents": 0,
+      "readonly": true,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Renata Solís",
+            "count": 1
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          },
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 390,
+        "width": 390,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 180.84375,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": null,
+        "railWidth": 358,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-14-viewer",
+      "width": 390,
+      "height": 844,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/f9a1b8d4-9d98-460f-913b-25fdf78f3119",
+      "contributions": 3,
+      "backendStatus": "VALIDATED",
+      "openClarifications": 0,
+      "missingRequiredRespondents": 0,
+      "readonly": true,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Héctor Villalobos",
+            "count": 1
+          },
+          {
+            "name": "Paula Quintana",
+            "count": 1
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 390,
+        "width": 390,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 180.84375,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": null,
+        "railWidth": 358,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-07",
+      "width": 390,
+      "height": 844,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/0de417b6-4e76-4e81-a99d-3197a55fe243",
+      "contributions": 50,
+      "backendStatus": "CLARIFICATION_REQUIRED",
+      "openClarifications": 2,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Uriel Urbina",
+            "count": 1
+          },
+          {
+            "name": "Teresa Trejo",
+            "count": 1
+          },
+          {
+            "name": "Samuel Serrano",
+            "count": 1
+          },
+          {
+            "name": "Rocío Reyes",
+            "count": 1
+          },
+          {
+            "name": "Quetzal Quiroz",
+            "count": 1
+          },
+          {
+            "name": "Pablo Pacheco",
+            "count": 1
+          },
+          {
+            "name": "Olivia Olvera",
+            "count": 1
+          },
+          {
+            "name": "Nicolás Nájera",
+            "count": 1
+          },
+          {
+            "name": "Lorena Maldonado",
+            "count": 1
+          },
+          {
+            "name": "Kevin Lara",
+            "count": 1
+          },
+          {
+            "name": "Jimena Jiménez",
+            "count": 1
+          },
+          {
+            "name": "Iván Ibáñez",
+            "count": 1
+          },
+          {
+            "name": "Hilda Herrera",
+            "count": 1
+          },
+          {
+            "name": "Gael Galván",
+            "count": 1
+          },
+          {
+            "name": "Fabiola Figueroa",
+            "count": 1
+          },
+          {
+            "name": "Ernesto Espinosa",
+            "count": 1
+          },
+          {
+            "name": "Diana Delgado",
+            "count": 1
+          },
+          {
+            "name": "Cristóbal Carrillo",
+            "count": 1
+          },
+          {
+            "name": "Itzel Benítez",
+            "count": 1
+          },
+          {
+            "name": "Sebastián Aranda",
+            "count": 1
+          },
+          {
+            "name": "Regina Vargas",
+            "count": 1
+          },
+          {
+            "name": "Julián Rosales",
+            "count": 1
+          },
+          {
+            "name": "Abril Mejía",
+            "count": 1
+          },
+          {
+            "name": "Octavio Salazar",
+            "count": 1
+          },
+          {
+            "name": "Natalia Ochoa",
+            "count": 1
+          },
+          {
+            "name": "Bruno Guerrero",
+            "count": 1
+          },
+          {
+            "name": "Elisa Ledesma",
+            "count": 1
+          },
+          {
+            "name": "Patricio Valdez",
+            "count": 1
+          },
+          {
+            "name": "Mariana Cabrera",
+            "count": 1
+          },
+          {
+            "name": "Leonardo Sandoval",
+            "count": 1
+          },
+          {
+            "name": "Sofía Paredes",
+            "count": 1
+          },
+          {
+            "name": "Ignacio Escobar",
+            "count": 1
+          },
+          {
+            "name": "Alejandra Navarro",
+            "count": 1
+          },
+          {
+            "name": "Gustavo Lozano",
+            "count": 1
+          },
+          {
+            "name": "Fernanda Zamora",
+            "count": 1
+          },
+          {
+            "name": "Rodrigo Cordero",
+            "count": 1
+          },
+          {
+            "name": "Daniela Fuentes",
+            "count": 1
+          },
+          {
+            "name": "Emilio Robles",
+            "count": 1
+          },
+          {
+            "name": "Camila Montes",
+            "count": 1
+          },
+          {
+            "name": "Tomás Aguirre",
+            "count": 1
+          },
+          {
+            "name": "Inés Beltrán",
+            "count": 1
+          },
+          {
+            "name": "Ramiro Téllez",
+            "count": 1
+          },
+          {
+            "name": "Marisol Ortega",
+            "count": 1
+          },
+          {
+            "name": "Joaquín Peña",
+            "count": 1
+          },
+          {
+            "name": "Andrés Calderón",
+            "count": 1
+          },
+          {
+            "name": "Paula Quintana",
+            "count": 1
+          },
+          {
+            "name": "Héctor Villalobos",
+            "count": 1
+          },
+          {
+            "name": "Renata Solís",
+            "count": 1
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          },
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 390,
+        "width": 390,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 198.34375,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": null,
+        "railWidth": 358,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-07-partial",
+      "width": 390,
+      "height": 844,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/84fa03ca-59eb-4470-9c51-67c2bfb20be2",
+      "contributions": 1,
+      "backendStatus": "PARTIAL",
+      "openClarifications": 0,
+      "missingRequiredRespondents": 1,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 390,
+        "width": 390,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 180.84375,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": 956.703125,
+        "railWidth": null,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-04",
+      "width": 320,
+      "height": 640,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/f67074ac-baf7-4f39-bb16-f5be2daa628e",
+      "contributions": 1,
+      "backendStatus": "ANSWERED",
+      "openClarifications": 0,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Renata Solís",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 320,
+        "width": 320,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 219.265625,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": 1130.375,
+        "railWidth": null,
+        "primaryCount": 1
+      },
+      "evidence": [
+        {
+          "name": "Plano_bodega_rechazos.pdf",
+          "width": 226,
+          "size": "903 bytes"
+        }
+      ],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-05",
+      "width": 320,
+      "height": 640,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/c31b28b9-1ac8-4f73-a181-2e18fe8fce77",
+      "contributions": 3,
+      "backendStatus": "CONFLICT",
+      "openClarifications": 1,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Renata Solís",
+            "count": 1
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          },
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 320,
+        "width": 320,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 219.265625,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": null,
+        "railWidth": 288,
+        "primaryCount": 1
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-06",
+      "width": 320,
+      "height": 640,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/1d06ebc4-23b0-4812-b9fb-36c1d71bd82d",
+      "contributions": 12,
+      "backendStatus": "CLARIFICATION_REQUIRED",
+      "openClarifications": 1,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Alejandra Navarro",
+            "count": 1
+          },
+          {
+            "name": "Daniela Fuentes",
+            "count": 1
+          },
+          {
+            "name": "Marisol Ortega",
+            "count": 1
+          },
+          {
+            "name": "Tomás Aguirre",
+            "count": 1
+          },
+          {
+            "name": "Ramiro Téllez",
+            "count": 1
+          },
+          {
+            "name": "Inés Beltrán",
+            "count": 1
+          },
+          {
+            "name": "Joaquín Peña",
+            "count": 1
+          },
+          {
+            "name": "Renata Solís",
+            "count": 1
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          },
+          {
+            "name": "Paula Quintana",
+            "count": 1
+          },
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          },
+          {
+            "name": "Andrés Calderón",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 320,
+        "width": 320,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 219.265625,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": null,
+        "railWidth": 288,
+        "primaryCount": 1
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-08",
+      "width": 320,
+      "height": 640,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/8911a14e-dd04-43fc-a401-e4a651a95340",
+      "contributions": 0,
+      "backendStatus": "PENDING",
+      "openClarifications": 0,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": []
+      },
+      "surface": {
+        "scrollWidth": 320,
+        "width": 320,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 219.265625,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": null,
+        "railWidth": null,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-13-admin",
+      "width": 320,
+      "height": 640,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/c31b28b9-1ac8-4f73-a181-2e18fe8fce77",
+      "contributions": 3,
+      "backendStatus": "CONFLICT",
+      "openClarifications": 1,
+      "missingRequiredRespondents": 0,
+      "readonly": true,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Renata Solís",
+            "count": 1
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          },
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 320,
+        "width": 320,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 219.265625,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": null,
+        "railWidth": 288,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-14-viewer",
+      "width": 320,
+      "height": 640,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/f9a1b8d4-9d98-460f-913b-25fdf78f3119",
+      "contributions": 3,
+      "backendStatus": "VALIDATED",
+      "openClarifications": 0,
+      "missingRequiredRespondents": 0,
+      "readonly": true,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Héctor Villalobos",
+            "count": 1
+          },
+          {
+            "name": "Paula Quintana",
+            "count": 1
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 320,
+        "width": 320,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 201.765625,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": null,
+        "railWidth": 288,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-07",
+      "width": 320,
+      "height": 640,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/0de417b6-4e76-4e81-a99d-3197a55fe243",
+      "contributions": 50,
+      "backendStatus": "CLARIFICATION_REQUIRED",
+      "openClarifications": 2,
+      "missingRequiredRespondents": 0,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Uriel Urbina",
+            "count": 1
+          },
+          {
+            "name": "Teresa Trejo",
+            "count": 1
+          },
+          {
+            "name": "Samuel Serrano",
+            "count": 1
+          },
+          {
+            "name": "Rocío Reyes",
+            "count": 1
+          },
+          {
+            "name": "Quetzal Quiroz",
+            "count": 1
+          },
+          {
+            "name": "Pablo Pacheco",
+            "count": 1
+          },
+          {
+            "name": "Olivia Olvera",
+            "count": 1
+          },
+          {
+            "name": "Nicolás Nájera",
+            "count": 1
+          },
+          {
+            "name": "Lorena Maldonado",
+            "count": 1
+          },
+          {
+            "name": "Kevin Lara",
+            "count": 1
+          },
+          {
+            "name": "Jimena Jiménez",
+            "count": 1
+          },
+          {
+            "name": "Iván Ibáñez",
+            "count": 1
+          },
+          {
+            "name": "Hilda Herrera",
+            "count": 1
+          },
+          {
+            "name": "Gael Galván",
+            "count": 1
+          },
+          {
+            "name": "Fabiola Figueroa",
+            "count": 1
+          },
+          {
+            "name": "Ernesto Espinosa",
+            "count": 1
+          },
+          {
+            "name": "Diana Delgado",
+            "count": 1
+          },
+          {
+            "name": "Cristóbal Carrillo",
+            "count": 1
+          },
+          {
+            "name": "Itzel Benítez",
+            "count": 1
+          },
+          {
+            "name": "Sebastián Aranda",
+            "count": 1
+          },
+          {
+            "name": "Regina Vargas",
+            "count": 1
+          },
+          {
+            "name": "Julián Rosales",
+            "count": 1
+          },
+          {
+            "name": "Abril Mejía",
+            "count": 1
+          },
+          {
+            "name": "Octavio Salazar",
+            "count": 1
+          },
+          {
+            "name": "Natalia Ochoa",
+            "count": 1
+          },
+          {
+            "name": "Bruno Guerrero",
+            "count": 1
+          },
+          {
+            "name": "Elisa Ledesma",
+            "count": 1
+          },
+          {
+            "name": "Patricio Valdez",
+            "count": 1
+          },
+          {
+            "name": "Mariana Cabrera",
+            "count": 1
+          },
+          {
+            "name": "Leonardo Sandoval",
+            "count": 1
+          },
+          {
+            "name": "Sofía Paredes",
+            "count": 1
+          },
+          {
+            "name": "Ignacio Escobar",
+            "count": 1
+          },
+          {
+            "name": "Alejandra Navarro",
+            "count": 1
+          },
+          {
+            "name": "Gustavo Lozano",
+            "count": 1
+          },
+          {
+            "name": "Fernanda Zamora",
+            "count": 1
+          },
+          {
+            "name": "Rodrigo Cordero",
+            "count": 1
+          },
+          {
+            "name": "Daniela Fuentes",
+            "count": 1
+          },
+          {
+            "name": "Emilio Robles",
+            "count": 1
+          },
+          {
+            "name": "Camila Montes",
+            "count": 1
+          },
+          {
+            "name": "Tomás Aguirre",
+            "count": 1
+          },
+          {
+            "name": "Inés Beltrán",
+            "count": 1
+          },
+          {
+            "name": "Ramiro Téllez",
+            "count": 1
+          },
+          {
+            "name": "Marisol Ortega",
+            "count": 1
+          },
+          {
+            "name": "Joaquín Peña",
+            "count": 1
+          },
+          {
+            "name": "Andrés Calderón",
+            "count": 1
+          },
+          {
+            "name": "Paula Quintana",
+            "count": 1
+          },
+          {
+            "name": "Héctor Villalobos",
+            "count": 1
+          },
+          {
+            "name": "Renata Solís",
+            "count": 1
+          },
+          {
+            "name": "Mateo Ibarra",
+            "count": 1
+          },
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 320,
+        "width": 320,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 219.265625,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": null,
+        "railWidth": 288,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    },
+    {
+      "id": "V-07-partial",
+      "width": 320,
+      "height": 640,
+      "path": "/projects/5d37e7e4-562a-4698-840c-c85e44f3d790/review/84fa03ca-59eb-4470-9c51-67c2bfb20be2",
+      "contributions": 1,
+      "backendStatus": "PARTIAL",
+      "openClarifications": 0,
+      "missingRequiredRespondents": 1,
+      "readonly": false,
+      "containment": {
+        "childOverflow": [],
+        "squeezedText": [],
+        "actorOccurrences": [
+          {
+            "name": "Lucía Barrera",
+            "count": 1
+          }
+        ]
+      },
+      "surface": {
+        "scrollWidth": 320,
+        "width": 320,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "geometry": {
+        "questionY": 219.265625,
+        "questionSize": 22,
+        "questionWeight": 600,
+        "questionFont": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "answerY": 1040.875,
+        "railWidth": null,
+        "primaryCount": 0
+      },
+      "evidence": [],
+      "axe": 0,
+      "initialAxe": 0
+    }
+  ]
+}

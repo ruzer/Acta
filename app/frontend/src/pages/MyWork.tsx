@@ -13,10 +13,11 @@ import { api } from "../api";
 import { Button, EmptyState, ErrorState, Input, LoadingState } from "../ui";
 import {
   ParticipantBadge,
-  ParticipantSummary,
   ParticipantFocus,
+  participantCounts,
   participantPath,
 } from "./ParticipantFlow";
+import { Callout, ProgressCard } from "../ui/semantic";
 import { ParticipantIcon } from "./ParticipantIcon";
 // Frontend density heuristic, not a domain limit; tools remain available below it.
 const SCALE_THRESHOLD = 20;
@@ -76,14 +77,29 @@ export function ParticipantHome({
         : best,
     undefined,
   );
+  const waiting = candidates.filter(
+    (c) => participantState(c.q) === "clarification",
+  );
   return (
     <div className="participant-page">
       <ParticipantFocus />
-      <h1>Hola, {displayName.split(" ")[0]}</h1>
-      <p className="participant-subtitle">Mi trabajo</p>
+      <div>
+        <h1>Hola, {displayName.split(" ")[0]}</h1>
+        <p className="participant-subtitle">Mi trabajo</p>
+      </div>
       <Welcome
         items={candidates.map((c) => c.q)}
+        progress={{
+          sent: entries.reduce((n, p) => n + p.data.progress.sent, 0),
+          total: entries.reduce((n, p) => n + p.data.progress.enabled, 0),
+          drafts: entries.reduce((n, p) => n + p.data.progress.drafts, 0),
+        }}
         href={next ? participantPath(next.projectId, next.q) : undefined}
+        waiting={waiting.map((c) => ({
+          href: participantPath(c.projectId, c.q),
+          question: c.q.question || c.q.title,
+          title: c.q.title,
+        }))}
       />
       {entries.length ? (
         entries.map((p) => (
@@ -97,30 +113,68 @@ export function ParticipantHome({
     </div>
   );
 }
-function Welcome({
+export function Welcome({
   items,
   href,
+  progress,
+  waiting,
 }: {
   items: PersonalQuestion[];
   href?: string;
+  progress: { sent: number; total: number; drafts: number };
+  waiting: { href: string; question: string; title: string }[];
 }) {
+  const counts = participantCounts(items);
   return (
     <section className="participant-welcome" aria-label="Resumen de Mi trabajo">
-      <ParticipantSummary items={items} />
+      <ProgressCard
+        sent={progress.sent}
+        total={progress.total}
+        drafts={progress.drafts}
+        noun="preguntas enviadas"
+      >
+        <p>
+          <ParticipantIcon name="info" /> Usa “Guardar y salir” para conservar
+          tu borrador y retomarlo después.
+        </p>
+        {counts.consultation > 0 && (
+          <p>
+            Requieren atención: {counts.attention} aclaraciones y{" "}
+            {counts.consultation} por consultar.
+          </p>
+        )}
+      </ProgressCard>
+      {waiting.length > 0 && (
+        <Callout
+          title={
+            waiting.length === 1
+              ? "Una aclaración espera tu respuesta"
+              : `${waiting.length} aclaraciones esperan tu respuesta`
+          }
+          action={
+            <Link
+              to={waiting[0]!.href}
+              aria-label={`Responder aclaración: ${waiting[0]!.title}`}
+            >
+              <ParticipantIcon name="arrow" />
+            </Link>
+          }
+        >
+          {waiting[0]!.question}
+        </Callout>
+      )}
       {href ? (
-        <Link className="button primary participant-continue" to={href}>
-          Continuar <ParticipantIcon name="arrow" />
-        </Link>
+        <div className="participant-progress-actions">
+          <Link className="button primary participant-continue" to={href}>
+            Continuar <ParticipantIcon name="arrow" />
+          </Link>
+        </div>
       ) : (
         <p className="participant-all-done">
           <ParticipantIcon />
           No tienes acciones pendientes por ahora.
         </p>
       )}
-      <p className="participant-save-hint">
-        <ParticipantIcon name="info" />
-        Usa “Guardar y salir” para conservar tu borrador y retomarlo después.
-      </p>
     </section>
   );
 }
@@ -139,22 +193,39 @@ export function MyWork() {
   return (
     <div className="participant-page">
       <ParticipantFocus />
-      <h1>Mi trabajo</h1>
-      <p className="participant-subtitle">{q.data.projectName}</p>
+      <div>
+        <h1>Mi trabajo</h1>
+        <p className="participant-subtitle">{q.data.projectName}</p>
+      </div>
       <Welcome
         items={items}
+        progress={{
+          sent: q.data.progress.sent,
+          total: q.data.progress.enabled,
+          drafts: q.data.progress.drafts,
+        }}
         href={next ? participantPath(projectId, next) : undefined}
+        waiting={items
+          .filter((item) => participantState(item) === "clarification")
+          .map((item) => ({
+            href: participantPath(projectId, item),
+            question: item.question || item.title,
+            title: item.title,
+          }))}
       />
-      <ProjectWork projectId={projectId} data={q.data} />
+      <ProjectWork projectId={projectId} data={q.data} showHeading={false} />
     </div>
   );
 }
 export function ProjectWork({
   projectId,
   data,
+  showHeading = true,
 }: {
   projectId: string;
   data: PersonalProjectView;
+  /** The page of a single project already names it; the list keeps an unseen heading. */
+  showHeading?: boolean;
 }) {
   const [search, setSearch] = useState(""),
     [filter, setFilter] = useState("all"),
@@ -185,7 +256,7 @@ export function ProjectWork({
   return (
     <section className="participant-project">
       <div className="participant-project-heading">
-        <h2>
+        <h2 className={showHeading ? undefined : "sr-only"}>
           <Link to={`/projects/${projectId}/work`}>{data.projectName}</Link>
         </h2>
         {!large && (

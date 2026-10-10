@@ -1,0 +1,487 @@
+{
+  "checkpoint": 3,
+  "records": [
+    {
+      "id": "V-02b",
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1440,
+      "rows": 40,
+      "fullyVisibleRows": 5,
+      "firstQuestionBottom": 535.78125,
+      "rowDisplay": "table-row",
+      "questionSize": 15,
+      "questionWeight": "500",
+      "questionLines": 2,
+      "headerPosition": "sticky",
+      "tooSmall": [],
+      "smallText": [],
+      "squeezedText": [],
+      "overflow": [],
+      "axeViolations": 0
+    },
+    {
+      "id": "V-02",
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1440,
+      "rows": 40,
+      "fullyVisibleRows": 5,
+      "firstQuestionBottom": 535.78125,
+      "rowDisplay": "table-row",
+      "questionSize": 15,
+      "questionWeight": "500",
+      "questionLines": 2,
+      "headerPosition": "sticky",
+      "tooSmall": [],
+      "smallText": [],
+      "squeezedText": [],
+      "overflow": [],
+      "axeViolations": 0
+    },
+    {
+      "id": "V-02c",
+      "width": 1440,
+      "height": 900,
+      "selectionBounds": {
+        "x": 296,
+        "y": 757,
+        "width": 1096,
+        "height": 127
+      },
+      "selectionMetrics": {
+        "scrollWidth": 1440,
+        "width": 1440,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "selectionAxeViolations": 0,
+      "dialogMetrics": {
+        "scrollWidth": 1440,
+        "width": 1440,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "axeViolations": 0,
+      "confirmed": false
+    },
+    {
+      "id": "V-03",
+      "width": 1440,
+      "height": 900,
+      "hero": {
+        "height": 113,
+        "size": 20,
+        "family": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif"
+      },
+      "footerBounds": {
+        "x": 241,
+        "y": 814,
+        "width": 958,
+        "height": 69
+      },
+      "formMetrics": {
+        "scrollWidth": 1440,
+        "width": 1440,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "axeViolations": 0,
+      "saved": false
+    },
+    {
+      "id": "V-02b",
+      "width": 1024,
+      "height": 768,
+      "scrollWidth": 1024,
+      "rows": 40,
+      "fullyVisibleRows": 3,
+      "firstQuestionBottom": 551.78125,
+      "rowDisplay": "table-row",
+      "questionSize": 15,
+      "questionWeight": "500",
+      "questionLines": 2,
+      "headerPosition": "sticky",
+      "tooSmall": [],
+      "smallText": [],
+      "squeezedText": [],
+      "overflow": [],
+      "axeViolations": 0
+    },
+    {
+      "id": "V-02",
+      "width": 1024,
+      "height": 768,
+      "scrollWidth": 1024,
+      "rows": 40,
+      "fullyVisibleRows": 3,
+      "firstQuestionBottom": 551.78125,
+      "rowDisplay": "table-row",
+      "questionSize": 15,
+      "questionWeight": "500",
+      "questionLines": 2,
+      "headerPosition": "sticky",
+      "tooSmall": [],
+      "smallText": [],
+      "squeezedText": [],
+      "overflow": [],
+      "axeViolations": 0
+    },
+    {
+      "id": "V-02c",
+      "width": 1024,
+      "height": 768,
+      "selectionBounds": {
+        "x": 96,
+        "y": 573,
+        "width": 896,
+        "height": 179
+      },
+      "selectionMetrics": {
+        "scrollWidth": 1024,
+        "width": 1024,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "selectionAxeViolations": 0,
+      "dialogMetrics": {
+        "scrollWidth": 1024,
+        "width": 1024,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "axeViolations": 0,
+      "confirmed": false
+    },
+    {
+      "id": "V-03",
+      "width": 1024,
+      "height": 768,
+      "hero": {
+        "height": 113,
+        "size": 20,
+        "family": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif"
+      },
+      "footerBounds": {
+        "x": 33,
+        "y": 682,
+        "width": 958,
+        "height": 69
+      },
+      "formMetrics": {
+        "scrollWidth": 1024,
+        "width": 1024,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "axeViolations": 0,
+      "saved": false
+    },
+    {
+      "id": "V-02b",
+      "width": 768,
+      "height": 1024,
+      "scrollWidth": 768,
+      "rows": 40,
+      "fullyVisibleRows": 1,
+      "firstQuestionBottom": 605.828125,
+      "rowDisplay": "grid",
+      "questionSize": 15,
+      "questionWeight": "500",
+      "questionLines": 2,
+      "headerPosition": "sticky",
+      "tooSmall": [],
+      "smallText": [],
+      "squeezedText": [],
+      "overflow": [],
+      "axeViolations": 0
+    },
+    {
+      "id": "V-02",
+      "width": 768,
+      "height": 1024,
+      "scrollWidth": 768,
+      "rows": 40,
+      "fullyVisibleRows": 1,
+      "firstQuestionBottom": 627.421875,
+      "rowDisplay": "grid",
+      "questionSize": 15,
+      "questionWeight": "500",
+      "questionLines": 2,
+      "headerPosition": "sticky",
+      "tooSmall": [],
+      "smallText": [],
+      "squeezedText": [],
+      "overflow": [],
+      "axeViolations": 0
+    },
+    {
+      "id": "V-02c",
+      "width": 768,
+      "height": 1024,
+      "selectionBounds": {
+        "x": 96,
+        "y": 829,
+        "width": 640,
+        "height": 179
+      },
+      "selectionMetrics": {
+        "scrollWidth": 768,
+        "width": 768,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "selectionAxeViolations": 0,
+      "dialogMetrics": {
+        "scrollWidth": 768,
+        "width": 768,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "axeViolations": 0,
+      "confirmed": false
+    },
+    {
+      "id": "V-03",
+      "width": 768,
+      "height": 1024,
+      "hero": {
+        "height": 113,
+        "size": 20,
+        "family": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif"
+      },
+      "footerBounds": {
+        "x": 9,
+        "y": 917.078125,
+        "width": 750,
+        "height": 97.921875
+      },
+      "formMetrics": {
+        "scrollWidth": 768,
+        "width": 768,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "axeViolations": 0,
+      "saved": false
+    },
+    {
+      "id": "V-02b",
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "rows": 40,
+      "fullyVisibleRows": 1,
+      "firstQuestionBottom": 572.3125,
+      "rowDisplay": "grid",
+      "questionSize": 15,
+      "questionWeight": "500",
+      "questionLines": 3,
+      "headerPosition": "sticky",
+      "tooSmall": [],
+      "smallText": [],
+      "squeezedText": [],
+      "overflow": [],
+      "axeViolations": 0
+    },
+    {
+      "id": "V-02",
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "rows": 40,
+      "fullyVisibleRows": 1,
+      "firstQuestionBottom": 589.8125,
+      "rowDisplay": "grid",
+      "questionSize": 15,
+      "questionWeight": "500",
+      "questionLines": 3,
+      "headerPosition": "sticky",
+      "tooSmall": [],
+      "smallText": [],
+      "squeezedText": [],
+      "overflow": [],
+      "axeViolations": 0
+    },
+    {
+      "id": "V-02c",
+      "width": 390,
+      "height": 844,
+      "selectionBounds": {
+        "x": 16,
+        "y": 496,
+        "width": 358,
+        "height": 264
+      },
+      "selectionMetrics": {
+        "scrollWidth": 390,
+        "width": 390,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "selectionAxeViolations": 0,
+      "dialogMetrics": {
+        "scrollWidth": 390,
+        "width": 390,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "axeViolations": 0,
+      "confirmed": false
+    },
+    {
+      "id": "V-03",
+      "width": 390,
+      "height": 844,
+      "hero": {
+        "height": 113,
+        "size": 20,
+        "family": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif"
+      },
+      "footerBounds": {
+        "x": 9,
+        "y": 737.078125,
+        "width": 372,
+        "height": 97.921875
+      },
+      "formMetrics": {
+        "scrollWidth": 390,
+        "width": 390,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "axeViolations": 0,
+      "saved": false
+    },
+    {
+      "id": "V-02b",
+      "width": 320,
+      "height": 640,
+      "scrollWidth": 320,
+      "rows": 40,
+      "fullyVisibleRows": 0,
+      "firstQuestionBottom": 637.90625,
+      "rowDisplay": "grid",
+      "questionSize": 15,
+      "questionWeight": "500",
+      "questionLines": 4,
+      "headerPosition": "sticky",
+      "tooSmall": [],
+      "smallText": [],
+      "squeezedText": [],
+      "overflow": [],
+      "reflowQuestionBounds": {
+        "x": 69,
+        "y": 277.90625,
+        "width": 226,
+        "height": 84
+      },
+      "axeViolations": 0
+    },
+    {
+      "id": "V-02",
+      "width": 320,
+      "height": 640,
+      "scrollWidth": 320,
+      "rows": 40,
+      "fullyVisibleRows": 0,
+      "firstQuestionBottom": 672.90625,
+      "rowDisplay": "grid",
+      "questionSize": 15,
+      "questionWeight": "500",
+      "questionLines": 4,
+      "headerPosition": "sticky",
+      "tooSmall": [],
+      "smallText": [],
+      "squeezedText": [],
+      "overflow": [],
+      "reflowQuestionBounds": {
+        "x": 69,
+        "y": 277.90625,
+        "width": 226,
+        "height": 84
+      },
+      "axeViolations": 0
+    },
+    {
+      "id": "V-02c",
+      "width": 320,
+      "height": 640,
+      "selectionBounds": {
+        "x": 16,
+        "y": 279.5625,
+        "width": 288,
+        "height": 283.5
+      },
+      "selectionMetrics": {
+        "scrollWidth": 320,
+        "width": 320,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "selectionAxeViolations": 0,
+      "dialogMetrics": {
+        "scrollWidth": 320,
+        "width": 320,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "axeViolations": 0,
+      "confirmed": false
+    },
+    {
+      "id": "V-03",
+      "width": 320,
+      "height": 640,
+      "hero": {
+        "height": 113,
+        "size": 20,
+        "family": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif"
+      },
+      "footerBounds": {
+        "x": 9,
+        "y": 533.078125,
+        "width": 302,
+        "height": 97.921875
+      },
+      "formMetrics": {
+        "scrollWidth": 320,
+        "width": 320,
+        "tooSmall": [],
+        "smallText": [],
+        "squeezedText": [],
+        "overflow": []
+      },
+      "axeViolations": 0,
+      "saved": false
+    }
+  ]
+}

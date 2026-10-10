@@ -343,44 +343,8 @@ export function QuestionForm({
               onChange={(e) => patch({ helpText: e.target.value })}
             />
           </details>
-          <div className="next-authoring-context">
-            <Select
-              label="Tema al que pertenece"
-              error={fieldError("sectionId")}
-              name="sectionId"
-              disabled={!!initial}
-              value={value.sectionId}
-              required
-              onChange={(e) =>
-                patch({
-                  sectionId: e.target.value,
-                  order:
-                    e.target.value === initial?.sectionId
-                      ? initial.order
-                      : Math.max(
-                          0,
-                          ...data.questions
-                            .filter((q) => q.sectionId === e.target.value)
-                            .map((q) => q.order),
-                        ) + 1,
-                })
-              }
-            >
-              {data.sections.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.title}
-                </option>
-              ))}
-            </Select>
-            <Checkbox
-              label="Pregunta obligatoria"
-              name="required"
-              checked={value.required}
-              onChange={(e) => patch({ required: e.target.checked })}
-            />
-          </div>
           <fieldset
-            className="av-type-picker"
+            className="av-type-picker ac-authoring-types"
             aria-describedby={
               fieldError("type")
                 ? titleId + "-type-error"
@@ -393,6 +357,7 @@ export function QuestionForm({
                 <label className="av-type-option" key={type}>
                   <input
                     type="radio"
+                    aria-label={typeLabels[type]}
                     name="type"
                     value={type}
                     checked={value.type === type}
@@ -402,7 +367,10 @@ export function QuestionForm({
                     }
                     onChange={() => patch({ type, config: null, options: [] })}
                   />
-                  <span>{typeLabels[type]}</span>
+                  <span className="ac-type-title">{typeLabels[type]}</span>
+                  <span className="ac-type-description">
+                    {typeDescriptions[type]}
+                  </span>
                 </label>
               ))}
             </div>
@@ -601,6 +569,45 @@ export function QuestionForm({
             ))}
           </fieldset>
         )}
+        <fieldset disabled={busy} className="ac-authoring-placement">
+          <legend>Ubicación y obligatoriedad</legend>
+          <div className="next-authoring-context">
+            <Select
+              label="Tema al que pertenece"
+              error={fieldError("sectionId")}
+              name="sectionId"
+              disabled={!!initial}
+              value={value.sectionId}
+              required
+              onChange={(e) =>
+                patch({
+                  sectionId: e.target.value,
+                  order:
+                    e.target.value === initial?.sectionId
+                      ? initial.order
+                      : Math.max(
+                          0,
+                          ...data.questions
+                            .filter((q) => q.sectionId === e.target.value)
+                            .map((q) => q.order),
+                        ) + 1,
+                })
+              }
+            >
+              {data.sections.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.title}
+                </option>
+              ))}
+            </Select>
+            <Checkbox
+              label="Pregunta obligatoria"
+              name="required"
+              checked={value.required}
+              onChange={(e) => patch({ required: e.target.checked })}
+            />
+          </div>
+        </fieldset>
         <fieldset disabled={busy} className="next-authoring-identification">
           <legend>Identificación de la pregunta</legend>
           <p className="hint">
@@ -1011,7 +1018,13 @@ export function QuestionForm({
             </ul>
           </div>
         )}
-        <div className="sticky-actions">
+        <footer className="sticky-actions">
+          <span className="hint" role="status">
+            {dirty ? "Cambios sin guardar" : "Sin cambios pendientes"}
+          </span>
+          <Button tone="secondary" disabled={busy} onClick={cancel}>
+            Cancelar
+          </Button>
           <Button type="submit" disabled={busy}>
             {busy
               ? "Guardando pregunta…"
@@ -1019,13 +1032,7 @@ export function QuestionForm({
                 ? "Guardar cambios"
                 : "Crear pregunta"}
           </Button>
-          <Button tone="secondary" disabled={busy} onClick={cancel}>
-            Cancelar
-          </Button>
-          <span className="hint" role="status">
-            {dirty ? "Cambios sin guardar" : "Sin cambios pendientes"}
-          </span>
-        </div>
+        </footer>
       </form>
     </dialog>
   );

@@ -5,14 +5,6 @@
   --av-paper: #f5f3f0;
   --av-surface: #fff;
   --av-line: #dedbd5;
-  --av-forest: #356842;
-  --av-forest-soft: #e4efe6;
-  --av-teal: #18675f;
-  --av-teal-soft: #dceeec;
-  --av-amber: #805508;
-  --av-amber-soft: #f6ecd4;
-  --av-conflict: #973e2d;
-  --av-conflict-soft: #f9e9e3;
   --av-radius: var(--radius, 6px);
   color: var(--av-ink);
 }
@@ -36,133 +28,10 @@
     600 0.875rem/1.4 "Acta Plex Sans",
     sans-serif;
 }
-.av-scope .av-neutral {
-  color: var(--av-muted);
-  background: var(--av-paper);
-}
-.av-scope .av-amber {
-  color: var(--av-amber);
-  background: var(--av-amber-soft);
-}
-.av-scope .av-teal {
-  color: var(--av-teal);
-  background: var(--av-teal-soft);
-}
-.av-scope .av-forest {
-  color: var(--av-forest);
-  background: var(--av-forest-soft);
-}
-.av-scope .av-conflict {
-  color: var(--av-conflict);
-  background: var(--av-conflict-soft);
-}
-.av-scope .av-kicker {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.075em;
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-.av-scope .av-decision {
-  background: var(--av-surface);
-  border: 1px solid var(--av-line);
-  border-top: 4px solid var(--av-forest);
-  border-radius: var(--av-radius);
-  padding: clamp(1rem, 3vw, 2.5rem);
-  margin-block: 1rem;
-  overflow-wrap: anywhere;
-  font-family: "Acta Plex Sans", sans-serif;
-}
-.av-scope .av-decision header {
-  border-bottom: 1px solid var(--av-line);
-  margin-bottom: 1.5rem;
-}
-.av-scope .av-current {
-  background: var(--av-forest-soft);
-}
-.av-scope .av-current .av-kicker {
-  color: var(--av-forest);
-}
-.av-scope .av-decision h3 {
-  font:
-    700 1.5rem/1.3 "Acta Manrope",
-    sans-serif;
-}
-.av-scope .av-decision h4 {
-  font-size: 0.9rem;
-  margin: 0 0 0.5rem;
-}
-.av-scope .av-decision-text {
-  font-size: clamp(1.1rem, 2vw, 1.4rem);
-  line-height: 1.55;
-  white-space: pre-wrap;
-  margin-bottom: 2rem;
-}
-.av-scope .av-decision-scope {
-  border-bottom: 1px solid var(--av-line);
-  margin-bottom: 1.5rem;
-}
-.av-scope .av-decision-author {
-  border-top: 1px solid var(--av-line);
-  padding-top: 1rem;
-  margin-top: 1.5rem;
-  color: var(--av-muted);
-}
-.av-scope .av-decision-author p {
-  margin-bottom: 0.4rem;
-}
-.av-scope .av-historical {
-  border-top-color: var(--av-muted);
-  background: var(--av-paper);
-}
-.av-scope .av-historical .av-decision-text {
-  font-size: 1.1rem;
-}
 .av-scope .av-history-reason {
   border-left: 3px solid var(--av-muted);
   padding-left: 1rem;
   margin-top: 1rem;
-}
-.av-scope .av-sources {
-  padding-left: 1.3rem;
-}
-.av-scope .av-comparison {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-  align-items: stretch;
-}
-.av-scope .av-posture {
-  background: var(--av-surface);
-  border: 1px solid var(--av-line);
-  border-radius: var(--av-radius);
-  padding: 1.25rem;
-  margin: 0;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-.av-scope .av-posture h4 {
-  margin: 0 0 0.25rem;
-  font-family: "Acta Manrope", sans-serif;
-}
-.av-scope .av-posture h5 {
-  font-size: 0.9rem;
-  margin: 1.25rem 0 0.5rem;
-}
-.av-scope .av-posture .evidence-list {
-  padding: 0;
-  list-style: none;
-}
-.av-scope .av-posture .evidence-list li {
-  border: 1px solid var(--av-line);
-  padding: 0.75rem;
-  background: var(--av-paper);
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 0.5rem;
 }
 .av-scope .av-attention {
   background: var(--av-surface);
@@ -194,7 +63,7 @@
 .av-scope .av-attention h3 {
   margin: 0.7rem 0 0.4rem;
   font:
-    700 1rem/1.5 "Acta Manrope",
+    700 1rem/1.5 "Acta Plex Sans",
     sans-serif;
 }
 .av-scope .av-attention p {
@@ -252,128 +121,15 @@
   }
 }
 @media (max-width: 767px) {
-  .av-scope .av-comparison,
   .av-scope .av-attention li {
     grid-template-columns: minmax(0, 1fr);
   }
   .av-scope .av-attention .button {
     justify-self: start;
   }
-  .av-scope .av-posture {
-    padding: 1rem;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   .av-scope .av-advanced[open] > .av-advanced-content {
     animation: none;
-  }
-}
-
-/* Criterio's focused composer, with the existing Acta palette and real types. */
-.av-question-dialog {
-  width: min(820px, calc(100% - 2rem));
-  max-width: 820px;
-  max-height: 92dvh;
-  padding: 0;
-  border: 1px solid var(--av-line);
-  border-radius: 14px;
-  background: var(--av-surface);
-  box-shadow: 0 18px 60px #1b1d2226;
-}
-.av-question-dialog::backdrop {
-  background: #1b1d2280;
-}
-.av-question-dialog .av-composer-form {
-  max-width: none;
-  padding: 1.5rem 2rem 0;
-}
-.av-question-dialog .av-composer-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding-bottom: 1rem;
-  margin-bottom: 1.25rem;
-  border-bottom: 1px solid var(--av-line);
-}
-.av-question-dialog .av-composer-head h2 {
-  margin: 0;
-  font:
-    700 1.4rem/1.4 "Acta Manrope",
-    sans-serif;
-}
-.av-question-dialog .av-composer-form > fieldset {
-  border: 0;
-  padding: 0;
-  margin: 0 0 1rem;
-}
-.av-question-dialog .av-type-picker {
-  border: 0;
-  padding: 0;
-  margin: 1rem 0;
-}
-.av-question-dialog .av-type-picker legend {
-  padding: 0;
-  margin-bottom: 0.5rem;
-}
-.av-question-dialog .av-type-options {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.5rem;
-}
-.av-question-dialog .av-type-option {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  min-height: 48px;
-  padding: 0.65rem 0.85rem;
-  border: 1px solid #8a908a;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  margin: 0;
-}
-.av-question-dialog .av-type-option:has(:checked) {
-  background: var(--av-forest-soft);
-  border-color: var(--av-forest);
-  color: var(--av-forest);
-}
-.av-question-dialog .av-type-option input {
-  width: 18px;
-  height: 18px;
-  margin: 0;
-  accent-color: var(--av-forest);
-  flex-shrink: 0;
-}
-.av-question-dialog .av-type-option:focus-within {
-  outline: 2px solid var(--focus, #805508);
-  outline-offset: 2px;
-}
-.av-question-dialog .sticky-actions {
-  margin: 0 -2rem;
-  padding: 1rem 2rem;
-  background: var(--av-surface);
-  z-index: 1;
-}
-@media (max-width: 600px) {
-  .av-question-dialog {
-    width: calc(100% - 1rem);
-    max-height: 96dvh;
-    border-radius: 10px;
-  }
-  .av-question-dialog .av-composer-form {
-    padding: 1rem 1rem 0;
-  }
-  .av-question-dialog .av-composer-head h2 {
-    font-size: 1.1rem;
-  }
-  .av-question-dialog .sticky-actions {
-    margin: 0 -1rem;
-    padding: 1rem;
-    gap: 0.5rem;
-  }
-  .av-question-dialog .av-type-option {
-    padding: 0.65rem 0.5rem;
-    font-size: 0.9rem;
   }
 }

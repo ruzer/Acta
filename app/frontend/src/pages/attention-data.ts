@@ -38,18 +38,24 @@ async function allReviewItems(
   return [...items.values()];
 }
 
-export async function loadClarificationQuestionIds(
+export async function loadAttentionData(
   client: QueryClient,
   projectId: string,
   data: AttentionDashboard,
   lifecycle: "ACTIVE" | "ARCHIVED",
-): Promise<string[]> {
-  if (!data.questions.length) return [];
+): Promise<{ clarificationIds: string[]; reviewItems: ReviewInbox["items"] }> {
+  if (!data.questions.length) return { clarificationIds: [], reviewItems: [] };
   if (data.role === "ANALYST" && lifecycle === "ACTIVE") {
     const questions = new Set(data.questions.map((q) => q.id));
-    return (await allReviewItems(projectId))
-      .filter((q) => questions.has(q.questionId) && q.openClarifications > 0)
-      .map((q) => q.questionId);
+    const reviewItems = (await allReviewItems(projectId)).filter((q) =>
+      questions.has(q.questionId),
+    );
+    return {
+      reviewItems,
+      clarificationIds: reviewItems
+        .filter((q) => q.openClarifications > 0)
+        .map((q) => q.questionId),
+    };
   }
   // The inbox is restricted to active analyst memberships. ADMIN and archived
   // projects can read details; only CONFLICT can mask open clarifications in
@@ -73,7 +79,18 @@ export async function loadClarificationQuestionIds(
       }
     }),
   );
-  return ids;
+  return { clarificationIds: ids, reviewItems: [] };
+}
+
+// Keep the independent loader contract used by clarification coverage tests.
+export async function loadClarificationQuestionIds(
+  client: QueryClient,
+  projectId: string,
+  data: AttentionDashboard,
+  lifecycle: "ACTIVE" | "ARCHIVED",
+) {
+  return (await loadAttentionData(client, projectId, data, lifecycle))
+    .clarificationIds;
 }
 
 export function useAttentionClarifications(
@@ -92,8 +109,7 @@ export function useAttentionClarifications(
       lifecycle,
       data.questions.map((q) => [q.id, q.status]),
     ],
-    queryFn: () =>
-      loadClarificationQuestionIds(client, projectId, data, lifecycle),
+    queryFn: () => loadAttentionData(client, projectId, data, lifecycle),
     staleTime: 0,
   });
 }

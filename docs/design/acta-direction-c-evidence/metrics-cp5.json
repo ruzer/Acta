@@ -1,0 +1,85 @@
+{
+  "checkpoint": 5,
+  "records": [
+    {
+      "id": "V-09",
+      "width": 1440,
+      "tableTop": 628.796875,
+      "sizes": {
+        "answer": 17,
+        "label": 12.5
+      }
+    },
+    {
+      "id": "V-09",
+      "width": 1024,
+      "tableTop": 644.796875,
+      "sizes": {
+        "answer": 17,
+        "label": 12.5
+      }
+    },
+    {
+      "id": "V-09",
+      "width": 768,
+      "tableTop": 864.046875,
+      "sizes": {
+        "answer": 17,
+        "label": 12.5
+      }
+    },
+    {
+      "id": "V-09",
+      "width": 390,
+      "tableTop": 1143.921875,
+      "sizes": {
+        "answer": 17,
+        "label": 12.5
+      }
+    },
+    {
+      "id": "V-09",
+      "width": 320,
+      "tableTop": 1218.078125,
+      "sizes": {
+        "answer": 17,
+        "label": 12.5
+      }
+    },
+    {
+      "id": "V-11",
+      "width": 1440,
+      "resultSize": 29,
+      "resultTop": 556.234375,
+      "grounds": 6
+    },
+    {
+      "id": "V-11",
+      "width": 1024,
+      "resultSize": 29,
+      "resultTop": 572.234375,
+      "grounds": 6
+    },
+    {
+      "id": "V-11",
+      "width": 768,
+      "resultSize": 29,
+      "resultTop": 763.734375,
+      "grounds": 6
+    },
+    {
+      "id": "V-11",
+      "width": 390,
+      "resultSize": 22,
+      "resultTop": 942.140625,
+      "grounds": 6
+    },
+    {
+      "id": "V-11",
+      "width": 320,
+      "resultSize": 22,
+      "resultTop": 993.890625,
+      "grounds": 6
+    }
+  ]
+}

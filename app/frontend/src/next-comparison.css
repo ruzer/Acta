@@ -4,88 +4,9 @@
 .next-comparison-count {
   font-weight: 650;
 }
-.next-comparison-selectors {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+.ac-comparison-intro {
+  margin: 0 0 12px;
 }
-.av-scope .next-comparison-postures .av-posture {
-  border-top: 3px solid var(--primary);
-}
-.next-comparison-postures .answer-text {
-  overflow-wrap: anywhere;
-}
-.next-comparison-postures .next-posture-revision {
-  border-top: 1px solid var(--line);
-  margin-top: 1.25rem;
-}
-.av-scope .next-comparison-postures .av-kicker {
-  font-size: 0.875rem;
-}
-.av-scope .av-decision.av-current {
-  background: var(--av-surface);
-}
-.av-scope .av-decision .av-decision-author {
-  border: 0;
-  margin: 0.75rem 0 1rem;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 1.5rem;
-}
-.av-scope .av-decision .av-decision-author p {
-  margin: 0;
-}
-.next-decision-reference {
-  font-size: 0.875rem;
-  color: var(--muted);
-  overflow-wrap: anywhere;
-}
-.next-decision-question {
-  padding-bottom: 1rem;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid var(--line);
-}
-.av-scope .av-decision-scope {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.5rem;
-}
-.av-scope .av-sources > li {
-  padding-block: 0.5rem;
-}
-.av-sources summary {
-  min-height: 44px;
-  padding-block: 0.5rem;
-  cursor: pointer;
-}
-@media (max-width: 767px) {
-  .next-comparison-selectors,
-  .av-scope .av-decision-scope {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0.75rem;
-  }
-}
-
-.av-scope .av-comparison.next-comparison-postures {
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  gap: 0.75rem;
-}
-.next-comparison-versus {
-  align-self: center;
-  color: var(--muted);
-  font-size: 0.875rem;
-  font-weight: 650;
-}
-@media (max-width: 767px) {
-  .av-scope .av-comparison.next-comparison-postures {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .next-comparison-versus {
-    justify-self: center;
-  }
-}
-
 .review-page .project-workbench .pw-tools {
   padding-block: 0;
   border-bottom: 0;

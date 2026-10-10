@@ -31,7 +31,9 @@ export async function login(
     "El acceso de prueba debe autenticarse sin eludir límites",
   ).toBe(201);
   await expect(
-    page.getByRole("button", { name: "Cerrar sesión", hidden: true }),
+    page
+      .getByRole("button", { name: "Cerrar sesión", includeHidden: true })
+      .first(),
   ).toBeAttached();
   if (
     await page

@@ -4,8 +4,8 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import "@testing-library/jest-dom/vitest";
 import type { PersonalProjectView } from "@requirements/contracts";
-import { ProjectWork } from "./MyWork";
-import { ParticipantSummary, ParticipantNotice } from "./ParticipantFlow";
+import { ProjectWork, Welcome } from "./MyWork";
+import { ParticipantNotice } from "./ParticipantFlow";
 afterEach(cleanup);
 it("300 preguntas: listado acotado, búsqueda por texto, filtro y tema colapsable por teclado", async () => {
   const data: PersonalProjectView = {
@@ -99,7 +99,11 @@ it("Por consultar aparece en atención sin perder su estado ni inventar un enví
   };
   render(
     <MemoryRouter>
-      <ParticipantSummary items={[item]} />
+      <Welcome
+        items={[item]}
+        progress={{ sent: 0, total: 1, drafts: 1 }}
+        waiting={[]}
+      />
       <ProjectWork projectId="p" data={data} />
     </MemoryRouter>,
   );
@@ -131,4 +135,53 @@ it("la confirmación de envío no desaparece mientras se lee la siguiente pregun
   } finally {
     vi.useRealTimers();
   }
+});
+it("el avance se dice con palabras y sin inventar envíos; la aclaración pendiente se destaca y lleva al sitio", () => {
+  const item: PersonalProjectView["sections"][number]["questions"][number] = {
+    id: "q",
+    title: "Criterio de urgencia",
+    question: "¿Quién autoriza una requisición urgente?",
+    currentSubmission: true,
+    hasSubmission: true,
+    applicability: "ENABLED",
+    state: "SENT",
+    updatedAt: null,
+    reviewStatus: "CLARIFICATION_REQUIRED",
+    clarificationWaiting: 1,
+    clarificationCount: 1,
+  };
+  render(
+    <MemoryRouter>
+      <Welcome
+        items={[item]}
+        progress={{ sent: 5, total: 10, drafts: 2 }}
+        href="/projects/p/respond/x"
+        waiting={[
+          {
+            href: "/projects/p/clarifications/q",
+            question: item.question,
+            title: item.title,
+          },
+        ]}
+      />
+    </MemoryRouter>,
+  );
+  expect(screen.getByText(/^5$/)).toBeVisible();
+  expect(
+    screen.getByRole("img", {
+      name: "5 de 10 preguntas enviadas; 2 en borrador",
+    }),
+  ).toBeVisible();
+  // One primary action; the clarification card is a single link to its page.
+  expect(screen.getByRole("link", { name: /Continuar/ })).toHaveAttribute(
+    "href",
+    "/projects/p/respond/x",
+  );
+  expect(screen.getByText("Una aclaración espera tu respuesta")).toBeVisible();
+  expect(
+    screen.getByRole("link", {
+      name: "Responder aclaración: Criterio de urgencia",
+    }),
+  ).toHaveAttribute("href", "/projects/p/clarifications/q");
+  expect(screen.getByText(/Guardar y salir/)).toBeVisible();
 });

@@ -1,3 +1,6 @@
+import { ProjectShell } from "./shell/ProjectShell";
+import { OrganizationShell } from "./shell/OrganizationShell";
+import { PageHeader } from "./ui/semantic";
 import { ProjectDecisions } from "./pages/ProjectDecisions";
 import { Invitations } from "./pages/Invitations";
 import { InvitedResponse } from "./pages/InvitedResponse";
@@ -134,12 +137,151 @@ function Session() {
         }}
       />
     );
+  const currentProject = projects.data?.find(
+    (item) =>
+      location.pathname === `/projects/${item.id}` ||
+      location.pathname.startsWith(`/projects/${item.id}/`),
+  );
+  const project =
+    !participant &&
+    !me.user.mustChangePassword &&
+    currentProject &&
+    ["ADMIN", "ANALYST", "VIEWER"].includes(currentProject.role)
+      ? currentProject
+      : undefined;
+  // The page mounts once, inside the shell. Without the project list the
+  // content would first mount in the legacy layout and remount (losing what
+  // was typed or chosen) the moment the shell appears.
+  if (
+    !participant &&
+    !me.user.mustChangePassword &&
+    projects.isLoading &&
+    location.pathname.startsWith("/projects/")
+  )
+    return <LoadingState />;
+  // Every page outside a project shares the same frame as the project pages.
+  // Only the forced password change (no navigation until it is done) keeps the
+  // minimal legacy header.
+  const organizationPage =
+    !participant && !project && !me.user.mustChangePassword;
+  const content = (
+    <main
+      id="main"
+      aria-label="Contenido principal"
+      className={participant ? "participant-content" : "container"}
+      key={me.user.id}
+    >
+      {participant && <ParticipantNotice />}
+      {error && <Alert error>{error}</Alert>}
+      {me.user.mustChangePassword ? (
+        <Password
+          required
+          onDone={() =>
+            signedOut(
+              "Contraseña actualizada. Inicia sesión con tu nueva contraseña.",
+            )
+          }
+        />
+      ) : (
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <Projects
+                displayName={me.user.displayName}
+                isOrganizationAdmin={me.user.isOrganizationAdmin}
+              />
+            }
+          />
+          <Route path="/review" element={<ReviewInbox />} />
+          <Route
+            path="/projects/:projectId/decisions"
+            element={<ProjectDecisions />}
+          />
+          <Route
+            path="/projects/:projectId/invitations"
+            element={<Invitations />}
+          />
+          <Route
+            path="/projects/:projectId/dashboard"
+            element={<Dashboard />}
+          />
+          <Route
+            path="/projects/:projectId/traceability"
+            element={<Traceability />}
+          />
+          <Route path="/projects/:projectId/history" element={<History />} />
+          <Route
+            path="/projects/:projectId/import"
+            element={<ImportStructure />}
+          />
+          <Route
+            path="/projects/:projectId/export"
+            element={<ExportProject />}
+          />
+          <Route
+            path="/projects/:projectId/review/:id"
+            element={<ReviewDetail />}
+          />
+          <Route
+            path="/projects/:projectId/clarifications/:id"
+            element={<Clarifications />}
+          />
+          <Route
+            path="/password"
+            element={
+              <Password
+                onDone={() =>
+                  signedOut(
+                    "Contraseña actualizada. Inicia sesión con tu nueva contraseña.",
+                  )
+                }
+              />
+            }
+          />
+          <Route path="/admin" element={<Administration me={me} />} />
+          <Route
+            path="/projects/:projectId/receipt"
+            element={<SessionReceipt />}
+          />
+          <Route
+            path="/projects/:projectId/submitted/:id"
+            element={<SubmittedResponse />}
+          />
+          <Route path="/projects/:projectId/work" element={<MyWork />} />
+          <Route
+            path="/projects/:projectId/respond/:id"
+            element={<Respond />}
+          />
+          <Route path="/projects/:projectId" element={<Participant />} />
+          <Route path="/projects/:projectId/editor" element={<Editor />} />
+          <Route path="/projects/:projectId/members" element={<Members />} />
+          <Route
+            path="*"
+            element={
+              <>
+                <PageHeader
+                  title="Página no encontrada"
+                  lead="La dirección no existe o no tienes acceso a ella."
+                />
+                <p>
+                  <Link className="button primary" to="/">
+                    Volver a mis proyectos
+                  </Link>
+                </p>
+              </>
+            }
+          />
+        </Routes>
+      )}
+    </main>
+  );
   return (
     <div className={participant ? "acta-participant" : undefined}>
       <a className="skip" href="#main">
         Ir al contenido
       </a>
-      {participant ? (
+      {project || organizationPage ? null : participant ? (
         <ParticipantHeader
           displayName={me.user.displayName}
           onLogout={logout}
@@ -182,109 +324,27 @@ function Session() {
           </div>
         </header>
       )}
-      <main
-        id="main"
-        className={participant ? "participant-content" : "container"}
-        key={me.user.id}
-      >
-        {participant && <ParticipantNotice />}
-        {error && <Alert error>{error}</Alert>}
-        {me.user.mustChangePassword ? (
-          <Password
-            required
-            onDone={() =>
-              signedOut(
-                "Contraseña actualizada. Inicia sesión con tu nueva contraseña.",
-              )
-            }
-          />
-        ) : (
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <Projects
-                  displayName={me.user.displayName}
-                  isOrganizationAdmin={me.user.isOrganizationAdmin}
-                />
-              }
-            />
-            <Route path="/review" element={<ReviewInbox />} />
-            <Route
-              path="/projects/:projectId/decisions"
-              element={<ProjectDecisions />}
-            />
-            <Route
-              path="/projects/:projectId/invitations"
-              element={<Invitations />}
-            />
-            <Route
-              path="/projects/:projectId/dashboard"
-              element={<Dashboard />}
-            />
-            <Route
-              path="/projects/:projectId/traceability"
-              element={<Traceability />}
-            />
-            <Route path="/projects/:projectId/history" element={<History />} />
-            <Route
-              path="/projects/:projectId/import"
-              element={<ImportStructure />}
-            />
-            <Route
-              path="/projects/:projectId/export"
-              element={<ExportProject />}
-            />
-            <Route
-              path="/projects/:projectId/review/:id"
-              element={<ReviewDetail />}
-            />
-            <Route
-              path="/projects/:projectId/clarifications/:id"
-              element={<Clarifications />}
-            />
-            <Route
-              path="/password"
-              element={
-                <Password
-                  onDone={() =>
-                    signedOut(
-                      "Contraseña actualizada. Inicia sesión con tu nueva contraseña.",
-                    )
-                  }
-                />
-              }
-            />
-            <Route path="/admin" element={<Administration me={me} />} />
-            <Route
-              path="/projects/:projectId/receipt"
-              element={<SessionReceipt />}
-            />
-            <Route
-              path="/projects/:projectId/submitted/:id"
-              element={<SubmittedResponse />}
-            />
-            <Route path="/projects/:projectId/work" element={<MyWork />} />
-            <Route
-              path="/projects/:projectId/respond/:id"
-              element={<Respond />}
-            />
-            <Route path="/projects/:projectId" element={<Participant />} />
-            <Route path="/projects/:projectId/editor" element={<Editor />} />
-            <Route path="/projects/:projectId/members" element={<Members />} />
-            <Route
-              path="*"
-              element={
-                <>
-                  <h1>Página no encontrada</h1>
-                  <Link to="/">Volver a mis proyectos</Link>
-                </>
-              }
-            />
-          </Routes>
-        )}
-      </main>
-      {!participant && (
+      {project ? (
+        <ProjectShell
+          project={project}
+          displayName={me.user.displayName}
+          organizationAdmin={me.user.isOrganizationAdmin}
+          onLogout={logout}
+        >
+          {content}
+        </ProjectShell>
+      ) : organizationPage ? (
+        <OrganizationShell
+          displayName={me.user.displayName}
+          organizationAdmin={me.user.isOrganizationAdmin}
+          onLogout={logout}
+        >
+          {content}
+        </OrganizationShell>
+      ) : (
+        content
+      )}
+      {!participant && !project && !organizationPage && (
         <footer className="footer">
           <Brand /> · Questions. Evidence. Decisions.
         </footer>

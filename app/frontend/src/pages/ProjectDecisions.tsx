@@ -15,7 +15,7 @@ import {
   LoadingState,
   Select,
 } from "../ui";
-import { AnalystStatus } from "./AnalystVisual";
+import { RegisterRow, StatusChip } from "../ui/semantic";
 import { ProjectWorkbench } from "./ProjectWorkbench";
 
 export function ProjectDecisions() {
@@ -81,9 +81,8 @@ export function ProjectDecisions() {
       role={data.role}
       active="decisions"
     >
-      <section aria-labelledby="project-decisions-title">
+      <section aria-label="Decisiones vigentes">
         <div className="pw-decisions-heading">
-          <h2 id="project-decisions-title">Decisiones</h2>
           <p>
             Preguntas con una decisión vigente. Abre una para consultar qué se
             decidió, su alcance y sus fuentes.
@@ -141,31 +140,33 @@ export function ProjectDecisions() {
           )}
         </div>
         {items.length ? (
-          <ul className="pw-decisions-list">
+          <ul className="ac-register">
             {items.map((question) => (
-              <li key={question.id}>
-                <div>
-                  <p className="pw-decision-reference">{question.externalId}</p>
-                  <h3>
-                    <Link
-                      data-workbench-id={question.id}
-                      to={`/projects/${projectId}/review/${question.id}`}
-                      state={{
-                        workbenchReturn: {
-                          view: "decisions",
-                          search: location.search,
-                        },
-                      }}
-                    >
-                      {question.title}
-                    </Link>
-                  </h3>
-                  <p>
-                    {question.sectionTitle} · {question.areaName}
-                  </p>
-                </div>
-                <AnalystStatus status={question.status} />
-              </li>
+              <RegisterRow
+                key={question.id}
+                level={2}
+                reference={question.externalId}
+                title={
+                  <Link
+                    data-workbench-id={question.id}
+                    to={`/projects/${projectId}/review/${question.id}`}
+                    state={{
+                      workbenchReturn: {
+                        view: "decisions",
+                        search: location.search,
+                      },
+                    }}
+                  >
+                    {question.title}
+                  </Link>
+                }
+                meta={`${question.sectionTitle} · ${question.areaName}`}
+                status={
+                  <StatusChip tone="success" icon="check">
+                    Vigente
+                  </StatusChip>
+                }
+              />
             ))}
           </ul>
         ) : (

@@ -11,7 +11,7 @@ import { Button, EmptyState } from "../../ui";
 import { Preview } from "./Preview";
 import { ReadinessPanel } from "./ReadinessPanel";
 import { Organize } from "./Organize";
-import { ParticipantIcon } from "../ParticipantIcon";
+import { StatusChip } from "../../ui/semantic";
 export type EditorAction =
   "assign" | "publish" | "archive" | "metadata" | "up" | "down" | "move";
 export type EditorProps = {
@@ -41,12 +41,9 @@ export const publications = {
 };
 export function Publication({ question }: { question: QuestionView }) {
   return (
-    <span className="av-status av-neutral">
-      <ParticipantIcon
-        name={question.publication === "PUBLISHED" ? "check" : "edit"}
-      />
+    <StatusChip icon={question.publication === "PUBLISHED" ? "check" : "edit"}>
       {publications[question.publication]}
-    </span>
+    </StatusChip>
   );
 }
 export function QuestionActions({
@@ -276,6 +273,7 @@ export function EditorWorkspace(props: EditorProps) {
     props.onModeChange?.(value);
   };
   const [preview, setPreview] = useState(false);
+  const [selectionExpanded, setSelectionExpanded] = useState(false);
   const [inspectId, setInspectId] = useState<string>();
   const { data, onEdit, onCreateTopic } = props;
   if (preview) return <Preview data={data} onClose={() => setPreview(false)} />;
@@ -283,7 +281,11 @@ export function EditorWorkspace(props: EditorProps) {
     <>
       <div className="qe-heading">
         <div>
-          <h2>Cuestionario</h2>
+          <p className="ac-questionnaire-total">
+            {data.questions.length} preguntas ·{" "}
+            {data.questions.filter((q) => q.publication === "PUBLISHED").length}{" "}
+            publicadas
+          </p>
         </div>
         <div className="actions">
           <Button tone="secondary" onClick={() => setPreview(true)}>
@@ -305,6 +307,7 @@ export function EditorWorkspace(props: EditorProps) {
             <Organize
               {...props}
               initialSelected={inspectId}
+              initialSelectionExpanded={selectionExpanded}
               organizeContext={organizeContext.current}
               onOrganizeContextChange={rememberOrganize}
             />
@@ -313,6 +316,7 @@ export function EditorWorkspace(props: EditorProps) {
             <ReadinessPanel
               {...props}
               onOrganize={() => {
+                setSelectionExpanded(true);
                 setMode(1);
                 requestAnimationFrame(() =>
                   document.getElementById("qe-tab-1")?.focus(),

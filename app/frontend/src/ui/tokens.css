@@ -1,0 +1,60 @@
+:root {
+  --ac-font-ui:
+    "Acta Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
+  --ac-font-document:
+    "Acta Plex Serif", Charter, "Iowan Old Style", "Palatino Linotype", Georgia,
+    serif;
+  --ac-font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --ac-bg: #f3f4f7;
+  --ac-surface: #ffffff;
+  --ac-surface-2: #f8f9fb;
+  --ac-sunken: #eceef2;
+  --ac-line: #e0e4ea;
+  --ac-line-2: #c9d0da;
+  --ac-ink: #12161c;
+  --ac-ink-2: #2c3542;
+  --ac-muted: #566070;
+  --ac-accent: var(--installation-accent, #1b4b8c);
+  --ac-accent-hover: color-mix(in srgb, var(--ac-accent) 82%, #000);
+  --ac-accent-weak: color-mix(in srgb, var(--ac-accent) 10%, #fff);
+  --ac-accent-line: color-mix(in srgb, var(--ac-accent) 32%, #fff);
+  --ac-danger: #af2118;
+  --ac-danger-weak: #fdecea;
+  --ac-danger-line: #f1b4ae;
+  --ac-warning: #85470a;
+  --ac-warning-weak: #fff3d8;
+  --ac-warning-line: #ebcb84;
+  --ac-success: #0a6a39;
+  --ac-success-weak: #e2f4e9;
+  --ac-success-line: #a5d8b8;
+  --ac-info: #39527a;
+  --ac-info-weak: #eaf0f8;
+  --ac-info-line: #bccbe0;
+  --ac-radius-row: 6px;
+  --ac-radius-control: 8px;
+  --ac-radius-surface: 12px;
+  --ac-radius-paper: 2px;
+  --ac-shadow: 0 1px 2px rgb(18 22 28 / 6%);
+  --ac-shadow-dialog: 0 12px 32px rgb(18 22 28 / 16%);
+  --ac-focus: 0 0 0 2px #fff, 0 0 0 4px var(--ac-accent);
+  --ac-space-1: 4px;
+  --ac-space-2: 8px;
+  --ac-space-3: 12px;
+  --ac-space-4: 16px;
+  --ac-space-5: 20px;
+  --ac-space-6: 24px;
+  --ac-space-8: 32px;
+  --ac-space-12: 48px;
+  --ac-sidebar-width: 248px;
+  --ac-mobile-header-height: 48px;
+  --ac-text-overline: 12.5px;
+  --ac-text-meta: 13.5px;
+  --ac-text-ui: 14px;
+  --ac-text-body: 15px;
+  --ac-text-answer: 17px;
+  --ac-text-question: 23px;
+  --ac-text-title: 26px;
+  --ac-text-decision: 29px;
+  --ac-text-respondent: 28px;
+}

@@ -79,7 +79,12 @@ it("VIS003: vigente con decisión, alcance, excepciones, autor, fecha y fuentes 
     v.validatedBy.displayName,
   ])
     expect(screen.getByText(text)).toBeVisible();
-  expect(screen.getByText(/Respuesta de .*envío #/)).toBeVisible();
+  // CP5: the sources are numbered grounds; each says who, which area and which submission.
+  const grounds = within(
+    screen.getByRole("heading", { name: "Fundamentos" }).closest("section")!,
+  ).getAllByRole("listitem");
+  expect(grounds.length).toBeGreaterThan(0);
+  expect(grounds[0]).toHaveTextContent(/envío #/);
 });
 it("VIS003: histórica explica pérdida de vigencia y conserva el texto", () => {
   const v = decision.validations.find((v) => v.invalidatedAt)!;
@@ -111,14 +116,29 @@ it("VIS002: posturas simétricas con actor, área, respuesta y evidencia o ausen
   render(
     <ConflictComparison data={conflict} conflict={conflict.conflicts[0]!} />,
   );
-  for (const name of ["Postura A", "Postura B"]) {
-    const region = within(screen.getByRole("region", { name }));
-    expect(region.getByRole("heading", { name: "Respuesta" })).toBeVisible();
-    expect(region.getByRole("heading", { name: "Evidencia" })).toBeVisible();
-  }
-  for (const s of conflict.submissions)
+  // CP5: one table, two columns of equal weight, each field label once.
+  const table = screen.getByRole("table", {
+    name: "Comparación de aportaciones",
+  });
+  for (const name of ["Postura A", "Postura B"])
     expect(
-      screen.getByRole("heading", { name: s.respondent.displayName }),
+      within(table).getByRole("columnheader", { name: new RegExp(`^${name}`) }),
+    ).toBeVisible();
+  for (const field of [
+    "Respuesta",
+    "Comentario",
+    "Ejemplo",
+    "Evidencia",
+    "Versión",
+  ])
+    expect(
+      within(table).getAllByRole("rowheader", { name: field }),
+    ).toHaveLength(1);
+  for (const s of conflict.submissions.slice(0, 2))
+    expect(
+      within(table).getByRole("columnheader", {
+        name: new RegExp(s.respondent.displayName),
+      }),
     ).toBeVisible();
   expect(
     screen.getByRole("button", { name: "Descargar guia-ficticia.pdf" }),
@@ -460,23 +480,29 @@ it("volver a Revisión conserva los filtros de procedencia sin cambiar el destin
 
 it("la decisión usa la referencia real, sitúa autor antes del resultado y permite consultar la fuente", async () => {
   const user = userEvent.setup();
+  const open = vi.fn();
   const validation = decision.validations.find((v) => !v.invalidatedAt)!;
-  render(<DecisionRecord data={decision} validation={validation} />);
+  render(
+    <DecisionRecord
+      data={decision}
+      validation={validation}
+      onOpenContribution={open}
+    />,
+  );
   const article = screen.getByRole("article", { name: "Decisión vigente" });
   expect(
-    within(article).getByText(`Referencia del registro: ${validation.id}`),
+    within(article).getByText(validation.id, { selector: "code" }),
   ).toBeVisible();
   expect(
     within(article)
       .getAllByRole("heading")
       .map((h) => h.textContent),
   ).toEqual([
-    "Decisión vigente",
-    "Pregunta",
-    "Qué se decidió",
+    "Decisión validada",
+    "Se decide",
     "Alcance",
     "Excepciones",
-    "Fuentes utilizadas",
+    "Fundamentos",
   ]);
   const author = within(article).getByText(validation.validatedBy.displayName);
   expect(
@@ -484,20 +510,37 @@ it("la decisión usa la referencia real, sitúa autor antes del resultado y perm
       within(article).getByText(validation.decisionText),
     ) & Node.DOCUMENT_POSITION_FOLLOWING,
   ).toBeTruthy();
+  // The record identifier is in the foot, after the result and its grounds.
+  const record = within(article).getByText(/^Referencia del registro:/);
+  expect(
+    within(article)
+      .getByText(validation.decisionText)
+      .compareDocumentPosition(record) & Node.DOCUMENT_POSITION_FOLLOWING,
+  ).toBeTruthy();
   const source = decision.submissions.find((s) =>
     validation.sources.some((v) => v.responseRevisionId === s.id),
   )!;
-  const trigger = within(article).getByText(/^Respuesta de/);
-  expect(trigger.closest("details")).not.toHaveAttribute("open");
-  await user.click(trigger);
-  expect(trigger.closest("details")).toHaveAttribute("open");
-  expect(
-    within(trigger.closest("details")!).getByText(
-      new RegExp(`Envío #${source.number}`),
-    ),
-  ).toBeVisible();
+  const ground = within(article).getAllByRole("listitem")[0]!;
+  expect(ground).toHaveTextContent(source.respondent.displayName);
+  expect(ground).toHaveTextContent(`envío #${source.number}`);
+  await user.click(
+    within(ground).getByRole("button", {
+      name: `Abrir la aportación de ${source.respondent.displayName}, envío #${source.number}`,
+    }),
+  );
+  expect(open).toHaveBeenCalledWith(source.id);
 });
-
+it("la decisión nombra su advertencia: documenta la revisión y no crea efectos jurídicos", () => {
+  const validation = decision.validations.find((v) => !v.invalidatedAt)!;
+  render(<DecisionRecord data={decision} validation={validation} />);
+  const sheet = screen.getByRole("article", { name: "Decisión vigente" });
+  expect(sheet.querySelector("footer")).toHaveTextContent(
+    "No equivale a una firma electrónica ni tiene un efecto jurídico adicional.",
+  );
+  expect(sheet.querySelector("footer")).toHaveTextContent(
+    "no significa que cada aportación individual haya sido validada",
+  );
+});
 it("la decisión vigente precede a Reabrir, que permanece secundaria y respeta canReview", async () => {
   const api = vi
     .spyOn(apiModule, "api")
@@ -523,7 +566,9 @@ it("la decisión vigente precede a Reabrir, que permanece secundaria y respeta c
   expect(
     card.compareDocumentPosition(reopen) & Node.DOCUMENT_POSITION_FOLLOWING,
   ).toBeTruthy();
-  expect(reopen).toHaveClass("secondary");
+  // CP5: reopening is a tertiary action in the foot of the document.
+  expect(reopen).toHaveClass("tertiary");
+  expect(card.querySelector("footer")).toContainElement(reopen);
   cleanup();
   api.mockImplementation(
     async (key) =>

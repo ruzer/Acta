@@ -1,0 +1,240 @@
+/* Review composition uses the shared Direction C primitives. */
+.review-page.ac-review {
+  max-width: none;
+  margin: 0;
+}
+.ac-review section {
+  margin-block: 0;
+}
+.ac-review-back {
+  margin-bottom: 12px;
+  font-size: var(--ac-text-meta);
+}
+.ac-review-back .back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
+.ac-review-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 24px;
+  align-items: start;
+  margin-bottom: 20px;
+}
+.ac-review-heading > div {
+  min-width: 0;
+}
+.ac-review .ac-question-band {
+  padding-bottom: 0;
+}
+.ac-review .ac-question-band .ac-overline {
+  margin: 0 0 8px;
+}
+.ac-review .ac-state-card {
+  margin: 0;
+  padding: 16px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+.ac-review .ac-state-copy .ac-turn-label {
+  margin-bottom: 8px;
+  font: 600 var(--ac-text-overline)/1.4 var(--ac-font-ui);
+  color: var(--ac-ink-2);
+}
+.ac-review .ac-state-copy > p {
+  font-size: var(--ac-text-meta);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.ac-review .ac-state-copy > p + p {
+  margin-top: 8px;
+}
+.ac-review .ac-state-actions {
+  display: grid;
+  gap: 8px;
+}
+.ac-review .ac-state-actions .button {
+  width: 100%;
+}
+.ac-review .ac-state-actions .field {
+  margin: 0;
+  font-size: var(--ac-text-meta);
+}
+.ac-review .ac-state-actions select {
+  width: 100%;
+  min-width: 0;
+}
+.ac-review > [role="tabpanel"] {
+  margin-top: 20px;
+}
+.ac-review [role="tabpanel"][hidden] {
+  display: none;
+}
+.ac-review .ac-question-help {
+  margin-top: 12px;
+  padding-block: 0;
+  border: 0;
+  font-size: var(--ac-text-meta);
+}
+.ac-review .ac-question-help summary {
+  font-weight: 500;
+}
+.ac-review details > summary {
+  display: list-item;
+  padding-block: 8px;
+  overflow-wrap: anywhere;
+}
+.ac-review .ac-review-participants {
+  margin-top: 20px;
+}
+.ac-review-thread {
+  margin-top: 20px;
+  border-top: 1px solid var(--ac-line);
+  padding-top: 16px;
+}
+.ac-review-thread h3 {
+  font: 600 15px/1.5 var(--ac-font-ui);
+}
+.ac-review-thread .actions {
+  margin-top: 12px;
+}
+.ac-contrast-heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.ac-contrast-heading h2 {
+  font: 600 18px/1.4 var(--ac-font-ui);
+}
+.ac-review .ac-review-participants li {
+  margin-bottom: 8px;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 899px) {
+  .ac-review-heading {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .ac-review-back .back {
+    min-height: 44px;
+  }
+  .ac-review .ac-question-band h1 {
+    font-size: 22px;
+  }
+  .ac-review .ac-tabs button {
+    min-height: 44px;
+  }
+}
+@media (max-width: 479px) {
+  .ac-review .ac-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ac-review .ac-tabs button {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* The return link has no legacy page-section margin. */
+.ac-review-back .back {
+  margin: 0;
+}
+.ac-review .ac-state-actions .field > span {
+  font-size: var(--ac-text-overline);
+}
+
+.ac-review .ac-review-state-labels {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+.ac-review .ac-state-copy .ac-review-state-labels .ac-turn-label {
+  margin: 0;
+}
+.ac-review .badge {
+  font-size: var(--ac-text-overline);
+}
+@media (min-width: 900px) {
+  .ac-review .ac-state-actions .field {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+  }
+  .ac-review .ac-state-actions .field label {
+    margin: 0;
+    font-size: var(--ac-text-overline);
+  }
+}
+
+/* The page-level details rules (margin, rule under) are for disclosures, not
+   for the actions menu. */
+.ac-review .ac-action-menu {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.ac-review .ac-action-menu > summary {
+  display: inline-flex;
+  padding: 0 12px;
+}
+
+/* UX-07: less vertical chrome on phones; the question, state, primary action
+   and the contribution stay easy to find, secondary actions sit in a menu. */
+@media (max-width: 759px) {
+  .ac-review-back {
+    margin-bottom: 0;
+  }
+  .ac-review .ac-question-band .ac-overline {
+    margin-bottom: 4px;
+  }
+  .ac-review-heading {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .ac-review .ac-question-help {
+    margin-top: 4px;
+  }
+  .ac-review .ac-state-card {
+    padding: 12px;
+    gap: 8px;
+  }
+  .ac-review .ac-state-copy h2 {
+    margin: 4px 0 2px;
+  }
+  .ac-review .ac-state-actions {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+  .ac-review .ac-state-actions .ac-action-menu > summary {
+    width: auto;
+  }
+  .ac-review > [role="tabpanel"] {
+    margin-top: 12px;
+  }
+}
+
+@media (max-width: 420px) {
+  /* Too narrow for two buttons side by side: stack them, both full width. */
+  .ac-review .ac-state-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ac-review .ac-state-actions .ac-action-menu > summary {
+    width: 100%;
+  }
+}
+
+@media (max-width: 359px) {
+  /* Compact phones: a long question must not push the state and its action off the first screen. */
+  .ac-review .ac-question-band h1 {
+    font-size: 20px;
+    line-height: 1.3;
+  }
+}

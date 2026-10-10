@@ -1,0 +1,620 @@
+{
+  "checkpoint": 1,
+  "records": [
+    {
+      "width": 1440,
+      "height": 900,
+      "pageWidth": 1440,
+      "smallText": [],
+      "squeezedText": [],
+      "overflow": [],
+      "targets": [
+        {
+          "label": "Registrar decisión",
+          "width": 157,
+          "height": 44
+        },
+        {
+          "label": "Solicitar aclaración",
+          "width": 165.484375,
+          "height": 44
+        },
+        {
+          "label": "Ver historial",
+          "width": 116,
+          "height": 44
+        },
+        {
+          "label": "Revocar invitación",
+          "width": 159.5625,
+          "height": 44
+        },
+        {
+          "label": "",
+          "width": 507,
+          "height": 46.25
+        },
+        {
+          "label": "Área de ejemplo",
+          "width": 507,
+          "height": 44
+        },
+        {
+          "label": "¿Cómo se revisa la entrega antes de recibirla?",
+          "width": 507,
+          "height": 92.75
+        },
+        {
+          "label": "",
+          "width": 507,
+          "height": 46.25
+        },
+        {
+          "label": "Aportaciones",
+          "width": 118.265625,
+          "height": 44
+        },
+        {
+          "label": "Contraste",
+          "width": 95.390625,
+          "height": 44
+        },
+        {
+          "label": "Decisión",
+          "width": 87.453125,
+          "height": 44
+        },
+        {
+          "label": "Historial",
+          "width": 87.15625,
+          "height": 44
+        },
+        {
+          "label": "Participante AÁrea de ejemplo",
+          "width": 292,
+          "height": 90
+        },
+        {
+          "label": "Participante BÁrea de ejemplo",
+          "width": 292,
+          "height": 90
+        },
+        {
+          "label": "Descargar Acta_de_recepción_documental_y_validación_de_entrega.pdf",
+          "width": 102.34375,
+          "height": 44
+        },
+        {
+          "label": "Asignar área",
+          "width": 119.46875,
+          "height": 44
+        },
+        {
+          "label": "Agregar participantes",
+          "width": 182.921875,
+          "height": 44
+        }
+      ],
+      "filenameWidth": 559.65625,
+      "fontFamily": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+      "bodySize": "15px",
+      "lineHeight": "23.25px",
+      "bg": "rgb(243, 244, 247)",
+      "axeViolations": 0,
+      "brandChecks": [
+        {
+          "accent": "#2b4d7c",
+          "violations": 0
+        },
+        {
+          "accent": "#18675f",
+          "violations": 0
+        }
+      ],
+      "localFonts": [
+        "/fonts/ibm-plex-sans-0.ttf",
+        "/fonts/ibm-plex-sans-2.ttf",
+        "/fonts/ibm-plex-sans-3.ttf",
+        "/fonts/ibm-plex-sans-1.ttf",
+        "/fonts/ibm-plex-serif-bold.ttf",
+        "/fonts/ibm-plex-serif-italic.ttf",
+        "/fonts/ibm-plex-serif-regular.ttf"
+      ],
+      "keyboard": "PASS",
+      "focus": "rgb(255, 255, 255) 0px 0px 0px 2px, rgb(27, 75, 140) 0px 0px 0px 4px",
+      "screenshot": "cp1/V-00-base-1440.png"
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "pageWidth": 1024,
+      "smallText": [],
+      "squeezedText": [],
+      "overflow": [],
+      "targets": [
+        {
+          "label": "Registrar decisión",
+          "width": 157,
+          "height": 44
+        },
+        {
+          "label": "Solicitar aclaración",
+          "width": 165.484375,
+          "height": 44
+        },
+        {
+          "label": "Ver historial",
+          "width": 116,
+          "height": 44
+        },
+        {
+          "label": "Revocar invitación",
+          "width": 159.5625,
+          "height": 44
+        },
+        {
+          "label": "",
+          "width": 459,
+          "height": 46.25
+        },
+        {
+          "label": "Área de ejemplo",
+          "width": 459,
+          "height": 44
+        },
+        {
+          "label": "¿Cómo se revisa la entrega antes de recibirla?",
+          "width": 459,
+          "height": 92.75
+        },
+        {
+          "label": "",
+          "width": 459,
+          "height": 46.25
+        },
+        {
+          "label": "Aportaciones",
+          "width": 118.265625,
+          "height": 44
+        },
+        {
+          "label": "Contraste",
+          "width": 95.390625,
+          "height": 44
+        },
+        {
+          "label": "Decisión",
+          "width": 87.453125,
+          "height": 44
+        },
+        {
+          "label": "Historial",
+          "width": 87.15625,
+          "height": 44
+        },
+        {
+          "label": "Participante AÁrea de ejemplo",
+          "width": 292,
+          "height": 90
+        },
+        {
+          "label": "Participante BÁrea de ejemplo",
+          "width": 292,
+          "height": 90
+        },
+        {
+          "label": "Descargar Acta_de_recepción_documental_y_validación_de_entrega.pdf",
+          "width": 102.34375,
+          "height": 44
+        },
+        {
+          "label": "Asignar área",
+          "width": 119.46875,
+          "height": 44
+        },
+        {
+          "label": "Agregar participantes",
+          "width": 182.921875,
+          "height": 44
+        }
+      ],
+      "filenameWidth": 463.65625,
+      "fontFamily": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+      "bodySize": "15px",
+      "lineHeight": "23.25px",
+      "bg": "rgb(243, 244, 247)",
+      "axeViolations": 0,
+      "brandChecks": [
+        {
+          "accent": "#2b4d7c",
+          "violations": 0
+        },
+        {
+          "accent": "#18675f",
+          "violations": 0
+        }
+      ],
+      "localFonts": [
+        "/fonts/ibm-plex-sans-0.ttf",
+        "/fonts/ibm-plex-sans-2.ttf",
+        "/fonts/ibm-plex-sans-3.ttf",
+        "/fonts/ibm-plex-sans-1.ttf",
+        "/fonts/ibm-plex-serif-bold.ttf",
+        "/fonts/ibm-plex-serif-italic.ttf",
+        "/fonts/ibm-plex-serif-regular.ttf"
+      ],
+      "keyboard": "PASS",
+      "focus": "rgb(255, 255, 255) 0px 0px 0px 2px, rgb(27, 75, 140) 0px 0px 0px 4px",
+      "screenshot": "cp1/V-00-base-1024.png"
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "pageWidth": 768,
+      "smallText": [],
+      "squeezedText": [],
+      "overflow": [],
+      "targets": [
+        {
+          "label": "Registrar decisión",
+          "width": 157,
+          "height": 44
+        },
+        {
+          "label": "Solicitar aclaración",
+          "width": 165.484375,
+          "height": 44
+        },
+        {
+          "label": "Ver historial",
+          "width": 116,
+          "height": 44
+        },
+        {
+          "label": "Revocar invitación",
+          "width": 159.5625,
+          "height": 44
+        },
+        {
+          "label": "",
+          "width": 678,
+          "height": 46.25
+        },
+        {
+          "label": "Área de ejemplo",
+          "width": 678,
+          "height": 44
+        },
+        {
+          "label": "¿Cómo se revisa la entrega antes de recibirla?",
+          "width": 678,
+          "height": 92.75
+        },
+        {
+          "label": "",
+          "width": 678,
+          "height": 46.25
+        },
+        {
+          "label": "Aportaciones",
+          "width": 198.1875,
+          "height": 44
+        },
+        {
+          "label": "Contraste",
+          "width": 175.328125,
+          "height": 44
+        },
+        {
+          "label": "Decisión",
+          "width": 167.390625,
+          "height": 44
+        },
+        {
+          "label": "Historial",
+          "width": 167.09375,
+          "height": 44
+        },
+        {
+          "label": "Participante AÁrea de ejemplo",
+          "width": 712,
+          "height": 90
+        },
+        {
+          "label": "Participante BÁrea de ejemplo",
+          "width": 712,
+          "height": 90
+        },
+        {
+          "label": "Descargar Acta_de_recepción_documental_y_validación_de_entrega.pdf",
+          "width": 102.34375,
+          "height": 44
+        },
+        {
+          "label": "Asignar área",
+          "width": 119.46875,
+          "height": 44
+        },
+        {
+          "label": "Agregar participantes",
+          "width": 182.921875,
+          "height": 44
+        }
+      ],
+      "filenameWidth": 658,
+      "fontFamily": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+      "bodySize": "15px",
+      "lineHeight": "23.25px",
+      "bg": "rgb(243, 244, 247)",
+      "axeViolations": 0,
+      "brandChecks": [
+        {
+          "accent": "#2b4d7c",
+          "violations": 0
+        },
+        {
+          "accent": "#18675f",
+          "violations": 0
+        }
+      ],
+      "localFonts": [
+        "/fonts/ibm-plex-sans-0.ttf",
+        "/fonts/ibm-plex-sans-2.ttf",
+        "/fonts/ibm-plex-sans-3.ttf",
+        "/fonts/ibm-plex-sans-1.ttf",
+        "/fonts/ibm-plex-serif-bold.ttf",
+        "/fonts/ibm-plex-serif-italic.ttf",
+        "/fonts/ibm-plex-serif-regular.ttf"
+      ],
+      "keyboard": "PASS",
+      "focus": "rgb(255, 255, 255) 0px 0px 0px 2px, rgb(27, 75, 140) 0px 0px 0px 4px",
+      "screenshot": "cp1/V-00-base-768.png"
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "pageWidth": 390,
+      "smallText": [],
+      "squeezedText": [],
+      "overflow": [],
+      "targets": [
+        {
+          "label": "Registrar decisión",
+          "width": 157,
+          "height": 44
+        },
+        {
+          "label": "Solicitar aclaración",
+          "width": 165.484375,
+          "height": 44
+        },
+        {
+          "label": "Ver historial",
+          "width": 116,
+          "height": 44
+        },
+        {
+          "label": "Revocar invitación",
+          "width": 159.5625,
+          "height": 44
+        },
+        {
+          "label": "",
+          "width": 324,
+          "height": 46.25
+        },
+        {
+          "label": "Área de ejemplo",
+          "width": 324,
+          "height": 44
+        },
+        {
+          "label": "¿Cómo se revisa la entrega antes de recibirla?",
+          "width": 324,
+          "height": 92.75
+        },
+        {
+          "label": "",
+          "width": 324,
+          "height": 46.25
+        },
+        {
+          "label": "Aportaciones",
+          "width": 107.6875,
+          "height": 44
+        },
+        {
+          "label": "Contraste",
+          "width": 84.828125,
+          "height": 44
+        },
+        {
+          "label": "Decisión",
+          "width": 76.890625,
+          "height": 44
+        },
+        {
+          "label": "Historial",
+          "width": 76.59375,
+          "height": 44
+        },
+        {
+          "label": "Participante AÁrea de ejemplo",
+          "width": 350,
+          "height": 90
+        },
+        {
+          "label": "Participante BÁrea de ejemplo",
+          "width": 350,
+          "height": 90
+        },
+        {
+          "label": "Descargar Acta_de_recepción_documental_y_validación_de_entrega.pdf",
+          "width": 102.34375,
+          "height": 44
+        },
+        {
+          "label": "Asignar área",
+          "width": 119.46875,
+          "height": 44
+        },
+        {
+          "label": "Agregar participantes",
+          "width": 182.921875,
+          "height": 44
+        }
+      ],
+      "filenameWidth": 296,
+      "fontFamily": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+      "bodySize": "15px",
+      "lineHeight": "23.25px",
+      "bg": "rgb(243, 244, 247)",
+      "axeViolations": 0,
+      "brandChecks": [
+        {
+          "accent": "#2b4d7c",
+          "violations": 0
+        },
+        {
+          "accent": "#18675f",
+          "violations": 0
+        }
+      ],
+      "localFonts": [
+        "/fonts/ibm-plex-sans-0.ttf",
+        "/fonts/ibm-plex-sans-2.ttf",
+        "/fonts/ibm-plex-sans-3.ttf",
+        "/fonts/ibm-plex-sans-1.ttf",
+        "/fonts/ibm-plex-serif-bold.ttf",
+        "/fonts/ibm-plex-serif-italic.ttf",
+        "/fonts/ibm-plex-serif-regular.ttf"
+      ],
+      "keyboard": "PASS",
+      "focus": "rgb(255, 255, 255) 0px 0px 0px 2px, rgb(27, 75, 140) 0px 0px 0px 4px",
+      "screenshot": "cp1/V-00-base-390.png"
+    },
+    {
+      "width": 320,
+      "height": 640,
+      "pageWidth": 320,
+      "smallText": [],
+      "squeezedText": [],
+      "overflow": [],
+      "targets": [
+        {
+          "label": "Registrar decisión",
+          "width": 157,
+          "height": 44
+        },
+        {
+          "label": "Solicitar aclaración",
+          "width": 165.484375,
+          "height": 44
+        },
+        {
+          "label": "Ver historial",
+          "width": 116,
+          "height": 44
+        },
+        {
+          "label": "Revocar invitación",
+          "width": 159.5625,
+          "height": 44
+        },
+        {
+          "label": "",
+          "width": 254,
+          "height": 46.25
+        },
+        {
+          "label": "Área de ejemplo",
+          "width": 254,
+          "height": 44
+        },
+        {
+          "label": "¿Cómo se revisa la entrega antes de recibirla?",
+          "width": 254,
+          "height": 92.75
+        },
+        {
+          "label": "",
+          "width": 254,
+          "height": 46.25
+        },
+        {
+          "label": "Aportaciones",
+          "width": 111.21875,
+          "height": 44
+        },
+        {
+          "label": "Contraste",
+          "width": 88.359375,
+          "height": 44
+        },
+        {
+          "label": "Decisión",
+          "width": 80.421875,
+          "height": 44
+        },
+        {
+          "label": "Historial",
+          "width": 288,
+          "height": 44
+        },
+        {
+          "label": "Participante AÁrea de ejemplo",
+          "width": 280,
+          "height": 90
+        },
+        {
+          "label": "Participante BÁrea de ejemplo",
+          "width": 280,
+          "height": 90
+        },
+        {
+          "label": "Descargar Acta_de_recepción_documental_y_validación_de_entrega.pdf",
+          "width": 102.34375,
+          "height": 44
+        },
+        {
+          "label": "Asignar área",
+          "width": 119.46875,
+          "height": 44
+        },
+        {
+          "label": "Agregar participantes",
+          "width": 182.921875,
+          "height": 44
+        }
+      ],
+      "filenameWidth": 226,
+      "fontFamily": "\"Acta Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+      "bodySize": "15px",
+      "lineHeight": "23.25px",
+      "bg": "rgb(243, 244, 247)",
+      "axeViolations": 0,
+      "brandChecks": [
+        {
+          "accent": "#2b4d7c",
+          "violations": 0
+        },
+        {
+          "accent": "#18675f",
+          "violations": 0
+        }
+      ],
+      "localFonts": [
+        "/fonts/ibm-plex-sans-0.ttf",
+        "/fonts/ibm-plex-sans-2.ttf",
+        "/fonts/ibm-plex-sans-3.ttf",
+        "/fonts/ibm-plex-sans-1.ttf",
+        "/fonts/ibm-plex-serif-bold.ttf",
+        "/fonts/ibm-plex-serif-italic.ttf",
+        "/fonts/ibm-plex-serif-regular.ttf"
+      ],
+      "keyboard": "PASS",
+      "focus": "rgb(255, 255, 255) 0px 0px 0px 2px, rgb(27, 75, 140) 0px 0px 0px 4px",
+      "screenshot": "cp1/V-00-base-320.png"
+    }
+  ]
+}

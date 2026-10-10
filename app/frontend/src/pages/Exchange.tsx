@@ -13,7 +13,7 @@ import {
   LoadingState,
   Select,
 } from "../ui";
-import { ProjectTools } from "./Visibility";
+import { PageHeader } from "../ui/semantic";
 import minimalTemplateUrl from "../../../../examples/questionnaire-template.minimal.json?url";
 import fullTemplateUrl from "../../../../examples/questionnaire-template.full.json?url";
 
@@ -143,12 +143,10 @@ export function ImportStructure() {
   }
   return (
     <>
-      <h1>Importar cuestionario</h1>
-      <ProjectTools projectId={projectId} />
-      <p>
-        Seleccionar archivo → Revisar → Confirmar. Se importa estructura en un
-        proyecto vacío; las preguntas quedarán en borrador.
-      </p>
+      <PageHeader
+        title="Importar cuestionario"
+        lead="Seleccionar archivo → Revisar → Confirmar. Se importa estructura en un proyecto vacío; las preguntas quedarán en borrador."
+      />
       {error && <Alert error>{error}</Alert>}
       {result ? (
         <>
@@ -350,21 +348,22 @@ export function ExportProject() {
   }
   return (
     <>
-      <h1>Exportar proyecto</h1>
-      {viewer ? (
-        <Link to={`/projects/${projectId}`}>Volver al proyecto</Link>
-      ) : (
-        <ProjectTools projectId={projectId} />
+      {viewer && (
+        <Link className="back" to={`/projects/${projectId}`}>
+          ← Volver al proyecto
+        </Link>
       )}
-      <h2>{project.name}</h2>
+      <PageHeader
+        title="Exportar proyecto"
+        lead={
+          viewer
+            ? "JSON de decisiones vigentes: incluye únicamente decisiones y fuentes autorizadas. No incluye historial privado."
+            : "Descarga el estado funcional de este proyecto."
+        }
+      />
       {error && <Alert error>{error}</Alert>}
       {notice && <Alert>{notice}</Alert>}
-      {viewer ? (
-        <p>
-          JSON de decisiones vigentes: incluye únicamente decisiones y fuentes
-          autorizadas. No incluye historial privado.
-        </p>
-      ) : (
+      {viewer ? null : (
         <>
           <Select
             label="Formato de exportación"
