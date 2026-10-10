@@ -1212,3 +1212,20 @@ section.narrow {
   border-radius: var(--ac-radius-control);
   font-size: var(--ac-text-ui);
 }
+.ac-audit-code {
+  display: grid;
+  gap: 2px;
+}
+.ac-audit-code small {
+  color: var(--ac-muted);
+  font-size: var(--ac-text-meta);
+  overflow-wrap: anywhere;
+}
+.data-table details {
+  margin: 0;
+}
+.data-table summary {
+  padding-block: 0;
+  font-weight: 400;
+  color: var(--ac-muted);
+}

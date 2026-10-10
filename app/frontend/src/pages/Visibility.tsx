@@ -1,6 +1,7 @@
 import { ProjectAttention } from "./ProjectAttention";
 import { ProjectWorkbench } from "./ProjectWorkbench";
 import { PageHeader } from "../ui/semantic";
+import { auditActions, auditObjects } from "./audit-labels";
 import { AnalystStatus } from "./AnalystVisual";
 import { useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
@@ -359,9 +360,12 @@ export function History() {
                 cells: [
                   new Date(e.occurredAt).toLocaleString("es-MX"),
                   e.actorName,
-                  e.action,
+                  <span key="a" className="ac-audit-code">
+                    {auditActions[e.action] ?? e.action}
+                    {auditActions[e.action] && <small>{e.action}</small>}
+                  </span>,
                   <span key="o">
-                    {e.objectType}
+                    {auditObjects[e.objectType] ?? e.objectType}
                     <details>
                       <summary>Identificador</summary>
                       {e.objectId}
