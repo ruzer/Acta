@@ -408,6 +408,14 @@ test("V-20/21/22 · Invitación externa: carta con la organización primero, vig
     await expect(
       page.locator(".invitation-section .ac-status", { hasText: "Enviada" }),
     ).toHaveCount(3);
+    // The next steps are plain sentences: they read as text, not as headings.
+    const weights = await next
+      .locator(".ac-step-title")
+      .evaluateAll((els) =>
+        els.map((el) => Number(getComputedStyle(el).fontWeight)),
+      );
+    expect(weights.length).toBe(3);
+    for (const weight of weights) expect(weight).toBeLessThan(600);
     await checkedPage(page, folder, "V-22-invitado-confirmacion", width);
     if (width <= 899)
       expect(

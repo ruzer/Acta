@@ -323,6 +323,11 @@ test("V-24 · Invitaciones: cabecera de página, estado con texto y color, ayuda
       row.locator(".ac-status", { hasText: "Activo" }),
     ).toBeVisible();
     await expect(row.locator(".ac-status svg").first()).toBeVisible();
+    // The end of the link is said in days while it can be used, date under it.
+    await expect(row.locator(".ac-expiry")).toHaveText(
+      /^Vence (en \d+ días|hoy o mañana)$/,
+    );
+    await expect(row.locator(".ac-expiry-date")).toBeVisible();
     // Progress is said in words; the bar only repeats it.
     await expect(row.getByText(/\d+ de \d+ preguntas con envío/)).toBeVisible();
     await expect(row.locator(".ac-mini-bar")).toHaveAttribute(

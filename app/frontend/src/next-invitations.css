@@ -160,3 +160,15 @@
     gap: 0.25rem 0.5rem;
   }
 }
+.ac-expiry {
+  display: block;
+  font-weight: 600;
+}
+.ac-expiry[data-soon] {
+  color: var(--ac-warning);
+}
+.ac-expiry-date {
+  display: block;
+  color: var(--ac-muted);
+  font-size: var(--ac-text-meta);
+}

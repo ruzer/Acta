@@ -391,6 +391,9 @@ test("ACTA NEXT: vigencia de invitaciones incluye la segunda página y excluye r
   await navigation(page)
     .getByRole("link", { name: "Atención", exact: true })
     .click();
+  // Wait for the page to change before using the navigation again: under CPU
+  // throttling the URL changes before the shell renders the remembered context.
+  await expect(page.locator("main h1")).toHaveText("Atención");
   await page.getByRole("link", { name: "Invitaciones", exact: true }).click();
   await expect(page.getByText("Página 2", { exact: true })).toBeVisible();
   await expect(list.getByRole("listitem")).toHaveCount(2);

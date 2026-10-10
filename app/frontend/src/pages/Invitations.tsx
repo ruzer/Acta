@@ -520,6 +520,20 @@ export function CreateInvitation({
     </Dialog>
   );
 }
+/** When the link ends: said in days while it can still be used, with the date under it. */
+function ExpiryText({ row, now }: { row: InvitationView; now: number }) {
+  const ends = new Date(row.expiresAt).getTime();
+  const days = Math.ceil((ends - now) / 86400000);
+  if (row.revokedAt || ends <= now) return <>{formatDate(row.expiresAt)}</>;
+  return (
+    <>
+      <strong className="ac-expiry" data-soon={days <= 3 ? "" : undefined}>
+        {days <= 1 ? "Vence hoy o mañana" : `Vence en ${days} días`}
+      </strong>
+      <span className="ac-expiry-date">{formatDate(row.expiresAt)}</span>
+    </>
+  );
+}
 export function Invitations() {
   const { projectId = "" } = useParams();
   const [error, setError] = useState("");
@@ -713,7 +727,9 @@ export function Invitations() {
                 </dl>
                 <dl>
                   <dt>Vigencia</dt>
-                  <dd>{formatDate(row.expiresAt)}</dd>
+                  <dd>
+                    <ExpiryText row={row} now={now} />
+                  </dd>
                   <dt>Estado del enlace</dt>
                   <dd>
                     {row.revokedAt ? (
