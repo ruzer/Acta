@@ -160,8 +160,10 @@ docker/postgres-init.sh
 docker/postgres-init.sql
 docker/versity/Dockerfile
 docker/versity/UPSTREAM-LICENSE
+docker/versity/UPSTREAM-MODIFICATIONS
 docker/versity/UPSTREAM-NOTICE
 docker/versity/start.mjs
+docker/versity/versitygw-v1.8.0-security.patch
 docs/ARCHITECTURE.md
 docs/BACKUP-RESTORE.md
 docs/CONFIGURATION.md
