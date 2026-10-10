@@ -356,3 +356,29 @@ it("group selection follows descendants only, never condition edges, and termina
     questionGroup([{ ...root, groupParentId: "child" }, child], "root"),
   ).toHaveLength(2);
 });
+it("UX-14: un lote sin cambios es información; solo los bloqueos son un error", async () => {
+  let blocked = 0;
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (_url, options) =>
+      Response.json({
+        ...preview("PUBLISH", JSON.parse(options.body)),
+        canConfirm: false,
+        counts: { ...count, applicable: 0, blocked },
+      }),
+    ),
+  );
+  const first = mount("PUBLISH");
+  await first.user.click(screen.getByRole("button", { name: "Revisar lote" }));
+  const info = await screen.findByText("No hay cambios que aplicar.");
+  // Nothing to apply is announced politely, not as an alert.
+  expect(info.closest("[role]")).toHaveAttribute("role", "status");
+  cleanup();
+  blocked = 1;
+  const second = mount("PUBLISH");
+  await second.user.click(screen.getByRole("button", { name: "Revisar lote" }));
+  const error = await screen.findByText(
+    "Hay errores que debes resolver. No se aplicará ningún cambio.",
+  );
+  expect(error.closest("[role]")).toHaveAttribute("role", "alert");
+});
