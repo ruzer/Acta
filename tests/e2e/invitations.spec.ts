@@ -286,10 +286,10 @@ test("analyst creates, renews and revokes a link from the editor without creatin
   await dialog
     .getByLabel("Nombre de la persona", { exact: true })
     .fill("Example Respondent");
-  await dialog.getByRole("button", { name: "Continuar", exact: true }).click();
   await dialog
     .getByLabel("Área de la aportación", { exact: true })
     .selectOption(fixture.areaId);
+  await dialog.getByRole("button", { name: "Continuar", exact: true }).click();
   await accessible(page);
   await dialog.getByRole("button", { name: "Continuar", exact: true }).click();
   await dialog.getByRole("button", { name: "Continuar", exact: true }).click();
@@ -554,6 +554,9 @@ test("ACTA NEXT: crear desde el gestor conserva alcance explícito y el invitado
   await dialog
     .getByLabel("Organización (opcional)")
     .fill("Example Organization");
+  await dialog
+    .getByLabel("Área de la aportación", { exact: true })
+    .selectOption(fixture.areaId);
   await accessible(page);
   await dialog.getByRole("button", { name: "Continuar", exact: true }).click();
   await expect(
@@ -568,9 +571,6 @@ test("ACTA NEXT: crear desde el gestor conserva alcance explícito y el invitado
       exact: true,
     })
     .check();
-  await dialog
-    .getByLabel("Área de la aportación", { exact: true })
-    .selectOption(fixture.areaId);
   await accessible(page);
   await dialog.getByRole("button", { name: "Continuar", exact: true }).click();
   await dialog

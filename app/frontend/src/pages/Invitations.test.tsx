@@ -82,21 +82,47 @@ async function recipient(user: ReturnType<typeof userEvent.setup>) {
     screen.getByLabelText("Nombre de la persona"),
     "Persona de ejemplo",
   );
-  await user.click(screen.getByRole("button", { name: "Continuar" }));
-}
-async function areaAndSummary(user: ReturnType<typeof userEvent.setup>) {
+  // The area is required and lives with the recipient, in view of the first step.
   await user.selectOptions(
     screen.getByLabelText("Área de la aportación"),
     questionnaire.areas[0]!.id,
   );
   await user.click(screen.getByRole("button", { name: "Continuar" }));
+}
+async function toSummary(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole("button", { name: "Continuar" }));
   await user.click(screen.getByRole("button", { name: "Continuar" }));
 }
+it("el área de la aportación se pide en el primer paso, bloquea el avance si falta y no reaparece entre las preguntas", async () => {
+  const { user } = mount();
+  expect(await screen.findByLabelText("Área de la aportación")).toBeRequired();
+  await user.type(
+    screen.getByLabelText("Referencia de la invitación"),
+    "Consulta ficticia",
+  );
+  await user.type(
+    screen.getByLabelText("Nombre de la persona"),
+    "Persona de ejemplo",
+  );
+  await user.click(screen.getByRole("button", { name: "Continuar" }));
+  expect(
+    screen.queryByRole("heading", { name: "Preguntas" }),
+  ).not.toBeInTheDocument();
+  await user.selectOptions(
+    screen.getByLabelText("Área de la aportación"),
+    questionnaire.areas[0]!.id,
+  );
+  await user.click(screen.getByRole("button", { name: "Continuar" }));
+  expect(screen.getByRole("heading", { name: "Preguntas" })).toHaveFocus();
+  expect(
+    screen.queryByLabelText("Área de la aportación"),
+  ).not.toBeInTheDocument();
+});
 it("crea solo después de revisar el resumen, con el mismo contrato y alcance contextual", async () => {
   const { request, user } = mount();
   await recipient(user);
   expect(screen.getByRole("heading", { name: "Preguntas" })).toHaveFocus();
-  await areaAndSummary(user);
+  await toSummary(user);
   expect(screen.getByRole("heading", { name: "Resumen" })).toHaveFocus();
   expect(screen.getByText("4 preguntas publicadas")).toBeVisible();
   expect(screen.getByText("7 días desde crear el enlace")).toBeVisible();
@@ -121,7 +147,7 @@ it("crea solo después de revisar el resumen, con el mismo contrato y alcance co
 it("volver conserva destinatario, alcance y campos de vigencia sin crear", async () => {
   const { user, request } = mount();
   await recipient(user);
-  await areaAndSummary(user);
+  await toSummary(user);
   await user.click(screen.getByRole("button", { name: "Atrás" }));
   await user.click(
     screen.getByLabelText("Permitir adjuntar y descargar evidencia propia"),
@@ -164,7 +190,7 @@ it("desde el gestor filtra solo publicadas y comunica las seleccionadas fuera de
   await user.click(
     screen.getByRole("button", { name: "Seleccionar 1 resultado" }),
   );
-  await areaAndSummary(user);
+  await toSummary(user);
   expect(screen.getByText("2 preguntas publicadas")).toBeVisible();
   await user.click(
     screen.getByRole("button", { name: "Crear enlace privado" }),
@@ -228,8 +254,12 @@ it("no nominal respeta la política y envía identidad vacía aunque hubiera dat
   expect(
     screen.queryByLabelText("Nombre de la persona"),
   ).not.toBeInTheDocument();
+  await user.selectOptions(
+    screen.getByLabelText("Área de la aportación"),
+    questionnaire.areas[0]!.id,
+  );
   await user.click(screen.getByRole("button", { name: "Continuar" }));
-  await areaAndSummary(user);
+  await toSummary(user);
   await user.click(
     screen.getByRole("button", { name: "Crear enlace privado" }),
   );
@@ -245,7 +275,7 @@ it("no nominal respeta la política y envía identidad vacía aunque hubiera dat
 it("el rechazo del backend mantiene el resumen y enfoca el error sin anunciar éxito", async () => {
   const { user, request } = mount();
   await recipient(user);
-  await areaAndSummary(user);
+  await toSummary(user);
   request.mockImplementation(async (key) => {
     if (key === "createInvitation")
       throw new apiModule.ApiFailure(
