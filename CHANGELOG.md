@@ -24,6 +24,12 @@ Sin cambios adicionales por anunciar.
   acaba de confirmarse una asignación y su actualización sigue pendiente.
   Se conservan las dependencias, la confirmación explícita y las validaciones
   de concurrencia del backend.
+- **Foco tras una revisión** ([#32](https://github.com/ruzer/Acta/pull/32)).
+  Después de registrar una decisión u otro comando de revisión que retira el
+  botón que tenía el foco, este pasa al título de la pregunta aunque la página
+  tarde en actualizarse. Antes podía perderse al inicio del documento, lo que
+  afectaba a quien navega con teclado o lector de pantalla. No cambia el
+  comportamiento al cancelar un diálogo ni los datos que se registran.
 
 Sin cambios de API, contratos, permisos, almacenamiento ni migraciones respecto
 de v0.6.0. [Notas de la versión](docs/releases/v0.6.1.md).

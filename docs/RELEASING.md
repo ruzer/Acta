@@ -14,13 +14,15 @@ Se prepara [Semantic Versioning](https://semver.org/lang/es/) en formato **MAJOR
 
 El contrato público incluye API documentada, configuración, formatos de intercambio y requisitos de actualización/persistencia. No basta con que TypeScript compile para afirmar compatibilidad. Antes de 1.0 no se promete estabilidad absoluta; los cambios incompatibles deben anunciarse, agruparse en un incremento MINOR de `0.x` y acompañarse de instrucciones de migración. PATCH seguirá reservado para cambios compatibles. Una corrección de seguridad que rompa compatibilidad debe decirlo y usar la versión apropiada.
 
-### Preparación de 0.6.1 — Grupos y publicación conjunta
+### Preparación de 0.6.1 — Grupos, publicación conjunta y foco
 
 La base es [v0.6.0](https://github.com/ruzer/Acta/releases/tag/v0.6.0).
 **0.6.1** reúne las correcciones compatibles de los PR
-[#29](https://github.com/ruzer/Acta/pull/29) y
-[#30](https://github.com/ruzer/Acta/pull/30): controles globales de grupos y
-actualización del cuestionario antes de la vista previa de operaciones masivas.
+[#29](https://github.com/ruzer/Acta/pull/29),
+[#30](https://github.com/ruzer/Acta/pull/30) y
+[#32](https://github.com/ruzer/Acta/pull/32): controles globales de grupos,
+actualización del cuestionario antes de la vista previa de operaciones masivas
+y conservación del foco tras registrar una revisión.
 No cambia contratos, backend, permisos, configuración ni migraciones.
 
 Los manifiestos, las referencias entre paquetes y el lockfile se preparan en
