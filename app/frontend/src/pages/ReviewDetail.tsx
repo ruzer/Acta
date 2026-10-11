@@ -132,6 +132,21 @@ export function ReviewDetail() {
         ) ?? document.getElementById("review-tabs-tab-contributions")
       )?.focus();
   }, [requestedTab]);
+  // A successful command can remove the control that held focus (validating
+  // removes "Registrar decisión"), but only in the commit that renders the
+  // refreshed review. A timer cannot know when that commit happens: a frame that
+  // fires first finds the old control still focused and leaves focus lost once
+  // it goes. The request records the review's last update and is fulfilled by
+  // the first commit that renders newer data, and only if focus was lost.
+  const anchorSince = useRef<number | null>(null);
+  useEffect(() => {
+    const since = anchorSince.current;
+    if (since === null || q.dataUpdatedAt <= since) return;
+    anchorSince.current = null;
+    const active = document.activeElement;
+    if (!active || active === document.body || !active.isConnected)
+      questionHeading.current?.focus();
+  }, [q.dataUpdatedAt]);
   const returnFocus = useRef<HTMLElement | null>(null);
   function setAction(next: typeof action) {
     if (next && !action)
@@ -162,6 +177,8 @@ export function ReviewDetail() {
             ? "validateQuestion"
             : "markPending";
   async function done() {
+    anchorSince.current =
+      client.getQueryState(["review", projectId, id])?.dataUpdatedAt ?? 0;
     setAction(null);
     setMessage("Revisión registrada. El historial se conserva.");
     await client.invalidateQueries({ queryKey: ["review"] });
@@ -169,12 +186,6 @@ export function ReviewDetail() {
     await client.invalidateQueries({ queryKey: ["my-work"] });
     await client.invalidateQueries({ queryKey: ["dashboard", projectId] });
     await client.invalidateQueries({ queryKey: ["questionnaire", projectId] });
-    // A successful command can remove its trigger (for example, validation).
-    // Keep cancellation focus unchanged and restore a useful anchor only if lost.
-    requestAnimationFrame(() => {
-      if (document.activeElement === document.body)
-        questionHeading.current?.focus();
-    });
   }
   const hasCurrentDecision = d.validations.some((v) => !v.invalidatedAt);
   const currentProject = projects.data?.find(
