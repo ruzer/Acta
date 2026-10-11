@@ -1104,3 +1104,93 @@ it("CP5: «Contrastar con otra» junto a una aportación abre Contraste con esa 
     }),
   ).toBeVisible();
 });
+
+it("registrar la decisión deja el foco en el título aunque el fotograma llegue antes del commit que retira el botón", async () => {
+  // jsdom has no modal dialogs; the app code under test is unchanged.
+  for (const [name, open] of [
+    ["showModal", true],
+    ["close", false],
+  ] as const)
+    Object.defineProperty(HTMLDialogElement.prototype, name, {
+      configurable: true,
+      value(this: HTMLDialogElement) {
+        if (open) this.setAttribute("open", "");
+        else this.removeAttribute("open");
+      },
+    });
+  wideViewport();
+  const ready = reviewDetailView.parse({
+    ...decision,
+    status: "ANSWERED",
+    validations: [],
+    dispositions: [],
+  });
+  let validated = false;
+  let release: () => void = () => {};
+  const refreshed = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  vi.spyOn(apiModule, "api").mockImplementation((async (key: string) => {
+    if (key === "projects") return [];
+    if (key === "validateQuestion") {
+      validated = true;
+      return { questionId: ready.question.id, status: "VALIDATED" };
+    }
+    if (!validated) return ready;
+    // The refreshed review arrives later than the first frame after the command.
+    await refreshed;
+    return decision;
+  }) as never);
+  const router = createMemoryRouter(
+    [{ path: "/projects/:projectId/review/:id", element: <ReviewPage /> }],
+    {
+      initialEntries: [
+        `/projects/${ready.projectId}/review/${ready.question.id}`,
+      ],
+    },
+  );
+  render(
+    <QueryClientProvider
+      client={
+        new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      }
+    >
+      <RouterProvider router={router} />
+    </QueryClientProvider>,
+  );
+  const user = userEvent.setup();
+  await user.click(
+    (await screen.findAllByRole("button", { name: "Registrar decisión" }))[0]!,
+  );
+  const dialog = await screen.findByRole("dialog");
+  await user.type(
+    within(dialog).getByLabelText("Decisión acordada"),
+    "Decisión explícita",
+  );
+  await user.type(within(dialog).getByLabelText("Alcance"), "Caso de prueba");
+  await user.type(
+    within(dialog).getByLabelText("Comentario interno"),
+    "Fuentes revisadas",
+  );
+  for (const box of within(dialog).getAllByRole("checkbox"))
+    await user.click(box);
+  // A frame can fire before React has committed the refreshed review.
+  vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+    callback(0);
+    return 0;
+  });
+  await user.click(
+    within(dialog).getByRole("button", { name: "Registrar como validada" }),
+  );
+  await waitFor(() => expect(validated).toBe(true));
+  release();
+  await waitFor(() =>
+    expect(
+      screen.queryByRole("button", { name: "Registrar decisión" }),
+    ).not.toBeInTheDocument(),
+  );
+  // The trigger left the page with the commit; focus must not be lost to <body>.
+  await waitFor(() =>
+    expect(screen.getByRole("heading", { level: 1 })).toHaveFocus(),
+  );
+});
