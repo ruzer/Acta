@@ -847,6 +847,9 @@ progress {
   border: 2px solid var(--primary);
   background: var(--ac-accent-weak);
 }
+.import-preview {
+  margin-top: 2rem;
+}
 .import-counts {
   display: flex;
   flex-wrap: wrap;

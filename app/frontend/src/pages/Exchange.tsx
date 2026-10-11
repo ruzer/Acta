@@ -83,6 +83,15 @@ const countLabels = {
 export function ImportStructure() {
   const { projectId = "" } = useParams(),
     client = useQueryClient();
+  // The file must repeat this project's identifier exactly; the listing already
+  // delivers it, so the page can say it instead of sending people to find it.
+  const projects = useQuery({
+    queryKey: ["projects"],
+    queryFn: () => api("projects"),
+  });
+  const projectExternalId = projects.data?.find(
+    (p) => p.id === projectId,
+  )?.externalId;
   const [file, setFile] = useState<File>(),
     [preview, setPreview] = useState<z.infer<typeof C.importPreviewView>>(),
     [result, setResult] = useState<z.infer<typeof C.importResultView>>(),
@@ -207,6 +216,12 @@ export function ImportStructure() {
             </p>
           </details>
           <h2>1. Seleccionar archivo</h2>
+          {projectExternalId && (
+            <p>
+              El archivo debe llevar <code>project.externalId</code> igual al
+              identificador de este proyecto: <code>{projectExternalId}</code>.
+            </p>
+          )}
           <Input
             label="Archivo JSON"
             type="file"
@@ -228,7 +243,7 @@ export function ImportStructure() {
             {busy ? "Procesando…" : "Revisar archivo"}
           </Button>
           {preview && (
-            <section aria-label="Vista previa">
+            <section aria-label="Vista previa" className="import-preview">
               <h2 ref={heading} tabIndex={-1}>
                 2. Revisar importación
               </h2>
@@ -245,12 +260,22 @@ export function ImportStructure() {
                   </div>
                 ))}
               </dl>
-              {[...preview.errors, ...preview.warnings].map((issue, i) => (
-                <div className="alert" key={i}>
+              {[
+                ...preview.errors.map((issue) => ({ issue, error: true })),
+                ...preview.warnings.map((issue) => ({ issue, error: false })),
+              ].map(({ issue, error }, i) => (
+                <div className={error ? "alert error" : "alert"} key={i}>
                   <p>
                     <strong>{importIssueContext(issue.path)}</strong>
                   </p>
                   <p>{issue.message}</p>
+                  {issue.path === "/project/externalId" &&
+                    projectExternalId && (
+                      <p>
+                        Identificador de este proyecto:{" "}
+                        <code>{projectExternalId}</code>.
+                      </p>
+                    )}
                   <details>
                     <summary>Detalles técnicos</summary>
                     <code>{issue.path || "/"}</code>
