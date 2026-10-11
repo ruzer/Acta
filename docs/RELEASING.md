@@ -14,6 +14,25 @@ Se prepara [Semantic Versioning](https://semver.org/lang/es/) en formato **MAJOR
 
 El contrato público incluye API documentada, configuración, formatos de intercambio y requisitos de actualización/persistencia. No basta con que TypeScript compile para afirmar compatibilidad. Antes de 1.0 no se promete estabilidad absoluta; los cambios incompatibles deben anunciarse, agruparse en un incremento MINOR de `0.x` y acompañarse de instrucciones de migración. PATCH seguirá reservado para cambios compatibles. Una corrección de seguridad que rompa compatibilidad debe decirlo y usar la versión apropiada.
 
+### Preparación de 0.6.1 — Grupos y publicación conjunta
+
+La base es [v0.6.0](https://github.com/ruzer/Acta/releases/tag/v0.6.0).
+**0.6.1** reúne las correcciones compatibles de los PR
+[#29](https://github.com/ruzer/Acta/pull/29) y
+[#30](https://github.com/ruzer/Acta/pull/30): controles globales de grupos y
+actualización del cuestionario antes de la vista previa de operaciones masivas.
+No cambia contratos, backend, permisos, configuración ni migraciones.
+
+Los manifiestos, las referencias entre paquetes y el lockfile se preparan en
+0.6.1, sin actualizar dependencias externas. Las
+[notas de la versión](releases/v0.6.1.md) incluyen la evidencia del CI de la base.
+El PR de preparación requiere CI verde y merge manual del maintainer. Después
+se debe verificar el CI del `main` resultante antes de crear un tag anotado
+`v0.6.1` sobre ese commit exacto y publicar la GitHub Release como Latest.
+Verificar también el CI del tag. La preparación y la fecha del changelog no
+constituyen por sí solas una publicación; no se publican imágenes Docker ni se
+actualizan downstreams en este proceso.
+
 ### Preparación de 0.6.0 — Dirección C
 
 La base anterior es [v0.5.0](https://github.com/ruzer/Acta/releases/tag/v0.5.0). **0.6.0** corresponde a una evolución compatible y sustancial de la presentación del frontend (Dirección C: jerarquía, navegación, cuestionario, aportaciones, conflictos, aclaraciones, decisiones, participantes e invitaciones) y a la actualización de seguridad de VersityGW, compilado desde su fuente oficial. Un patch `0.5.x` no describe ese alcance. No se documenta un cambio incompatible de API, configuración o formatos de intercambio.

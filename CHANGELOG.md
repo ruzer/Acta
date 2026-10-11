@@ -8,6 +8,26 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 Sin cambios adicionales por anunciar.
 
+## 0.6.1 — 2026-10-10
+
+### Fixed
+
+- **Grupos del cuestionario** ([#29](https://github.com/ruzer/Acta/pull/29)).
+  «Expandir todos los grupos» y «Contraer todos los grupos» están juntos y
+  visibles cuando hay preguntas con seguimientos. Afectan todos los grupos,
+  incluidos los de otras páginas o fuera de los filtros, sin perder la
+  selección ni los controles individuales. Durante una búsqueda se muestran
+  también los seguimientos y se deshabilita la contracción global.
+- **Publicación conjunta** ([#30](https://github.com/ruzer/Acta/pull/30)).
+  La vista previa de operaciones masivas refresca el cuestionario antes de
+  calcular el alcance. Evita usar versiones anteriores de las preguntas si
+  acaba de confirmarse una asignación y su actualización sigue pendiente.
+  Se conservan las dependencias, la confirmación explícita y las validaciones
+  de concurrencia del backend.
+
+Sin cambios de API, contratos, permisos, almacenamiento ni migraciones respecto
+de v0.6.0. [Notas de la versión](docs/releases/v0.6.1.md).
+
 ## 0.6.0 — 2026-10-10
 
 ### Dirección C
