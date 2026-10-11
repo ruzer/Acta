@@ -378,7 +378,7 @@ it("participants require explicit new-assignment policy and explain existing ass
     "no",
   );
   await user.click(screen.getByRole("button", { name: "Revisar lote" }));
-  expect(await screen.findByText(/1 existentes sin cambios/)).toBeVisible();
+  expect(await screen.findByText(/1 existente sin cambios/)).toBeVisible();
   expect(sent?.participants).toEqual([
     {
       projectMemberId: data.members.find(

@@ -182,7 +182,7 @@ it("Organizar conserva plegado y selección al cambiar de modo y volver", async 
   );
   await user.click(screen.getByRole("tab", { name: "Escribir" }));
   await user.click(screen.getByRole("tab", { name: "Organizar" }));
-  expect(screen.getByText("1 preguntas en grupos plegados.")).toBeVisible();
+  expect(screen.getByText("1 pregunta en grupos plegados.")).toBeVisible();
   expect(screen.getByText("1 pregunta seleccionada")).toBeVisible();
   await user.click(
     screen.getByRole("button", { name: "Expandir todos los grupos" }),
@@ -219,7 +219,7 @@ it.each([12, 54, 304])(
         name: "Contraer seguimientos de Pregunta 0",
       }),
     );
-    expect(screen.getByText("1 preguntas en grupos plegados.")).toBeVisible();
+    expect(screen.getByText("1 pregunta en grupos plegados.")).toBeVisible();
     expect(screen.getByText("1 pregunta seleccionada")).toBeVisible();
     await user.click(
       screen.getByText("Seleccionar preguntas", { exact: true }),

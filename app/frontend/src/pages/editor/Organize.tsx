@@ -30,6 +30,7 @@ import {
   unfoldedQuestions,
 } from "./questionnaire-presentation";
 import "../../next-questionnaire.css";
+import { plural } from "../../ui/plural";
 function InspectorFrame({
   children,
   onClose,
@@ -600,7 +601,7 @@ export function Organize(
           <p className="hint" role="status">
             {search.trim()
               ? "La búsqueda muestra también seguimientos de grupos plegados."
-              : `${questions.length - unfolded.length} preguntas en grupos plegados.`}
+              : `${plural(questions.length - unfolded.length, "pregunta")} en grupos plegados.`}
           </p>
         )}
         {props.contributionsError && (
@@ -613,7 +614,11 @@ export function Organize(
         )}
         <div className="ac-questionnaire-results">
           <p role="status" className="hint">
-            {questions.length} preguntas encontradas
+            {plural(
+              questions.length,
+              "pregunta encontrada",
+              "preguntas encontradas",
+            )}
             {unfolded.length > 40
               ? ` · Página ${currentPage + 1} de ${pages}`
               : ""}
@@ -656,7 +661,7 @@ export function Organize(
                     );
                     addSelection(rows);
                     setSelectionNotice(
-                      `Se seleccionó el tema completo: ${rows.length} preguntas, incluidas las que quedan fuera de los filtros.`,
+                      `Se seleccionó el tema completo: ${plural(rows.length, "pregunta")}, incluidas las que quedan fuera de los filtros.`,
                     );
                   }}
                 >
@@ -852,7 +857,13 @@ export function Organize(
                               <span className="an-cell-label">
                                 Participantes
                               </span>
-                              <span>{assigned} participantes asignados</span>
+                              <span>
+                                {plural(
+                                  assigned,
+                                  "participante asignado",
+                                  "participantes asignados",
+                                )}
+                              </span>
                             </>
                           ) : (
                             <>
@@ -1074,7 +1085,7 @@ export function Organize(
           onComplete={(result) => {
             closeBulk();
             setBulkIds(new Set());
-            const message = `Operación aplicada: ${result.changedIds.length} preguntas actualizadas; ${result.ignoredIds.length} sin cambios.`;
+            const message = `Operación aplicada: ${plural(result.changedIds.length, "pregunta actualizada", "preguntas actualizadas")}; ${result.ignoredIds.length} sin cambios.`;
             setSelectionNotice(message);
             props.onBulkComplete?.(message);
           }}
@@ -1088,7 +1099,7 @@ export function Organize(
             const group = questionGroup(data.questions, selection.id);
             addSelection(group);
             setSelectionNotice(
-              `Grupo seleccionado: ${group.length} preguntas. La selección incluye seguimientos fuera de la página o los filtros actuales.`,
+              `Grupo seleccionado: ${plural(group.length, "pregunta")}. La selección incluye seguimientos fuera de la página o los filtros actuales.`,
             );
             setSelected(null);
           }}

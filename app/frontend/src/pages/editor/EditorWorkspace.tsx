@@ -12,6 +12,7 @@ import { Preview } from "./Preview";
 import { ReadinessPanel } from "./ReadinessPanel";
 import { Organize } from "./Organize";
 import { StatusChip } from "../../ui/semantic";
+import { plural } from "../../ui/plural";
 export type EditorAction =
   "assign" | "publish" | "archive" | "metadata" | "up" | "down" | "move";
 export type EditorProps = {
@@ -282,9 +283,12 @@ export function EditorWorkspace(props: EditorProps) {
       <div className="qe-heading">
         <div>
           <p className="ac-questionnaire-total">
-            {data.questions.length} preguntas ·{" "}
-            {data.questions.filter((q) => q.publication === "PUBLISHED").length}{" "}
-            publicadas
+            {plural(data.questions.length, "pregunta")} ·{" "}
+            {plural(
+              data.questions.filter((q) => q.publication === "PUBLISHED")
+                .length,
+              "publicada",
+            )}
           </p>
         </div>
         <div className="actions">
@@ -369,7 +373,7 @@ export function EditorWorkspace(props: EditorProps) {
                         <h3>{s.title}</h3>
                         <TopicActions {...props} id={s.id} />
                         <span className="hint">
-                          {questions.length} preguntas
+                          {plural(questions.length, "pregunta")}
                         </span>
                       </header>
                       {s.description && <p className="hint">{s.description}</p>}

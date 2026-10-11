@@ -169,8 +169,9 @@ function Receipt({
       </div>
       {data.progress.undetermined > 0 && (
         <Alert>
-          Hay {data.progress.undetermined} preguntas cuya aplicación depende de
-          respuestas anteriores.
+          {data.progress.undetermined === 1
+            ? "Hay 1 pregunta cuya aplicación depende de respuestas anteriores."
+            : `Hay ${data.progress.undetermined} preguntas cuya aplicación depende de respuestas anteriores.`}
         </Alert>
       )}
       {data.progress.excluded > 0 && (

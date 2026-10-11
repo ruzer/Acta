@@ -15,6 +15,7 @@ import {
 } from "./attention-data";
 import { expiringInvitations, invitationQueryOptions } from "./invitation-data";
 import "../next-attention.css";
+import { plural } from "../ui/plural";
 
 const taskLabels = {
   conflicts: "Conflictos",
@@ -353,7 +354,7 @@ export function ProjectAttention({
           ) : (
             <>
               <p className="ac-attention-result" role="status">
-                {items.length} preguntas
+                {plural(items.length, "pregunta")}
               </p>
               {!items.length ? (
                 <EmptyState

@@ -185,7 +185,7 @@ describe("Import guidance without a new import contract", () => {
     );
     await user.click(confirm);
     expect(
-      await screen.findByText("Importación completada: 2 preguntas y 1 temas."),
+      await screen.findByText("Importación completada: 2 preguntas y 1 tema."),
     ).toBeVisible();
     expect(vi.mocked(exchangeRequest).mock.calls[1]?.[3]).toEqual({
       file,

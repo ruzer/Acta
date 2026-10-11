@@ -12,6 +12,7 @@ import type {
 import { api, ApiFailure } from "../../api";
 import { Alert, Button, Checkbox, Dialog, Radio, Select } from "../../ui";
 import { StatusChip } from "../../ui/semantic";
+import { plural } from "../../ui/plural";
 type Command = BulkAreaInput | BulkParticipantsInput | BulkPublishInput;
 const titles: Record<BulkOperation, string> = {
   ASSIGN_AREA: "Asignar área a las preguntas",
@@ -215,7 +216,11 @@ export function BulkDialog({
                   )}
                   <Radio
                     name="bulk-area-mode"
-                    label={`Cambiar las ${questions.length} seleccionadas`}
+                    label={
+                      questions.length === 1
+                        ? "Cambiar la pregunta seleccionada"
+                        : `Cambiar las ${questions.length} seleccionadas`
+                    }
                     checked={allAreas}
                     onChange={() => setAllAreas(true)}
                   />
@@ -376,9 +381,20 @@ export function BulkDialog({
                   {required === "yes" ? "obligatorias" : "opcionales"}.
                 </p>
                 <p>
-                  {preview.counts.newAssignments} asignaciones nuevas ·{" "}
-                  {preview.counts.reactivatedAssignments} reactivadas ·{" "}
-                  {preview.counts.existingAssignments} existentes sin cambios.
+                  {plural(
+                    preview.counts.newAssignments,
+                    "asignación nueva",
+                    "asignaciones nuevas",
+                  )}{" "}
+                  ·{" "}
+                  {plural(preview.counts.reactivatedAssignments, "reactivada")}{" "}
+                  ·{" "}
+                  {plural(
+                    preview.counts.existingAssignments,
+                    "existente sin cambios",
+                    "existentes sin cambios",
+                  )}
+                  .
                 </p>
               </>
             )}

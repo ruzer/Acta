@@ -19,6 +19,7 @@ import {
 } from "./ParticipantFlow";
 import { Callout, ProgressCard } from "../ui/semantic";
 import { ParticipantIcon } from "./ParticipantIcon";
+import { plural } from "../ui/plural";
 // Frontend density heuristic, not a domain limit; tools remain available below it.
 const SCALE_THRESHOLD = 20;
 export function PersonalProgress({ projectId }: { projectId: string }) {
@@ -335,8 +336,9 @@ export function ProjectWork({
       )}
       {data.progress.undetermined > 0 && (
         <p className="hint">
-          {data.progress.undetermined} preguntas dependen de una respuesta
-          anterior enviada. Aún no sabemos si te corresponden.
+          {data.progress.undetermined === 1
+            ? "1 pregunta depende de una respuesta anterior enviada. Aún no sabemos si te corresponde."
+            : `${data.progress.undetermined} preguntas dependen de una respuesta anterior enviada. Aún no sabemos si te corresponden.`}
         </p>
       )}
     </section>
@@ -362,7 +364,7 @@ function Topic({
         <button
           aria-expanded={expanded}
           aria-controls={`topic-${section.id}`}
-          aria-label={`${section.title}, ${section.questions.length} preguntas`}
+          aria-label={`${section.title}, ${plural(section.questions.length, "pregunta")}`}
           onClick={() => setOpen(!open)}
           disabled={forceOpen}
         >

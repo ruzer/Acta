@@ -16,6 +16,7 @@ import { PersonalProgress, ParticipantHome } from "./MyWork";
 import { Brand } from "../branding";
 import { PageHeader } from "../ui/semantic";
 import { AnalystStatus } from "./AnalystVisual";
+import { plural } from "../ui/plural";
 export function Login({
   onLogin,
   notice,
@@ -222,7 +223,11 @@ export function Projects({
                   <h2>{p.name}</h2>
                   <p>{p.description}</p>
                   <span className="muted">
-                    {p.questionCount} preguntas publicadas disponibles
+                    {plural(
+                      p.questionCount,
+                      "pregunta publicada disponible",
+                      "preguntas publicadas disponibles",
+                    )}
                   </span>
                   {p.role === "STAKEHOLDER" && (
                     <PersonalProgress projectId={p.id} />
@@ -331,7 +336,7 @@ export function Participant() {
                 onClick={() => setSection(s.key)}
               >
                 {s.title}
-                <span>{s.questions.length} preguntas</span>
+                <span>{plural(s.questions.length, "pregunta")}</span>
               </button>
             ))}
           </nav>

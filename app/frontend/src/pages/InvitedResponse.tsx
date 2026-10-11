@@ -28,6 +28,7 @@ import { FactGrid, NextSteps, StatusChip } from "../ui/semantic";
 import { AnswerControl, answerText } from "./AnswerControl";
 import { ParticipantIcon } from "./ParticipantIcon";
 import "../invitation.css";
+import { plural } from "../ui/plural";
 const empty: ResponseContent = {
   answer: null,
   comment: "",
@@ -370,7 +371,7 @@ export function InvitationHome({
         </>
       )}
       <p role="status">
-        {sent} de {questions.length} preguntas con respuesta enviada
+        {sent} de {plural(questions.length, "pregunta")} con respuesta enviada
       </p>
       {access.work.sections.map((section) => (
         <section

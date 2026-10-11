@@ -8,6 +8,7 @@ import { ContributionComparison } from "./ContributionComparison";
 import { relevantSubmissionId } from "./review-turn";
 import { dateText, SubmittedAnswer } from "./ReviewShared";
 import "../next-contributions.css";
+import { plural } from "../ui/plural";
 
 type Submission = ReviewDetail["submissions"][number];
 type Situation = "" | "clarification" | "conflict";
@@ -230,7 +231,7 @@ export function ContributionSet({
               );
             }}
           >
-            ← Volver a {current.length} aportaciones
+            ← Volver a {plural(current.length, "aportación", "aportaciones")}
           </Button>
           <h3 ref={comparisonHeading} tabIndex={-1}>
             Contrastar aportaciones
@@ -266,7 +267,8 @@ export function ContributionSet({
                 </div>
               )}
               <p className="ac-contribution-count" role="status">
-                {visible.length} de {current.length} aportaciones
+                {visible.length} de{" "}
+                {plural(current.length, "aportación", "aportaciones")}
               </p>
               {visible.length ? (
                 <ContributionRail
@@ -333,7 +335,8 @@ export function ContributionSet({
             <div className="ac-contribution-selected">
               {!wide && current.length > 1 && (
                 <Button tone="secondary" onClick={returnToSet}>
-                  ← Volver a {current.length} aportaciones
+                  ← Volver a{" "}
+                  {plural(current.length, "aportación", "aportaciones")}
                 </Button>
               )}
               <ContributionPane

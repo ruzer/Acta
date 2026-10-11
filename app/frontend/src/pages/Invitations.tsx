@@ -24,6 +24,7 @@ import {
   Textarea,
 } from "../ui";
 import "../next-invitations.css";
+import { plural } from "../ui/plural";
 const labels: Record<InvitationView["status"], string> = {
   PENDING: "Pendiente",
   OPENED: "Abrió el enlace",
@@ -307,8 +308,12 @@ export function CreateInvitation({
                     onChange={(e) => setSearch(e.target.value)}
                   />
                   <p role="status">
-                    {selectedQuestions.length} seleccionadas · {visible.length}{" "}
-                    resultados publicados
+                    {plural(selectedQuestions.length, "seleccionada")} ·{" "}
+                    {plural(
+                      visible.length,
+                      "resultado publicado",
+                      "resultados publicados",
+                    )}
                   </p>
                   <div className="actions">
                     <Button
@@ -372,8 +377,12 @@ export function CreateInvitation({
                 </>
               ) : (
                 <p>
-                  {selectedQuestions.length} preguntas seleccionadas en
-                  Organizar. La selección se conserva al cerrar.
+                  {plural(
+                    selectedQuestions.length,
+                    "pregunta seleccionada",
+                    "preguntas seleccionadas",
+                  )}{" "}
+                  en Organizar. La selección se conserva al cerrar.
                 </p>
               )}
               <details>
@@ -720,7 +729,7 @@ export function Invitations() {
                   <dd>{row.total} incluidas</dd>
                   <dt>Envíos</dt>
                   <dd>
-                    {row.submitted} de {row.total} preguntas con envío
+                    {row.submitted} de {plural(row.total, "pregunta")} con envío
                     <span className="ac-mini-bar" aria-hidden="true">
                       <span
                         style={{

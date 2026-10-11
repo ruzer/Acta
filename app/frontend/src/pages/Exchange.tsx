@@ -16,6 +16,7 @@ import {
 import { PageHeader } from "../ui/semantic";
 import minimalTemplateUrl from "../../../../examples/questionnaire-template.minimal.json?url";
 import fullTemplateUrl from "../../../../examples/questionnaire-template.full.json?url";
+import { plural } from "../ui/plural";
 
 function importIssueContext(path: string): string {
   const parts = path.split("/").slice(1);
@@ -160,8 +161,9 @@ export function ImportStructure() {
       {result ? (
         <>
           <Alert>
-            Importación completada: {result.counts.questions} preguntas y{" "}
-            {result.counts.sections} temas.
+            Importación completada:{" "}
+            {plural(result.counts.questions, "pregunta")} y{" "}
+            {plural(result.counts.sections, "tema")}.
           </Alert>
           <Link to={`/projects/${projectId}/editor`}>
             Revisar estructura importada
@@ -249,8 +251,8 @@ export function ImportStructure() {
               </h2>
               <h3>{preview.projectName}</h3>
               <p>
-                {preview.errors.length} errores · {preview.warnings.length}{" "}
-                advertencias
+                {plural(preview.errors.length, "error", "errores")} ·{" "}
+                {plural(preview.warnings.length, "advertencia")}
               </p>
               <dl className="import-counts">
                 {Object.entries(preview.counts).map(([key, value]) => (

@@ -625,7 +625,7 @@ test("ACTA NEXT: crear desde el gestor conserva alcance explícito y el invitado
     }),
   ).toBeVisible();
   await expect(
-    row.getByText("0 de 1 preguntas con envío", { exact: true }),
+    row.getByText("0 de 1 pregunta con envío", { exact: true }),
   ).toBeVisible();
   await expect(row.getByText("Activo", { exact: true })).toBeVisible();
   const context = await browser.newContext({
@@ -669,14 +669,14 @@ test("ACTA NEXT: crear desde el gestor conserva alcance explícito y el invitado
       .getByRole("button", { name: "← Todas las preguntas", exact: true })
       .click();
     await expect(guest.getByRole("status")).toHaveText(
-      "1 de 1 preguntas con respuesta enviada",
+      "1 de 1 pregunta con respuesta enviada",
     );
   } finally {
     await context.close();
   }
   await page.reload();
   await expect(
-    row.getByText("1 de 1 preguntas con envío", { exact: true }),
+    row.getByText("1 de 1 pregunta con envío", { exact: true }),
   ).toBeVisible();
   await expect(
     row.getByText("Sin aperturas registradas", { exact: true }),
