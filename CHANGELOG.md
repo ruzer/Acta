@@ -6,7 +6,23 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
-Sin cambios adicionales por anunciar.
+### Fixed
+
+- El asistente de invitación pide el «Área de la aportación» en el primer paso,
+  junto al destinatario; antes estaba al final del paso de preguntas, fuera de
+  la vista, y bloqueaba «Continuar» sin explicación.
+- Importar muestra el identificador del proyecto que el archivo debe repetir y
+  lo recuerda junto al error de coincidencia; los errores de la revisión se
+  presentan como errores y las advertencias como información.
+- Los conteos de uno se escriben en singular («1 pregunta», «1 aportación»,
+  «1 error») en toda la interfaz.
+- Un cuestionario sin preguntas muestra solo cómo empezar, sin la barra de
+  búsqueda, filtros y selección; Atención sin preguntas indica al analista dónde
+  continuar e Invitaciones distingue entre no tener ninguna y un filtro sin
+  resultados.
+
+Presentación del frontend únicamente; sin cambios de API, contratos, permisos,
+almacenamiento ni migraciones. Ver el [registro de mejora continua](docs/product/CONTINUOUS-IMPROVEMENT.md).
 
 ## 0.6.1 — 2026-10-10
 
