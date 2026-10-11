@@ -368,6 +368,11 @@ summary {
   font-weight: 600;
   min-height: 44px;
 }
+.empty-action {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
 .empty {
   margin: 24px 0;
   padding: 32px 24px;

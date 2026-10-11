@@ -704,7 +704,15 @@ export function Invitations() {
             {filtered.length}{" "}
             {filtered.length === 1 ? "invitación" : "invitaciones"}
           </p>
-          {!items.length && <p>Todavía no hay invitaciones en esta página.</p>}
+          {!items.length && (
+            <p>
+              {filtered.length
+                ? "No hay invitaciones en esta página."
+                : expires
+                  ? "Ninguna invitación vence en los próximos 7 días."
+                  : "Todavía no hay invitaciones. Crea una para que una persona externa responda sin cuenta."}
+            </p>
+          )}
           <ul className="invitation-management">
             {items.map((row) => (
               <li key={row.id}>

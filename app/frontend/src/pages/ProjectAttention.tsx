@@ -364,9 +364,21 @@ export function ProjectAttention({
                       : "Sin preguntas"
                   }
                 >
-                  {data.questions.length
-                    ? "Puedes cambiar los filtros para consultar otros casos."
-                    : "Publica preguntas para ver su avance."}
+                  {data.questions.length ? (
+                    "Puedes cambiar los filtros para consultar otros casos."
+                  ) : (
+                    <>
+                      Publica preguntas para ver su avance.
+                      {canReview && (
+                        <>
+                          {" "}
+                          <Link to={`/projects/${projectId}/editor`}>
+                            Ir al cuestionario
+                          </Link>
+                        </>
+                      )}
+                    </>
+                  )}
                 </EmptyState>
               ) : task || status ? (
                 <section

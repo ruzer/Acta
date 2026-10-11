@@ -9,13 +9,14 @@ import {
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import {
   invitationCreateInput,
   questionnaireView,
 } from "@requirements/contracts";
 import fixture from "../../../../tests/fixtures/analyst-visual.json";
 import * as apiModule from "../api";
-import { CreateInvitation } from "./Invitations";
+import { CreateInvitation, Invitations } from "./Invitations";
 const questionnaire = questionnaireView.parse(fixture.questionnaire);
 const policy = {
   allowNonNominal: false,
@@ -294,4 +295,59 @@ it("el rechazo del backend mantiene el resumen y enfoca el error sin anunciar é
   expect(
     within(screen.getByRole("dialog")).queryByLabelText("Enlace privado"),
   ).not.toBeInTheDocument();
+});
+
+function mountList(search = "") {
+  vi.spyOn(apiModule, "api").mockImplementation((async (key: string) =>
+    key === "invitations"
+      ? { items: [], page: 1, total: 0 }
+      : key === "projects"
+        ? [
+            {
+              id: fixture.projectId,
+              externalId: "EXP-001",
+              name: "Proyecto",
+              description: "",
+              lifecycle: "ACTIVE",
+              role: "ANALYST",
+              lockVersion: 1,
+              questionCount: 0,
+            },
+          ]
+        : key === "questionnaire"
+          ? questionnaire
+          : policy) as never);
+  render(
+    <QueryClientProvider
+      client={
+        new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      }
+    >
+      <MemoryRouter
+        initialEntries={[`/projects/${fixture.projectId}/invitations${search}`]}
+      >
+        <Routes>
+          <Route
+            path="/projects/:projectId/invitations"
+            element={<Invitations />}
+          />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
+  );
+}
+it("sin invitaciones dice que aún no hay ninguna y para qué sirven, no que falten en «esta página»", async () => {
+  mountList();
+  expect(
+    await screen.findByText(
+      "Todavía no hay invitaciones. Crea una para que una persona externa responda sin cuenta.",
+    ),
+  ).toBeVisible();
+  expect(screen.queryByText(/en esta página/)).not.toBeInTheDocument();
+});
+it("el filtro de vencimiento sin resultados dice que ninguna vence pronto", async () => {
+  mountList("?expiresWithin=7");
+  expect(
+    await screen.findByText("Ninguna invitación vence en los próximos 7 días."),
+  ).toBeVisible();
 });

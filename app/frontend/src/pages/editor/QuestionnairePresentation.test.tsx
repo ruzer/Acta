@@ -486,10 +486,41 @@ it("un cuestionario vacío explica cómo empezar, sin atribuir la ausencia a los
     ),
   ).toBeVisible();
   expect(screen.getByRole("button", { name: "+ Agregar tema" })).toBeEnabled();
-  expect(screen.getByRole("button", { name: "Nueva pregunta" })).toBeDisabled();
+  // No topic yet, so "Nueva pregunta" would be a dead control: it is not offered.
+  expect(
+    screen.queryByRole("button", { name: "Nueva pregunta" }),
+  ).not.toBeInTheDocument();
   expect(
     screen.queryByText("Cambia el tema o elimina los filtros."),
   ).not.toBeInTheDocument();
+});
+it("un cuestionario vacío no muestra búsqueda, filtros ni selección: solo cómo empezar", () => {
+  render(<Organize {...handlers} data={dataFor(0)} />);
+  expect(
+    screen.queryByRole("searchbox", { name: "Buscar preguntas" }),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByText("Seleccionar preguntas")).not.toBeInTheDocument();
+  expect(screen.queryByRole("table")).not.toBeInTheDocument();
+  expect(
+    screen.getByText(
+      "Crea la primera con Nueva pregunta o importa una estructura.",
+    ),
+  ).toBeVisible();
+  expect(screen.getByRole("button", { name: "Nueva pregunta" })).toBeEnabled();
+});
+it("un cuestionario vacío sin áreas activas explica por qué no se puede crear la primera pregunta", () => {
+  const data = dataFor(0);
+  render(
+    <Organize
+      {...handlers}
+      data={{
+        ...data,
+        areas: data.areas.map((a) => ({ ...a, active: false })),
+      }}
+    />,
+  );
+  expect(screen.getByRole("button", { name: "Nueva pregunta" })).toBeDisabled();
+  expect(screen.getByText(/hace falta al menos un área activa/)).toBeVisible();
 });
 it("una búsqueda sin coincidencias conserva el mensaje de filtros, sin fingir un cuestionario vacío", async () => {
   const user = userEvent.setup();

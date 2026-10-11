@@ -401,6 +401,40 @@ export function Organize(
     bulkTrigger.current = document.activeElement as HTMLElement;
     setBulkOperation(operation);
   }
+  // A questionnaire without questions has nothing to search, filter, fold or
+  // select: say how to begin and offer the one action that applies.
+  if (!data.questions.length) {
+    const hasArea = data.areas.some((a) => a.active);
+    return (
+      <div className="qe-organize an-questionnaire">
+        <EmptyState
+          title="Todavía no hay preguntas."
+          action={
+            data.sections.length ? (
+              <Button
+                disabled={!hasArea}
+                onClick={() => props.onEdit(undefined, undefined)}
+              >
+                Nueva pregunta
+              </Button>
+            ) : (
+              <Button onClick={props.onCreateTopic}>+ Agregar tema</Button>
+            )
+          }
+        >
+          {data.sections.length
+            ? "Crea la primera con Nueva pregunta o importa una estructura."
+            : "Agrega un tema para crear la primera pregunta o importa una estructura."}
+        </EmptyState>
+        {!hasArea && (
+          <p className="hint">
+            Para crear preguntas hace falta al menos un área activa; un
+            administrador puede crearla en Administración.
+          </p>
+        )}
+      </div>
+    );
+  }
   return (
     <div
       className={
