@@ -329,7 +329,9 @@ test("V-24 · Invitaciones: cabecera de página, estado con texto y color, ayuda
     );
     await expect(row.locator(".ac-expiry-date")).toBeVisible();
     // Progress is said in words; the bar only repeats it.
-    await expect(row.getByText(/\d+ de \d+ preguntas con envío/)).toBeVisible();
+    await expect(
+      row.getByText(/\d+ de \d+ preguntas? con envío/),
+    ).toBeVisible();
     await expect(row.locator(".ac-mini-bar")).toHaveAttribute(
       "aria-hidden",
       "true",
@@ -526,9 +528,13 @@ test("V-25 · asistente de invitación: cuatro pasos, acciones al pie del diálo
     });
     expect(boxes.insideTop && boxes.insideBottom).toBe(true);
     expect(boxes.overflow).toBe(false);
-    // Going forward needs the required data; going back is offered only afterwards.
+    // Going forward needs the required data, the contribution area included
+    // (it is asked with the recipient); going back is offered only afterwards.
     await dialog.getByLabel("Referencia de la invitación").fill("Revisión CP7");
     await dialog.getByLabel("Nombre de la persona").fill("Persona ficticia");
+    await dialog
+      .getByLabel("Área de la aportación", { exact: true })
+      .selectOption({ index: 1 });
     await dialog.getByRole("button", { name: "Continuar" }).click();
     await expect(steps.locator('[aria-current="step"]')).toContainText(
       "Preguntas",
