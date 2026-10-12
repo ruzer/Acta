@@ -10,7 +10,11 @@ import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import "@testing-library/jest-dom/vitest";
-import { dashboardView } from "@requirements/contracts";
+import {
+  dashboardView,
+  decisionRegisterView,
+  type DecisionRegisterEntry,
+} from "@requirements/contracts";
 import fixture from "../../../../tests/fixtures/analyst-visual.json";
 import { exchangeRequest } from "../api";
 import { ProjectDecisions } from "./ProjectDecisions";
@@ -38,6 +42,39 @@ const second = {
   sectionTitle: "Seguimiento",
 };
 const data = { ...source, questions: [...source.questions, second] };
+const entry = (
+  questionId: string,
+  extra: Partial<DecisionRegisterEntry> = {},
+): DecisionRegisterEntry => ({
+  questionId,
+  state: "CURRENT",
+  excerpt: "Se adopta el registro único el mismo día.",
+  truncated: false,
+  scope: "Procedimiento general",
+  hasExceptions: false,
+  decidedAt: "2026-10-10T12:00:00.000Z",
+  decidedBy: "Analista de ejemplo",
+  endedAt: null,
+  endedReason: null,
+  previous: 0,
+  ...extra,
+});
+/** Answers each operation of the page: the project's questions and the decisions' excerpts. */
+function serve(
+  dashboard: unknown,
+  entries: DecisionRegisterEntry[] | Error = [],
+) {
+  vi.mocked(exchangeRequest).mockImplementation((async (
+    _project: string,
+    operation: string,
+  ) => {
+    if (operation === "decisions") {
+      if (entries instanceof Error) throw entries;
+      return { entries };
+    }
+    return dashboard;
+  }) as never);
+}
 function LocationProbe() {
   const location = useLocation();
   return (
@@ -76,7 +113,7 @@ function setup(search = "") {
 }
 
 it("lista solo VALIDATED desde la proyección existente y enlaza el detalle real", async () => {
-  vi.mocked(exchangeRequest).mockResolvedValue(data);
+  serve(data);
   setup();
   expect(
     await screen.findByRole("link", { name: first.title }),
@@ -93,15 +130,21 @@ it("lista solo VALIDATED desde la proyección existente y enlaza el detalle real
     expect(
       screen.queryByRole("link", { name: question.title }),
     ).not.toBeInTheDocument();
-  expect(exchangeRequest).toHaveBeenCalledExactlyOnceWith(
+  expect(exchangeRequest).toHaveBeenCalledTimes(2);
+  expect(exchangeRequest).toHaveBeenCalledWith(
     "project-a",
     "dashboard",
     dashboardView,
   );
+  expect(exchangeRequest).toHaveBeenCalledWith(
+    "project-a",
+    "decisions",
+    decisionRegisterView,
+  );
 });
 
 it("combina los filtros de URL y conserva su contexto completo al abrir una decisión", async () => {
-  vi.mocked(exchangeRequest).mockResolvedValue(data);
+  serve(data);
   const search = `?q=DEC-2&area=${second.areaId}&section=${second.sectionId}`;
   const user = setup(search);
   const link = await screen.findByRole("link", { name: second.title });
@@ -120,7 +163,7 @@ it("combina los filtros de URL y conserva su contexto completo al abrir una deci
 });
 
 it("cambiar y limpiar filtros usa la URL sin otra petición ni eliminar parámetros ajenos", async () => {
-  vi.mocked(exchangeRequest).mockResolvedValue(data);
+  serve(data);
   const user = setup("?source=test");
   await screen.findByRole("link", { name: first.title });
   await user.type(screen.getByLabelText("Buscar decisiones"), "DEC-2");
@@ -138,11 +181,12 @@ it("cambiar y limpiar filtros usa la URL sin otra petición ni eliminar parámet
   expect(JSON.parse(screen.getByTestId("location").textContent!).search).toBe(
     "?source=test",
   );
-  expect(exchangeRequest).toHaveBeenCalledTimes(1);
+  // One request per resource on opening; filtering never asks again.
+  expect(exchangeRequest).toHaveBeenCalledTimes(2);
 });
 
 it("distingue ausencia de decisiones de ausencia de coincidencias", async () => {
-  vi.mocked(exchangeRequest).mockResolvedValue({
+  serve({
     ...data,
     questions: data.questions.filter(
       (question) => question.status !== "VALIDATED",
@@ -156,7 +200,7 @@ it("distingue ausencia de decisiones de ausencia de coincidencias", async () => 
   ).toBeVisible();
   expect(screen.queryByLabelText("Buscar decisiones")).not.toBeInTheDocument();
   cleanup();
-  vi.mocked(exchangeRequest).mockResolvedValue(data);
+  serve(data);
   setup("?area=missing");
   expect(
     await screen.findByRole("heading", {
@@ -188,7 +232,7 @@ it("un error de carga no se presenta como cero decisiones ni expone navegación 
 });
 
 it("UX-02: la página tiene un único h1 «Decisiones» y no repite el título como h2 ni usa el nombre del proyecto", async () => {
-  vi.mocked(exchangeRequest).mockResolvedValue(data);
+  serve(data);
   setup();
   await screen.findByLabelText("Buscar decisiones");
   const h1 = screen.getAllByRole("heading", { level: 1 });
@@ -204,7 +248,7 @@ it("UX-02: la página tiene un único h1 «Decisiones» y no repite el título c
 });
 
 it("CP5: cada decisión es una línea de registro: referencia, título como enlace y tema · área, sin repetir «Vigente» en cada fila", async () => {
-  vi.mocked(exchangeRequest).mockResolvedValue(data);
+  serve(data);
   setup();
   await screen.findByRole("link", { name: first.title });
   const items = screen.getAllByRole("listitem");
@@ -222,4 +266,131 @@ it("CP5: cada decisión es una línea de registro: referencia, título como enla
       .compareDocumentPosition(entry.querySelector(".ac-register-title")!) &
       Node.DOCUMENT_POSITION_FOLLOWING,
   ).toBeTruthy();
+});
+
+const pending = source.questions.find(
+  (question) =>
+    question.status !== "VALIDATED" && question.status !== "NOT_APPLICABLE",
+)!;
+const undecidedOthers = data.questions.filter(
+  (question) =>
+    question.status !== "VALIDATED" &&
+    question.status !== "NOT_APPLICABLE" &&
+    question.id !== pending.id,
+).length;
+
+it("cada decisión muestra el inicio de lo decidido con su alcance, fecha y autor, y la búsqueda lo encuentra", async () => {
+  serve(data, [
+    entry(first.id, {
+      excerpt: "Se centraliza la información en una sola hoja compartida.",
+      hasExceptions: true,
+      previous: 2,
+    }),
+    entry(second.id),
+  ]);
+  const user = setup();
+  const row = (await screen.findByRole("link", { name: first.title })).closest(
+    "li",
+  )!;
+  expect(row).toHaveTextContent(
+    "Se centraliza la información en una sola hoja",
+  );
+  expect(row).toHaveTextContent("Alcance: Procedimiento general");
+  expect(row).toHaveTextContent("Analista de ejemplo");
+  expect(row).toHaveTextContent("Con excepciones");
+  expect(row).toHaveTextContent("2 decisiones anteriores");
+  expect(screen.queryByText("Vigente")).not.toBeInTheDocument();
+  // The register is searchable by what was decided, not only by title.
+  await user.type(
+    screen.getByLabelText("Buscar decisiones"),
+    "hoja compartida",
+  );
+  expect(screen.getByRole("link", { name: first.title })).toBeVisible();
+  expect(
+    screen.queryByRole("link", { name: second.title }),
+  ).not.toBeInTheDocument();
+});
+
+it("una decisión que dejó de estar vigente se separa de las vigentes, dice por qué y abre su registro", async () => {
+  serve(data, [
+    entry(first.id),
+    entry(pending.id, {
+      state: "REOPENED",
+      excerpt: "Se mantiene el procedimiento actual.",
+      endedAt: "2026-10-11T09:00:00.000Z",
+      endedReason: "Se solicitó una aclaración.",
+      previous: 1,
+    }),
+  ]);
+  setup();
+  const heading = await screen.findByRole("heading", {
+    name: "Sin decisión vigente (1)",
+  });
+  const group = heading.closest("section")!;
+  const row = within(group).getByRole("link", { name: pending.title });
+  expect(row).toHaveAttribute(
+    "href",
+    `/projects/project-a/review/${pending.id}?tab=decision`,
+  );
+  const item = row.closest("li")!;
+  expect(item).toHaveTextContent(
+    "Decisión anterior: Se mantiene el procedimiento actual.",
+  );
+  expect(item).toHaveTextContent("Dejó de estar vigente el");
+  expect(item).toHaveTextContent("Se solicitó una aclaración.");
+  // Two lists: each has its own heading and the entries sit one level below it.
+  expect(
+    screen.getByRole("heading", {
+      level: 2,
+      name: /^Decisiones vigentes \(\d+\)$/,
+    }),
+  ).toBeVisible();
+  expect(
+    screen.getByRole("heading", { level: 3, name: first.title }),
+  ).toBeVisible();
+  expect(
+    within(group).getByRole("heading", { level: 3, name: pending.title }),
+  ).toBeVisible();
+  // Current decisions stay in their own list, unmarked, and are not repeated here.
+  expect(within(group).queryByRole("link", { name: first.title })).toBeNull();
+  expect(screen.getByRole("link", { name: first.title })).toHaveAttribute(
+    "href",
+    `/projects/project-a/review/${first.id}`,
+  );
+  // The whole picture in one line: reopened, still to decide, and where to go.
+  const jump = screen.getByRole("link", { name: "1 con decisión anterior" });
+  expect(jump.closest("p")).toHaveTextContent(
+    `Sin decisión vigente: 1 con decisión anterior · ${undecidedOthers} ${undecidedOthers === 1 ? "pregunta por decidir" : "preguntas por decidir"}`,
+  );
+  expect(screen.getByRole("link", { name: "Ver en Atención" })).toHaveAttribute(
+    "href",
+    "/projects/project-a/dashboard",
+  );
+  // The group sits after the long list: the count takes the reader there.
+  heading.scrollIntoView = vi.fn();
+  await userEvent.click(jump);
+  expect(heading.scrollIntoView).toHaveBeenCalled();
+  expect(heading).toHaveFocus();
+});
+
+it("sin decisiones reabiertas no hay grupos ni encabezados añadidos", async () => {
+  serve(data, [entry(first.id), entry(second.id)]);
+  setup();
+  await screen.findByRole("link", { name: first.title });
+  expect(
+    screen.queryByRole("heading", {
+      name: /Sin decisión vigente|Decisiones vigentes \(/,
+    }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("heading", { level: 2, name: first.title }),
+  ).toBeVisible();
+});
+
+it("si los extractos no cargan, el registro sigue siendo la lista de preguntas con decisión", async () => {
+  serve(data, new Error("sin extractos"));
+  setup();
+  expect(await screen.findByRole("link", { name: first.title })).toBeVisible();
+  expect(screen.getByRole("status")).toHaveTextContent("2 decisiones");
+  expect(screen.queryByText(/Alcance:/)).not.toBeInTheDocument();
 });

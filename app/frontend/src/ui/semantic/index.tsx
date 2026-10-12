@@ -519,12 +519,18 @@ export function RegisterRow({
   reference,
   title,
   meta,
+  summary,
+  detail,
   status,
   level = 3,
 }: {
   reference?: ReactNode;
   title: ReactNode;
   meta?: ReactNode;
+  /** What the entry says, as an excerpt. */
+  summary?: ReactNode;
+  /** Small print under the summary: scope, date, flags. */
+  detail?: ReactNode;
   status?: ReactNode;
   /** Heading level of the title: 2 directly under the page's h1, 3 under a section. */
   level?: 2 | 3;
@@ -536,6 +542,8 @@ export function RegisterRow({
         {reference && <p className="ac-register-reference">{reference}</p>}
         <Heading className="ac-register-title">{title}</Heading>
         {meta && <p className="ac-register-meta">{meta}</p>}
+        {summary && <p className="ac-register-summary">{summary}</p>}
+        {detail && <p className="ac-register-detail">{detail}</p>}
       </div>
       {status}
     </li>

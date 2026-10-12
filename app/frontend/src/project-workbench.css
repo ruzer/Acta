@@ -40,6 +40,17 @@
 .project-workbench .pw-decision-results p {
   margin: 0;
 }
+.project-workbench .pw-decision-aside {
+  margin: 0 0 0.75rem;
+  color: var(--ac-muted);
+}
+.project-workbench .pw-decision-group {
+  margin: 2rem 0 0.25rem;
+  font-size: 1.125rem;
+}
+.project-workbench .pw-decision-group-first {
+  margin-top: 0.5rem;
+}
 @media (max-width: 767px) {
   .project-workbench .pw-decision-filters {
     grid-template-columns: minmax(0, 1fr);
