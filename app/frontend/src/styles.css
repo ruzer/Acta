@@ -1013,6 +1013,13 @@ section.narrow {
 .data-table td[data-end] {
   text-align: right;
 }
+/* Row links (open, members): side by side, never wrapped under each other. */
+.data-table .table-links {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  white-space: nowrap;
+}
 .data-table .ac-cell-status {
   display: inline-flex;
   flex-direction: column;
@@ -1065,13 +1072,15 @@ section.narrow {
   .data-table td[data-label]::before {
     /* Visual only: the column header already names the cell for assistive tech. */
     content: attr(data-label) / "";
-    flex: 0 0 4.5rem;
+    flex: 0 0 6.5rem;
+    overflow-wrap: normal;
     color: var(--ac-muted);
     font: 600 var(--ac-text-overline) / 1.4 var(--ac-font-ui);
     letter-spacing: 0.05em;
     text-transform: uppercase;
   }
-  .data-table .actions {
+  .data-table .actions,
+  .data-table .table-links {
     justify-content: flex-start;
     padding-top: 6px;
   }
