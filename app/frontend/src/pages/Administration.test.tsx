@@ -1,4 +1,4 @@
-import { afterEach, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, expect, it, vi } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
@@ -8,6 +8,15 @@ import type { Me } from "@requirements/contracts";
 import * as apiModule from "../api";
 import { Administration } from "./Administration";
 
+beforeAll(() => {
+  // jsdom has no modal dialogs; the app code under test is unchanged.
+  HTMLDialogElement.prototype.showModal = function () {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close = function () {
+    this.removeAttribute("open");
+  };
+});
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
@@ -67,4 +76,42 @@ it("sin proyectos, la pestaña dice cómo crear el primero", async () => {
     await screen.findByRole("heading", { name: "Todavía no hay proyectos" }),
   ).toBeVisible();
   expect(screen.getByText(/Crea el primero con/)).toBeVisible();
+});
+it("la acción de cada cuenta dice qué hace y a quién: restablecer su contraseña", async () => {
+  vi.spyOn(apiModule, "api").mockImplementation((async (key: string) =>
+    key === "users"
+      ? [
+          {
+            id: "u1",
+            username: "analista",
+            displayName: "Analista de ejemplo",
+            active: true,
+            mustChangePassword: false,
+            isOrganizationAdmin: false,
+            areaName: null,
+          },
+        ]
+      : []) as never);
+  render(
+    <QueryClientProvider
+      client={
+        new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      }
+    >
+      <MemoryRouter>
+        <Administration me={me} />
+      </MemoryRouter>
+    </QueryClientProvider>,
+  );
+  const user = userEvent.setup();
+  await user.click(
+    await screen.findByRole("button", {
+      name: "Restablecer contraseña de Analista de ejemplo",
+    }),
+  );
+  expect(
+    screen.getByRole("dialog", {
+      name: "Restablecer contraseña · Analista de ejemplo",
+    }),
+  ).toBeVisible();
 });
