@@ -6,6 +6,18 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
+Sin cambios adicionales por anunciar.
+
+## 0.7.0 — 2026-10-12
+
+Mejora continua del frontend con datos de gran volumen y ampliaciones de
+**lectura** compatibles en la API (ver el último párrafo).
+PRs [#33](https://github.com/ruzer/Acta/pull/33),
+[#34](https://github.com/ruzer/Acta/pull/34),
+[#35](https://github.com/ruzer/Acta/pull/35),
+[#36](https://github.com/ruzer/Acta/pull/36) y
+[#37](https://github.com/ruzer/Acta/pull/37).
+
 ### Fixed
 
 - El asistente de invitación pide el «Área de la aportación» en el primer paso,
@@ -80,14 +92,15 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   «Invitaciones externas (N)», en lugar de una opción por invitación; con cientos
   de invitaciones la lista ya no es inmanejable.
 
-Cambios de contrato, solo de lectura y compatibles (sin permisos, escrituras,
-estados persistidos, almacenamiento ni migraciones nuevos): nuevo
+Cambios de contrato de la API, solo de lectura y compatibles (sin permisos,
+escrituras, estados persistidos, almacenamiento ni migraciones nuevos): nuevo
 `GET /projects/:projectId/decisions` (solo ADMIN y ANALYST; extractos de la
 decisión vigente o, si se reabrió, de la última anterior; una lectura sin
 consultas por registro); `GET /projects/:projectId/history` añade `subject` a
 cada evento, `invitationActors` y el filtro `actorKind`, y `actors` pasa a
 listar solo cuentas (más el actor filtrado). El contrato de exportación no
-cambia. Ver el [registro de mejora continua](docs/product/CONTINUOUS-IMPROVEMENT.md).
+cambia. Ver el [registro de mejora continua](docs/product/CONTINUOUS-IMPROVEMENT.md)
+y las [notas de la versión](docs/releases/v0.7.0.md).
 
 ## 0.6.1 — 2026-10-10
 

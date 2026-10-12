@@ -14,6 +14,35 @@ Se prepara [Semantic Versioning](https://semver.org/lang/es/) en formato **MAJOR
 
 El contrato público incluye API documentada, configuración, formatos de intercambio y requisitos de actualización/persistencia. No basta con que TypeScript compile para afirmar compatibilidad. Antes de 1.0 no se promete estabilidad absoluta; los cambios incompatibles deben anunciarse, agruparse en un incremento MINOR de `0.x` y acompañarse de instrucciones de migración. PATCH seguirá reservado para cambios compatibles. Una corrección de seguridad que rompa compatibilidad debe decirlo y usar la versión apropiada.
 
+### Preparación de 0.7.0 — Decisiones y bitácora trazables, uso con volumen
+
+La base es [v0.6.1](https://github.com/ruzer/Acta/releases/tag/v0.6.1).
+**0.7.0** reúne cinco iteraciones de mejora continua
+([#33](https://github.com/ruzer/Acta/pull/33) a
+[#37](https://github.com/ruzer/Acta/pull/37)): invitaciones, importación,
+revisión con «Siguiente por revisar», Administración › Proyectos, cuestionarios
+y registros con cientos de elementos, decisiones con su extracto, bitácora que
+nombra qué ocurrió y filtro de actores simplificado.
+
+Es MINOR porque añade funcionalidad compatible: un endpoint de **lectura**
+(`GET /projects/:projectId/decisions`, solo ADMIN y ANALYST) y campos aditivos en
+`GET /projects/:projectId/history` (`subject`, `invitationActors`, filtro
+`actorKind`; `actors` pasa a listar solo cuentas, más el actor filtrado). El
+contrato de exportación no cambia. No hay migraciones, ni cambios de permisos,
+escrituras, estados persistidos, almacenamiento, autenticación o invitaciones.
+Un fork que consuma `history` debe revisar `actors` y los campos nuevos
+(`docs/CONTRACTS-2E.md`).
+
+Los manifiestos, las referencias entre paquetes y el lockfile se preparan en
+0.7.0 sin actualizar dependencias externas. Las
+[notas de la versión](releases/v0.7.0.md) incluyen la evidencia del CI de la
+base. El PR de preparación requiere CI verde y merge manual del maintainer.
+Después se debe verificar el CI del `main` resultante antes de crear un tag
+anotado `v0.7.0` sobre ese commit exacto y publicar la GitHub Release como
+Latest. Verificar también el CI del tag. La preparación y la fecha del changelog
+no constituyen por sí solas una publicación; no se publican imágenes Docker ni
+se actualizan downstreams en este proceso.
+
 ### Preparación de 0.6.1 — Grupos, publicación conjunta y foco
 
 La base es [v0.6.0](https://github.com/ruzer/Acta/releases/tag/v0.6.0).
