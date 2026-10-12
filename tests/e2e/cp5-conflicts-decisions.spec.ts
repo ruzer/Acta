@@ -380,6 +380,12 @@ test("V-11 · una decisión reabierta se conserva como antecedente, no como la v
   await expect(
     page.getByRole("article", { name: "Decisión vigente" }),
   ).toHaveCount(0);
+  // Without a decision in force the tab says so instead of showing only a closed list.
+  await expect(
+    page.getByText(
+      "No hay una decisión vigente. La decisión anterior se conserva como antecedente.",
+    ),
+  ).toBeVisible();
   const history = page.locator("details.ac-decision-history");
   await expect(history.locator(":scope > summary")).toHaveText(
     "Decisiones históricas (1)",

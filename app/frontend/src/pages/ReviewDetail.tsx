@@ -585,6 +585,17 @@ export function ReviewDetail() {
               {!d.validations.length && d.status !== "NOT_APPLICABLE" && (
                 <p>No hay decisiones registradas.</p>
               )}
+              {!hasCurrentDecision &&
+                historicalDecisions.length > 0 &&
+                d.status !== "NOT_APPLICABLE" && (
+                  <p>
+                    No hay una decisión vigente.{" "}
+                    {historicalDecisions.length === 1
+                      ? "La decisión anterior se conserva"
+                      : "Las decisiones anteriores se conservan"}{" "}
+                    como antecedente.
+                  </p>
+                )}
               {(historicalDecisions.length > 0 ||
                 (d.status === "NOT_APPLICABLE" &&
                   historicalDispositions.length > 0)) && (
