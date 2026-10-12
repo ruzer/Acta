@@ -6,7 +6,47 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
-Sin cambios adicionales por anunciar.
+Instalación guiada y centro de configuración. **Agrega una migración**
+(`202610120001_installation_setup_settings`, solo tablas nuevas); las
+instalaciones existentes conservan usuarios, evidencia y configuración, y no
+ven el asistente. Ver [Instalación guiada y Configuración](docs/ADMIN-CENTER.md).
+
+### Added
+
+- **Asistente de primera instalación**, opcional: Bienvenida, Administrador,
+  Organización, Almacenamiento (solo comprueba), Personalización con vista
+  previa, Verificación y Finalizar. Solo funciona con un código de un solo uso
+  que emite quien opera el servidor (`scripts/setup-token.mjs`), guardado como
+  SHA-256, con caducidad, límite de intentos y una única transacción bajo el
+  mismo candado que `bootstrap-admin`. No reaparece una vez que existe un
+  administrador. `SETUP_WIZARD=disabled` lo apaga.
+- `scripts/install.sh`: comprueba Docker, escribe un `.env` mínimo solo si no
+  existe y se pidieron opciones, arranca Acta y muestra la dirección del
+  asistente. Es un atajo: `docker compose up` con o sin `.env` sigue siendo
+  válido.
+- **Administración → Configuración**: General (institución, nombre de la
+  aplicación y corto, formato regional, zona horaria), Apariencia (logotipo,
+  favicon, color con verificación de contraste y vista previa), Almacenamiento
+  (estado y prueba de conexión) y Sistema (versión, base de datos, seguridad y
+  límites). Cambios con control de versión, auditados (`SETTINGS_UPDATED`,
+  `BRANDING_ASSET_CHANGED/REMOVED`, `STORAGE_CONNECTION_TESTED`).
+- Logotipo y favicon subidos desde la aplicación: se validan por sus bytes
+  (PNG/JPEG, PNG/ICO; sin SVG) y se sirven como imagen inerte.
+- Pruebas de instalación limpia y reinicio en CI (`guided-install`) y guía de
+  [diseño de integraciones](docs/INTEGRATIONS-DESIGN.md) (sin implementar).
+
+### Changed
+
+- Los valores de apariencia que define la infraestructura (`APP_NAME`,
+  `APP_SHORT_NAME`, `APP_ACCENT`, `APP_LOGO`, `APP_FAVICON`, `DEFAULT_LOCALE`,
+  `DEFAULT_TIMEZONE`) se muestran como «administrado externamente» y no se
+  pueden cambiar desde la aplicación; el resto lo elige la administración.
+  `docker-compose.yml` ya no inyecta valores por defecto para ellas (los
+  aplica la aplicación) y `.env.example` las deja comentadas.
+- El nombre de la institución de la pantalla de acceso y del encabezado sale
+  de la base de datos, igual que dentro de la sesión; `ORGANIZATION_NAME` es
+  solo el nombre inicial.
+- `bootstrap-admin` también registra la instalación como completada.
 
 ## 0.7.0 — 2026-10-12
 

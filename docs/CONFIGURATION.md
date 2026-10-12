@@ -4,21 +4,24 @@
 
 `.env.example` funciona como inicio local sin editar: origen loopback, cookies no Secure solo en loopback, demo desactivada y secretos generados por `secrets-init`. Para producción configurar `APP_ORIGIN=https://…`, `NODE_ENV=production`, `COOKIE_SECURE=true` y TLS externo. Configuración inválida impide arrancar; no se imprimen valores secretos.
 
-`ORGANIZATION_CODE` es el código interno de instalación (DEFAULT por defecto), nunca un campo de login. `ORGANIZATION_NAME` se usa al bootstrap/demo y en branding. El nombre inicial queda persistido en Organization; no existe una pantalla para renombrar organizaciones existentes. Cambiar el código de despliegue no mueve usuarios ni crea acceso cruzado. Cambiar el nombre de despliegue no sobrescribe registros existentes automáticamente.
+`ORGANIZATION_CODE` es el código interno de instalación (DEFAULT por defecto), nunca un campo de login. `ORGANIZATION_NAME` es solo el nombre **inicial** (el asistente lo propone; `bootstrap-admin` y la demo lo usan): queda persistido en Organization y se renombra en **Administración → Configuración**. Cambiar el código de despliegue no mueve usuarios ni crea acceso cruzado. Cambiar `ORGANIZATION_NAME` después de instalar no sobrescribe el registro existente.
 
 ## Opcional / branding
 
-| Variable               | Default               | Regla                                                                                        |
+Hay una regla de precedencia: **si defines la variable (no vacía), la infraestructura manda**; Acta muestra el valor como «administrado externamente» y no deja cambiarlo desde **Configuración**. Si la dejas vacía o ausente, el valor lo elige un administrador en la aplicación y, si nadie lo eligió, vale el predeterminado. [Detalle](ADMIN-CENTER.md#regla-de-precedencia).
+
+| Variable               | Predeterminado        | Regla                                                                                        |
 | ---------------------- | --------------------- | -------------------------------------------------------------------------------------------- |
 | APP_NAME               | Acta | Nombre visible / título, hasta 100 caracteres                                                |
 | APP_SHORT_NAME         | Acta                  | Hasta 40 caracteres                                                                          |
-| ORGANIZATION_NAME      | Example Organization       | Nombre inicial y contexto de instalación                                                     |
-| APP_LOGO / APP_FAVICON | vacío                 | Ruta local `/branding/archivo.png` (png/jpg/jpeg/webp/ico/svg), sin traversal ni URL externa |
+| ORGANIZATION_NAME      | (sin valor)           | Nombre **inicial** de la institución; después vive en la base de datos y se cambia en Configuración |
+| APP_LOGO / APP_FAVICON | vacío                 | Ruta local `/branding/archivo.png` (png/jpg/jpeg/webp/ico/svg), sin traversal ni URL externa. Sin ellas, el logotipo y el favicon se suben en Configuración (PNG/JPEG e ICO, sin SVG) |
 | APP_ACCENT             | #2b4d7c               | Hexadecimal; contraste mínimo 4.5:1 sobre blanco                                             |
 | DEFAULT_LOCALE         | es-MX                 | Locale válido para formato; no implica traducción de toda la UI                              |
 | DEFAULT_TIMEZONE       | UTC                   | Zona IANA válida para fechas de revisión/participante                                        |
+| SETUP_WIZARD           | auto                  | `auto`: ofrece el asistente de primera instalación mientras no haya administrador. `disabled`: lo apaga (crea al administrador con `bootstrap-admin`) |
 
-Añadir assets propios en `app/frontend/public/branding/` y reconstruir frontend, o montar un directorio de assets revisados en `/usr/share/nginx/html/branding` de solo lectura. No incorporar logos con restricciones sin permiso. Solo estos datos públicos salen por `/api/v1/configuration/public`; nunca se expone el entorno completo.
+`.env.example` deja comentadas las variables de apariencia para que copiarlo no las fije. Añadir assets propios en `app/frontend/public/branding/` y reconstruir frontend, o montar un directorio de assets revisados en `/usr/share/nginx/html/branding` de solo lectura, sigue funcionando para `APP_LOGO`/`APP_FAVICON`. No incorporar logos con restricciones sin permiso. Solo estos datos públicos salen por `/api/v1/configuration/public`; nunca se expone el entorno completo.
 
 ## Secretos y persistencia
 

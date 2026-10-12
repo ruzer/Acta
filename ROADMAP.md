@@ -19,5 +19,7 @@ Prioridades sin fechas ni compromiso de implementación. Esta lista no declara f
 
 - Reconsiderar plataformas y almacenamiento adicionales según resultados y aportes de la comunidad.
 - Evaluar mejoras genéricas provenientes de forks mediante el proceso de contribución, sin prometer un ecosistema de plugins o nuevas integraciones.
+- Webhooks y correo saliente: solo existe un [diseño mínimo](docs/INTEGRATIONS-DESIGN.md); implementarlos requiere revisión de seguridad propia (SSRF, firma, datos mínimos, auditoría).
+- Cambio de proveedor de almacenamiento, rotación de credenciales y migración de evidencia desde la aplicación: hoy son procedimientos de infraestructura.
 
 No se programa HA, migración automática de proveedores, nuevos tipos de pregunta o internacionalización completa. Son propuestas posibles, no deuda aprobada ni compromisos de esta hoja de ruta.

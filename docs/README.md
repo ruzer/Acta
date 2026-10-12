@@ -5,13 +5,17 @@ El idioma editorial principal es **español**, conforme a la documentación y la
 | Audiencia | Empieza aquí | Consulta después |
 |---|---|---|
 | Usuarios | [Producto y primeros pasos](../README.md) | [Galería](assets/README.md) |
-| Operadores | [Self-hosting](SELF-HOSTING.md) | [Configuración](CONFIGURATION.md), [Backup/restore](BACKUP-RESTORE.md), [Proveedores S3](S3-PROVIDERS.md) |
+| Operadores | [Self-hosting](SELF-HOSTING.md) | [Instalación guiada y Configuración](ADMIN-CENTER.md), [Configuración](CONFIGURATION.md), [Backup/restore](BACKUP-RESTORE.md), [Proveedores S3](S3-PROVIDERS.md) |
 | Desarrolladores | [Desarrollo](DEVELOPMENT.md) | [Arquitectura](ARCHITECTURE.md), [Dominio](DOMAIN-MODEL.md), [Contratos por función](CONTRACTS.md) |
 | Contribuidores | [Contribuir](../CONTRIBUTING.md) | [Gobernanza](../GOVERNANCE.md), [Forks](UPSTREAM-FORKS.md), [Seguridad](../SECURITY.md), [Conducta](../CODE_OF_CONDUCT.md) |
 
 [Manifiesto](../PUBLIC-SNAPSHOT-MANIFEST.md): resultados fechados y límites verificados. [Avisos de terceros](THIRD-PARTY-NOTICES.md): procedencia y obligaciones. [Identidad](NAMING-NOTES.md): Acta, nombre seleccionado y alcance de su descriptor.
 
 Cada guía operativa describe su procedimiento; el manifiesto registra pruebas, no reemplaza instrucciones. Los contratos históricos permanecen enlazados desde el índice funcional sin exigir conocer su numeración.
+
+## Instalar y configurar
+
+[Instalación guiada y Configuración](ADMIN-CENTER.md): asistente de primera instalación, centro de configuración, quién decide cada valor (infraestructura o aplicación) y compatibilidad con instalaciones existentes. [Integraciones y webhooks](INTEGRATIONS-DESIGN.md): diseño mínimo, sin implementar.
 
 ## Administrar cuestionarios grandes
 
