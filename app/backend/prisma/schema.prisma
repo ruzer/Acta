@@ -98,21 +98,36 @@ enum StorageBackend {
   S3
 }
 
+enum SetupState {
+  PENDING
+  COMPLETED
+}
+
+enum BrandingAssetKind {
+  LOGO
+  FAVICON
+}
+
 model Organization {
   invitations             ResponseInvitation[]
-  id                      String               @id @default(uuid()) @db.Uuid
-  code                    String               @unique
+  id                      String                @id @default(uuid()) @db.Uuid
+  code                    String                @unique
   name                    String
-  createdAt               DateTime             @default(now()) @db.Timestamptz(3)
-  updatedAt               DateTime             @updatedAt @db.Timestamptz(3)
-  User_organization       User[]               @relation("User_organization")
-  Area_organization       Area[]               @relation("Area_organization")
-  Project_organization    Project[]            @relation("Project_organization")
-  AuditEvent_organization AuditEvent[]         @relation("AuditEvent_organization")
+  createdAt               DateTime              @default(now()) @db.Timestamptz(3)
+  updatedAt               DateTime              @updatedAt @db.Timestamptz(3)
+  User_organization       User[]                @relation("User_organization")
+  Area_organization       Area[]                @relation("Area_organization")
+  Project_organization    Project[]             @relation("Project_organization")
+  AuditEvent_organization AuditEvent[]          @relation("AuditEvent_organization")
+  settings                OrganizationSettings?
+  brandingAssets          BrandingAsset[]
 }
 
 model User {
   invitationOnly                  Boolean                @default(false)
+  setupCompleted                  InstallationSetup[]    @relation("InstallationSetup_completedBy")
+  settingsUpdated                 OrganizationSettings[] @relation("OrganizationSettings_updatedBy")
+  brandingAssetsCreated           BrandingAsset[]        @relation("BrandingAsset_createdBy")
   responseInvitation              ResponseInvitation?    @relation("InvitedRespondent")
   createdInvitations              ResponseInvitation[]   @relation("InvitationCreator")
   id                              String                 @id @default(uuid()) @db.Uuid
@@ -747,6 +762,54 @@ model QuestionDisposition {
 
   @@unique([projectId, id])
   @@index([projectId])
+}
+
+/// One row for the whole installation. Closed for good once an administrator exists.
+model InstallationSetup {
+  id             String     @id @default("installation")
+  state          SetupState @default(PENDING)
+  /// SHA-256 of the one-time setup code; the code itself is only ever shown to the operator.
+  tokenHash      String?
+  tokenIssuedAt  DateTime?  @db.Timestamptz(3)
+  tokenExpiresAt DateTime?  @db.Timestamptz(3)
+  completedAt    DateTime?  @db.Timestamptz(3)
+  completedById  String?    @db.Uuid
+  createdAt      DateTime   @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime   @updatedAt @db.Timestamptz(3)
+  completedBy    User?      @relation("InstallationSetup_completedBy", fields: [completedById], references: [id], onDelete: Restrict, onUpdate: Restrict)
+}
+
+/// Choices an administrator saves from the application. A null column falls back to the
+/// value the installation defines in its environment, so existing installations keep working.
+model OrganizationSettings {
+  organizationId String       @id @db.Uuid
+  appName        String?
+  shortName      String?
+  accent         String?
+  locale         String?
+  timezone       String?
+  lockVersion    Int          @default(0)
+  updatedAt      DateTime     @updatedAt @db.Timestamptz(3)
+  updatedById    String?      @db.Uuid
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  updatedBy      User?        @relation("OrganizationSettings_updatedBy", fields: [updatedById], references: [id], onDelete: Restrict, onUpdate: Restrict)
+}
+
+/// A small image (logo or favicon). Validated raster formats only; never executable content.
+model BrandingAsset {
+  id             String            @id @default(uuid()) @db.Uuid
+  organizationId String            @db.Uuid
+  kind           BrandingAssetKind
+  contentType    String
+  byteSize       Int
+  sha256         String
+  content        Bytes
+  createdAt      DateTime          @default(now()) @db.Timestamptz(3)
+  createdById    String            @db.Uuid
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  createdBy      User              @relation("BrandingAsset_createdBy", fields: [createdById], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([organizationId, kind])
 }
 
 model AuditEvent {

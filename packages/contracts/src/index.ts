@@ -1,4 +1,17 @@
 import { z } from "zod";
+import {
+  assetCommandView,
+  assetRemoveInput,
+  settingsInput,
+  settingsView,
+  setupChecksView,
+  setupCompleteInput,
+  setupStatusView,
+  setupVerifyInput,
+  setupVerifyView,
+  storageTestView,
+  systemStatusView,
+} from "./installation.js";
 export const roles = ["ADMIN", "ANALYST", "STAKEHOLDER", "VIEWER"] as const;
 export const priorities = ["P0", "P1", "P2", "P3"] as const;
 export const questionTypes = [
@@ -1022,6 +1035,55 @@ export const contracts = {
     output: reviewResult,
   },
 
+  setupStatus: {
+    method: "GET",
+    path: "/setup/status",
+    output: setupStatusView,
+  },
+  setupVerify: {
+    method: "POST",
+    path: "/setup/verify",
+    input: setupVerifyInput,
+    output: setupVerifyView,
+  },
+  setupChecks: {
+    method: "POST",
+    path: "/setup/checks",
+    input: setupVerifyInput,
+    output: setupChecksView,
+  },
+  setupComplete: {
+    method: "POST",
+    path: "/setup/complete",
+    input: setupCompleteInput,
+    output: okView,
+  },
+  settings: { method: "GET", path: "/settings", output: settingsView },
+  updateSettings: {
+    method: "POST",
+    path: "/settings",
+    input: settingsInput,
+    output: settingsView,
+  },
+  uploadBrandingAsset: {
+    transport: "binary" as const,
+    method: "POST",
+    path: "/settings/assets/:kind",
+    output: assetCommandView,
+  },
+  removeBrandingAsset: {
+    method: "POST",
+    path: "/settings/assets/:kind/remove",
+    input: assetRemoveInput,
+    output: assetCommandView,
+  },
+  systemStatus: { method: "GET", path: "/system", output: systemStatusView },
+  storageTest: {
+    method: "POST",
+    path: "/system/storage-test",
+    input: z.strictObject({}),
+    output: storageTestView,
+  },
   branding: {
     method: "GET",
     path: "/configuration/public",
@@ -1732,3 +1794,4 @@ export const validatedDecisionsExportDocument = z.strictObject({
 });
 
 export * from "./participant.js";
+export * from "./installation.js";

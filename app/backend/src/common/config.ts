@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { publicBrandingView } from "@requirements/contracts";
+import {
+  accentContrast,
+  minimumAccentContrast,
+  publicBrandingView,
+} from "@requirements/contracts";
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
   ORGANIZATION_CODE: z
@@ -20,6 +24,8 @@ const envSchema = z.object({
   INVITATION_MAX_DAYS: z.coerce.number().int().min(1).max(365).default(30),
   SESSION_IDLE_MINUTES: z.coerce.number().int().positive().max(120).default(30),
   SESSION_MAX_HOURS: z.coerce.number().int().positive().max(24).default(8),
+  // "disabled" turns the first-run wizard off for installations configured only through the environment.
+  SETUP_WIZARD: z.enum(["auto", "disabled"]).default("auto"),
 });
 export type AppConfig = z.infer<typeof envSchema>;
 export function loadConfig(): AppConfig {
@@ -71,12 +77,7 @@ export function publicBranding() {
     throw new Error("Invalid locale or timezone");
   }
   // Keep white button text readable; preserve Acta's visual hierarchy.
-  const channels = [1, 3, 5]
-    .map((i) => parseInt(c.accent.slice(i, i + 2), 16) / 255)
-    .map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
-  const luminance =
-    0.2126 * channels[0]! + 0.7152 * channels[1]! + 0.0722 * channels[2]!;
-  if (1.05 / (luminance + 0.05) < 4.5)
+  if (accentContrast(c.accent) < minimumAccentContrast)
     throw new Error(
       "APP_ACCENT must provide contrast of at least 4.5:1 with white",
     );

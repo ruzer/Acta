@@ -12,6 +12,7 @@ import {
   createBrowserRouter,
   RouterProvider,
   Link,
+  Navigate,
   Route,
   Routes,
   useLocation,
@@ -26,6 +27,8 @@ import { api, setCsrf } from "./api";
 import { Alert, Button, LoadingState, Dialog } from "./ui";
 import { Login, Password, Participant, Projects } from "./pages/Access";
 import { Administration, Members } from "./pages/Administration";
+import { Settings } from "./pages/Settings";
+import { Setup } from "./pages/Setup";
 import { Editor } from "./pages/Editor";
 import { MyWork } from "./pages/MyWork";
 import { ParticipantHeader } from "./pages/ParticipantShell";
@@ -56,6 +59,38 @@ function RouteFocus() {
     window.scrollTo(0, 0);
   }, [location.pathname]);
   return null;
+}
+/**
+ * What a visitor without a session sees. A new installation offers the guided
+ * setup; anything else, including a setup check that fails, shows the sign-in:
+ * Acta never depends on the wizard to be usable.
+ */
+function SignedOut({
+  notice,
+  onLogin,
+}: {
+  notice: string;
+  onLogin: (me: Me) => void;
+}) {
+  const setup = useQuery({
+    queryKey: ["setup-status"],
+    queryFn: () => api("setupStatus"),
+    staleTime: 0,
+  });
+  const [finished, setFinished] = useState(false);
+  if (setup.isPending) return <LoadingState />;
+  if (setup.data?.state === "PENDING" && !finished)
+    return <Setup onFinished={() => setFinished(true)} />;
+  return (
+    <Login
+      notice={
+        finished
+          ? "La instalación quedó configurada. Inicia sesión con la cuenta de administración que creaste."
+          : notice
+      }
+      onLogin={onLogin}
+    />
+  );
 }
 function Session() {
   const location = useLocation();
@@ -128,7 +163,7 @@ function Session() {
   if (loading) return <LoadingState />;
   if (!me)
     return (
-      <Login
+      <SignedOut
         notice={notice}
         onLogin={(m) => {
           client.clear();
@@ -240,6 +275,14 @@ function Session() {
             }
           />
           <Route path="/admin" element={<Administration me={me} />} />
+          <Route
+            path="/admin/settings"
+            element={<Navigate to="/admin/settings/general" replace />}
+          />
+          <Route
+            path="/admin/settings/:section"
+            element={<Settings me={me} />}
+          />
           <Route
             path="/projects/:projectId/receipt"
             element={<SessionReceipt />}

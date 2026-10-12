@@ -12,6 +12,7 @@ Usa este índice para localizar capacidades sin conocer las fases históricas. S
 | Responses/Evidence — borradores, envíos y archivos | [Respuestas y evidencia](CONTRACTS-2C.md) | [Contratos compartidos](../packages/contracts/src/index.ts), [presentación participante](../packages/contracts/src/participant.ts) |
 | Review/Clarifications — aclaraciones, conflictos y decisiones | [Revisión](CONTRACTS-2D.md) | [Contratos compartidos](../packages/contracts/src/index.ts) |
 | Dashboard/Traceability — métricas, referencias y bitácora | [Visibilidad](CONTRACTS-2E.md) | [Contratos compartidos](../packages/contracts/src/index.ts) |
+| Setup/Settings — asistente de primera instalación, configuración, imágenes de la institución y estado del sistema | [Instalación guiada y Configuración](ADMIN-CENTER.md#api) | [Contratos de instalación](../packages/contracts/src/installation.ts), [módulo setup](../app/backend/src/setup), [módulo settings](../app/backend/src/settings) |
 | Import/Export — intercambio | [Intercambio](CONTRACTS-2E.md), [Formato de importación](IMPORT-FORMAT.md) | [Contratos compartidos](../packages/contracts/src/index.ts) |
 
 Los esquemas Zod y endpoints implementados son la referencia ejecutable vigente. Este índice no crea endpoints, campos ni permisos. Para entender entidades y relaciones: [Modelo de dominio](DOMAIN-MODEL.md) y [Arquitectura](ARCHITECTURE.md).

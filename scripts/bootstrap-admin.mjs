@@ -79,6 +79,24 @@ try {
         isOrganizationAdmin: true,
       },
     });
+    // The advanced path closes the first-run wizard exactly like the wizard itself does.
+    await tx.installationSetup.upsert({
+      where: { id: "installation" },
+      create: {
+        id: "installation",
+        state: "COMPLETED",
+        completedAt: new Date(),
+        completedById: actor.id,
+      },
+      update: {
+        state: "COMPLETED",
+        tokenHash: null,
+        tokenIssuedAt: null,
+        tokenExpiresAt: null,
+        completedAt: new Date(),
+        completedById: actor.id,
+      },
+    });
     await audit(
       tx,
       actor,

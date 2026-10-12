@@ -41,15 +41,13 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
       q.data.accent,
     );
     formatting = { locale: q.data.locale, timezone: q.data.timezone };
-    let icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+    const icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
     if (q.data.favicon) {
-      if (!icon) {
-        icon = document.createElement("link");
-        icon.rel = "icon";
-        document.head.append(icon);
-      }
-      icon.href = q.data.favicon;
-    }
+      const link = icon ?? document.createElement("link");
+      link.rel = "icon";
+      link.href = q.data.favicon;
+      if (!icon) document.head.append(link);
+    } else icon?.remove();
   }, [q.data]);
   if (q.isPending) return <LoadingState />;
   if (q.error)

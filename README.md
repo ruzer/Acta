@@ -76,22 +76,27 @@ Para detenerla conservando datos: `docker compose -p requirements-demo stop`. Pa
 
 ## Quiero instalar una instancia vacía
 
-En un directorio separado, copia `.env.example` a `.env` y conserva `DEMO_SEED=false`:
+Hay dos caminos y puedes usar el que prefieras. [Cómo conviven y qué decide cada uno](docs/ADMIN-CENTER.md).
+
+**Guiado** (para empezar): con Docker y Docker Compose 2.24.4 o posterior, en un directorio separado.
+
+```sh
+sh scripts/install.sh
+```
+
+Genera los secretos en volúmenes privados, arranca Acta y muestra una dirección con un código de un solo uso. Ábrela para crear al administrador, nombrar a la institución y elegir la apariencia con un asistente. No editas ningún archivo. Para un servidor con HTTPS: `sh scripts/install.sh --origin https://acta.example.org`.
+
+**Avanzado** (variables de entorno, automatización, CI/CD): copia `.env.example` a `.env`, ajusta lo que necesites y arranca con Compose. El asistente es opcional; apágalo con `SETUP_WIZARD=disabled` si configuras todo por entorno.
 
 ```sh
 cp .env.example .env
 docker compose up --build
-```
-
-Cuando los servicios estén saludables, crea el primer administrador desde otra terminal:
-
-```sh
 docker compose exec backend node scripts/bootstrap-admin.mjs
 ```
 
-Introduce usuario, nombre visible y una contraseña temporal privada de al menos 20 caracteres. El primer acceso exige cambiarla. No existe una contraseña universal; repetir el bootstrap no restablece cuentas existentes.
+`bootstrap-admin` pide usuario, nombre visible y una contraseña temporal privada de al menos 20 caracteres (o recibe JSON por la entrada estándar, sin terminal). El primer acceso exige cambiarla. No existe una contraseña universal; repetir el bootstrap no restablece cuentas existentes.
 
-Abre [localhost:4317](http://localhost:4317). Crea un proyecto desde **Administración → Proyectos** y agrega un tema y una pregunta desde **Escribir**. El formulario exige título breve e identificador externo; usa valores propios y conserva el identificador exactamente. Crea las áreas y usuarios necesarios, agrega miembros al proyecto, asigna participantes concretos y publica las preguntas. Después accede con el participante para responder y con un analista del proyecto para revisar.
+Abre [localhost:4317](http://localhost:4317). Crea un proyecto desde **Administración → Proyectos** y agrega un tema y una pregunta desde **Escribir**. El formulario exige título breve e identificador externo; usa valores propios y conserva el identificador exactamente. Crea las áreas y usuarios necesarios, agrega miembros al proyecto, asigna participantes concretos y publica las preguntas. Después accede con el participante para responder y con un analista del proyecto para revisar. En **Administración → Configuración** personalizas el nombre, el color, el logotipo y el favicon, y consultas el estado del sistema.
 
 Este arranque local no expone la aplicación a otras computadoras. Para un servidor y HTTPS, sigue [Self-hosting](docs/SELF-HOSTING.md). No borres volúmenes para actualizar o resolver errores.
 

@@ -20,7 +20,11 @@ Docker, Docker Compose **2.24.4+**, conexión para descargar dependencias/imáge
 
 ## Quick Start local
 
-Desde la raíz, con DEMO_SEED=false:
+Hay dos caminos equivalentes (ver [Instalación guiada y Configuración](ADMIN-CENTER.md)). Desde la raíz, con DEMO_SEED=false:
+
+**Guiado.** `sh scripts/install.sh` comprueba Docker, arranca los servicios y muestra la dirección del asistente de primera instalación con su código de un solo uso. No necesitas `.env`. Si el código caduca: `docker compose exec backend node scripts/setup-token.mjs`.
+
+**Avanzado.** Con `.env` (opcional; los valores por defecto funcionan sin él):
 
 ```sh
 cp .env.example .env
@@ -34,9 +38,9 @@ docker compose ps
 docker compose exec backend node scripts/bootstrap-admin.mjs
 ```
 
-Espera PostgreSQL, object-storage, backend y frontend saludables. Los trabajos secrets-init, migrate y storage-init deben finalizar correctamente; no son servicios permanentes. Abre [localhost:4317](http://localhost:4317), inicia sesión y cambia la contraseña temporal.
+Espera PostgreSQL, object-storage, backend y frontend saludables. Los trabajos secrets-init, migrate y storage-init deben finalizar correctamente; no son servicios permanentes. Abre [localhost:4317](http://localhost:4317), inicia sesión y cambia la contraseña temporal (con el asistente no hay contraseña temporal: eliges la tuya).
 
-Para ejecución en segundo plano usa `docker compose up --build -d --wait`. Si no termina correctamente, revisa `docker compose ps -a` y logs del servicio afectado. No compartas logs sin revisar datos sensibles. No borres volúmenes para intentar reparar el arranque.
+Para ejecución en segundo plano usa `docker compose up --build -d --wait`. Si no termina correctamente, revisa `docker compose ps -a` y logs del servicio afectado. No compartas logs sin revisar datos sensibles. No borres volúmenes para intentar reparar el arranque. Con `SETUP_WIZARD=disabled` el asistente no se ofrece y el administrador se crea siempre con `bootstrap-admin`.
 
 ## Servidor real: acceso y HTTPS
 
@@ -47,7 +51,7 @@ Para evaluar remotamente sin exposición pública puedes establecer un túnel SS
 Para acceso estable, utiliza el reverse proxy que ya operes (Caddy, Nginx o Traefik, por ejemplo). Ninguno es dependencia obligatoria del proyecto. El proxy termina TLS y reenvía al frontend local, incluyendo las rutas `/api`; conserva Host y esquema de la solicitud.
 
 1. Configura DNS y un certificado válido para el dominio elegido.
-2. En `.env`, establece APP_ORIGIN al origen HTTPS exacto, NODE_ENV=production y COOKIE_SECURE=true. Mantén DEMO_SEED=false.
+2. En `.env` (o con `sh scripts/install.sh --origin https://…` en una instalación nueva), establece APP_ORIGIN al origen HTTPS exacto, NODE_ENV=production y COOKIE_SECURE=true. Mantén DEMO_SEED=false.
 3. Configura el proxy al loopback del frontend y conserva sus límites de carga/timeouts. El proxy necesita permitir el tamaño de evidencia autorizado; Nginx incluido limita cuerpos a 21 MiB.
 4. Aplica configuración con `docker compose up --build -d --wait` y prueba login, cambio de contraseña y upload/download autorizado desde el origen HTTPS.
 5. Restringe puertos de administración y protege acceso a Docker y backups.
@@ -77,7 +81,7 @@ VersityGW es un servicio S3 para guardar adjuntos privados. Las descargas pasan 
 1. Lee el changelog y confirma compatibilidad de aplicación, PostgreSQL y provider.
 2. Ejecuta y verifica un backup coordinado de DB, objetos y configuración.
 3. Conserva `.env`, nombre del proyecto Compose y volúmenes. Cambiar de directorio no debe cambiar la identidad del despliegue.
-4. Ejecuta `docker compose up --build -d --wait` con la nueva versión autorizada. El trabajo de migración aplica migraciones versionadas; nunca uses db push.
+4. Ejecuta `docker compose up --build -d --wait` con la nueva versión autorizada. El trabajo de migración aplica migraciones versionadas; nunca uses db push. Una instalación existente conserva su configuración y usuarios, y no vuelve a ver el asistente de primera instalación.
 5. Verifica salud, login y una descarga conocida. Cambiar código hacia atrás no revierte automáticamente las migraciones; usa una restauración coordinada si hace falta volver.
 
 No ejecutes `down --volumes` sobre datos que quieras conservar. Mantén disponibilidad de la versión previa y su backup; no mezcles escritores de versiones distintas.

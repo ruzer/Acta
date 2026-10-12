@@ -1,0 +1,316 @@
+/* First-run setup and the settings center. Same tokens as the rest of the application. */
+.setup {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--ac-space-6);
+  width: min(880px, 100%);
+  margin: 0 auto;
+  padding: var(--ac-space-8) var(--ac-space-4) var(--ac-space-12);
+}
+.setup-head h1 {
+  margin: 0;
+  font: 600 var(--ac-text-title) / 1.25 var(--ac-font-ui);
+}
+.setup-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ac-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.setup-steps li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ac-space-2);
+  padding: 4px 12px 4px 4px;
+  color: var(--ac-muted);
+  background: var(--ac-surface);
+  border: 1px solid var(--ac-line);
+  border-radius: 999px;
+  font-size: var(--ac-text-meta);
+}
+.setup-steps li > span[aria-hidden] {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  color: var(--ac-ink-2);
+  background: var(--ac-sunken);
+  border-radius: 50%;
+  font-weight: 600;
+}
+.setup-steps li[data-state="current"] {
+  color: var(--ac-ink);
+  border-color: var(--ac-accent);
+  font-weight: 600;
+}
+.setup-steps li[data-state="current"] > span[aria-hidden] {
+  color: #fff;
+  background: var(--ac-accent);
+}
+.setup-steps li[data-state="done"] > span[aria-hidden] {
+  color: var(--ac-success);
+  background: var(--ac-success-weak);
+}
+.setup-panel,
+.settings-panel {
+  padding: var(--ac-space-8);
+  background: var(--ac-surface);
+  border: 1px solid var(--ac-line);
+  border-radius: var(--ac-radius-surface);
+}
+.setup-panel h2,
+.settings-panel h2 {
+  margin: 0 0 var(--ac-space-4);
+  font: 600 var(--ac-text-body) / 1.3 var(--ac-font-ui);
+  font-size: 19px;
+}
+.setup-panel h2:focus,
+.settings-panel h2:focus {
+  outline: none;
+}
+.setup-command {
+  margin: 0 0 var(--ac-space-4);
+  padding: var(--ac-space-3) var(--ac-space-4);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  background: var(--ac-sunken);
+  border-radius: var(--ac-radius-control);
+  font: var(--ac-text-ui) / 1.5 var(--ac-font-mono);
+}
+.setup-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--ac-space-3);
+  margin-top: var(--ac-space-6);
+}
+.setup-appearance {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 280px);
+  gap: var(--ac-space-8);
+  align-items: start;
+}
+.setup-summary {
+  display: grid;
+  gap: var(--ac-space-3);
+  margin: 0 0 var(--ac-space-4);
+}
+.setup-summary div {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr);
+  gap: var(--ac-space-3);
+}
+.setup-summary dt {
+  color: var(--ac-muted);
+}
+.setup-summary dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.setup-checks {
+  display: grid;
+  gap: var(--ac-space-2);
+  margin: 0 0 var(--ac-space-4);
+  padding: 0;
+  list-style: none;
+}
+.setup-checks li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ac-space-3);
+}
+
+/* Accent color: the text field and the color picker side by side. */
+.accent-input {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0 var(--ac-space-3);
+  align-items: start;
+}
+.accent-input .accent-picker {
+  align-self: start;
+  margin-top: 28px;
+}
+.accent-input .accent-picker input[type="color"] {
+  width: 52px;
+  min-height: 44px;
+  padding: 2px;
+  cursor: pointer;
+}
+.accent-input .accent-status {
+  grid-column: 1 / -1;
+  margin: 0 0 var(--ac-space-4);
+}
+
+/* The preview re-derives the accent shades inside its own box. */
+.brand-preview {
+  --ac-accent: var(--preview-accent, #2b4d7c);
+  --ac-accent-hover: color-mix(in srgb, var(--ac-accent) 82%, #000);
+  --ac-accent-weak: color-mix(in srgb, var(--ac-accent) 10%, #fff);
+  --ac-accent-line: color-mix(in srgb, var(--ac-accent) 32%, #fff);
+  margin: 0;
+}
+.brand-preview figcaption {
+  margin-bottom: var(--ac-space-2);
+  color: var(--ac-muted);
+  font-size: var(--ac-text-meta);
+}
+.brand-preview-card {
+  display: grid;
+  gap: var(--ac-space-3);
+  padding: var(--ac-space-4);
+  background: var(--ac-bg);
+  border: 1px solid var(--ac-line-2);
+  border-radius: var(--ac-radius-surface);
+}
+.brand-preview-card p {
+  margin: 0;
+  color: var(--ac-ink-2);
+  font-size: var(--ac-text-ui);
+}
+.brand-preview-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--ac-space-2);
+  padding-bottom: var(--ac-space-3);
+  border-bottom: 3px solid var(--ac-accent);
+}
+.brand-preview-bar img {
+  max-width: 120px;
+  max-height: 32px;
+  object-fit: contain;
+}
+.brand-preview-institution {
+  font-weight: 600;
+}
+.brand-preview-link {
+  color: var(--ac-accent);
+  text-decoration: underline;
+}
+.brand-preview .button {
+  justify-self: start;
+  color: #fff;
+  background: var(--ac-accent);
+  border-color: var(--ac-accent);
+  pointer-events: none;
+}
+
+/* Settings center. */
+.settings-layout {
+  display: grid;
+  grid-template-columns: 14rem minmax(0, 1fr);
+  gap: var(--ac-space-8);
+  align-items: start;
+}
+.settings-layout > * {
+  min-width: 0;
+}
+.settings-nav ul {
+  display: grid;
+  gap: var(--ac-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.settings-nav a {
+  display: flex;
+  align-items: center;
+  gap: var(--ac-space-2);
+  min-height: 44px;
+  padding: 0 var(--ac-space-3);
+  color: var(--ac-ink-2);
+  border-radius: var(--ac-radius-control);
+  text-decoration: none;
+}
+.settings-nav a:hover {
+  background: var(--ac-sunken);
+}
+.settings-nav a[aria-current="page"] {
+  color: var(--ac-accent);
+  background: var(--ac-accent-weak);
+  font-weight: 600;
+}
+.settings-appearance {
+  display: grid;
+  gap: var(--ac-space-6);
+}
+.settings-appearance .brand-preview {
+  max-width: 360px;
+}
+.settings-panel + .settings-panel {
+  margin-top: var(--ac-space-6);
+}
+.settings-asset {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: var(--ac-space-4);
+  align-items: center;
+  margin-bottom: var(--ac-space-6);
+}
+.settings-asset-image {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  background: var(--ac-sunken);
+  border: 1px dashed var(--ac-line-2);
+  border-radius: var(--ac-radius-control);
+  color: var(--ac-muted);
+  font-size: var(--ac-text-meta);
+  text-align: center;
+}
+.settings-asset-image img {
+  max-width: 88px;
+  max-height: 88px;
+  object-fit: contain;
+}
+.settings-facts {
+  display: grid;
+  gap: var(--ac-space-3);
+  margin: 0 0 var(--ac-space-4);
+}
+.settings-facts div {
+  display: grid;
+  grid-template-columns: 14rem minmax(0, 1fr);
+  gap: var(--ac-space-3);
+}
+.settings-facts dt {
+  color: var(--ac-muted);
+}
+.settings-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.settings-note {
+  margin: var(--ac-space-4) 0 0;
+  color: var(--ac-muted);
+  font-size: var(--ac-text-meta);
+}
+input[readonly]:not([type="checkbox"]):not([type="radio"]) {
+  color: var(--ac-ink-2);
+  background: var(--ac-surface-2);
+}
+
+@media (max-width: 760px) {
+  .setup-panel,
+  .settings-panel {
+    padding: var(--ac-space-4);
+  }
+  .setup-appearance,
+  .settings-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--ac-space-6);
+  }
+  .setup-summary div,
+  .settings-facts div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--ac-space-1);
+  }
+  .settings-nav ul {
+    display: flex;
+    flex-wrap: wrap;
+  }
+}

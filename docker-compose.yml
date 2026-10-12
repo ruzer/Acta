@@ -92,13 +92,16 @@ services:
     environment:
       ORGANIZATION_CODE: ${ORGANIZATION_CODE:-DEFAULT}
       ORGANIZATION_NAME: ${ORGANIZATION_NAME:-Example Organization}
-      APP_NAME: ${APP_NAME:-Acta}
-      APP_SHORT_NAME: ${APP_SHORT_NAME:-Acta}
+      # Left empty, these are chosen in the application (Configuración). Set here, the
+      # infrastructure controls them and the application shows them as managed externally.
+      APP_NAME: ${APP_NAME:-}
+      APP_SHORT_NAME: ${APP_SHORT_NAME:-}
       APP_LOGO: ${APP_LOGO:-}
       APP_FAVICON: ${APP_FAVICON:-}
-      APP_ACCENT: ${APP_ACCENT:-#2b4d7c}
-      DEFAULT_LOCALE: ${DEFAULT_LOCALE:-es-MX}
-      DEFAULT_TIMEZONE: ${DEFAULT_TIMEZONE:-UTC}
+      APP_ACCENT: ${APP_ACCENT:-}
+      DEFAULT_LOCALE: ${DEFAULT_LOCALE:-}
+      DEFAULT_TIMEZONE: ${DEFAULT_TIMEZONE:-}
+      SETUP_WIZARD: ${SETUP_WIZARD:-auto}
       APP_ORIGIN: ${APP_ORIGIN:-http://localhost:4317}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       INVITATION_IDENTITY: ${INVITATION_IDENTITY:-NAME}
