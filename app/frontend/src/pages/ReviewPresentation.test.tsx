@@ -38,7 +38,11 @@ function page(
   detail: ReviewDetail,
   search = "",
   projects: unknown[] = [],
-  options: { seed?: (client: QueryClient) => void; returnSearch?: string } = {},
+  options: {
+    seed?: (client: QueryClient) => void;
+    returnSearch?: string;
+    state?: unknown;
+  } = {},
 ) {
   const cache = new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -56,7 +60,7 @@ function page(
         {
           pathname: `/projects/${detail.projectId}/review/${detail.question.id}`,
           search,
-          state: {
+          state: options.state ?? {
             workbenchReturn: {
               view: "attention",
               search: options.returnSearch ?? "status=CONFLICT",
@@ -1289,4 +1293,30 @@ it("Siguiente por revisar: no se ofrece a quien solo consulta", async () => {
   expect(
     screen.queryByRole("link", { name: /^Siguiente por revisar/ }),
   ).not.toBeInTheDocument();
+});
+it("una pregunta abierta desde la Bitácora vuelve a la Bitácora con sus filtros", async () => {
+  const to = `/projects/${decision.projectId}/history?action=RESPONSE_VALIDATED&page=3`;
+  page(decision, "", [], { state: { logReturn: to } });
+  expect(
+    await screen.findByRole("link", { name: "← Bitácora" }),
+  ).toHaveAttribute("href", to);
+  expect(
+    screen.queryByRole("link", { name: "← Revisar respuestas" }),
+  ).not.toBeInTheDocument();
+});
+it("la vuelta a la Bitácora solo acepta la bitácora de este proyecto", async () => {
+  for (const logReturn of [
+    "https://example.test/projects/x/history",
+    "/projects/otro-proyecto/history",
+    "//example.test/projects/x/history",
+    `//example.test/projects/${decision.projectId}/history`,
+    `/projects/${decision.projectId}/history/../../admin`,
+  ]) {
+    cleanup();
+    page(decision, "", [], { state: { logReturn } });
+    await screen.findByRole("heading", { level: 1 });
+    expect(
+      screen.queryByRole("link", { name: "← Bitácora" }),
+    ).not.toBeInTheDocument();
+  }
 });
