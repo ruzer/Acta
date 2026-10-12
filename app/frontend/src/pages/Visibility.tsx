@@ -3,7 +3,7 @@ import { ProjectWorkbench } from "./ProjectWorkbench";
 import { PageHeader } from "../ui/semantic";
 import { auditActions, auditObjects } from "./audit-labels";
 import { AnalystStatus } from "./AnalystVisual";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
@@ -261,6 +261,24 @@ export function Traceability() {
     </>
   );
 }
+/** Options named in plain language, in alphabetical order; an unknown value in the address is kept as it came. */
+function labelled(names: Record<string, string>, current: string | undefined) {
+  const options = Object.entries(names).sort(([, a], [, b]) =>
+    a.localeCompare(b, "es"),
+  );
+  return (
+    <>
+      {current && !(current in names) && (
+        <option value={current}>{current}</option>
+      )}
+      {options.map(([value, label]) => (
+        <option key={value} value={value}>
+          {label}
+        </option>
+      ))}
+    </>
+  );
+}
 export function History() {
   const { projectId = "" } = useParams(),
     [params, setParams] = useSearchParams(),
@@ -271,6 +289,20 @@ export function History() {
       exchangeRequest(projectId, "history", C.historyView, { query: input }),
     staleTime: 0,
   });
+  // The log names questions by identifier only; the project's question list
+  // (already cached by the other views) turns those into something readable.
+  const dashboard = useQuery({
+    queryKey: ["dashboard", projectId],
+    queryFn: () => exchangeRequest(projectId, "dashboard", C.dashboardView),
+    staleTime: 60_000,
+    retry: false,
+  });
+  const questions = useMemo(
+    () => new Map(dashboard.data?.questions.map((x) => [x.id, x])),
+    [dashboard.data],
+  );
+  // Only exports carry a detail: keep the column out of the way when none does.
+  const hasDetail = !!q.data?.items.some((e) => e.exportType || e.scope);
   const filter = (key: string, value: string) => {
     const p = new URLSearchParams(params);
     p.delete("page");
@@ -285,22 +317,22 @@ export function History() {
         lead="Historial de solo lectura. Los datos privados de borradores y archivos no se muestran."
       />
       <div className="review-filters">
-        <Input
+        <Select
           label="Objeto"
           value={input.objectType ?? ""}
-          placeholder="Question, ImportBatch…"
           onChange={(e) => filter("objectType", e.target.value)}
-        />
-        <Input
+        >
+          <option value="">Todos</option>
+          {labelled(auditObjects, input.objectType)}
+        </Select>
+        <Select
           label="Acción"
           value={input.action ?? ""}
-          list="audit-actions"
           onChange={(e) => filter("action", e.target.value)}
-        />
-        <datalist id="audit-actions">
-          <option value="PROJECT_IMPORTED" />
-          <option value="EXPORT_CREATED" />
-        </datalist>
+        >
+          <option value="">Todas</option>
+          {labelled(auditActions, input.action)}
+        </Select>
         <Select
           label="Actor"
           value={input.actorId ?? ""}
@@ -353,27 +385,44 @@ export function History() {
                 { label: "Actor" },
                 { label: "Acción" },
                 { label: "Objeto" },
-                { label: "Detalle" },
+                ...(hasDetail ? [{ label: "Detalle" }] : []),
               ]}
-              rows={q.data.items.map((e) => ({
-                key: e.id,
-                cells: [
-                  new Date(e.occurredAt).toLocaleString("es-MX"),
-                  e.actorName,
-                  <span key="a" className="ac-audit-code">
-                    {auditActions[e.action] ?? e.action}
-                    {auditActions[e.action] && <small>{e.action}</small>}
-                  </span>,
-                  <span key="o">
-                    {auditObjects[e.objectType] ?? e.objectType}
-                    <details>
-                      <summary>Identificador</summary>
-                      {e.objectId}
-                    </details>
-                  </span>,
-                  `${e.exportType ?? "—"} ${e.scope ?? ""}`.trim(),
-                ],
-              }))}
+              rows={q.data.items.map((e) => {
+                const question =
+                  e.objectType === "Question"
+                    ? questions.get(e.objectId)
+                    : undefined;
+                return {
+                  key: e.id,
+                  cells: [
+                    new Date(e.occurredAt).toLocaleString("es-MX"),
+                    e.actorName,
+                    <span key="a" className="ac-audit-code">
+                      {auditActions[e.action] ?? e.action}
+                      {auditActions[e.action] && <small>{e.action}</small>}
+                    </span>,
+                    <span key="o">
+                      {auditObjects[e.objectType] ?? e.objectType}
+                      {question ? (
+                        <Link
+                          className="ac-audit-object"
+                          to={`/projects/${projectId}/review/${question.id}`}
+                        >
+                          {question.externalId} · {question.title}
+                        </Link>
+                      ) : (
+                        <details>
+                          <summary>Identificador</summary>
+                          {e.objectId}
+                        </details>
+                      )}
+                    </span>,
+                    ...(hasDetail
+                      ? [`${e.exportType ?? "—"} ${e.scope ?? ""}`.trim()]
+                      : []),
+                  ],
+                };
+              })}
             />
           )}
           <div className="actions">
@@ -386,7 +435,10 @@ export function History() {
             >
               Anterior
             </Button>
-            <span>Página {q.data.page}</span>
+            <span>
+              Página {q.data.page} de{" "}
+              {Math.max(1, Math.ceil(q.data.total / q.data.pageSize))}
+            </span>
             <Button
               tone="secondary"
               disabled={q.data.page * q.data.pageSize >= q.data.total}

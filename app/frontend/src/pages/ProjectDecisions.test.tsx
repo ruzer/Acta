@@ -203,7 +203,7 @@ it("UX-02: la página tiene un único h1 «Decisiones» y no repite el título c
   ).toBeVisible();
 });
 
-it("CP5: cada decisión es una línea de registro: referencia, título como enlace, tema · área y la marca Vigente", async () => {
+it("CP5: cada decisión es una línea de registro: referencia, título como enlace y tema · área, sin repetir «Vigente» en cada fila", async () => {
   vi.mocked(exchangeRequest).mockResolvedValue(data);
   setup();
   await screen.findByRole("link", { name: first.title });
@@ -211,7 +211,9 @@ it("CP5: cada decisión es una línea de registro: referencia, título como enla
   expect(items.length).toBeGreaterThan(0);
   const entry = items[0]!;
   expect(within(entry).getByRole("link")).toBeVisible();
-  expect(within(entry).getByText("Vigente")).toBeVisible();
+  // Every row is a current decision, which the page already says once.
+  expect(screen.queryByText("Vigente")).not.toBeInTheDocument();
+  expect(screen.getByRole("list")).toHaveClass("ac-register-compact");
   expect(entry.querySelector(".ac-register-reference")).not.toBeNull();
   // Technical identifiers are secondary: smaller and never above the title.
   expect(

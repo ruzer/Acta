@@ -394,7 +394,7 @@ test("V-11 · una decisión reabierta se conserva como antecedente, no como la v
   await checkedPage(page, folder, "V-11-reabierta", 1440);
 });
 
-test("V-12 · Decisiones del proyecto: línea de registro con referencia, título documental, tema · área y marca Vigente", async ({
+test("V-12 · Decisiones del proyecto: línea de registro con referencia, título documental y tema · área, sin repetir la marca Vigente", async ({
   page,
 }) => {
   test.setTimeout(240000);
@@ -405,7 +405,8 @@ test("V-12 · Decisiones del proyecto: línea de registro con referencia, títul
     await expect(page.locator("main h1")).toHaveText("Decisiones");
     const row = page.locator(".ac-register-row").first();
     await expect(row).toBeVisible();
-    await expect(row.getByText("Vigente")).toBeVisible();
+    // Every entry is a current decision: the page says it once, not per row.
+    await expect(page.getByText("Vigente", { exact: true })).toHaveCount(0);
     const parts = await row.evaluate((el) => {
       const px = (selector: string) =>
         parseFloat(getComputedStyle(el.querySelector(selector)!).fontSize);

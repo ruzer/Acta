@@ -3,10 +3,10 @@ import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import type { Me } from "@requirements/contracts";
 import * as apiModule from "../api";
-import { Administration } from "./Administration";
+import { Administration, Members } from "./Administration";
 
 beforeAll(() => {
   // jsdom has no modal dialogs; the app code under test is unchanged.
@@ -114,4 +114,50 @@ it("la acción de cada cuenta dice qué hace y a quién: restablecer su contrase
       name: "Restablecer contraseña · Analista de ejemplo",
     }),
   ).toBeVisible();
+});
+
+function mountApp(
+  entries: Parameters<typeof MemoryRouter>[0]["initialEntries"],
+) {
+  vi.spyOn(apiModule, "api").mockImplementation((async (key: string) =>
+    key === "projects" ? [project("a", "Proyecto A")] : []) as never);
+  render(
+    <QueryClientProvider
+      client={
+        new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      }
+    >
+      <MemoryRouter initialEntries={entries}>
+        <Routes>
+          <Route path="/admin" element={<Administration me={me} />} />
+          <Route path="/projects/:projectId/members" element={<Members />} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
+  );
+  return userEvent.setup();
+}
+it("los miembros de un proyecto abierto desde Administración vuelven a esa lista de proyectos", async () => {
+  const user = mountApp(["/admin"]);
+  await user.click(screen.getByRole("button", { name: "Proyectos" }));
+  await user.click(
+    await screen.findByRole("link", { name: "Miembros de Proyecto A" }),
+  );
+  const back = await screen.findByRole("link", { name: "← Administración" });
+  expect(back).toHaveAttribute("href", "/admin");
+  expect(
+    screen.queryByRole("link", { name: "← Cuestionario" }),
+  ).not.toBeInTheDocument();
+  await user.click(back);
+  // Back on the list it was opened from, not on the first tab.
+  expect(await screen.findByRole("table", { name: "Proyectos" })).toBeVisible();
+});
+it("los miembros abiertos desde el proyecto siguen volviendo al cuestionario", async () => {
+  mountApp(["/projects/a/members"]);
+  expect(
+    await screen.findByRole("link", { name: "← Cuestionario" }),
+  ).toHaveAttribute("href", "/projects/a/editor");
+  expect(
+    screen.queryByRole("link", { name: "← Administración" }),
+  ).not.toBeInTheDocument();
 });

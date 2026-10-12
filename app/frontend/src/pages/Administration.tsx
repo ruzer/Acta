@@ -1,6 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { roles, roleLabels, type Me } from "@requirements/contracts";
 import { api, formValues } from "../api";
 import {
@@ -61,7 +61,12 @@ export function ActionForm({
   );
 }
 export function Administration({ me }: { me: Me }) {
-  const [tab, setTab] = useState("users");
+  // Coming back from a project's members reopens the list it was reached from.
+  const [tab, setTab] = useState(
+    (useLocation().state as { tab?: string } | null)?.tab === "projects"
+      ? "projects"
+      : "users",
+  );
   const [reset, setReset] = useState<{ id: string; name: string } | null>(null);
   const [deactivate, setDeactivate] = useState<{
     id: string;
@@ -263,6 +268,7 @@ export function Administration({ me }: { me: Me }) {
                       </Link>
                       <Link
                         to={`/projects/${p.id}/members`}
+                        state={{ from: "administration" }}
                         aria-label={`Miembros de ${p.name}`}
                       >
                         Miembros
@@ -443,6 +449,9 @@ export function Administration({ me }: { me: Me }) {
 }
 export function Members() {
   const { projectId = "" } = useParams();
+  const fromAdministration =
+    (useLocation().state as { from?: string } | null)?.from ===
+    "administration";
   const qc = useQueryClient();
   const members = useQuery({
     queryKey: ["members", projectId],
@@ -455,9 +464,15 @@ export function Members() {
     return <ErrorState error={(members.error || areas.error)!} />;
   return (
     <>
-      <Link to={"/projects/" + projectId + "/editor"} className="back">
-        ← Cuestionario
-      </Link>
+      {fromAdministration ? (
+        <Link to="/admin" state={{ tab: "projects" }} className="back">
+          ← Administración
+        </Link>
+      ) : (
+        <Link to={"/projects/" + projectId + "/editor"} className="back">
+          ← Cuestionario
+        </Link>
+      )}
       <PageHeader
         title="Miembros del proyecto"
         lead={

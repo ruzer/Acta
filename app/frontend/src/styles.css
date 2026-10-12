@@ -1238,6 +1238,10 @@ section.narrow {
   font-size: var(--ac-text-meta);
   overflow-wrap: anywhere;
 }
+.ac-audit-object {
+  display: block;
+  overflow-wrap: anywhere;
+}
 .data-table details {
   margin: 0;
 }
@@ -1245,4 +1249,35 @@ section.narrow {
   padding-block: 0;
   font-weight: 400;
   color: var(--ac-muted);
+}
+
+/* Sources of a decision: a long list says how many are chosen and stays inside a bounded area. */
+.source-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s1) var(--s2);
+  margin-block: var(--s1) var(--s2);
+}
+.source-tools [role="status"] {
+  margin-right: auto;
+  font-weight: 600;
+}
+.source-list-long {
+  max-height: 22rem;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  padding: var(--s1) var(--s2);
+}
+.source-option + .source-option {
+  margin-top: var(--s1);
+}
+.source-answer {
+  margin: 0 0 0 1.75rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { contracts, type ReviewDetail } from "@requirements/contracts";
 import { api, ApiFailure, formValues } from "../api";
 import { Alert, Button, Checkbox, Dialog, Select, Textarea } from "../ui";
+import { SourcePicker } from "./SourcePicker";
 export type ReviewAction =
   | "requestClarification"
   | "closeClarification"
@@ -319,28 +320,20 @@ export function ReviewActionDialog({
             </p>
           )}
           {pickSources && (
-            <fieldset>
-              <legend>Fuentes utilizadas</legend>
-              <p className="hint">
-                Selecciona{" "}
-                {action === "markConflict"
+            <SourcePicker
+              legend="Fuentes utilizadas"
+              hint={`Selecciona ${
+                action === "markConflict"
                   ? "al menos dos envíos de participantes distintos"
-                  : "las respuestas enviadas que sustentan esta decisión"}
-                .
-              </p>
-              {sources.map((s) => (
-                <Checkbox
-                  key={s.id}
-                  name="sources"
-                  value={s.id}
-                  // With a single current submission it is the only possible
-                  // source of a decision: start with it chosen (still editable).
-                  defaultChecked={
-                    action === "validateQuestion" && sources.length === 1
-                  }
-                  label={`${s.respondent.displayName} · envío #${s.number}${s.current ? "" : " · histórico"}`}
-                />
-              ))}
+                  : "las respuestas enviadas que sustentan esta decisión"
+              }.`}
+              sources={sources}
+              question={d.question}
+              // With a single current submission it is the only possible
+              // source of a decision: start with it chosen (still editable).
+              preselect={action === "validateQuestion" && sources.length === 1}
+              onChange={() => setDirty(true)}
+            >
               {action === "validateQuestion" && (
                 <>
                   {d.threads
@@ -367,7 +360,7 @@ export function ReviewActionDialog({
                     ))}
                 </>
               )}
-            </fieldset>
+            </SourcePicker>
           )}
         </fieldset>
         <div className="actions">

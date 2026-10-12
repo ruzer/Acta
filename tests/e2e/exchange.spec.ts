@@ -120,7 +120,9 @@ test("B/C/F admin imports fictitious JSON after preview; invalid file writes not
     page.getByText(/Importación completada: 2 preguntas/),
   ).toBeVisible();
   await page.goto(`/projects/${projectId}/history`);
-  await page.getByLabel("Acción", { exact: true }).fill("PROJECT_IMPORTED");
+  await page
+    .getByLabel("Acción", { exact: true })
+    .selectOption({ label: "Cuestionario importado" });
   await expect(
     page.getByRole("cell", {
       name: /Cuestionario importado\s*PROJECT_IMPORTED/,
@@ -260,7 +262,9 @@ test("A/D analyst dashboard filters and opens review; Markdown includes current 
   await page.setViewportSize({ width: 390, height: 844 });
   await axe(page);
   await page.goto(`/projects/${projectId}/history`);
-  await page.getByLabel("Acción", { exact: true }).fill("EXPORT_CREATED");
+  await page
+    .getByLabel("Acción", { exact: true })
+    .selectOption({ label: "Exportación creada" });
   await expect(
     // The cell says it in words and keeps the raw code under it.
     page.getByRole("cell", { name: /Exportación creada\s*EXPORT_CREATED/ }),
