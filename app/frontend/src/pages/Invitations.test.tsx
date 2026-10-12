@@ -9,13 +9,14 @@ import {
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import {
   invitationCreateInput,
   questionnaireView,
 } from "@requirements/contracts";
 import fixture from "../../../../tests/fixtures/analyst-visual.json";
 import * as apiModule from "../api";
-import { CreateInvitation } from "./Invitations";
+import { CreateInvitation, Invitations } from "./Invitations";
 const questionnaire = questionnaireView.parse(fixture.questionnaire);
 const policy = {
   allowNonNominal: false,
@@ -82,21 +83,47 @@ async function recipient(user: ReturnType<typeof userEvent.setup>) {
     screen.getByLabelText("Nombre de la persona"),
     "Persona de ejemplo",
   );
-  await user.click(screen.getByRole("button", { name: "Continuar" }));
-}
-async function areaAndSummary(user: ReturnType<typeof userEvent.setup>) {
+  // The area is required and lives with the recipient, in view of the first step.
   await user.selectOptions(
     screen.getByLabelText("Área de la aportación"),
     questionnaire.areas[0]!.id,
   );
   await user.click(screen.getByRole("button", { name: "Continuar" }));
+}
+async function toSummary(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole("button", { name: "Continuar" }));
   await user.click(screen.getByRole("button", { name: "Continuar" }));
 }
+it("el área de la aportación se pide en el primer paso, bloquea el avance si falta y no reaparece entre las preguntas", async () => {
+  const { user } = mount();
+  expect(await screen.findByLabelText("Área de la aportación")).toBeRequired();
+  await user.type(
+    screen.getByLabelText("Referencia de la invitación"),
+    "Consulta ficticia",
+  );
+  await user.type(
+    screen.getByLabelText("Nombre de la persona"),
+    "Persona de ejemplo",
+  );
+  await user.click(screen.getByRole("button", { name: "Continuar" }));
+  expect(
+    screen.queryByRole("heading", { name: "Preguntas" }),
+  ).not.toBeInTheDocument();
+  await user.selectOptions(
+    screen.getByLabelText("Área de la aportación"),
+    questionnaire.areas[0]!.id,
+  );
+  await user.click(screen.getByRole("button", { name: "Continuar" }));
+  expect(screen.getByRole("heading", { name: "Preguntas" })).toHaveFocus();
+  expect(
+    screen.queryByLabelText("Área de la aportación"),
+  ).not.toBeInTheDocument();
+});
 it("crea solo después de revisar el resumen, con el mismo contrato y alcance contextual", async () => {
   const { request, user } = mount();
   await recipient(user);
   expect(screen.getByRole("heading", { name: "Preguntas" })).toHaveFocus();
-  await areaAndSummary(user);
+  await toSummary(user);
   expect(screen.getByRole("heading", { name: "Resumen" })).toHaveFocus();
   expect(screen.getByText("4 preguntas publicadas")).toBeVisible();
   expect(screen.getByText("7 días desde crear el enlace")).toBeVisible();
@@ -121,7 +148,7 @@ it("crea solo después de revisar el resumen, con el mismo contrato y alcance co
 it("volver conserva destinatario, alcance y campos de vigencia sin crear", async () => {
   const { user, request } = mount();
   await recipient(user);
-  await areaAndSummary(user);
+  await toSummary(user);
   await user.click(screen.getByRole("button", { name: "Atrás" }));
   await user.click(
     screen.getByLabelText("Permitir adjuntar y descargar evidencia propia"),
@@ -164,7 +191,7 @@ it("desde el gestor filtra solo publicadas y comunica las seleccionadas fuera de
   await user.click(
     screen.getByRole("button", { name: "Seleccionar 1 resultado" }),
   );
-  await areaAndSummary(user);
+  await toSummary(user);
   expect(screen.getByText("2 preguntas publicadas")).toBeVisible();
   await user.click(
     screen.getByRole("button", { name: "Crear enlace privado" }),
@@ -228,8 +255,12 @@ it("no nominal respeta la política y envía identidad vacía aunque hubiera dat
   expect(
     screen.queryByLabelText("Nombre de la persona"),
   ).not.toBeInTheDocument();
+  await user.selectOptions(
+    screen.getByLabelText("Área de la aportación"),
+    questionnaire.areas[0]!.id,
+  );
   await user.click(screen.getByRole("button", { name: "Continuar" }));
-  await areaAndSummary(user);
+  await toSummary(user);
   await user.click(
     screen.getByRole("button", { name: "Crear enlace privado" }),
   );
@@ -245,7 +276,7 @@ it("no nominal respeta la política y envía identidad vacía aunque hubiera dat
 it("el rechazo del backend mantiene el resumen y enfoca el error sin anunciar éxito", async () => {
   const { user, request } = mount();
   await recipient(user);
-  await areaAndSummary(user);
+  await toSummary(user);
   request.mockImplementation(async (key) => {
     if (key === "createInvitation")
       throw new apiModule.ApiFailure(
@@ -264,4 +295,59 @@ it("el rechazo del backend mantiene el resumen y enfoca el error sin anunciar é
   expect(
     within(screen.getByRole("dialog")).queryByLabelText("Enlace privado"),
   ).not.toBeInTheDocument();
+});
+
+function mountList(search = "") {
+  vi.spyOn(apiModule, "api").mockImplementation((async (key: string) =>
+    key === "invitations"
+      ? { items: [], page: 1, total: 0 }
+      : key === "projects"
+        ? [
+            {
+              id: fixture.projectId,
+              externalId: "EXP-001",
+              name: "Proyecto",
+              description: "",
+              lifecycle: "ACTIVE",
+              role: "ANALYST",
+              lockVersion: 1,
+              questionCount: 0,
+            },
+          ]
+        : key === "questionnaire"
+          ? questionnaire
+          : policy) as never);
+  render(
+    <QueryClientProvider
+      client={
+        new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      }
+    >
+      <MemoryRouter
+        initialEntries={[`/projects/${fixture.projectId}/invitations${search}`]}
+      >
+        <Routes>
+          <Route
+            path="/projects/:projectId/invitations"
+            element={<Invitations />}
+          />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
+  );
+}
+it("sin invitaciones dice que aún no hay ninguna y para qué sirven, no que falten en «esta página»", async () => {
+  mountList();
+  expect(
+    await screen.findByText(
+      "Todavía no hay invitaciones. Crea una para que una persona externa responda sin cuenta.",
+    ),
+  ).toBeVisible();
+  expect(screen.queryByText(/en esta página/)).not.toBeInTheDocument();
+});
+it("el filtro de vencimiento sin resultados dice que ninguna vence pronto", async () => {
+  mountList("?expiresWithin=7");
+  expect(
+    await screen.findByText("Ninguna invitación vence en los próximos 7 días."),
+  ).toBeVisible();
 });

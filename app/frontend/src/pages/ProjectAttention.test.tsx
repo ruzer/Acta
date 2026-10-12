@@ -636,3 +636,20 @@ it("UX-01: si el contexto guardado apunta a una fila de un grupo plegado, ese gr
   expect(fold(/Todas las preguntas \(304\)/)).not.toHaveAttribute("open");
   expect(screen.getAllByRole("link", { name: /: Caso 150$/ })).toHaveLength(1);
 });
+
+it("sin preguntas publicadas, el analista ve cómo llegar al cuestionario; quien solo consulta (administración), no", async () => {
+  const empty: AttentionDashboard = { ...dashboard(0), role: "ANALYST" };
+  mockScale(empty);
+  renderScale(client(), empty);
+  expect(
+    await screen.findByRole("link", { name: "Ir al cuestionario" }),
+  ).toHaveAttribute("href", "/projects/project/editor");
+  cleanup();
+  const admin: AttentionDashboard = { ...empty, role: "ADMIN" };
+  mockScale(admin);
+  renderScale(client(), admin);
+  expect(await screen.findByText("Sin preguntas")).toBeVisible();
+  expect(
+    screen.queryByRole("link", { name: "Ir al cuestionario" }),
+  ).not.toBeInTheDocument();
+});

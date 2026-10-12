@@ -24,6 +24,7 @@ import {
   Textarea,
 } from "../ui";
 import "../next-invitations.css";
+import { plural } from "../ui/plural";
 const labels: Record<InvitationView["status"], string> = {
   PENDING: "Pendiente",
   OPENED: "Abrió el enlace",
@@ -272,6 +273,24 @@ export function CreateInvitation({
                   />
                 </>
               )}
+              {/* Required for every invitation, so it lives with the recipient
+                  data at the top of the wizard, not below a long question list. */}
+              <Select
+                label="Área de la aportación"
+                hint="Su aportación se registrará con esta área."
+                required
+                value={areaId}
+                onChange={(e) => setAreaId(e.target.value)}
+              >
+                <option value="">Selecciona un área</option>
+                {areas
+                  .filter((a) => a.active)
+                  .map((a) => (
+                    <option value={a.id} key={a.id}>
+                      {a.name}
+                    </option>
+                  ))}
+              </Select>
               <p className="ac-note">
                 Los datos describen al destinatario previsto. El enlace no
                 verifica su identidad ni se envía por correo automáticamente.
@@ -289,8 +308,12 @@ export function CreateInvitation({
                     onChange={(e) => setSearch(e.target.value)}
                   />
                   <p role="status">
-                    {selectedQuestions.length} seleccionadas · {visible.length}{" "}
-                    resultados publicados
+                    {plural(selectedQuestions.length, "seleccionada")} ·{" "}
+                    {plural(
+                      visible.length,
+                      "resultado publicado",
+                      "resultados publicados",
+                    )}
                   </p>
                   <div className="actions">
                     <Button
@@ -354,8 +377,12 @@ export function CreateInvitation({
                 </>
               ) : (
                 <p>
-                  {selectedQuestions.length} preguntas seleccionadas en
-                  Organizar. La selección se conserva al cerrar.
+                  {plural(
+                    selectedQuestions.length,
+                    "pregunta seleccionada",
+                    "preguntas seleccionadas",
+                  )}{" "}
+                  en Organizar. La selección se conserva al cerrar.
                 </p>
               )}
               <details>
@@ -384,21 +411,6 @@ export function CreateInvitation({
                     : "Vuelve a Organizar e inclúyelas explícitamente."}
                 </Alert>
               )}
-              <Select
-                label="Área de la aportación"
-                required
-                value={areaId}
-                onChange={(e) => setAreaId(e.target.value)}
-              >
-                <option value="">Selecciona un área</option>
-                {areas
-                  .filter((a) => a.active)
-                  .map((a) => (
-                    <option value={a.id} key={a.id}>
-                      {a.name}
-                    </option>
-                  ))}
-              </Select>
             </>
           )}
           {step === 2 && (
@@ -692,7 +704,15 @@ export function Invitations() {
             {filtered.length}{" "}
             {filtered.length === 1 ? "invitación" : "invitaciones"}
           </p>
-          {!items.length && <p>Todavía no hay invitaciones en esta página.</p>}
+          {!items.length && (
+            <p>
+              {filtered.length
+                ? "No hay invitaciones en esta página."
+                : expires
+                  ? "Ninguna invitación vence en los próximos 7 días."
+                  : "Todavía no hay invitaciones. Crea una para que una persona externa responda sin cuenta."}
+            </p>
+          )}
           <ul className="invitation-management">
             {items.map((row) => (
               <li key={row.id}>
@@ -717,7 +737,7 @@ export function Invitations() {
                   <dd>{row.total} incluidas</dd>
                   <dt>Envíos</dt>
                   <dd>
-                    {row.submitted} de {row.total} preguntas con envío
+                    {row.submitted} de {plural(row.total, "pregunta")} con envío
                     <span className="ac-mini-bar" aria-hidden="true">
                       <span
                         style={{

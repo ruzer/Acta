@@ -10,6 +10,7 @@ import {
 } from "./ContributionComparison";
 import { dateText } from "./ReviewShared";
 import type { ThreadOpen } from "./ReviewThreads";
+import { plural } from "../ui/plural";
 
 type Conflict = ReviewDetail["conflicts"][number];
 
@@ -160,7 +161,7 @@ export function ReviewContrast({
           Contrastar aportaciones
         </h2>
         <Button tone="secondary" onClick={onBack}>
-          ← Volver a {current.length} aportaciones
+          ← Volver a {plural(current.length, "aportación", "aportaciones")}
         </Button>
       </div>
       {open.map((c) => (

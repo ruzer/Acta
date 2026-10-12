@@ -1,4 +1,5 @@
 import type { AttentionDashboard } from "./attention-data";
+import { plural } from "../ui/plural";
 
 type Question = AttentionDashboard["questions"][number];
 export type AttentionGroup = {
@@ -94,7 +95,7 @@ export function attentionGroups(
       ),
       action: () => "Ver aportaciones",
       reason: (q) =>
-        `Faltan ${q.requiredRespondents - q.submittedRespondents} de ${q.requiredRespondents} aportaciones`,
+        `${q.requiredRespondents - q.submittedRespondents === 1 ? "Falta" : "Faltan"} ${q.requiredRespondents - q.submittedRespondents} de ${plural(q.requiredRespondents, "aportación", "aportaciones")}`,
     },
     {
       id: "unassigned",

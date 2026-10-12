@@ -2,6 +2,7 @@ import { Button, EmptyState, Alert } from "../../ui";
 import { FactGrid } from "../../ui/semantic";
 import { type EditorProps } from "./EditorWorkspace";
 import { readiness, type ReadinessIssue } from "./readiness";
+import { plural } from "../../ui/plural";
 export function ReadinessPanel(
   props: EditorProps & {
     onInspect: (id: string) => void;
@@ -136,8 +137,8 @@ export function ReadinessPanel(
       })}
       {published > 0 && (
         <p className="hint">
-          {published} preguntas publicadas. Su contenido está protegido; puedes
-          consultar su detalle en Organizar.
+          {plural(published, "pregunta publicada", "preguntas publicadas")}. Su
+          contenido está protegido; puedes consultar su detalle en Organizar.
         </p>
       )}
       <section className="qe-publication">

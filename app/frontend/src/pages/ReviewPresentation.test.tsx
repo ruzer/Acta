@@ -555,7 +555,7 @@ it("F4: cada comparación describe su propio alcance sin atribuir el conflicto a
 });
 
 const backButton = () =>
-  screen.findByRole("button", { name: /^← Volver a \d+ aportaciones/ });
+  screen.findByRole("button", { name: /^← Volver a \d+ aportaci(?:ón|ones)/ });
 it("F5: «← Volver a N aportaciones» devuelve el foco a «Comparar aportaciones» ya visible", async () => {
   wideViewport();
   page(withUnlinkedContribution(conflict), "?tab=contrast");
@@ -605,6 +605,8 @@ it("F5: sin botón de comparar (una sola aportación) el foco vuelve a la pesta�
   page(reviewDetailView.parse(decision), "?tab=contrast");
   expect(decision.submissions.filter((s) => s.current)).toHaveLength(1);
   const user = userEvent.setup();
+  // One contribution reads in the singular.
+  expect(await backButton()).toHaveAccessibleName("← Volver a 1 aportación");
   await user.click(await backButton());
   const tab = screen.getByRole("tab", { name: /^Aportaciones/ });
   await waitFor(() => expect(tab).toHaveFocus());

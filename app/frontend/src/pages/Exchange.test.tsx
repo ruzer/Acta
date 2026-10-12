@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { exchangeRequest } from "../api";
+import { api, exchangeRequest } from "../api";
 import { ImportStructure } from "./Exchange";
 vi.mock("../api", () => ({
   exchangeRequest: vi.fn(),
@@ -37,6 +37,18 @@ const preview = {
   canConfirm: true,
 };
 function setup() {
+  vi.mocked(api).mockResolvedValue([
+    {
+      id: "example",
+      externalId: "EXP-001",
+      name: "Proyecto de ejemplo",
+      description: "",
+      lifecycle: "ACTIVE",
+      role: "ANALYST",
+      lockVersion: 1,
+      questionCount: 0,
+    },
+  ] as never);
   render(
     <QueryClientProvider
       client={
@@ -56,6 +68,45 @@ function setup() {
   return userEvent.setup();
 }
 describe("Import guidance without a new import contract", () => {
+  it("says the project's own identifier where the file is chosen", async () => {
+    setup();
+    expect(
+      await screen.findByText("EXP-001", { selector: "code" }),
+    ).toBeVisible();
+    expect(
+      screen.getByText(/igual al identificador de este proyecto/),
+    ).toBeVisible();
+  });
+  it("repeats the project's identifier next to a mismatch and shows errors as errors, warnings as information", async () => {
+    vi.mocked(exchangeRequest).mockResolvedValue({
+      ...preview,
+      canConfirm: false,
+      errors: [
+        {
+          path: "/project/externalId",
+          message:
+            "El identificador del archivo debe coincidir exactamente con este proyecto.",
+        },
+      ],
+      warnings: [{ path: "/questions/0/helpText", message: "Texto largo." }],
+    });
+    const user = setup();
+    await screen.findByText("EXP-001", { selector: "code" });
+    await user.upload(
+      screen.getByLabelText("Archivo JSON"),
+      new File(["{}"], "example.json", { type: "application/json" }),
+    );
+    await user.click(screen.getByRole("button", { name: "Revisar archivo" }));
+    const mismatch = (await screen.findByText(/debe coincidir exactamente/))
+      .parentElement!;
+    expect(mismatch).toHaveClass("alert", "error");
+    expect(
+      within(mismatch).getByText("EXP-001", { selector: "code" }),
+    ).toBeVisible();
+    const warning = screen.getByText("Texto largo.").parentElement!;
+    expect(warning).toHaveClass("alert");
+    expect(warning).not.toHaveClass("error");
+  });
   it("offers downloadable examples and keyboard-accessible preparation help", async () => {
     const user = setup();
     expect(
@@ -134,7 +185,7 @@ describe("Import guidance without a new import contract", () => {
     );
     await user.click(confirm);
     expect(
-      await screen.findByText("Importación completada: 2 preguntas y 1 temas."),
+      await screen.findByText("Importación completada: 2 preguntas y 1 tema."),
     ).toBeVisible();
     expect(vi.mocked(exchangeRequest).mock.calls[1]?.[3]).toEqual({
       file,

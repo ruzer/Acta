@@ -30,6 +30,7 @@ import {
   unfoldedQuestions,
 } from "./questionnaire-presentation";
 import "../../next-questionnaire.css";
+import { plural } from "../../ui/plural";
 function InspectorFrame({
   children,
   onClose,
@@ -400,6 +401,40 @@ export function Organize(
     bulkTrigger.current = document.activeElement as HTMLElement;
     setBulkOperation(operation);
   }
+  // A questionnaire without questions has nothing to search, filter, fold or
+  // select: say how to begin and offer the one action that applies.
+  if (!data.questions.length) {
+    const hasArea = data.areas.some((a) => a.active);
+    return (
+      <div className="qe-organize an-questionnaire">
+        <EmptyState
+          title="Todavía no hay preguntas."
+          action={
+            data.sections.length ? (
+              <Button
+                disabled={!hasArea}
+                onClick={() => props.onEdit(undefined, undefined)}
+              >
+                Nueva pregunta
+              </Button>
+            ) : (
+              <Button onClick={props.onCreateTopic}>+ Agregar tema</Button>
+            )
+          }
+        >
+          {data.sections.length
+            ? "Crea la primera con Nueva pregunta o importa una estructura."
+            : "Agrega un tema para crear la primera pregunta o importa una estructura."}
+        </EmptyState>
+        {!hasArea && (
+          <p className="hint">
+            Para crear preguntas hace falta al menos un área activa; un
+            administrador puede crearla en Administración.
+          </p>
+        )}
+      </div>
+    );
+  }
   return (
     <div
       className={
@@ -600,7 +635,7 @@ export function Organize(
           <p className="hint" role="status">
             {search.trim()
               ? "La búsqueda muestra también seguimientos de grupos plegados."
-              : `${questions.length - unfolded.length} preguntas en grupos plegados.`}
+              : `${plural(questions.length - unfolded.length, "pregunta")} en grupos plegados.`}
           </p>
         )}
         {props.contributionsError && (
@@ -613,7 +648,11 @@ export function Organize(
         )}
         <div className="ac-questionnaire-results">
           <p role="status" className="hint">
-            {questions.length} preguntas encontradas
+            {plural(
+              questions.length,
+              "pregunta encontrada",
+              "preguntas encontradas",
+            )}
             {unfolded.length > 40
               ? ` · Página ${currentPage + 1} de ${pages}`
               : ""}
@@ -656,7 +695,7 @@ export function Organize(
                     );
                     addSelection(rows);
                     setSelectionNotice(
-                      `Se seleccionó el tema completo: ${rows.length} preguntas, incluidas las que quedan fuera de los filtros.`,
+                      `Se seleccionó el tema completo: ${plural(rows.length, "pregunta")}, incluidas las que quedan fuera de los filtros.`,
                     );
                   }}
                 >
@@ -852,7 +891,13 @@ export function Organize(
                               <span className="an-cell-label">
                                 Participantes
                               </span>
-                              <span>{assigned} participantes asignados</span>
+                              <span>
+                                {plural(
+                                  assigned,
+                                  "participante asignado",
+                                  "participantes asignados",
+                                )}
+                              </span>
                             </>
                           ) : (
                             <>
@@ -1074,7 +1119,7 @@ export function Organize(
           onComplete={(result) => {
             closeBulk();
             setBulkIds(new Set());
-            const message = `Operación aplicada: ${result.changedIds.length} preguntas actualizadas; ${result.ignoredIds.length} sin cambios.`;
+            const message = `Operación aplicada: ${plural(result.changedIds.length, "pregunta actualizada", "preguntas actualizadas")}; ${result.ignoredIds.length} sin cambios.`;
             setSelectionNotice(message);
             props.onBulkComplete?.(message);
           }}
@@ -1088,7 +1133,7 @@ export function Organize(
             const group = questionGroup(data.questions, selection.id);
             addSelection(group);
             setSelectionNotice(
-              `Grupo seleccionado: ${group.length} preguntas. La selección incluye seguimientos fuera de la página o los filtros actuales.`,
+              `Grupo seleccionado: ${plural(group.length, "pregunta")}. La selección incluye seguimientos fuera de la página o los filtros actuales.`,
             );
             setSelected(null);
           }}

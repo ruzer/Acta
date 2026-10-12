@@ -15,6 +15,7 @@ import {
 } from "./attention-data";
 import { expiringInvitations, invitationQueryOptions } from "./invitation-data";
 import "../next-attention.css";
+import { plural } from "../ui/plural";
 
 const taskLabels = {
   conflicts: "Conflictos",
@@ -353,7 +354,7 @@ export function ProjectAttention({
           ) : (
             <>
               <p className="ac-attention-result" role="status">
-                {items.length} preguntas
+                {plural(items.length, "pregunta")}
               </p>
               {!items.length ? (
                 <EmptyState
@@ -363,9 +364,21 @@ export function ProjectAttention({
                       : "Sin preguntas"
                   }
                 >
-                  {data.questions.length
-                    ? "Puedes cambiar los filtros para consultar otros casos."
-                    : "Publica preguntas para ver su avance."}
+                  {data.questions.length ? (
+                    "Puedes cambiar los filtros para consultar otros casos."
+                  ) : (
+                    <>
+                      Publica preguntas para ver su avance.
+                      {canReview && (
+                        <>
+                          {" "}
+                          <Link to={`/projects/${projectId}/editor`}>
+                            Ir al cuestionario
+                          </Link>
+                        </>
+                      )}
+                    </>
+                  )}
                 </EmptyState>
               ) : task || status ? (
                 <section

@@ -154,14 +154,18 @@ export function Alert({
 export function EmptyState({
   title,
   children,
+  action,
 }: {
   title: string;
   children?: ReactNode;
+  /** The one thing to do next, kept inside the card it belongs to. */
+  action?: ReactNode;
 }) {
   return (
     <div className="empty">
       <h2>{title}</h2>
       <p>{children}</p>
+      {action && <div className="empty-action">{action}</div>}
     </div>
   );
 }
