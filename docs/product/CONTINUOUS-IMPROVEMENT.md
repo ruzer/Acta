@@ -37,4 +37,22 @@ Exploración con un proyecto ficticio de 300 preguntas y 41 aportaciones (analis
 | Tras una operación en lote el mismo mensaje salía dos veces | «Operación aplicada: 300 preguntas…» arriba y junto a la selección | Se dice una vez | Aserción E2E de que aparece una sola vez |
 | «Contraseña temporal» como botón parecía un estado | Fila de usuarios | «Restablecer contraseña», con el nombre para lectores de pantalla | Hecho |
 
-Pendiente: Decisiones y Bitácora con volumen no se llegaron a medir (se reinició la base de pruebas). Se descarta el recuadro de foco del `h1`: aparece solo con foco por teclado o sin ratón y es lo esperado. «← Cuestionario» de Miembros se queda: una prueba lo usa para navegar y el cambio no compensa.
+Pendiente (resuelto en la iteración 4): Decisiones y Bitácora con volumen no se llegaron a medir (se reinició la base de pruebas). Se descarta el recuadro de foco del `h1`: aparece solo con foco por teclado o sin ratón y es lo esperado. «← Cuestionario» de Miembros se quedó entonces; la iteración 4 lo hace depender de dónde llegó la persona.
+
+## Iteración 4 — 2026-10-12
+
+Exploración con un proyecto ficticio de 150 preguntas, 63 invitaciones (50 aportaciones en una pregunta, 12 en otras dos y una persona respondiendo 127), 120 decisiones y 658 eventos de bitácora, como analista y como administrador. La revisión de una pregunta con 50 aportaciones ya funciona bien (lista con búsqueda y filtro, contraste con selectores); los problemas estaban en lo que rodea a la decisión y en los registros largos.
+
+| Problema | Evidencia | Mejora | Resultado |
+|---|---|---|---|
+| Decidir con 50 aportaciones obliga a marcar 50 casillas sin ver qué dice cada una | Diálogo de ~3 100 px, casillas con solo «Invitación: … · envío #1», sin conteo ni selección en bloque | Con más de seis fuentes: conteo, «Seleccionar todas», «Quitar selección», inicio de cada respuesta y lista acotada | Diálogo de ~1 300 px; el foco se queda en el botón pulsado (una primera versión lo deshabilitaba y lo perdía) |
+| La Bitácora pedía escribir el código en inglés y ocultaba qué pregunta era | «Objeto: Question, ImportBatch…» y «Acción» como texto libre con filtro exacto; cada evento de decisión decía «Pregunta ▸ Identificador» (un UUID) | Listas en español con el código por debajo; las preguntas se nombran y enlazan a su revisión con datos ya cargados; «Detalle» solo si hay detalle; «Página 1 de N» | 120 eventos de decisión distinguibles; sin cambios de API |
+| Decisiones con 120 registros repetía «Vigente» y ocupaba ~14 900 px | 121 px por fila y la misma marca en todas | Una línea por decisión y sin la marca repetida | ~6 200 px (49 px por fila); en móvil 70 px |
+| Miembros abierto desde Administración ofrecía «← Cuestionario» | El administrador llega desde Administración › Proyectos y el único retorno iba al editor | Vuelve a Administración, a la lista de Proyectos; desde el proyecto sigue volviendo al cuestionario | Hecho |
+
+**Verificación.** Unitarias de lo tocado (decisión, Bitácora, Decisiones, Administración), lint y typecheck, y las 121 E2E de los recorridos relacionados (decisiones y conflictos, intercambio, revisión, plataforma, Atención, UX y Direction C) sobre una base reiniciada. La suite completa queda para el CI del PR.
+
+**Decisión de diseño.** Se retira la marca «Vigente» de cada fila de Decisiones porque la lista solo contiene decisiones vigentes y la página ya lo dice; el estado no se pierde, simplemente no se repite. Los tests de CP5 y V-12 que la fijaban se actualizaron a propósito.
+
+**Observado y no hecho** (necesita el servidor o es de poco valor): la lista de Decisiones no puede mostrar el texto de cada decisión porque la proyección actual no lo entrega (cambio de contrato: propuesta pendiente); los eventos de respuesta (borrador/envío) de la Bitácora solo traen el identificador de la respuesta y no se pueden nombrar sin ampliar la API; el selector de «Actor» de la Bitácora lista a cada invitación como una persona más (66 opciones).
+
