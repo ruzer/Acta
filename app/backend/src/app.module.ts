@@ -1,4 +1,6 @@
 import { InvitationsModule } from "./invitations/invitations.module.js";
+import { SettingsModule } from "./settings/settings.module.js";
+import { SetupModule } from "./setup/setup.module.js";
 import { ExchangeModule } from "./exchange/exchange.module.js";
 import { ReviewModule } from "./review/review.module.js";
 import {
@@ -38,13 +40,6 @@ class HealthController {
     }
   }
 }
-import { publicBranding } from "./common/config.js";
-@Controller("configuration")
-class PublicConfigurationController {
-  @Public() @Get("public") get() {
-    return publicBranding();
-  }
-}
 @Module({
   imports: [
     DatabaseModule,
@@ -55,7 +50,9 @@ class PublicConfigurationController {
     ReviewModule,
     ExchangeModule,
     InvitationsModule,
+    SettingsModule,
+    SetupModule,
   ],
-  controllers: [HealthController, PublicConfigurationController],
+  controllers: [HealthController],
 })
 export class AppModule {}
