@@ -21,6 +21,24 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   continuar e Invitaciones distingue entre no tener ninguna y un filtro sin
   resultados.
 
+### Added
+
+- «Siguiente por revisar» en la revisión de una pregunta: al llegar desde
+  Atención, lleva a la siguiente pregunta de la misma lista, en su mismo orden
+  y con sus mismos filtros, y conserva el retorno a Atención. Solo usa datos ya
+  cargados; no aparece para quien solo consulta ni cuando no hay más casos.
+- Administración › Proyectos lista los proyectos con su identificador,
+  preguntas publicadas y accesos directos a abrirlos y a sus miembros, y el
+  formulario de alta explica para qué sirve el identificador.
+
+### Changed
+
+- Organizar dice el alcance de «Expandir/Contraer todos los grupos» solo cuando
+  llega más allá de lo visible (filtros o varias páginas); antes ocupaba una
+  línea fija.
+- En móvil, las etiquetas de las tablas apiladas ya no se parten a mitad de
+  palabra.
+
 Presentación del frontend únicamente; sin cambios de API, contratos, permisos,
 almacenamiento ni migraciones. Ver el [registro de mejora continua](docs/product/CONTINUOUS-IMPROVEMENT.md).
 
