@@ -25,3 +25,16 @@ Principio: eliminar, simplificar, reorganizar y reutilizar antes de añadir. Las
 ## Iteración 2 — 2026-10-12
 
 Autorizada por producto. Se resolvieron las cuatro oportunidades acordadas, sin cambios de contratos ni de backend: «Siguiente por revisar» (entrada 5 de la iteración 1), Administración › Proyectos con lista y accesos, controles de Organizar más ligeros y el identificador explicado en el alta. Pendiente de la iteración 1 que sigue abierto: el recuadro de foco del `h1` al cargar sin ratón y el enlace «← Cuestionario» de Miembros. Los dos botones de selección de Organizar se dejan como están: duplican su conteo solo cuando todo cabe en una página, están plegados por defecto y fundirlos habría tocado ~10 pruebas por poco beneficio.
+
+## Iteración 3 — 2026-10-12
+
+Exploración con un proyecto ficticio de 300 preguntas y 41 aportaciones (analista, participante, administración). Con 300 preguntas la importación, la asignación y la publicación en lote tardan menos de un segundo, y «Mi trabajo» y Atención ya escalan; lo que quedaba era la tarea más repetida: decidir.
+
+| Problema | Evidencia | Mejora | Resultado |
+|---|---|---|---|
+| Decidir cada pregunta pedía más pasos de los necesarios y el campo obligatorio «Fuentes» quedaba fuera de la vista del diálogo, con un error genérico | El diálogo muestra cuatro cuadros altos; las fuentes quedan bajo el pliegue, el foco abre en «Cerrar» y el error no dice qué falta | Fuente única ya elegida, foco inicial en el primer campo y mensaje específico que enfoca la fuente | 12 decisiones seguidas con «Siguiente por revisar»: 5 acciones por pregunta más el salto |
+| «Escribir» con 300 preguntas era una página de ~48 000 px y ~5 600 nodos | Medido en el navegador; «Mi trabajo» ya pliega por tema | Temas plegados desde 40 preguntas, el primero abierto por identificador | Prueba E2E de reordenar con 300 preguntas ajustada por el diseño, no debilitada |
+| Tras una operación en lote el mismo mensaje salía dos veces | «Operación aplicada: 300 preguntas…» arriba y junto a la selección | Se dice una vez | Aserción E2E de que aparece una sola vez |
+| «Contraseña temporal» como botón parecía un estado | Fila de usuarios | «Restablecer contraseña», con el nombre para lectores de pantalla | Hecho |
+
+Pendiente: Decisiones y Bitácora con volumen no se llegaron a medir (se reinició la base de pruebas). Se descarta el recuadro de foco del `h1`: aparece solo con foco por teclado o sin ratón y es lo esperado. «← Cuestionario» de Miembros se queda: una prueba lo usa para navegar y el cambio no compensa.

@@ -98,14 +98,20 @@ it("decisión exige fuentes y envía contenido completo; fallo de red conserva t
     screen.getByLabelText("Comentario interno"),
     "Fuentes revisadas",
   );
+  const source = screen.getByRole("checkbox", { name: /Participante · envío/ });
+  // A single submission is the obvious source: it starts chosen. Without any
+  // source the decision is refused, and the message brings the first into view.
+  expect(source).toBeChecked();
+  await user.click(source);
   await user.click(
     screen.getByRole("button", { name: "Registrar como validada" }),
   );
   expect(api).not.toHaveBeenCalled();
-  expect(screen.getByRole("alert")).toHaveTextContent("selecciona las fuentes");
-  await user.click(
-    screen.getByRole("checkbox", { name: /Participante · envío/ }),
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    "Selecciona al menos una respuesta que sustente la decisión.",
   );
+  await waitFor(() => expect(source).toHaveFocus());
+  await user.click(source);
   await user.click(
     screen.getByRole("button", { name: "Registrar como validada" }),
   );
@@ -125,6 +131,41 @@ it("decisión exige fuentes y envía contenido completo; fallo de red conserva t
     responseRevisionIds: [rid],
     decisionText: "Decisión explícita",
   });
+});
+it("con varias respuestas vigentes no se elige ninguna fuente por defecto", () => {
+  const first = data.submissions[0]!;
+  render(
+    <ReviewActionDialog
+      data={{
+        ...data,
+        submissions: [
+          first,
+          { ...first, id: "00000000-0000-4000-8000-000000000009", number: 2 },
+        ],
+      }}
+      action="validateQuestion"
+      onClose={vi.fn()}
+      onDone={vi.fn()}
+      refresh={vi.fn()}
+    />,
+  );
+  const sources = screen.getAllByRole("checkbox", {
+    name: /Participante · envío/,
+  });
+  expect(sources).toHaveLength(2);
+  for (const source of sources) expect(source).not.toBeChecked();
+});
+it("al abrir una decisión el foco empieza en su primer campo, no en «Cerrar»", () => {
+  render(
+    <ReviewActionDialog
+      data={data}
+      action="validateQuestion"
+      onClose={vi.fn()}
+      onDone={vi.fn()}
+      refresh={vi.fn()}
+    />,
+  );
+  expect(screen.getByLabelText("Decisión acordada")).toHaveFocus();
 });
 it("cerrar con cambios requiere decisión del usuario y mantiene texto al cancelar descarte", async () => {
   const close = vi.fn();

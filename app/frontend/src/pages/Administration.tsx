@@ -179,11 +179,12 @@ export function Administration({ me }: { me: Me }) {
                   <div className="actions" key="a">
                     <Button
                       tone="tertiary"
+                      aria-label={`Restablecer contraseña de ${u.displayName}`}
                       onClick={() =>
                         setReset({ id: u.id, name: u.displayName })
                       }
                     >
-                      Contraseña temporal
+                      Restablecer contraseña
                     </Button>
                     {u.id !== me.user.id && (
                       <Button
@@ -378,7 +379,7 @@ export function Administration({ me }: { me: Me }) {
       )}
       {reset && (
         <Dialog
-          title={"Contraseña temporal · " + reset.name}
+          title={"Restablecer contraseña · " + reset.name}
           onClose={() => setReset(null)}
         >
           <ActionForm

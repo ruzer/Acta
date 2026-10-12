@@ -1186,8 +1186,9 @@ it("registrar la decisión deja el foco en el título aunque el fotograma llegue
     within(dialog).getByLabelText("Comentario interno"),
     "Fuentes revisadas",
   );
+  // The only submission starts chosen as the source of the decision.
   for (const box of within(dialog).getAllByRole("checkbox"))
-    await user.click(box);
+    if (!(box as HTMLInputElement).checked) await user.click(box);
   // A frame can fire before React has committed the refreshed review.
   vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
     callback(0);
