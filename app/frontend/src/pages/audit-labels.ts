@@ -1,6 +1,8 @@
 /** Plain-language names for what the audit log records; the raw code stays visible beside them. */
 export const auditActions: Record<string, string> = {
   AREA_CREATED: "Área creada",
+  BRANDING_ASSET_CHANGED: "Imagen de la institución cambiada",
+  BRANDING_ASSET_REMOVED: "Imagen de la institución quitada",
   ASSIGNMENT_CHANGED: "Asignación cambiada",
   CLARIFICATION_CLOSED: "Aclaración cerrada",
   CLARIFICATION_REQUESTED: "Aclaración solicitada",
@@ -11,6 +13,7 @@ export const auditActions: Record<string, string> = {
   EVIDENCE_DOWNLOADED: "Evidencia descargada",
   EVIDENCE_STAGED: "Evidencia preparada",
   EXPORT_CREATED: "Exportación creada",
+  INSTALLATION_BOOTSTRAPPED: "Instalación configurada",
   INVITATION_CREATED: "Invitación creada",
   INVITATION_OPENED: "Invitación abierta",
   INVITATION_RENEWED: "Enlace de invitación renovado",
@@ -34,6 +37,8 @@ export const auditActions: Record<string, string> = {
   RESPONSE_SUBMITTED: "Respuesta enviada",
   RESPONSE_VALIDATED: "Respuesta validada",
   SECTION_CREATED: "Tema creado",
+  SETTINGS_UPDATED: "Configuración actualizada",
+  STORAGE_CONNECTION_TESTED: "Conexión de almacenamiento probada",
   SECTION_UPDATED: "Tema actualizado",
   SECTIONS_REORDERED: "Temas reordenados",
   USER_CREATED: "Usuario creado",
@@ -42,6 +47,7 @@ export const auditActions: Record<string, string> = {
 export const auditObjects: Record<string, string> = {
   Area: "Área",
   Evidence: "Evidencia",
+  Organization: "Organización",
   ImportBatch: "Importación",
   Project: "Proyecto",
   ProjectMember: "Miembro del proyecto",
@@ -52,6 +58,7 @@ export const auditObjects: Record<string, string> = {
   ResponseInvitation: "Invitación",
   Section: "Tema",
   Session: "Sesión",
+  Storage: "Almacenamiento",
   User: "Usuario",
   Validation: "Validación",
 };

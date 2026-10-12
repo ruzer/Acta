@@ -31,12 +31,13 @@ const destinations = () =>
     screen.getAllByRole("navigation", { name: "Navegación principal" })[0]!,
   );
 
-it("CP7: quien administra ve Mis proyectos y Administración, y la página actual queda marcada", () => {
+it("CP7: quien administra ve Mis proyectos, Administración y Configuración, y la página actual queda marcada", () => {
   setup("/admin", true);
   const links = destinations().getAllByRole("link");
   expect(links.map((link) => link.textContent)).toEqual([
     "Mis proyectos",
     "Administración",
+    "Configuración",
   ]);
   expect(
     destinations().getByRole("link", { name: "Administración" }),
@@ -45,11 +46,27 @@ it("CP7: quien administra ve Mis proyectos y Administración, y la página actua
     destinations().getByRole("link", { name: "Mis proyectos" }),
   ).not.toHaveAttribute("aria-current");
 });
+it("Configuración se marca sola: dentro de /admin/settings Administración no queda también marcada", () => {
+  setup("/admin/settings/appearance", true);
+  expect(
+    destinations().getByRole("link", { name: "Configuración" }),
+  ).toHaveAttribute("aria-current", "page");
+  expect(
+    destinations().getByRole("link", { name: "Administración" }),
+  ).not.toHaveAttribute("aria-current");
+  const context = within(
+    screen.getByRole("navigation", { name: "Contexto de página" }),
+  );
+  expect(context.getByText("Configuración")).toBeVisible();
+});
 it("CP7: sin administración solo existe el destino de proyectos; no se inventa otro", () => {
   setup("/", false);
   expect(destinations().getAllByRole("link")).toHaveLength(1);
   expect(
     screen.queryByRole("link", { name: "Administración" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("link", { name: "Configuración" }),
   ).not.toBeInTheDocument();
 });
 it("CP7: el contexto de página nombra la pantalla sin llevar el nombre de un proyecto", () => {

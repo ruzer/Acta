@@ -10,6 +10,7 @@ import "./shell.css";
 const pageNames: Record<string, string> = {
   "/": "Mis proyectos",
   "/admin": "Administración",
+  "/admin/settings": "Configuración",
   "/password": "Mi contraseña",
   "/review": "Revisar respuestas",
 };
@@ -35,9 +36,19 @@ export function OrganizationShell({
   const destinations = [
     { path: "/", label: "Mis proyectos", icon: "folder" },
     ...(organizationAdmin
-      ? [{ path: "/admin", label: "Administración", icon: "building" }]
+      ? [
+          { path: "/admin", label: "Administración", icon: "building" },
+          { path: "/admin/settings", label: "Configuración", icon: "settings" },
+        ]
       : []),
   ];
+  // The most specific destination is the current one: /admin/settings is not also "Administración".
+  const current = destinations
+    .filter(
+      ({ path }) =>
+        pathname === path || (path !== "/" && pathname.startsWith(path + "/")),
+    )
+    .sort((a, b) => b.path.length - a.path.length)[0]?.path;
   const navigation = (
     <nav className="ac-project-navigation" aria-label="Navegación principal">
       {destinations.map(({ path, label, icon }) => (
@@ -45,7 +56,7 @@ export function OrganizationShell({
           key={path}
           to={path}
           title={label}
-          aria-current={pathname === path ? "page" : undefined}
+          aria-current={current === path ? "page" : undefined}
         >
           <ParticipantIcon name={icon} />
           <span>{label}</span>
@@ -66,7 +77,11 @@ export function OrganizationShell({
   );
   const page =
     pageNames[pathname] ??
-    (pathname.startsWith("/projects/") ? "Proyecto" : "Página no encontrada");
+    (pathname.startsWith("/admin/settings/")
+      ? "Configuración"
+      : pathname.startsWith("/projects/")
+        ? "Proyecto"
+        : "Página no encontrada");
   return (
     <AppShell
       navigation={
