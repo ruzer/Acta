@@ -178,6 +178,10 @@ test("304 questions: area filter → all results → area; group → participant
   }
   await page.getByRole("button", { name: "Confirmar 304 preguntas" }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
+  // The result is said once, in the page notice; not again beside the selection.
+  await expect(
+    page.getByText(/^Operación aplicada: 304 preguntas/),
+  ).toHaveCount(1);
   let data = await structure(page);
   expect(
     data.questions.every((q) => q.responsibleAreaId === targetAreaId),

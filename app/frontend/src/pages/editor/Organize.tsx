@@ -1129,8 +1129,10 @@ export function Organize(
             closeBulk();
             setBulkIds(new Set());
             const message = `Operación aplicada: ${plural(result.changedIds.length, "pregunta actualizada", "preguntas actualizadas")}; ${result.ignoredIds.length} sin cambios.`;
-            setSelectionNotice(message);
-            props.onBulkComplete?.(message);
+            // The page already says it in its own notice; repeating it beside
+            // the selection only adds a second copy of the same sentence.
+            if (props.onBulkComplete) props.onBulkComplete(message);
+            else setSelectionNotice(message);
           }}
         />
       )}
