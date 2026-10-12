@@ -15,7 +15,7 @@ import {
   LoadingState,
   Select,
 } from "../ui";
-import { RegisterRow, StatusChip } from "../ui/semantic";
+import { RegisterRow } from "../ui/semantic";
 import { ProjectWorkbench } from "./ProjectWorkbench";
 
 export function ProjectDecisions() {
@@ -140,7 +140,7 @@ export function ProjectDecisions() {
           )}
         </div>
         {items.length ? (
-          <ul className="ac-register">
+          <ul className="ac-register ac-register-compact">
             {items.map((question) => (
               <RegisterRow
                 key={question.id}
@@ -161,11 +161,6 @@ export function ProjectDecisions() {
                   </Link>
                 }
                 meta={`${question.sectionTitle} · ${question.areaName}`}
-                status={
-                  <StatusChip tone="success" icon="check">
-                    Vigente
-                  </StatusChip>
-                }
               />
             ))}
           </ul>
