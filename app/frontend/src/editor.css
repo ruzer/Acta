@@ -64,6 +64,35 @@
   padding-bottom: 16px;
   border-bottom: 1px solid var(--av-line);
 }
+.qe-topic-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.qe-chevron {
+  display: inline-flex;
+  transition: transform 120ms;
+}
+.qe-chevron.open {
+  transform: rotate(90deg);
+}
+.qe-chevron .participant-icon {
+  width: 18px;
+  height: 18px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .qe-chevron {
+    transition: none;
+  }
+}
 .qe-editorial-row {
   display: flex;
   justify-content: space-between;

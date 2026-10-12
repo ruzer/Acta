@@ -13,6 +13,7 @@ import { ReadinessPanel } from "./ReadinessPanel";
 import { Organize } from "./Organize";
 import { StatusChip } from "../../ui/semantic";
 import { plural } from "../../ui/plural";
+import { ParticipantIcon } from "../ParticipantIcon";
 export type EditorAction =
   "assign" | "publish" | "archive" | "metadata" | "up" | "down" | "move";
 export type EditorProps = {
@@ -276,7 +277,16 @@ export function EditorWorkspace(props: EditorProps) {
   const [preview, setPreview] = useState(false);
   const [selectionExpanded, setSelectionExpanded] = useState(false);
   const [inspectId, setInspectId] = useState<string>();
+  // A long questionnaire would otherwise be one very long page: from 40
+  // questions on, topics start folded (the first stays open), as in "Mi trabajo".
+  const [topicOpen, setTopicOpen] = useState<Record<string, boolean>>({});
   const { data, onEdit, onCreateTopic } = props;
+  const foldTopics = data.questions.length > 40;
+  // The topic that was first when this opened stays open by id, so moving a
+  // topic never folds the one being handled.
+  const [firstTopic] = useState(
+    () => [...data.sections].sort((a, b) => a.order - b.order)[0]?.id,
+  );
   if (preview) return <Preview data={data} onClose={() => setPreview(false)} />;
   return (
     <>
@@ -363,6 +373,9 @@ export function EditorWorkspace(props: EditorProps) {
                   const questions = data.questions
                     .filter((q) => q.sectionId === s.id)
                     .sort((a, b) => a.order - b.order);
+                  const open =
+                    topicOpen[s.id] ??
+                    (!foldTopics || s.id === firstTopic || !questions.length);
                   return (
                     <section
                       className="qe-topic"
@@ -370,52 +383,80 @@ export function EditorWorkspace(props: EditorProps) {
                       aria-label={s.title}
                     >
                       <header>
-                        <h3>{s.title}</h3>
+                        <h3>
+                          {foldTopics ? (
+                            <button
+                              className="qe-topic-toggle"
+                              aria-expanded={open}
+                              aria-controls={`qe-topic-${s.id}`}
+                              onClick={() =>
+                                setTopicOpen({ ...topicOpen, [s.id]: !open })
+                              }
+                            >
+                              <span
+                                className={
+                                  open ? "qe-chevron open" : "qe-chevron"
+                                }
+                              >
+                                <ParticipantIcon name="chevron" />
+                              </span>
+                              {s.title}
+                            </button>
+                          ) : (
+                            s.title
+                          )}
+                        </h3>
                         <TopicActions {...props} id={s.id} />
                         <span className="hint">
                           {plural(questions.length, "pregunta")}
                         </span>
                       </header>
-                      {s.description && <p className="hint">{s.description}</p>}
-                      {!questions.length && (
-                        <p className="hint">
-                          Este tema todavía no tiene preguntas.
-                        </p>
+                      {open && (
+                        <div id={`qe-topic-${s.id}`}>
+                          {s.description && (
+                            <p className="hint">{s.description}</p>
+                          )}
+                          {!questions.length && (
+                            <p className="hint">
+                              Este tema todavía no tiene preguntas.
+                            </p>
+                          )}
+                          {questions.map((q) => (
+                            <article
+                              className={
+                                "qe-editorial-row" +
+                                (q.groupParentId ? " qe-followup" : "")
+                              }
+                              key={q.id}
+                              aria-label={q.title}
+                            >
+                              <div>
+                                {q.groupParentId && (
+                                  <p className="hint">
+                                    ↳ Seguimiento de{" "}
+                                    {data.questions.find(
+                                      (p) => p.id === q.groupParentId,
+                                    )?.title ?? "pregunta no disponible"}
+                                  </p>
+                                )}
+                                <h4>{q.question}</h4>
+                                <div className="qe-row-meta">
+                                  <span>{typeLabels[q.type]}</span>
+                                  <Publication question={q} />
+                                </div>
+                              </div>
+                              <QuestionActions {...props} question={q} />
+                            </article>
+                          ))}
+                          <Button
+                            tone="secondary"
+                            disabled={!data.areas.some((a) => a.active)}
+                            onClick={() => onEdit(undefined, s.id)}
+                          >
+                            + Agregar pregunta
+                          </Button>
+                        </div>
                       )}
-                      {questions.map((q) => (
-                        <article
-                          className={
-                            "qe-editorial-row" +
-                            (q.groupParentId ? " qe-followup" : "")
-                          }
-                          key={q.id}
-                          aria-label={q.title}
-                        >
-                          <div>
-                            {q.groupParentId && (
-                              <p className="hint">
-                                ↳ Seguimiento de{" "}
-                                {data.questions.find(
-                                  (p) => p.id === q.groupParentId,
-                                )?.title ?? "pregunta no disponible"}
-                              </p>
-                            )}
-                            <h4>{q.question}</h4>
-                            <div className="qe-row-meta">
-                              <span>{typeLabels[q.type]}</span>
-                              <Publication question={q} />
-                            </div>
-                          </div>
-                          <QuestionActions {...props} question={q} />
-                        </article>
-                      ))}
-                      <Button
-                        tone="secondary"
-                        disabled={!data.areas.some((a) => a.active)}
-                        onClick={() => onEdit(undefined, s.id)}
-                      >
-                        + Agregar pregunta
-                      </Button>
                     </section>
                   );
                 })}
