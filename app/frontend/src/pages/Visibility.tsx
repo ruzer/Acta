@@ -3,8 +3,13 @@ import { ProjectWorkbench } from "./ProjectWorkbench";
 import { PageHeader } from "../ui/semantic";
 import { auditActions, auditObjects } from "./audit-labels";
 import { AnalystStatus } from "./AnalystVisual";
-import { useMemo, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { useState } from "react";
+import {
+  Link,
+  useLocation,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import * as C from "@requirements/contracts";
@@ -261,6 +266,7 @@ export function Traceability() {
     </>
   );
 }
+const INVITATIONS = "invitations";
 /** Options named in plain language, in alphabetical order; an unknown value in the address is kept as it came. */
 function labelled(names: Record<string, string>, current: string | undefined) {
   const options = Object.entries(names).sort(([, a], [, b]) =>
@@ -280,7 +286,8 @@ function labelled(names: Record<string, string>, current: string | undefined) {
   );
 }
 export function History() {
-  const { projectId = "" } = useParams(),
+  const location = useLocation(),
+    { projectId = "" } = useParams(),
     [params, setParams] = useSearchParams(),
     input = Object.fromEntries(params);
   const q = useQuery({
@@ -289,18 +296,6 @@ export function History() {
       exchangeRequest(projectId, "history", C.historyView, { query: input }),
     staleTime: 0,
   });
-  // The log names questions by identifier only; the project's question list
-  // (already cached by the other views) turns those into something readable.
-  const dashboard = useQuery({
-    queryKey: ["dashboard", projectId],
-    queryFn: () => exchangeRequest(projectId, "dashboard", C.dashboardView),
-    staleTime: 60_000,
-    retry: false,
-  });
-  const questions = useMemo(
-    () => new Map(dashboard.data?.questions.map((x) => [x.id, x])),
-    [dashboard.data],
-  );
   // Only exports carry a detail: keep the column out of the way when none does.
   const hasDetail = !!q.data?.items.some((e) => e.exportType || e.scope);
   const filter = (key: string, value: string) => {
@@ -308,6 +303,19 @@ export function History() {
     p.delete("page");
     if (value) p.set(key, value);
     else p.delete(key);
+    setParams(p);
+  };
+  // One choice for "an account", "any external invitation" or "everyone": the
+  // invitations are too many to be options one by one.
+  const actorChoice =
+    input.actorKind === "INVITATION" ? INVITATIONS : (input.actorId ?? "");
+  const chooseActor = (value: string) => {
+    const p = new URLSearchParams(params);
+    p.delete("page");
+    p.delete("actorId");
+    p.delete("actorKind");
+    if (value === INVITATIONS) p.set("actorKind", "INVITATION");
+    else if (value) p.set("actorId", value);
     setParams(p);
   };
   return (
@@ -335,10 +343,15 @@ export function History() {
         </Select>
         <Select
           label="Actor"
-          value={input.actorId ?? ""}
-          onChange={(e) => filter("actorId", e.target.value)}
+          value={actorChoice}
+          onChange={(e) => chooseActor(e.target.value)}
         >
           <option value="">Todos</option>
+          {!!q.data?.invitationActors && (
+            <option value={INVITATIONS}>
+              {`Invitaciones externas (${q.data.invitationActors})`}
+            </option>
+          )}
           {q.data?.actors.map((a) => (
             <option value={a.id} key={a.id}>
               {a.displayName}
@@ -388,10 +401,6 @@ export function History() {
                 ...(hasDetail ? [{ label: "Detalle" }] : []),
               ]}
               rows={q.data.items.map((e) => {
-                const question =
-                  e.objectType === "Question"
-                    ? questions.get(e.objectId)
-                    : undefined;
                 return {
                   key: e.id,
                   cells: [
@@ -403,13 +412,22 @@ export function History() {
                     </span>,
                     <span key="o">
                       {auditObjects[e.objectType] ?? e.objectType}
-                      {question ? (
-                        <Link
-                          className="ac-audit-object"
-                          to={`/projects/${projectId}/review/${question.id}`}
-                        >
-                          {question.externalId} · {question.title}
-                        </Link>
+                      {e.subject ? (
+                        e.subject.kind === "QUESTION" ? (
+                          <Link
+                            className="ac-audit-object"
+                            to={`/projects/${projectId}/review/${e.subject.id}`}
+                            state={{
+                              logReturn: location.pathname + location.search,
+                            }}
+                          >
+                            {e.subject.reference} · {e.subject.label}
+                          </Link>
+                        ) : (
+                          <span className="ac-audit-object">
+                            {e.subject.label}
+                          </span>
+                        )
                       ) : (
                         <details>
                           <summary>Identificador</summary>

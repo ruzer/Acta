@@ -8,10 +8,9 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import "@testing-library/jest-dom/vitest";
-import { dashboardView, historyView } from "@requirements/contracts";
-import fixture from "../../../../tests/fixtures/analyst-visual.json";
+import { historyView } from "@requirements/contracts";
 import { exchangeRequest } from "../api";
 import { History } from "./Visibility";
 
@@ -23,8 +22,18 @@ afterEach(() => {
   cleanup();
   vi.resetAllMocks();
 });
-const dashboard = dashboardView.parse(fixture.dashboard);
-const question = dashboard.questions[0]!;
+const question = {
+  kind: "QUESTION",
+  id: "00000000-0000-4000-8000-0000000000aa",
+  reference: "Q-011",
+  label: "Requisito ficticio 11",
+};
+const invitation = {
+  kind: "INVITATION",
+  id: "00000000-0000-4000-8000-0000000000bb",
+  reference: null,
+  label: "Aportación A-12",
+};
 const actor = "00000000-0000-4000-8000-000000000009";
 const event = (n: number, extra: Record<string, unknown> = {}) => ({
   id: `00000000-0000-4000-8000-0000000001${String(n).padStart(2, "0")}`,
@@ -37,37 +46,44 @@ const event = (n: number, extra: Record<string, unknown> = {}) => ({
   requestId: "req",
   exportType: null,
   scope: null,
+  subject: question,
   ...extra,
 });
-function history(items: unknown[], total = items.length) {
+function history(
+  items: unknown[],
+  total = items.length,
+  extra: Record<string, unknown> = {},
+) {
   return historyView.parse({
     items,
     total,
     page: 1,
     pageSize: 25,
     actors: [{ id: actor, displayName: "Analista de ejemplo" }],
+    invitationActors: 0,
+    ...extra,
   });
 }
-function serve(log: unknown, dashboardFails = false) {
-  vi.mocked(exchangeRequest).mockImplementation((async (
-    _project: string,
-    operation: string,
-  ) => {
-    if (operation === "history") return log;
-    if (dashboardFails) throw new Error("sin acceso");
-    return dashboard;
-  }) as never);
+function serve(log: unknown) {
+  vi.mocked(exchangeRequest).mockResolvedValue(log as never);
 }
-function setup() {
+function StateProbe() {
+  return <p data-testid="state">{JSON.stringify(useLocation().state)}</p>;
+}
+function setup(search = "") {
   render(
     <QueryClientProvider
       client={
         new QueryClient({ defaultOptions: { queries: { retry: false } } })
       }
     >
-      <MemoryRouter initialEntries={["/projects/project-a/history"]}>
+      <MemoryRouter initialEntries={["/projects/project-a/history" + search]}>
         <Routes>
           <Route path="/projects/:projectId/history" element={<History />} />
+          <Route
+            path="/projects/:projectId/review/:id"
+            element={<StateProbe />}
+          />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
@@ -75,31 +91,48 @@ function setup() {
   return userEvent.setup();
 }
 
-it("una pregunta de la bitácora se nombra y enlaza a su revisión en vez de mostrar su identificador", async () => {
-  serve(history([event(1)]));
+it("lo que el servidor puede nombrar se muestra con su nombre y una pregunta enlaza a su revisión", async () => {
+  serve(
+    history([
+      event(1),
+      event(2, {
+        action: "RESPONSE_SUBMITTED",
+        objectType: "Response",
+        objectId: "00000000-0000-4000-8000-0000000000cc",
+      }),
+      event(3, {
+        action: "INVITATION_CREATED",
+        objectType: "ResponseInvitation",
+        subject: invitation,
+      }),
+    ]),
+  );
   setup();
-  const link = await screen.findByRole("link", {
-    name: `${question.externalId} · ${question.title}`,
+  const links = await screen.findAllByRole("link", {
+    name: `${question.reference} · ${question.label}`,
   });
-  expect(link).toHaveAttribute(
+  // The validation and the submitted response name the same question.
+  expect(links).toHaveLength(2);
+  expect(links[0]).toHaveAttribute(
     "href",
     `/projects/project-a/review/${question.id}`,
   );
+  expect(screen.getByText("Aportación A-12")).toBeVisible();
   expect(screen.queryByText("Identificador")).not.toBeInTheDocument();
 });
-it("lo que no se puede nombrar conserva su identificador, también si no se carga el proyecto", async () => {
+it("lo que no se puede nombrar conserva su identificador: no se inventa nada", async () => {
   serve(
     history([
-      event(1, { objectType: "Response", action: "RESPONSE_SUBMITTED" }),
-      event(2),
+      event(1, {
+        objectType: "Response",
+        action: "RESPONSE_SUBMITTED",
+        subject: null,
+      }),
     ]),
-    true,
   );
   setup();
   await screen.findByRole("table", { name: "Eventos registrados" });
-  await waitFor(() =>
-    expect(screen.getAllByText("Identificador")).toHaveLength(2),
-  );
+  expect(screen.getByText("Identificador")).toBeVisible();
   expect(screen.queryByRole("link")).not.toBeInTheDocument();
 });
 it("Objeto y Acción se eligen con nombres en español y piden el código al servidor", async () => {
@@ -125,6 +158,64 @@ it("Objeto y Acción se eligen con nombres en español y piden el código al ser
     ),
   );
 });
+it("el filtro Actor lista las cuentas y una sola opción para todas las invitaciones", async () => {
+  serve(history([event(1)], 1, { invitationActors: 63 }));
+  const user = setup();
+  await screen.findByRole("table", { name: "Eventos registrados" });
+  const select = screen.getByLabelText("Actor");
+  const options = within(select)
+    .getAllByRole("option")
+    .map((option) => option.textContent);
+  expect(options).toEqual([
+    "Todos",
+    "Invitaciones externas (63)",
+    "Analista de ejemplo",
+  ]);
+  await user.selectOptions(select, "Invitaciones externas (63)");
+  await waitFor(() =>
+    expect(exchangeRequest).toHaveBeenLastCalledWith(
+      "project-a",
+      "history",
+      historyView,
+      { query: { actorKind: "INVITATION" } },
+    ),
+  );
+  // Choosing an account replaces the kind instead of adding to it.
+  await user.selectOptions(select, "Analista de ejemplo");
+  await waitFor(() =>
+    expect(exchangeRequest).toHaveBeenLastCalledWith(
+      "project-a",
+      "history",
+      historyView,
+      { query: { actorId: actor } },
+    ),
+  );
+});
+it("sin invitaciones no se ofrece la opción, y una invitación ya filtrada se ve elegida", async () => {
+  serve(history([event(1)]));
+  setup();
+  await screen.findByRole("table", { name: "Eventos registrados" });
+  const select = screen.getByLabelText("Actor");
+  expect(
+    within(select).queryByRole("option", { name: /Invitaciones externas/ }),
+  ).not.toBeInTheDocument();
+  cleanup();
+  const invited = "00000000-0000-4000-8000-0000000000dd";
+  serve(
+    history([event(1)], 1, {
+      actors: [
+        { id: actor, displayName: "Analista de ejemplo" },
+        { id: invited, displayName: "Invitación: Aportación A-12" },
+      ],
+      invitationActors: 1,
+    }),
+  );
+  setup(`?actorId=${invited}`);
+  await screen.findByRole("table", { name: "Eventos registrados" });
+  expect(screen.getByLabelText("Actor")).toHaveDisplayValue(
+    "Invitación: Aportación A-12",
+  );
+});
 it("la columna Detalle solo aparece si algún evento la usa y la paginación dice cuántas páginas hay", async () => {
   serve(history([event(1)], 60));
   setup();
@@ -141,6 +232,7 @@ it("la columna Detalle solo aparece si algún evento la usa y la paginación dic
         objectType: "Project",
         exportType: "JSON",
         scope: "full",
+        subject: null,
       }),
     ]),
   );
@@ -149,4 +241,16 @@ it("la columna Detalle solo aparece si algún evento la usa y la paginación dic
     await screen.findByRole("columnheader", { name: "Detalle" }),
   ).toBeVisible();
   expect(screen.getByText("JSON full")).toBeVisible();
+});
+it("al abrir una pregunta desde la Bitácora se conserva el filtro para volver", async () => {
+  serve(history([event(1)]));
+  const user = setup("?action=RESPONSE_VALIDATED&page=2");
+  await user.click(
+    await screen.findByRole("link", {
+      name: `${question.reference} · ${question.label}`,
+    }),
+  );
+  expect(JSON.parse(screen.getByTestId("state").textContent!)).toEqual({
+    logReturn: "/projects/project-a/history?action=RESPONSE_VALIDATED&page=2",
+  });
 });

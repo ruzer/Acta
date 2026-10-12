@@ -57,6 +57,21 @@ export function metrics(
     submission: metric(items.filter((q) => q.submittedRespondents > 0).length),
   };
 }
+const EXCERPT_CHARS = 240,
+  SCOPE_CHARS = 120,
+  REASON_CHARS = 200;
+/** A readable start of a text: one line, cut at a word, never the whole document. */
+export function excerpt(text: string, max: number) {
+  const flat = text.replace(/\s+/g, " ").trim();
+  if (flat.length <= max) return { text: flat, truncated: false };
+  const cut = flat.slice(0, max),
+    space = cut.lastIndexOf(" ");
+  return {
+    text: (space > max * 0.6 ? cut.slice(0, space) : cut).trimEnd() + "…",
+    truncated: true,
+  };
+}
+type Subject = z.infer<typeof C.auditSubject>;
 @Injectable()
 export class VisibilityService {
   constructor(
@@ -160,6 +175,159 @@ export class VisibilityService {
       { isolationLevel: "RepeatableRead", timeout: 30000 },
     );
   }
+  /**
+   * The decisions register as excerpts: one read of the project's decisions,
+   * grouped in memory. Only people who can already read decisions in the review
+   * (admins and analysts) get it; a question that was closed as "no aplica" is
+   * not a reopened decision and is left out.
+   */
+  async decisions(actor: User, p: string) {
+    return this.db.$transaction(
+      async (tx) => {
+        await this.access.project(tx, actor, p, ["ADMIN", "ANALYST"]);
+        const rows = await tx.validation.findMany({
+          where: { projectId: p, question: { publication: "PUBLISHED" } },
+          select: {
+            questionId: true,
+            decisionText: true,
+            scope: true,
+            exceptions: true,
+            validatedAt: true,
+            invalidatedAt: true,
+            invalidationReason: true,
+            validatedBy: { select: { displayName: true } },
+            question: { select: { status: true } },
+          },
+          orderBy: [{ validatedAt: "desc" }],
+        });
+        const byQuestion = new Map<string, typeof rows>();
+        for (const row of rows)
+          byQuestion.set(row.questionId, [
+            ...(byQuestion.get(row.questionId) ?? []),
+            row,
+          ]);
+        const entries: z.infer<typeof C.decisionRegisterEntry>[] = [];
+        for (const [questionId, list] of byQuestion) {
+          const current = list.find((v) => !v.invalidatedAt),
+            shown = current ?? list[0]!;
+          if (!current && shown.question.status === "NOT_APPLICABLE") continue;
+          const text = excerpt(shown.decisionText, EXCERPT_CHARS);
+          entries.push({
+            questionId,
+            state: current ? "CURRENT" : "REOPENED",
+            excerpt: text.text,
+            truncated: text.truncated,
+            scope: excerpt(shown.scope, SCOPE_CHARS).text,
+            hasExceptions: !!shown.exceptions?.trim(),
+            decidedAt: shown.validatedAt.toISOString(),
+            decidedBy: shown.validatedBy.displayName,
+            endedAt: current
+              ? null
+              : (shown.invalidatedAt?.toISOString() ?? null),
+            endedReason:
+              !current && shown.invalidationReason
+                ? excerpt(shown.invalidationReason, REASON_CHARS).text
+                : null,
+            previous: list.length - 1,
+          });
+        }
+        return serialize(C.decisionRegisterView, { entries });
+      },
+      { isolationLevel: "RepeatableRead" },
+    );
+  }
+  /**
+   * Names what a page of events is about with a fixed number of reads (one per
+   * kind of object), never one per event. Anything that cannot be resolved in
+   * this project stays unnamed: nothing is invented.
+   */
+  private async subjects(
+    tx: Tx,
+    p: string,
+    items: { objectType: string; objectId: string }[],
+  ) {
+    const ids = (type: string) => [
+      ...new Set(
+        items
+          .filter(
+            (e) =>
+              e.objectType === type && z.uuid().safeParse(e.objectId).success,
+          )
+          .map((e) => e.objectId),
+      ),
+    ];
+    const [responses, validations, dispositions, invitations] =
+      await Promise.all([
+        tx.response.findMany({
+          where: { projectId: p, id: { in: ids("Response") } },
+          select: { id: true, questionId: true },
+        }),
+        tx.validation.findMany({
+          where: { projectId: p, id: { in: ids("Validation") } },
+          select: { id: true, questionId: true },
+        }),
+        tx.questionDisposition.findMany({
+          where: { projectId: p, id: { in: ids("QuestionDisposition") } },
+          select: { id: true, questionId: true },
+        }),
+        tx.responseInvitation.findMany({
+          where: { projectId: p, id: { in: ids("ResponseInvitation") } },
+          select: { id: true, label: true },
+        }),
+      ]);
+    const questionOf = new Map<string, string>();
+    for (const row of [...responses, ...validations, ...dispositions])
+      questionOf.set(row.id, row.questionId);
+    const questions = await tx.question.findMany({
+      where: {
+        projectId: p,
+        id: {
+          in: [
+            ...new Set([
+              ...ids("Question"),
+              // A response's first draft is recorded under its question's identifier.
+              ...ids("Response"),
+              ...questionOf.values(),
+            ]),
+          ],
+        },
+      },
+      select: {
+        id: true,
+        externalId: true,
+        QuestionRevision_questionRecord: {
+          orderBy: { number: "desc" },
+          take: 1,
+          select: { title: true },
+        },
+      },
+    });
+    const named = new Map<string, Subject>(
+      questions.map((q) => [
+        q.id,
+        {
+          kind: "QUESTION",
+          id: q.id,
+          reference: q.externalId,
+          label: q.QuestionRevision_questionRecord[0]?.title ?? q.externalId,
+        },
+      ]),
+    );
+    const invited = new Map<string, Subject>(
+      invitations.map((i) => [
+        i.id,
+        { kind: "INVITATION", id: i.id, reference: null, label: i.label },
+      ]),
+    );
+    return (e: { objectType: string; objectId: string }) => {
+      if (e.objectType === "ResponseInvitation")
+        return invited.get(e.objectId) ?? null;
+      const own = e.objectType === "Question" || e.objectType === "Response";
+      return (
+        named.get(questionOf.get(e.objectId) ?? (own ? e.objectId : "")) ?? null
+      );
+    };
+  }
   async traceability(actor: User, p: string) {
     return this.db.$transaction(
       async (tx) => {
@@ -223,6 +391,9 @@ export class VisibilityService {
           organizationId: actor.organizationId,
           ...(d.objectType ? { objectType: d.objectType } : {}),
           ...(d.actorId ? { actorId: d.actorId } : {}),
+          ...(d.actorKind
+            ? { actor: { invitationOnly: d.actorKind === "INVITATION" } }
+            : {}),
           ...(d.action ? { action: d.action } : {}),
           occurredAt: {
             ...(d.from ? { gte: new Date(d.from) } : {}),
@@ -237,20 +408,33 @@ export class VisibilityService {
             skip: (d.page - 1) * d.pageSize,
             take: d.pageSize,
           });
-        const actors = await tx.user.findMany({
-          where: {
-            organizationId: actor.organizationId,
-            AuditEvent_actor: { some: { projectId: p } },
-          },
-          select: { id: true, displayName: true },
-          orderBy: { displayName: "asc" },
-        });
+        // The actor filter lists the accounts; the many external invitations are
+        // one choice (their number says how many), plus the one being filtered.
+        const withEvents = {
+          organizationId: actor.organizationId,
+          AuditEvent_actor: { some: { projectId: p } },
+        };
+        const [actors, invitationActors, subject] = await Promise.all([
+          tx.user.findMany({
+            where: {
+              OR: [
+                { ...withEvents, invitationOnly: false },
+                ...(d.actorId ? [{ ...withEvents, id: d.actorId }] : []),
+              ],
+            },
+            select: { id: true, displayName: true },
+            orderBy: { displayName: "asc" },
+          }),
+          tx.user.count({ where: { ...withEvents, invitationOnly: true } }),
+          this.subjects(tx, p, items),
+        ]);
         return serialize(C.historyView, {
-          items: items.map(safeAudit),
+          items: items.map((e) => ({ ...safeAudit(e), subject: subject(e) })),
           total,
           page: d.page,
           pageSize: d.pageSize,
           actors,
+          invitationActors,
         });
       },
       { isolationLevel: "RepeatableRead" },

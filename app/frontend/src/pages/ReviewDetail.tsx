@@ -83,6 +83,14 @@ export function ReviewDetail() {
         typeof source?.search === "string" ? source.search : "",
       )
     : null;
+  // Opened from the project log: go back to the log with the filters it had.
+  const logTo = (location.state as { logReturn?: unknown } | null)?.logReturn;
+  const logBase = `/projects/${projectId}/history`;
+  const logPath =
+    typeof logTo === "string" &&
+    (logTo === logBase || logTo.startsWith(logBase + "?"))
+      ? logTo
+      : null;
   const projects = useQuery({
     queryKey: ["projects"],
     queryFn: () => api("projects"),
@@ -347,6 +355,7 @@ export function ReviewDetail() {
           className="back"
           to={
             sourcePath ??
+            logPath ??
             (questionnaireReturn
               ? `/projects/${projectId}/editor`
               : d.canReview
@@ -358,11 +367,13 @@ export function ReviewDetail() {
             ? sourceView === "attention"
               ? "← Atención"
               : "← Decisiones"
-            : questionnaireReturn
-              ? "← Cuestionario"
-              : d.canReview
-                ? "← Revisar respuestas"
-                : "← Proyecto"}
+            : logPath
+              ? "← Bitácora"
+              : questionnaireReturn
+                ? "← Cuestionario"
+                : d.canReview
+                  ? "← Revisar respuestas"
+                  : "← Proyecto"}
         </Link>
         {next && (
           <Link
@@ -574,6 +585,17 @@ export function ReviewDetail() {
               {!d.validations.length && d.status !== "NOT_APPLICABLE" && (
                 <p>No hay decisiones registradas.</p>
               )}
+              {!hasCurrentDecision &&
+                historicalDecisions.length > 0 &&
+                d.status !== "NOT_APPLICABLE" && (
+                  <p>
+                    No hay una decisión vigente.{" "}
+                    {historicalDecisions.length === 1
+                      ? "La decisión anterior se conserva"
+                      : "Las decisiones anteriores se conservan"}{" "}
+                    como antecedente.
+                  </p>
+                )}
               {(historicalDecisions.length > 0 ||
                 (d.status === "NOT_APPLICABLE" &&
                   historicalDispositions.length > 0)) && (

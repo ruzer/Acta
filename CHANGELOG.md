@@ -23,6 +23,9 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   resultados.
 - Miembros de un proyecto abierto desde Administración › Proyectos vuelve a
   Administración, en esa misma lista, en lugar de enviar al cuestionario.
+- Una pregunta que tuvo una decisión y ya no la tiene vigente lo dice en la
+  pestaña Decisión («No hay una decisión vigente. La decisión anterior se
+  conserva como antecedente»); antes solo mostraba una lista cerrada.
 
 ### Added
 
@@ -33,6 +36,17 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 - Administración › Proyectos lista los proyectos con su identificador,
   preguntas publicadas y accesos directos a abrirlos y a sus miembros, y el
   formulario de alta explica para qué sirve el identificador.
+- Decisiones muestra el inicio de lo decidido en cada línea (extracto de hasta
+  240 caracteres), su alcance, fecha y quién la registró, y la búsqueda también
+  encuentra por el texto de la decisión. Las preguntas cuya decisión dejó de
+  estar vigente aparecen aparte («Sin decisión vigente») con el antecedente y el
+  motivo, y una línea resume cuántas están así y cuántas preguntas faltan por
+  decidir, con enlace a Atención. Abrir una pregunta lleva a su registro
+  completo.
+- La Bitácora nombra sobre qué ocurrió cada evento de respuestas, decisiones e
+  invitaciones: la pregunta (identificador y título, con enlace que vuelve a la
+  Bitácora con sus filtros) o la invitación por su etiqueta; lo que no puede
+  nombrar sigue mostrando su identificador.
 
 ### Changed
 
@@ -62,9 +76,18 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 - Decisiones muestra una línea por decisión y no repite «Vigente» en cada fila
   (la página ya lo dice): 120 decisiones ocupan unos 6 200 px en vez de unos
   14 900.
+- El filtro «Actor» de la Bitácora lista las cuentas y una sola opción,
+  «Invitaciones externas (N)», en lugar de una opción por invitación; con cientos
+  de invitaciones la lista ya no es inmanejable.
 
-Presentación del frontend únicamente; sin cambios de API, contratos, permisos,
-almacenamiento ni migraciones. Ver el [registro de mejora continua](docs/product/CONTINUOUS-IMPROVEMENT.md).
+Cambios de contrato, solo de lectura y compatibles (sin permisos, escrituras,
+estados persistidos, almacenamiento ni migraciones nuevos): nuevo
+`GET /projects/:projectId/decisions` (solo ADMIN y ANALYST; extractos de la
+decisión vigente o, si se reabrió, de la última anterior; una lectura sin
+consultas por registro); `GET /projects/:projectId/history` añade `subject` a
+cada evento, `invitationActors` y el filtro `actorKind`, y `actors` pasa a
+listar solo cuentas (más el actor filtrado). El contrato de exportación no
+cambia. Ver el [registro de mejora continua](docs/product/CONTINUOUS-IMPROVEMENT.md).
 
 ## 0.6.1 — 2026-10-10
 

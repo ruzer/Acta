@@ -1530,6 +1530,8 @@ export const historyQuery = z.strictObject({
   pageSize: z.coerce.number().int().min(1).max(50).default(25),
   objectType: z.string().max(100).optional(),
   actorId: z.uuid().optional(),
+  /** Every account, or every external invitation, instead of one actor. */
+  actorKind: z.enum(["ACCOUNT", "INVITATION"]).optional(),
   action: z.string().max(100).optional(),
   from: z.iso.datetime().optional(),
   to: z.iso.datetime().optional(),
@@ -1546,13 +1548,50 @@ export const auditSummary = z.strictObject({
   exportType: z.string().nullable(),
   scope: z.string().nullable(),
 });
+/** What an event is about, in words: the question (or the invitation) behind an otherwise opaque identifier. */
+export const auditSubject = z.strictObject({
+  kind: z.enum(["QUESTION", "INVITATION"]),
+  id: z.uuid(),
+  reference: z.string().nullable(),
+  label: z.string(),
+});
+export const historyItem = auditSummary.extend({
+  subject: auditSubject.nullable(),
+});
 export const historyView = z.strictObject({
-  items: z.array(auditSummary),
+  items: z.array(historyItem),
   total: z.number().int(),
   page: z.number().int(),
   pageSize: z.number().int(),
+  /** Accounts with events in the project, plus the selected actor if it is an invitation. */
   actors: z.array(z.strictObject({ id: z.uuid(), displayName: z.string() })),
+  /** How many external invitations have events (they are one choice, not one option each). */
+  invitationActors: z.number().int().nonnegative(),
 });
+/**
+ * One line of the decisions register: the decision in force for a question (or,
+ * when it was reopened, the latest earlier one), as an excerpt. The full text
+ * stays in the question's review.
+ */
+export const decisionRegisterEntry = z.strictObject({
+  questionId: z.uuid(),
+  state: z.enum(["CURRENT", "REOPENED"]),
+  excerpt: z.string(),
+  truncated: z.boolean(),
+  scope: z.string(),
+  hasExceptions: z.boolean(),
+  decidedAt: z.iso.datetime(),
+  decidedBy: z.string(),
+  /** REOPENED only: when and why the decision stopped being in force. */
+  endedAt: z.iso.datetime().nullable(),
+  endedReason: z.string().nullable(),
+  /** Earlier decisions kept as history, not counting the one shown when REOPENED. */
+  previous: z.number().int().nonnegative(),
+});
+export const decisionRegisterView = z.strictObject({
+  entries: z.array(decisionRegisterEntry),
+});
+export type DecisionRegisterEntry = z.infer<typeof decisionRegisterEntry>;
 export const exportInput = z.strictObject({
   format: z.enum(["JSON", "CSV", "MARKDOWN"]),
   scope: z.enum(["full", "validated-decisions"]),
