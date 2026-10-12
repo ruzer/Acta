@@ -26,9 +26,11 @@ export const appearanceVariables: Record<AppearanceKey, string> = {
   accent: "APP_ACCENT",
   locale: "DEFAULT_LOCALE",
   timezone: "DEFAULT_TIMEZONE",
+  secondaryName: "APP_SECONDARY_NAME",
 };
 export const assetVariables: Record<BrandingAssetKind, string> = {
   logo: "APP_LOGO",
+  logoSecondary: "APP_LOGO_SECONDARY",
   favicon: "APP_FAVICON",
 };
 export const productDefaults: Record<AppearanceKey, string> = {
@@ -37,6 +39,7 @@ export const productDefaults: Record<AppearanceKey, string> = {
   accent: "#2b4d7c",
   locale: "es-MX",
   timezone: "UTC",
+  secondaryName: "",
 };
 
 /** The value the infrastructure defines, or null when it leaves the choice open. */
@@ -72,6 +75,7 @@ export function resolveAppearance(
     accent: field("accent"),
     locale: field("locale"),
     timezone: field("timezone"),
+    secondaryName: field("secondaryName"),
   };
 }
 
