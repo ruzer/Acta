@@ -649,6 +649,176 @@ test("Audit metadata filtered/paginated/read-only; ImportBatch immutable at data
   );
 });
 
+test("decisions register: excerpts of what is in force, history kept apart, no leaks and read-only roles", async () => {
+  const register = (session = analyst, id = project.id) =>
+    req(`/projects/${id}/decisions`, { session });
+  const entry = (list, q) => list.entries.find((e) => e.questionId === q.id);
+  // The SHORT_TEXT question had a decision that a later submission invalidated:
+  // it is an earlier decision, not one in force.
+  const closed = of("SHORT_TEXT");
+  const before = (await register()).data;
+  assert.equal(entry(before, closed)?.state, "REOPENED");
+  assert.ok(entry(before, closed).endedAt && entry(before, closed).endedReason);
+  assert.equal(entry(before, closed).previous, 0);
+  // A long decision is returned as an excerpt: the document stays in the review.
+  const q = of("YES_NO");
+  const long =
+    "Se adopta el procedimiento único. ".repeat(40) + "FINAL-COMPLETO";
+  const first = await submit(q, true);
+  await command(q, "validate", {
+    ...decision([first.revisions[0].id]),
+    decisionText: long,
+    scope: "Alcance " + "amplio ".repeat(60),
+    exceptions: "Salvo urgencias",
+  });
+  let list = (await register()).data;
+  let current = entry(list, q);
+  assert.equal(current.state, "CURRENT");
+  assert.equal(current.truncated, true);
+  assert.ok(current.excerpt.length <= 241 && current.excerpt.endsWith("…"));
+  assert.ok(!JSON.stringify(list).includes("FINAL-COMPLETO"));
+  assert.ok(current.scope.length <= 121);
+  assert.equal(current.hasExceptions, true);
+  assert.equal(current.previous, 0);
+  assert.equal(current.endedAt, null);
+  assert.equal(current.decidedBy, "Analista demo");
+  // Reopen and decide again: the new one is in force, the old one is history.
+  await command(q, "reopen", { reason: "Cambió el alcance" });
+  const reopened = entry((await register()).data, q);
+  assert.equal(reopened.state, "REOPENED");
+  assert.equal(reopened.endedReason, "Cambió el alcance");
+  assert.equal(reopened.previous, 0);
+  const second = await submit(q, false);
+  await command(q, "validate", {
+    ...decision([second.revisions[0].id]),
+    decisionText: "Segunda decisión vigente",
+  });
+  current = entry((await register()).data, q);
+  assert.equal(current.state, "CURRENT");
+  assert.equal(current.excerpt, "Segunda decisión vigente");
+  assert.equal(current.previous, 1);
+  assert.equal(current.hasExceptions, false);
+  // A question closed as "no aplica" is neither in force nor reopened.
+  const n = of("NUMBER");
+  const sent = await submit(n, 7);
+  await command(n, "validate", decision([sent.revisions[0].id]));
+  await command(n, "reopen", { reason: "Revisión" });
+  await command(n, "not-applicable", { reason: "Ya no aplica", scope: "Todo" });
+  assert.equal(entry((await register()).data, n), undefined);
+  // Only this project's questions, only people who can already read decisions.
+  list = (await register()).data;
+  assert.ok(
+    list.entries.every((e) => questions.some((x) => x.id === e.questionId)),
+  );
+  assert.equal((await register(admin)).status, 200);
+  for (const session of [viewer, stakeholder, other])
+    assert.equal((await register(session)).status, 403);
+  const foreign = await ok("/projects", {
+    session: admin,
+    method: "POST",
+    body: { externalId: "DECISIONS-FOREIGN", name: "Ajeno ficticio" },
+  });
+  assert.ok([403, 404].includes((await register(analyst, foreign.id)).status));
+  assert.deepEqual((await register(admin, foreign.id)).data.entries, []);
+  assert.equal(
+    (await req(`/projects/${project.id}/decisions`, { session: null })).status,
+    401,
+  );
+  assert.equal(
+    (await req(`/projects/${project.id}/decisions`, { method: "POST" })).status,
+    404,
+  );
+});
+test("history names what an event is about without extra reads per event and groups invitation actors", async () => {
+  const q = of("DATE");
+  const link = await ok(`/projects/${project.id}/invitations`, {
+    method: "POST",
+    body: {
+      requestId: randomUUID(),
+      label: "Invitación de bitácora",
+      questionIds: [q.id],
+      areaId: member.areaId,
+      identity: { name: "Persona ficticia" },
+      nonNominal: false,
+      allowEvidence: false,
+    },
+  });
+  const entered = await fetch(origin + "/api/v1/invitations/access/exchange", {
+    method: "POST",
+    headers: { Origin: origin, "Content-Type": "application/json" },
+    body: JSON.stringify({ token: new URL(link.url).hash.slice(1) }),
+  });
+  assert.equal(entered.status, 201);
+  await submit(of("SHORT_TEXT"), "Respuesta para la bitácora");
+  const log = await ok(`/projects/${project.id}/history?pageSize=50`);
+  const by = (action) => log.items.filter((e) => e.action === action);
+  // A submitted response names its question; so does a decision.
+  const sentEvent = by("RESPONSE_SUBMITTED").find(
+    (e) => e.subject?.id === of("SHORT_TEXT").id,
+  );
+  assert.equal(sentEvent.objectType, "Response");
+  assert.equal(sentEvent.subject.kind, "QUESTION");
+  assert.equal(sentEvent.subject.reference, of("SHORT_TEXT").externalId);
+  assert.ok(sentEvent.subject.label.length > 0);
+  assert.ok(
+    by("RESPONSE_VALIDATED").every((e) => e.subject?.kind === "QUESTION"),
+  );
+  // The first draft of a response is recorded under its question's identifier.
+  const drafts = (
+    await ok(
+      `/projects/${project.id}/history?action=RESPONSE_DRAFTED&pageSize=50`,
+    )
+  ).items;
+  const firstDrafts = drafts.filter((e) =>
+    questions.some((x) => x.id === e.objectId),
+  );
+  assert.ok(firstDrafts.length > 0);
+  assert.ok(firstDrafts.every((e) => e.subject?.id === e.objectId));
+  assert.ok(drafts.every((e) => e.subject?.kind === "QUESTION"));
+  // An invitation is named by the label the analyst gave it.
+  const created = by("INVITATION_CREATED")[0];
+  assert.equal(created.subject.kind, "INVITATION");
+  assert.equal(created.subject.label, "Invitación de bitácora");
+  // What cannot be resolved stays unnamed instead of guessed.
+  assert.ok(by("PROJECT_MEMBER_CHANGED").every((e) => e.subject === null));
+  // Nothing beyond reference and title/label is added to the event.
+  assert.deepEqual(Object.keys(sentEvent.subject).sort(), [
+    "id",
+    "kind",
+    "label",
+    "reference",
+  ]);
+  // Actors: accounts are options, invitations are a count and a kind filter.
+  assert.ok(log.invitationActors >= 1);
+  assert.ok(log.actors.length > 0);
+  const invited = await db.user.findMany({
+    where: {
+      organizationId: analyst.user.organizationId,
+      invitationOnly: true,
+    },
+    select: { id: true },
+  });
+  assert.ok(log.actors.every((a) => !invited.some((i) => i.id === a.id)));
+  const kind = await ok(`/projects/${project.id}/history?actorKind=INVITATION`);
+  assert.ok(kind.total >= 1);
+  assert.ok(kind.items.every((e) => invited.some((i) => i.id === e.actorId)));
+  const accounts = await ok(
+    `/projects/${project.id}/history?actorKind=ACCOUNT`,
+  );
+  assert.ok(
+    accounts.items.every((e) => !invited.some((i) => i.id === e.actorId)),
+  );
+  assert.equal(accounts.total + kind.total, log.total);
+  // One selected invitation actor is still offered so the filter shows it.
+  const one = kind.items[0].actorId;
+  const picked = await ok(`/projects/${project.id}/history?actorId=${one}`);
+  assert.ok(picked.actors.some((a) => a.id === one));
+  assert.equal(
+    (await req(`/projects/${project.id}/history`, { session: viewer })).status,
+    403,
+  );
+});
+
 test("Areas exact-code/name; analyst imports with existing area; CSRF/scope and CSV formula stored unchanged", async () => {
   const p = await emptyProject("ANALYST-IMPORT"),
     file = template(p.externalId, "EXACT-AREA");
