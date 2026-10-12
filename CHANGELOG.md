@@ -16,6 +16,7 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   presentan como errores y las advertencias como información.
 - Los conteos de uno se escriben en singular («1 pregunta», «1 aportación»,
   «1 error») en toda la interfaz.
+- Tras una operación en lote el resultado se dice una vez, no dos veces.
 - Un cuestionario sin preguntas muestra solo cómo empezar, sin la barra de
   búsqueda, filtros y selección; Atención sin preguntas indica al analista dónde
   continuar e Invitaciones distingue entre no tener ninguna y un filtro sin
@@ -33,6 +34,15 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ### Changed
 
+- Registrar una decisión es más directo: si hay una sola respuesta vigente ya
+  viene elegida como fuente, el foco empieza en «Decisión acordada» y, si falta
+  la fuente, el mensaje lo dice y lleva a ella en lugar de quedar fuera de la
+  vista del diálogo.
+- Escribir pliega los temas cuando el cuestionario tiene más de 40 preguntas
+  (el primero queda abierto y cada tema muestra su conteo), como ya hace Mi
+  trabajo; un cuestionario de 300 preguntas ya no es una sola página muy larga.
+- La acción de cada cuenta en Administración se llama «Restablecer contraseña»
+  y nombra a la persona para lectores de pantalla.
 - Organizar dice el alcance de «Expandir/Contraer todos los grupos» solo cuando
   llega más allá de lo visible (filtros o varias páginas); antes ocupaba una
   línea fija.
