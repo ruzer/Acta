@@ -113,3 +113,27 @@ jobs:
       - name: Remove disposable CI volumes
         if: always()
         run: docker compose down --volumes
+
+  guided-install:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      COMPOSE_PROJECT_NAME: guided-ci
+    steps:
+      - uses: actions/checkout@v4
+      - name: Guided installation with the helper (no .env file)
+        run: sh scripts/install.sh
+      - name: First run through the real proxy (operator code, wizard, administrator, logo)
+        run: docker compose exec -T -e SELFHOST_SMOKE_ALLOWED=true backend node scripts/guided-install-smoke.mjs
+      - name: Restart keeps the administrator, settings and logo
+        run: |
+          docker compose restart postgres object-storage backend frontend
+          docker compose up -d --wait
+          docker compose exec -T -e SELFHOST_SMOKE_ALLOWED=true backend node scripts/guided-install-smoke.mjs --verify
+      - name: Only the frontend is published, and only on loopback
+        run: |
+          docker compose ps --format json | jq -s -e '[.[] | select(.Service != "frontend") | .Publishers[]? | select(.PublishedPort != 0)] | length == 0'
+          docker compose ps --format json | jq -s -e '[.[] | select(.Service == "frontend") | .Publishers[]? | select(.PublishedPort != 0) | .URL] == ["127.0.0.1"]'
+      - name: Remove disposable CI volumes
+        if: always()
+        run: docker compose down --volumes
