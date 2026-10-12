@@ -296,6 +296,13 @@ legend {
   color: var(--ac-ink);
   font: 600 var(--ac-text-title) / 1.25 var(--ac-font-ui);
 }
+.access-intro .access-secondary {
+  margin: -2px 0 8px;
+  font-size: var(--ac-text-body);
+}
+.access-intro .access-product {
+  margin-top: 8px;
+}
 .access-intro p {
   max-width: none;
   margin: 0;
@@ -896,6 +903,43 @@ progress {
   }
 }
 
+/* The institution's marks: the main logo is its identity, the optional second one is
+   subordinate. Proportions are always kept; nothing is stretched or cropped. */
+.institution-marks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px 20px;
+  margin: 0 0 16px;
+}
+.institution-mark {
+  width: auto;
+  height: auto;
+  max-width: min(240px, 100%);
+  max-height: 64px;
+  object-fit: contain;
+}
+.institution-mark-secondary {
+  max-width: min(180px, 100%);
+  max-height: 44px;
+}
+.institution-mark-divider {
+  align-self: stretch;
+  width: 1px;
+  min-height: 32px;
+  background: var(--ac-line-2);
+}
+/* Too narrow for two marks side by side: stack them, main first, without a dangling divider. */
+@media (max-width: 519px) {
+  .institution-marks {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .institution-mark-divider {
+    display: none;
+  }
+}
 .installation-logo {
   width: auto;
   max-width: 120px;

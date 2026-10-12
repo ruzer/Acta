@@ -17,6 +17,13 @@
   font-size: var(--ac-text-body);
   font-weight: 700;
 }
+.invitation-secondary {
+  width: auto;
+  max-width: 140px;
+  height: 28px;
+  margin-left: auto;
+  object-fit: contain;
+}
 .invitation-organization {
   padding-left: 12px;
   color: var(--ac-muted);
