@@ -56,3 +56,20 @@ Exploración con un proyecto ficticio de 150 preguntas, 63 invitaciones (50 apor
 
 **Observado y no hecho** (necesita el servidor o es de poco valor): la lista de Decisiones no puede mostrar el texto de cada decisión porque la proyección actual no lo entrega (cambio de contrato: propuesta pendiente); los eventos de respuesta (borrador/envío) de la Bitácora solo traen el identificador de la respuesta y no se pueden nombrar sin ampliar la API; el selector de «Actor» de la Bitácora lista a cada invitación como una persona más (66 opciones).
 
+## Iteración 5 — 2026-10-12
+
+Decisiones y trazabilidad para quien tiene que entender el resultado sin abrir cada pantalla. Mismo proyecto ficticio de volumen (150 preguntas, 63 invitaciones, 120 decisiones, 658 eventos) con una decisión reabierta, una con segunda versión, una larga con excepciones y una cerrada como «no aplica». Por primera vez hay **ampliación de contratos de lectura**, compatible y sin tocar permisos, escrituras, estados ni migraciones.
+
+| Problema | Evidencia | Mejora | Resultado |
+|---|---|---|---|
+| El listado de Decisiones identifica la pregunta, pero no dice qué se decidió | La proyección del tablero solo trae estado y conteos; había que abrir las 120 | Nuevo `GET /projects/:id/decisions` (solo ADMIN/ANALYST): una lectura, extractos de 240 caracteres, alcance, fecha, autor, excepciones y decisiones anteriores; la página los muestra y la búsqueda encuentra por su texto | Una línea por decisión con su contenido; si el endpoint falla, la lista sigue como antes |
+| Los estados no se distinguían: una decisión que dejó de estar vigente no aparecía en ningún sitio y su pestaña «Decisión» solo mostraba una lista cerrada | Q-004 reabierta: ni en Decisiones ni una frase que lo dijera | Grupo «Sin decisión vigente» con el antecedente y el motivo; línea de resumen (con decisión anterior · por decidir, con enlace a Atención); la pestaña dice «No hay una decisión vigente…» | Vigente, anterior, sin decisión vigente y por decidir se distinguen sin añadir marcas por fila |
+| Los eventos de respuestas no decían qué pregunta afectaban | 201 «Respuesta enviada»/«Borrador guardado» solo con «Identificador»; el primer borrador se registra con el id de la pregunta | `history` añade `subject` (pregunta o etiqueta de la invitación) con una lectura por tipo, sin consulta por evento; la página lo muestra con enlace que vuelve a la Bitácora con sus filtros | Los 25 eventos de una página quedan nombrados; lo que no se puede nombrar conserva su identificador |
+| El filtro «Actor» listaba a cada invitación | 66 opciones con 63 invitaciones | Cuentas + «Invitaciones externas (N)» (`actorKind`) y el actor filtrado si es una invitación | Lista de 4 opciones con el mismo proyecto |
+
+**Contratos (solo lectura, aditivos).** `decisionRegisterView` (nuevo); `historyView`: `items[].subject`, `invitationActors` y `actors` solo cuentas; `historyQuery`: `actorKind`. `auditSummary` (usado por la exportación) no cambia. Documentado en `docs/CONTRACTS-2E.md`.
+
+**Garantías comprobadas con pruebas de integración.** Solo ADMIN/ANALYST (VIEWER, STAKEHOLDER y otro participante reciben 403; sin sesión 401; un proyecto ajeno no filtra nada); la decisión histórica nunca se presenta como vigente (estado `REOPENED`, con motivo y fecha de fin); una pregunta cerrada como «no aplica» no se lista como reabierta; el texto completo, el comentario interno y las fuentes no salen; el extracto se corta en una palabra.
+
+**Observado y no hecho.** Las decisiones de «no aplica» tampoco aparecen en Decisiones (es un cambio de significado de la página: queda como propuesta); las 120 filas con contenido miden unos 10 000 px (el costo de mostrar qué se decidió; la búsqueda y los filtros acotan); el nombre de otros objetos de la Bitácora (evidencia, asignaciones) no se resuelve.
+
