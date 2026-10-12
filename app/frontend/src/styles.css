@@ -1238,6 +1238,10 @@ section.narrow {
   font-size: var(--ac-text-meta);
   overflow-wrap: anywhere;
 }
+.ac-audit-object {
+  display: block;
+  overflow-wrap: anywhere;
+}
 .data-table details {
   margin: 0;
 }
