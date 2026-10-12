@@ -284,6 +284,9 @@ export function Dialog({
     const el = ref.current;
     const opener = document.activeElement as HTMLElement | null;
     el?.showModal();
+    // A form says where to start: a field marked data-autofocus takes the focus
+    // instead of the first control in the dialog (the close button).
+    el?.querySelector<HTMLElement>("[data-autofocus]")?.focus();
     return () => {
       el?.close();
       // A dialog React removes from the page does not hand focus back by

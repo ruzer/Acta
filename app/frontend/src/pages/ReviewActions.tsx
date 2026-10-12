@@ -131,9 +131,22 @@ export function ReviewActionDialog({
         requestId: request.current.id,
       });
       if (!parsed.success) {
+        // The missing piece is usually the sources, which can sit below the
+        // visible part of the dialog: say so and bring the first one into view.
+        const noSource = pickSources && !fd.getAll("sources").length;
         setError(
-          "Completa los campos obligatorios y selecciona las fuentes necesarias.",
+          noSource
+            ? action === "markConflict"
+              ? "Selecciona al menos dos envíos de participantes distintos."
+              : "Selecciona al menos una respuesta que sustente la decisión."
+            : "Completa los campos obligatorios y selecciona las fuentes necesarias.",
         );
+        if (noSource)
+          requestAnimationFrame(() =>
+            form
+              .querySelector<HTMLInputElement>('input[name="sources"]')
+              ?.focus(),
+          );
         return;
       }
       await api(
@@ -214,6 +227,7 @@ export function ReviewActionDialog({
               <Textarea
                 label="Pregunta de aclaración"
                 name="body"
+                data-autofocus={!!t || !!aboutSubmission || undefined}
                 required
                 maxLength={10000}
               />
@@ -228,6 +242,7 @@ export function ReviewActionDialog({
               <Textarea
                 label="Decisión acordada"
                 name="decisionText"
+                data-autofocus
                 required
                 maxLength={10000}
               />
@@ -263,6 +278,7 @@ export function ReviewActionDialog({
               <Textarea
                 label="Resolución del conflicto"
                 name="resolutionText"
+                data-autofocus
                 required
                 maxLength={10000}
               />
@@ -280,7 +296,13 @@ export function ReviewActionDialog({
             "markConflict",
             "closeClarification",
           ].includes(action) && (
-            <Textarea label="Motivo" name="reason" required maxLength={10000} />
+            <Textarea
+              label="Motivo"
+              name="reason"
+              data-autofocus
+              required
+              maxLength={10000}
+            />
           )}
           {action === "markNotApplicable" && (
             <Textarea
@@ -311,6 +333,11 @@ export function ReviewActionDialog({
                   key={s.id}
                   name="sources"
                   value={s.id}
+                  // With a single current submission it is the only possible
+                  // source of a decision: start with it chosen (still editable).
+                  defaultChecked={
+                    action === "validateQuestion" && sources.length === 1
+                  }
                   label={`${s.respondent.displayName} · envío #${s.number}${s.current ? "" : " · histórico"}`}
                 />
               ))}
