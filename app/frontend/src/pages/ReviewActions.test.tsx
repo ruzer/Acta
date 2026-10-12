@@ -185,3 +185,82 @@ it("cerrar con cambios requiere decisión del usuario y mantiene texto al cancel
   expect(screen.getByLabelText("Motivo")).toHaveValue("Falta precisar");
   vi.mocked(window.confirm).mockRestore();
 });
+
+const sourceId = (n: number) => `00000000-0000-4000-8000-00000000010${n}`;
+const many = reviewDetailView.parse({
+  ...data,
+  submissions: Array.from({ length: 8 }, (_, n) => ({
+    ...data.submissions[0],
+    id: sourceId(n),
+    answer: `Respuesta número ${n + 1}`,
+    respondent: { id, displayName: `Persona ${n + 1}` },
+  })),
+});
+it("con muchas fuentes la lista cuenta las elegidas, las elige todas de una vez y deja leer el inicio de cada respuesta", async () => {
+  const user = userEvent.setup(),
+    onClose = vi.fn(),
+    confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+  vi.mocked(api).mockResolvedValue({
+    questionId: id,
+    status: "VALIDATED",
+    lockVersion: 4,
+    threadId: null,
+  });
+  render(
+    <ReviewActionDialog
+      data={many}
+      action="validateQuestion"
+      onClose={onClose}
+      onDone={vi.fn()}
+      refresh={vi.fn()}
+    />,
+  );
+  const boxes = () => screen.getAllByRole("checkbox", { name: /· envío #1/ });
+  expect(boxes()).toHaveLength(8);
+  expect(screen.getByRole("status")).toHaveTextContent("0 seleccionadas de 8");
+  expect(
+    screen.getByRole("checkbox", { name: "Persona 2 · envío #1" }),
+  ).toHaveAccessibleDescription("Respuesta número 2");
+  await user.click(screen.getByRole("button", { name: "Seleccionar todas" }));
+  expect(boxes().every((box) => (box as HTMLInputElement).checked)).toBe(true);
+  expect(screen.getByRole("status")).toHaveTextContent("8 seleccionadas de 8");
+  // The buttons stay enabled so the keyboard focus is not lost when pressed.
+  expect(
+    screen.getByRole("button", { name: "Seleccionar todas" }),
+  ).toHaveFocus();
+  await user.click(screen.getByRole("checkbox", { name: /Persona 3/ }));
+  expect(screen.getByRole("status")).toHaveTextContent("7 seleccionadas de 8");
+  // Choosing in bulk counts as a change: closing asks before discarding it.
+  await user.click(screen.getByRole("button", { name: "Cerrar" }));
+  expect(confirm).toHaveBeenCalled();
+  expect(onClose).not.toHaveBeenCalled();
+  await user.type(screen.getByLabelText("Decisión acordada"), "Decisión");
+  await user.type(screen.getByLabelText("Alcance"), "Todo");
+  await user.type(screen.getByLabelText("Comentario interno"), "Revisado");
+  await user.click(
+    screen.getByRole("button", { name: "Registrar como validada" }),
+  );
+  await waitFor(() => expect(api).toHaveBeenCalledOnce());
+  const sent = vi.mocked(api).mock.calls[0]![2] as {
+    responseRevisionIds: string[];
+  };
+  expect(sent.responseRevisionIds).toHaveLength(7);
+  expect(sent.responseRevisionIds).not.toContain(sourceId(2));
+  await user.click(screen.getByRole("button", { name: "Quitar selección" }));
+  expect(screen.getByRole("status")).toHaveTextContent("0 seleccionadas de 8");
+});
+it("con pocas fuentes no se añaden controles de selección en bloque", () => {
+  render(
+    <ReviewActionDialog
+      data={data}
+      action="validateQuestion"
+      onClose={vi.fn()}
+      onDone={vi.fn()}
+      refresh={vi.fn()}
+    />,
+  );
+  expect(
+    screen.queryByRole("button", { name: "Seleccionar todas" }),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
+});
