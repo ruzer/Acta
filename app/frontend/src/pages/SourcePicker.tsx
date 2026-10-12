@@ -1,4 +1,4 @@
-import { useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import type { ReviewDetail } from "@requirements/contracts";
 import { Button, Checkbox } from "../ui";
 import { plural } from "../ui/plural";
@@ -38,6 +38,9 @@ export function SourcePicker({
   const [picked, setPicked] = useState(preselect ? sources.length : 0);
   const count = () =>
     list.current?.querySelectorAll("input:checked").length ?? 0;
+  // The submissions can change under an open dialog (a refreshed conflict):
+  // the count follows what is really chosen.
+  useEffect(() => setPicked(count()), [sources]);
   function setAll(checked: boolean) {
     list.current
       ?.querySelectorAll<HTMLInputElement>('input[name="sources"]')
