@@ -7,8 +7,19 @@
   margin-block: 0;
 }
 .ac-review-back {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 16px;
   margin-bottom: 12px;
   font-size: var(--ac-text-meta);
+}
+.ac-review-next {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  margin-left: auto;
 }
 .ac-review-back .back {
   display: inline-flex;
@@ -120,7 +131,8 @@
     grid-template-columns: minmax(0, 1fr);
     gap: 16px;
   }
-  .ac-review-back .back {
+  .ac-review-back .back,
+  .ac-review-next {
     min-height: 44px;
   }
   .ac-review .ac-question-band h1 {

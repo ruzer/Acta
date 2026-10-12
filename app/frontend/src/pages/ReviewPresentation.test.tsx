@@ -10,7 +10,11 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
-import { reviewDetailView, type ReviewDetail } from "@requirements/contracts";
+import {
+  dashboardView,
+  reviewDetailView,
+  type ReviewDetail,
+} from "@requirements/contracts";
 import fixture from "../../../../tests/fixtures/analyst-visual.json";
 import * as apiModule from "../api";
 import { ReviewDetail as ReviewPage } from "./ReviewDetail";
@@ -30,7 +34,16 @@ function wideViewport() {
     removeEventListener: vi.fn(),
   }));
 }
-function page(detail: ReviewDetail, search = "", projects: unknown[] = []) {
+function page(
+  detail: ReviewDetail,
+  search = "",
+  projects: unknown[] = [],
+  options: { seed?: (client: QueryClient) => void; returnSearch?: string } = {},
+) {
+  const cache = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  options.seed?.(cache);
   const api = vi
     .spyOn(apiModule, "api")
     .mockImplementation(
@@ -44,18 +57,17 @@ function page(detail: ReviewDetail, search = "", projects: unknown[] = []) {
           pathname: `/projects/${detail.projectId}/review/${detail.question.id}`,
           search,
           state: {
-            workbenchReturn: { view: "attention", search: "status=CONFLICT" },
+            workbenchReturn: {
+              view: "attention",
+              search: options.returnSearch ?? "status=CONFLICT",
+            },
           },
         },
       ],
     },
   );
   render(
-    <QueryClientProvider
-      client={
-        new QueryClient({ defaultOptions: { queries: { retry: false } } })
-      }
-    >
+    <QueryClientProvider client={cache}>
       <RouterProvider router={router} />
     </QueryClientProvider>,
   );
@@ -1195,4 +1207,85 @@ it("registrar la decisión deja el foco en el título aunque el fotograma llegue
   await waitFor(() =>
     expect(screen.getByRole("heading", { level: 1 })).toHaveFocus(),
   );
+});
+
+const dashboardWith = (
+  statuses: [string, "CONFLICT" | "ANSWERED" | "PENDING"][],
+) => ({
+  ...dashboardView.parse(fixture.dashboard),
+  questions: statuses.map(([id, status]) => ({
+    ...dashboardView.parse(fixture.dashboard).questions[0]!,
+    id,
+    title: `Caso ${id}`,
+    status,
+  })),
+});
+const seedDashboard =
+  (data: ReturnType<typeof dashboardWith>) => (client: QueryClient) =>
+    client.setQueryData(["dashboard", conflict.projectId], data);
+it("Siguiente por revisar: desde Atención lleva a la siguiente pregunta de la lista y conserva el contexto de retorno", async () => {
+  wideViewport();
+  const { router } = page(conflict, "", [], {
+    returnSearch: "",
+    seed: seedDashboard(
+      dashboardWith([
+        [conflict.question.id, "CONFLICT"],
+        ["otra-lista", "ANSWERED"],
+      ]),
+    ),
+  });
+  const user = userEvent.setup();
+  const link = await screen.findByRole("link", {
+    name: "Siguiente por revisar: Caso otra-lista",
+  });
+  expect(link).toHaveAttribute(
+    "href",
+    `/projects/${conflict.projectId}/review/otra-lista`,
+  );
+  await user.click(link);
+  expect(router.state.location.pathname).toBe(
+    `/projects/${conflict.projectId}/review/otra-lista`,
+  );
+  expect(router.state.location.state).toMatchObject({
+    workbenchReturn: { view: "attention", search: "" },
+  });
+});
+it("Siguiente por revisar: no aparece sin panel en caché, con un filtro sin más casos ni fuera de Atención", async () => {
+  wideViewport();
+  page(conflict, "", [], { returnSearch: "" });
+  await screen.findByRole("heading", { level: 1 });
+  expect(
+    screen.queryByRole("link", { name: /^Siguiente por revisar/ }),
+  ).not.toBeInTheDocument();
+  cleanup();
+  // Filtered by conflicts and this is the only one.
+  page(conflict, "", [], {
+    returnSearch: "task=conflicts",
+    seed: seedDashboard(
+      dashboardWith([
+        [conflict.question.id, "CONFLICT"],
+        ["otra-lista", "ANSWERED"],
+      ]),
+    ),
+  });
+  await screen.findByRole("heading", { level: 1 });
+  expect(
+    screen.queryByRole("link", { name: /^Siguiente por revisar/ }),
+  ).not.toBeInTheDocument();
+});
+it("Siguiente por revisar: no se ofrece a quien solo consulta", async () => {
+  wideViewport();
+  page({ ...conflict, canReview: false }, "", [], {
+    returnSearch: "",
+    seed: seedDashboard(
+      dashboardWith([
+        [conflict.question.id, "CONFLICT"],
+        ["otra-lista", "ANSWERED"],
+      ]),
+    ),
+  });
+  await screen.findByRole("heading", { level: 1 });
+  expect(
+    screen.queryByRole("link", { name: /^Siguiente por revisar/ }),
+  ).not.toBeInTheDocument();
 });

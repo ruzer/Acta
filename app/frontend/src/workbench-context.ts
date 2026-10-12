@@ -45,6 +45,20 @@ export function rememberWorkbenchItem(
   }));
 }
 
+/** Point the list's return focus at `id` without touching its saved position. */
+export function rememberWorkbenchFocus(
+  client: QueryClient,
+  projectId: string,
+  view: WorkbenchView,
+  id: string,
+) {
+  client.setQueryData<Context>(key(projectId, view), (old) => ({
+    search: old?.search ?? "",
+    scroll: old?.scroll ?? 0,
+    focusId: id,
+  }));
+}
+
 /** Session-only presentation state. It contains no answers or invitation URLs. */
 export function useWorkbenchContext(projectId: string, view?: WorkbenchView) {
   const client = useQueryClient();

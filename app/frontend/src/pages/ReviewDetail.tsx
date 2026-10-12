@@ -30,7 +30,7 @@ import { ReviewContrast } from "./ReviewContrast";
 import { ClarificationThread } from "./ReviewThreads";
 import { buildTimeline } from "./review-timeline";
 import "../direction-c-review.css";
-import { workbenchPath } from "../workbench-context";
+import { rememberWorkbenchFocus, workbenchPath } from "../workbench-context";
 import { ContributionSet } from "./ContributionSet";
 import { Alert, Button, ErrorState, LoadingState } from "../ui";
 import {
@@ -39,6 +39,7 @@ import {
   type ReviewAction,
 } from "./ReviewActions";
 import { dateText } from "./ReviewShared";
+import { nextToReview } from "./attention-data";
 export function ReviewDetail() {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -236,6 +237,23 @@ export function ReviewDetail() {
           .getQueryData<z.infer<typeof dashboardView>>(["dashboard", projectId])
           ?.questions.find((question) => question.id === id)
       : undefined;
+  // Offer the next question of the list this review was opened from, in the
+  // same order and under the same filters. It reads the dashboard already
+  // cached (never fetches) and only when coming from Atención.
+  const dashboardQuestions =
+    d.canReview && sourceView === "attention"
+      ? client.getQueryData<z.infer<typeof dashboardView>>([
+          "dashboard",
+          projectId,
+        ])?.questions
+      : undefined;
+  const next = dashboardQuestions
+    ? nextToReview(
+        dashboardQuestions,
+        typeof source?.search === "string" ? source.search : "",
+        id,
+      )
+    : undefined;
   // v0.5.0 withheld "Registrar decisión" while a clarification was open; the
   // backend refuses to validate until every thread is closed.
   const validationBlocked = primary === "validateQuestion" && !!openThread;
@@ -346,6 +364,19 @@ export function ReviewDetail() {
                 ? "← Revisar respuestas"
                 : "← Proyecto"}
         </Link>
+        {next && (
+          <Link
+            className="ac-review-next"
+            to={`/projects/${projectId}/review/${next.id}`}
+            state={location.state}
+            aria-label={`Siguiente por revisar: ${next.title}`}
+            onClick={() =>
+              rememberWorkbenchFocus(client, projectId, "attention", next.id)
+            }
+          >
+            Siguiente por revisar →
+          </Link>
+        )}
       </div>
       <div className="ac-review-heading">
         <div>
