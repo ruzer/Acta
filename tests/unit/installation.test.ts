@@ -11,6 +11,7 @@ import {
   resolveAppearance,
 } from "../../app/backend/src/settings/appearance";
 import { inspectImage } from "../../app/backend/src/settings/branding-image";
+import { publicBranding } from "../../app/backend/src/common/config";
 import { SettingsService } from "../../app/backend/src/settings/settings.service";
 import {
   codeIsValid,
@@ -29,6 +30,8 @@ const variables = [
   "DEFAULT_LOCALE",
   "DEFAULT_TIMEZONE",
   "APP_LOGO",
+  "APP_LOGO_SECONDARY",
+  "APP_SECONDARY_NAME",
   "APP_FAVICON",
 ];
 function clearEnvironment() {
@@ -63,6 +66,7 @@ describe("who decides a value", () => {
     clearEnvironment();
     process.env.APP_NAME = "  Nombre .env ";
     process.env.APP_SHORT_NAME = "   ";
+    process.env.APP_SECONDARY_NAME = "Coordinación";
     const fields = resolveAppearance({
       appName: "Guardado",
       shortName: "Corto guardado",
@@ -80,6 +84,11 @@ describe("who decides a value", () => {
       variable: null,
     });
     expect(fields.accent.source).toBe("saved");
+    expect(fields.secondaryName).toEqual({
+      value: "Coordinación",
+      source: "external",
+      variable: "APP_SECONDARY_NAME",
+    });
     expect(fields.locale).toEqual({
       value: "es-MX",
       source: "default",
@@ -90,13 +99,10 @@ describe("who decides a value", () => {
   it("without environment or choices the product defaults apply", () => {
     clearEnvironment();
     const fields = resolveAppearance(null);
-    expect(Object.values(fields).map((f) => f.source)).toEqual([
-      "default",
-      "default",
-      "default",
-      "default",
-      "default",
-    ]);
+    expect(Object.values(fields).map((f) => f.source)).toEqual(
+      Array(6).fill("default"),
+    );
+    expect(fields.secondaryName.value).toBe("");
     expect([
       fields.appName.value,
       fields.accent.value,
@@ -184,10 +190,16 @@ describe("stored images", () => {
     ]);
     expect(image.sha256).toMatch(/^[0-9a-f]{64}$/);
     expect(inspectImage("favicon", png(32)).contentType).toBe("image/png");
+    expect(inspectImage("logoSecondary", png(40, 20)).contentType).toBe(
+      "image/png",
+    );
   });
   it("refuses SVG, scripts, truncated files and the wrong shape", () => {
-    const refuse = (kind: "logo" | "favicon", bytes: Buffer, message: RegExp) =>
-      expect(() => inspectImage(kind, bytes)).toThrow(message);
+    const refuse = (
+      kind: "logo" | "logoSecondary" | "favicon",
+      bytes: Buffer,
+      message: RegExp,
+    ) => expect(() => inspectImage(kind, bytes)).toThrow(message);
     refuse(
       "logo",
       Buffer.from('<?xml version="1.0"?><svg onload="x()"/>'),
@@ -199,7 +211,31 @@ describe("stored images", () => {
     refuse("logo", png(8), /pequeña/);
     refuse("favicon", png(64, 32), /cuadrado/);
     refuse("logo", Buffer.alloc(0), /vacío/);
+    // The second logo follows the same rules as the first.
+    refuse("logoSecondary", Buffer.from("<svg/>"), /SVG/);
+    refuse("logoSecondary", png(8), /pequeña/);
+    refuse("logoSecondary", Buffer.alloc(600 * 1024, 1), /grande/);
     refuse("logo", Buffer.alloc(600 * 1024, 1), /grande/);
+  });
+});
+
+describe("second logo from the environment", () => {
+  it("follows the same local-file rule as the main logo", () => {
+    clearEnvironment();
+    process.env.APP_LOGO_SECONDARY = "https://tracker.example/area.png";
+    expect(() => publicBranding()).toThrow(/local/);
+    process.env.APP_LOGO_SECONDARY = "/branding/../area.png";
+    expect(() => publicBranding()).toThrow();
+    process.env.APP_LOGO_SECONDARY = "/branding/area.png";
+    process.env.APP_SECONDARY_NAME = " Coordinación General ";
+    const branding = publicBranding();
+    expect(branding.logoSecondary).toBe("/branding/area.png");
+    expect(branding.secondaryName).toBe("Coordinación General");
+  });
+  it("is empty when nobody configures it", () => {
+    clearEnvironment();
+    const branding = publicBranding();
+    expect([branding.logoSecondary, branding.secondaryName]).toEqual(["", ""]);
   });
 });
 

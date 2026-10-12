@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { checkedPage } from "./fixtures/page-checks";
-import { login } from "./login-helper";
+import { login, logout } from "./login-helper";
+import { crc32, deflateSync } from "node:zlib";
 
 // First run and the settings center in a real browser. The wizard runs against a
 // mocked API (a seeded installation already has its administrator, and the wizard
@@ -20,6 +21,8 @@ const branding = {
   shortName: "Acta",
   organizationName: "Institución de ejemplo",
   logo: "",
+  logoSecondary: "",
+  secondaryName: "",
   favicon: "",
   accent: "#2b4d7c",
   locale: "es-MX",
@@ -35,6 +38,7 @@ const defaults = {
     accent: field("#2b4d7c"),
     locale: field("es-MX"),
     timezone: field("UTC"),
+    secondaryName: field(""),
   },
 };
 
@@ -211,10 +215,15 @@ test("la configuración: secciones accesibles, cambio visible al instante y vuel
 
   const renamed = `Acta de pruebas ${Date.now()}`;
   try {
+    await page.goto("/admin/settings/appearance");
     await page
       .getByRole("textbox", { name: "Nombre de la aplicación", exact: true })
       .fill(renamed);
-    await page.getByRole("button", { name: "Guardar cambios" }).click();
+    // The preview follows what is typed, before saving.
+    await expect(
+      page.getByTestId("branding-preview").locator(".brand-preview-tab"),
+    ).toContainText(renamed);
+    await page.getByRole("button", { name: "Guardar identidad" }).click();
     await expect(page.getByText("Configuración guardada.")).toBeVisible();
     // The title of the page follows without a reload, and survives one.
     await expect(page).toHaveTitle(renamed);
@@ -227,7 +236,6 @@ test("la configuración: secciones accesibles, cambio visible al instante y vuel
       }),
     ).toHaveValue(renamed);
     // A color that the white text could not be read on is explained and not saved.
-    await page.goto("/admin/settings/appearance");
     await page.getByLabel("Color principal").fill("#eeeeee");
     await expect(page.getByText(/demasiado claro/)).toBeVisible();
     await page.getByLabel("Color principal").fill("#7a2e8f");
@@ -236,7 +244,7 @@ test("la configuración: secciones accesibles, cambio visible al instante y vuel
     ).toHaveCSS("background-color", "rgb(122, 46, 143)");
   } finally {
     // Put back what this test changed, whether or not it got that far.
-    await page.goto("/admin/settings/general");
+    await page.goto("/admin/settings/appearance");
     const name = page.getByRole("textbox", {
       name: "Nombre de la aplicación",
       exact: true,
@@ -251,4 +259,126 @@ test("la configuración: secciones accesibles, cambio visible al instante y vuel
     }
   }
   await expect(page).not.toHaveTitle(renamed);
+});
+
+/** A valid PNG of a flat color, built from its specification. */
+function png(width: number, height: number, shade = 0x66) {
+  const chunk = (type: string, data: Buffer) => {
+    const body = Buffer.concat([Buffer.from(type), data]);
+    const out = Buffer.alloc(12 + data.length);
+    out.writeUInt32BE(data.length, 0);
+    body.copy(out, 4);
+    out.writeUInt32BE(crc32(body), 8 + data.length);
+    return out;
+  };
+  const header = Buffer.alloc(13);
+  header.writeUInt32BE(width, 0);
+  header.writeUInt32BE(height, 4);
+  header.set([8, 2, 0, 0, 0], 8);
+  const row = Buffer.concat([Buffer.from([0]), Buffer.alloc(width * 3, shade)]);
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    chunk("IHDR", header),
+    chunk(
+      "IDAT",
+      deflateSync(Buffer.concat(Array.from({ length: height }, () => row))),
+    ),
+    chunk("IEND", Buffer.alloc(0)),
+  ]);
+}
+
+test("los dos logotipos: se eligen con vista previa, aparecen en el acceso con jerarquía y se eliminan", async ({
+  page,
+}) => {
+  test.setTimeout(240000);
+  await login(page, "admin");
+  const entity = "Coordinación General de Sistemas e Informática";
+  const mark = (name: string, width: number, height: number) => ({
+    name,
+    mimeType: "image/png",
+    buffer: png(width, height),
+  });
+  try {
+    await page.goto("/admin/settings/appearance");
+    const preview = page.getByTestId("branding-preview");
+    // Chosen files are seen in the preview before anything is saved.
+    await page
+      .getByLabel("Subir logotipo principal")
+      .setInputFiles(mark("institucion.png", 480, 120));
+    await expect(preview.locator(".institution-mark").first()).toHaveAttribute(
+      "src",
+      /^data:image\/png/,
+    );
+    await page
+      .getByRole("button", { name: "Guardar logotipo principal" })
+      .click();
+    await expect(page.getByText("Logotipo principal guardado.")).toBeVisible();
+    await page
+      .getByLabel("Subir segundo logotipo")
+      .setInputFiles(mark("area.png", 300, 90));
+    await page
+      .getByRole("button", { name: "Guardar segundo logotipo" })
+      .click();
+    await expect(page.getByText("Segundo logotipo guardado.")).toBeVisible();
+    await page
+      .getByLabel("Entidad del segundo logotipo (opcional)")
+      .fill(entity);
+    await page.getByRole("button", { name: "Guardar identidad" }).click();
+    await expect(page.getByText("Configuración guardada.")).toBeVisible();
+    await expect(preview.locator(".institution-mark")).toHaveCount(2);
+    await expect(preview.locator(".institution-mark-divider")).toHaveCount(1);
+    await checkedPage(page, evidence, "settings-two-logos", 1440, {
+      capture: false,
+    });
+
+    // The sign-in shows the identity first and Acta last, at every width.
+    await logout(page);
+    for (const [width, height] of widths) {
+      await page.setViewportSize({ width, height });
+      await page.goto("/");
+      await expect(
+        page.getByRole("heading", { name: "Iniciar sesión" }),
+      ).toBeVisible();
+      const marks = page.locator(".access-intro .institution-marks img");
+      await expect(marks).toHaveCount(2);
+      await expect(page.locator(".access-secondary")).toHaveText(entity);
+      // Same order on the page, and the second mark is the smaller one.
+      const sizes = await marks.evaluateAll((images) =>
+        images.map((image) => {
+          const box = image.getBoundingClientRect();
+          return { height: box.height, left: box.left, top: box.top };
+        }),
+      );
+      expect(sizes[1]!.height).toBeLessThanOrEqual(sizes[0]!.height);
+      await expect(page.locator(".access-product")).toContainText(
+        "Questions. Evidence. Decisions.",
+      );
+      await checkedPage(page, evidence, "login-two-logos", width, {
+        capture: false,
+      });
+    }
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await login(page, "admin");
+  } finally {
+    // Leave the installation without logos, as it was.
+    await page.goto("/admin/settings/appearance");
+    for (const label of [
+      "Eliminar logotipo principal",
+      "Eliminar segundo logotipo",
+    ]) {
+      const remove = page.getByRole("button", { name: label });
+      if (await remove.count()) {
+        await remove.click();
+        await expect(remove).toHaveCount(0);
+      }
+    }
+    const field = page.getByLabel("Entidad del segundo logotipo (opcional)");
+    if ((await field.inputValue()) !== "") {
+      await field.fill("");
+      await page.getByRole("button", { name: "Guardar identidad" }).click();
+      await expect(page.getByText("Configuración guardada.")).toBeVisible();
+    }
+  }
+  await page.goto("/admin/settings/appearance");
+  await expect(page.locator(".institution-mark")).toHaveCount(0);
 });

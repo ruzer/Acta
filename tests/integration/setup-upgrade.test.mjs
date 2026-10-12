@@ -42,7 +42,7 @@ test(
       const previous = join(root, "migrations");
       await mkdir(previous);
       for (const entry of await readdir(migrations))
-        if (entry !== added)
+        if (entry < added)
           await cp(join(migrations, entry), join(previous, entry), {
             recursive: true,
           });
