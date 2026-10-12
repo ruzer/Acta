@@ -35,6 +35,33 @@ ven el asistente. Ver [Instalación guiada y Configuración](docs/ADMIN-CENTER.m
 - Pruebas de instalación limpia y reinicio en CI (`guided-install`) y guía de
   [diseño de integraciones](docs/INTEGRATIONS-DESIGN.md) (sin implementar).
 
+### Added (personalización institucional)
+
+- **Segundo logotipo opcional** y **entidad del segundo logotipo**, para
+  organizaciones con una identidad principal y un área o entidad que la
+  acompaña (por ejemplo, la institución y su coordinación de sistemas). Se
+  sube, reemplaza y elimina en **Configuración → Apariencia** con las mismas
+  validaciones de bytes que el logotipo principal (sin SVG) y también se
+  puede definir por entorno (`APP_LOGO_SECONDARY`, `APP_SECONDARY_NAME`, que
+  mandan y se muestran como administradas externamente). Añade una migración
+  compatible (`202610130001_secondary_logo`): no toca logotipos ni ajustes
+  guardados.
+- Jerarquía visual: el principal es la identidad (acceso, barra lateral y
+  encabezado móvil); el segundo es más pequeño y solo aparece en el acceso y en
+  las invitaciones externas. Sin él, nada cambia.
+- Apariencia reúne identidad, color e imágenes con una vista previa realista
+  (pestaña, navegación y acceso) que muestra lo escrito y las imágenes
+  elegidas antes de guardarlas; General queda para formato regional y zona
+  horaria.
+
+### Changed (personalización institucional)
+
+- En el acceso, el logotipo principal ahora se muestra grande sobre el nombre de
+  la institución (antes iba pequeño junto al nombre de Acta).
+- La ruta de navegación no repite el logotipo donde la barra lateral ya lo
+  muestra, y en la barra estrecha la barra lateral muestra solo el logotipo
+  (su nombre sigue disponible para lectores de pantalla).
+
 ### Changed
 
 - Los valores de apariencia que define la infraestructura (`APP_NAME`,
