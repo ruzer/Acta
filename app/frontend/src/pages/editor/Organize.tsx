@@ -625,7 +625,16 @@ export function Organize(
                 Contraer todos los grupos
               </Button>
             </div>
-            <p className="hint" id={`group-scope-${props.projectId}`}>
+            {/* The scope is worth saying only when it reaches beyond what is on
+                screen; otherwise it stays available to assistive technology. */}
+            <p
+              className={
+                questions.length < data.questions.length || pages > 1
+                  ? "hint"
+                  : "sr-only"
+              }
+              id={`group-scope-${props.projectId}`}
+            >
               Todos los grupos, incluso fuera de los filtros y de esta página.
               Se conserva la selección.
             </p>

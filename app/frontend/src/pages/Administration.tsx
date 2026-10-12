@@ -84,6 +84,12 @@ export function Administration({ me }: { me: Me }) {
     queryFn: () => api("areas"),
     enabled: me.user.isOrganizationAdmin,
   });
+  // The same listing as "Mis proyectos": the projects this account belongs to.
+  const projects = useQuery({
+    queryKey: ["projects"],
+    queryFn: () => api("projects"),
+    enabled: me.user.isOrganizationAdmin,
+  });
   const refresh = () => {
     void qc.invalidateQueries();
   };
@@ -221,13 +227,60 @@ export function Administration({ me }: { me: Me }) {
         </>
       )}
       {tab === "projects" && (
-        <section className="panel">
-          <h2>Proyectos</h2>
-          <p>
-            Los proyectos disponibles y sus miembros se consultan desde{" "}
-            <Link to="/">Mis proyectos</Link>.
-          </p>
-        </section>
+        <>
+          {projects.isPending ? (
+            <LoadingState />
+          ) : projects.error ? (
+            <ErrorState error={projects.error} />
+          ) : projects.data?.length ? (
+            <>
+              <DataTable
+                caption="Proyectos"
+                columns={[
+                  { label: "Proyecto", bare: true },
+                  { label: "Identificador" },
+                  { label: "Preguntas publicadas" },
+                  { label: "Acciones", bare: true, end: true },
+                ]}
+                rows={projects.data.map((p) => ({
+                  key: p.id,
+                  cells: [
+                    <div key="n">
+                      <strong>{p.name}</strong>
+                      {p.lifecycle === "ARCHIVED" && (
+                        <span className="muted"> · Archivado</span>
+                      )}
+                    </div>,
+                    <code key="c">{p.externalId}</code>,
+                    p.questionCount,
+                    <div className="table-links" key="a">
+                      <Link
+                        to={`/projects/${p.id}/dashboard`}
+                        aria-label={`Abrir ${p.name}`}
+                      >
+                        Abrir
+                      </Link>
+                      <Link
+                        to={`/projects/${p.id}/members`}
+                        aria-label={`Miembros de ${p.name}`}
+                      >
+                        Miembros
+                      </Link>
+                    </div>,
+                  ],
+                }))}
+              />
+              <p className="hint">
+                Se muestran los proyectos en los que tienes membresía. El
+                identificador es el que debe repetir el archivo de importación.
+              </p>
+            </>
+          ) : (
+            <EmptyState title="Todavía no hay proyectos">
+              Crea el primero con «Crear proyecto».
+            </EmptyState>
+          )}
+        </>
       )}
       {creating && (
         <Dialog
@@ -316,7 +369,7 @@ export function Administration({ me }: { me: Me }) {
                 label="Identificador externo"
                 name="externalId"
                 required
-                hint="Se conservará exactamente como lo escribas."
+                hint="Es el código con el que el archivo de importación reconoce este proyecto. Se conservará exactamente como lo escribas."
               />
               <Textarea label="Descripción" name="description" />
             </ActionForm>

@@ -110,6 +110,36 @@ test("ACTA NEXT: navegación del proyecto, teclado y reflow en cuatro tamaños",
   }
 });
 
+test("ACTA NEXT: «Siguiente por revisar» avanza por la lista de Atención y conserva el retorno, a 1440 y 390 px", async ({
+  page,
+}) => {
+  await login(page, "analyst");
+  for (const [width, height] of [
+    [1440, 900],
+    [390, 844],
+  ]) {
+    await page.setViewportSize({ width, height });
+    await page.goto(`/projects/${fixture.project.id}/dashboard`);
+    const turn = page.getByRole("list", { name: "Te toca a ti" });
+    await expect(turn.locator(":scope > li")).toHaveCount(2);
+    // Open the first one the way a person does: from its row in Atención.
+    await turn.locator(":scope > li").first().getByRole("link").click();
+    await expect(page.locator("main h1")).toBeVisible();
+    const first = new URL(page.url()).pathname;
+    const next = page.getByRole("link", { name: /^Siguiente por revisar: / });
+    await expect(next).toBeVisible();
+    await accessible(page);
+    await next.click();
+    await expect(page.locator("main h1")).toBeVisible();
+    expect(new URL(page.url()).pathname).not.toBe(first);
+    // It keeps the return path: "← Atención" still leads back to the list.
+    await page.getByRole("link", { name: "← Atención", exact: true }).click();
+    await expect(page).toHaveURL(
+      new RegExp(`/projects/${fixture.project.id}/dashboard`),
+    );
+  }
+});
+
 test("ACTA NEXT: atención conserva el solapamiento y el contexto al volver del detalle", async ({
   page,
 }) => {

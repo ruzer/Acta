@@ -538,3 +538,28 @@ it("una búsqueda sin coincidencias conserva el mensaje de filtros, sin fingir u
     screen.queryByRole("heading", { name: "Todavía no hay preguntas." }),
   ).not.toBeInTheDocument();
 });
+
+it("la frase del alcance de «Expandir/Contraer todos» solo se ve si el alcance va más allá de lo visible", async () => {
+  const user = userEvent.setup();
+  const { unmount } = render(<Organize {...handlers} data={dataFor(12)} />);
+  const scope = () =>
+    screen.getByText(/Todos los grupos, incluso fuera de los filtros/);
+  // Everything is on screen: the sentence stays for assistive technology only.
+  expect(scope()).toHaveClass("sr-only");
+  expect(
+    screen.getByRole("group", { name: "Presentación de grupos" }),
+  ).toHaveAccessibleDescription(
+    /Todos los grupos, incluso fuera de los filtros/,
+  );
+  // A filter hides part of the questionnaire: now it is worth saying.
+  await user.type(
+    screen.getByRole("searchbox", { name: "Buscar preguntas" }),
+    "Consulta de ejemplo 3",
+  );
+  expect(scope()).toHaveClass("hint");
+  expect(scope()).not.toHaveClass("sr-only");
+  unmount();
+  // More than one page of results: also worth saying.
+  render(<Organize {...handlers} data={dataFor(54)} />);
+  expect(scope()).toHaveClass("hint");
+});

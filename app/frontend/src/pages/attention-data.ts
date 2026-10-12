@@ -4,8 +4,10 @@ import {
   type QueryClient,
 } from "@tanstack/react-query";
 import type { z } from "zod";
+import { reviewStates } from "@requirements/contracts";
 import type { dashboardView, ReviewInbox } from "@requirements/contracts";
 import { api } from "../api";
+import { attentionGroups } from "./attention-groups";
 
 export type AttentionDashboard = z.infer<typeof dashboardView>;
 export type AttentionTask = "conflicts" | "clarifications" | "ready";
@@ -138,5 +140,34 @@ export function attentionQuestions(
           : task === "ready"
             ? q.status === "ANSWERED"
             : clarifications.has(q.id))),
+  );
+}
+
+/**
+ * The question to review after `currentId`, in the order Atención shows it
+ * ("Te toca a ti": conflicts, then ready to decide) and under the filters the
+ * review was opened from. Presentation only: it reads the dashboard already
+ * loaded and returns nothing when that cannot answer (no cache, or a filter
+ * that depends on data this page does not have).
+ */
+export function nextToReview(
+  questions: AttentionDashboard["questions"],
+  search: string,
+  currentId: string,
+): AttentionDashboard["questions"][number] | undefined {
+  const params = new URLSearchParams(search);
+  const task = attentionTask(params.get("task"));
+  if (task === "clarifications") return undefined;
+  const status = reviewStates.find((s) => s === params.get("status")) ?? "";
+  const queue =
+    attentionGroups(
+      attentionQuestions(questions, task, status, []),
+      [],
+      true,
+    ).find((group) => group.id === "action")?.questions ?? [];
+  const index = queue.findIndex((q) => q.id === currentId);
+  return (
+    queue.slice(index + 1).find((q) => q.id !== currentId) ??
+    queue.find((q) => q.id !== currentId)
   );
 }
