@@ -331,6 +331,27 @@ test("los dos logotipos: se eligen con vista previa, aparecen en el acceso con j
       capture: false,
     });
 
+    // The external invitation (no account) carries the same marks and must still fit.
+    for (const [width, height] of [
+      [390, 844],
+      [320, 640],
+    ] as const) {
+      await page.setViewportSize({ width, height });
+      await page.goto("/invite#" + "a".repeat(43));
+      await expect(
+        page.getByRole("heading", { name: "Invitación no disponible" }),
+      ).toBeVisible();
+      await expect(page.locator(".invitation-secondary")).toBeVisible();
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+        `desborde horizontal en la invitación a ${width}px`,
+      ).toBe(true);
+    }
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/");
+
     // The sign-in shows the identity first and Acta last, at every width.
     await logout(page);
     for (const [width, height] of widths) {
@@ -360,8 +381,19 @@ test("los dos logotipos: se eligen con vista previa, aparecen en el acceso con j
     await page.setViewportSize({ width: 1440, height: 900 });
     await login(page, "admin");
   } finally {
-    // Leave the installation without logos, as it was.
+    // Leave the installation without logos, as it was. Wait for the form before looking
+    // for what to remove: counting while the page still loads would skip the cleanup and
+    // leave the logos for every spec that runs after this one.
+    await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/admin/settings/appearance");
+    const signIn = page.getByRole("heading", { name: "Iniciar sesión" });
+    const identity = page.getByRole("button", { name: "Guardar identidad" });
+    await expect(signIn.or(identity)).toBeVisible();
+    if (await signIn.isVisible()) {
+      await login(page, "admin");
+      await page.goto("/admin/settings/appearance");
+      await expect(identity).toBeVisible();
+    }
     for (const label of [
       "Eliminar logotipo principal",
       "Eliminar segundo logotipo",
@@ -375,10 +407,13 @@ test("los dos logotipos: se eligen con vista previa, aparecen en el acceso con j
     const field = page.getByLabel("Entidad del segundo logotipo (opcional)");
     if ((await field.inputValue()) !== "") {
       await field.fill("");
-      await page.getByRole("button", { name: "Guardar identidad" }).click();
+      await identity.click();
       await expect(page.getByText("Configuración guardada.")).toBeVisible();
     }
   }
   await page.goto("/admin/settings/appearance");
+  await expect(
+    page.getByRole("button", { name: "Guardar identidad" }),
+  ).toBeVisible();
   await expect(page.locator(".institution-mark")).toHaveCount(0);
 });
