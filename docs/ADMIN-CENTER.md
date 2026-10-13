@@ -20,7 +20,7 @@ Cada ajuste pertenece a una de cuatro clases. Esto evita que la configuración e
 |---|---|---|---|
 | **A. Infraestructura** | Necesaria antes de arrancar los servicios | `.env`, Compose, gestor de secretos | `APP_ORIGIN`, `COOKIE_SECURE`, `NODE_ENV`, `ORGANIZATION_CODE`, contraseñas de PostgreSQL, `S3_*`, límites, sesiones, invitaciones |
 | **B. Instalación** | Se decide una sola vez, en el primer uso | Asistente (o `bootstrap-admin`) | Primer administrador, nombre de la institución |
-| **C. Administración** | Se modifica desde la aplicación | **Administración → Configuración** | Nombre de la aplicación, nombre corto, color, formato regional, zona horaria, logotipo, favicon |
+| **C. Administración** | Se modifica desde la aplicación | **Administración → Configuración** | Nombre de la aplicación, nombre corto, color, formato regional, zona horaria, logotipo principal y secundario, entidad del segundo logotipo, favicon |
 | **D. Organización** | Personalización de la institución | Configuración | Nombre de la institución |
 
 Los secretos fundamentales (contraseñas de base de datos, claves del almacenamiento) **siguen fuera de la aplicación**: nada de eso se guarda en PostgreSQL ni se puede ver o cambiar desde la interfaz.
@@ -68,14 +68,23 @@ El logotipo y el favicon se añaden después, en **Configuración → Apariencia
 
 | Sección | Qué hace |
 |---|---|
-| **General** | Nombre de la institución, de la aplicación y corto, formato regional y zona horaria |
-| **Apariencia** | Logotipo, favicon, color principal con vista previa y verificación de contraste (texto blanco ≥ 4.5:1). Sin CSS ni JavaScript propio |
+| **General** | Formato regional y zona horaria |
+| **Apariencia** | **Identidad**: nombre de la institución, de la aplicación y corto, entidad del segundo logotipo y color principal (verificación de contraste con texto blanco ≥ 4.5:1). **Imágenes**: logotipo principal, segundo logotipo (opcional) y favicon. Una **vista previa** muestra la pestaña, la navegación y la pantalla de acceso con lo que escribes y con las imágenes que eliges *antes* de guardarlas. Sin CSS ni JavaScript propio |
 | **Almacenamiento** | Estado, proveedor, servidor, bucket y región, evidencia por proveedor y **prueba de conexión**. Solo lectura |
 | **Sistema** | Versión, entorno, base de datos, dirección y HTTPS, cookies seguras, sesiones, invitaciones y límites. Solo lectura |
 
+Los cambios se ven al instante, sin recompilar el frontend ni reiniciar Docker: la pantalla de acceso, el título y el favicon leen la configuración vigente.
+
+### Logotipos: jerarquía
+
+- **Logotipo principal** = la identidad de la institución. Va más grande: en la pantalla de acceso (sobre el nombre), en la barra lateral (como marca única en la barra estrecha) y en el encabezado móvil.
+- **Segundo logotipo** (opcional) = una entidad colaboradora, un área responsable o una identidad complementaria. Va más pequeño, después de un separador: en la pantalla de acceso (con el nombre de la entidad escrito bajo el de la institución) y en el encabezado de las **invitaciones externas**, que es donde quien responde necesita ver quién pregunta. No aparece en la navegación, los encabezados ni las pantallas administrativas, para no añadir ruido.
+- En pantallas estrechas las marcas se apilan, la principal primero. Las proporciones siempre se conservan (nada se estira ni se recorta).
+- Sin segundo logotipo, nada cambia ni se reserva espacio. Acta sigue siendo reconocible: su nombre y «Questions. Evidence. Decisions.» permanecen en el acceso.
+
 Cada guardado usa la **versión** que la persona vio: si otra persona cambió algo mientras tanto, se rechaza con `409` y no se pierde ningún cambio ajeno.
 
-Las imágenes se validan por sus **bytes** (PNG o JPEG para el logotipo; PNG cuadrado o ICO para el favicon; 512 KB y 128 KB como máximo, con tamaño en píxeles acotado). **No se admite SVG.** Se guardan en la base de datos y se sirven como imagen inerte (`nosniff`, CSP sin recursos).
+Las imágenes se validan por sus **bytes** (PNG o JPEG para los logotipos; PNG cuadrado o ICO para el favicon; 512 KB y 128 KB como máximo, con tamaño en píxeles acotado). **No se admite SVG.** Se guardan en la base de datos y se sirven como imagen inerte (`nosniff`, CSP sin recursos).
 
 ### Almacenamiento: por qué no se cambia desde Acta
 
@@ -91,7 +100,7 @@ Todas las rutas de administración exigen una sesión de administrador de la ins
 
 | Ruta | Acceso |
 |---|---|
-| `GET /configuration/public`, `GET /configuration/assets/{logo,favicon}` | Público: la pantalla de acceso necesita verse como la institución |
+| `GET /configuration/public`, `GET /configuration/assets/{logo,logoSecondary,favicon}` | Público: la pantalla de acceso necesita verse como la institución |
 | `GET /setup/status` | Público: solo `PENDING`, `COMPLETED` o `DISABLED` |
 | `POST /setup/{verify,checks,complete}` | Requieren el código de instalación; cerradas al completar |
 | `GET/POST /settings`, `POST /settings/assets/:kind[/remove]` | Administración |
@@ -99,7 +108,7 @@ Todas las rutas de administración exigen una sesión de administrador de la ins
 
 ## Compatibilidad con instalaciones existentes
 
-- La migración `202610120001_installation_setup_settings` solo **agrega** tablas. Si hay un administrador, registra la instalación como completada: el asistente nunca aparece.
+- Las migraciones `202610120001_installation_setup_settings` y `202610130001_secondary_logo` solo **agregan** tablas, un valor de enumeración y una columna; no reescriben nada. Los logotipos y ajustes guardados se conservan y una instalación sin segundo logotipo no cambia. Si hay un administrador, registra la instalación como completada: el asistente nunca aparece.
 - Sin ajustes guardados, la apariencia es exactamente la que dicen las variables de entorno. Quien ya definía `APP_NAME` y similares sigue igual y lo ve como «administrado externamente».
 - Usuarios, contraseñas, evidencia, proyectos y sesiones no se tocan. `bootstrap-admin` sigue funcionando (y ahora también cierra el asistente).
 - Un cambio de comportamiento menor: el nombre de la institución que se muestra en la pantalla de acceso y en el encabezado sale siempre de la base de datos (como ya ocurría en la sesión iniciada), no de `ORGANIZATION_NAME`.
@@ -113,5 +122,4 @@ Todas las rutas de administración exigen una sesión de administrador de la ins
 
 - **Correo**: Acta no envía correo; no hay configuración que mostrar.
 - **Integraciones y webhooks**: no existen; hay solo un [diseño](INTEGRATIONS-DESIGN.md), sin implementar.
-- **Segundo logotipo**: no hay dónde mostrarlo.
 - **Idioma**: la interfaz está en español; «Formato regional» cambia fechas y números, no traduce.

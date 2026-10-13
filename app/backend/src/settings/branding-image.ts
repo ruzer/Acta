@@ -17,6 +17,7 @@ const PNG_END = Buffer.from([
 ]);
 const bounds = {
   logo: { min: 16, max: 2000, square: false },
+  logoSecondary: { min: 16, max: 2000, square: false },
   favicon: { min: 16, max: 512, square: true },
 } as const;
 export type InspectedImage = {
@@ -108,15 +109,15 @@ export function inspectImage(
     size = icoSize(bytes);
   } else
     reject(
-      kind === "logo"
-        ? "Formato no admitido. Usa una imagen PNG o JPEG."
-        : "Formato no admitido. Usa una imagen PNG o un archivo ICO.",
+      kind === "favicon"
+        ? "Formato no admitido. Usa una imagen PNG o un archivo ICO."
+        : "Formato no admitido. Usa una imagen PNG o JPEG.",
     );
   if (!(limits.types as readonly string[]).includes(contentType))
     reject(
-      kind === "logo"
-        ? "Formato no admitido. Usa una imagen PNG o JPEG."
-        : "Formato no admitido. Usa una imagen PNG o un archivo ICO.",
+      kind === "favicon"
+        ? "Formato no admitido. Usa una imagen PNG o un archivo ICO."
+        : "Formato no admitido. Usa una imagen PNG o JPEG.",
     );
   if (!size) reject("El archivo está dañado o incompleto.");
   const { min, max, square } = bounds[kind];

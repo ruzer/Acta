@@ -90,6 +90,9 @@ export const publicBrandingView = z.strictObject({
   shortName: z.string().min(1).max(40),
   organizationName: z.string().min(1).max(200),
   logo: z.string(),
+  /** Optional second logo (an area or a collaborating entity) and its name. */
+  logoSecondary: z.string(),
+  secondaryName: z.string().max(200),
   favicon: z.string(),
   accent: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   locale: z.string(),

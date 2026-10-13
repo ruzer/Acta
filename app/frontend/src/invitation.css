@@ -8,20 +8,31 @@
 }
 .invitation-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: 8px 12px;
   min-height: 56px;
-  padding: 0 max(16px, calc((100vw - 720px) / 2));
+  padding: 8px max(16px, calc((100vw - 720px) / 2));
   background: var(--ac-surface);
   border-bottom: 1px solid var(--ac-line);
   font-size: var(--ac-text-body);
   font-weight: 700;
 }
+/* The responsible entity comes last and small; on a narrow screen it wraps to its own line. */
+.invitation-secondary {
+  width: auto;
+  max-width: 140px;
+  height: 28px;
+  margin-left: auto;
+  object-fit: contain;
+}
 .invitation-organization {
+  min-width: 0;
   padding-left: 12px;
   color: var(--ac-muted);
   border-left: 1px solid var(--ac-line);
   font-weight: 600;
+  overflow-wrap: anywhere;
 }
 .invitation-content {
   display: grid;

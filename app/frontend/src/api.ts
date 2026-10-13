@@ -1,4 +1,8 @@
-import { contracts, errorView } from "@requirements/contracts";
+import {
+  contracts,
+  errorView,
+  type BrandingAssetKind,
+} from "@requirements/contracts";
 import { z } from "zod";
 let csrfToken = "";
 export function setCsrf(value: string) {
@@ -117,7 +121,7 @@ export async function uploadEvidence(
 }
 /** Logo or favicon: the bytes travel as they are, the version of the settings they were chosen against in a header. */
 export async function uploadBrandingAsset(
-  kind: "logo" | "favicon",
+  kind: BrandingAssetKind,
   expectedVersion: number,
   file: File,
 ) {

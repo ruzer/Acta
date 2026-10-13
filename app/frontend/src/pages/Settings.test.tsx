@@ -1,5 +1,11 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import {
+  cleanup,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -40,7 +46,9 @@ const settings = (overrides: Record<string, unknown> = {}) => ({
   accent: field("#2b4d7c"),
   locale: field("es-MX"),
   timezone: field("UTC"),
+  secondaryName: field(""),
   logo: asset(),
+  logoSecondary: asset(),
   favicon: asset(),
   minimumContrast: 4.5,
   ...overrides,
@@ -137,24 +145,11 @@ it("ofrece solo secciones que funcionan y marca la actual", async () => {
   expect(screen.queryByText(/Correo|Integraciones|Webhook/)).toBeNull();
 });
 
-it("guarda solo lo que cambió, con la versión que se vio", async () => {
+it("General guarda solo lo que cambió, con la versión que se vio, y no llama al servidor sin cambios", async () => {
   const { user, calls } = mount("general", {
     updateSettings: () =>
-      settings({ version: 4, organizationName: "Nueva institución" }),
+      settings({ version: 4, timezone: field("America/Mexico_City", "saved") }),
   });
-  const name = await screen.findByLabelText("Nombre de la institución");
-  await user.clear(name);
-  await user.type(name, "Nueva institución");
-  await user.click(screen.getByRole("button", { name: "Guardar cambios" }));
-  expect(await screen.findByText("Configuración guardada.")).toBeVisible();
-  expect(calls.find(([key]) => key === "updateSettings")![1]).toEqual({
-    expectedVersion: 3,
-    organizationName: "Nueva institución",
-  });
-});
-
-it("no llama al servidor cuando no hay nada que guardar", async () => {
-  const { user, calls } = mount("general");
   await user.click(
     await screen.findByRole("button", { name: "Guardar cambios" }),
   );
@@ -162,14 +157,98 @@ it("no llama al servidor cuando no hay nada que guardar", async () => {
     "No hay cambios que guardar.",
   );
   expect(calls.some(([key]) => key === "updateSettings")).toBe(false);
+  await user.selectOptions(
+    screen.getByLabelText("Zona horaria"),
+    "America/Mexico_City",
+  );
+  await user.click(screen.getByRole("button", { name: "Guardar cambios" }));
+  expect(await screen.findByText("Configuración guardada.")).toBeVisible();
+  expect(calls.find(([key]) => key === "updateSettings")![1]).toEqual({
+    expectedVersion: 3,
+    timezone: "America/Mexico_City",
+  });
 });
 
-it("un valor de la infraestructura se muestra sin poder editarse ni restablecerse", async () => {
+it("General muestra de solo lectura lo que define la infraestructura", async () => {
   mount("general", {
     settings: () =>
       settings({
-        appName: field("Nombre del .env", "external", "APP_NAME"),
         timezone: field("Europe/Madrid", "external", "DEFAULT_TIMEZONE"),
+        locale: field("es-ES", "saved"),
+      }),
+  });
+  const zone = await screen.findByLabelText("Zona horaria");
+  expect(zone).toHaveValue("Europe/Madrid");
+  expect(zone).toHaveAttribute("readonly");
+  expect(
+    screen.getByText(/Administrado externamente \(DEFAULT_TIMEZONE\)/),
+  ).toBeVisible();
+  expect(
+    screen.getByRole("button", {
+      name: "Volver al valor predeterminado de formato regional",
+    }),
+  ).toBeVisible();
+});
+
+it("Apariencia reúne identidad, color e imágenes y guarda solo lo que cambió", async () => {
+  const { user, calls } = mount("appearance", {
+    updateSettings: () =>
+      settings({
+        version: 4,
+        organizationName: "Nueva institución",
+        secondaryName: field("Coordinación General", "saved"),
+      }),
+  });
+  const name = await screen.findByLabelText("Nombre de la institución");
+  await user.clear(name);
+  await user.type(name, "Nueva institución");
+  await user.type(
+    screen.getByLabelText("Entidad del segundo logotipo (opcional)"),
+    "Coordinación General",
+  );
+  // The preview follows what is typed, before anything is saved.
+  const preview = within(screen.getByTestId("branding-preview"));
+  expect(preview.getByText("Nueva institución")).toBeVisible();
+  expect(preview.getByText("Coordinación General")).toBeVisible();
+  await user.click(screen.getByRole("button", { name: "Guardar identidad" }));
+  expect(await screen.findByText("Configuración guardada.")).toBeVisible();
+  expect(calls.find(([key]) => key === "updateSettings")![1]).toEqual({
+    expectedVersion: 3,
+    organizationName: "Nueva institución",
+    secondaryName: "Coordinación General",
+  });
+});
+
+it("Apariencia no llama al servidor sin cambios y explica un conflicto de versión", async () => {
+  const { user, calls } = mount("appearance", {
+    updateSettings: () => {
+      throw new apiModule.ApiFailure(
+        409,
+        "La configuración cambió mientras la editabas.",
+      );
+    },
+  });
+  await user.click(
+    await screen.findByRole("button", { name: "Guardar identidad" }),
+  );
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    "No hay cambios que guardar.",
+  );
+  expect(calls.some(([key]) => key === "updateSettings")).toBe(false);
+  await user.type(screen.getByLabelText("Nombre corto"), " 2");
+  await user.click(screen.getByRole("button", { name: "Guardar identidad" }));
+  expect(await screen.findByText(/cambió mientras la editabas/)).toBeVisible();
+  expect(
+    screen.getByRole("button", { name: "Cargar la configuración actual" }),
+  ).toBeVisible();
+});
+
+it("un valor de la infraestructura se muestra sin poder editarse ni restablecerse", async () => {
+  mount("appearance", {
+    settings: () =>
+      settings({
+        appName: field("Nombre del .env", "external", "APP_NAME"),
+        secondaryName: field("Área del .env", "external", "APP_SECONDARY_NAME"),
         shortName: field("Corto", "saved"),
       }),
   });
@@ -179,7 +258,9 @@ it("un valor de la infraestructura se muestra sin poder editarse ni restablecers
   expect(
     screen.getByText(/Administrado externamente \(APP_NAME\)/),
   ).toBeVisible();
-  expect(screen.getByLabelText("Zona horaria")).toHaveAttribute("readonly");
+  expect(
+    screen.getByLabelText("Entidad del segundo logotipo (opcional)"),
+  ).toHaveAttribute("readonly");
   // Solo lo guardado desde Acta se puede devolver a su valor predeterminado.
   expect(
     screen.getByRole("button", {
@@ -191,32 +272,12 @@ it("un valor de la infraestructura se muestra sin poder editarse ni restablecers
   ).toBeNull();
 });
 
-it("un conflicto de versión ofrece cargar la configuración actual", async () => {
-  const { user } = mount("general", {
-    updateSettings: () => {
-      throw new apiModule.ApiFailure(
-        409,
-        "La configuración cambió mientras la editabas.",
-      );
-    },
-  });
-  const name = await screen.findByLabelText("Nombre de la institución");
-  await user.type(name, " 2");
-  await user.click(screen.getByRole("button", { name: "Guardar cambios" }));
-  expect(await screen.findByText(/cambió mientras la editabas/)).toBeVisible();
-  expect(
-    screen.getByRole("button", { name: "Cargar la configuración actual" }),
-  ).toBeVisible();
-});
-
-it("la apariencia explica el contraste, muestra la vista previa y no permite SVG", async () => {
+it("el color se explica con palabras y la vista previa lo usa; no se admite SVG", async () => {
   const { user, calls } = mount("appearance", {
     updateSettings: () =>
       settings({ version: 4, accent: field("#1b4b8c", "saved") }),
   });
   const accent = await screen.findByLabelText("Color principal");
-  const save = screen.getByRole("button", { name: "Guardar color" });
-  expect(save).toBeDisabled();
   await user.clear(accent);
   await user.type(accent, "#eeeeee");
   expect(screen.getByText(/demasiado claro/)).toBeVisible();
@@ -224,35 +285,135 @@ it("la apariencia explica el contraste, muestra la vista previa y no permite SVG
   await user.type(accent, "#1b4b8c");
   expect(screen.getByText(/Es legible/)).toBeVisible();
   expect(screen.getByTestId("branding-preview")).toBeVisible();
-  await user.click(save);
+  await user.click(screen.getByRole("button", { name: "Guardar identidad" }));
   expect(await screen.findByText("Configuración guardada.")).toBeVisible();
   expect(calls.find(([key]) => key === "updateSettings")![1]).toEqual({
     expectedVersion: 3,
     accent: "#1b4b8c",
   });
-  const logo = screen.getByLabelText("Subir logotipo") as HTMLInputElement;
-  expect(logo.accept).toBe("image/png,image/jpeg");
-  expect(screen.getAllByText(/No se\s+admiten SVG/).length).toBeGreaterThan(0);
+  const accepts = (label: string) =>
+    (screen.getByLabelText(label) as HTMLInputElement).accept;
+  expect(accepts("Subir logotipo principal")).toBe("image/png,image/jpeg");
+  expect(accepts("Subir segundo logotipo")).toBe("image/png,image/jpeg");
+  expect(accepts("Subir favicon")).toBe("image/png,image/x-icon");
+  expect(screen.getAllByText(/No se\s+admiten SVG/)).toHaveLength(3);
+});
+
+it("el segundo logotipo es opcional: se elige, se ve antes de guardar, se guarda, se reemplaza y se elimina", async () => {
+  const upload = vi
+    .spyOn(apiModule, "uploadBrandingAsset")
+    .mockResolvedValue({} as never);
+  const { user, calls } = mount("appearance", {
+    settings: () =>
+      settings({
+        logoSecondary: asset({
+          url: "/api/v1/configuration/assets/logoSecondary?v=abc",
+          source: "saved",
+          byteSize: 100,
+        }),
+      }),
+    removeBrandingAsset: () => ({}),
+  });
+  // Sin segundo logotipo guardado la sección sigue ofreciendo solo subirlo.
+  const input = (await screen.findByLabelText(
+    "Reemplazar segundo logotipo",
+  )) as HTMLInputElement;
+  const file = new File([new Uint8Array([137, 80, 78, 71])], "area.png", {
+    type: "image/png",
+  });
+  await user.upload(input, file);
+  // Visible in the preview before it is saved.
+  await waitFor(() =>
+    expect(
+      [...screen.getByTestId("branding-preview").querySelectorAll("img")].some(
+        (img) => img.getAttribute("src")?.startsWith("data:image/png"),
+      ),
+    ).toBe(true),
+  );
+  await user.click(
+    screen.getByRole("button", { name: "Guardar segundo logotipo" }),
+  );
+  await waitFor(() =>
+    expect(upload).toHaveBeenCalledWith("logoSecondary", 3, file),
+  );
+  await user.click(
+    screen.getByRole("button", { name: "Eliminar segundo logotipo" }),
+  );
+  await waitFor(() =>
+    expect(calls).toContainEqual([
+      "removeBrandingAsset",
+      { expectedVersion: 3 },
+    ]),
+  );
+  // Another kind is not offered a removal it does not have.
   expect(
-    (screen.getByLabelText("Subir favicon") as HTMLInputElement).accept,
-  ).toBe("image/png,image/x-icon");
+    screen.queryByRole("button", { name: "Eliminar logotipo principal" }),
+  ).toBeNull();
+});
+
+it("una imagen demasiado grande se rechaza antes de enviarla", async () => {
+  const upload = vi.spyOn(apiModule, "uploadBrandingAsset");
+  const { user } = mount("appearance");
+  const input = await screen.findByLabelText("Subir segundo logotipo");
+  await user.upload(
+    input,
+    new File([new Uint8Array(513 * 1024)], "grande.png", { type: "image/png" }),
+  );
+  expect(await screen.findByText(/demasiado grande/)).toBeVisible();
+  expect(
+    screen.getByRole("button", { name: "Guardar segundo logotipo" }),
+  ).toBeDisabled();
+  expect(upload).not.toHaveBeenCalled();
 });
 
 it("un logotipo definido en la infraestructura no se puede cambiar desde la pantalla", async () => {
   mount("appearance", {
     settings: () =>
       settings({
-        logo: asset({
-          url: "/branding/logo.png",
+        logoSecondary: asset({
+          url: "/branding/area.png",
           source: "external",
-          variable: "APP_LOGO",
+          variable: "APP_LOGO_SECONDARY",
         }),
       }),
   });
-  await screen.findByText(/Se define en la infraestructura \(APP_LOGO\)/);
-  expect(screen.queryByLabelText("Reemplazar logotipo")).toBeNull();
-  expect(screen.queryByLabelText("Subir logotipo")).toBeNull();
+  await screen.findByText(
+    /Se define en la infraestructura \(APP_LOGO_SECONDARY\)/,
+  );
+  expect(screen.queryByLabelText("Subir segundo logotipo")).toBeNull();
+  expect(screen.queryByLabelText("Reemplazar segundo logotipo")).toBeNull();
+  expect(screen.getByLabelText("Subir logotipo principal")).toBeVisible();
   expect(screen.getByLabelText("Subir favicon")).toBeVisible();
+});
+
+it("la vista previa muestra solo las marcas que existen y separa la secundaria", async () => {
+  mount("appearance", {
+    settings: () =>
+      settings({
+        logo: asset({ url: "/a.png", source: "saved" }),
+        logoSecondary: asset({ url: "/b.png", source: "saved" }),
+        favicon: asset({ url: "/f.png", source: "saved" }),
+      }),
+  });
+  await screen.findByTestId("branding-preview");
+  const preview = screen.getByTestId("branding-preview");
+  expect(preview.querySelector(".institution-marks")).not.toBeNull();
+  expect(preview.querySelector(".institution-mark-divider")).not.toBeNull();
+  expect(preview.querySelector(".institution-mark-secondary")).toHaveAttribute(
+    "src",
+    "/b.png",
+  );
+  expect(preview.querySelector(".brand-preview-tab img")).toHaveAttribute(
+    "src",
+    "/f.png",
+  );
+  cleanup();
+  mount("appearance");
+  await screen.findByTestId("branding-preview");
+  // Sin ninguna imagen: sin marcas ni espacio reservado, y el sistema sigue funcionando.
+  expect(
+    screen.getByTestId("branding-preview").querySelector(".institution-marks"),
+  ).toBeNull();
 });
 
 it("almacenamiento muestra el estado, no ofrece cambiarlo y permite probar la conexión", async () => {
