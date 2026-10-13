@@ -14,6 +14,43 @@ Se prepara [Semantic Versioning](https://semver.org/lang/es/) en formato **MAJOR
 
 El contrato público incluye API documentada, configuración, formatos de intercambio y requisitos de actualización/persistencia. No basta con que TypeScript compile para afirmar compatibilidad. Antes de 1.0 no se promete estabilidad absoluta; los cambios incompatibles deben anunciarse, agruparse en un incremento MINOR de `0.x` y acompañarse de instrucciones de migración. PATCH seguirá reservado para cambios compatibles. Una corrección de seguridad que rompa compatibilidad debe decirlo y usar la versión apropiada.
 
+### Preparación de 0.8.0 — Instalación guiada, Configuración y segundo logotipo
+
+La base es [v0.7.0](https://github.com/ruzer/Acta/releases/tag/v0.7.0).
+**0.8.0** reúne dos PRs: [#39](https://github.com/ruzer/Acta/pull/39)
+(asistente de primera instalación opcional, `scripts/install.sh`, Administración →
+Configuración) y [#40](https://github.com/ruzer/Acta/pull/40) (personalización
+institucional: segundo logotipo opcional, entidad del segundo logotipo, jerarquía
+visual y formulario de Apariencia con vista previa).
+
+Es MINOR porque añade funcionalidad compatible: rutas nuevas (`/setup/*`,
+`/settings`, `/system`, imágenes públicas de la institución), campos aditivos en
+`GET /configuration/public` y variables opcionales (`SETUP_WIZARD`,
+`APP_LOGO_SECONDARY`, `APP_SECONDARY_NAME`). **Incluye migraciones**, a diferencia
+de 0.7.0, pero son aditivas (no reescriben ni borran datos): `202610120001_installation_setup_settings`
+(tablas `InstallationSetup`, `OrganizationSettings` y `BrandingAsset`; registra la
+instalación como completada si ya hay un administrador) y
+`202610130001_secondary_logo` (un valor de enumeración y una columna nullable). No
+cambian permisos de dominio, escrituras de respuestas, estados persistidos,
+almacenamiento de evidencia, autenticación ni invitaciones.
+
+Un cambio de comportamiento visible para quien ya personalizaba Acta: lo que la
+infraestructura define por variable se muestra como «administrado externamente»
+y ya no se puede cambiar desde la aplicación; `docker-compose.yml` dejó de
+inyectar valores por defecto de apariencia. Un fork debe fusionar las migraciones
+y traducir las acciones de bitácora nuevas en sus catálogos propios.
+
+Los manifiestos, las referencias entre paquetes y el lockfile se preparan en
+0.8.0 sin actualizar dependencias externas. Las
+[notas de la versión](releases/v0.8.0.md) incluyen la actualización desde v0.7.0,
+los límites conocidos y la evidencia del CI de la base. El PR de preparación
+requiere CI verde y merge manual del maintainer. Después se debe verificar el CI
+del `main` resultante antes de crear un tag anotado `v0.8.0` sobre ese commit
+exacto y publicar la GitHub Release como Latest. Verificar también el CI del tag.
+La preparación y la fecha del changelog no constituyen por sí solas una
+publicación; no se publican imágenes Docker ni se actualizan downstreams en este
+proceso.
+
 ### Preparación de 0.7.0 — Decisiones y bitácora trazables, uso con volumen
 
 La base es [v0.6.1](https://github.com/ruzer/Acta/releases/tag/v0.6.1).
