@@ -57,6 +57,9 @@ export class AdministrationController {
   ) {
     return this.service.createArea(r, d);
   }
+  @Get("administration/projects") organizationProjects(@Req() r: ActorRequest) {
+    return this.service.organizationProjects(r.actor);
+  }
   @Get("projects") projects(@Req() r: ActorRequest) {
     return this.service.projects(r.actor);
   }

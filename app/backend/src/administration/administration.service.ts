@@ -6,6 +6,7 @@ import {
 import { z } from "zod";
 import {
   areaInput,
+  organizationProjectView,
   areaView,
   createUserInput,
   memberInput,
@@ -244,6 +245,55 @@ export class AdministrationService {
           counts.find((c) => c.projectId === m.projectId)?._count || 0,
       }),
     );
+  }
+  /**
+   * Every project of the organization, for the administration that must find them. It shows where
+   * a project is and who runs it, and nothing of its content: answers, evidence and decisions
+   * still need an active membership, so listing a project grants no access to it.
+   */
+  async organizationProjects(actor: User) {
+    await this.access.organizationAdmin(this.db, actor);
+    const rows = await this.db.project.findMany({
+      where: { organizationId: actor.organizationId },
+      orderBy: [{ lifecycle: "asc" }, { name: "asc" }],
+      take: 500,
+      select: {
+        id: true,
+        externalId: true,
+        name: true,
+        description: true,
+        lifecycle: true,
+        ProjectMember_project: {
+          where: {
+            active: true,
+            user: { active: true, invitationOnly: false },
+          },
+          select: {
+            userId: true,
+            role: true,
+            user: { select: { displayName: true } },
+          },
+        },
+      },
+    });
+    return rows.map((p) => {
+      const admins = p.ProjectMember_project.filter((m) => m.role === "ADMIN")
+        .map((m) => m.user.displayName)
+        .sort((a, b) => a.localeCompare(b, "es"));
+      return serialize(organizationProjectView, {
+        id: p.id,
+        externalId: p.externalId,
+        name: p.name,
+        description: p.description,
+        lifecycle: p.lifecycle,
+        myRole:
+          p.ProjectMember_project.find((m) => m.userId === actor.id)?.role ??
+          null,
+        admins: admins.slice(0, 5),
+        adminCount: admins.length,
+        memberCount: p.ProjectMember_project.length,
+      });
+    });
   }
   async createProject(req: CommandContext, d: z.infer<typeof projectInput>) {
     return this.db.$transaction(async (tx) => {
