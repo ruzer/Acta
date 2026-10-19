@@ -590,7 +590,7 @@ export function Organize(
             {data.areas.map((a) => (
               <option key={a.id} value={a.id}>
                 {a.name}
-                {!a.active ? " (inactiva)" : ""}
+                {!a.active ? " (desactivada)" : ""}
               </option>
             ))}
           </Select>
