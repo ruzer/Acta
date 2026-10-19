@@ -15,6 +15,27 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   definida manda y se muestra como «administrado externamente». Una prueba
   comprueba que Compose pase todas las variables de apariencia.
 
+### Added
+
+- **Administración de áreas.** En Administración → Áreas se puede **renombrar**,
+  **desactivar** y **reactivar** un área, y consultar las desactivadas con
+  «Mostrar áreas desactivadas». El código no cambia y no existe borrado.
+  Un área desactivada deja de poder elegirse para preguntas nuevas, miembros,
+  invitaciones y operaciones masivas, y una pregunta de esa área no se publica
+  hasta moverla; todo lo que ya la usa se conserva y sigue funcionando:
+  preguntas (editables sin cambiar su área), asignaciones, participantes e
+  invitaciones. Solo la administración de la institución puede hacerlo y cada
+  cambio queda en la bitácora como «Área actualizada» (`AREA_UPDATED`, con el
+  antes y el después). Operación nueva: `POST /areas/:id`.
+
+### Changed
+
+- Los participantes de un área desactivada ya no pierden el acceso a lo que
+  tenían asignado: antes esa condición ocultaba sus preguntas y los excluía del
+  avance. La importación indica ahora con el nombre actual por qué rechaza un
+  área existente (renombrada o desactivada) y los formularios muestran un error
+  junto al campo cuando se elige un área desactivada.
+
 ## 0.8.0 — 2026-10-13
 
 Instalación guiada, Centro de Configuración y personalización institucional con

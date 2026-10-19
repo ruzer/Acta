@@ -68,10 +68,15 @@ export class ImportService {
               `/areas/${i}/code`,
               "Esta área no existe. Solicita a administración que la cree antes de importar.",
             );
-        } else if (existing.name !== a.name || !existing.active)
+        } else if (!existing.active)
+          fail(
+            `/areas/${i}/code`,
+            "El área existe pero está desactivada. Pide a administración que la reactive o usa otra.",
+          );
+        else if (existing.name !== a.name)
           fail(
             `/areas/${i}/name`,
-            "El área existente tiene otro nombre o está inactiva. Revisa el catálogo institucional.",
+            `El área ya existe con el nombre «${existing.name}». Usa ese nombre en el archivo.`,
           );
       });
       if (missingAreas.length && member.role === "ADMIN")

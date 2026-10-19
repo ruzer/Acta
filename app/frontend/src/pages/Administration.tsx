@@ -73,6 +73,15 @@ export function Administration({ me }: { me: Me }) {
     name: string;
     active: boolean;
   } | null>(null);
+  const [editArea, setEditArea] = useState<{ id: string; name: string } | null>(
+    null,
+  );
+  const [areaState, setAreaState] = useState<{
+    id: string;
+    name: string;
+    active: boolean;
+  } | null>(null);
+  const [showInactive, setShowInactive] = useState(false);
   const [error, setError] = useState("");
   const [creating, setCreating] = useState<
     "users" | "areas" | "projects" | null
@@ -219,14 +228,64 @@ export function Administration({ me }: { me: Me }) {
           ) : areas.error ? (
             <ErrorState error={areas.error} />
           ) : areas.data?.length ? (
-            <DataTable
-              caption="Áreas registradas"
-              columns={[{ label: "Área", bare: true }, { label: "Código" }]}
-              rows={areas.data.map((a) => ({
-                key: a.id,
-                cells: [<strong key="n">{a.name}</strong>, a.code],
-              }))}
-            />
+            <>
+              {areas.data.some((a) => !a.active) && (
+                <Checkbox
+                  label={`Mostrar áreas desactivadas (${areas.data.filter((a) => !a.active).length})`}
+                  checked={showInactive}
+                  onChange={(e) => setShowInactive(e.target.checked)}
+                />
+              )}
+              <DataTable
+                caption="Áreas registradas"
+                columns={[
+                  { label: "Área", bare: true },
+                  { label: "Código" },
+                  { label: "Estado" },
+                  { label: "Acciones", bare: true, end: true },
+                ]}
+                rows={areas.data
+                  .filter((a) => a.active || showInactive)
+                  .map((a) => ({
+                    key: a.id,
+                    cells: [
+                      <strong key="n">{a.name}</strong>,
+                      a.code,
+                      <StatusChip
+                        key="s"
+                        tone={a.active ? "success" : "neutral"}
+                        icon={a.active ? "check" : "info"}
+                      >
+                        {a.active ? "Activa" : "Desactivada"}
+                      </StatusChip>,
+                      <div className="actions" key="a">
+                        <Button
+                          tone="tertiary"
+                          aria-label={`Renombrar ${a.name}`}
+                          onClick={() =>
+                            setEditArea({ id: a.id, name: a.name })
+                          }
+                        >
+                          Renombrar
+                        </Button>
+                        <Button
+                          tone={a.active ? "danger" : "secondary"}
+                          aria-label={`${a.active ? "Desactivar" : "Reactivar"} ${a.name}`}
+                          onClick={() =>
+                            setAreaState({
+                              id: a.id,
+                              name: a.name,
+                              active: !a.active,
+                            })
+                          }
+                        >
+                          {a.active ? "Desactivar" : "Reactivar"}
+                        </Button>
+                      </div>,
+                    ],
+                  }))}
+              />
+            </>
           ) : (
             <EmptyState title="Todavía no hay áreas" />
           )}
@@ -411,6 +470,64 @@ export function Administration({ me }: { me: Me }) {
           </ActionForm>
         </Dialog>
       )}
+      {editArea && (
+        <Dialog title="Renombrar área" onClose={() => setEditArea(null)}>
+          <ActionForm
+            label="Guardar nombre"
+            onDone={() => {
+              setEditArea(null);
+              setSaved("Área actualizada.");
+              refresh();
+            }}
+            onSubmit={(d) =>
+              api("updateArea", { id: editArea.id }, { name: d.name })
+            }
+          >
+            <Input
+              label="Nombre del área"
+              name="name"
+              defaultValue={editArea.name}
+              required
+              maxLength={200}
+              hint="El código no cambia: lo usan las importaciones y las exportaciones."
+            />
+          </ActionForm>
+        </Dialog>
+      )}
+      {areaState && (
+        <Dialog
+          title={(areaState.active ? "Reactivar" : "Desactivar") + " área"}
+          onClose={() => setAreaState(null)}
+        >
+          <p>
+            {areaState.name}.{" "}
+            {areaState.active
+              ? "Volverá a poder elegirse para preguntas, participantes e invitaciones."
+              : "Dejará de poder elegirse para nuevas preguntas, participantes e invitaciones. Lo que ya la usa se conserva y sigue funcionando: preguntas, asignaciones, participantes e invitaciones. Las preguntas en borrador de esta área deberán pasar a otra antes de publicarse. Puedes reactivarla cuando quieras."}
+          </p>
+          <Button
+            tone={areaState.active ? "secondary" : "danger"}
+            onClick={() => {
+              void api(
+                "updateArea",
+                { id: areaState.id },
+                { active: areaState.active },
+              )
+                .then(() => {
+                  setAreaState(null);
+                  setSaved("Área actualizada.");
+                  refresh();
+                })
+                .catch((e) => {
+                  setError((e as Error).message);
+                  setAreaState(null);
+                });
+            }}
+          >
+            Confirmar {areaState.active ? "reactivación" : "desactivación"}
+          </Button>
+        </Dialog>
+      )}
       {deactivate && (
         <Dialog
           title={(deactivate.active ? "Activar" : "Desactivar") + " cuenta"}
@@ -563,11 +680,13 @@ export function Members() {
               hint="Obligatoria para participantes activos."
             >
               <option value="">Sin área</option>
-              {areas.data?.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.name}
-                </option>
-              ))}
+              {areas.data
+                ?.filter((a) => a.active)
+                .map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
+                ))}
             </Select>
           </div>
           <Checkbox label="Membresía activa" name="active" defaultChecked />
