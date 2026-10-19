@@ -76,7 +76,7 @@ export function QuestionForm({
           type: "SHORT_TEXT",
           required: true,
           priority: "P1",
-          responsibleAreaId: data.areas[0]?.id || "",
+          responsibleAreaId: data.areas.find((a) => a.active)?.id || "",
           order:
             Math.max(
               0,
@@ -732,10 +732,13 @@ export function QuestionForm({
                   onChange={(e) => patch({ responsibleAreaId: e.target.value })}
                 >
                   {data.areas
-                    .filter((a) => a.active)
+                    .filter(
+                      (a) => a.active || a.id === initial?.responsibleAreaId,
+                    )
                     .map((a) => (
                       <option key={a.id} value={a.id}>
                         {a.name}
+                        {a.active ? "" : " (desactivada)"}
                       </option>
                     ))}
                 </Select>

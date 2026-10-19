@@ -10,6 +10,7 @@ import {
 import { z } from "zod";
 import {
   areaInput,
+  areaUpdateInput,
   createUserInput,
   memberInput,
   projectInput,
@@ -59,6 +60,13 @@ export class AdministrationController {
   }
   @Get("administration/projects") organizationProjects(@Req() r: ActorRequest) {
     return this.service.organizationProjects(r.actor);
+  }
+  @Post("areas/:id") updateArea(
+    @Req() r: ActorRequest,
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body(new SchemaPipe(areaUpdateInput)) d: z.infer<typeof areaUpdateInput>,
+  ) {
+    return this.service.updateArea(r, id, d);
   }
   @Get("projects") projects(@Req() r: ActorRequest) {
     return this.service.projects(r.actor);
