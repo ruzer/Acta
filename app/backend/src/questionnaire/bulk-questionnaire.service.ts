@@ -11,6 +11,7 @@ import { AccessService } from "../administration/access.service.js";
 import { CommandContext, Tx, jsonValue, serialize } from "../common/http.js";
 import { presentQuestion, questionInclude } from "./questionnaire.service.js";
 import { publicationIssues } from "./publication-rules.js";
+import { lockAreas } from "../administration/area-rules.js";
 import { canonical } from "../responses/response-graph.js";
 import { sha256 } from "../responses/storage.js";
 import { ResponsesService } from "../responses/responses.service.js";
@@ -204,6 +205,25 @@ export class BulkQuestionnaireService {
       operation === "ADD_PARTICIPANTS"
         ? (input as C.BulkParticipantsInput)
         : null;
+    // Work is only handed to areas that are still active when this commits: hold them first.
+    await lockAreas(tx, [
+      areaInput?.targetAreaId,
+      ...(participantInput
+        ? (
+            await tx.projectMember.findMany({
+              where: {
+                projectId,
+                id: {
+                  in: participantInput.participants.map(
+                    (p) => p.projectMemberId,
+                  ),
+                },
+              },
+              select: { areaId: true },
+            })
+          ).map((m) => m.areaId)
+        : []),
+    ]);
     const [rows, sections, areas, refs, members, project] = await Promise.all([
       tx.question.findMany({
         where: { projectId },
