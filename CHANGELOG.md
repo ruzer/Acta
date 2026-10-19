@@ -6,7 +6,18 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
-Sin cambios adicionales por anunciar.
+### Changed
+
+- **Capturar un cuestionario pide menos.** «+ Agregar tema» sale de un menú
+  cerrado y de la última línea de una lista larga: ahora está junto a «Nueva
+  pregunta» en Organizar y al inicio de Escribir, con cuestionarios vacíos y con
+  cientos de preguntas. Una pregunta nueva propone el siguiente identificador
+  libre (`P-001`, `P-002`…) y un título breve tomado de la primera oración de la
+  redacción, sin servicios externos; ambos se pueden cambiar y el título no se
+  vuelve a sobrescribir si lo modificas. Los identificadores existentes no
+  cambian. Si dos personas guardan el mismo identificador a la vez, quien llega
+  segundo recibe el error junto al campo (antes, un mensaje genérico) y el
+  formulario propone el siguiente sin perder lo escrito.
 
 ## 0.8.0 — 2026-10-13
 

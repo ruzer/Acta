@@ -729,19 +729,35 @@ export class QuestionnaireService {
       async (tx) => {
         const id = randomUUID();
         const refs = await this.checkLinks(tx, req.actor, projectId, id, d);
-        await tx.question.create({
-          data: {
-            id,
-            projectId,
-            sectionId: d.sectionId,
-            externalId: d.externalId,
-            groupParentId: d.groupParentId,
-            supersedesQuestionId: d.supersedesQuestionId,
-            responsibleAreaId: d.responsibleAreaId,
-            priority: d.priority,
-            order: d.order,
-          },
-        });
+        try {
+          await tx.question.create({
+            data: {
+              id,
+              projectId,
+              sectionId: d.sectionId,
+              externalId: d.externalId,
+              groupParentId: d.groupParentId,
+              supersedesQuestionId: d.supersedesQuestionId,
+              responsibleAreaId: d.responsibleAreaId,
+              priority: d.priority,
+              order: d.order,
+            },
+          });
+        } catch (error) {
+          // Two people saving the same suggested identifier: the loser learns which field to change.
+          if (
+            error instanceof Prisma.PrismaClientKnownRequestError &&
+            error.code === "P2002"
+          )
+            throw new BadRequestException({
+              message: "Revisa los campos indicados.",
+              fieldErrors: {
+                externalId:
+                  "Ya existe una pregunta con este identificador en el proyecto.",
+              },
+            });
+          throw error;
+        }
         await this.writeRevision(tx, req.actor, projectId, id, 1, d, refs);
         await audit(
           tx,
