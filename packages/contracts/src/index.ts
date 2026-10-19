@@ -122,6 +122,12 @@ export const resetPasswordInput = z.strictObject({
   temporaryPassword: z.string().min(12).max(128),
 });
 export const areaInput = z.strictObject({ code: externalId, name });
+// Areas are renamed or switched on and off; the code stays and nothing is deleted.
+export const areaUpdateInput = z
+  .strictObject({ name: name.optional(), active: z.boolean().optional() })
+  .refine((d) => d.name !== undefined || d.active !== undefined, {
+    message: "Indica el nombre o el estado del área.",
+  });
 export const projectInput = z.strictObject({
   externalId,
   name,
@@ -1269,6 +1275,12 @@ export const contracts = {
     method: "POST",
     path: "/areas",
     input: areaInput,
+    output: areaView,
+  },
+  updateArea: {
+    method: "POST",
+    path: "/areas/:id",
+    input: areaUpdateInput,
     output: areaView,
   },
   projects: { method: "GET", path: "/projects", output: z.array(projectView) },

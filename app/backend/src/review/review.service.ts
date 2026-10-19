@@ -122,7 +122,6 @@ export class ReviewService {
         questionId: q,
         projectMemberId: member.id,
         active: true,
-        member: { area: { active: true } },
       },
     });
     if (!a) throw new NotFoundException("No se encontró la pregunta asignada.");
