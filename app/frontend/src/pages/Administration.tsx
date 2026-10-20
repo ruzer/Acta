@@ -98,10 +98,10 @@ export function Administration({ me }: { me: Me }) {
     queryFn: () => api("areas"),
     enabled: me.user.isOrganizationAdmin,
   });
-  // The same listing as "Mis proyectos": the projects this account belongs to.
+  // Every project of the institution, not only the ones this account belongs to ("Mis proyectos").
   const projects = useQuery({
-    queryKey: ["projects"],
-    queryFn: () => api("projects"),
+    queryKey: ["organization-projects"],
+    queryFn: () => api("organizationProjects"),
     enabled: me.user.isOrganizationAdmin,
   });
   const refresh = () => {
@@ -304,7 +304,8 @@ export function Administration({ me }: { me: Me }) {
                 columns={[
                   { label: "Proyecto", bare: true },
                   { label: "Identificador" },
-                  { label: "Preguntas publicadas" },
+                  { label: "Administra" },
+                  { label: "Tu acceso" },
                   { label: "Acciones", bare: true, end: true },
                 ]}
                 rows={projects.data.map((p) => ({
@@ -317,14 +318,28 @@ export function Administration({ me }: { me: Me }) {
                       )}
                     </div>,
                     <code key="c">{p.externalId}</code>,
-                    p.questionCount,
+                    p.adminCount ? (
+                      <span key="ad">
+                        {p.admins.join(", ")}
+                        {p.adminCount > p.admins.length
+                          ? ` y ${p.adminCount - p.admins.length} más`
+                          : ""}
+                      </span>
+                    ) : (
+                      <StatusChip key="ad" tone="warning" icon="info">
+                        Sin administrador activo
+                      </StatusChip>
+                    ),
+                    p.myRole ? roleLabels[p.myRole] : "Sin acceso",
                     <div className="table-links" key="a">
-                      <Link
-                        to={`/projects/${p.id}/dashboard`}
-                        aria-label={`Abrir ${p.name}`}
-                      >
-                        Abrir
-                      </Link>
+                      {p.myRole && (
+                        <Link
+                          to={`/projects/${p.id}/dashboard`}
+                          aria-label={`Abrir ${p.name}`}
+                        >
+                          Abrir
+                        </Link>
+                      )}
                       <Link
                         to={`/projects/${p.id}/members`}
                         state={{ from: "administration" }}
@@ -337,7 +352,9 @@ export function Administration({ me }: { me: Me }) {
                 }))}
               />
               <p className="hint">
-                Se muestran los proyectos en los que tienes membresía. El
+                Aquí están todos los proyectos de la institución. Verlos no da
+                acceso a sus respuestas, evidencias ni decisiones: para trabajar
+                en uno, agrégate o agrega a quien corresponda en «Miembros». El
                 identificador es el que debe repetir el archivo de importación.
               </p>
             </>
@@ -576,6 +593,12 @@ export function Members() {
   });
   const users = useQuery({ queryKey: ["users"], queryFn: () => api("users") });
   const areas = useQuery({ queryKey: ["areas"], queryFn: () => api("areas") });
+  // Reached from Administración, the administration may not belong to the project: say which one it is.
+  const project = useQuery({
+    queryKey: ["organization-projects"],
+    queryFn: () => api("organizationProjects"),
+    enabled: fromAdministration,
+  }).data?.find((p) => p.id === projectId);
   if (members.isPending || areas.isPending) return <LoadingState />;
   if (members.error || areas.error)
     return <ErrorState error={(members.error || areas.error)!} />;
@@ -591,7 +614,9 @@ export function Members() {
         </Link>
       )}
       <PageHeader
-        title="Miembros del proyecto"
+        title={
+          project ? `Miembros de ${project.name}` : "Miembros del proyecto"
+        }
         lead={
           <>
             La membresía da acceso al proyecto. Para que un participante pueda
