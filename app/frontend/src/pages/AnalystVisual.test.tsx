@@ -260,8 +260,13 @@ async function basic(user: ReturnType<typeof userEvent.setup>) {
     "¿Se registra la solicitud?",
   );
   await user.click(screen.getByRole("radio", { name: "Sí o no" }));
-  await user.type(screen.getByLabelText("Identificador externo"), "FIC-014");
-  await user.type(screen.getByLabelText("Título breve"), "Registro");
+  // Identifier and title come suggested; the person replaces both.
+  const id = screen.getByLabelText("Identificador externo");
+  await user.clear(id);
+  await user.type(id, "FIC-014");
+  const title = screen.getByLabelText("Título breve");
+  await user.clear(title);
+  await user.type(title, "Registro");
 }
 it("VIS005: creación básica sin abrir avanzado preserva contrato y externalId", async () => {
   const { user, onSave } = form();
@@ -430,6 +435,8 @@ it("VIS005 Criterio: el selector de tipos funciona con flechas del teclado", asy
 
 it("el resumen de errores distingue destinos y activa el campo elegido", async () => {
   const { user } = form();
+  // The identifier is suggested; clearing it brings back its error.
+  await user.clear(screen.getByLabelText("Identificador externo"));
   await user.click(screen.getByRole("button", { name: "Crear pregunta" }));
   // Validation focuses its first field on the next frame. Observe that state
   // before exercising a different error link, as the browser interaction does.

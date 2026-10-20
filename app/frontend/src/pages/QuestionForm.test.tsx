@@ -12,6 +12,7 @@ import {
 import fixture from "../../../../tests/fixtures/analyst-visual.json";
 import { ApiFailure } from "../api";
 import { QuestionForm } from "./QuestionForm";
+import { nextQuestionId, suggestTitle } from "./question-suggestions";
 
 const questionnaire = questionnaireView.parse(fixture.questionnaire);
 const parent = { ...questionnaire.questions[0]!, type: "YES_NO" as const };
@@ -195,4 +196,123 @@ it("el acceso contextual abre el grupo y enfoca una referencia concreta", async 
       .getByText("Referencias de trazabilidad", { exact: true })
       .closest("details"),
   ).toHaveAttribute("open");
+});
+
+const withIds = (...ids: string[]) => ({
+  ...data,
+  questions: data.questions.map((q, i) => ({
+    ...q,
+    externalId: ids[i] ?? q.externalId,
+  })),
+});
+
+it("la siguiente pregunta propone el identificador libre y nunca toca los existentes", () => {
+  expect(nextQuestionId([])).toBe("P-001");
+  expect(nextQuestionId(["P-001", "P-009", "Q-77", "p-3"])).toBe("P-010");
+  expect(nextQuestionId(["P-999"])).toBe("P-1000");
+});
+
+it("el título sugerido sale de la primera oración, sin servicios externos", () => {
+  expect(suggestTitle("")).toBe("");
+  expect(
+    suggestTitle("¿Cómo se registra una solicitud?  ¿Quién la revisa?"),
+  ).toBe("Cómo se registra una solicitud");
+  const long =
+    "Describe el procedimiento completo de recepción de solicitudes internas y de su registro inicial en el sistema";
+  const title = suggestTitle(long);
+  expect(title.length).toBeLessThanOrEqual(81);
+  expect(title.endsWith("…")).toBe(true);
+  expect(long.startsWith(title.slice(0, -1))).toBe(true);
+});
+
+it("una pregunta nueva propone identificador y título, editables y sin pisar lo escrito", async () => {
+  const { user } = form({
+    initial: undefined,
+    data: withIds("P-007", "P-002"),
+  });
+  const id = screen.getByLabelText("Identificador externo");
+  const title = screen.getByLabelText("Título breve");
+  expect(id).toHaveValue("P-008");
+  const statement = screen.getByLabelText("Pregunta", { exact: true });
+  await user.type(statement, "¿Qué canal se usa para recibir solicitudes?");
+  expect(title).toHaveValue("Qué canal se usa para recibir solicitudes");
+  // The person writes their own title: later edits of the statement leave it alone.
+  await user.clear(title);
+  await user.type(title, "Canal de recepción");
+  await user.type(statement, " Responde con el canal principal.");
+  expect(title).toHaveValue("Canal de recepción");
+  // And their own identifier is kept as typed.
+  await user.clear(id);
+  await user.type(id, "RH-014");
+  expect(id).toHaveValue("RH-014");
+});
+
+it("editar una pregunta existente no propone ni cambia identificador ni título", async () => {
+  const { user } = form();
+  const statement = screen.getByLabelText("Pregunta", { exact: true });
+  const before = {
+    id: (screen.getByLabelText("Identificador externo") as HTMLInputElement)
+      .value,
+    title: (screen.getByLabelText("Título breve") as HTMLInputElement).value,
+  };
+  await user.type(statement, " Más contexto.");
+  expect(screen.getByLabelText("Identificador externo")).toHaveValue(before.id);
+  expect(screen.getByLabelText("Título breve")).toHaveValue(before.title);
+});
+
+it("si otra persona usó el identificador sugerido, propone el siguiente sin perder el texto", async () => {
+  const onSave = vi
+    .fn()
+    .mockRejectedValueOnce(
+      new ApiFailure(400, "Revisa los campos indicados.", {
+        externalId:
+          "Ya existe una pregunta con este identificador en el proyecto.",
+      }),
+    )
+    .mockResolvedValue(undefined);
+  const { user } = form({ initial: undefined, data: withIds("P-001"), onSave });
+  await user.type(
+    screen.getByLabelText("Pregunta", { exact: true }),
+    "¿Hay un canal único?",
+  );
+  expect(screen.getByLabelText("Identificador externo")).toHaveValue("P-002");
+  await user.click(screen.getByRole("button", { name: "Crear pregunta" }));
+  await waitFor(() =>
+    expect(screen.getByLabelText("Identificador externo")).toHaveValue("P-003"),
+  );
+  expect(screen.getByText(/El identificador P-002 ya se usó/)).toBeVisible();
+  expect(screen.getByLabelText("Pregunta", { exact: true })).toHaveValue(
+    "¿Hay un canal único?",
+  );
+  await user.click(screen.getByRole("button", { name: "Crear pregunta" }));
+  await waitFor(() => expect(onSave).toHaveBeenCalledTimes(2));
+  expect(onSave.mock.calls[1]![0].externalId).toBe("P-003");
+});
+
+it("un identificador escrito a mano que ya existe se señala en su campo y no se cambia", async () => {
+  const onSave = vi.fn().mockRejectedValue(
+    new ApiFailure(400, "Revisa los campos indicados.", {
+      externalId:
+        "Ya existe una pregunta con este identificador en el proyecto.",
+    }),
+  );
+  const { user } = form({
+    initial: undefined,
+    data: withIds("RH-014"),
+    onSave,
+  });
+  await user.type(
+    screen.getByLabelText("Pregunta", { exact: true }),
+    "¿Hay un canal único?",
+  );
+  const id = screen.getByLabelText("Identificador externo");
+  await user.clear(id);
+  await user.type(id, "RH-014");
+  await user.click(screen.getByRole("button", { name: "Crear pregunta" }));
+  await waitFor(() =>
+    expect(
+      screen.getAllByText(/Ya existe una pregunta/).length,
+    ).toBeGreaterThan(0),
+  );
+  expect(id).toHaveValue("RH-014");
 });
