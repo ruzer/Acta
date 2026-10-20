@@ -563,3 +563,52 @@ it("la frase del alcance de «Expandir/Contraer todos» solo se ve si el alcance
   render(<Organize {...handlers} data={dataFor(54)} />);
   expect(scope()).toHaveClass("hint");
 });
+
+it.each([0, 3, 304])(
+  "Agregar tema es un solo botón visible en Organizar con %i preguntas",
+  async (count) => {
+    const user = userEvent.setup();
+    const onCreateTopic = vi.fn();
+    render(
+      <Organize
+        {...handlers}
+        onCreateTopic={onCreateTopic}
+        data={dataFor(count)}
+      />,
+    );
+    // One control, in the page itself and not inside the closed topic picker.
+    const buttons = screen.getAllByRole("button", { name: "+ Agregar tema" });
+    expect(buttons).toHaveLength(1);
+    expect(buttons[0]!.closest("details")).toBeNull();
+    await user.click(buttons[0]!);
+    expect(onCreateTopic).toHaveBeenCalledTimes(1);
+    // It sits beside "Nueva pregunta", which stays available in both states.
+    expect(
+      screen.getAllByRole("button", { name: "Nueva pregunta" }),
+    ).toHaveLength(1);
+  },
+);
+
+it("Escribir ofrece Agregar tema al inicio, antes de los temas, y una sola vez", () => {
+  render(<EditorWorkspace {...handlers} data={dataFor(304)} initialMode={0} />);
+  const buttons = screen.getAllByRole("button", { name: "+ Agregar tema" });
+  expect(buttons).toHaveLength(1);
+  const firstTopic = screen.getAllByRole("region")[0]!;
+  expect(
+    buttons[0]!.compareDocumentPosition(firstTopic) &
+      Node.DOCUMENT_POSITION_FOLLOWING,
+  ).toBeTruthy();
+});
+
+it("Escribir sin temas también permite empezar con Agregar tema", () => {
+  render(
+    <EditorWorkspace
+      {...handlers}
+      data={{ ...dataFor(0), sections: [] }}
+      initialMode={0}
+    />,
+  );
+  expect(
+    screen.getAllByRole("button", { name: "+ Agregar tema" }),
+  ).toHaveLength(1);
+});
