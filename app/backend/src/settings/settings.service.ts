@@ -36,7 +36,11 @@ import {
 } from "./appearance.js";
 import { inspectImage } from "./branding-image.js";
 
-const kindColumn = { logo: "LOGO", favicon: "FAVICON" } as const;
+const kindColumn = {
+  logo: "LOGO",
+  logoSecondary: "LOGO_SECONDARY",
+  favicon: "FAVICON",
+} as const;
 const assetUrl = (kind: BrandingAssetKind, sha256: string) =>
   `/api/v1/configuration/assets/${kind}?v=${sha256.slice(0, 12)}`;
 const backendVersion = (() => {
@@ -112,6 +116,8 @@ export class SettingsService {
       shortName: appearance.shortName.value,
       organizationName: organization.name,
       logo: asset("logo"),
+      logoSecondary: asset("logoSecondary"),
+      secondaryName: appearance.secondaryName.value,
       favicon: asset("favicon"),
       accent: appearance.accent.value,
       locale: appearance.locale.value,
@@ -193,6 +199,7 @@ export class SettingsService {
       organizationName: organization.name,
       ...appearance,
       logo: asset("logo"),
+      logoSecondary: asset("logoSecondary"),
       favicon: asset("favicon"),
       minimumContrast: minimumAccentContrast,
     });
@@ -230,9 +237,11 @@ export class SettingsService {
       const before: Record<string, unknown> = {};
       const after: Record<string, unknown> = {};
       for (const key of changes) {
-        data[key] = input[key]!;
+        // An emptied optional name is "no name", not an empty choice.
+        const value = input[key]! === "" ? null : input[key]!;
+        data[key] = value;
         before[key] = current?.[key] ?? null;
-        after[key] = input[key]!;
+        after[key] = value;
       }
       for (const key of resets) {
         data[key] = null;

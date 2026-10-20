@@ -1,0 +1,2052 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-50 antialiased">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acta — Questions. Evidence. Decisions.</title>
+  
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            acta: {
+              50: '#F8FAFC',
+              100: '#F1F5F9',
+              200: '#E2E8F0',
+              300: '#CBD5E1',
+              400: '#94A3B8',
+              500: '#64748B',
+              600: '#475569',
+              700: '#334155',
+              800: '#1E293B',
+              900: '#0F172A',
+              950: '#020617',
+            },
+            institution: {
+              base: '#1E293B',
+              accent: '#0284C7',
+              accentHover: '#0369A1',
+              decision: '#0F766E', // Institutional Teal for validated decisions
+              conflict: '#B91C1C', // Subdued warning red
+              clarification: '#D97706', // Amber
+              review: '#4338CA', // Indigo
+            }
+          },
+          boxShadow: {
+            'subtle': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+            'elevated': '0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05)',
+            'modal': '0 20px 25px -5px rgba(15, 23, 42, 0.15), 0 8px 10px -6px rgba(15, 23, 42, 0.1)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * {
+      border-color: #E2E8F0;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* Institutional subdued scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+    .mono-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-feature-settings: "zero" 1;
+    }
+    /* Mobile device frame simulation */
+    .mobile-frame {
+      max-width: 390px;
+      height: 844px;
+      margin: 0 auto;
+      border-radius: 40px;
+      border: 10px solid #1E293B;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+      position: relative;
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col overflow-hidden text-slate-800 bg-slate-100">
+
+  <!-- TOP GLOBAL TESTING TOOLBAR -->
+  <header class="bg-slate-900 text-white px-4 py-2 text-xs flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 select-none z-50 flex-shrink-0">
+    <div class="flex items-center space-x-3">
+      <div class="flex items-center space-x-1.5 font-bold tracking-wider text-slate-200">
+        <svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+        <span>ACTA</span>
+        <span class="text-[10px] text-slate-400 font-normal px-1.5 py-0.5 bg-slate-800 rounded">PROTOTIPO FUNCIONAL</span>
+      </div>
+      <span class="text-slate-600">|</span>
+      
+      <!-- Role Switcher -->
+      <div class="flex items-center space-x-1 bg-slate-800 p-0.5 rounded-md border border-slate-700">
+        <span class="px-2 text-slate-400 font-medium">Rol:</span>
+        <button onclick="switchRole('analyst')" id="role-btn-analyst" class="px-2.5 py-1 rounded bg-sky-600 text-white font-medium transition">
+          Analista (Workbench)
+        </button>
+        <button onclick="switchRole('participant')" id="role-btn-participant" class="px-2.5 py-1 rounded text-slate-300 hover:text-white transition">
+          Participante (Mi Trabajo)
+        </button>
+        <button onclick="switchRole('guest')" id="role-btn-guest" class="px-2.5 py-1 rounded text-slate-300 hover:text-white transition">
+          Invitado Externo (Enlace)
+        </button>
+      </div>
+
+      <!-- Dataset Scale Switcher -->
+      <div class="hidden lg:flex items-center space-x-1 bg-slate-800 p-0.5 rounded-md border border-slate-700">
+        <span class="px-2 text-slate-400 font-medium">Escala:</span>
+        <button onclick="loadDataset('small')" id="ds-small" class="px-2 py-1 rounded text-slate-300 hover:text-white transition">12 pgs</button>
+        <button onclick="loadDataset('med')" id="ds-med" class="px-2 py-1 rounded text-slate-300 hover:text-white transition">54 pgs</button>
+        <button onclick="loadDataset('large')" id="ds-large" class="px-2 py-1 rounded bg-sky-600 text-white font-medium transition">304 preguntas (Real)</button>
+      </div>
+    </div>
+
+    <!-- Viewport Frame Switcher -->
+    <div class="flex items-center space-x-2">
+      <span class="text-slate-400 hidden sm:inline">Dispositivo:</span>
+      <div class="flex bg-slate-800 p-0.5 rounded border border-slate-700 text-slate-300">
+        <button onclick="setViewport('desktop')" id="vp-desktop" class="px-2 py-0.5 rounded bg-slate-700 text-white" title="Desktop 1440px / Fluido">Desktop</button>
+        <button onclick="setViewport('tablet')" id="vp-tablet" class="px-2 py-0.5 rounded hover:text-white" title="Tablet 768px">768px</button>
+        <button onclick="setViewport('mobile')" id="vp-mobile" class="px-2 py-0.5 rounded hover:text-white" title="Móvil 390px (Marco)">390px</button>
+      </div>
+      <div id="save-status-indicator" class="flex items-center space-x-1.5 text-emerald-400 text-[11px] ml-2 font-mono">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+        <span>Sincronizado</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="app-viewport-container" class="flex-1 w-full h-full overflow-hidden flex flex-col transition-all duration-200">
+    <div id="app-root" class="w-full h-full flex flex-col bg-white overflow-hidden relative">
+
+      <!-- ========================================================================= -->
+      <!-- VIEW 1: ANALYST WORKBENCH (FULL CAPABILITY: DASHBOARD, 304 QUESTIONS, CONFLICTS, DECISIONS) -->
+      <!-- ========================================================================= -->
+      <section id="view-analyst" class="flex-1 flex flex-col h-full overflow-hidden">
+        
+        <!-- Analyst Header / Navigation -->
+        <header class="bg-white border-b border-slate-200 px-6 py-3 flex-shrink-0 flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+              <span class="font-bold text-slate-900 tracking-tight text-base">Acta</span>
+              <span class="text-slate-300">/</span>
+              <select id="project-selector" onchange="onProjectChange(this.value)" class="text-sm font-semibold text-slate-800 bg-transparent border-0 focus:ring-0 cursor-pointer hover:text-sky-700 pr-2">
+                <option value="large">Diagnóstico Integral de Adquisiciones y Contratos (304 pgs)</option>
+                <option value="med">Auditoría Operativa de Proveedores Críticos (54 pgs)</option>
+                <option value="small">Protocolo Escolar y Rutas de Evacuación (12 pgs)</option>
+              </select>
+            </div>
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200">
+              En Recolección y Contraste
+            </span>
+          </div>
+
+          <!-- Section Tabs -->
+          <nav class="flex items-center space-x-1">
+            <button onclick="setAnalystTab('dashboard')" id="atab-dashboard" class="px-3 py-1.5 text-xs font-medium rounded-md text-slate-600 hover:text-slate-900 transition flex items-center space-x-1.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+              <span>Atención Prioritaria</span>
+              <span id="badge-conflict-count" class="bg-rose-100 text-rose-700 px-1.5 py-0.2 rounded-full font-mono text-[10px]">3</span>
+            </button>
+            <button onclick="setAnalystTab('outliner')" id="atab-outliner" class="px-3 py-1.5 text-xs font-semibold rounded-md bg-slate-100 text-slate-900 flex items-center space-x-1.5">
+              <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+              <span>Cuestionario y Respuestas</span>
+              <span id="badge-total-q" class="bg-slate-200 text-slate-700 px-1.5 py-0.2 rounded-full font-mono text-[10px]">304</span>
+            </button>
+            <button onclick="setAnalystTab('decisions')" id="atab-decisions" class="px-3 py-1.5 text-xs font-medium rounded-md text-slate-600 hover:text-slate-900 transition flex items-center space-x-1.5">
+              <svg class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              <span>Actas de Decisión</span>
+              <span class="bg-teal-100 text-teal-800 px-1.5 py-0.2 rounded-full font-mono text-[10px]">14</span>
+            </button>
+          </nav>
+
+          <!-- Quick Action Buttons -->
+          <div class="flex items-center space-x-2">
+            <button onclick="openPublicationPreviewModal()" class="px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-50 transition flex items-center space-x-1">
+              <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              <span>Publicar Cuestionario</span>
+            </button>
+            <button onclick="openCreateQuestionModal()" class="px-3 py-1.5 text-xs font-medium text-white bg-slate-900 rounded hover:bg-slate-800 transition flex items-center space-x-1 shadow-sm">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              <span>Nueva Pregunta</span>
+            </button>
+          </div>
+        </header>
+
+        <!-- SUB-VIEW: ANALYST DASHBOARD (Action-oriented, no vanity charts) -->
+        <div id="analyst-dashboard-view" class="hidden flex-1 overflow-y-auto p-6 bg-slate-50">
+          <div class="max-w-6xl mx-auto space-y-6">
+            
+            <!-- Context Banner -->
+            <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-subtle flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h1 class="text-lg font-bold text-slate-900">Estado de Atención Prioritaria</h1>
+                <p class="text-xs text-slate-500 mt-1">Este tablero no muestra estadísticas decorativas. Cada número representa trabajo pendiente o divergencias que requieren intervención de analista.</p>
+              </div>
+              <div class="flex items-center space-x-4 text-xs font-medium">
+                <div class="px-3 py-2 bg-slate-100 rounded text-slate-700">
+                  <span class="block text-slate-400 text-[10px] uppercase font-bold">Progreso Global</span>
+                  <span class="text-sm font-semibold text-slate-800">42% documentado</span>
+                </div>
+                <div class="px-3 py-2 bg-slate-100 rounded text-slate-700">
+                  <span class="block text-slate-400 text-[10px] uppercase font-bold">Aportantes</span>
+                  <span class="text-sm font-semibold text-slate-800">18 activos (6 ext.)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Priority Action Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+              
+              <!-- Card 1: Conflicts -->
+              <div class="bg-white border-l-4 border-rose-600 rounded-lg border border-slate-200 p-4 shadow-subtle flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-rose-800 uppercase tracking-wider">Conflictos / Divergencias</span>
+                    <span class="bg-rose-100 text-rose-800 font-mono text-xs px-2 py-0.5 rounded font-bold">3 activos</span>
+                  </div>
+                  <p class="text-2xl font-bold text-slate-900 mt-2">3</p>
+                  <p class="text-xs text-slate-500 mt-1">Respuestas contradictorias entre áreas que impiden validar decisión.</p>
+                </div>
+                <button onclick="filterByState('CONFLICT'); setAnalystTab('outliner');" class="mt-4 text-xs font-medium text-rose-700 hover:text-rose-900 flex items-center space-x-1">
+                  <span>Revisar conflictos ahora</span>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </button>
+              </div>
+
+              <!-- Card 2: Needs Clarification -->
+              <div class="bg-white border-l-4 border-amber-500 rounded-lg border border-slate-200 p-4 shadow-subtle flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-amber-800 uppercase tracking-wider">Aclaraciones en Curso</span>
+                    <span class="bg-amber-100 text-amber-800 font-mono text-xs px-2 py-0.5 rounded font-bold">7 pendientes</span>
+                  </div>
+                  <p class="text-2xl font-bold text-slate-900 mt-2">7</p>
+                  <p class="text-xs text-slate-500 mt-1">Preguntas donde se solicitó precisión o evidencia complementaria.</p>
+                </div>
+                <button onclick="filterByState('NEEDS_CLARIFICATION'); setAnalystTab('outliner');" class="mt-4 text-xs font-medium text-amber-700 hover:text-amber-900 flex items-center space-x-1">
+                  <span>Inspeccionar aclaraciones</span>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </button>
+              </div>
+
+              <!-- Card 3: Ready to Review -->
+              <div class="bg-white border-l-4 border-indigo-600 rounded-lg border border-slate-200 p-4 shadow-subtle flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-indigo-800 uppercase tracking-wider">Listas para Decisión</span>
+                    <span class="bg-indigo-100 text-indigo-800 font-mono text-xs px-2 py-0.5 rounded font-bold">19 listas</span>
+                  </div>
+                  <p class="text-2xl font-bold text-slate-900 mt-2">19</p>
+                  <p class="text-xs text-slate-500 mt-1">Todas las áreas asignadas han respondido con evidencia sustentatoria.</p>
+                </div>
+                <button onclick="filterByState('READY_REVIEW'); setAnalystTab('outliner');" class="mt-4 text-xs font-medium text-indigo-700 hover:text-indigo-900 flex items-center space-x-1">
+                  <span>Proceder a dictamen</span>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </button>
+              </div>
+
+              <!-- Card 4: Invitations Expiring -->
+              <div class="bg-white border-l-4 border-slate-500 rounded-lg border border-slate-200 p-4 shadow-subtle flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-slate-700 uppercase tracking-wider">Invitaciones por Expirar</span>
+                    <span class="bg-slate-200 text-slate-800 font-mono text-xs px-2 py-0.5 rounded font-bold">2 en 48h</span>
+                  </div>
+                  <p class="text-2xl font-bold text-slate-900 mt-2">2</p>
+                  <p class="text-xs text-slate-500 mt-1">Enlaces seguros a auditores externos sin respuesta registrada.</p>
+                </div>
+                <button onclick="openExternalInvitationsDrawer()" class="mt-4 text-xs font-medium text-slate-700 hover:text-slate-900 flex items-center space-x-1">
+                  <span>Revisar y renovar enlaces</span>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </button>
+              </div>
+
+            </div>
+
+            <!-- Priority Queues Table -->
+            <div class="bg-white rounded-lg border border-slate-200 shadow-subtle overflow-hidden">
+              <div class="px-5 py-3 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
+                <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Casos Críticos que Bloquean Conclusión</h2>
+                <span class="text-[11px] text-slate-500">Ordenados por impacto en trazabilidad</span>
+              </div>
+              <div class="divide-y divide-slate-200 text-xs">
+                
+                <div class="p-4 hover:bg-slate-50 flex items-start justify-between gap-4 cursor-pointer" onclick="openConflictComparison('ADQ-01.03')">
+                  <div class="space-y-1">
+                    <div class="flex items-center space-x-2">
+                      <span class="mono-badge font-semibold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">ADQ-01.03</span>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                        CONFLICTO DIRECTO
+                      </span>
+                      <span class="text-slate-500">Tema 01: Marco Legal y Delegaciones</span>
+                    </div>
+                    <p class="font-medium text-slate-900">¿Cuál es el umbral económico exacto que exige fianza de cumplimiento en adjudicaciones directas?</p>
+                    <p class="text-slate-600 text-[11px]">
+                      <strong>Jurídico:</strong> "Obligatorio a partir de 500 UMA" vs <strong>Finanzas:</strong> "No aplica fianza si el pago es contra entrega verificada".
+                    </p>
+                  </div>
+                  <div class="flex-shrink-0 text-right">
+                    <button class="px-3 py-1.5 bg-rose-600 text-white font-medium rounded hover:bg-rose-700 transition">
+                      Abrir Contraste (2 posturas)
+                    </button>
+                  </div>
+                </div>
+
+                <div class="p-4 hover:bg-slate-50 flex items-start justify-between gap-4 cursor-pointer" onclick="openResponseDetailModal('ADQ-04.01', 0)">
+                  <div class="space-y-1">
+                    <div class="flex items-center space-x-2">
+                      <span class="mono-badge font-semibold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">ADQ-04.01</span>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                        ACLARACIÓN SOLICITADA
+                      </span>
+                      <span class="text-slate-500">Tema 04: Almacén y Control de Entradas</span>
+                    </div>
+                    <p class="font-medium text-slate-900">¿Qué documento acredita la recepción formal de bienes informáticos?</p>
+                    <p class="text-slate-600 text-[11px]">
+                      Respuesta de Almacén General indica formato provisional F-4. Analista pidió el manual de procedimientos 2024.
+                    </p>
+                  </div>
+                  <div class="flex-shrink-0 text-right">
+                    <button class="px-3 py-1.5 bg-white border border-slate-300 text-slate-700 font-medium rounded hover:bg-slate-50 transition">
+                      Ver Hilo de Aclaración
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SUB-VIEW: OUTLINER & QUESTION MANAGEMENT (Handles 10 to 304 questions seamlessly) -->
+        <div id="analyst-outliner-view" class="flex-1 flex flex-col overflow-hidden bg-white">
+          
+          <!-- Filter & Operational Toolbar -->
+          <div class="bg-slate-50 border-b border-slate-200 px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 flex-shrink-0">
+            
+            <!-- Left: Search, Theme dropdown & Quick filters -->
+            <div class="flex items-center space-x-2 flex-wrap gap-y-2">
+              
+              <!-- Search Input -->
+              <div class="relative w-64">
+                <input type="text" id="q-search" oninput="applyFilters()" placeholder="Buscar en 304 preguntas..." class="w-full text-xs pl-8 pr-3 py-1.5 rounded border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-sky-500">
+                <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              </div>
+
+              <!-- Theme Filter -->
+              <select id="theme-filter" onchange="applyFilters()" class="text-xs py-1.5 px-2.5 rounded border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-sky-500 max-w-[200px] truncate">
+                <option value="ALL">Todos los temas (23)</option>
+                <option value="T1">Tema 01: Marco Normativo y Atribuciones</option>
+                <option value="T2">Tema 02: Plan Anual de Compras</option>
+                <option value="T3">Tema 03: Comité de Adquisiciones</option>
+                <option value="T4">Tema 04: Recepción, Almacén e Inventarios</option>
+                <option value="T5">Tema 05: Pagos y Finiquitos Contractuales</option>
+              </select>
+
+              <!-- State Filter -->
+              <select id="status-filter" onchange="applyFilters()" class="text-xs py-1.5 px-2 rounded border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-sky-500">
+                <option value="ALL">Cualquier estado</option>
+                <option value="CONFLICT">En conflicto</option>
+                <option value="NEEDS_CLARIFICATION">Aclaración requerida</option>
+                <option value="READY_REVIEW">Lista para decisión</option>
+                <option value="VALIDATED">Decisión documentada</option>
+                <option value="DRAFT">Borrador</option>
+                <option value="PENDING">Pendiente de respuesta</option>
+              </select>
+
+              <!-- Hierarchy toggle -->
+              <button onclick="toggleFollowupsVisibility()" id="btn-toggle-followups" class="px-2.5 py-1.5 text-xs font-medium rounded border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 flex items-center space-x-1">
+                <span id="txt-followups">Colapsar seguimientos</span>
+              </button>
+            </div>
+
+            <!-- Right: Bulk Actions Trigger & Counters -->
+            <div class="flex items-center space-x-3 text-xs">
+              <span id="filter-results-count" class="text-slate-500 font-mono">Mostrando 304 preguntas</span>
+              
+              <!-- Selection bar (revealed when >= 1 checkbox checked) -->
+              <div id="bulk-selection-bar" class="hidden items-center space-x-2 bg-sky-50 border border-sky-300 text-sky-900 px-3 py-1 rounded">
+                <span id="selected-count-label" class="font-bold">0 seleccionadas</span>
+                <span class="text-sky-300">|</span>
+                <button onclick="openBulkOperationModal()" class="font-semibold underline hover:text-sky-700">
+                  Operación múltiple...
+                </button>
+                <button onclick="clearSelection()" class="text-sky-600 hover:text-sky-900 text-[10px] ml-1">
+                  ✕ Cancelar
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Question Table Header -->
+          <div class="bg-slate-100/80 border-b border-slate-200 px-6 py-2 grid grid-cols-12 gap-3 text-[11px] font-bold text-slate-600 uppercase tracking-wider flex-shrink-0 select-none">
+            <div class="col-span-1 flex items-center space-x-2">
+              <input type="checkbox" id="select-all-q" onchange="toggleSelectAll(this.checked)" class="rounded border-slate-300 text-sky-600 focus:ring-sky-500 h-3.5 w-3.5 cursor-pointer">
+              <span>ID</span>
+            </div>
+            <div class="col-span-5">Enunciado y Tipo de Dato</div>
+            <div class="col-span-2">Área Responsable</div>
+            <div class="col-span-2">Aportaciones (N)</div>
+            <div class="col-span-2 text-right">Estado / Acción</div>
+          </div>
+
+          <!-- Virtualized / High Density Question List Container -->
+          <div id="question-list-scrollable" class="flex-1 overflow-y-auto divide-y divide-slate-100">
+            <!-- Dynamic rows injected here -->
+          </div>
+
+          <!-- High-Scale Pagination / Slice footer -->
+          <div class="bg-white border-t border-slate-200 px-6 py-2 flex items-center justify-between text-xs text-slate-500 flex-shrink-0">
+            <div class="flex items-center space-x-2">
+              <span>Vista de alta densidad para cuestionarios institucionales.</span>
+              <span class="text-slate-300">|</span>
+              <span class="text-slate-700 font-medium">36 principales · 268 seguimientos vinculados</span>
+            </div>
+            <div class="flex items-center space-x-1">
+              <span class="text-[11px] mr-2">Página 1 de 1 (Visualización optimizada)</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- SUB-VIEW: VALIDATED DECISIONS (Actas documentadas) -->
+        <div id="analyst-decisions-view" class="hidden flex-1 overflow-y-auto p-6 bg-slate-50">
+          <div class="max-w-5xl mx-auto space-y-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <h1 class="text-lg font-bold text-slate-900">Actas de Decisión Institucional</h1>
+                <p class="text-xs text-slate-500 mt-0.5">Decisiones formalizadas y sustentadas con evidencia trazable. Este documento tiene validez probatoria.</p>
+              </div>
+              <button onclick="window.print()" class="px-3 py-1.5 bg-white border border-slate-300 text-slate-700 rounded text-xs font-medium hover:bg-slate-50 flex items-center space-x-1.5 shadow-subtle">
+                <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                <span>Exportar Dictamen Completo (PDF)</span>
+              </button>
+            </div>
+
+            <!-- Single Validated Decision Card (Expanded Example) -->
+            <article class="bg-white rounded-lg border-2 border-teal-700/40 p-6 shadow-elevated space-y-5">
+              <header class="border-b border-slate-200 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <div class="flex items-center space-x-2">
+                    <span class="mono-badge font-bold text-teal-900 bg-teal-50 px-2 py-0.5 rounded border border-teal-200 text-xs">ACTA-DEC-2024-008</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-teal-100 text-teal-900 border border-teal-300">
+                      ✓ DECISIÓN FORMALIZADA
+                    </span>
+                    <span class="text-xs text-slate-500">Ref: ADQ-01.03</span>
+                  </div>
+                  <h2 class="text-base font-bold text-slate-900 mt-2">Criterio Institucional: Aplicación de Fianza de Cumplimiento en Adjudicación Directa</h2>
+                </div>
+                <div class="text-right text-xs text-slate-500">
+                  <div>Fecha de Validación: <strong>03 Octubre 2024</strong></div>
+                  <div>Validador: <strong>Mtro. Julián Sotomayor (Analista Líder)</strong></div>
+                </div>
+              </header>
+
+              <!-- Documented Resolution -->
+              <div class="space-y-2">
+                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Acuerdo y Criterio Obligatorio</h3>
+                <div class="bg-slate-50 border-l-4 border-teal-600 p-4 rounded text-sm text-slate-800 leading-relaxed font-sans">
+                  "Se determina que para toda adjudicación directa superior a 500 UMA, la fianza de cumplimiento es <strong>estrictamente obligatoria</strong> cuando el objeto implique prestación de servicios continuos o entregas diferidas en parcialidades. Quedan exentas únicamente las compras de bienes de entrega inmediata contra factura autorizada, previo visto bueno de Almacén General."
+                </div>
+              </div>
+
+              <!-- Scope and Exceptions Grid -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div class="bg-slate-50 p-3.5 rounded border border-slate-200">
+                  <span class="font-bold text-slate-800 block mb-1">Alcance Operativo:</span>
+                  <p class="text-slate-600">Aplica a Dirección General de Administración, Subdirección de Recursos Materiales y Enlaces Administrativos de las 4 dependencias auxiliares.</p>
+                </div>
+                <div class="bg-slate-50 p-3.5 rounded border border-slate-200">
+                  <span class="font-bold text-slate-800 block mb-1">Excepciones Expresas:</span>
+                  <p class="text-slate-600">No aplica para suministros perecederos de reposición semanal ni contrataciones de emergencia declaradas bajo acta del Comité de Protección Civil.</p>
+                </div>
+              </div>
+
+              <!-- Evidentiary Basis & Traceability Trail -->
+              <div class="space-y-2 pt-2 border-t border-slate-200">
+                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Trazabilidad y Sustento Probatorio</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                  
+                  <div class="p-3 bg-white border border-slate-200 rounded hover:border-slate-300">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase block">Postura Jurídica</span>
+                    <span class="font-semibold text-slate-800 block">Lic. Carmen Viveros</span>
+                    <p class="text-slate-500 text-[11px] mt-1 line-clamp-2">Fundamento en Art. 48 de la Ley de Adquisiciones Institucionales.</p>
+                    <a href="javascript:void(0)" onclick="openResponseDetailModal('ADQ-01.03', 0)" class="text-sky-600 text-[11px] font-medium hover:underline mt-2 inline-block">Ver aportación original →</a>
+                  </div>
+
+                  <div class="p-3 bg-white border border-slate-200 rounded hover:border-slate-300">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase block">Postura Finanzas</span>
+                    <span class="font-semibold text-slate-800 block">Lic. Roberto Mendieta</span>
+                    <p class="text-slate-500 text-[11px] mt-1 line-clamp-2">Argumentó que la fianza retrasaba el suministro de insumos críticos de cómputo.</p>
+                    <a href="javascript:void(0)" onclick="openResponseDetailModal('ADQ-01.03', 1)" class="text-sky-600 text-[11px] font-medium hover:underline mt-2 inline-block">Ver aportación original →</a>
+                  </div>
+
+                  <div class="p-3 bg-white border border-slate-200 rounded hover:border-slate-300">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase block">Evidencia Vinculada</span>
+                    <span class="font-semibold text-slate-800 block">Oficio_Finanzas_DF-2024-91.pdf</span>
+                    <span class="text-[10px] text-slate-400 block font-mono">SHA256: 4b2f8a...e71c</span>
+                    <span class="text-emerald-700 text-[10px] font-medium mt-1 inline-block">Evidencia cotejada y verificada</span>
+                  </div>
+
+                </div>
+              </div>
+
+            </article>
+
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- VIEW 2: PARTICIPANT WITH ACCOUNT ("MI TRABAJO" - INTENTIONALLY SIMPLE) -->
+      <!-- ========================================================================= -->
+      <section id="view-participant" class="hidden flex-1 flex flex-col h-full overflow-hidden bg-slate-50">
+        
+        <!-- Participant Top Bar -->
+        <header class="bg-white border-b border-slate-200 px-6 py-3 flex-shrink-0 flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <span class="font-bold text-slate-900 tracking-tight">Acta</span>
+            <span class="text-slate-300">/</span>
+            <span class="text-xs font-semibold text-slate-700">Mi Trabajo de Aportación</span>
+            <span class="px-2 py-0.5 rounded bg-sky-100 text-sky-800 text-[11px] font-medium">Lic. Carmen Viveros (Jurídico)</span>
+          </div>
+          <div class="text-xs text-slate-500 flex items-center space-x-3">
+            <span id="participant-save-label">Guardado automático activo</span>
+            <span class="text-slate-300">|</span>
+            <button onclick="switchRole('analyst')" class="text-sky-600 hover:underline">Volver a Workbench</button>
+          </div>
+        </header>
+
+        <!-- Participant Content -->
+        <div class="flex-1 overflow-y-auto p-6">
+          <div class="max-w-3xl mx-auto space-y-6">
+            
+            <!-- Context Header -->
+            <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-subtle">
+              <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Cuestionario asignado</span>
+              <h1 class="text-lg font-bold text-slate-900">Diagnóstico Integral de Adquisiciones y Contratos</h1>
+              <div class="mt-3 flex items-center justify-between text-xs text-slate-600">
+                <span>Tienes <strong>3 preguntas asignadas</strong> por el analista responsable.</span>
+                <span class="font-mono text-slate-800">1 completada · 2 pendientes</span>
+              </div>
+              <!-- Progress bar -->
+              <div class="w-full bg-slate-100 h-2 rounded-full mt-2 overflow-hidden">
+                <div class="bg-sky-600 h-2 rounded-full" style="width: 33%;"></div>
+              </div>
+            </div>
+
+            <!-- Participant Task 1: Pending Form -->
+            <div class="bg-white rounded-lg border border-slate-200 shadow-subtle p-6 space-y-4">
+              <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center space-x-2">
+                  <span class="mono-badge text-xs font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">ADQ-01.03</span>
+                  <span class="text-xs font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">Obligatoria</span>
+                </div>
+                <span class="text-xs text-slate-400">Área: Dirección Jurídica</span>
+              </div>
+
+              <div>
+                <h2 class="text-base font-semibold text-slate-900 leading-snug">
+                  ¿Cuál es el umbral económico exacto que exige fianza de cumplimiento en adjudicaciones directas?
+                </h2>
+                <p class="text-xs text-slate-500 mt-1">Indica el fundamento y si existen causales de dispensa bajo tu normatividad.</p>
+              </div>
+
+              <!-- Input Response Area -->
+              <div class="space-y-2">
+                <label class="block text-xs font-semibold text-slate-700 uppercase">Tu Respuesta Oficial</label>
+                <textarea id="part-input-response" rows="3" class="w-full text-xs p-3 rounded border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-800" placeholder="Escribe tu postura fundada...">De conformidad con el artículo 48 de la Ley de Adquisiciones, la fianza de cumplimiento es obligatoria a partir de las 500 UMA sin excepción para obras o servicios diferidos.</textarea>
+              </div>
+
+              <!-- Evidence Attachment Section -->
+              <div class="space-y-2">
+                <label class="block text-xs font-semibold text-slate-700 uppercase">Evidencia Documental Adjunta</label>
+                <div class="flex items-center space-x-3 p-3 bg-slate-50 border border-dashed border-slate-300 rounded">
+                  <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                  <div class="text-xs flex-1">
+                    <span class="font-medium text-slate-700">Reglamento_Interior_Art48.pdf</span>
+                    <span class="text-slate-400 block text-[10px]">1.8 MB · Verificado</span>
+                  </div>
+                  <button class="text-rose-600 hover:text-rose-800 text-xs font-medium">Reemplazar</button>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+                <span class="text-[11px] text-slate-400">Último autoguardado a las 17:42 hrs</span>
+                <div class="flex items-center space-x-2">
+                  <button onclick="saveParticipantDraft()" class="px-3 py-1.5 text-xs text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-50">Guardar Borrador</button>
+                  <button onclick="submitParticipantResponse()" class="px-4 py-1.5 text-xs font-semibold text-white bg-sky-700 rounded hover:bg-sky-800 shadow-sm">Enviar Respuesta Final</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Participant Task 2: Clarification Requested -->
+            <div class="bg-amber-50/50 rounded-lg border border-amber-200 p-6 space-y-4">
+              <div class="flex items-center justify-between border-b border-amber-200/60 pb-3">
+                <div class="flex items-center space-x-2">
+                  <span class="mono-badge text-xs font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded">ADQ-02.04</span>
+                  <span class="text-xs font-bold text-amber-800 bg-amber-200/70 px-2 py-0.5 rounded">Aclaración Requerida por Analista</span>
+                </div>
+              </div>
+
+              <div class="bg-white p-3.5 rounded border border-amber-200 text-xs space-y-1">
+                <div class="flex items-center justify-between text-slate-500 text-[11px]">
+                  <span>Mensaje de: <strong>Mtro. Julián Sotomayor (Analista)</strong></span>
+                  <span>Ayer, 16:10</span>
+                </div>
+                <p class="text-slate-800 italic">"Carmen, mencionas que el Comité sesiona quincenalmente, pero Finanzas reportó que las sesiones son por convocatoria extraordinaria. ¿Podrías confirmar cuál es la periodicidad reglamentaria?"</p>
+              </div>
+
+              <div class="space-y-2">
+                <label class="block text-xs font-semibold text-slate-700 uppercase">Tu Respuesta a la Aclaración</label>
+                <textarea rows="2" class="w-full text-xs p-3 rounded border border-slate-300 focus:outline-none focus:ring-1 focus:ring-amber-500" placeholder="Escribe tu aclaración aquí..."></textarea>
+              </div>
+
+              <div class="flex justify-end">
+                <button onclick="submitClarificationResponse()" class="px-4 py-1.5 text-xs font-semibold text-amber-900 bg-amber-300 hover:bg-amber-400 rounded transition">
+                  Enviar Aclaración
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- VIEW 3: EXTERNAL GUEST (NO ACCOUNT, SCOPED TOKEN, MOBILE-FIRST CLEAN) -->
+      <!-- ========================================================================= -->
+      <section id="view-guest" class="hidden flex-1 flex flex-col h-full overflow-hidden bg-slate-100">
+        
+        <!-- Minimal Guest Top Bar (No Admin Sidebar, No Role Switcher) -->
+        <header class="bg-white border-b border-slate-200 px-6 py-4 flex-shrink-0 flex items-center justify-between shadow-subtle">
+          <div class="flex items-center space-x-3">
+            <div class="w-7 h-7 bg-slate-900 text-white rounded flex items-center justify-center font-bold text-xs">A</div>
+            <div>
+              <span class="font-bold text-slate-900 text-sm block leading-tight">Acta · Aportación Externa</span>
+              <span class="text-[11px] text-slate-500">Invitación Segura para: <strong>Auditor Externo Independiente</strong></span>
+            </div>
+          </div>
+          <div class="text-right text-xs">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-100 text-emerald-800">
+              ● Enlace Válido (Expira en 5 días)
+            </span>
+          </div>
+        </header>
+
+        <!-- Guest Body Container -->
+        <div class="flex-1 overflow-y-auto p-4 sm:p-6 flex justify-center">
+          <div class="w-full max-w-2xl space-y-5">
+            
+            <!-- Invitation Context Card -->
+            <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-subtle">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Proyecto Convocante</span>
+              <h1 class="text-base font-bold text-slate-900 mt-0.5">Diagnóstico Integral de Adquisiciones y Contratos</h1>
+              <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                Usted ha sido invitado para proporcionar información técnica imparcial sobre los procesos de recepción de suministros informáticos. Esta respuesta se integrará formalmente en la investigación.
+              </p>
+              <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                <span>Pregunta 1 de 1 asignada</span>
+                <span class="text-emerald-600 font-medium">✓ Progreso guardado</span>
+              </div>
+            </div>
+
+            <!-- The Question Form -->
+            <div class="bg-white rounded-lg border border-slate-200 shadow-subtle p-6 space-y-5">
+              <div>
+                <span class="mono-badge text-[11px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">PREGUNTA TÉCNICA</span>
+                <h2 class="text-sm font-semibold text-slate-900 mt-2 leading-relaxed">
+                  ¿Se aplicaron pruebas de estrés y validación física previa a la firma del acta de recepción en los servidores del Data Center 2024?
+                </h2>
+                <p class="text-xs text-slate-500 mt-1">Indique si se contó con bitácora de pruebas y personal certificado del fabricante.</p>
+              </div>
+
+              <!-- Options / Text Input -->
+              <div class="space-y-3">
+                <div class="space-y-2">
+                  <label class="flex items-center space-x-2 text-xs text-slate-800 font-medium cursor-pointer">
+                    <input type="radio" name="guest_q1" value="yes" class="text-sky-600 focus:ring-sky-500 h-4 w-4">
+                    <span>Sí, se ejecutaron pruebas de esfuerzo completas con bitácora formal.</span>
+                  </label>
+                  <label class="flex items-center space-x-2 text-xs text-slate-800 font-medium cursor-pointer">
+                    <input type="radio" name="guest_q1" value="partial" checked class="text-sky-600 focus:ring-sky-500 h-4 w-4">
+                    <span>Parcialmente; se encendieron equipos pero sin prueba de carga bajo estándar Tier III.</span>
+                  </label>
+                  <label class="flex items-center space-x-2 text-xs text-slate-800 font-medium cursor-pointer">
+                    <input type="radio" name="guest_q1" value="no" class="text-sky-600 focus:ring-sky-500 h-4 w-4">
+                    <span>No se realizaron pruebas previas; la entrega fue documental.</span>
+                  </label>
+                </div>
+
+                <div class="pt-2">
+                  <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Declaración y Observaciones Técnicas</label>
+                  <textarea rows="3" class="w-full text-xs p-3 rounded border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:outline-none text-slate-800" placeholder="Describa el protocolo observado...">En la visita ocular del 12 de julio se constató que los equipos estaban energizados, sin embargo el acta de entrega-recepción definitiva carecía del sello de conformidad de la Gerencia de Ciberseguridad.</textarea>
+                </div>
+
+                <!-- Evidence Upload for Guest -->
+                <div class="pt-2">
+                  <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Adjuntar Informe Pericial o Evidencia (Opcional)</label>
+                  <div class="border-2 border-dashed border-slate-300 rounded p-4 text-center hover:bg-slate-50 cursor-pointer">
+                    <svg class="w-6 h-6 text-slate-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                    <span class="text-xs text-slate-600 font-medium mt-1 block">Arrastre su archivo o haga clic para seleccionar</span>
+                    <span class="text-[10px] text-slate-400">PDF, PNG o DOCX (Máx. 25MB)</span>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Submission buttons -->
+              <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <span class="text-[11px] text-slate-400">Puede cerrar esta ventana y regresar más tarde con su mismo enlace.</span>
+                <div class="flex items-center space-x-2 w-full sm:w-auto">
+                  <button onclick="triggerGuestToast('Borrador guardado localmente.')" class="w-1/2 sm:w-auto px-4 py-2 text-xs font-medium text-slate-700 bg-slate-100 rounded hover:bg-slate-200">
+                    Guardar
+                  </button>
+                  <button onclick="submitGuestResponse()" class="w-1/2 sm:w-auto px-5 py-2 text-xs font-semibold text-white bg-slate-900 rounded hover:bg-slate-800 shadow-sm">
+                    Enviar Aportación
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- MODAL / DRAWER 1: CONFLICT RESOLUTION (POSTURE A vs POSTURE B) -->
+      <!-- ========================================================================= -->
+      <div id="modal-conflict" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-modal border border-slate-200 w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          
+          <!-- Header -->
+          <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center space-x-3">
+              <span class="bg-rose-500 text-white font-mono text-xs px-2 py-0.5 rounded font-bold">CONFLICTO DETECTADO</span>
+              <span class="mono-badge text-xs text-slate-300" id="conflict-modal-qid">ADQ-01.03</span>
+              <span class="text-slate-400">|</span>
+              <span class="text-xs text-slate-300">2 Posturas Incompatibles Registradas</span>
+            </div>
+            <button onclick="closeModal('modal-conflict')" class="text-slate-400 hover:text-white text-lg">✕</button>
+          </div>
+
+          <!-- Question Context -->
+          <div class="bg-slate-50 border-b border-slate-200 px-6 py-3 text-xs text-slate-700 flex-shrink-0">
+            <span class="font-bold text-slate-900">Pregunta en Disputa:</span>
+            <span class="text-slate-800 ml-1" id="conflict-modal-statement">
+              ¿Cuál es el umbral económico exacto que exige fianza de cumplimiento en adjudicaciones directas?
+            </span>
+          </div>
+
+          <!-- Comparative Body (Posture A vs Posture B side-by-side) -->
+          <div class="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-100/50">
+            
+            <!-- POSTURE A -->
+            <div class="bg-white rounded-lg border-2 border-slate-300 p-5 space-y-4 shadow-subtle flex flex-col justify-between">
+              <div class="space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">POSTURA A</span>
+                    <span class="text-sm font-bold text-slate-900">Lic. Carmen Viveros</span>
+                  </div>
+                  <span class="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-medium border border-slate-200">
+                    Dirección Jurídica
+                  </span>
+                </div>
+
+                <div>
+                  <span class="text-[11px] font-bold text-slate-500 uppercase">Respuesta Declarada</span>
+                  <div class="text-xs font-semibold text-rose-900 bg-rose-50 border border-rose-200 p-2.5 rounded mt-1">
+                    "Obligatorio a partir de 500 UMA sin excepción para cualquier contrato."
+                  </div>
+                </div>
+
+                <div>
+                  <span class="text-[11px] font-bold text-slate-500 uppercase">Argumento / Justificación</span>
+                  <p class="text-xs text-slate-700 mt-1 leading-relaxed">
+                    "El artículo 48 de la ley no distingue entre pago diferido o pago contra entrega cuando la adjudicación directa rebasa el umbral mínimo legal. Omitir la fianza generaría responsabilidad administrativa para los firmantes ante el Órgano de Control."
+                  </p>
+                </div>
+
+                <div>
+                  <span class="text-[11px] font-bold text-slate-500 uppercase">Evidencia Aportada</span>
+                  <div class="mt-1 flex items-center space-x-2 text-xs p-2 bg-slate-50 rounded border border-slate-200">
+                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <span class="font-medium text-slate-800">Criterio_Juridico_CJ-2023-11.pdf</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-3 border-t border-slate-100 text-[11px] text-slate-400">
+                Aportado el 28 Sept 2024 · 11:20 hrs
+              </div>
+            </div>
+
+            <!-- POSTURE B -->
+            <div class="bg-white rounded-lg border-2 border-slate-300 p-5 space-y-4 shadow-subtle flex flex-col justify-between">
+              <div class="space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">POSTURA B</span>
+                    <span class="text-sm font-bold text-slate-900">Lic. Roberto Mendieta</span>
+                  </div>
+                  <span class="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-medium border border-slate-200">
+                    Dirección de Finanzas
+                  </span>
+                </div>
+
+                <div>
+                  <span class="text-[11px] font-bold text-slate-500 uppercase">Respuesta Declarada</span>
+                  <div class="text-xs font-semibold text-rose-900 bg-rose-50 border border-rose-200 p-2.5 rounded mt-1">
+                    "Exento si el pago es 100% contra entrega verificada por Almacén."
+                  </div>
+                </div>
+
+                <div>
+                  <span class="text-[11px] font-bold text-slate-500 uppercase">Argumento / Justificación</span>
+                  <p class="text-xs text-slate-700 mt-1 leading-relaxed">
+                    "Exigir fianza para compras menores a 1,200 UMA entregadas en el acto bloquea proveedores locales y triplica los tiempos de suministro de papelería e insumos médicos de emergencia."
+                  </p>
+                </div>
+
+                <div>
+                  <span class="text-[11px] font-bold text-slate-500 uppercase">Evidencia Aportada</span>
+                  <div class="mt-1 flex items-center space-x-2 text-xs p-2 bg-slate-50 rounded border border-slate-200">
+                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <span class="font-medium text-slate-800">Circular_Finanzas_CF-04-2022.pdf</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-3 border-t border-slate-100 text-[11px] text-slate-400">
+                Aportado el 30 Sept 2024 · 09:45 hrs
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Decision Action Footer (The system does NOT auto-decide; human analyst documents resolution) -->
+          <div class="bg-white border-t border-slate-200 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 flex-shrink-0">
+            <div class="text-xs text-slate-500">
+              El analista debe contrastar los fundamentos antes de registrar la decisión final.
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="requestMediationClarification()" class="px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-50">
+                Pedir Aclaración a Ambas Áreas
+              </button>
+              <button onclick="openFormulateDecisionModal()" class="px-4 py-1.5 text-xs font-semibold text-white bg-teal-700 hover:bg-teal-800 rounded shadow-sm">
+                Documentar Decisión Validada →
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- MODAL 2: FORMULATE VALIDATED DECISION -->
+      <!-- ========================================================================= -->
+      <div id="modal-formulate-decision" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-modal border border-slate-200 w-full max-w-3xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          <div class="bg-teal-900 text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-bold bg-teal-700 text-white px-2 py-0.5 rounded">FORMALIZACIÓN</span>
+              <span class="text-sm font-bold">Documentar Decisión y Criterio Institucional</span>
+            </div>
+            <button onclick="closeModal('modal-formulate-decision')" class="text-teal-300 hover:text-white">✕</button>
+          </div>
+
+          <div class="p-6 space-y-4 overflow-y-auto text-xs">
+            <p class="text-slate-600">
+              Esta acción transformará la pregunta y sus respuestas en un criterio documentado con trazabilidad legal y probatoria.
+            </p>
+
+            <div class="space-y-1">
+              <label class="font-bold text-slate-700">Título Formal del Dictamen</label>
+              <input type="text" id="dec-title" value="Criterio Institucional: Aplicación de Fianza de Cumplimiento en Adjudicación Directa" class="w-full text-xs p-2.5 rounded border border-slate-300 focus:ring-1 focus:ring-teal-600">
+            </div>
+
+            <div class="space-y-1">
+              <label class="font-bold text-slate-700">Criterio Institucional / Acuerdo Vinculante</label>
+              <textarea id="dec-text" rows="4" class="w-full text-xs p-2.5 rounded border border-slate-300 focus:ring-1 focus:ring-teal-600">Se determina que para toda adjudicación directa superior a 500 UMA, la fianza es obligatoria cuando existan entregas diferidas. Se autoriza dispensa cuando Almacén certifique recepción simultánea al pedido.</textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-1">
+                <label class="font-bold text-slate-700">Alcance de Aplicación</label>
+                <input type="text" id="dec-scope" value="Dirección de Administración y Finanzas, Enlaces de Compras" class="w-full text-xs p-2.5 rounded border border-slate-300">
+              </div>
+              <div class="space-y-1">
+                <label class="font-bold text-slate-700">Excepciones Específicas</label>
+                <input type="text" id="dec-exceptions" value="Bienes perecederos y suministros médicos de urgencia" class="w-full text-xs p-2.5 rounded border border-slate-300">
+              </div>
+            </div>
+
+            <div class="bg-slate-50 p-3 rounded border border-slate-200 text-[11px] text-slate-600">
+              <span class="font-bold text-slate-800 block">Sustento Trazable:</span>
+              Se vincularán automáticamente las posturas de Jurídico (Lic. Carmen Viveros) y Finanzas (Lic. Roberto Mendieta) junto con los archivos normativos adjuntos.
+            </div>
+          </div>
+
+          <div class="bg-slate-50 border-t border-slate-200 px-6 py-3 flex items-center justify-end space-x-2 flex-shrink-0">
+            <button onclick="closeModal('modal-formulate-decision')" class="px-3 py-1.5 text-xs text-slate-600 bg-white border border-slate-300 rounded hover:bg-slate-100">Cancelar</button>
+            <button onclick="confirmValidatedDecision()" class="px-4 py-1.5 text-xs font-semibold text-white bg-teal-800 hover:bg-teal-900 rounded shadow-sm">
+              Guardar y Formalizar Decisión
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- MODAL 3: BULK OPERATIONS WITH IMPACT PREVIEW (NEVER SILENT) -->
+      <!-- ========================================================================= -->
+      <div id="modal-bulk" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-modal border border-slate-200 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          
+          <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-bold bg-sky-600 text-white px-2 py-0.5 rounded">OPERACIÓN EN CONJUNTO</span>
+              <span class="text-sm font-bold">Modificar Selección de Preguntas</span>
+            </div>
+            <button onclick="closeModal('modal-bulk')" class="text-slate-400 hover:text-white">✕</button>
+          </div>
+
+          <div class="p-6 space-y-5 overflow-y-auto text-xs">
+            
+            <!-- Scope Declaration -->
+            <div class="bg-sky-50 border border-sky-200 rounded p-4 text-sky-900">
+              <div class="font-bold text-sm" id="bulk-modal-target-count">Operación sobre 14 preguntas seleccionadas</div>
+              <p class="text-xs mt-1 text-sky-800">
+                Esta acción se aplicará por lotes. El sistema detallará exactamente qué preguntas cambiarán y cuáles no se alterarán por dependencias activas.
+              </p>
+            </div>
+
+            <!-- Action Select -->
+            <div class="space-y-2">
+              <label class="font-bold text-slate-700">Acción a Realizar</label>
+              <select id="bulk-action-type" onchange="onBulkActionTypeChange(this.value)" class="w-full text-xs p-2.5 rounded border border-slate-300 bg-white">
+                <option value="ASSIGN_AREA">Reasignar Área Responsable</option>
+                <option value="ASSIGN_PARTICIPANT">Asignar Participante Titular</option>
+                <option value="INVITE_EXTERNAL">Generar Enlace de Invitación Externa</option>
+                <option value="PUBLISH_SET">Publicar Preguntas (Poner en circulación)</option>
+              </select>
+            </div>
+
+            <!-- Target Parameter -->
+            <div id="bulk-param-area" class="space-y-1">
+              <label class="font-bold text-slate-700">Nueva Área Responsable</label>
+              <select id="bulk-new-area" class="w-full text-xs p-2.5 rounded border border-slate-300 bg-white">
+                <option value="Jurídico">Dirección Jurídica y Normatividad</option>
+                <option value="Finanzas">Tesorería y Finanzas</option>
+                <option value="Almacén">Almacén General y Control de Activos</option>
+                <option value="Órgano de Control">Órgano Interno de Control</option>
+              </select>
+            </div>
+
+            <!-- Impact Preview Table -->
+            <div class="space-y-2">
+              <span class="font-bold text-slate-700 block">Previsualización de Impacto</span>
+              <div class="border border-slate-200 rounded divide-y divide-slate-100 max-h-36 overflow-y-auto bg-slate-50">
+                <div class="p-2.5 text-[11px] flex justify-between items-center bg-emerald-50/50">
+                  <span class="text-slate-800">12 preguntas en estado BORRADOR</span>
+                  <span class="text-emerald-700 font-medium">✓ Cambiarán al área seleccionada</span>
+                </div>
+                <div class="p-2.5 text-[11px] flex justify-between items-center bg-amber-50/50">
+                  <span class="text-slate-800">2 preguntas con RESPUESTAS YA EMITIDAS</span>
+                  <span class="text-amber-800 font-medium">⚠ Se conservará histórico de respuestas</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="bg-slate-50 border-t border-slate-200 px-6 py-3 flex items-center justify-end space-x-2 flex-shrink-0">
+            <button onclick="closeModal('modal-bulk')" class="px-3 py-1.5 text-xs text-slate-600 bg-white border border-slate-300 rounded hover:bg-slate-100">Cancelar</button>
+            <button onclick="executeBulkOperation()" class="px-4 py-1.5 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded shadow-sm">
+              Confirmar y Aplicar Cambios
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- MODAL 4: PUBLICATION PREVIEW (BEFORE GOING LIVE) -->
+      <!-- ========================================================================= -->
+      <div id="modal-publication-preview" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-modal border border-slate-200 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-bold bg-amber-500 text-slate-950 px-2 py-0.5 rounded">CONTROL DE PUBLICACIÓN</span>
+              <span class="text-sm font-bold">Verificación Previa a la Apertura</span>
+            </div>
+            <button onclick="closeModal('modal-publication-preview')" class="text-slate-400 hover:text-white">✕</button>
+          </div>
+
+          <div class="p-6 space-y-4 overflow-y-auto text-xs">
+            <p class="text-slate-700">
+              Al publicar, las preguntas pasarán de <strong>Borrador (DRAFT)</strong> a <strong>Pendiente de Respuesta (PENDING)</strong> y los participantes recibirán notificación con sus accesos.
+            </p>
+
+            <div class="bg-slate-50 border border-slate-200 rounded p-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-600 font-medium">Preguntas listas para publicación:</span>
+                <span class="font-bold text-slate-900 font-mono text-sm">288 preguntas</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-600 font-medium">Preguntas bloqueadas por falta de área responsable:</span>
+                <span class="font-bold text-rose-600 font-mono text-sm">16 preguntas</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-600 font-medium">Participantes internos notificados:</span>
+                <span class="font-bold text-slate-900 font-mono text-sm">12 cuentas activas</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-600 font-medium">Enlaces externos emitidos con token:</span>
+                <span class="font-bold text-slate-900 font-mono text-sm">6 enlaces con caducidad</span>
+              </div>
+            </div>
+
+            <div class="border-l-4 border-amber-500 p-3 bg-amber-50/50 text-amber-900 text-[11px]">
+              <strong>Política de integridad Acta:</strong> Las preguntas publicadas no podrán eliminarse si ya cuentan con respuestas emitidas; únicamente podrán declararse No Aplicables (N/A) con justificación documentada.
+            </div>
+          </div>
+
+          <div class="bg-slate-50 border-t border-slate-200 px-6 py-3 flex items-center justify-end space-x-2 flex-shrink-0">
+            <button onclick="closeModal('modal-publication-preview')" class="px-3 py-1.5 text-xs text-slate-600 bg-white border border-slate-300 rounded hover:bg-slate-100">Cancelar</button>
+            <button onclick="confirmPublication()" class="px-4 py-1.5 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded shadow-sm">
+              Confirmar Publicación General
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- MODAL 5: RESPONSE DETAIL & CLARIFICATION THREAD -->
+      <!-- ========================================================================= -->
+      <div id="modal-response-detail" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-modal border border-slate-200 w-full max-w-3xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          
+          <div class="bg-slate-900 text-white px-6 py-3.5 flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-bold bg-indigo-600 text-white px-2 py-0.5 rounded">DETALLE DE APORTACIÓN</span>
+              <span class="mono-badge text-xs text-slate-300" id="resp-detail-qid">ADQ-04.01</span>
+            </div>
+            <button onclick="closeModal('modal-response-detail')" class="text-slate-400 hover:text-white">✕</button>
+          </div>
+
+          <div class="p-6 space-y-5 overflow-y-auto text-xs">
+            
+            <!-- Question text -->
+            <div class="border-b border-slate-200 pb-3">
+              <span class="text-[10px] text-slate-400 uppercase font-bold">Pregunta</span>
+              <p class="text-sm font-semibold text-slate-900 mt-1" id="resp-detail-statement">
+                ¿Qué documento acredita la recepción formal de bienes informáticos en almacén central?
+              </p>
+            </div>
+
+            <!-- Respondent Info -->
+            <div class="flex items-center justify-between bg-slate-50 p-3 rounded border border-slate-200">
+              <div>
+                <span class="font-bold text-slate-800" id="resp-detail-actor">Ing. Gonzalo Peñaloza</span>
+                <span class="text-slate-500 block text-[11px]" id="resp-detail-area">Almacén General · Cuenta Interna</span>
+              </div>
+              <span class="text-slate-500 font-mono text-[11px]">Enviado el 01 Oct 2024 · 14:32 hrs</span>
+            </div>
+
+            <!-- Response content -->
+            <div class="space-y-1">
+              <span class="font-bold text-slate-700 uppercase text-[10px]">Aportación Registrada</span>
+              <div class="p-3 bg-white border border-slate-200 rounded text-slate-800 leading-relaxed font-sans" id="resp-detail-body">
+                "Se utiliza la forma valorada F-4 (Entrada Provisional de Almacén) firmada por el chofer del proveedor y el jefe de andén. Posteriormente se elabora la nota de entrada definitiva en sistema ERP."
+              </div>
+            </div>
+
+            <!-- Evidence attached -->
+            <div class="space-y-1">
+              <span class="font-bold text-slate-700 uppercase text-[10px]">Evidencia Probatoria</span>
+              <div class="flex items-center space-x-2 p-2.5 bg-slate-50 border border-slate-200 rounded">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                <span class="font-medium text-slate-800 flex-1">Formato_F4_Muestra_Firmada.pdf</span>
+                <button class="text-sky-600 hover:underline">Ver documento</button>
+              </div>
+            </div>
+
+            <!-- Clarification Thread Section -->
+            <div class="border-t border-slate-200 pt-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-800 uppercase tracking-wider text-[11px]">Hilo Contextual de Aclaración</span>
+                <span class="text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 font-medium">Aclaración Abierta</span>
+              </div>
+
+              <!-- Message 1: Analyst asks -->
+              <div class="bg-amber-50/60 p-3 rounded border border-amber-200 space-y-1">
+                <div class="flex items-center justify-between text-[11px] text-amber-900 font-semibold">
+                  <span>Mtro. Julián Sotomayor (Analista)</span>
+                  <span class="text-slate-400 font-normal">02 Oct, 10:15 hrs</span>
+                </div>
+                <p class="text-slate-800 text-xs">
+                  "Ing. Peñaloza, requerimos que aclare si el formato provisional F-4 tiene sustento en el Manual de Procedimientos 2024 o si es un mecanismo de uso consuetudinario sin formalizar."
+                </p>
+              </div>
+
+              <!-- Clarification Input Box -->
+              <div class="space-y-2 pt-2">
+                <label class="font-bold text-slate-700 text-[11px]">Agregar Requerimiento de Aclaración</label>
+                <textarea id="analyst-clarification-msg" rows="2" class="w-full text-xs p-2.5 rounded border border-slate-300 focus:ring-1 focus:ring-amber-500" placeholder="Escriba la precisión requerida al aportante..."></textarea>
+                <div class="flex justify-end">
+                  <button onclick="sendAnalystClarification()" class="px-3 py-1.5 text-xs font-medium text-white bg-amber-700 hover:bg-amber-800 rounded">
+                    Enviar Solicitud al Aportante
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="bg-slate-50 border-t border-slate-200 px-6 py-3 flex items-center justify-between flex-shrink-0">
+            <span class="text-slate-500 text-[11px]">Esta aclaración formará parte del expediente de trazabilidad.</span>
+            <button onclick="closeModal('modal-response-detail')" class="px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-100">
+              Cerrar
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- DRAWER: EXTERNAL INVITATIONS MANAGER -->
+      <!-- ========================================================================= -->
+      <div id="drawer-invitations" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex justify-end">
+        <div class="bg-white w-full max-w-xl h-full shadow-modal flex flex-col overflow-hidden animate-in slide-in-from-right duration-200">
+          
+          <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
+            <div>
+              <h2 class="text-sm font-bold">Gestión de Enlaces e Invitaciones Externas</h2>
+              <span class="text-xs text-slate-400">Tokens seguros de alcance limitado (Sin cuenta requerida)</span>
+            </div>
+            <button onclick="closeInvitationsDrawer()" class="text-slate-400 hover:text-white text-lg">✕</button>
+          </div>
+
+          <div class="p-6 space-y-5 overflow-y-auto text-xs flex-1">
+            
+            <!-- Create new link form -->
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
+              <span class="font-bold text-slate-800 uppercase tracking-wider text-[11px] block">Generar Nuevo Enlace Seguro</span>
+              
+              <div class="space-y-1">
+                <label class="text-slate-700 font-medium">Destinatario / Entidad</label>
+                <input type="text" id="new-inv-target" placeholder="Ej. Perito Externo en Servidores, Despacho Auditor..." class="w-full text-xs p-2 rounded border border-slate-300 bg-white">
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                  <label class="text-slate-700 font-medium">Pregunta Asignada</label>
+                  <select id="new-inv-qid" class="w-full text-xs p-2 rounded border border-slate-300 bg-white">
+                    <option value="ADQ-04.03">ADQ-04.03 (Pruebas Tier III Data Center)</option>
+                    <option value="ADQ-02.01">ADQ-02.01 (Estudio de Mercado)</option>
+                  </select>
+                </div>
+                <div class="space-y-1">
+                  <label class="text-slate-700 font-medium">Vigencia del Token</label>
+                  <select id="new-inv-validity" class="w-full text-xs p-2 rounded border border-slate-300 bg-white">
+                    <option value="7">7 días hábiles</option>
+                    <option value="15">15 días naturales</option>
+                    <option value="30">30 días naturales</option>
+                  </select>
+                </div>
+              </div>
+
+              <button onclick="generateExternalInvitation()" class="w-full py-2 text-xs font-semibold text-white bg-slate-900 rounded hover:bg-slate-800 transition">
+                Generar y Copiar Enlace Cifrado
+              </button>
+            </div>
+
+            <!-- Active Invitations List -->
+            <div class="space-y-3">
+              <span class="font-bold text-slate-800 uppercase tracking-wider text-[11px] block">Enlaces Emitidos Activos (3)</span>
+              
+              <div class="border border-slate-200 rounded divide-y divide-slate-100">
+                
+                <div class="p-3 space-y-2 hover:bg-slate-50">
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-slate-900">Auditor Externo Independiente</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-100 text-emerald-800">
+                      Activo (5 días restantes)
+                    </span>
+                  </div>
+                  <div class="flex items-center justify-between text-slate-500 text-[11px]">
+                    <span class="mono-badge">ADQ-04.03</span>
+                    <span>Token: <code class="bg-slate-100 px-1 py-0.5 rounded">tk_8f92a...c01</code></span>
+                  </div>
+                  <div class="flex items-center space-x-2 pt-1">
+                    <button onclick="copyMockLink('https://acta.institucion.org/e/tk_8f92a...')" class="text-sky-600 hover:underline text-[11px]">Copiar enlace</button>
+                    <span class="text-slate-300">·</span>
+                    <button onclick="revokeInvitation('tk_8f92a')" class="text-rose-600 hover:underline text-[11px]">Revocar token</button>
+                  </div>
+                </div>
+
+                <div class="p-3 space-y-2 hover:bg-slate-50">
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-slate-900">Perito Valuador de Bienes Inmuebles</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-800">
+                      Expira en 48 horas
+                    </span>
+                  </div>
+                  <div class="flex items-center justify-between text-slate-500 text-[11px]">
+                    <span class="mono-badge">ADQ-05.02</span>
+                    <span>Token: <code class="bg-slate-100 px-1 py-0.5 rounded">tk_33a1b...e99</code></span>
+                  </div>
+                  <div class="flex items-center space-x-2 pt-1">
+                    <button onclick="copyMockLink('https://acta.institucion.org/e/tk_33a1b...')" class="text-sky-600 hover:underline text-[11px]">Copiar enlace</button>
+                    <span class="text-slate-300">·</span>
+                    <button onclick="extendInvitation('tk_33a1b')" class="text-slate-700 hover:underline text-[11px]">Extender 7 días</button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+          <div class="bg-slate-50 border-t border-slate-200 p-4 text-right flex-shrink-0">
+            <button onclick="closeInvitationsDrawer()" class="px-4 py-1.5 text-xs text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-100">
+              Cerrar Panel
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- MODAL 6: CREATE / EDIT QUESTION (PROGRESSIVE DISCLOSURE) -->
+      <!-- ========================================================================= -->
+      <div id="modal-create-question" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-modal border border-slate-200 w-full max-w-3xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-bold bg-sky-600 text-white px-2 py-0.5 rounded">AUTORÍA</span>
+              <span class="text-sm font-bold">Redactar Pregunta Institucional</span>
+            </div>
+            <button onclick="closeModal('modal-create-question')" class="text-slate-400 hover:text-white">✕</button>
+          </div>
+
+          <div class="p-6 space-y-4 overflow-y-auto text-xs">
+            
+            <!-- Core Statement (Primary task - clear and unobstructed) -->
+            <div class="space-y-1">
+              <label class="font-bold text-slate-800 text-sm">Enunciado Principal de la Pregunta <span class="text-rose-500">*</span></label>
+              <textarea id="new-q-statement" rows="3" class="w-full text-xs p-3 rounded border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:outline-none" placeholder="¿Cuál es el procedimiento específico para...?"></textarea>
+            </div>
+
+            <!-- Primary Metadata (Essential only) -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="space-y-1">
+                <label class="font-semibold text-slate-700">Identificador (Código)</label>
+                <input type="text" id="new-q-id" value="ADQ-05.04" class="w-full text-xs p-2 rounded border border-slate-300 font-mono">
+              </div>
+              <div class="space-y-1">
+                <label class="font-semibold text-slate-700">Tema Pertinente</label>
+                <select id="new-q-theme" class="w-full text-xs p-2 rounded border border-slate-300 bg-white">
+                  <option value="T1">Tema 01: Marco Normativo</option>
+                  <option value="T2">Tema 02: Plan Anual</option>
+                  <option value="T3">Tema 03: Comité</option>
+                  <option value="T4">Tema 04: Recepción y Almacén</option>
+                  <option value="T5">Tema 05: Finiquitos</option>
+                </select>
+              </div>
+              <div class="space-y-1">
+                <label class="font-semibold text-slate-700">Tipo de Respuesta</label>
+                <select id="new-q-type" class="w-full text-xs p-2 rounded border border-slate-300 bg-white">
+                  <option value="LONG_TEXT">Texto Largo con Evidencia</option>
+                  <option value="SHORT_TEXT">Texto Corto</option>
+                  <option value="YES_NO">Sí / No</option>
+                  <option value="SINGLE_CHOICE">Opción Única</option>
+                  <option value="MULTIPLE_CHOICE">Opción Múltiple</option>
+                  <option value="DATE">Fecha</option>
+                  <option value="NUMBER">Numérico</option>
+                  <option value="MATRIX">Matriz de Criterios</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- PROGRESSIVE DISCLOSURE TOGGLE (Keep complex fields hidden by default) -->
+            <div class="pt-2">
+              <button type="button" onclick="toggleAdvancedQuestionFields()" class="text-xs font-semibold text-sky-700 hover:text-sky-900 flex items-center space-x-1.5">
+                <span id="adv-toggle-icon">▸</span>
+                <span>Configuración avanzada (Área, seguimiento subordinado, evidencia obligatoria)</span>
+              </button>
+            </div>
+
+            <!-- Hidden Advanced Drawer -->
+            <div id="adv-question-fields" class="hidden space-y-4 pt-3 border-t border-slate-200">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="space-y-1">
+                  <label class="font-semibold text-slate-700">Área Responsable Primaria</label>
+                  <select id="new-q-area" class="w-full text-xs p-2 rounded border border-slate-300 bg-white">
+                    <option value="Jurídico">Dirección Jurídica</option>
+                    <option value="Finanzas">Dirección de Finanzas</option>
+                    <option value="Almacén">Almacén General</option>
+                    <option value="Administración">Dirección de Administración</option>
+                  </select>
+                </div>
+                <div class="space-y-1">
+                  <label class="font-semibold text-slate-700">Jerarquía / Subordinación</label>
+                  <select id="new-q-parent" class="w-full text-xs p-2 rounded border border-slate-300 bg-white">
+                    <option value="NONE">Pregunta Principal Independiente</option>
+                    <option value="ADQ-01.01">Subordinada a ADQ-01.01</option>
+                    <option value="ADQ-01.03">Subordinada a ADQ-01.03</option>
+                  </select>
+                  <p class="text-[10px] text-slate-400">En Acta, un seguimiento puede existir siempre sin depender de condición lógica.</p>
+                </div>
+              </div>
+
+              <div class="flex items-center space-x-4 pt-1">
+                <label class="flex items-center space-x-2 cursor-pointer">
+                  <input type="checkbox" id="new-q-mandatory" checked class="rounded border-slate-300 text-sky-600">
+                  <span class="text-xs text-slate-700">Respuesta obligatoria</span>
+                </label>
+                <label class="flex items-center space-x-2 cursor-pointer">
+                  <input type="checkbox" id="new-q-req-evidence" checked class="rounded border-slate-300 text-sky-600">
+                  <span class="text-xs text-slate-700">Evidencia documental obligatoria</span>
+                </label>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="bg-slate-50 border-t border-slate-200 px-6 py-3 flex items-center justify-end space-x-2 flex-shrink-0">
+            <button onclick="closeModal('modal-create-question')" class="px-3 py-1.5 text-xs text-slate-600 bg-white border border-slate-300 rounded hover:bg-slate-100">Cancelar</button>
+            <button onclick="saveNewQuestion()" class="px-4 py-1.5 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded shadow-sm">
+              Crear como Borrador
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOAST NOTIFICATION CONTAINER (Never browser alerts) -->
+      <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none">
+        <!-- Injected via showToast(message, type) -->
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- JAVASCRIPT: ROBUST MOCK DATASET & COMPLETE INTERACTIVE ENGINE -->
+  <!-- ========================================================================= -->
+  <script>
+    
+    // Core state
+    let currentRole = 'analyst'; // 'analyst' | 'participant' | 'guest'
+    let currentDataset = 'large'; // 'small' | 'med' | 'large'
+    let currentAnalystTab = 'outliner'; // 'dashboard' | 'outliner' | 'decisions'
+    let followupsCollapsed = false;
+    let selectedQuestionIds = new Set();
+    
+    // Generate realistic institutional question dataset
+    const questionsDatabase = {
+      small: generateQuestionDataset(12, 2, "Protocolo de Emergencia Escolar"),
+      med: generateQuestionDataset(54, 6, "Auditoría de Proveedores Críticos"),
+      large: generateQuestionDataset(304, 23, "Diagnóstico Integral de Adquisiciones")
+    };
+
+    function generateQuestionDataset(totalCount, themeCount, prefix) {
+      const areas = ["Dirección Jurídica", "Dirección de Finanzas", "Almacén General", "Administración Central", "Órgano de Control"];
+      const states = ["VALIDATED", "CONFLICT", "NEEDS_CLARIFICATION", "READY_REVIEW", "PENDING", "DRAFT"];
+      const items = [];
+      
+      const themeTitles = [
+        "Marco Normativo y Atribuciones", "Plan Anual de Compras", "Comité de Adquisiciones",
+        "Recepción, Almacén e Inventarios", "Pagos y Finiquitos Contractuales", "Gestión de Proveedores",
+        "Licitaciones Públicas", "Adjudicaciones Directas", "Contratos de Servicios TI",
+        "Mantenimiento de Inmuebles", "Seguridad y Custodia", "Auditoría en Tiempo Real",
+        "Control Presupuestal", "Transparencia y Acceso", "Archivos y Expedientes",
+        "Fianzas y Garantías", "Penalizaciones Contractuales", "Suministro Médico",
+        "Parque Vehicular", "Comisión de Bajas", "Sistemas Digitales", "Protección Civil",
+        "Cierre de Ejercicio Fiscal"
+      ];
+
+      let mainCount = 0;
+      let followCount = 0;
+
+      for (let i = 1; i <= totalCount; i++) {
+        const themeIndex = (i % themeCount) + 1;
+        const isMain = (i === 1 || i % 8 === 1);
+        
+        let parentId = null;
+        let id = "";
+        
+        if (isMain) {
+          mainCount++;
+          id = `ADQ-${String(themeIndex).padStart(2, '0')}.${String(mainCount).padStart(2, '0')}`;
+        } else {
+          followCount++;
+          const currentMain = Math.max(1, mainCount);
+          id = `ADQ-${String(themeIndex).padStart(2, '0')}.${String(currentMain).padStart(2, '0')}.${String(followCount % 7 + 1).padStart(2, '0')}`;
+          parentId = `ADQ-${String(themeIndex).padStart(2, '0')}.${String(currentMain).padStart(2, '0')}`;
+        }
+
+        // Dedicated curated critical rows for predictable UX testing
+        if (i === 1) {
+          items.push({
+            id: "ADQ-01.01",
+            themeId: "T1",
+            themeTitle: "Tema 01: Marco Normativo y Atribuciones",
+            isMain: true,
+            parentId: null,
+            statement: "¿Existe un reglamento vigente que faculte a los titulares de área a firmar requisiciones de compra?",
+            type: "YES_NO",
+            area: "Dirección Jurídica",
+            status: "VALIDATED",
+            responsesCount: 2,
+            hasConflict: false,
+            hasClarification: false,
+            decisionDocumented: true
+          });
+          continue;
+        }
+
+        if (i === 2) {
+          items.push({
+            id: "ADQ-01.03",
+            themeId: "T1",
+            themeTitle: "Tema 01: Marco Normativo y Atribuciones",
+            isMain: true,
+            parentId: null,
+            statement: "¿Cuál es el umbral económico exacto que exige fianza de cumplimiento en adjudicaciones directas?",
+            type: "LONG_TEXT",
+            area: "Dirección Jurídica",
+            status: "CONFLICT",
+            responsesCount: 2,
+            hasConflict: true,
+            hasClarification: false,
+            decisionDocumented: false
+          });
+          continue;
+        }
+
+        if (i === 3) {
+          items.push({
+            id: "ADQ-04.01",
+            themeId: "T4",
+            themeTitle: "Tema 04: Recepción, Almacén e Inventarios",
+            isMain: true,
+            parentId: null,
+            statement: "¿Qué documento formal acredita la recepción de bienes informáticos en almacén central?",
+            type: "SHORT_TEXT",
+            area: "Almacén General",
+            status: "NEEDS_CLARIFICATION",
+            responsesCount: 1,
+            hasConflict: false,
+            hasClarification: true,
+            decisionDocumented: false
+          });
+          continue;
+        }
+
+        // Pseudo-random deterministic distribution for the rest
+        const assignedState = states[i % states.length];
+        const assignedArea = areas[i % areas.length];
+        
+        items.push({
+          id: id,
+          themeId: `T${themeIndex}`,
+          themeTitle: `Tema ${String(themeIndex).padStart(2, '0')}: ${themeTitles[(themeIndex - 1) % themeTitles.length]}`,
+          isMain: isMain,
+          parentId: parentId,
+          statement: isMain 
+            ? `¿Cómo se supervisa el cumplimiento del protocolo institucional de ${themeTitles[(themeIndex - 1) % themeTitles.length].toLowerCase()}?`
+            : `Seguimiento específico: ¿Se conserva constancia física y digital debidamente foliada para el inciso ${i}?`,
+          type: (i % 3 === 0) ? "SINGLE_CHOICE" : (i % 5 === 0 ? "YES_NO" : "LONG_TEXT"),
+          area: assignedArea,
+          status: assignedState,
+          responsesCount: assignedState === "DRAFT" ? 0 : (assignedState === "CONFLICT" ? 2 : 1),
+          hasConflict: assignedState === "CONFLICT",
+          hasClarification: assignedState === "NEEDS_CLARIFICATION",
+          decisionDocumented: assignedState === "VALIDATED"
+        });
+      }
+      return items;
+    }
+
+    
+    function renderQuestionList() {
+      const container = document.getElementById('question-list-scrollable');
+      const questions = questionsDatabase[currentDataset];
+      
+      const query = (document.getElementById('q-search')?.value || '').toLowerCase().trim();
+      const themeFilter = document.getElementById('theme-filter')?.value || 'ALL';
+      const statusFilter = document.getElementById('status-filter')?.value || 'ALL';
+
+      let filtered = questions.filter(q => {
+        if (themeFilter !== 'ALL' && q.themeId !== themeFilter) return false;
+        if (statusFilter !== 'ALL' && q.status !== statusFilter) return false;
+        if (query && !q.statement.toLowerCase().includes(query) && !q.id.toLowerCase().includes(query) && !q.area.toLowerCase().includes(query)) return false;
+        if (followupsCollapsed && !q.isMain) return false;
+        return true;
+      });
+
+      document.getElementById('filter-results-count').textContent = `Mostrando ${filtered.length} de ${questions.length} preguntas`;
+      
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="py-16 text-center text-slate-400">
+            <svg class="w-8 h-8 mx-auto mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <p class="font-medium text-slate-600">No se encontraron preguntas con los filtros seleccionados.</p>
+            <button onclick="resetFilters()" class="text-xs text-sky-600 hover:underline mt-2">Restablecer todos los filtros</button>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      let lastTheme = null;
+
+      filtered.forEach(q => {
+        // Theme divider header when grouping
+        if (q.themeTitle !== lastTheme) {
+          lastTheme = q.themeTitle;
+          html += `
+            <div class="bg-slate-100/90 px-6 py-1.5 text-[11px] font-bold text-slate-700 flex items-center justify-between border-y border-slate-200 sticky top-0 z-10">
+              <span class="tracking-wide">${q.themeTitle}</span>
+              <span class="text-slate-400 font-mono text-[10px] font-normal">Identificador de Tema: ${q.themeId}</span>
+            </div>
+          `;
+        }
+
+        const isChecked = selectedQuestionIds.has(q.id);
+        const indentClass = q.isMain ? 'pl-6' : 'pl-12 bg-slate-50/40';
+
+        // Badge styling based on status
+        let statusBadge = '';
+        if (q.status === 'CONFLICT') {
+          statusBadge = `<button onclick="openConflictComparison('${q.id}')" class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-200">⚠ CONFLICTO</button>`;
+        } else if (q.status === 'NEEDS_CLARIFICATION') {
+          statusBadge = `<button onclick="openResponseDetailModal('${q.id}', 0)" class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-300 hover:bg-amber-200">ACLARACIÓN</button>`;
+        } else if (q.status === 'VALIDATED') {
+          statusBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-teal-100 text-teal-800 border border-teal-300">✓ DECISIÓN</span>`;
+        } else if (q.status === 'READY_REVIEW') {
+          statusBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">LISTA REVISIÓN</span>`;
+        } else if (q.status === 'PENDING') {
+          statusBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200">PENDIENTE</span>`;
+        } else {
+          statusBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-50 text-slate-400 border border-slate-200">BORRADOR</span>`;
+        }
+
+        html += `
+          <div class="hover:bg-slate-50/80 px-6 py-2.5 grid grid-cols-12 gap-3 text-xs items-center transition-colors ${indentClass} ${isChecked ? 'bg-sky-50/40' : ''}">
+            
+            <!-- Col 1: Select & ID -->
+            <div class="col-span-1 flex items-center space-x-2">
+              <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSelectQuestion('${q.id}', this.checked)" class="rounded border-slate-300 text-sky-600 focus:ring-sky-500 h-3.5 w-3.5 cursor-pointer">
+              <span class="mono-badge font-semibold text-slate-800 text-[11px]">${q.id}</span>
+            </div>
+
+            <!-- Col 2: Statement & Metadata -->
+            <div class="col-span-5 pr-4">
+              <div class="flex items-center space-x-1.5">
+                ${!q.isMain ? '<span class="text-slate-400 text-xs font-mono">↳</span>' : ''}
+                <span class="font-medium text-slate-900 leading-snug line-clamp-2 hover:text-sky-700 cursor-pointer" onclick="openResponseDetailModal('${q.id}', 0)">
+                  ${q.statement}
+                </span>
+              </div>
+              <div class="flex items-center space-x-2 mt-0.5 text-[10px] text-slate-400">
+                <span class="uppercase tracking-wider font-mono">${q.type}</span>
+                <span>·</span>
+                <span>${q.isMain ? 'Pregunta Principal' : 'Seguimiento Subordinado'}</span>
+              </div>
+            </div>
+
+            <!-- Col 3: Area Responsable -->
+            <div class="col-span-2 text-slate-700 text-[11px] truncate">
+              <span class="inline-block w-2 h-2 rounded-full bg-slate-400 mr-1.5"></span>
+              <span>${q.area}</span>
+            </div>
+
+            <!-- Col 4: Multi-Respondent Counts -->
+            <div class="col-span-2 flex items-center space-x-2">
+              <span class="font-mono text-slate-700 font-semibold">${q.responsesCount}</span>
+              <span class="text-slate-400 text-[11px]">aportaciones</span>
+              ${q.hasConflict ? '<span class="w-2 h-2 rounded-full bg-rose-500" title="Contradicción detectada"></span>' : ''}
+            </div>
+
+            <!-- Col 5: Status Badge & Actions -->
+            <div class="col-span-2 flex items-center justify-end space-x-2">
+              ${statusBadge}
+              <button onclick="openResponseDetailModal('${q.id}', 0)" title="Ver respuestas y trazabilidad" class="p-1 text-slate-400 hover:text-slate-700 rounded hover:bg-slate-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    
+    function toggleSelectQuestion(id, checked) {
+      if (checked) {
+        selectedQuestionIds.add(id);
+      } else {
+        selectedQuestionIds.delete(id);
+      }
+      updateBulkSelectionBar();
+    }
+
+    function toggleSelectAll(checked) {
+      const questions = questionsDatabase[currentDataset];
+      if (checked) {
+        questions.forEach(q => selectedQuestionIds.add(q.id));
+      } else {
+        selectedQuestionIds.clear();
+      }
+      renderQuestionList();
+      updateBulkSelectionBar();
+    }
+
+    function clearSelection() {
+      selectedQuestionIds.clear();
+      const masterCheckbox = document.getElementById('select-all-q');
+      if (masterCheckbox) masterCheckbox.checked = false;
+      renderQuestionList();
+      updateBulkSelectionBar();
+    }
+
+    function updateBulkSelectionBar() {
+      const bar = document.getElementById('bulk-selection-bar');
+      const countLabel = document.getElementById('selected-count-label');
+      if (selectedQuestionIds.size > 0) {
+        bar.classList.remove('hidden');
+        bar.classList.add('flex');
+        countLabel.textContent = `${selectedQuestionIds.size} seleccionadas`;
+      } else {
+        bar.classList.add('hidden');
+        bar.classList.remove('flex');
+      }
+    }
+
+    
+    function applyFilters() {
+      renderQuestionList();
+    }
+
+    function resetFilters() {
+      document.getElementById('q-search').value = '';
+      document.getElementById('theme-filter').value = 'ALL';
+      document.getElementById('status-filter').value = 'ALL';
+      renderQuestionList();
+    }
+
+    function filterByState(state) {
+      document.getElementById('status-filter').value = state;
+      applyFilters();
+    }
+
+    function toggleFollowupsVisibility() {
+      followupsCollapsed = !followupsCollapsed;
+      const btn = document.getElementById('txt-followups');
+      btn.textContent = followupsCollapsed ? "Expandir seguimientos" : "Colapsar seguimientos";
+      renderQuestionList();
+    }
+
+    function setAnalystTab(tab) {
+      currentAnalystTab = tab;
+      
+      const views = {
+        dashboard: document.getElementById('analyst-dashboard-view'),
+        outliner: document.getElementById('analyst-outliner-view'),
+        decisions: document.getElementById('analyst-decisions-view')
+      };
+
+      const tabs = {
+        dashboard: document.getElementById('atab-dashboard'),
+        outliner: document.getElementById('atab-outliner'),
+        decisions: document.getElementById('atab-decisions')
+      };
+
+      Object.keys(views).forEach(k => {
+        if (k === tab) {
+          views[k].classList.remove('hidden');
+          tabs[k].className = "px-3 py-1.5 text-xs font-semibold rounded-md bg-slate-100 text-slate-900 flex items-center space-x-1.5";
+        } else {
+          views[k].classList.add('hidden');
+          tabs[k].className = "px-3 py-1.5 text-xs font-medium rounded-md text-slate-600 hover:text-slate-900 transition flex items-center space-x-1.5";
+        }
+      });
+    }
+
+    
+    function switchRole(role) {
+      currentRole = role;
+      
+      const analystView = document.getElementById('view-analyst');
+      const participantView = document.getElementById('view-participant');
+      const guestView = document.getElementById('view-guest');
+
+      analystView.classList.add('hidden');
+      participantView.classList.add('hidden');
+      guestView.classList.add('hidden');
+
+      const btnAnalyst = document.getElementById('role-btn-analyst');
+      const btnParticipant = document.getElementById('role-btn-participant');
+      const btnGuest = document.getElementById('role-btn-guest');
+
+      [btnAnalyst, btnParticipant, btnGuest].forEach(b => {
+        b.className = "px-2.5 py-1 rounded text-slate-300 hover:text-white transition";
+      });
+
+      if (role === 'analyst') {
+        analystView.classList.remove('hidden');
+        btnAnalyst.className = "px-2.5 py-1 rounded bg-sky-600 text-white font-medium transition";
+      } else if (role === 'participant') {
+        participantView.classList.remove('hidden');
+        btnParticipant.className = "px-2.5 py-1 rounded bg-sky-600 text-white font-medium transition";
+      } else if (role === 'guest') {
+        guestView.classList.remove('hidden');
+        btnGuest.className = "px-2.5 py-1 rounded bg-sky-600 text-white font-medium transition";
+      }
+
+      showToast(`Modo cambiado a: ${role === 'analyst' ? 'Analista Workbench' : (role === 'participant' ? 'Participante Interno' : 'Invitado Externo')}`, 'info');
+    }
+
+    function setViewport(device) {
+      const container = document.getElementById('app-viewport-container');
+      const appRoot = document.getElementById('app-root');
+      
+      const btnDesktop = document.getElementById('vp-desktop');
+      const btnTablet = document.getElementById('vp-tablet');
+      const btnMobile = document.getElementById('vp-mobile');
+
+      [btnDesktop, btnTablet, btnMobile].forEach(b => {
+        b.className = "px-2 py-0.5 rounded hover:text-white";
+      });
+
+      if (device === 'desktop') {
+        btnDesktop.className = "px-2 py-0.5 rounded bg-slate-700 text-white";
+        container.className = "flex-1 w-full h-full overflow-hidden flex flex-col transition-all duration-200";
+        appRoot.className = "w-full h-full flex flex-col bg-white overflow-hidden relative";
+      } else if (device === 'tablet') {
+        btnTablet.className = "px-2 py-0.5 rounded bg-slate-700 text-white";
+        container.className = "flex-1 w-full h-full overflow-auto flex items-center justify-center p-4 bg-slate-300";
+        appRoot.className = "w-[768px] h-[95%] rounded-lg shadow-2xl flex flex-col bg-white overflow-hidden relative border border-slate-400";
+      } else if (device === 'mobile') {
+        btnMobile.className = "px-2 py-0.5 rounded bg-slate-700 text-white";
+        container.className = "flex-1 w-full h-full overflow-auto flex items-center justify-center p-4 bg-slate-300";
+        appRoot.className = "mobile-frame flex flex-col bg-white overflow-hidden relative";
+      }
+    }
+
+    function loadDataset(scale) {
+      currentDataset = scale;
+      selectedQuestionIds.clear();
+      updateBulkSelectionBar();
+
+      const btnS = document.getElementById('ds-small');
+      const btnM = document.getElementById('ds-med');
+      const btnL = document.getElementById('ds-large');
+      
+      [btnS, btnM, btnL].forEach(b => b.className = "px-2 py-1 rounded text-slate-300 hover:text-white transition");
+      
+      if (scale === 'small') btnS.className = "px-2 py-1 rounded bg-sky-600 text-white font-medium transition";
+      if (scale === 'med') btnM.className = "px-2 py-1 rounded bg-sky-600 text-white font-medium transition";
+      if (scale === 'large') btnL.className = "px-2 py-1 rounded bg-sky-600 text-white font-medium transition";
+
+      const total = questionsDatabase[scale].length;
+      document.getElementById('badge-total-q').textContent = total;
+      
+      renderQuestionList();
+      showToast(`Cargado cuestionario a escala: ${total} preguntas`, 'info');
+    }
+
+    function onProjectChange(val) {
+      loadDataset(val);
+    }
+
+    
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function openConflictComparison(qid) {
+      const modal = document.getElementById('modal-conflict');
+      document.getElementById('conflict-modal-qid').textContent = qid;
+      modal.classList.remove('hidden');
+    }
+
+    function openFormulateDecisionModal() {
+      closeModal('modal-conflict');
+      document.getElementById('modal-formulate-decision').classList.remove('hidden');
+    }
+
+    function confirmValidatedDecision() {
+      closeModal('modal-formulate-decision');
+      
+      // Update data state for question ADQ-01.03
+      const q = questionsDatabase[currentDataset].find(x => x.id === 'ADQ-01.03');
+      if (q) {
+        q.status = 'VALIDATED';
+        q.hasConflict = false;
+        q.decisionDocumented = true;
+      }
+
+      renderQuestionList();
+      setAnalystTab('decisions');
+      showToast('Decisión Formalizada con Éxito. Trazabilidad guardada en Acta.', 'success');
+    }
+
+    function requestMediationClarification() {
+      closeModal('modal-conflict');
+      showToast('Solicitud de aclaración enviada a Dirección Jurídica y Finanzas.', 'info');
+    }
+
+    function openResponseDetailModal(qid, index) {
+      const modal = document.getElementById('modal-response-detail');
+      document.getElementById('resp-detail-qid').textContent = qid;
+      
+      const q = questionsDatabase[currentDataset].find(x => x.id === qid);
+      if (q) {
+        document.getElementById('resp-detail-statement').textContent = q.statement;
+        document.getElementById('resp-detail-area').textContent = `${q.area} · Registro Formal`;
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function sendAnalystClarification() {
+      const msg = document.getElementById('analyst-clarification-msg').value;
+      if (!msg.trim()) {
+        showToast('Escriba un requerimiento válido de aclaración.', 'warning');
+        return;
+      }
+      document.getElementById('analyst-clarification-msg').value = '';
+      closeModal('modal-response-detail');
+      showToast('Aclaración notificada al titular responsable.', 'success');
+    }
+
+    function openBulkOperationModal() {
+      if (selectedQuestionIds.size === 0) return;
+      document.getElementById('bulk-modal-target-count').textContent = `Operación sobre ${selectedQuestionIds.size} preguntas seleccionadas`;
+      document.getElementById('modal-bulk').classList.remove('hidden');
+    }
+
+    function executeBulkOperation() {
+      const newArea = document.getElementById('bulk-new-area').value;
+      const count = selectedQuestionIds.size;
+      
+      questionsDatabase[currentDataset].forEach(q => {
+        if (selectedQuestionIds.has(q.id)) {
+          q.area = newArea;
+        }
+      });
+
+      closeModal('modal-bulk');
+      clearSelection();
+      renderQuestionList();
+      showToast(`Se reasignó con éxito el área a las ${count} preguntas seleccionadas.`, 'success');
+    }
+
+    function onBulkActionTypeChange(action) {
+      const paramArea = document.getElementById('bulk-param-area');
+      if (action === 'ASSIGN_AREA') {
+        paramArea.classList.remove('hidden');
+      } else {
+        paramArea.classList.add('hidden');
+      }
+    }
+
+    function openPublicationPreviewModal() {
+      document.getElementById('modal-publication-preview').classList.remove('hidden');
+    }
+
+    function confirmPublication() {
+      closeModal('modal-publication-preview');
+      showToast('Cuestionario publicado exitosamente. Convocatoria en circulación.', 'success');
+    }
+
+    function openExternalInvitationsDrawer() {
+      document.getElementById('drawer-invitations').classList.remove('hidden');
+    }
+
+    function closeInvitationsDrawer() {
+      document.getElementById('drawer-invitations').classList.add('hidden');
+    }
+
+    function generateExternalInvitation() {
+      const target = document.getElementById('new-inv-target').value;
+      if (!target.trim()) {
+        showToast('Indique el nombre o despacho destinatario.', 'warning');
+        return;
+      }
+      showToast(`Enlace seguro generado para: ${target}. Token copiado al portapapeles.`, 'success');
+      document.getElementById('new-inv-target').value = '';
+    }
+
+    function copyMockLink(url) {
+      showToast('Enlace seguro con token copiado al portapapeles.', 'info');
+    }
+
+    function revokeInvitation(tk) {
+      showToast(`Token ${tk} revocado inmediatamente. El enlace ya no es accesible.`, 'warning');
+    }
+
+    function extendInvitation(tk) {
+      showToast(`Token ${tk} extendido por 7 días hábiles adicionales.`, 'success');
+    }
+
+    function openCreateQuestionModal() {
+      document.getElementById('modal-create-question').classList.remove('hidden');
+    }
+
+    function toggleAdvancedQuestionFields() {
+      const adv = document.getElementById('adv-question-fields');
+      const icon = document.getElementById('adv-toggle-icon');
+      if (adv.classList.contains('hidden')) {
+        adv.classList.remove('hidden');
+        icon.textContent = '▾';
+      } else {
+        adv.classList.add('hidden');
+        icon.textContent = '▸';
+      }
+    }
+
+    function saveNewQuestion() {
+      const statement = document.getElementById('new-q-statement').value;
+      const id = document.getElementById('new-q-id').value;
+      const themeId = document.getElementById('new-q-theme').value;
+      const type = document.getElementById('new-q-type').value;
+
+      if (!statement.trim()) {
+        showToast('El enunciado de la pregunta es obligatorio.', 'warning');
+        return;
+      }
+
+      questionsDatabase[currentDataset].unshift({
+        id: id || "ADQ-NEW",
+        themeId: themeId,
+        themeTitle: "Tema 01: Marco Normativo y Atribuciones",
+        isMain: true,
+        parentId: null,
+        statement: statement,
+        type: type,
+        area: "Dirección Jurídica",
+        status: "DRAFT",
+        responsesCount: 0,
+        hasConflict: false,
+        hasClarification: false,
+        decisionDocumented: false
+      });
+
+      closeModal('modal-create-question');
+      document.getElementById('new-q-statement').value = '';
+      renderQuestionList();
+      showToast(`Pregunta ${id} creada en estado BORRADOR.`, 'success');
+    }
+
+    
+    function saveParticipantDraft() {
+      const label = document.getElementById('participant-save-label');
+      label.textContent = "Guardando borrador...";
+      setTimeout(() => {
+        label.textContent = "Borrador guardado a las " + new Date().toLocaleTimeString();
+        showToast("Borrador guardado con éxito.", "info");
+      }, 400);
+    }
+
+    function submitParticipantResponse() {
+      showToast("Respuesta enviada formalmente al Analista. Registro completado.", "success");
+      setTimeout(() => {
+        switchRole('analyst');
+      }, 1000);
+    }
+
+    function submitClarificationResponse() {
+      showToast("Aclaración enviada con éxito.", "success");
+    }
+
+    function submitGuestResponse() {
+      showToast("Aportación enviada con éxito. Su participación ha concluido.", "success");
+    }
+
+    function triggerGuestToast(msg) {
+      showToast(msg, 'info');
+    }
+
+    
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      
+      let borderClass = 'border-slate-800 bg-slate-900 text-white';
+      if (type === 'success') borderClass = 'border-emerald-600 bg-emerald-900 text-emerald-100';
+      if (type === 'warning') borderClass = 'border-amber-600 bg-amber-950 text-amber-100';
+      if (type === 'danger') borderClass = 'border-rose-600 bg-rose-950 text-rose-100';
+
+      toast.className = `p-3.5 rounded-lg shadow-modal border text-xs max-w-sm flex items-start space-x-2.5 transition-all duration-200 pointer-events-auto ${borderClass}`;
+      toast.innerHTML = `
+        <span class="font-bold">●</span>
+        <div class="flex-1 leading-snug">${message}</div>
+      `;
+
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        setTimeout(() => toast.remove(), 250);
+      }, 3500);
+    }
+
+    // Auto-initialize on load
+    window.addEventListener('DOMContentLoaded', () => {
+      renderQuestionList();
+    });
+  </script>
+</body>
+</html>

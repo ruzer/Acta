@@ -125,6 +125,12 @@
   font-size: var(--ac-text-meta);
   margin-top: 8px;
 }
+/* Where the sidebar shows the logo, the page path does not repeat it. */
+@media (min-width: 760px) {
+  .ac-breadcrumb .installation-logo {
+    display: none;
+  }
+}
 .ac-breadcrumb {
   display: flex;
   flex-wrap: wrap;
@@ -188,7 +194,20 @@
     padding: 0;
   }
   .ac-sidebar .ac-brand .installation-logo {
-    max-width: 30px;
+    max-width: 32px;
+    height: 32px;
+    margin-right: 0;
+  }
+  /* In the narrow rail the logo is the mark; its name stays available to screen readers. */
+  .ac-sidebar .ac-brand .installation-logo + .brand-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
   .ac-sidebar .ac-project-navigation a {
     justify-content: center;

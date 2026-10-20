@@ -106,6 +106,7 @@ enum SetupState {
 enum BrandingAssetKind {
   LOGO
   FAVICON
+  LOGO_SECONDARY
 }
 
 model Organization {
@@ -788,6 +789,7 @@ model OrganizationSettings {
   accent         String?
   locale         String?
   timezone       String?
+  secondaryName  String?
   lockVersion    Int          @default(0)
   updatedAt      DateTime     @updatedAt @db.Timestamptz(3)
   updatedById    String?      @db.Uuid

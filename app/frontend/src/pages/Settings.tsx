@@ -42,6 +42,7 @@ const defaultsText: Record<AppearanceKey, string> = {
   accent: "#2b4d7c",
   locale: "es-MX",
   timezone: "UTC",
+  secondaryName: "",
 };
 
 /** Administration of the installation: only for organization administrators. */
@@ -180,42 +181,82 @@ function ResetButton({
   );
 }
 
-function General({ settings }: { settings: SettingsView }) {
-  const [organizationName, setOrganizationName] = useState(
-    settings.organizationName,
+/** A text the infrastructure may control: read-only with its variable named, or editable with a way back to the default. */
+function TextSetting({
+  label,
+  name,
+  field,
+  value,
+  onChange,
+  error,
+  hint,
+  maxLength,
+  fallback,
+  onReset,
+  busy,
+}: {
+  label: string;
+  /** Lower-case name used in the reset button's accessible name. */
+  name: string;
+  field: SettingField;
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+  hint?: string;
+  maxLength: number;
+  fallback: string;
+  onReset: () => void;
+  busy: boolean;
+}) {
+  if (field.source === "external")
+    return <ExternalInput label={label} field={field} />;
+  return (
+    <>
+      <Input
+        label={label}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        error={error}
+        hint={hint}
+        maxLength={maxLength}
+      />
+      <ResetButton
+        field={field}
+        name={name}
+        fallback={fallback}
+        onReset={onReset}
+        busy={busy}
+      />
+    </>
   );
-  const [appName, setAppName] = useState(settings.appName.value);
-  const [shortName, setShortName] = useState(settings.shortName.value);
+}
+
+function General({ settings }: { settings: SettingsView }) {
   const [locale, setLocale] = useState(settings.locale.value);
   const [timezone, setTimezone] = useState(settings.timezone.value);
   // New data (after a save or a reload) replaces what is in the form; the notice of a save stays.
   const [synced, setSynced] = useState(settings.version);
   if (synced !== settings.version) {
     setSynced(settings.version);
-    setOrganizationName(settings.organizationName);
-    setAppName(settings.appName.value);
-    setShortName(settings.shortName.value);
     setLocale(settings.locale.value);
     setTimezone(settings.timezone.value);
   }
   const { mutation, error, saved, setSaved, setError, queryClient } =
     useSettingsSave(settings.version);
-  const fieldError = (key: string) => error?.fields[key];
 
   function submit(event: FormEvent) {
     event.preventDefault();
     const changes: Record<string, string> = {};
-    if (organizationName.trim() !== settings.organizationName)
-      changes.organizationName = organizationName.trim();
-    const edits: [AppearanceKey, string, SettingField][] = [
-      ["appName", appName.trim(), settings.appName],
-      ["shortName", shortName.trim(), settings.shortName],
-      ["locale", locale, settings.locale],
-      ["timezone", timezone, settings.timezone],
-    ];
-    for (const [key, value, field] of edits)
-      if (field.source !== "external" && value !== field.value)
-        changes[key] = value;
+    if (
+      settings.locale.source !== "external" &&
+      locale !== settings.locale.value
+    )
+      changes.locale = locale;
+    if (
+      settings.timezone.source !== "external" &&
+      timezone !== settings.timezone.value
+    )
+      changes.timezone = timezone;
     if (!Object.keys(changes).length) {
       setSaved("");
       setError(new ApiFailure(0, "No hay cambios que guardar."));
@@ -227,59 +268,11 @@ function General({ settings }: { settings: SettingsView }) {
   return (
     <section className="settings-panel" aria-labelledby="general-title">
       <h2 id="general-title">General</h2>
+      <p className="hint">
+        Cómo se escriben las fechas y en qué zona horaria se muestran. El nombre
+        y las imágenes de la institución están en Apariencia.
+      </p>
       <form onSubmit={submit} noValidate>
-        <Input
-          label="Nombre de la institución"
-          value={organizationName}
-          onChange={(event) => setOrganizationName(event.target.value)}
-          error={fieldError("organizationName")}
-          hint="Aparece en la pantalla de acceso y en el encabezado."
-          maxLength={200}
-        />
-        {settings.appName.source === "external" ? (
-          <ExternalInput
-            label="Nombre de la aplicación"
-            field={settings.appName}
-          />
-        ) : (
-          <>
-            <Input
-              label="Nombre de la aplicación"
-              value={appName}
-              onChange={(event) => setAppName(event.target.value)}
-              error={fieldError("appName")}
-              maxLength={100}
-            />
-            <ResetButton
-              field={settings.appName}
-              name="nombre de la aplicación"
-              fallback={defaultsText.appName}
-              onReset={() => reset("appName")}
-              busy={mutation.isPending}
-            />
-          </>
-        )}
-        {settings.shortName.source === "external" ? (
-          <ExternalInput label="Nombre corto" field={settings.shortName} />
-        ) : (
-          <>
-            <Input
-              label="Nombre corto"
-              value={shortName}
-              onChange={(event) => setShortName(event.target.value)}
-              error={fieldError("shortName")}
-              hint="Se usa en la barra lateral."
-              maxLength={40}
-            />
-            <ResetButton
-              field={settings.shortName}
-              name="nombre corto"
-              fallback={defaultsText.shortName}
-              onReset={() => reset("shortName")}
-              busy={mutation.isPending}
-            />
-          </>
-        )}
         {settings.locale.source === "external" ? (
           <ExternalInput label="Formato regional" field={settings.locale} />
         ) : (
@@ -323,103 +316,232 @@ function General({ settings }: { settings: SettingsView }) {
   );
 }
 
+/**
+ * Identity and look in one place: names, color and images, with a preview that
+ * follows what is typed and what is chosen before anything is saved.
+ */
 function Appearance({ settings }: { settings: SettingsView }) {
+  const [organizationName, setOrganizationName] = useState(
+    settings.organizationName,
+  );
+  const [appName, setAppName] = useState(settings.appName.value);
+  const [shortName, setShortName] = useState(settings.shortName.value);
+  const [secondaryName, setSecondaryName] = useState(
+    settings.secondaryName.value,
+  );
   const [accent, setAccent] = useState(settings.accent.value);
+  // Images chosen but not saved yet, as data addresses (the page only allows those and its own).
+  const [pending, setPending] = useState<
+    Partial<Record<BrandingAssetKind, string>>
+  >({});
   const [synced, setSynced] = useState(settings.version);
   if (synced !== settings.version) {
     setSynced(settings.version);
+    setOrganizationName(settings.organizationName);
+    setAppName(settings.appName.value);
+    setShortName(settings.shortName.value);
+    setSecondaryName(settings.secondaryName.value);
     setAccent(settings.accent.value);
   }
   const { mutation, error, saved, setSaved, setError, queryClient } =
     useSettingsSave(settings.version);
-  const external = settings.accent.source === "external";
-  const dirty = accent !== settings.accent.value;
+  const fieldError = (key: string) => error?.fields[key];
+  const edit = (apply: () => void) => {
+    apply();
+    setSaved("");
+    setError(null);
+  };
+
+  function submit(event: FormEvent) {
+    event.preventDefault();
+    setSaved("");
+    const changes: Record<string, string> = {};
+    if (organizationName.trim() !== settings.organizationName)
+      changes.organizationName = organizationName.trim();
+    const edits: [AppearanceKey, string, SettingField][] = [
+      ["appName", appName.trim(), settings.appName],
+      ["shortName", shortName.trim(), settings.shortName],
+      ["secondaryName", secondaryName.trim(), settings.secondaryName],
+      ["accent", accent, settings.accent],
+    ];
+    for (const [key, value, field] of edits)
+      if (field.source !== "external" && value !== field.value)
+        changes[key] = value;
+    if (!Object.keys(changes).length) {
+      setError(new ApiFailure(0, "No hay cambios que guardar."));
+      return;
+    }
+    mutation.mutate(changes);
+  }
+  const reset = (key: AppearanceKey, restore: () => void) => {
+    restore();
+    mutation.mutate({ reset: [key] });
+  };
+  const preview = (kind: BrandingAssetKind) => (url: string | null) =>
+    setPending((current) => {
+      const next = { ...current };
+      if (url) next[kind] = url;
+      else delete next[kind];
+      return next;
+    });
   return (
-    <>
-      <section className="settings-panel" aria-labelledby="appearance-title">
-        <h2 id="appearance-title">Apariencia</h2>
-        <div className="settings-appearance">
-          <BrandingPreview
-            appName={settings.appName.value}
-            shortName={settings.shortName.value}
-            organizationName={settings.organizationName}
-            accent={accent}
-            logo={settings.logo.url}
-          />
-          <div>
-            <AssetControl kind="logo" settings={settings} />
-            <AssetControl kind="favicon" settings={settings} />
-            <form
-              onSubmit={(event) => {
-                event.preventDefault();
-                setSaved("");
-                if (dirty) mutation.mutate({ accent });
-              }}
-              noValidate
-            >
-              {external ? (
-                <ExternalInput
-                  label="Color principal"
-                  field={settings.accent}
-                />
-              ) : (
-                <>
-                  <AccentInput
-                    value={accent}
-                    onChange={(value) => {
-                      setAccent(value);
-                      setError(null);
-                    }}
-                    error={error?.fields.accent}
-                  />
-                  <ResetButton
-                    field={settings.accent}
-                    name="color principal"
-                    fallback={defaultsText.accent}
-                    onReset={() => {
-                      setAccent(defaultsText.accent);
-                      mutation.mutate({ reset: ["accent"] });
-                    }}
-                    busy={mutation.isPending}
-                  />
-                  <SaveFeedback
-                    error={error}
-                    saved={saved}
-                    onReload={() =>
-                      void queryClient.invalidateQueries({
-                        queryKey: ["settings"],
-                      })
-                    }
-                  />
-                  <Button type="submit" disabled={mutation.isPending || !dirty}>
-                    {mutation.isPending ? "Guardando…" : "Guardar color"}
-                  </Button>
-                </>
-              )}
-            </form>
-          </div>
-        </div>
-        <p className="settings-note">
-          Los colores se validan para que el texto blanco siga siendo legible.
-          No se admite CSS ni JavaScript personalizado.
+    <section className="settings-panel" aria-labelledby="appearance-title">
+      <h2 id="appearance-title">Apariencia</h2>
+      <BrandingPreview
+        appName={appName}
+        shortName={shortName}
+        organizationName={organizationName}
+        secondaryName={secondaryName}
+        accent={accent}
+        logo={pending.logo ?? settings.logo.url}
+        logoSecondary={pending.logoSecondary ?? settings.logoSecondary.url}
+        favicon={pending.favicon ?? settings.favicon.url}
+      />
+      <form onSubmit={submit} noValidate className="settings-identity">
+        <h3>Identidad</h3>
+        <Input
+          label="Nombre de la institución"
+          value={organizationName}
+          onChange={(event) =>
+            edit(() => setOrganizationName(event.target.value))
+          }
+          error={fieldError("organizationName")}
+          hint="Aparece en la pantalla de acceso y en el encabezado."
+          maxLength={200}
+        />
+        <TextSetting
+          label="Nombre de la aplicación"
+          name="nombre de la aplicación"
+          field={settings.appName}
+          value={appName}
+          onChange={(value) => edit(() => setAppName(value))}
+          error={fieldError("appName")}
+          maxLength={100}
+          fallback={defaultsText.appName}
+          onReset={() =>
+            reset("appName", () => setAppName(defaultsText.appName))
+          }
+          busy={mutation.isPending}
+        />
+        <TextSetting
+          label="Nombre corto"
+          name="nombre corto"
+          field={settings.shortName}
+          value={shortName}
+          onChange={(value) => edit(() => setShortName(value))}
+          error={fieldError("shortName")}
+          hint="Se usa en la barra lateral."
+          maxLength={40}
+          fallback={defaultsText.shortName}
+          onReset={() =>
+            reset("shortName", () => setShortName(defaultsText.shortName))
+          }
+          busy={mutation.isPending}
+        />
+        <TextSetting
+          label="Entidad del segundo logotipo (opcional)"
+          name="entidad del segundo logotipo"
+          field={settings.secondaryName}
+          value={secondaryName}
+          onChange={(value) => edit(() => setSecondaryName(value))}
+          error={fieldError("secondaryName")}
+          hint="El área o entidad que acompaña a la institución. Se muestra bajo su nombre en la pantalla de acceso."
+          maxLength={200}
+          fallback="vacío"
+          onReset={() => reset("secondaryName", () => setSecondaryName(""))}
+          busy={mutation.isPending}
+        />
+        {settings.accent.source === "external" ? (
+          <ExternalInput label="Color principal" field={settings.accent} />
+        ) : (
+          <>
+            <AccentInput
+              value={accent}
+              onChange={(value) => edit(() => setAccent(value))}
+              error={fieldError("accent")}
+            />
+            <ResetButton
+              field={settings.accent}
+              name="color principal"
+              fallback={defaultsText.accent}
+              onReset={() =>
+                reset("accent", () => setAccent(defaultsText.accent))
+              }
+              busy={mutation.isPending}
+            />
+          </>
+        )}
+        <SaveFeedback
+          error={error}
+          saved={saved}
+          onReload={() =>
+            void queryClient.invalidateQueries({ queryKey: ["settings"] })
+          }
+        />
+        <Button type="submit" disabled={mutation.isPending}>
+          {mutation.isPending ? "Guardando…" : "Guardar identidad"}
+        </Button>
+      </form>
+      <div className="settings-images">
+        <h3>Imágenes</h3>
+        <p className="hint">
+          El logotipo principal es la identidad de la institución. El segundo es
+          opcional y se muestra más pequeño, en la pantalla de acceso y en las
+          invitaciones externas; sin él, Acta funciona igual. Se guardan al
+          elegirlos y se ven al instante, sin reiniciar nada.
         </p>
-      </section>
-    </>
+        <AssetControl
+          kind="logo"
+          settings={settings}
+          onPreview={preview("logo")}
+        />
+        <AssetControl
+          kind="logoSecondary"
+          settings={settings}
+          onPreview={preview("logoSecondary")}
+        />
+        <AssetControl
+          kind="favicon"
+          settings={settings}
+          onPreview={preview("favicon")}
+        />
+      </div>
+      <p className="settings-note">
+        Los colores se validan para que el texto blanco siga siendo legible. No
+        se admite CSS ni JavaScript personalizado.
+      </p>
+    </section>
   );
 }
+
+const assetLabels: Record<
+  BrandingAssetKind,
+  { label: string; accepts: string; hint?: string }
+> = {
+  logo: { label: "Logotipo principal", accepts: "PNG o JPEG" },
+  logoSecondary: {
+    label: "Segundo logotipo",
+    accepts: "PNG o JPEG",
+    hint: "Opcional: un área o entidad que acompaña a la institución.",
+  },
+  favicon: { label: "Favicon", accepts: "PNG cuadrado o ICO" },
+};
 
 function AssetControl({
   kind,
   settings,
+  onPreview,
 }: {
   kind: BrandingAssetKind;
   settings: SettingsView;
+  /** Lets the preview show the chosen image before it is saved. */
+  onPreview: (url: string | null) => void;
 }) {
   const queryClient = useQueryClient();
   const asset: SettingsAssetView = settings[kind];
   const limits = brandingAssetLimits[kind];
-  const label = kind === "logo" ? "Logotipo" : "Favicon";
-  const accepts = kind === "logo" ? "PNG o JPEG" : "PNG cuadrado o ICO";
+  const { label, accepts, hint } = assetLabels[kind];
+  const lower = label.toLowerCase();
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState("");
   const [done, setDone] = useState("");
@@ -435,6 +557,7 @@ function AssetControl({
       await queryClient.invalidateQueries({ queryKey: ["settings"] });
       await queryClient.invalidateQueries({ queryKey: ["public-branding"] });
       setFile(null);
+      onPreview(null);
       setDone(success);
     } catch (failure) {
       setError((failure as Error).message);
@@ -444,6 +567,7 @@ function AssetControl({
   }
   function choose(next: File | null) {
     setDone("");
+    onPreview(null);
     if (next && next.size > limits.maxBytes) {
       setFile(null);
       setError(
@@ -453,6 +577,13 @@ function AssetControl({
     }
     setError("");
     setFile(next);
+    if (!next) return;
+    // Only a data address can be shown: the page's policy does not allow blob addresses.
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") onPreview(reader.result);
+    };
+    reader.readAsDataURL(next);
   }
   return (
     <div className="settings-asset">
@@ -478,8 +609,8 @@ function AssetControl({
             <div className="field">
               <label htmlFor={inputId}>
                 {asset.source === "saved"
-                  ? `Reemplazar ${label.toLowerCase()}`
-                  : `Subir ${label.toLowerCase()}`}
+                  ? `Reemplazar ${lower}`
+                  : `Subir ${lower}`}
               </label>
               <input
                 id={inputId}
@@ -489,6 +620,7 @@ function AssetControl({
                 aria-describedby={`${inputId}-hint`}
               />
               <p id={`${inputId}-hint`} className="hint">
+                {hint ? `${hint} ` : ""}
                 {accepts}, hasta {Math.round(limits.maxBytes / 1024)} KB. No se
                 admiten SVG.
               </p>
@@ -504,7 +636,7 @@ function AssetControl({
                   )
                 }
               >
-                {busy ? "Guardando…" : `Guardar ${label.toLowerCase()}`}
+                {busy ? "Guardando…" : `Guardar ${lower}`}
               </Button>
               {asset.source === "saved" && (
                 <Button
@@ -518,11 +650,11 @@ function AssetControl({
                           { kind },
                           { expectedVersion: settings.version },
                         ),
-                      `${label} quitado.`,
+                      `${label} eliminado.`,
                     )
                   }
                 >
-                  Quitar {label.toLowerCase()}
+                  Eliminar {lower}
                 </Button>
               )}
             </div>

@@ -6,10 +6,38 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
-Instalación guiada y centro de configuración. **Agrega una migración**
-(`202610120001_installation_setup_settings`, solo tablas nuevas); las
-instalaciones existentes conservan usuarios, evidencia y configuración, y no
-ven el asistente. Ver [Instalación guiada y Configuración](docs/ADMIN-CENTER.md).
+### Added
+
+- **Administración de áreas.** En Administración → Áreas se puede **renombrar**,
+  **desactivar** y **reactivar** un área, y consultar las desactivadas con
+  «Mostrar áreas desactivadas». El código no cambia y no existe borrado.
+  Un área desactivada deja de poder elegirse para preguntas nuevas, miembros,
+  invitaciones y operaciones masivas, y una pregunta de esa área no se publica
+  hasta moverla; todo lo que ya la usa se conserva y sigue funcionando:
+  preguntas (editables sin cambiar su área), asignaciones, participantes e
+  invitaciones. Solo la administración de la institución puede hacerlo y cada
+  cambio queda en la bitácora como «Área actualizada» (`AREA_UPDATED`, con el
+  antes y el después). Operación nueva: `POST /areas/:id`.
+
+### Changed
+
+- Los participantes de un área desactivada ya no pierden el acceso a lo que
+  tenían asignado: antes esa condición ocultaba sus preguntas y los excluía del
+  avance. La importación indica ahora con el nombre actual por qué rechaza un
+  área existente (renombrada o desactivada) y los formularios muestran un error
+  junto al campo cuando se elige un área desactivada.
+
+## 0.8.0 — 2026-10-13
+
+Instalación guiada, Centro de Configuración y personalización institucional con
+segundo logotipo. PRs [#39](https://github.com/ruzer/Acta/pull/39) y
+[#40](https://github.com/ruzer/Acta/pull/40). **Agrega dos migraciones aditivas**
+(`202610120001_installation_setup_settings` y `202610130001_secondary_logo`:
+tablas nuevas, un valor de enumeración y una columna; no reescriben datos). Las
+instalaciones existentes conservan usuarios, evidencia, configuración y `.env`,
+y no ven el asistente. Ver [Instalación guiada y Configuración](docs/ADMIN-CENTER.md)
+y las [notas de la versión](docs/releases/v0.8.0.md), que incluyen cómo
+actualizar desde v0.7.0 y los límites conocidos.
 
 ### Added
 
@@ -24,29 +52,60 @@ ven el asistente. Ver [Instalación guiada y Configuración](docs/ADMIN-CENTER.m
   existe y se pidieron opciones, arranca Acta y muestra la dirección del
   asistente. Es un atajo: `docker compose up` con o sin `.env` sigue siendo
   válido.
-- **Administración → Configuración**: General (institución, nombre de la
-  aplicación y corto, formato regional, zona horaria), Apariencia (logotipo,
-  favicon, color con verificación de contraste y vista previa), Almacenamiento
-  (estado y prueba de conexión) y Sistema (versión, base de datos, seguridad y
-  límites). Cambios con control de versión, auditados (`SETTINGS_UPDATED`,
-  `BRANDING_ASSET_CHANGED/REMOVED`, `STORAGE_CONNECTION_TESTED`).
-- Logotipo y favicon subidos desde la aplicación: se validan por sus bytes
-  (PNG/JPEG, PNG/ICO; sin SVG) y se sirven como imagen inerte.
-- Pruebas de instalación limpia y reinicio en CI (`guided-install`) y guía de
-  [diseño de integraciones](docs/INTEGRATIONS-DESIGN.md) (sin implementar).
+- **Administración → Configuración**: General (formato regional y zona horaria),
+  Apariencia, Almacenamiento (estado y prueba de conexión) y Sistema (versión,
+  base de datos, seguridad y límites). Cambios con control de versión y
+  auditados (`SETTINGS_UPDATED`, `BRANDING_ASSET_CHANGED/REMOVED`,
+  `STORAGE_CONNECTION_TESTED`, `INSTALLATION_BOOTSTRAPPED`).
+- **Apariencia** reúne identidad (institución, aplicación, nombre corto y
+  entidad del segundo logotipo), color y tres imágenes: logotipo principal,
+  **segundo logotipo opcional** (un área o entidad que acompaña a la
+  institución) y favicon. La vista previa es realista (pestaña, navegación y
+  acceso) y muestra lo escrito y las imágenes elegidas antes de guardarlas. Los
+  cambios se ven sin recompilar ni reiniciar.
+- Las imágenes se validan por sus bytes (PNG/JPEG para los logotipos, PNG/ICO
+  para el favicon; sin SVG), con límites de tamaño, y se sirven como imagen
+  inerte. También se definen por entorno (`APP_LOGO`, `APP_LOGO_SECONDARY`,
+  `APP_FAVICON`) y entonces mandan.
+- Jerarquía visual de las marcas: el principal es la identidad (acceso, barra
+  lateral y encabezado móvil); el segundo es más pequeño y solo aparece en el
+  acceso y en las invitaciones externas. Sin él, nada cambia ni se reserva
+  espacio.
+- Pruebas de instalación limpia y reinicio en CI (`guided-install`) y una guía
+  de [diseño de integraciones](docs/INTEGRATIONS-DESIGN.md) (webhooks y correo,
+  sin implementar).
 
 ### Changed
 
 - Los valores de apariencia que define la infraestructura (`APP_NAME`,
-  `APP_SHORT_NAME`, `APP_ACCENT`, `APP_LOGO`, `APP_FAVICON`, `DEFAULT_LOCALE`,
-  `DEFAULT_TIMEZONE`) se muestran como «administrado externamente» y no se
-  pueden cambiar desde la aplicación; el resto lo elige la administración.
-  `docker-compose.yml` ya no inyecta valores por defecto para ellas (los
-  aplica la aplicación) y `.env.example` las deja comentadas.
+  `APP_SHORT_NAME`, `APP_ACCENT`, `APP_LOGO`, `APP_LOGO_SECONDARY`,
+  `APP_SECONDARY_NAME`, `APP_FAVICON`, `DEFAULT_LOCALE`, `DEFAULT_TIMEZONE`)
+  se muestran como «administrado externamente» y no se pueden cambiar desde la
+  aplicación; el resto lo elige la administración. `docker-compose.yml` ya no
+  inyecta valores por defecto para ellas (los aplica la aplicación) y
+  `.env.example` las deja comentadas.
 - El nombre de la institución de la pantalla de acceso y del encabezado sale
   de la base de datos, igual que dentro de la sesión; `ORGANIZATION_NAME` es
   solo el nombre inicial.
+- En el acceso, el logotipo principal se muestra grande sobre el nombre de la
+  institución (antes iba pequeño junto al nombre de Acta). La ruta de
+  navegación no repite el logotipo que la barra lateral ya muestra y, en la
+  barra estrecha, la barra lateral muestra solo el logotipo (su nombre sigue
+  disponible para lectores de pantalla). El encabezado de las invitaciones
+  externas envuelve en pantallas estrechas en lugar de desbordarse.
 - `bootstrap-admin` también registra la instalación como completada.
+- La API pública de configuración (`GET /configuration/public`) añade
+  `logoSecondary` y `secondaryName` (cadenas vacías si no se usan).
+
+### Security
+
+- Rutas públicas nuevas, acotadas: `GET /setup/status` (solo un estado),
+  `/setup/*` (exigen el código de instalación y se cierran al completar la
+  instalación) y `GET /configuration/assets/{logo,logoSecondary,favicon}`
+  (imagen inerte con `nosniff` y CSP sin recursos). Las rutas de administración
+  exigen administrador de la institución, origen de la aplicación y CSRF, y
+  comprueban quién antes de validar qué. Ningún secreto aparece en respuestas
+  ni en la auditoría.
 
 ## 0.7.0 — 2026-10-12
 
