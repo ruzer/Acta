@@ -410,16 +410,22 @@ export function Organize(
         <EmptyState
           title="Todavía no hay preguntas."
           action={
-            data.sections.length ? (
+            <>
               <Button
-                disabled={!hasArea}
-                onClick={() => props.onEdit(undefined, undefined)}
+                tone={data.sections.length ? "secondary" : "primary"}
+                onClick={props.onCreateTopic}
               >
-                Nueva pregunta
+                + Agregar tema
               </Button>
-            ) : (
-              <Button onClick={props.onCreateTopic}>+ Agregar tema</Button>
-            )
+              {data.sections.length > 0 && (
+                <Button
+                  disabled={!hasArea}
+                  onClick={() => props.onEdit(undefined, undefined)}
+                >
+                  Nueva pregunta
+                </Button>
+              )}
+            </>
           }
         >
           {data.sections.length
@@ -478,6 +484,9 @@ export function Organize(
             onClick={() => setFiltersOpen((open) => !open)}
           >
             Filtros
+          </Button>
+          <Button tone="secondary" onClick={props.onCreateTopic}>
+            + Agregar tema
           </Button>
           <Button
             tone={bulkIds.size ? "secondary" : "primary"}
@@ -565,11 +574,6 @@ export function Organize(
                     </button>
                   ))}
                 {topic && <TopicActions {...props} id={topic} />}
-                {data.sections.length > 0 && (
-                  <Button tone="secondary" onClick={props.onCreateTopic}>
-                    + Agregar tema
-                  </Button>
-                )}
               </div>
             </details>
           </nav>
@@ -586,7 +590,7 @@ export function Organize(
             {data.areas.map((a) => (
               <option key={a.id} value={a.id}>
                 {a.name}
-                {!a.active ? " (inactiva)" : ""}
+                {!a.active ? " (desactivada)" : ""}
               </option>
             ))}
           </Select>

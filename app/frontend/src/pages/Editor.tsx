@@ -655,11 +655,16 @@ export function Editor() {
                 name="responsibleAreaId"
                 defaultValue={action.q.responsibleAreaId}
               >
-                {data.areas.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.name}
-                  </option>
-                ))}
+                {data.areas
+                  .filter(
+                    (a) => a.active || a.id === action.q.responsibleAreaId,
+                  )
+                  .map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.name}
+                      {a.active ? "" : " (desactivada)"}
+                    </option>
+                  ))}
               </Select>
             </ActionForm>
           )}

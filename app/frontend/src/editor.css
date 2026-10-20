@@ -613,3 +613,7 @@
     overflow-wrap: anywhere;
   }
 }
+/* Adding a topic is a page-level action: it sits above the list, not after hundreds of questions. */
+.qe-topic-add {
+  margin-bottom: 12px;
+}
