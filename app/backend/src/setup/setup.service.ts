@@ -87,6 +87,8 @@ export class SetupService {
       const row = await tx.installationSetup.findUnique({
         where: { id: SETUP_ROW },
       });
+      // Another request may have completed setup after the initial guard.
+      if (row?.state === "COMPLETED") throw new ConflictException(CLOSED);
       const ok = codeIsValid(row, token);
       if (!ok)
         await tx.loginAttempt.create({
