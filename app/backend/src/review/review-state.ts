@@ -15,7 +15,6 @@ export async function coverage(tx: Tx, access: AccessService, p: string) {
         active: true,
         role: "STAKEHOLDER",
         user: { active: true },
-        area: { active: true },
       },
     },
     include: { member: { include: { user: true, area: true } } },

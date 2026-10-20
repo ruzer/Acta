@@ -274,6 +274,8 @@ test("simplicity: keyboard returns after cancel, assignment, publication and ins
   await page
     .getByRole("button", { name: "+ Agregar pregunta", exact: true })
     .click();
+  // The identifier arrives suggested; emptying it restores the error under test.
+  await page.getByLabel("Identificador externo", { exact: true }).fill("");
   await page
     .getByRole("button", { name: "Crear pregunta", exact: true })
     .click();

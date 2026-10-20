@@ -344,6 +344,11 @@ export function EditorWorkspace(props: EditorProps) {
           )}
           {mode === i && i === 0 && (
             <>
+              <div className="qe-topic-add">
+                <Button tone="secondary" onClick={onCreateTopic}>
+                  + Agregar tema
+                </Button>
+              </div>
               {data.questions.length > 1 && (
                 <p className="hint">
                   Para asignar participantes o publicar varias preguntas juntas,
@@ -460,9 +465,6 @@ export function EditorWorkspace(props: EditorProps) {
                     </section>
                   );
                 })}
-              <Button tone="secondary" onClick={onCreateTopic}>
-                + Agregar tema
-              </Button>
             </>
           )}
         </div>
