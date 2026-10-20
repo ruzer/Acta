@@ -126,7 +126,7 @@ Se elige una columna por fila. Entre 1 y 20 filas y entre 2 y 20 columnas; sus c
 
 ## Áreas responsables
 
-Cada `responsibleAreaCode` debe aparecer en `areas`. Acta busca el código **exacto** dentro de tu institución. Si ya existe, debe estar activo y tener exactamente el mismo nombre del archivo; importar no renombra áreas existentes.
+Cada `responsibleAreaCode` debe aparecer en `areas`. Acta busca el código **exacto** dentro de tu institución. Si ya existe, debe estar activo y tener exactamente el mismo nombre del archivo; importar no renombra áreas existentes. Si Administración la renombró o la desactivó, la vista previa lo dice con el nombre actual o pide reactivarla; el nombre y el estado se cambian en **Administración → Áreas**.
 
 Si no existe, Administración verá una advertencia y deberá marcar **Confirmo crear estas áreas en la institución**. Un Analista verá un error hasta que Administración dé de alta el área. Es responsabilidad, no asignación automática de personas.
 

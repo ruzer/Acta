@@ -16,6 +16,8 @@ Hay una regla de precedencia: **si defines la variable (no vacía), la infraestr
 | APP_SHORT_NAME         | Acta                  | Hasta 40 caracteres                                                                          |
 | ORGANIZATION_NAME      | (sin valor)           | Nombre **inicial** de la institución; después vive en la base de datos y se cambia en Configuración |
 | APP_LOGO / APP_FAVICON | vacío                 | Ruta local `/branding/archivo.png` (png/jpg/jpeg/webp/ico/svg), sin traversal ni URL externa. Sin ellas, el logotipo y el favicon se suben en Configuración (PNG/JPEG e ICO, sin SVG) |
+| APP_LOGO_SECONDARY     | vacío                 | Segundo logotipo opcional (área o entidad colaboradora): misma regla que `APP_LOGO`. Se muestra en el acceso y en las invitaciones externas |
+| APP_SECONDARY_NAME     | vacío                 | Nombre de esa entidad (hasta 200 caracteres); se escribe bajo el nombre de la institución en el acceso |
 | APP_ACCENT             | #2b4d7c               | Hexadecimal; contraste mínimo 4.5:1 sobre blanco                                             |
 | DEFAULT_LOCALE         | es-MX                 | Locale válido para formato; no implica traducción de toda la UI                              |
 | DEFAULT_TIMEZONE       | UTC                   | Zona IANA válida para fechas de revisión/participante                                        |

@@ -48,6 +48,8 @@ const timezone = z
   );
 const appName = z.string().trim().min(1, "Escribe un nombre.").max(100);
 const shortName = z.string().trim().min(1, "Escribe un nombre.").max(40);
+/** The entity of the optional second logo (an area or a collaborating body). Empty is allowed: it is optional. */
+const secondaryName = z.string().trim().max(200);
 const organizationName = z
   .string()
   .trim()
@@ -66,6 +68,7 @@ export const appearanceKeys = [
   "accent",
   "locale",
   "timezone",
+  "secondaryName",
 ] as const;
 export const appearanceKey = z.enum(appearanceKeys);
 export type AppearanceKey = z.infer<typeof appearanceKey>;
@@ -82,6 +85,7 @@ export const appearanceFields = z.strictObject({
   accent: settingField,
   locale: settingField,
   timezone: settingField,
+  secondaryName: settingField,
 });
 export type AppearanceFields = z.infer<typeof appearanceFields>;
 
@@ -92,6 +96,7 @@ export const appearanceChoices = z.strictObject({
   accent,
   locale: z.enum(localeValues),
   timezone,
+  secondaryName,
 });
 export type AppearanceChoices = z.infer<typeof appearanceChoices>;
 
@@ -147,12 +152,13 @@ export type SetupChecks = z.infer<typeof setupChecksView>;
 export type SetupCompleteInput = z.infer<typeof setupCompleteInput>;
 
 // ---------------------------------------------------------------- settings
-export const brandingAssetKinds = ["logo", "favicon"] as const;
+export const brandingAssetKinds = ["logo", "logoSecondary", "favicon"] as const;
 export const brandingAssetKind = z.enum(brandingAssetKinds);
 export type BrandingAssetKind = z.infer<typeof brandingAssetKind>;
 /** The kinds of image an installation accepts, with the largest size of each. */
 export const brandingAssetLimits = {
   logo: { maxBytes: 512 * 1024, types: ["image/png", "image/jpeg"] },
+  logoSecondary: { maxBytes: 512 * 1024, types: ["image/png", "image/jpeg"] },
   favicon: { maxBytes: 128 * 1024, types: ["image/png", "image/x-icon"] },
 } as const;
 export const settingsAssetView = z.strictObject({
@@ -171,7 +177,9 @@ export const settingsView = z.strictObject({
   accent: settingField,
   locale: settingField,
   timezone: settingField,
+  secondaryName: settingField,
   logo: settingsAssetView,
+  logoSecondary: settingsAssetView,
   favicon: settingsAssetView,
   /** The lowest contrast accepted, so the form can explain a rejected color. */
   minimumContrast: z.number(),
@@ -185,6 +193,7 @@ export const settingsInput = z
     accent: accent.optional(),
     locale: z.enum(localeValues).optional(),
     timezone: timezone.optional(),
+    secondaryName: secondaryName.optional(),
     /** Saved choices listed here are removed and the default applies again. */
     reset: z.array(appearanceKey).max(5).optional(),
   })

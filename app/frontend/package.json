@@ -1,6 +1,6 @@
 {
   "name": "@requirements/frontend",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,7 +9,7 @@
     "dev": "vite --host 127.0.0.1"
   },
   "dependencies": {
-    "@requirements/contracts": "0.7.0",
+    "@requirements/contracts": "0.8.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-router-dom": "7.18.4",
@@ -19,7 +19,7 @@
     "zod": "4.6.5"
   },
   "devDependencies": {
-    "vite": "8.3.1",
+    "vite": "8.3.4",
     "@vitejs/plugin-react": "6.1.1",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0"

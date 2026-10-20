@@ -21,6 +21,7 @@ import {
   Textarea,
 } from "../ui";
 import { ApiFailure } from "../api";
+import { nextQuestionId, suggestTitle } from "./question-suggestions";
 
 const typeDescriptions: Record<QuestionInput["type"], string> = {
   YES_NO: "El participante elige entre sí y no.",
@@ -68,7 +69,7 @@ export function QuestionForm({
           references: initial.references,
         }
       : {
-          externalId: "",
+          externalId: nextQuestionId(data.questions.map((q) => q.externalId)),
           sectionId: defaultSectionId ?? data.sections[0]?.id ?? "",
           title: "",
           question: "",
@@ -76,7 +77,7 @@ export function QuestionForm({
           type: "SHORT_TEXT",
           required: true,
           priority: "P1",
-          responsibleAreaId: data.areas[0]?.id || "",
+          responsibleAreaId: data.areas.find((a) => a.active)?.id || "",
           order:
             Math.max(
               0,
@@ -95,6 +96,9 @@ export function QuestionForm({
           references: [],
         },
   );
+  // A new question follows the suggestions until the person writes their own value.
+  const [idAuto, setIdAuto] = useState(!initial);
+  const [titleAuto, setTitleAuto] = useState(!initial);
   const formRef = useRef<HTMLFormElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -231,7 +235,17 @@ export function QuestionForm({
       setDirty(false);
     } catch (e) {
       setError((e as Error).message);
-      if (e instanceof ApiFailure) showErrors(e.fields);
+      if (e instanceof ApiFailure && e.fields.externalId && idAuto) {
+        // Someone saved the same suggestion first: move past it instead of asking for a code.
+        const next = nextQuestionId([
+          ...data.questions.map((q) => q.externalId),
+          value.externalId,
+        ]);
+        setError(
+          `El identificador ${value.externalId} ya se usó. Se propone ${next}; revisa y guarda de nuevo.`,
+        );
+        setValue((v) => ({ ...v, externalId: next }));
+      } else if (e instanceof ApiFailure) showErrors(e.fields);
     } finally {
       setBusy(false);
     }
@@ -330,7 +344,12 @@ export function QuestionForm({
               value={value.question}
               required
               error={fieldError("question")}
-              onChange={(e) => patch({ question: e.target.value })}
+              onChange={(e) =>
+                patch({
+                  question: e.target.value,
+                  ...(titleAuto ? { title: suggestTitle(e.target.value) } : {}),
+                })
+              }
             />
           </div>
           <details className="av-help" open={!!initial?.helpText}>
@@ -613,7 +632,7 @@ export function QuestionForm({
           <p className="hint">
             {initial
               ? "El identificador se conserva; puedes ajustar el título breve."
-              : "Ambos campos son obligatorios para guardar y reconocer la pregunta."}
+              : "Se proponen a partir de lo que escribes y puedes cambiarlos. El identificador es el código único y fijo de la pregunta en este proyecto (aparece en exportaciones y referencias) y no se podrá cambiar después."}
           </p>
           <div className="grid2">
             <Input
@@ -623,7 +642,10 @@ export function QuestionForm({
               value={value.externalId}
               readOnly={!!initial}
               error={fieldError("externalId")}
-              onChange={(e) => patch({ externalId: e.target.value })}
+              onChange={(e) => {
+                setIdAuto(false);
+                patch({ externalId: e.target.value });
+              }}
             />
 
             <Input
@@ -632,7 +654,10 @@ export function QuestionForm({
               value={value.title}
               required
               error={fieldError("title")}
-              onChange={(e) => patch({ title: e.target.value })}
+              onChange={(e) => {
+                setTitleAuto(e.target.value === "");
+                patch({ title: e.target.value });
+              }}
             />
           </div>
         </fieldset>
@@ -732,10 +757,13 @@ export function QuestionForm({
                   onChange={(e) => patch({ responsibleAreaId: e.target.value })}
                 >
                   {data.areas
-                    .filter((a) => a.active)
+                    .filter(
+                      (a) => a.active || a.id === initial?.responsibleAreaId,
+                    )
                     .map((a) => (
                       <option key={a.id} value={a.id}>
                         {a.name}
+                        {a.active ? "" : " (desactivada)"}
                       </option>
                     ))}
                 </Select>

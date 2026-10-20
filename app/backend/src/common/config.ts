@@ -57,6 +57,8 @@ export function publicBranding() {
     shortName: process.env.APP_SHORT_NAME || "Acta",
     organizationName: process.env.ORGANIZATION_NAME || "My organization",
     logo: process.env.APP_LOGO || "",
+    logoSecondary: process.env.APP_LOGO_SECONDARY || "",
+    secondaryName: process.env.APP_SECONDARY_NAME?.trim() || "",
     favicon: process.env.APP_FAVICON || "",
     accent: process.env.APP_ACCENT || "#2b4d7c",
     locale: process.env.DEFAULT_LOCALE || "es-MX",
@@ -65,7 +67,7 @@ export function publicBranding() {
   if (!config.success)
     throw new Error("Invalid public branding configuration; values omitted");
   const c = config.data;
-  for (const path of [c.logo, c.favicon])
+  for (const path of [c.logo, c.logoSecondary, c.favicon])
     if (
       path &&
       !/^\/branding\/[a-zA-Z0-9_-]+\.(png|jpg|jpeg|webp|ico|svg)$/.test(path)

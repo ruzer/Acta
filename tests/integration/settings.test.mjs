@@ -25,6 +25,8 @@ const variables = [
   "APP_NAME",
   "APP_SHORT_NAME",
   "APP_LOGO",
+  "APP_LOGO_SECONDARY",
+  "APP_SECONDARY_NAME",
   "APP_FAVICON",
   "APP_ACCENT",
   "DEFAULT_LOCALE",
@@ -253,7 +255,14 @@ test("only an active organization administrator reaches the administration route
 test("an installation without saved choices looks exactly as its environment says (compatibility)", async () => {
   const view = await settings();
   assert.equal(view.version, 0);
-  for (const key of ["appName", "shortName", "accent", "locale", "timezone"])
+  for (const key of [
+    "appName",
+    "shortName",
+    "accent",
+    "locale",
+    "timezone",
+    "secondaryName",
+  ])
     assert.equal(view[key].source, "default", key);
   assert.deepEqual(
     [
@@ -595,6 +604,176 @@ test("system status reports the installation without exposing any secret", async
   assert.equal(probe.data.status, "ok");
   const [event] = await audited("STORAGE_CONNECTION_TESTED");
   assert.equal(event.after.status, "ok");
+});
+
+test("the second logo is optional, independent of the main one, checked like it, and the infrastructure can define it", async () => {
+  // An installation that never uses it sees nothing change.
+  const none = await settings();
+  assert.deepEqual(
+    [none.logoSecondary.source, none.secondaryName.source],
+    ["default", "default"],
+  );
+  const bare = await branding();
+  assert.deepEqual([bare.logoSecondary, bare.secondaryName], ["", ""]);
+  let version = none.version;
+  // Its entity is saved trimmed; the main logo and every other value are untouched.
+  const named = await save(
+    { secondaryName: "  Coordinación General de Sistemas e Informática " },
+    version,
+  );
+  assert.equal(named.status, 201, JSON.stringify(named.data));
+  version = named.data.version;
+  assert.deepEqual(
+    [named.data.secondaryName.value, named.data.secondaryName.source],
+    ["Coordinación General de Sistemas e Informática", "saved"],
+  );
+  assert.equal(
+    (await branding()).secondaryName,
+    "Coordinación General de Sistemas e Informática",
+  );
+  // The same byte-level checks as the main logo.
+  for (const [bytes, hint] of [
+    [
+      Buffer.from(
+        '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"/>',
+      ),
+      "SVG",
+    ],
+    [Buffer.from("<html><script>alert(1)</script></html>"), "Formato"],
+    [png(8), "pequeña"],
+    [png(64).subarray(0, 60), "dañado"],
+  ]) {
+    const r = await upload("logoSecondary", bytes, version);
+    assert.equal(r.status, 400, hint);
+    assert.match(r.data.message, new RegExp(hint, "i"));
+  }
+  assert.equal(
+    (await upload("logoSecondary", Buffer.alloc(513 * 1024, 1), version))
+      .status,
+    413,
+  );
+  assert.equal(
+    (await upload("logoSecondary", png(64), version, { session: analyst }))
+      .status,
+    403,
+  );
+  assert.equal(
+    await db.brandingAsset.count({ where: { kind: "LOGO_SECONDARY" } }),
+    0,
+  );
+  // Accepted, served as an inert image, and a different address from the main logo.
+  const mark = png(120, 40);
+  const stored = await upload("logoSecondary", mark, version);
+  assert.equal(stored.status, 201, JSON.stringify(stored.data));
+  version = stored.data.version;
+  assert.match(
+    stored.data.asset.url,
+    /^\/api\/v1\/configuration\/assets\/logoSecondary\?v=[0-9a-f]{12}$/,
+  );
+  const served = await fetch(origin + stored.data.asset.url);
+  assert.equal(served.headers.get("content-type"), "image/png");
+  assert.equal(served.headers.get("x-content-type-options"), "nosniff");
+  assert.deepEqual(Buffer.from(await served.arrayBuffer()), mark);
+  const both = await upload("logo", png(64), version);
+  assert.equal(both.status, 201);
+  version = both.data.version;
+  const shown = await branding();
+  assert.match(shown.logo, /assets\/logo\?v=/);
+  assert.match(shown.logoSecondary, /assets\/logoSecondary\?v=/);
+  assert.notEqual(shown.logo, shown.logoSecondary);
+  assert.equal(
+    await db.brandingAsset.count({
+      where: { kind: { in: ["LOGO", "LOGO_SECONDARY"] } },
+    }),
+    2,
+  );
+  // Removing the main logo keeps the second, and the other way round.
+  const noMain = await request("/settings/assets/logo/remove", {
+    session: admin,
+    method: "POST",
+    body: { expectedVersion: version },
+  });
+  assert.equal(noMain.status, 201);
+  version = noMain.data.version;
+  assert.equal((await branding()).logo, "");
+  assert.equal((await fetch(origin + shown.logoSecondary)).status, 200);
+  // What the infrastructure defines wins and cannot be changed from the panel.
+  Object.assign(process.env, {
+    APP_LOGO_SECONDARY: "/branding/area.png",
+    APP_SECONDARY_NAME: "Definida en .env",
+  });
+  try {
+    const external = await settings();
+    assert.deepEqual(
+      [
+        external.logoSecondary.source,
+        external.logoSecondary.variable,
+        external.secondaryName.source,
+        external.secondaryName.variable,
+      ],
+      ["external", "APP_LOGO_SECONDARY", "external", "APP_SECONDARY_NAME"],
+    );
+    assert.equal((await upload("logoSecondary", png(64), version)).status, 409);
+    assert.equal(
+      (
+        await request("/settings/assets/logoSecondary/remove", {
+          session: admin,
+          method: "POST",
+          body: { expectedVersion: version },
+        })
+      ).status,
+      409,
+    );
+    assert.equal(
+      (await save({ secondaryName: "Intento" }, version)).status,
+      409,
+    );
+    assert.equal(
+      (await save({ reset: ["secondaryName"] }, version)).status,
+      409,
+    );
+    const publicView = await branding();
+    assert.deepEqual(
+      [publicView.logoSecondary, publicView.secondaryName],
+      ["/branding/area.png", "Definida en .env"],
+    );
+    assert.equal(
+      (await fetch(origin + "/api/v1/configuration/assets/logoSecondary"))
+        .status,
+      404,
+    );
+  } finally {
+    delete process.env.APP_LOGO_SECONDARY;
+    delete process.env.APP_SECONDARY_NAME;
+  }
+  // Without the variables the saved choices apply again: nothing was lost.
+  assert.match((await branding()).logoSecondary, /assets\/logoSecondary\?v=/);
+  // Deleting the image and emptying the name leaves an installation with no second logo at all.
+  const gone = await request("/settings/assets/logoSecondary/remove", {
+    session: admin,
+    method: "POST",
+    body: { expectedVersion: version },
+  });
+  assert.equal(gone.status, 201);
+  assert.equal(gone.data.asset.source, "default");
+  const cleared = await save({ secondaryName: "" }, gone.data.version);
+  assert.equal(cleared.status, 201);
+  assert.equal(cleared.data.secondaryName.source, "default");
+  const final = await branding();
+  assert.deepEqual([final.logoSecondary, final.secondaryName], ["", ""]);
+  assert.equal(
+    (await fetch(origin + "/api/v1/configuration/assets/logoSecondary")).status,
+    404,
+  );
+  const kinds = (await audited("BRANDING_ASSET_CHANGED")).map(
+    (e) => e.after.kind,
+  );
+  assert.ok(kinds.includes("logoSecondary"));
+  assert.ok(
+    (await audited("BRANDING_ASSET_REMOVED")).some(
+      (e) => e.before.kind === "logoSecondary",
+    ),
+  );
 });
 
 test("settings, images and the setup record survive a restart", async () => {

@@ -101,6 +101,14 @@ export function InvitedResponse() {
             {branding.organizationName}
           </span>
         )}
+        {/* Who is asking: the responsible entity, small and last. */}
+        {branding.logoSecondary && (
+          <img
+            className="invitation-secondary"
+            src={branding.logoSecondary}
+            alt={branding.secondaryName}
+          />
+        )}
       </header>
       <main id="main" className="invitation-content">
         {pendingLink && (

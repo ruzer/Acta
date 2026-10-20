@@ -5,6 +5,7 @@ import {
   minimumAccentContrast,
   type SettingField,
 } from "@requirements/contracts";
+import { Marks } from "../branding";
 import { Input, Select } from "../ui";
 import { StatusChip } from "../ui/semantic";
 
@@ -136,19 +137,29 @@ export function AccentInput({
   );
 }
 
-/** What the sign-in page and the navigation will look like with these choices. */
+/**
+ * What the installation will look like with these choices: the browser tab, the
+ * sign-in screen and the side navigation, drawn with the same marks and
+ * proportions as the real ones. Nothing here is interactive.
+ */
 export function BrandingPreview({
   appName,
   shortName,
   organizationName,
+  secondaryName = "",
   accent,
   logo,
+  logoSecondary = "",
+  favicon = "",
 }: {
   appName: string;
   shortName: string;
   organizationName: string;
+  secondaryName?: string;
   accent: string;
   logo: string;
+  logoSecondary?: string;
+  favicon?: string;
 }) {
   const style = (isHex(accent) ? { "--preview-accent": accent } : undefined) as
     CSSProperties | undefined;
@@ -156,18 +167,40 @@ export function BrandingPreview({
     <figure className="brand-preview" style={style}>
       <figcaption>Vista previa</figcaption>
       <div className="brand-preview-card" data-testid="branding-preview">
-        <div className="brand-preview-bar">
-          {logo && <img src={logo} alt="" />}
-          <strong>{shortName || appName}</strong>
+        <div className="brand-preview-tab">
+          {favicon ? (
+            <img src={favicon} alt="" />
+          ) : (
+            <span className="brand-preview-tab-empty" aria-hidden="true" />
+          )}
+          <span>{appName}</span>
         </div>
-        <p className="brand-preview-institution">{organizationName}</p>
-        <p>{appName} · Questions. Evidence. Decisions.</p>
-        <p>
-          <span className="brand-preview-link">Un enlace de ejemplo</span>
-        </p>
-        <span className="button primary" aria-hidden="true">
-          Iniciar sesión
-        </span>
+        <div className="brand-preview-body">
+          <div className="brand-preview-side">
+            <div className="brand-preview-bar">
+              {logo && <img src={logo} alt="" />}
+              <strong>{shortName || appName}</strong>
+            </div>
+            <span className="brand-preview-nav" data-current="">
+              Mis proyectos
+            </span>
+            <span className="brand-preview-nav">Administración</span>
+          </div>
+          <div className="brand-preview-login">
+            <Marks logo={logo} logoSecondary={logoSecondary} name="" />
+            <p className="brand-preview-institution">{organizationName}</p>
+            {secondaryName && (
+              <p className="brand-preview-secondary">{secondaryName}</p>
+            )}
+            <p>{appName} · Questions. Evidence. Decisions.</p>
+            <p>
+              <span className="brand-preview-link">Un enlace de ejemplo</span>
+            </p>
+            <span className="button primary" aria-hidden="true">
+              Iniciar sesión
+            </span>
+          </div>
+        </div>
       </div>
     </figure>
   );

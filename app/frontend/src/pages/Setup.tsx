@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   appearanceChoices,
-  appearanceKeys,
   setupAdministratorInput,
   type AppearanceKey,
   type SetupChecks,
@@ -31,6 +30,14 @@ const steps = [
 ] as const;
 type StepId = (typeof steps)[number]["id"];
 const command = "docker compose exec backend node scripts/setup-token.mjs";
+/** What the wizard asks about; the logos and the second entity are set later in Configuración. */
+const wizardKeys = [
+  "appName",
+  "shortName",
+  "accent",
+  "locale",
+  "timezone",
+] as const satisfies readonly AppearanceKey[];
 
 type Values = {
   username: string;
@@ -134,6 +141,7 @@ export function Setup({ onFinished }: { onFinished: () => void }) {
         accent: a.accent.value,
         locale: a.locale.value,
         timezone: a.timezone.value,
+        secondaryName: a.secondaryName.value,
       });
       setStep("administrator");
     } catch (error) {
@@ -168,7 +176,7 @@ export function Setup({ onFinished }: { onFinished: () => void }) {
       found["organization.name"] = "Escribe el nombre de la institución.";
     if (current === "appearance") {
       const open = Object.fromEntries(
-        appearanceKeys
+        wizardKeys
           .filter((key) => !external(key))
           .map((key) => [key, values[key]]),
       );
@@ -227,7 +235,7 @@ export function Setup({ onFinished }: { onFinished: () => void }) {
           },
           organization: { name: values.organizationName.trim() },
           appearance: Object.fromEntries(
-            appearanceKeys
+            wizardKeys
               .filter((key) => !external(key))
               .map((key) => [key, values[key]]),
           ),

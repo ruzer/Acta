@@ -13,7 +13,7 @@ import {
   StatusBadge,
 } from "../ui";
 import { PersonalProgress, ParticipantHome } from "./MyWork";
-import { Brand } from "../branding";
+import { Brand, InstitutionMarks, useBranding } from "../branding";
 import { PageHeader } from "../ui/semantic";
 import { AnalystStatus } from "./AnalystVisual";
 import { plural } from "../ui/plural";
@@ -26,6 +26,7 @@ export function Login({
   notice: string;
   compact?: boolean;
 }) {
+  const branding = useBranding();
   const context = useQuery({
     queryKey: ["login-context"],
     queryFn: () => api("loginContext"),
@@ -71,9 +72,14 @@ export function Login({
   return (
     <Container className={compact ? "reauth" : "access"}>
       <div className="access-intro">
+        {/* Identity first: the institution's marks, then its name, then who it works with, then the product. */}
+        <InstitutionMarks nameShown={!!branding.secondaryName} />
         <p className="access-institution">{context.data.institutionName}</p>
-        <p>
-          <Brand /> · Questions. Evidence. Decisions.
+        {branding.secondaryName && (
+          <p className="access-secondary">{branding.secondaryName}</p>
+        )}
+        <p className="access-product">
+          <Brand logo={false} /> · Questions. Evidence. Decisions.
         </p>
       </div>
       <section className="access-form">

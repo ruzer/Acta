@@ -30,6 +30,7 @@ const defaults = (overrides: Record<string, unknown> = {}) => ({
     accent: field("#2b4d7c"),
     locale: field("es-MX"),
     timezone: field("UTC"),
+    secondaryName: field(""),
     ...overrides,
   },
 });
