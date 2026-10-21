@@ -6,6 +6,15 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
+### Fixed
+
+- **Docker Compose** ahora pasa `APP_LOGO_SECONDARY` y `APP_SECONDARY_NAME` al
+  backend. En v0.8.0 estaban documentadas pero `docker-compose.yml` no las
+  entregaba, así que definirlas en `.env` no tenía efecto en una instalación con
+  Docker. Siguen vacías por defecto y la precedencia no cambia: una variable
+  definida manda y se muestra como «administrado externamente». Una prueba
+  comprueba que Compose pase todas las variables de apariencia.
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**
