@@ -73,7 +73,7 @@ jobs:
           docker create --name storage-binary requirements-storage-audit
           docker cp storage-binary:/usr/local/bin/versitygw ./storage-audit-binary
           docker rm storage-binary
-          docker run --rm -v "$PWD/storage-audit-binary:/input/versitygw:ro" golang:1.26.8-bookworm sh -c 'go install golang.org/x/vuln/cmd/govulncheck@v1.8.0 && /go/bin/govulncheck -mode=binary /input/versitygw'
+          docker run --rm -v "$PWD/storage-audit-binary:/input/versitygw:ro" golang:1.27.3-bookworm@sha256:5c3e9b43cfd3bb95c7937462e29d87ada57b481a96fa23ad0eb61778d7a00110 sh -c 'go install golang.org/x/vuln/cmd/govulncheck@v1.8.0 && /go/bin/govulncheck -mode=binary /input/versitygw'
 
   secrets:
     runs-on: ubuntu-latest
