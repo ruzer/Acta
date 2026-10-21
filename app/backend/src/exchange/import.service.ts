@@ -13,6 +13,7 @@ import {
 } from "@requirements/contracts";
 import { Database } from "../database/database.module.js";
 import { AccessService } from "../administration/access.service.js";
+import { lockAreas } from "../administration/area-rules.js";
 import { Tx, CommandContext, jsonValue, serialize } from "../common/http.js";
 import { inspectTemplate, referenceKey } from "./template.js";
 @Injectable()
@@ -53,11 +54,22 @@ export class ImportService {
           "/project/externalId",
           "El identificador del archivo debe coincidir exactamente con este proyecto.",
         );
+      const codes = result.data.areas.map((a) => a.code);
+      // Hold the areas the file names, then read them: a deactivation in flight is waited for.
+      await lockAreas(
+        tx,
+        (
+          await tx.area.findMany({
+            where: {
+              organizationId: actor.organizationId,
+              code: { in: codes },
+            },
+            select: { id: true },
+          })
+        ).map((a) => a.id),
+      );
       const areas = await tx.area.findMany({
-        where: {
-          organizationId: actor.organizationId,
-          code: { in: result.data.areas.map((a) => a.code) },
-        },
+        where: { organizationId: actor.organizationId, code: { in: codes } },
       });
       result.data.areas.forEach((a, i) => {
         const existing = areas.find((x) => x.code === a.code);
