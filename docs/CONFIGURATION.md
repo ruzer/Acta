@@ -65,7 +65,7 @@ Los scripts del MinIO incluido fijan `MINIO_UPDATE=off`, `MC_UPDATE=off` y `MINI
 
 ## Configuración actual de storage
 
-El default es `S3_ENDPOINT=http://object-storage:9000` con VersityGW 1.8.0 fijado. Los nombres `MINIO_ROOT_USER`/`MINIO_ROOT_PASSWORD` se conservan como aliases operativos históricos del generador de secretos, no como dependencia del dominio: controlan el root del storage incluido. Mantenerlos vacíos genera secretos únicos; no rotarlos borrando volúmenes. API solo recibe S3_ACCESS_KEY/S3_SECRET_KEY.
+El default es `S3_ENDPOINT=http://object-storage:9000` con VersityGW 1.9.0 fijado. Los nombres `MINIO_ROOT_USER`/`MINIO_ROOT_PASSWORD` se conservan como aliases operativos históricos del generador de secretos, no como dependencia del dominio: controlan el root del storage incluido. Mantenerlos vacíos genera secretos únicos; no rotarlos borrando volúmenes. API solo recibe S3_ACCESS_KEY/S3_SECRET_KEY.
 
 El override `docker-compose.external-s3.yml` permite omitir storage/init locales para un bucket externo ya privado. La comprobación API de HeadBucket sigue fallando si las credenciales/provider no sirven. No se usan URLs firmadas ni se cambia la autorización del dominio.
 

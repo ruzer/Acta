@@ -1,10 +1,10 @@
 # Proveedores S3 para self-hosting
 
-Evaluación: **2026-09-30**. Este documento distingue capacidades declaradas por upstream de pruebas ejecutadas con Acta. No certifica toda la API S3, alta disponibilidad ni ausencia de vulnerabilidades. La licencia principal de Acta es AGPL-3.0-only.
+Evaluación inicial: **2026-09-30**. Actualización de seguridad del default: **2026-10-20**. Este documento distingue capacidades declaradas por upstream de pruebas ejecutadas con Acta. No certifica toda la API S3, alta disponibilidad ni ausencia de vulnerabilidades. La licencia principal de Acta es AGPL-3.0-only.
 
 ## Decisión
 
-**VersityGW 1.8.0 — DEFAULT — instalación sencilla.** Se conserva para el despliegue single-host de evidencia. No se agregan productos, SDK específicos, selectores UI ni enums al dominio. La API utiliza exclusivamente `S3Storage`, claves estables y configuración S3.
+**VersityGW 1.9.0 — DEFAULT — instalación sencilla.** Se conserva para el despliegue single-host de evidencia. No se agregan productos, SDK específicos, selectores UI ni enums al dominio. La API utiliza exclusivamente `S3Storage`, claves estables y configuración S3.
 
 Garage no satisface el contrato de escrituras condicionales del adaptador; no se incluye un override que obligue a debilitarlo. SeaweedFS queda como candidato avanzado **no verificado**, sin Compose incluido. MinIO se conserva únicamente para instalaciones anteriores y pruebas de compatibilidad; no es una recomendación de seguridad.
 
@@ -14,7 +14,7 @@ En Single host/Distributed se describe upstream; Tested/Backup/ARM64/AMD64 descr
 
 | Provider / versión evaluada | Clasificación | Self-hosted | Single host | Distributed | Tested | Backup tested | ARM64 | AMD64 |
 |---|---|---|---|---|---|---|---|---|
-| VersityGW 1.8.0 | DEFAULT + VERIFIED | Sí | Sí, POSIX incluido | Gateway sobre storage compartido; no replicación del disco local incluida | 21/21 + recorrido API | Sí, destructivo TEST | Linux verificado | No ensayado |
+| VersityGW 1.9.0 | DEFAULT + VERIFIED | Sí | Sí, POSIX incluido | Gateway sobre storage compartido; no replicación del disco local incluida | 41/41 + recorrido API + actualización desde 1.8.0 | Ensayo histórico con 1.8.0; no repetido con 1.9.0 | Linux verificado localmente | Consultar CI de la revisión |
 | Garage 2.4.1 | NOT SUPPORTED por el contrato actual | Sí | Upstream lo permite; recomienda redundancia para producción | Sí, upstream | No ejecutado; incompatibilidad documentada | No | Binario upstream, app no ensayada | Binario upstream, app no ensayada |
 | SeaweedFS 4.48 | CANDIDATE / NOT VERIFIED | Sí | `weed mini` agrupa servicios | Sí, upstream | No ejecutado | No | Asset upstream, app no ensayada | Asset upstream, app no ensayada |
 | MinIO RELEASE.2025-10-15T17-29-55Z | LEGACY, no recomendado | Sí | Override existente | Upstream; no incluido aquí | 21/21 + recorrido API | Sí, destructivo TEST | Linux verificado (funcional) | No ensayado |
@@ -38,11 +38,19 @@ El esquema todavía conserva el valor **MINIO** de registros históricos, leído
 
 ## VersityGW
 
-Repositorio activo; release 1.8.0 publicada el 4 de septiembre de 2026. Apache-2.0. El binario se compila desde el código fuente oficial de la release 1.8.0 (commit `fd04bc1df2656298577b82667a4195c77f8c7563`, verificado en el build) con Go 1.27.2 (imagen fijada por digest) y `golang.org/x/net` v0.60.0, porque el binario de la imagen oficial 1.8.0 (Go 1.27.1, x/net v0.58.0) no pasa `govulncheck`; ver `docker/versity/UPSTREAM-MODIFICATIONS` y `docker/versity/versitygw-v1.8.0-security.patch`. Base Node/Debian, LICENSE/NOTICE conservados. Al publicarse una release oficial compilada con una versión corregida de Go y `x/net`, volver a la imagen oficial fijada por digest. El wrapper evita depender del entrypoint de la imagen upstream en ARM64. El build y los ensayos de este snapshot usan Linux ARM64; AMD64 no se afirma verificado. [Release y cambios oficiales](https://github.com/versity/versitygw/releases/tag/v1.8.0), [código/licencia](https://github.com/versity/versitygw).
+El default compila la release oficial **1.9.0**, commit `ca4c8d30f579a5ac3dd8c91bbfa8340c69dac0ac`, con **Go 1.27.3** fijado por digest. No se modifica código ni dependencias upstream: `golang.org/x/net` v0.60.0 ya está incluido y se retira el parche local de 1.8.0. LICENSE/NOTICE se conservan íntegros, verificados contra la nueva release; ver [modificaciones del build](../docker/versity/UPSTREAM-MODIFICATIONS) e [inventario de licencias](STORAGE-DEPENDENCY-LICENSES.csv).
 
-Es el camino más pequeño ya comprobado: gateway S3, filesystem POSIX persistente y política de cuenta limitada. Healthcheck interno `/_health`, más `HeadBucket` desde API. Conservar objetos, metadata sidecar, IAM y marcador de formato del volumen. La edición incluida no convierte discos locales en un clúster replicado; single-host no es HA. [Operación upstream](https://github.com/versity/versitygw/wiki/Quickstart).
+La misma etapa de compilación se usa en `docker/versity/Dockerfile` y `app/backend/Dockerfile` (aprovisionamiento). El backend de aplicación no recibe ese binario ni las credenciales root. Se conservan el wrapper sin privilegios, POSIX con metadata sidecar, IAM local, política por prefijo y healthcheck `/_health` más `HeadBucket`. No cambia la API de Acta ni la configuración S3. Single-host no es HA.
 
-Seguridad: el índice oficial consultado contiene GHSA-c7wx-9pfv-whxh y GHSA-7c8h-9q99-mm84 con corrección en 1.8.0, además de correcciones anteriores de LDAP/path traversal. Mantener la versión fijada y revisar advisories al actualizar; no interpretar este gate funcional como un pentest ni como escaneo completo de Go/OS. [Advisories oficiales](https://github.com/versity/versitygw/security/advisories).
+Correcciones: Go 1.27.3 resuelve **GO-2026-6809 / CVE-2026-111943** (`crypto/x509`). VersityGW 1.9.0 corrige **GHSA-7qcr-88c3-f9p7** (path traversal mediante uploadId y borrado múltiple) y **GHSA-5gjv-3vhq-4chv** (cuerpos chunked sin consumir y reutilización de conexiones). El despliegue estándar no activa keepalive ni usa multipart; eso limita el alcance probado, pero no justifica conservar una versión afectada. El gate `govulncheck` sigue siendo obligatorio y no certifica ausencia de todas las vulnerabilidades de aplicación o del sistema operativo.
+
+### Actualización desde 1.8.0
+
+Conservar **todo** `objectdata`: objetos, metadata sidecar, IAM y marcador de formato. Antes de actualizar, realizar el [backup coordinado](BACKUP-RESTORE.md), detener escritores y conservar las imágenes anteriores. Reconstruir `object-storage` y `storage-init` desde la misma revisión de Acta, iniciar y comprobar salud, descarga autorizada con SHA-256 y denegación de acceso anónimo. No borrar volúmenes ni generar nuevas credenciales. Un rollback debe recuperar una copia coordinada y las imágenes correspondientes; no se afirma que sea seguro bajar de versión sobre datos que ya recibieron escrituras nuevas.
+
+**Excepción para configuraciones externas al default:** 1.9.0 cambia la retención predeterminada de Object Lock. Si el operador la habilitó, debe evaluar las reglas históricas y el procedimiento upstream antes de actualizar. Acta no activa Object Lock, versionado ni reglas de retención en su aprovisionador. No se ejecuta ninguna migración automática ni se habilita retención irreversible. Tampoco se activa el nuevo `--fsync`; un restart exitoso no demuestra resistencia ante pérdida abrupta de energía.
+
+Fuentes: [release 1.9.0](https://github.com/versity/versitygw/releases/tag/v1.9.0), [avisos del proveedor](https://github.com/versity/versitygw/security/advisories), [aviso Go](https://pkg.go.dev/vuln/GO-2026-6809), [migración Object Lock](https://github.com/versity/versitygw/discussions/2521).
 
 ## Garage
 
@@ -117,7 +125,7 @@ Se reutiliza la suite real, sin excepciones por proveedor ni assertions debilita
 | Restart y persistencia de metadata/bytes | `scripts/selfhost-smoke.mjs --verify` tras reiniciar y esperar healthchecks |
 | Backup/restore | Dump coordinado + tar de volúmenes detenidos + destrucción de volúmenes TEST + restore + mismo smoke/hash |
 
-El runner `scripts/test-storage-container.mjs` ejecuta 17 pruebas de respuestas/evidencia y 4 de S3: **21 casos**, sin skips ni retries. Solo usar instalación y bucket descartables: la reconciliación puede eliminar huérfanos de ese bucket. El runner recibe temporalmente credenciales DB de migración; el servicio backend normal no las monta.
+El runner `scripts/test-storage-container.mjs` ejecuta 17 pruebas de respuestas/evidencia, 18 de invitaciones y 6 de S3: **41 casos**, sin skips ni retries. Solo usar instalación y bucket descartables: la reconciliación puede eliminar huérfanos de ese bucket. El runner recibe temporalmente credenciales DB de migración; el servicio backend normal no las monta.
 
 ```sh
 # Desde el snapshot, con Docker, sin dependencias instaladas en el host.
@@ -139,6 +147,19 @@ docker compose --env-file .env.example exec -T -e SELFHOST_SMOKE_ALLOWED=true \
 ```
 
 Para legacy utilizar **otro proyecto/puerto/volúmenes**, añadir el override en todos los comandos y ajustar el volumen del runner. No ejecutar la suite después del smoke sobre el mismo bucket: el test de reconciliación tiene reloj adelantado; ejecutar suite primero, luego smoke/restore. Para un futuro endpoint externo usar una DB temporal, bucket separado y cuenta con la misma política. No se permite saltar pruebas para obtener VERIFIED.
+
+## Verificación de seguridad y compatibilidad 1.9.0 (2026-10-20)
+
+Linux ARM64, stack descartable separado, sin usar datos ni volúmenes existentes:
+
+- Ambos builds Docker completados; servicio y aprovisionador contienen el mismo binario SHA-256 `71630c3ddd80d96d8a5d4507df3a357f16e164de4a55b83564e8ed94d4babf95`. Servicio ejecutado como usuario `node`.
+- `govulncheck` v1.8.0 en modo binario y sobre `./cmd/versitygw`: exit 0, sin vulnerabilidades alcanzables ni paquetes importados afectados. Informa **GO-2026-5932** en el módulo `golang.org/x/crypto` por `openpgp`, paquete no importado por este binario. No hay exclusión ni supresión; no se afirma que el inventario completo de módulos carezca de avisos.
+- Suite real S3/backend: **41/41 PASS**, cero skips. Incluye hashes, bytes, privacidad, credenciales inválidas, restricciones por prefijo, denegación de lectura de políticas, concurrencia `If-None-Match: *`, rollback, reconciliación e invitaciones.
+- Pruebas upstream focalizadas en `backend/posix`, `s3api/middlewares` y `s3api/controllers`: PASS para la carrera de creación condicional, drenado/cierre de cuerpos chunked y `DeleteObjects`.
+- Instalación limpia 1.9.0 y restart de PostgreSQL, storage, backend y frontend: PASS; respuesta, decisión/fuente y SHA-256 de evidencia conservados con el smoke existente.
+- Actualización real **1.8.0 → 1.9.0**: se creó primero una instalación 1.8.0 con el smoke existente, se detuvieron escritores, se reconstruyeron únicamente `object-storage` y `storage-init`, y se inició con los mismos volúmenes y configuración. `scripts/selfhost-smoke.mjs --verify` confirmó login, respuesta, decisión/fuente, evidencia con el mismo SHA-256 y privacidad. No se convirtieron objetos ni se reinicializó IAM.
+
+El cambio conserva `start.mjs`, el aprovisionador, Compose y el adaptador S3. El CI de cada PR ejecuta además `verify`, `secrets`, `selfhosting` y `guided-install`; su resultado se consulta sobre el SHA exacto, no se deduce de las pruebas locales. No se probó Object Lock, HA ni migración a otro proveedor. La receta de backup/restore conserva su evidencia histórica separada.
 
 ## Registro de ejecución del snapshot
 
