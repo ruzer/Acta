@@ -31,14 +31,15 @@ const project = (id: string, name: string, extra = {}) => ({
   name,
   description: "",
   lifecycle: "ACTIVE",
-  role: "ADMIN",
-  lockVersion: 1,
-  questionCount: 4,
+  myRole: "ADMIN",
+  admins: ["Ana Admin"],
+  adminCount: 1,
+  memberCount: 3,
   ...extra,
 });
 function mount(projects: unknown[]) {
   vi.spyOn(apiModule, "api").mockImplementation((async (key: string) =>
-    key === "projects" ? projects : []) as never);
+    key === "organizationProjects" ? projects : []) as never);
   render(
     <QueryClientProvider
       client={
@@ -68,6 +69,40 @@ it("Proyectos lista cada proyecto con su identificador y accesos directos a abri
     screen.getByRole("link", { name: "Miembros de Proyecto A" }),
   ).toHaveAttribute("href", "/projects/a/members");
   expect(screen.getByText(/Archivado/)).toBeVisible();
+});
+it("Proyectos muestra los de toda la institución, también los ajenos y los sin administrador, sin ofrecer abrirlos", async () => {
+  const user = mount([
+    project("a", "Proyecto mío"),
+    project("b", "Proyecto ajeno", {
+      myRole: null,
+      admins: ["Beto Admin", "Carla Admin"],
+      adminCount: 7,
+    }),
+    project("c", "Proyecto huérfano", {
+      myRole: null,
+      admins: [],
+      adminCount: 0,
+    }),
+  ]);
+  await user.click(screen.getByRole("button", { name: "Proyectos" }));
+  await screen.findByRole("table", { name: "Proyectos" });
+  // The other administrator's project is there, with who runs it and no access of mine.
+  expect(screen.getByText("Proyecto ajeno")).toBeVisible();
+  expect(screen.getByText("Beto Admin, Carla Admin y 5 más")).toBeVisible();
+  expect(screen.getAllByText("Sin acceso")).toHaveLength(2);
+  // Listing it does not open it: only its members page is offered.
+  expect(
+    screen.queryByRole("link", { name: "Abrir Proyecto ajeno" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("link", { name: "Miembros de Proyecto ajeno" }),
+  ).toHaveAttribute("href", "/projects/b/members");
+  // A project nobody runs is flagged so it can be given an administrator.
+  expect(screen.getByText("Sin administrador activo")).toBeVisible();
+  expect(
+    screen.getByRole("link", { name: "Miembros de Proyecto huérfano" }),
+  ).toBeVisible();
+  expect(screen.getByText(/no da acceso a sus respuestas/)).toBeVisible();
 });
 it("sin proyectos, la pestaña dice cómo crear el primero", async () => {
   const user = mount([]);
@@ -120,7 +155,9 @@ function mountApp(
   entries: Parameters<typeof MemoryRouter>[0]["initialEntries"],
 ) {
   vi.spyOn(apiModule, "api").mockImplementation((async (key: string) =>
-    key === "projects" ? [project("a", "Proyecto A")] : []) as never);
+    key === "organizationProjects"
+      ? [project("a", "Proyecto A")]
+      : []) as never);
   render(
     <QueryClientProvider
       client={
@@ -145,6 +182,10 @@ it("los miembros de un proyecto abierto desde Administración vuelven a esa list
   );
   const back = await screen.findByRole("link", { name: "← Administración" });
   expect(back).toHaveAttribute("href", "/admin");
+  // The administration may not belong to the project, so the page says which one it is.
+  expect(
+    await screen.findByRole("heading", { name: "Miembros de Proyecto A" }),
+  ).toBeVisible();
   expect(
     screen.queryByRole("link", { name: "← Cuestionario" }),
   ).not.toBeInTheDocument();
