@@ -6,11 +6,14 @@ import {
 } from "@nestjs/common";
 import { ProjectRole, User } from "@prisma/client";
 import { Database } from "../database/database.module.js";
+import { invitationAccess } from "../common/invitation-access.js";
 import { Tx } from "../common/http.js";
 @Injectable()
 export class AccessService {
   constructor(private readonly db: Database) {}
   async organizationAdmin(tx: Tx, actor: User) {
+    if (actor.invitationOnly)
+      throw new ForbiddenException("Esta acción requiere una cuenta.");
     const u = await tx.user.findFirst({
       where: {
         id: actor.id,
@@ -46,13 +49,20 @@ export class AccessService {
       );
     if (roles && !roles.includes(member.role))
       throw new ForbiddenException("Tu perfil no permite esta acción.");
-    return { project, member };
+    const invitation = current.invitationOnly
+      ? await invitationAccess(tx, actor, projectId)
+      : null;
+    if (invitation && member.role !== "STAKEHOLDER")
+      throw new ForbiddenException("Invitación no disponible.");
+    return { project, member, invitation };
   }
   async membershipAdmin(tx: Tx, actor: User, projectId: string) {
     const project = await tx.project.findFirst({
       where: { id: projectId, organizationId: actor.organizationId },
     });
     if (!project) throw new NotFoundException("No se encontró el proyecto.");
+    if (actor.invitationOnly)
+      throw new ForbiddenException("Esta acción requiere una cuenta.");
     const u = await tx.user.findFirst({
       where: {
         id: actor.id,

@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
-import { roleLabels, type Me } from "@requirements/contracts";
+import { roleLabels, statusLabels, type Me } from "@requirements/contracts";
 import { api, formValues, setCsrf } from "../api";
 import {
   Alert,
@@ -13,7 +13,10 @@ import {
   StatusBadge,
 } from "../ui";
 import { PersonalProgress, ParticipantHome } from "./MyWork";
-import { Brand } from "../branding";
+import { Brand, InstitutionMarks, useBranding } from "../branding";
+import { PageHeader } from "../ui/semantic";
+import { AnalystStatus } from "./AnalystVisual";
+import { plural } from "../ui/plural";
 export function Login({
   onLogin,
   notice,
@@ -23,6 +26,7 @@ export function Login({
   notice: string;
   compact?: boolean;
 }) {
+  const branding = useBranding();
   const context = useQuery({
     queryKey: ["login-context"],
     queryFn: () => api("loginContext"),
@@ -68,13 +72,18 @@ export function Login({
   return (
     <Container className={compact ? "reauth" : "access"}>
       <div className="access-intro">
-        <h1>{context.data.institutionName}</h1>
-        <p>
-          <Brand /> · Questions. Evidence. Decisions.
+        {/* Identity first: the institution's marks, then its name, then who it works with, then the product. */}
+        <InstitutionMarks nameShown={!!branding.secondaryName} />
+        <p className="access-institution">{context.data.institutionName}</p>
+        {branding.secondaryName && (
+          <p className="access-secondary">{branding.secondaryName}</p>
+        )}
+        <p className="access-product">
+          <Brand logo={false} /> · Questions. Evidence. Decisions.
         </p>
       </div>
       <section className="access-form">
-        <h2>Iniciar sesión</h2>
+        {compact ? <h2>Iniciar sesión</h2> : <h1>Iniciar sesión</h1>}
         <p>Utiliza la cuenta proporcionada por la administración.</p>
         {notice && <Alert>{notice}</Alert>}
         {error && <Alert error>{error}</Alert>}
@@ -174,7 +183,13 @@ export function Password({
     </section>
   );
 }
-export function Projects({ displayName = "" }: { displayName?: string }) {
+export function Projects({
+  displayName = "",
+  isOrganizationAdmin = false,
+}: {
+  displayName?: string;
+  isOrganizationAdmin?: boolean;
+}) {
   const q = useQuery({
     queryKey: ["projects"],
     queryFn: () => api("projects"),
@@ -186,75 +201,104 @@ export function Projects({ displayName = "" }: { displayName?: string }) {
     return <ParticipantHome projects={q.data} displayName={displayName} />;
   return (
     <>
-      <p className="eyebrow">TU ESPACIO DE TRABAJO</p>
-      <h1>Mis proyectos</h1>
-      <p className="lead">
-        Consulta las preguntas disponibles y su organización por secciones.
-      </p>
+      <PageHeader
+        overline="TU ESPACIO DE TRABAJO"
+        title="Mis proyectos"
+        lead="Accede al cuestionario, las respuestas y el trabajo de cada proyecto."
+      />
       {q.data.length === 0 ? (
         <EmptyState title="Aún no tienes proyectos">
-          La administración debe asignarte una membresía para comenzar.
+          {isOrganizationAdmin ? (
+            <>
+              Crea tu primer proyecto desde{" "}
+              <Link to="/admin">Administración → Proyectos</Link>. Después
+              podrás preparar o importar su cuestionario.
+            </>
+          ) : (
+            "La administración debe asignarte una membresía para comenzar."
+          )}
         </EmptyState>
       ) : (
         <ul className="project-list">
-          {q.data.map((p) => (
-            <li key={p.id}>
-              <div>
-                <StatusBadge>{roleLabels[p.role]}</StatusBadge>
-                <h2>{p.name}</h2>
-                <p>{p.description}</p>
-                <span className="muted">
-                  {p.questionCount} preguntas publicadas disponibles
-                </span>
-                {(p.role === "ADMIN" || p.role === "ANALYST") && (
-                  <Link to={`/projects/${p.id}/dashboard`}>
-                    Resumen del proyecto
-                  </Link>
-                )}
-                {p.role === "VIEWER" && (
-                  <Link to={`/projects/${p.id}/export`}>
-                    Exportar decisiones vigentes
-                  </Link>
-                )}
-                {p.role === "ANALYST" && (
+          {q.data.map((p) => {
+            const manages = p.role === "ADMIN" || p.role === "ANALYST";
+            return (
+              <li key={p.id}>
+                <div className="project-card-main">
+                  <StatusBadge>{roleLabels[p.role]}</StatusBadge>
+                  <h2>{p.name}</h2>
+                  <p>{p.description}</p>
+                  <span className="muted">
+                    {plural(
+                      p.questionCount,
+                      "pregunta publicada disponible",
+                      "preguntas publicadas disponibles",
+                    )}
+                  </span>
+                  {p.role === "STAKEHOLDER" && (
+                    <PersonalProgress projectId={p.id} />
+                  )}
+                </div>
+                {/* One main action per project: where the work starts. The rest are quiet. */}
+                <div className="project-card-actions">
                   <Link
                     className="button primary"
-                    to={`/review?projectId=${p.id}`}
+                    to={
+                      manages
+                        ? `/projects/${p.id}/dashboard`
+                        : p.role === "STAKEHOLDER"
+                          ? `/projects/${p.id}/work`
+                          : `/projects/${p.id}`
+                    }
                   >
-                    Revisar respuestas
+                    {manages
+                      ? "Atención del proyecto"
+                      : p.role === "STAKEHOLDER"
+                        ? "Abrir proyecto"
+                        : "Consultar preguntas"}
                   </Link>
-                )}
-                {p.role === "STAKEHOLDER" && (
-                  <PersonalProgress projectId={p.id} />
-                )}
-              </div>
-              <Link
-                className="button primary"
-                to={
-                  "/projects/" +
-                  p.id +
-                  (p.role === "ADMIN" || p.role === "ANALYST"
-                    ? "/editor"
-                    : p.role === "STAKEHOLDER"
-                      ? "/work"
-                      : "")
-                }
-              >
-                {p.role === "ADMIN" || p.role === "ANALYST"
-                  ? "Editar cuestionario"
-                  : p.role === "STAKEHOLDER"
-                    ? "Abrir proyecto"
-                    : "Consultar preguntas"}
-              </Link>
-            </li>
-          ))}
+                  {manages && (
+                    <Link
+                      className="button secondary"
+                      to={`/projects/${p.id}/editor`}
+                    >
+                      Editar cuestionario
+                    </Link>
+                  )}
+                  {p.role === "ANALYST" && (
+                    <Link
+                      className="button secondary"
+                      to={`/review?projectId=${p.id}`}
+                    >
+                      Revisar respuestas
+                    </Link>
+                  )}
+                  {p.role === "VIEWER" && (
+                    <Link
+                      className="button secondary"
+                      to={`/projects/${p.id}/export`}
+                    >
+                      Exportar decisiones vigentes
+                    </Link>
+                  )}
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
-      <p className="phase-note">
-        Guarda tus borradores y envía cada respuesta cuando esté lista para
-        revisión.
-      </p>
     </>
+  );
+}
+/** The review state a question was published with, as the same chip the analyst sees. */
+function ReviewStatusChip({ label }: { label: string }) {
+  const status = (
+    Object.keys(statusLabels) as (keyof typeof statusLabels)[]
+  ).find((key) => statusLabels[key] === label);
+  return status ? (
+    <AnalystStatus status={status} />
+  ) : (
+    <StatusBadge>{label}</StatusBadge>
   );
 }
 export function Participant() {
@@ -275,16 +319,21 @@ export function Participant() {
       <Link className="back" to="/">
         ← Mis proyectos
       </Link>
-      <p className="eyebrow">{data.roleLabel}</p>
-      <h1>{data.projectName}</h1>
+      <PageHeader
+        overline={`${data.roleLabel} · ${data.projectName}`}
+        title="Preguntas publicadas"
+      />
       <Alert>{data.phaseNotice}</Alert>
       {!data.sections.length ? (
         <EmptyState title="No hay preguntas disponibles">
           Cuando se publiquen preguntas para ti, aparecerán aquí.
         </EmptyState>
       ) : (
-        <div className="workspace">
-          <nav className="section-nav" aria-label="Secciones del proyecto">
+        <div className="ac-viewer">
+          <nav
+            className="ac-viewer-sections"
+            aria-label="Secciones del proyecto"
+          >
             <h2>Secciones</h2>
             {data.sections.map((s) => (
               <button
@@ -293,7 +342,7 @@ export function Participant() {
                 onClick={() => setSection(s.key)}
               >
                 {s.title}
-                <span>{s.questions.length} preguntas</span>
+                <span>{plural(s.questions.length, "pregunta")}</span>
               </button>
             ))}
           </nav>
@@ -302,43 +351,48 @@ export function Participant() {
             {!current?.questions.length ? (
               <EmptyState title="Sin preguntas en esta sección" />
             ) : (
-              current.questions.map((x, i) => (
-                <article className="participant-question" key={x.key}>
-                  <p className="eyebrow">
-                    Pregunta {i + 1} de {current.questions.length}
-                  </p>
-                  <h3>{x.title}</h3>
-                  <p className="question-text">{x.question}</p>
-                  {x.helpText && <p className="help">{x.helpText}</p>}
-                  {x.conditional && (
-                    <p className="hint">
-                      Pregunta de seguimiento
-                      {x.groupTitle ? " de «" + x.groupTitle + "»" : ""}. Su
-                      aplicación se determinará al responder.
-                    </p>
-                  )}
-                  {x.options.length > 0 && (
-                    <details>
-                      <summary>Opciones previstas</summary>
-                      <ul>
-                        {x.options.map((o) => (
-                          <li key={o}>{o}</li>
-                        ))}
-                      </ul>
-                    </details>
-                  )}
-                  <StatusBadge>{x.statusLabel}</StatusBadge>
-                  {x.reviewQuestionId && (
-                    <p>
-                      <Link
-                        to={`/projects/${projectId}/review/${x.reviewQuestionId}`}
-                      >
-                        Consultar decisión y fuentes
-                      </Link>
-                    </p>
-                  )}
-                </article>
-              ))
+              <ul className="ac-viewer-list">
+                {current.questions.map((x, i) => (
+                  <li key={x.key}>
+                    <article>
+                      <p className="eyebrow">
+                        Pregunta {i + 1} de {current.questions.length}
+                      </p>
+                      <h3>{x.title}</h3>
+                      <p className="question-text">{x.question}</p>
+                      {x.helpText && <p className="help">{x.helpText}</p>}
+                      {x.conditional && (
+                        <p className="hint">
+                          Pregunta de seguimiento
+                          {x.groupTitle ? " de «" + x.groupTitle + "»" : ""}. Su
+                          aplicación se determinará al responder.
+                        </p>
+                      )}
+                      {x.options.length > 0 && (
+                        <details>
+                          <summary>Opciones previstas</summary>
+                          <ul>
+                            {x.options.map((o) => (
+                              <li key={o}>{o}</li>
+                            ))}
+                          </ul>
+                        </details>
+                      )}
+                      <div className="ac-viewer-foot">
+                        <ReviewStatusChip label={x.statusLabel} />
+                        {x.reviewQuestionId && (
+                          <Link
+                            className="button secondary"
+                            to={`/projects/${projectId}/review/${x.reviewQuestionId}`}
+                          >
+                            Consultar decisión y fuentes
+                          </Link>
+                        )}
+                      </div>
+                    </article>
+                  </li>
+                ))}
+              </ul>
             )}
           </section>
         </div>

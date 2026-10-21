@@ -1,13 +1,14 @@
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
+  dashboardView,
   priorities,
   referenceTypes,
   type QuestionnaireView,
   type QuestionView,
 } from "@requirements/contracts";
-import { api } from "../api";
+import { api, exchangeRequest } from "../api";
 import {
   Alert,
   Button,
@@ -22,7 +23,10 @@ import {
 import { ActionForm } from "./Administration";
 import { QuestionForm } from "./QuestionForm";
 import { EditorWorkspace } from "./editor/EditorWorkspace";
+import type { OrganizeContext } from "./editor/questionnaire-presentation";
 import "../editor.css";
+import { ProjectWorkbench } from "./ProjectWorkbench";
+import { rememberWorkbenchItem } from "../workbench-context";
 const refLabels = {
   QUESTION: "Pregunta",
   BUSINESS_RULE: "Regla de negocio",
@@ -36,23 +40,74 @@ const refLabels = {
 export function Editor() {
   const { projectId = "" } = useParams();
   const qc = useQueryClient();
+  const navigate = useNavigate();
+  const contextKey = ["questionnaire-context", projectId];
+  const savedContext = qc.getQueryData<{
+    mode?: number;
+    organize?: OrganizeContext;
+  }>(contextKey);
+  const rememberOrganize = useCallback(
+    (organize: OrganizeContext) => {
+      qc.setQueryData(
+        ["questionnaire-context", projectId],
+        (previous: { mode?: number } | undefined) => ({
+          ...previous,
+          organize,
+        }),
+      );
+    },
+    [qc, projectId],
+  );
+  const contributions = useQuery({
+    queryKey: ["dashboard", projectId],
+    queryFn: () => exchangeRequest(projectId, "dashboard", dashboardView),
+    staleTime: 0,
+  });
   const structureTrigger = useRef<HTMLElement | null>(null);
-  function rememberStructureTrigger() {
+  const actionQuestionId = useRef<string | null>(null);
+  const pendingFocusReturn = useRef(false);
+  function rememberStructureTrigger(questionId: string | null = null) {
+    actionQuestionId.current = questionId;
     const active = document.activeElement as HTMLElement;
     structureTrigger.current =
       active.closest("details")?.querySelector("summary") ?? active;
   }
-  function closeStructureDialog() {
-    setEditingTopic(null);
-    setMoving(null);
+  function restoreStructureFocus() {
     requestAnimationFrame(() => {
+      if (document.querySelector("dialog[open]")) return;
+      const active = document.activeElement;
+      if (
+        active !== document.body &&
+        active instanceof HTMLElement &&
+        active.getClientRects().length
+      )
+        return;
       const target = structureTrigger.current;
-      if (target?.isConnected) target.focus();
-      else
+      if (target?.isConnected && target.getClientRects().length) target.focus();
+      else {
+        const row = Array.from(
+          document.querySelectorAll<HTMLElement>(
+            ".qe-compact-row[data-question-id]",
+          ),
+        ).find((el) => el.dataset.questionId === actionQuestionId.current);
+        if (row?.getClientRects().length) {
+          row.focus();
+          return;
+        }
         document
           .querySelector<HTMLElement>('.qe-modes [aria-selected="true"]')
           ?.focus();
+      }
     });
+  }
+  function closeAction() {
+    pendingFocusReturn.current = true;
+    setAction(null);
+  }
+  function closeStructureDialog() {
+    pendingFocusReturn.current = true;
+    setEditingTopic(null);
+    setMoving(null);
   }
   const [editing, setEditing] = useState<QuestionView | "new" | null>(null);
   const [action, setAction] = useState<{
@@ -71,6 +126,12 @@ export function Editor() {
     question: QuestionView;
     snapshot: QuestionnaireView;
   } | null>(null);
+  useEffect(() => {
+    if (pendingFocusReturn.current && !action && !editingTopic && !moving) {
+      pendingFocusReturn.current = false;
+      restoreStructureFocus();
+    }
+  }, [action, editingTopic, moving]);
   const [creatingTopic, setCreatingTopic] = useState(false);
   const [creatingReference, setCreatingReference] = useState(false);
   const [topicExternalId, setTopicExternalId] = useState("");
@@ -86,6 +147,7 @@ export function Editor() {
     queryFn: () => api("projects"),
   });
   const refresh = () => {
+    void qc.invalidateQueries({ queryKey: ["dashboard", projectId] });
     void qc.invalidateQueries({ queryKey: ["questionnaire", projectId] });
     void qc.invalidateQueries({ queryKey: ["projects"] });
   };
@@ -126,7 +188,7 @@ export function Editor() {
         { projectId, id: question.id },
         { expectedVersion: question.lockVersion },
       );
-      setAction(null);
+      closeAction();
       setNotice(
         kind === "publish"
           ? "Pregunta publicada. Su contenido quedó protegido."
@@ -135,7 +197,7 @@ export function Editor() {
       refresh();
     } catch (e) {
       setError((e as Error).message);
-      setAction(null);
+      closeAction();
     } finally {
       setBusy(false);
     }
@@ -222,15 +284,12 @@ export function Editor() {
   return (
     <div className="qe-shell av-scope">
       {composer}
-      <Link to="/" className="back">
-        ← Mis proyectos
-      </Link>
-      <p className="eyebrow">EDITOR DE CUESTIONARIO</p>
-      <h1>{project?.name || "Cuestionario del proyecto"}</h1>
-      <p>
-        Prepara las preguntas, asigna participantes y publica cuando el
-        contenido esté listo.
-      </p>
+      <ProjectWorkbench
+        projectId={projectId}
+        projectName={project?.name || "Cuestionario del proyecto"}
+        role={project?.role}
+        active="questionnaire"
+      />
       {notice && <Alert>{notice}</Alert>}
       {error && (
         <Alert error>
@@ -246,20 +305,48 @@ export function Editor() {
           </Button>
         </Alert>
       )}
-      <div className="actions">
-        <Link className="button secondary" to={"/projects/" + projectId}>
-          Ver preguntas publicadas
-        </Link>
-        {project?.role === "ADMIN" && (
+      {!data.questions.length && (
+        <p>
           <Link
             className="button secondary"
-            to={"/projects/" + projectId + "/members"}
+            to={`/projects/${projectId}/import`}
           >
-            Administrar miembros
+            Importar estructura
           </Link>
-        )}
-      </div>
+        </p>
+      )}
       <EditorWorkspace
+        initialMode={savedContext?.mode ?? 1}
+        onModeChange={(mode) =>
+          qc.setQueryData(
+            contextKey,
+            (previous: { organize?: OrganizeContext } | undefined) => ({
+              ...previous,
+              mode,
+            }),
+          )
+        }
+        organizeContext={savedContext?.organize}
+        onOrganizeContextChange={rememberOrganize}
+        contributionQuestions={contributions.data?.questions}
+        contributionsLoading={contributions.isPending}
+        contributionsError={contributions.isError}
+        onRetryContributions={() => void contributions.refetch()}
+        onOpenContributions={(id) => {
+          rememberWorkbenchItem(qc, projectId, "questionnaire", id);
+          navigate(`/projects/${projectId}/review/${id}`, {
+            state: { questionnaireReturn: true },
+          });
+        }}
+        onRefresh={async () => {
+          const result = await q.refetch();
+          if (result.error) throw result.error;
+          return result.data!;
+        }}
+        onBulkComplete={(message) => {
+          setNotice(message);
+          refresh();
+        }}
         data={data}
         projectId={projectId}
         onCreateTopic={() => {
@@ -277,9 +364,12 @@ export function Editor() {
         onAction={(kind, question) => {
           if (kind === "up" || kind === "down") reorderQuestion(kind, question);
           else if (kind === "move") {
-            rememberStructureTrigger();
+            rememberStructureTrigger(question.id);
             setMoving({ question, snapshot: data });
-          } else setAction({ kind, q: question });
+          } else {
+            rememberStructureTrigger(question.id);
+            setAction({ kind, q: question });
+          }
         }}
       />
       {editingTopic && (
@@ -451,7 +541,7 @@ export function Editor() {
               metadata: "Configurar pregunta",
             }[action.kind]
           }
-          onClose={() => !busy && setAction(null)}
+          onClose={() => !busy && closeAction()}
         >
           <h3>{action.q.title}</h3>
           {action.kind === "publish" || action.kind === "archive" ? (
@@ -484,7 +574,7 @@ export function Editor() {
               <ActionForm
                 label="Guardar asignación"
                 onDone={() => {
-                  setAction(null);
+                  closeAction();
                   setNotice("Asignación guardada.");
                   refresh();
                 }}
@@ -532,7 +622,7 @@ export function Editor() {
             <ActionForm
               label="Guardar configuración"
               onDone={() => {
-                setAction(null);
+                closeAction();
                 refresh();
                 setNotice(
                   "Configuración actualizada. El contenido de la pregunta se conserva.",
@@ -565,11 +655,16 @@ export function Editor() {
                 name="responsibleAreaId"
                 defaultValue={action.q.responsibleAreaId}
               >
-                {data.areas.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.name}
-                  </option>
-                ))}
+                {data.areas
+                  .filter(
+                    (a) => a.active || a.id === action.q.responsibleAreaId,
+                  )
+                  .map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.name}
+                      {a.active ? "" : " (desactivada)"}
+                    </option>
+                  ))}
               </Select>
             </ActionForm>
           )}

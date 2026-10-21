@@ -28,6 +28,7 @@ import {
 } from "@requirements/contracts";
 import { Database } from "../database/database.module.js";
 import { AccessService } from "../administration/access.service.js";
+import { assignableArea } from "../administration/area-rules.js";
 import { AdministrationService } from "../administration/administration.service.js";
 import {
   CommandContext,
@@ -38,8 +39,9 @@ import {
 } from "../common/http.js";
 import { assertAcyclic, validateQuestion } from "./rules.js";
 import { ResponsesService } from "../responses/responses.service.js";
+import { publicationIssues } from "./publication-rules.js";
 const editorRoles = ["ADMIN", "ANALYST"] as const;
-const questionInclude = {
+export const questionInclude = {
   QuestionRevision_questionRecord: {
     orderBy: { number: "desc" as const },
     take: 1,
@@ -49,7 +51,11 @@ const questionInclude = {
   },
   QuestionCondition_child: true,
   QuestionTraceability_question: true,
-  QuestionAssignment_question: true,
+  QuestionAssignment_question: {
+    include: {
+      member: { select: { user: { select: { invitationOnly: true } } } },
+    },
+  },
 };
 type FullQuestion = Prisma.QuestionGetPayload<{
   include: typeof questionInclude;
@@ -93,7 +99,9 @@ export function presentQuestion(q: FullQuestion) {
     status: q.status,
     lockVersion: q.lockVersion,
     revisionNumber: v.number,
-    assignments: q.QuestionAssignment_question.map((a) => ({
+    assignments: q.QuestionAssignment_question.filter(
+      (a) => !a.member?.user.invitationOnly,
+    ).map((a) => ({
       id: a.id,
       projectMemberId: a.projectMemberId,
       required: a.required,
@@ -559,22 +567,19 @@ export class QuestionnaireService {
     projectId: string,
     id: string,
     d: QuestionInput,
+    currentAreaId?: string,
   ) {
     validateQuestion(d);
     if (
       !(await tx.section.findFirst({ where: { id: d.sectionId, projectId } }))
     )
       throw new NotFoundException("No se encontró la sección.");
-    if (
-      !(await tx.area.findFirst({
-        where: {
-          id: d.responsibleAreaId,
-          organizationId: actor.organizationId,
-          active: true,
-        },
-      }))
-    )
-      throw new NotFoundException("No se encontró el área responsable.");
+    await assignableArea(
+      tx,
+      actor.organizationId,
+      d.responsibleAreaId,
+      currentAreaId,
+    );
     const refs = await tx.traceabilityReference.findMany({
       where: { projectId, id: { in: d.references.map((x) => x.referenceId) } },
     });
@@ -722,19 +727,35 @@ export class QuestionnaireService {
       async (tx) => {
         const id = randomUUID();
         const refs = await this.checkLinks(tx, req.actor, projectId, id, d);
-        await tx.question.create({
-          data: {
-            id,
-            projectId,
-            sectionId: d.sectionId,
-            externalId: d.externalId,
-            groupParentId: d.groupParentId,
-            supersedesQuestionId: d.supersedesQuestionId,
-            responsibleAreaId: d.responsibleAreaId,
-            priority: d.priority,
-            order: d.order,
-          },
-        });
+        try {
+          await tx.question.create({
+            data: {
+              id,
+              projectId,
+              sectionId: d.sectionId,
+              externalId: d.externalId,
+              groupParentId: d.groupParentId,
+              supersedesQuestionId: d.supersedesQuestionId,
+              responsibleAreaId: d.responsibleAreaId,
+              priority: d.priority,
+              order: d.order,
+            },
+          });
+        } catch (error) {
+          // Two people saving the same suggested identifier: the loser learns which field to change.
+          if (
+            error instanceof Prisma.PrismaClientKnownRequestError &&
+            error.code === "P2002"
+          )
+            throw new BadRequestException({
+              message: "Revisa los campos indicados.",
+              fieldErrors: {
+                externalId:
+                  "Ya existe una pregunta con este identificador en el proyecto.",
+              },
+            });
+          throw error;
+        }
         await this.writeRevision(tx, req.actor, projectId, id, 1, d, refs);
         await audit(
           tx,
@@ -772,7 +793,14 @@ export class QuestionnaireService {
           throw new ConflictException(
             "El identificador externo es estable y no se cambia al editar.",
           );
-        const refs = await this.checkLinks(tx, req.actor, projectId, id, d);
+        const refs = await this.checkLinks(
+          tx,
+          req.actor,
+          projectId,
+          id,
+          d,
+          old.responsibleAreaId,
+        );
         // Changing a parent must not leave a condition or grouping invalid.
         const children = await tx.questionCondition.findMany({
           where: { projectId, parentQuestionId: id },
@@ -854,16 +882,12 @@ export class QuestionnaireService {
       this.version(q, d.expectedVersion);
       if (q.publication === "ARCHIVED")
         throw new ConflictException("La pregunta está archivada.");
-      if (
-        !(await tx.area.findFirst({
-          where: {
-            id: d.responsibleAreaId,
-            organizationId: req.actor.organizationId,
-            active: true,
-          },
-        }))
-      )
-        throw new NotFoundException("No se encontró el área.");
+      await assignableArea(
+        tx,
+        req.actor.organizationId,
+        d.responsibleAreaId,
+        q.responsibleAreaId,
+      );
       await tx.question.update({
         where: { id },
         data: {
@@ -905,12 +929,13 @@ export class QuestionnaireService {
       const m = await tx.projectMember.findFirst({
         where: {
           id: d.projectMemberId,
+          user: { invitationOnly: false },
           projectId: p,
           ...(d.active
             ? {
                 role: "STAKEHOLDER" as const,
                 active: true,
-                user: { active: true },
+                user: { active: true, invitationOnly: false },
                 area: { active: true },
               }
             : {}),
@@ -1009,45 +1034,33 @@ export class QuestionnaireService {
       this.version(q, expectedVersion);
       if (q.publication !== "DRAFT")
         throw new ConflictException("Solo se publican preguntas en borrador.");
-      const d = presentQuestion(q);
-      await this.checkLinks(tx, req.actor, p, id, d);
-      if (
-        q.groupParentId &&
-        !(await tx.question.findFirst({
-          where: {
-            id: q.groupParentId,
-            projectId: p,
-            publication: "PUBLISHED",
-          },
-        }))
-      )
-        throw new ConflictException("Publica primero la pregunta principal.");
-      if (d.condition) {
-        const parent = await tx.question.findFirst({
-          where: {
-            id: d.condition.parentQuestionId,
-            projectId: p,
-            publication: "PUBLISHED",
-          },
-        });
-        if (!parent)
-          throw new ConflictException(
-            "Publica primero la pregunta de la condición.",
-          );
-        for (const a of d.assignments.filter((a) => a.active))
-          if (
-            !(await tx.questionAssignment.findFirst({
-              where: {
-                questionId: parent.id,
-                projectMemberId: a.projectMemberId,
-                active: true,
-              },
-            }))
-          )
-            throw new ConflictException(
-              "Un participante no tiene asignada la pregunta principal.",
-            );
-      }
+      await this.checkLinks(tx, req.actor, p, id, presentQuestion(q));
+      const [rows, sections, areas, references] = await Promise.all([
+        tx.question.findMany({
+          where: { projectId: p },
+          include: questionInclude,
+        }),
+        tx.section.findMany({ where: { projectId: p }, select: { id: true } }),
+        tx.area.findMany({
+          where: { organizationId: req.actor.organizationId },
+          select: { id: true, active: true },
+        }),
+        tx.traceabilityReference.findMany({
+          where: { projectId: p },
+          select: { id: true },
+        }),
+      ]);
+      const issues = publicationIssues(
+        presentQuestion(q),
+        {
+          questions: new Map(rows.map((row) => [row.id, presentQuestion(row)])),
+          sections: new Set(sections.map((s) => s.id)),
+          areas: new Map(areas.map((a) => [a.id, a])),
+          references: new Set(references.map((r) => r.id)),
+        },
+        new Set(),
+      );
+      if (issues.length) throw new ConflictException(issues[0]!.message);
       await tx.question.update({
         where: { id },
         data: {

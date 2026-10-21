@@ -79,8 +79,8 @@ export function readiness(data: QuestionnaireView): ReadinessIssue[] {
       else if (q.publication === "DRAFT" && parent.publication !== "PUBLISHED")
         add(
           field,
-          "Publica primero la pregunta principal.",
-          "ERROR",
+          "Para publicarla por separado, publica primero la principal. También puedes seleccionar ambas en Organizar y revisar su publicación conjunta.",
+          "ADVERTENCIA",
           parent.id,
         );
       let node: QuestionView | undefined = q;

@@ -6,6 +6,7 @@ import {
 import { z } from "zod";
 import {
   areaInput,
+  areaUpdateInput,
   areaView,
   createUserInput,
   memberInput,
@@ -19,6 +20,7 @@ import { Database } from "../database/database.module.js";
 import { CommandContext, audit, serialize, Tx } from "../common/http.js";
 import { hashPassword, publicUser } from "../auth/auth.service.js";
 import { AccessService } from "./access.service.js";
+import { assignableArea } from "./area-rules.js";
 import { ResponsesService } from "../responses/responses.service.js";
 @Injectable()
 export class AdministrationService {
@@ -41,7 +43,7 @@ export class AdministrationService {
     await this.access.organizationAdmin(this.db, actor);
     return (
       await this.db.user.findMany({
-        where: { organizationId: actor.organizationId },
+        where: { organizationId: actor.organizationId, invitationOnly: false },
         orderBy: { displayName: "asc" },
         take: 500,
       })
@@ -81,7 +83,11 @@ export class AdministrationService {
       if (id === req.actor.id && !active)
         throw new ConflictException("No puedes desactivar tu propia cuenta.");
       const u = await tx.user.findFirst({
-        where: { id, organizationId: req.actor.organizationId },
+        where: {
+          id,
+          organizationId: req.actor.organizationId,
+          invitationOnly: false,
+        },
       });
       if (!u) throw new NotFoundException("No se encontró el usuario.");
       const affected = await tx.projectMember.findMany({
@@ -118,7 +124,11 @@ export class AdministrationService {
     return this.db.$transaction(async (tx) => {
       await this.access.organizationAdmin(tx, req.actor);
       const u = await tx.user.findFirst({
-        where: { id, organizationId: req.actor.organizationId },
+        where: {
+          id,
+          organizationId: req.actor.organizationId,
+          invitationOnly: false,
+        },
       });
       if (!u) throw new NotFoundException("No se encontró el usuario.");
       await tx.user.update({
@@ -158,6 +168,51 @@ export class AdministrationService {
         active: x.active,
       }),
     );
+  }
+  async updateArea(
+    req: CommandContext,
+    id: string,
+    d: z.infer<typeof areaUpdateInput>,
+  ) {
+    return this.db.$transaction(async (tx) => {
+      await this.access.organizationAdmin(tx, req.actor);
+      // One writer at a time per area: concurrent edits apply in order and each is audited.
+      const rows = await tx.$queryRaw<{ id: string }[]>`
+        SELECT id FROM "Area" WHERE id=${id}::uuid AND "organizationId"=${req.actor.organizationId}::uuid FOR UPDATE`;
+      if (!rows.length) throw new NotFoundException("No se encontró el área.");
+      const old = await tx.area.findUniqueOrThrow({ where: { id } });
+      const data = {
+        ...(d.name !== undefined && d.name !== old.name
+          ? { name: d.name }
+          : {}),
+        ...(d.active !== undefined && d.active !== old.active
+          ? { active: d.active }
+          : {}),
+      };
+      // Nothing to change: no write and no audit noise.
+      const x = Object.keys(data).length
+        ? await tx.area.update({ where: { id }, data })
+        : old;
+      const v = serialize(areaView, {
+        id: x.id,
+        code: x.code,
+        name: x.name,
+        active: x.active,
+      });
+      if (x !== old)
+        await audit(
+          tx,
+          req.actor,
+          "AREA_UPDATED",
+          "Area",
+          id,
+          null,
+          { name: old.name, active: old.active },
+          { name: x.name, active: x.active },
+          req.requestId,
+        );
+      return v;
+    });
   }
   async createArea(req: CommandContext, d: z.infer<typeof areaInput>) {
     return this.db.$transaction(async (tx) => {
@@ -273,7 +328,7 @@ export class AdministrationService {
   }
   async memberList(tx: Tx, projectId: string) {
     const rows = await tx.projectMember.findMany({
-      where: { projectId },
+      where: { projectId, user: { invitationOnly: false } },
       include: { user: true, area: true },
       orderBy: { createdAt: "asc" },
       take: 500,
@@ -304,6 +359,7 @@ export class AdministrationService {
       const u = await tx.user.findFirst({
         where: {
           id: d.userId,
+          invitationOnly: false,
           organizationId: req.actor.organizationId,
           ...(d.active ? { active: true } : {}),
         },
@@ -312,20 +368,17 @@ export class AdministrationService {
         throw new NotFoundException(
           "No se encontró un usuario activo de esta institución.",
         );
-      if (
-        d.areaId &&
-        !(await tx.area.findFirst({
-          where: {
-            id: d.areaId,
-            organizationId: req.actor.organizationId,
-            active: true,
-          },
-        }))
-      )
-        throw new NotFoundException("No se encontró el área.");
       const old = await tx.projectMember.findUnique({
         where: { projectId_userId: { projectId, userId: d.userId } },
       });
+      if (d.areaId)
+        await assignableArea(
+          tx,
+          req.actor.organizationId,
+          d.areaId,
+          old?.areaId,
+          "areaId",
+        );
       if (
         old &&
         (!d.active || d.role !== "STAKEHOLDER") &&

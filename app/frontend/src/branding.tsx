@@ -9,6 +9,8 @@ const defaults: PublicBranding = {
   shortName: "Acta",
   organizationName: "My organization",
   logo: "",
+  logoSecondary: "",
+  secondaryName: "",
   favicon: "",
   accent: "#2b4d7c",
   locale: "es-MX",
@@ -41,15 +43,13 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
       q.data.accent,
     );
     formatting = { locale: q.data.locale, timezone: q.data.timezone };
-    let icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+    const icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
     if (q.data.favicon) {
-      if (!icon) {
-        icon = document.createElement("link");
-        icon.rel = "icon";
-        document.head.append(icon);
-      }
-      icon.href = q.data.favicon;
-    }
+      const link = icon ?? document.createElement("link");
+      link.rel = "icon";
+      link.href = q.data.favicon;
+      if (!icon) document.head.append(link);
+    } else icon?.remove();
   }, [q.data]);
   if (q.isPending) return <LoadingState />;
   if (q.error)
@@ -61,12 +61,70 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
     </BrandingContext.Provider>
   );
 }
-export function Brand({ short = false }: { short?: boolean }) {
+export function Brand({
+  short = false,
+  logo = true,
+}: {
+  short?: boolean;
+  /** False where the logos are shown on their own (the sign-in): the name alone follows. */
+  logo?: boolean;
+}) {
   const b = useBranding();
   return (
     <>
-      {b.logo && <img className="installation-logo" src={b.logo} alt="" />}
-      {short ? b.shortName : b.appName}
+      {logo && b.logo && (
+        <img className="installation-logo" src={b.logo} alt="" />
+      )}
+      <span className="brand-name">{short ? b.shortName : b.appName}</span>
     </>
+  );
+}
+
+/**
+ * The institution's marks. The main logo is the institution's identity; the
+ * optional second one is a collaborating entity or responsible area and stays
+ * visibly subordinate (smaller, after a divider). Nothing is reserved for a
+ * logo that does not exist: with none, this renders nothing.
+ */
+export function Marks({
+  logo,
+  logoSecondary,
+  name = "",
+}: {
+  logo: string;
+  logoSecondary: string;
+  /** The entity of the second logo; text beside it carries the name, so the image adds none. */
+  name?: string;
+}) {
+  if (!logo && !logoSecondary) return null;
+  return (
+    <div className="institution-marks">
+      {logo && <img className="institution-mark" src={logo} alt="" />}
+      {logo && logoSecondary && (
+        <span className="institution-mark-divider" aria-hidden="true" />
+      )}
+      {logoSecondary && (
+        <img
+          className="institution-mark institution-mark-secondary"
+          src={logoSecondary}
+          alt={name}
+        />
+      )}
+    </div>
+  );
+}
+export function InstitutionMarks({
+  nameShown = false,
+}: {
+  nameShown?: boolean;
+}) {
+  const b = useBranding();
+  // When the name is written out next to the marks the image repeats nothing.
+  return (
+    <Marks
+      logo={b.logo}
+      logoSecondary={b.logoSecondary}
+      name={nameShown ? "" : b.secondaryName}
+    />
   );
 }

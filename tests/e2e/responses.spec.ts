@@ -76,7 +76,7 @@ test("A: guardar, cerrar sesión, regresar y recuperar; sin contenido en localSt
     text,
   );
   await expect(
-    page.locator(".participant-badge").filter({ hasText: "Por consultar" }),
+    page.locator(".ac-status").filter({ hasText: "Por consultar" }),
   ).toBeVisible();
   expect(await page.evaluate(() => JSON.stringify(localStorage))).not.toContain(
     text,

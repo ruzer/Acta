@@ -1,0 +1,97 @@
+[
+  {
+    "file": "p02-publication-preview.png",
+    "bytes": 163674,
+    "sha256": "6609c92ad6d8cbb634727cee207f6e337b9403b52621bec2e7245e9867e84bc7"
+  },
+  {
+    "file": "p02-publication-summary.png",
+    "bytes": 117305,
+    "sha256": "8487faed3c244f62156ac4f9f9de08cb360265bf99a5713ac7fe8a1a0f2c2dd6"
+  },
+  {
+    "file": "p02-readiness.png",
+    "bytes": 131257,
+    "sha256": "b073120eea1d6d383b9efd2d1b8129239ebde081e0c9810abe9be93b455bfb41"
+  },
+  {
+    "file": "p02-write.png",
+    "bytes": 108630,
+    "sha256": "10f193f8a11d6a2351d0c594b925b8e1c75ea881f0e804b109a138b38904b7bc"
+  },
+  {
+    "file": "p03-publication-preview.png",
+    "bytes": 165622,
+    "sha256": "828e1dd475ffb90c1051a00b1fa6073356776cdaa275e4c835885464595db297"
+  },
+  {
+    "file": "p03-publication-summary.png",
+    "bytes": 118938,
+    "sha256": "9a3479f039c2ae4d568c1b8ea32ab3cd0d33eb96075e4ad23fe25d6dde0249b1"
+  },
+  {
+    "file": "p03-readiness.png",
+    "bytes": 131947,
+    "sha256": "9cf17459567d56837a306d0700e7e350cf2d3063b42aae42b8d8abf74130aa08"
+  },
+  {
+    "file": "p03-write.png",
+    "bytes": 109279,
+    "sha256": "1868a71d703f696c635aa715c76570a9e6df4e16476f988cbb5f2dc8c35a3124"
+  },
+  {
+    "file": "p05-consultation-filter.png",
+    "bytes": 68305,
+    "sha256": "1b46929a63429d7dfb1a01fe92c61cbc359ca330e76ff8f68279d5ab945b9941"
+  },
+  {
+    "file": "p05-submission-feedback.png",
+    "bytes": 83390,
+    "sha256": "f52b2adfc5c2835ba68d7d3f205be5ddb675126f33ebb3b92d2c2b42c0744dd3"
+  },
+  {
+    "file": "p07-publication-preview.png",
+    "bytes": 147734,
+    "sha256": "5c136cb21bec1f608c4a328e50b205c56c6d2d43dc163f7d51a590c452d997af"
+  },
+  {
+    "file": "p07-publication-summary.png",
+    "bytes": 120699,
+    "sha256": "cdd014c7179b17fa6bdc683265d9462efb9a2258a9a9f6f96e34a5a80ebc9dd0"
+  },
+  {
+    "file": "p07-readiness.png",
+    "bytes": 128860,
+    "sha256": "c4edff325ee952e87bdf8e177315d01429c13cf5cdb915b9ccedc7899e6d8f09"
+  },
+  {
+    "file": "p07-write.png",
+    "bytes": 105046,
+    "sha256": "0b3638cde6715ebd7325b4ddc4d21f469dc45b89682fa0868c8996288725955c"
+  },
+  {
+    "file": "p08-mobile-confirmation.png",
+    "bytes": 64427,
+    "sha256": "a7b41da8a0eabfea20830877fb1f13561ef2a26e04b63b0ed20bb5527955acb8"
+  },
+  {
+    "file": "p09-keyboard-publication.png",
+    "bytes": 93882,
+    "sha256": "91e6685a4db99de8b8f95c982cbe72dc60b7e85921e9f715b47adcaa54a62d4d"
+  },
+  {
+    "file": "p10-empty-admin.png",
+    "bytes": 54015,
+    "sha256": "cfa6b38291d3ff397178a1860a21f27a84a2bca0a81e7bb5c60d667728dc223c"
+  },
+  {
+    "file": "p10-imported.png",
+    "bytes": 107396,
+    "sha256": "a53b531f6fcc8da385f0221b3e9ac3dab539a134eb3a5ac05bc030ece40fcb60"
+  },
+  {
+    "file": "results.json",
+    "bytes": 4158,
+    "sha256": "31ee098900e37742a8342ef08ee19c889028bd074328350509169ba1cad8643b"
+  }
+]

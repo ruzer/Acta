@@ -1,0 +1,605 @@
+{
+  "checkpoint": "ux-gate",
+  "records": [
+    {
+      "id": "UX01-n12",
+      "width": 1440,
+      "nodes": 352,
+      "scrollHeight": 1159,
+      "firstRowY": 323,
+      "dataset": {
+        "total": 12,
+        "action": 2,
+        "clarificationsOnly": 1,
+        "waiting": 3,
+        "unassigned": 5
+      }
+    },
+    {
+      "id": "UX01-n12",
+      "width": 768,
+      "nodes": 352,
+      "scrollHeight": 2069,
+      "firstRowY": 343,
+      "dataset": {
+        "total": 12,
+        "action": 2,
+        "clarificationsOnly": 1,
+        "waiting": 3,
+        "unassigned": 5
+      }
+    },
+    {
+      "id": "UX01-n12",
+      "width": 390,
+      "nodes": 352,
+      "scrollHeight": 2506,
+      "firstRowY": 343,
+      "dataset": {
+        "total": 12,
+        "action": 2,
+        "clarificationsOnly": 1,
+        "waiting": 3,
+        "unassigned": 5
+      }
+    },
+    {
+      "id": "UX01-n12",
+      "width": 320,
+      "nodes": 352,
+      "scrollHeight": 2659,
+      "firstRowY": 367,
+      "dataset": {
+        "total": 12,
+        "action": 2,
+        "clarificationsOnly": 1,
+        "waiting": 3,
+        "unassigned": 5
+      }
+    },
+    {
+      "id": "UX01-n54",
+      "width": 1440,
+      "nodes": 352,
+      "scrollHeight": 1159,
+      "firstRowY": 323,
+      "dataset": {
+        "total": 54,
+        "action": 2,
+        "clarificationsOnly": 1,
+        "waiting": 20,
+        "unassigned": 30
+      }
+    },
+    {
+      "id": "UX01-n54",
+      "width": 768,
+      "nodes": 352,
+      "scrollHeight": 2069,
+      "firstRowY": 343,
+      "dataset": {
+        "total": 54,
+        "action": 2,
+        "clarificationsOnly": 1,
+        "waiting": 20,
+        "unassigned": 30
+      }
+    },
+    {
+      "id": "UX01-n54",
+      "width": 390,
+      "nodes": 352,
+      "scrollHeight": 2506,
+      "firstRowY": 343,
+      "dataset": {
+        "total": 54,
+        "action": 2,
+        "clarificationsOnly": 1,
+        "waiting": 20,
+        "unassigned": 30
+      }
+    },
+    {
+      "id": "UX01-n54",
+      "width": 320,
+      "nodes": 352,
+      "scrollHeight": 2659,
+      "firstRowY": 367,
+      "dataset": {
+        "total": 54,
+        "action": 2,
+        "clarificationsOnly": 1,
+        "waiting": 20,
+        "unassigned": 30
+      }
+    },
+    {
+      "id": "UX01-n304",
+      "width": 1440,
+      "nodes": 352,
+      "scrollHeight": 1159,
+      "firstRowY": 323,
+      "dataset": {
+        "total": 304,
+        "action": 2,
+        "clarificationsOnly": 1,
+        "waiting": 120,
+        "unassigned": 180
+      }
+    },
+    {
+      "id": "UX01-n304",
+      "width": 768,
+      "nodes": 352,
+      "scrollHeight": 2069,
+      "firstRowY": 343,
+      "dataset": {
+        "total": 304,
+        "action": 2,
+        "clarificationsOnly": 1,
+        "waiting": 120,
+        "unassigned": 180
+      }
+    },
+    {
+      "id": "UX01-n304",
+      "width": 390,
+      "nodes": 352,
+      "scrollHeight": 2537,
+      "firstRowY": 343,
+      "dataset": {
+        "total": 304,
+        "action": 2,
+        "clarificationsOnly": 1,
+        "waiting": 120,
+        "unassigned": 180
+      }
+    },
+    {
+      "id": "UX01-n304",
+      "width": 320,
+      "nodes": 352,
+      "scrollHeight": 2659,
+      "firstRowY": 367,
+      "dataset": {
+        "total": 304,
+        "action": 2,
+        "clarificationsOnly": 1,
+        "waiting": 120,
+        "unassigned": 180
+      }
+    },
+    {
+      "id": "UX06-zero",
+      "width": 1440,
+      "h1": {
+        "top": 118,
+        "bottom": 179
+      },
+      "card": {
+        "top": 92,
+        "bottom": 266
+      },
+      "cta": null,
+      "pane": null,
+      "answer": null
+    },
+    {
+      "id": "UX06-zero",
+      "width": 768,
+      "h1": {
+        "top": 158,
+        "bottom": 216
+      },
+      "card": {
+        "top": 270,
+        "bottom": 471
+      },
+      "cta": null,
+      "pane": null,
+      "answer": null
+    },
+    {
+      "id": "UX06-zero",
+      "width": 390,
+      "h1": {
+        "top": 159,
+        "bottom": 277
+      },
+      "card": {
+        "top": 322,
+        "bottom": 478
+      },
+      "cta": null,
+      "pane": null,
+      "answer": null
+    },
+    {
+      "id": "UX06-zero",
+      "width": 320,
+      "h1": {
+        "top": 177,
+        "bottom": 281
+      },
+      "card": {
+        "top": 326,
+        "bottom": 502
+      },
+      "cta": null,
+      "pane": null,
+      "answer": null
+    },
+    {
+      "id": "UX06-one",
+      "width": 1440,
+      "h1": {
+        "top": 118,
+        "bottom": 179
+      },
+      "card": {
+        "top": 92,
+        "bottom": 338
+      },
+      "cta": {
+        "top": 225,
+        "bottom": 269
+      },
+      "pane": {
+        "top": 493,
+        "bottom": 517
+      },
+      "answer": {
+        "top": 628,
+        "bottom": 682
+      }
+    },
+    {
+      "id": "UX06-one",
+      "width": 768,
+      "h1": {
+        "top": 158,
+        "bottom": 216
+      },
+      "card": {
+        "top": 270,
+        "bottom": 523
+      },
+      "cta": {
+        "top": 383,
+        "bottom": 427
+      },
+      "pane": {
+        "top": 674,
+        "bottom": 697
+      },
+      "answer": {
+        "top": 808,
+        "bottom": 890
+      }
+    },
+    {
+      "id": "UX06-one",
+      "width": 390,
+      "h1": {
+        "top": 159,
+        "bottom": 277
+      },
+      "card": {
+        "top": 322,
+        "bottom": 530
+      },
+      "cta": {
+        "top": 421,
+        "bottom": 465
+      },
+      "pane": {
+        "top": 745,
+        "bottom": 769
+      },
+      "answer": {
+        "top": 906,
+        "bottom": 1042
+      }
+    },
+    {
+      "id": "UX06-one",
+      "width": 320,
+      "h1": {
+        "top": 159,
+        "bottom": 289
+      },
+      "card": {
+        "top": 335,
+        "bottom": 562
+      },
+      "cta": {
+        "top": 453,
+        "bottom": 497
+      },
+      "pane": {
+        "top": 798,
+        "bottom": 822
+      },
+      "answer": {
+        "top": 984,
+        "bottom": 1147
+      }
+    },
+    {
+      "id": "UX06-three",
+      "width": 1440,
+      "h1": {
+        "top": 118,
+        "bottom": 179
+      },
+      "card": {
+        "top": 92,
+        "bottom": 338
+      },
+      "cta": {
+        "top": 225,
+        "bottom": 269
+      },
+      "pane": {
+        "top": 452,
+        "bottom": 476
+      },
+      "answer": {
+        "top": 586,
+        "bottom": 641
+      }
+    },
+    {
+      "id": "UX06-three",
+      "width": 768,
+      "h1": {
+        "top": 175,
+        "bottom": 263
+      },
+      "card": {
+        "top": 317,
+        "bottom": 569
+      },
+      "cta": {
+        "top": 430,
+        "bottom": 474
+      },
+      "pane": {
+        "top": 735,
+        "bottom": 759
+      },
+      "answer": {
+        "top": 870,
+        "bottom": 952
+      }
+    },
+    {
+      "id": "UX06-three",
+      "width": 390,
+      "h1": {
+        "top": 159,
+        "bottom": 277
+      },
+      "card": {
+        "top": 322,
+        "bottom": 550
+      },
+      "cta": {
+        "top": 441,
+        "bottom": 485
+      },
+      "pane": {
+        "top": 756,
+        "bottom": 780
+      },
+      "answer": {
+        "top": 939,
+        "bottom": 1075
+      }
+    },
+    {
+      "id": "UX06-three",
+      "width": 320,
+      "h1": {
+        "top": 177,
+        "bottom": 307
+      },
+      "card": {
+        "top": 352,
+        "bottom": 580
+      },
+      "cta": {
+        "top": 471,
+        "bottom": 515
+      },
+      "pane": {
+        "top": 786,
+        "bottom": 810
+      },
+      "answer": {
+        "top": 994,
+        "bottom": 1158
+      }
+    },
+    {
+      "id": "UX06-twelve",
+      "width": 1440,
+      "h1": {
+        "top": 118,
+        "bottom": 179
+      },
+      "card": {
+        "top": 92,
+        "bottom": 338
+      },
+      "cta": {
+        "top": 225,
+        "bottom": 269
+      },
+      "pane": {
+        "top": 452,
+        "bottom": 476
+      },
+      "answer": {
+        "top": 586,
+        "bottom": 641
+      }
+    },
+    {
+      "id": "UX06-twelve",
+      "width": 768,
+      "h1": {
+        "top": 175,
+        "bottom": 263
+      },
+      "card": {
+        "top": 317,
+        "bottom": 569
+      },
+      "cta": {
+        "top": 430,
+        "bottom": 474
+      },
+      "pane": {
+        "top": 735,
+        "bottom": 759
+      },
+      "answer": {
+        "top": 870,
+        "bottom": 952
+      }
+    },
+    {
+      "id": "UX06-twelve",
+      "width": 390,
+      "h1": {
+        "top": 159,
+        "bottom": 277
+      },
+      "card": {
+        "top": 322,
+        "bottom": 550
+      },
+      "cta": {
+        "top": 441,
+        "bottom": 485
+      },
+      "pane": {
+        "top": 756,
+        "bottom": 780
+      },
+      "answer": {
+        "top": 939,
+        "bottom": 1075
+      }
+    },
+    {
+      "id": "UX06-twelve",
+      "width": 320,
+      "h1": {
+        "top": 177,
+        "bottom": 307
+      },
+      "card": {
+        "top": 352,
+        "bottom": 604
+      },
+      "cta": {
+        "top": 495,
+        "bottom": 539
+      },
+      "pane": {
+        "top": 810,
+        "bottom": 833
+      },
+      "answer": {
+        "top": 1018,
+        "bottom": 1181
+      }
+    },
+    {
+      "id": "UX06-fifty",
+      "width": 1440,
+      "h1": {
+        "top": 118,
+        "bottom": 179
+      },
+      "card": {
+        "top": 92,
+        "bottom": 335
+      },
+      "cta": null,
+      "pane": {
+        "top": 449,
+        "bottom": 473
+      },
+      "answer": {
+        "top": 584,
+        "bottom": 638
+      }
+    },
+    {
+      "id": "UX06-fifty",
+      "width": 768,
+      "h1": {
+        "top": 158,
+        "bottom": 216
+      },
+      "card": {
+        "top": 270,
+        "bottom": 471
+      },
+      "cta": null,
+      "pane": {
+        "top": 637,
+        "bottom": 660
+      },
+      "answer": {
+        "top": 771,
+        "bottom": 853
+      }
+    },
+    {
+      "id": "UX06-fifty",
+      "width": 390,
+      "h1": {
+        "top": 159,
+        "bottom": 277
+      },
+      "card": {
+        "top": 322,
+        "bottom": 522
+      },
+      "cta": null,
+      "pane": {
+        "top": 728,
+        "bottom": 752
+      },
+      "answer": {
+        "top": 911,
+        "bottom": 1047
+      }
+    },
+    {
+      "id": "UX06-fifty",
+      "width": 320,
+      "h1": {
+        "top": 177,
+        "bottom": 307
+      },
+      "card": {
+        "top": 352,
+        "bottom": 577
+      },
+      "cta": null,
+      "pane": {
+        "top": 783,
+        "bottom": 807
+      },
+      "answer": {
+        "top": 992,
+        "bottom": 1155
+      }
+    }
+  ]
+}

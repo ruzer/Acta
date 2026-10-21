@@ -1,20 +1,36 @@
-import { useRef, useState, type KeyboardEvent } from "react";
+import { useCallback, useRef, useState, type KeyboardEvent } from "react";
 import {
   type QuestionnaireView,
   type QuestionView,
   typeLabels,
+  type dashboardView,
 } from "@requirements/contracts";
+import type { z } from "zod";
+import type { OrganizeContext } from "./questionnaire-presentation";
 import { Button, EmptyState } from "../../ui";
 import { Preview } from "./Preview";
 import { ReadinessPanel } from "./ReadinessPanel";
 import { Organize } from "./Organize";
+import { StatusChip } from "../../ui/semantic";
+import { plural } from "../../ui/plural";
 import { ParticipantIcon } from "../ParticipantIcon";
 export type EditorAction =
   "assign" | "publish" | "archive" | "metadata" | "up" | "down" | "move";
 export type EditorProps = {
   data: QuestionnaireView;
   projectId: string;
+  contributionQuestions?: z.infer<typeof dashboardView>["questions"];
+  contributionsLoading?: boolean;
+  contributionsError?: boolean;
+  onRetryContributions?: () => void;
+  onOpenContributions?: (questionId: string) => void;
+  organizeContext?: OrganizeContext;
+  onOrganizeContextChange?: (context: OrganizeContext) => void;
+  initialMode?: number;
+  onModeChange?: (mode: number) => void;
   onCreateTopic: () => void;
+  onBulkComplete?: (message: string) => void;
+  onRefresh?: () => Promise<QuestionnaireView>;
   onTopicAction?: (kind: "edit" | "up" | "down", id: string) => void;
   onCreateReference: () => void;
   onEdit: (question?: QuestionView, sectionId?: string, field?: string) => void;
@@ -27,12 +43,9 @@ export const publications = {
 };
 export function Publication({ question }: { question: QuestionView }) {
   return (
-    <span className="av-status av-neutral">
-      <ParticipantIcon
-        name={question.publication === "PUBLISHED" ? "check" : "edit"}
-      />
+    <StatusChip icon={question.publication === "PUBLISHED" ? "check" : "edit"}>
       {publications[question.publication]}
-    </span>
+    </StatusChip>
   );
 }
 export function QuestionActions({
@@ -195,7 +208,7 @@ export function TopicActions({
     </details>
   );
 }
-const modes = ["Escribir", "Organizar", "Revisar"] as const;
+const modes = ["Escribir", "Organizar", "Revisar publicación"] as const;
 export function EditorModeSwitcher({
   value,
   onChange,
@@ -247,18 +260,45 @@ export function EditorModeSwitcher({
   );
 }
 export function EditorWorkspace(props: EditorProps) {
-  const [mode, setMode] = useState(0);
+  const organizeContext = useRef(props.organizeContext);
+  const onRemember = props.onOrganizeContextChange;
+  const rememberOrganize = useCallback(
+    (context: OrganizeContext) => {
+      organizeContext.current = context;
+      onRemember?.(context);
+    },
+    [onRemember],
+  );
+  const [mode, updateMode] = useState(props.initialMode ?? 0);
+  const setMode = (value: number) => {
+    updateMode(value);
+    props.onModeChange?.(value);
+  };
   const [preview, setPreview] = useState(false);
+  const [selectionExpanded, setSelectionExpanded] = useState(false);
   const [inspectId, setInspectId] = useState<string>();
+  // A long questionnaire would otherwise be one very long page: from 40
+  // questions on, topics start folded (the first stays open), as in "Mi trabajo".
+  const [topicOpen, setTopicOpen] = useState<Record<string, boolean>>({});
   const { data, onEdit, onCreateTopic } = props;
+  const foldTopics = data.questions.length > 40;
+  // The topic that was first when this opened stays open by id, so moving a
+  // topic never folds the one being handled.
+  const [firstTopic] = useState(
+    () => [...data.sections].sort((a, b) => a.order - b.order)[0]?.id,
+  );
   if (preview) return <Preview data={data} onClose={() => setPreview(false)} />;
   return (
     <>
       <div className="qe-heading">
         <div>
-          <h2>Cuestionario</h2>
-          <p className="hint">
-            Contenido, estructura y preparación para publicar.
+          <p className="ac-questionnaire-total">
+            {plural(data.questions.length, "pregunta")} ·{" "}
+            {plural(
+              data.questions.filter((q) => q.publication === "PUBLISHED")
+                .length,
+              "publicada",
+            )}
           </p>
         </div>
         <div className="actions">
@@ -278,11 +318,24 @@ export function EditorWorkspace(props: EditorProps) {
           tabIndex={0}
         >
           {mode === i && i === 1 && (
-            <Organize {...props} initialSelected={inspectId} />
+            <Organize
+              {...props}
+              initialSelected={inspectId}
+              initialSelectionExpanded={selectionExpanded}
+              organizeContext={organizeContext.current}
+              onOrganizeContextChange={rememberOrganize}
+            />
           )}
           {mode === i && i === 2 && (
             <ReadinessPanel
               {...props}
+              onOrganize={() => {
+                setSelectionExpanded(true);
+                setMode(1);
+                requestAnimationFrame(() =>
+                  document.getElementById("qe-tab-1")?.focus(),
+                );
+              }}
               onInspect={(id) => {
                 setInspectId(id);
                 setMode(1);
@@ -291,6 +344,29 @@ export function EditorWorkspace(props: EditorProps) {
           )}
           {mode === i && i === 0 && (
             <>
+              <div className="qe-topic-add">
+                <Button tone="secondary" onClick={onCreateTopic}>
+                  + Agregar tema
+                </Button>
+              </div>
+              {data.questions.length > 1 && (
+                <p className="hint">
+                  Para asignar participantes o publicar varias preguntas juntas,
+                  usa{" "}
+                  <Button
+                    tone="secondary"
+                    onClick={() => {
+                      setMode(1);
+                      requestAnimationFrame(() =>
+                        document.getElementById("qe-tab-1")?.focus(),
+                      );
+                    }}
+                  >
+                    Organizar preguntas
+                  </Button>
+                  .
+                </p>
+              )}
               {!data.sections.length && (
                 <EmptyState title="Todavía no hay preguntas.">
                   Agrega el primer tema para comenzar.
@@ -302,6 +378,9 @@ export function EditorWorkspace(props: EditorProps) {
                   const questions = data.questions
                     .filter((q) => q.sectionId === s.id)
                     .sort((a, b) => a.order - b.order);
+                  const open =
+                    topicOpen[s.id] ??
+                    (!foldTopics || s.id === firstTopic || !questions.length);
                   return (
                     <section
                       className="qe-topic"
@@ -309,58 +388,83 @@ export function EditorWorkspace(props: EditorProps) {
                       aria-label={s.title}
                     >
                       <header>
-                        <h3>{s.title}</h3>
+                        <h3>
+                          {foldTopics ? (
+                            <button
+                              className="qe-topic-toggle"
+                              aria-expanded={open}
+                              aria-controls={`qe-topic-${s.id}`}
+                              onClick={() =>
+                                setTopicOpen({ ...topicOpen, [s.id]: !open })
+                              }
+                            >
+                              <span
+                                className={
+                                  open ? "qe-chevron open" : "qe-chevron"
+                                }
+                              >
+                                <ParticipantIcon name="chevron" />
+                              </span>
+                              {s.title}
+                            </button>
+                          ) : (
+                            s.title
+                          )}
+                        </h3>
                         <TopicActions {...props} id={s.id} />
                         <span className="hint">
-                          {questions.length} preguntas
+                          {plural(questions.length, "pregunta")}
                         </span>
                       </header>
-                      {s.description && <p className="hint">{s.description}</p>}
-                      {!questions.length && (
-                        <p className="hint">
-                          Este tema todavía no tiene preguntas.
-                        </p>
+                      {open && (
+                        <div id={`qe-topic-${s.id}`}>
+                          {s.description && (
+                            <p className="hint">{s.description}</p>
+                          )}
+                          {!questions.length && (
+                            <p className="hint">
+                              Este tema todavía no tiene preguntas.
+                            </p>
+                          )}
+                          {questions.map((q) => (
+                            <article
+                              className={
+                                "qe-editorial-row" +
+                                (q.groupParentId ? " qe-followup" : "")
+                              }
+                              key={q.id}
+                              aria-label={q.title}
+                            >
+                              <div>
+                                {q.groupParentId && (
+                                  <p className="hint">
+                                    ↳ Seguimiento de{" "}
+                                    {data.questions.find(
+                                      (p) => p.id === q.groupParentId,
+                                    )?.title ?? "pregunta no disponible"}
+                                  </p>
+                                )}
+                                <h4>{q.question}</h4>
+                                <div className="qe-row-meta">
+                                  <span>{typeLabels[q.type]}</span>
+                                  <Publication question={q} />
+                                </div>
+                              </div>
+                              <QuestionActions {...props} question={q} />
+                            </article>
+                          ))}
+                          <Button
+                            tone="secondary"
+                            disabled={!data.areas.some((a) => a.active)}
+                            onClick={() => onEdit(undefined, s.id)}
+                          >
+                            + Agregar pregunta
+                          </Button>
+                        </div>
                       )}
-                      {questions.map((q) => (
-                        <article
-                          className={
-                            "qe-editorial-row" +
-                            (q.groupParentId ? " qe-followup" : "")
-                          }
-                          key={q.id}
-                          aria-label={q.title}
-                        >
-                          <div>
-                            {q.groupParentId && (
-                              <p className="hint">
-                                ↳ Seguimiento de{" "}
-                                {data.questions.find(
-                                  (p) => p.id === q.groupParentId,
-                                )?.title ?? "pregunta no disponible"}
-                              </p>
-                            )}
-                            <h4>{q.question}</h4>
-                            <div className="qe-row-meta">
-                              <span>{typeLabels[q.type]}</span>
-                              <Publication question={q} />
-                            </div>
-                          </div>
-                          <QuestionActions {...props} question={q} />
-                        </article>
-                      ))}
-                      <Button
-                        tone="secondary"
-                        disabled={!data.areas.some((a) => a.active)}
-                        onClick={() => onEdit(undefined, s.id)}
-                      >
-                        + Agregar pregunta
-                      </Button>
                     </section>
                   );
                 })}
-              <Button tone="secondary" onClick={onCreateTopic}>
-                + Agregar tema
-              </Button>
             </>
           )}
         </div>

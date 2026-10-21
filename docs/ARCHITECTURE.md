@@ -28,3 +28,13 @@ Estas categorías orientan contribuciones; no añaden entidades, interfaces de p
 | INFRASTRUCTURE | Compose, persistencia, S3 y operación; configuración propia no equivale a un provider nuevo verificado |
 
 Una personalización no justifica debilitar aislamiento ni cambiar contratos silenciosamente. Los detalles específicos pueden mantenerse en un fork según la licencia aplicable; mantenerlos fuera de upstream no concede una excepción a obligaciones legales. [Guía de forks](UPSTREAM-FORKS.md) · [Gobernanza](../GOVERNANCE.md).
+
+## Operaciones masivas de cuestionario
+
+Organizar conserva el inspector individual y mantiene por separado un conjunto de IDs seleccionados. Tres comandos explícitos (área, añadir participantes y publicar) tienen preview y confirmación, definidos por los schemas Zod compartidos. El frontend no encadena operaciones individuales.
+
+`BulkQuestionnaireService` carga el contexto del proyecto una vez, valida el estado final propuesto y entrega un hash de revisión. La confirmación usa `AccessService.mutate`: bloqueo PostgreSQL del proyecto, autorización vigente y una transacción para cambios, proyección de revisión y auditoría. El hash incluye versiones de preguntas seleccionadas y dependencias, estructura y estado administrativo relevante; no depende únicamente de la versión de Project. Los cambios de metadata/asignaciones ya incrementan la versión de Question.
+
+La publicación por capas respeta grupo y condición sin confundirlos. La validación pura compartida comprueba contenido/configuración y relaciones; los endpoints individuales conservan sus comprobaciones existentes. La proyección de revisión consulta validaciones, conflictos, aclaraciones y disposiciones por proyecto, actualiza estados por conjuntos y se ejecuta una vez por lote. No cambia la precedencia de estados ni la invalidación de fuentes.
+
+La auditoría correlacionada `QUESTIONNAIRE_BATCH_APPLIED` conserva requestId, hash del comando, acuse, IDs y metadatos anteriores/resultantes. Repetir el mismo comando por el mismo actor devuelve el acuse sin repetir escrituras; otro contenido con la misma clave produce conflicto. No se agrega esquema ni migración. [Contrato, límites y mediciones](BULK-QUESTIONNAIRE-OPERATIONS.md).

@@ -1,0 +1,77 @@
+.project-workbench {
+  min-width: 0;
+}
+.ac-workbench-heading {
+  margin-bottom: 16px;
+}
+.ac-workbench-heading h1 {
+  margin: 0;
+  font: 600 26px/1.3 var(--ac-font-ui);
+  overflow-wrap: anywhere;
+}
+.ac-workbench-compact {
+  margin-bottom: 12px;
+}
+.pw-project-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: var(--ac-text-meta);
+}
+.project-workbench .pw-decisions-heading {
+  margin-bottom: 1rem;
+}
+.project-workbench .pw-decisions-heading h2 {
+  margin-bottom: 0.35rem;
+}
+.project-workbench .pw-decision-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+}
+.project-workbench .pw-decision-results {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.project-workbench .pw-decision-results p {
+  margin: 0;
+}
+.project-workbench .pw-decision-aside {
+  margin: 0 0 0.75rem;
+  color: var(--ac-muted);
+}
+.project-workbench .pw-decision-group {
+  margin: 2rem 0 0.25rem;
+  font-size: 1.125rem;
+}
+.project-workbench .pw-decision-group-first {
+  margin-top: 0.5rem;
+}
+@media (max-width: 767px) {
+  .project-workbench .pw-decision-filters {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+}
+
+/* One project header, followed directly by the active task controls. */
+.qe-shell .qe-heading {
+  padding: 0 0 12px;
+  margin-bottom: 16px;
+}
+.pw-metrics {
+  margin-top: 1.5rem;
+  padding: 16px 20px;
+  border: 1px solid var(--ac-line);
+  border-radius: 12px;
+  background: var(--ac-surface);
+}
+.pw-metrics > summary {
+  min-height: 44px;
+  cursor: pointer;
+  font-weight: 600;
+}

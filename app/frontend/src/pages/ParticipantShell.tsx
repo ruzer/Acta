@@ -44,11 +44,10 @@ export function ParticipantHeader({
           <span className="participant-project-name">
             {q.data?.projectName}
           </span>
-          {topic && (
+          {topic && position >= 0 && (
             <span className="participant-header-context">
-              Tema: {topic.title}
-              {position >= 0 &&
-                ` · Pregunta ${position + 1} de ${sequence.length}`}
+              Pregunta {position + 1} de {sequence.length} · no es el número de
+              envíos
             </span>
           )}
         </>

@@ -1,6 +1,6 @@
 # Versionado y releases de Acta
 
-**PROCESO FUTURO; no hay release pública.** Titularidad, autorización, AGPL-3.0-only y DCO 1.1 están confirmados. La publicación del código exige superar el gate remoto; la release formal requiere además CI, configuración y revisión. El [manifiesto](../PUBLIC-SNAPSHOT-MANIFEST.md) demuestra pruebas del snapshot, no autorización legal ni una release.
+**Proceso para preparar y publicar releases.** La primera release pública es [v0.2.0](https://github.com/ruzer/Acta/releases/tag/v0.2.0). Titularidad, autorización, AGPL-3.0-only y DCO 1.1 están confirmados. La publicación del código exige superar el gate remoto; la release formal requiere además CI, configuración y revisión. El [manifiesto](../PUBLIC-SNAPSHOT-MANIFEST.md) demuestra pruebas del snapshot, no autorización legal ni una release.
 
 ## Política de versiones
 
@@ -14,11 +14,104 @@ Se prepara [Semantic Versioning](https://semver.org/lang/es/) en formato **MAJOR
 
 El contrato público incluye API documentada, configuración, formatos de intercambio y requisitos de actualización/persistencia. No basta con que TypeScript compile para afirmar compatibilidad. Antes de 1.0 no se promete estabilidad absoluta; los cambios incompatibles deben anunciarse, agruparse en un incremento MINOR de `0.x` y acompañarse de instrucciones de migración. PATCH seguirá reservado para cambios compatibles. Una corrección de seguridad que rompa compatibilidad debe decirlo y usar la versión apropiada.
 
-### Primera versión prevista
+### Preparación de 0.8.0 — Instalación guiada, Configuración y segundo logotipo
 
-**0.2.0, versión inicial prevista aprobada.** `0.1.0` es una opción válida para empezar una historia pública, pero los cuatro manifiestos de paquetes ya declaran `0.2.0` y el snapshot usa esa base. Conservar 0.2.0 evita renumerar tooling o sugerir un downgrade sin beneficio funcional. No implica que exista una release pública 0.1.0: la historia pública empieza con Acta.
+La base es [v0.7.0](https://github.com/ruzer/Acta/releases/tag/v0.7.0).
+**0.8.0** reúne dos PRs: [#39](https://github.com/ruzer/Acta/pull/39)
+(asistente de primera instalación opcional, `scripts/install.sh`, Administración →
+Configuración) y [#40](https://github.com/ruzer/Acta/pull/40) (personalización
+institucional: segundo logotipo opcional, entidad del segundo logotipo, jerarquía
+visual y formulario de Apariencia con vista previa).
 
-Si se necesita una candidata, evaluar `0.2.0-rc.1` antes de la release final; no se crea ahora. Los manifiestos y lockfile ya están alineados en 0.2.0 y se conservan. La creación de tag/release requiere una fase posterior autorizada. Las releases publicadas serán inmutables: correcciones posteriores usan otra versión, sin mover tags existentes.
+Es MINOR porque añade funcionalidad compatible: rutas nuevas (`/setup/*`,
+`/settings`, `/system`, imágenes públicas de la institución), campos aditivos en
+`GET /configuration/public` y variables opcionales (`SETUP_WIZARD`,
+`APP_LOGO_SECONDARY`, `APP_SECONDARY_NAME`). **Incluye migraciones**, a diferencia
+de 0.7.0, pero son aditivas (no reescriben ni borran datos): `202610120001_installation_setup_settings`
+(tablas `InstallationSetup`, `OrganizationSettings` y `BrandingAsset`; registra la
+instalación como completada si ya hay un administrador) y
+`202610130001_secondary_logo` (un valor de enumeración y una columna nullable). No
+cambian permisos de dominio, escrituras de respuestas, estados persistidos,
+almacenamiento de evidencia, autenticación ni invitaciones.
+
+Un cambio de comportamiento visible para quien ya personalizaba Acta: lo que la
+infraestructura define por variable se muestra como «administrado externamente»
+y ya no se puede cambiar desde la aplicación; `docker-compose.yml` dejó de
+inyectar valores por defecto de apariencia. Un fork debe fusionar las migraciones
+y traducir las acciones de bitácora nuevas en sus catálogos propios.
+
+Los manifiestos, las referencias entre paquetes y el lockfile se preparan en
+0.8.0 sin actualizar dependencias externas. Las
+[notas de la versión](releases/v0.8.0.md) incluyen la actualización desde v0.7.0,
+los límites conocidos y la evidencia del CI de la base. El PR de preparación
+requiere CI verde y merge manual del maintainer. Después se debe verificar el CI
+del `main` resultante antes de crear un tag anotado `v0.8.0` sobre ese commit
+exacto y publicar la GitHub Release como Latest. Verificar también el CI del tag.
+La preparación y la fecha del changelog no constituyen por sí solas una
+publicación; no se publican imágenes Docker ni se actualizan downstreams en este
+proceso.
+
+### Preparación de 0.7.0 — Decisiones y bitácora trazables, uso con volumen
+
+La base es [v0.6.1](https://github.com/ruzer/Acta/releases/tag/v0.6.1).
+**0.7.0** reúne cinco iteraciones de mejora continua
+([#33](https://github.com/ruzer/Acta/pull/33) a
+[#37](https://github.com/ruzer/Acta/pull/37)): invitaciones, importación,
+revisión con «Siguiente por revisar», Administración › Proyectos, cuestionarios
+y registros con cientos de elementos, decisiones con su extracto, bitácora que
+nombra qué ocurrió y filtro de actores simplificado.
+
+Es MINOR porque añade funcionalidad compatible: un endpoint de **lectura**
+(`GET /projects/:projectId/decisions`, solo ADMIN y ANALYST) y campos aditivos en
+`GET /projects/:projectId/history` (`subject`, `invitationActors`, filtro
+`actorKind`; `actors` pasa a listar solo cuentas, más el actor filtrado). El
+contrato de exportación no cambia. No hay migraciones, ni cambios de permisos,
+escrituras, estados persistidos, almacenamiento, autenticación o invitaciones.
+Un fork que consuma `history` debe revisar `actors` y los campos nuevos
+(`docs/CONTRACTS-2E.md`).
+
+Los manifiestos, las referencias entre paquetes y el lockfile se preparan en
+0.7.0 sin actualizar dependencias externas. Las
+[notas de la versión](releases/v0.7.0.md) incluyen la evidencia del CI de la
+base. El PR de preparación requiere CI verde y merge manual del maintainer.
+Después se debe verificar el CI del `main` resultante antes de crear un tag
+anotado `v0.7.0` sobre ese commit exacto y publicar la GitHub Release como
+Latest. Verificar también el CI del tag. La preparación y la fecha del changelog
+no constituyen por sí solas una publicación; no se publican imágenes Docker ni
+se actualizan downstreams en este proceso.
+
+### Preparación de 0.6.1 — Grupos, publicación conjunta y foco
+
+La base es [v0.6.0](https://github.com/ruzer/Acta/releases/tag/v0.6.0).
+**0.6.1** reúne las correcciones compatibles de los PR
+[#29](https://github.com/ruzer/Acta/pull/29),
+[#30](https://github.com/ruzer/Acta/pull/30) y
+[#32](https://github.com/ruzer/Acta/pull/32): controles globales de grupos,
+actualización del cuestionario antes de la vista previa de operaciones masivas
+y conservación del foco tras registrar una revisión.
+No cambia contratos, backend, permisos, configuración ni migraciones.
+
+Los manifiestos, las referencias entre paquetes y el lockfile se preparan en
+0.6.1, sin actualizar dependencias externas. Las
+[notas de la versión](releases/v0.6.1.md) incluyen la evidencia del CI de la base.
+El PR de preparación requiere CI verde y merge manual del maintainer. Después
+se debe verificar el CI del `main` resultante antes de crear un tag anotado
+`v0.6.1` sobre ese commit exacto y publicar la GitHub Release como Latest.
+Verificar también el CI del tag. La preparación y la fecha del changelog no
+constituyen por sí solas una publicación; no se publican imágenes Docker ni se
+actualizan downstreams en este proceso.
+
+### Preparación de 0.6.0 — Dirección C
+
+La base anterior es [v0.5.0](https://github.com/ruzer/Acta/releases/tag/v0.5.0). **0.6.0** corresponde a una evolución compatible y sustancial de la presentación del frontend (Dirección C: jerarquía, navegación, cuestionario, aportaciones, conflictos, aclaraciones, decisiones, participantes e invitaciones) y a la actualización de seguridad de VersityGW, compilado desde su fuente oficial. Un patch `0.5.x` no describe ese alcance. No se documenta un cambio incompatible de API, configuración o formatos de intercambio.
+
+SemVer trata `0.y.z` como desarrollo inicial. La política de Acta adopta MINOR para evolución compatible sustancial y PATCH para correcciones compatibles, sin prometer estabilidad absoluta antes de 1.0. Esta versión conserva backend, dominio, contratos, permisos, reglas de publicación y almacenamiento; no añade migraciones. Las únicas modificaciones fuera del frontend y la documentación son las de la compilación de VersityGW (`docker/versity/` y la etapa equivalente del `Dockerfile` del backend).
+
+Raíz, frontend, backend, contracts, referencias internas y lockfile se preparan coherentemente en 0.6.0 mediante PR que solo modifica versiones, changelog y documentación de release. La preparación no equivale a publicación: verificar CI del commit final antes de crear el tag y la GitHub Release. Las releases publicadas son inmutables; no mover ni reemplazar tags. Las [notas de la versión](releases/v0.6.0.md) resumen el alcance para administradores y usuarios técnicos.
+
+Se conservan los límites del contrato: el acceso del invitado no expone su destinatario previsto y la revisión no entrega un origen estructurado independiente del actor. La UI no inventa esos datos ni acredita identidad a partir del enlace. El [informe de la Dirección C](design/ACTA-DIRECTION-C-IMPLEMENTATION.md) registra alcance, pruebas y límites; el [changelog](../CHANGELOG.md) resume los cambios para usuarios.
+
+Los forks permanecen en su base estable actual durante esta preparación. Después de publicar v0.6.0 deben verificar su tag y commit, probar la actualización en una rama propia y hacer backup antes de desplegar. No actualizar instalaciones directamente desde `main`. Seguir [invitaciones](EXTERNAL-INVITATIONS.md), [configuración](CONFIGURATION.md) y [backup/restauración](BACKUP-RESTORE.md).
 
 ## Preparar, verificar y autorizar
 

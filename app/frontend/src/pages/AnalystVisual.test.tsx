@@ -79,7 +79,12 @@ it("VIS003: vigente con decisión, alcance, excepciones, autor, fecha y fuentes 
     v.validatedBy.displayName,
   ])
     expect(screen.getByText(text)).toBeVisible();
-  expect(screen.getByText(/Respuesta de .*envío #/)).toBeVisible();
+  // CP5: the sources are numbered grounds; each says who, which area and which submission.
+  const grounds = within(
+    screen.getByRole("heading", { name: "Fundamentos" }).closest("section")!,
+  ).getAllByRole("listitem");
+  expect(grounds.length).toBeGreaterThan(0);
+  expect(grounds[0]).toHaveTextContent(/envío #/);
 });
 it("VIS003: histórica explica pérdida de vigencia y conserva el texto", () => {
   const v = decision.validations.find((v) => v.invalidatedAt)!;
@@ -111,14 +116,29 @@ it("VIS002: posturas simétricas con actor, área, respuesta y evidencia o ausen
   render(
     <ConflictComparison data={conflict} conflict={conflict.conflicts[0]!} />,
   );
-  for (const name of ["Postura A", "Postura B"]) {
-    const region = within(screen.getByRole("region", { name }));
-    expect(region.getByRole("heading", { name: "Respuesta" })).toBeVisible();
-    expect(region.getByRole("heading", { name: "Evidencia" })).toBeVisible();
-  }
-  for (const s of conflict.submissions)
+  // CP5: one table, two columns of equal weight, each field label once.
+  const table = screen.getByRole("table", {
+    name: "Comparación de aportaciones",
+  });
+  for (const name of ["Postura A", "Postura B"])
     expect(
-      screen.getByRole("heading", { name: s.respondent.displayName }),
+      within(table).getByRole("columnheader", { name: new RegExp(`^${name}`) }),
+    ).toBeVisible();
+  for (const field of [
+    "Respuesta",
+    "Comentario",
+    "Ejemplo",
+    "Evidencia",
+    "Versión",
+  ])
+    expect(
+      within(table).getAllByRole("rowheader", { name: field }),
+    ).toHaveLength(1);
+  for (const s of conflict.submissions.slice(0, 2))
+    expect(
+      within(table).getByRole("columnheader", {
+        name: new RegExp(s.respondent.displayName),
+      }),
     ).toBeVisible();
   expect(
     screen.getByRole("button", { name: "Descargar guia-ficticia.pdf" }),
@@ -240,8 +260,13 @@ async function basic(user: ReturnType<typeof userEvent.setup>) {
     "¿Se registra la solicitud?",
   );
   await user.click(screen.getByRole("radio", { name: "Sí o no" }));
-  await user.type(screen.getByLabelText("Identificador externo"), "FIC-014");
-  await user.type(screen.getByLabelText("Título breve"), "Registro");
+  // Identifier and title come suggested; the person replaces both.
+  const id = screen.getByLabelText("Identificador externo");
+  await user.clear(id);
+  await user.type(id, "FIC-014");
+  const title = screen.getByLabelText("Título breve");
+  await user.clear(title);
+  await user.type(title, "Registro");
 }
 it("VIS005: creación básica sin abrir avanzado preserva contrato y externalId", async () => {
   const { user, onSave } = form();
@@ -352,7 +377,9 @@ it("VIS005: abre avanzado aunque el primer error sea de contenido", async () => 
 });
 
 it("VIS002: cerrar resolución devuelve el foco al botón que abrió el diálogo", async () => {
-  vi.spyOn(apiModule, "api").mockResolvedValue(conflict);
+  vi.spyOn(apiModule, "api").mockImplementation(
+    async (key) => (key === "projects" ? [] : conflict) as never,
+  );
   Object.defineProperty(HTMLDialogElement.prototype, "showModal", {
     configurable: true,
     value: function (this: HTMLDialogElement) {
@@ -404,4 +431,161 @@ it("VIS005 Criterio: el selector de tipos funciona con flechas del teclado", asy
   await user.keyboard("{ArrowRight}");
   expect(screen.getByRole("radio", { name: "Texto amplio" })).toBeChecked();
   expect(screen.getByRole("radio", { name: "Texto amplio" })).toHaveFocus();
+});
+
+it("el resumen de errores distingue destinos y activa el campo elegido", async () => {
+  const { user } = form();
+  // The identifier is suggested; clearing it brings back its error.
+  await user.clear(screen.getByLabelText("Identificador externo"));
+  await user.click(screen.getByRole("button", { name: "Crear pregunta" }));
+  // Validation focuses its first field on the next frame. Observe that state
+  // before exercising a different error link, as the browser interaction does.
+  await waitFor(() =>
+    expect(screen.getByLabelText("Pregunta", { exact: true })).toHaveFocus(),
+  );
+  const links = screen.getAllByRole("link");
+  const externalId = links.find((link) =>
+    link.textContent?.startsWith("Identificador externo:"),
+  );
+  expect(externalId).toBeDefined();
+  expect(links.some((link) => link.textContent?.startsWith("Pregunta:"))).toBe(
+    true,
+  );
+  expect(
+    links.some((link) => link.textContent?.startsWith("Título breve:")),
+  ).toBe(true);
+  await user.click(externalId!);
+  expect(screen.getByLabelText("Identificador externo")).toHaveFocus();
+});
+
+it("volver a Revisión conserva los filtros de procedencia sin cambiar el destino", async () => {
+  vi.spyOn(apiModule, "api").mockImplementation(
+    async (key) => (key === "projects" ? [] : conflict) as never,
+  );
+  render(
+    <QueryClientProvider
+      client={
+        new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      }
+    >
+      <MemoryRouter
+        initialEntries={[
+          {
+            pathname: "/",
+            state: { reviewSearch: "projectId=demo&status=CONFLICT" },
+          },
+        ]}
+      >
+        <ReviewDetailPage />
+      </MemoryRouter>
+    </QueryClientProvider>,
+  );
+  expect(
+    await screen.findByRole("link", { name: "← Revisar respuestas" }),
+  ).toHaveAttribute("href", "/review?projectId=demo&status=CONFLICT");
+});
+
+it("la decisión usa la referencia real, sitúa autor antes del resultado y permite consultar la fuente", async () => {
+  const user = userEvent.setup();
+  const open = vi.fn();
+  const validation = decision.validations.find((v) => !v.invalidatedAt)!;
+  render(
+    <DecisionRecord
+      data={decision}
+      validation={validation}
+      onOpenContribution={open}
+    />,
+  );
+  const article = screen.getByRole("article", { name: "Decisión vigente" });
+  expect(
+    within(article).getByText(validation.id, { selector: "code" }),
+  ).toBeVisible();
+  expect(
+    within(article)
+      .getAllByRole("heading")
+      .map((h) => h.textContent),
+  ).toEqual([
+    "Decisión validada",
+    "Se decide",
+    "Alcance",
+    "Excepciones",
+    "Fundamentos",
+  ]);
+  const author = within(article).getByText(validation.validatedBy.displayName);
+  expect(
+    author.compareDocumentPosition(
+      within(article).getByText(validation.decisionText),
+    ) & Node.DOCUMENT_POSITION_FOLLOWING,
+  ).toBeTruthy();
+  // The record identifier is in the foot, after the result and its grounds.
+  const record = within(article).getByText(/^Referencia del registro:/);
+  expect(
+    within(article)
+      .getByText(validation.decisionText)
+      .compareDocumentPosition(record) & Node.DOCUMENT_POSITION_FOLLOWING,
+  ).toBeTruthy();
+  const source = decision.submissions.find((s) =>
+    validation.sources.some((v) => v.responseRevisionId === s.id),
+  )!;
+  const ground = within(article).getAllByRole("listitem")[0]!;
+  expect(ground).toHaveTextContent(source.respondent.displayName);
+  expect(ground).toHaveTextContent(`envío #${source.number}`);
+  await user.click(
+    within(ground).getByRole("button", {
+      name: `Abrir la aportación de ${source.respondent.displayName}, envío #${source.number}`,
+    }),
+  );
+  expect(open).toHaveBeenCalledWith(source.id);
+});
+it("la decisión nombra su advertencia: documenta la revisión y no crea efectos jurídicos", () => {
+  const validation = decision.validations.find((v) => !v.invalidatedAt)!;
+  render(<DecisionRecord data={decision} validation={validation} />);
+  const sheet = screen.getByRole("article", { name: "Decisión vigente" });
+  expect(sheet.querySelector("footer")).toHaveTextContent(
+    "No equivale a una firma electrónica ni tiene un efecto jurídico adicional.",
+  );
+  expect(sheet.querySelector("footer")).toHaveTextContent(
+    "no significa que cada aportación individual haya sido validada",
+  );
+});
+it("la decisión vigente precede a Reabrir, que permanece secundaria y respeta canReview", async () => {
+  const api = vi
+    .spyOn(apiModule, "api")
+    .mockImplementation(
+      async (key) => (key === "projects" ? [] : decision) as never,
+    );
+  function page() {
+    return (
+      <QueryClientProvider
+        client={
+          new QueryClient({ defaultOptions: { queries: { retry: false } } })
+        }
+      >
+        <MemoryRouter>
+          <ReviewDetailPage />
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+  }
+  render(page());
+  const card = await screen.findByRole("article", { name: "Decisión vigente" });
+  const reopen = screen.getByRole("button", { name: "Reabrir pregunta" });
+  expect(
+    card.compareDocumentPosition(reopen) & Node.DOCUMENT_POSITION_FOLLOWING,
+  ).toBeTruthy();
+  // CP5: reopening is a tertiary action in the foot of the document.
+  expect(reopen).toHaveClass("tertiary");
+  expect(card.querySelector("footer")).toContainElement(reopen);
+  cleanup();
+  api.mockImplementation(
+    async (key) =>
+      (key === "projects" ? [] : { ...decision, canReview: false }) as never,
+  );
+  render(page());
+  expect(
+    await screen.findByRole("article", { name: "Decisión vigente" }),
+  ).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Reabrir pregunta" }),
+  ).not.toBeInTheDocument();
 });

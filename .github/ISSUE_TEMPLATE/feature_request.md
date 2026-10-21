@@ -3,7 +3,7 @@ name: Feature request
 about: Proponer una mejora genérica y suficientemente definida
 ---
 
-<!-- PENDING UNTIL PUBLICATION. Ideas amplias o alternativas todavía abiertas: Discussions cuando se habiliten. -->
+<!-- Ideas amplias o alternativas todavía abiertas: consulta CONTRIBUTING.md para Discussions y su estado de verificación. -->
 ## Problema y personas afectadas
 
 Ejemplo ficticio y por qué las capacidades actuales no bastan.

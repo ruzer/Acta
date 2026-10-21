@@ -1,0 +1,22 @@
+Modifications to Versity Gateway (versitygw) made by this project
+
+versitygw is © Versity Software, Inc. and distributed under the Apache License 2.0
+(see UPSTREAM-LICENSE and UPSTREAM-NOTICE, unchanged copies of the files in the
+upstream source tree).
+
+The binary shipped in this project's images is built from the official source of
+release v1.8.0 (commit fd04bc1df2656298577b82667a4195c77f8c7563 of
+https://github.com/versity/versitygw) with these changes, stated here as the
+Apache-2.0 license requires:
+
+ 1. No source file of versitygw is modified. Only its dependency manifests are
+    changed by versitygw-v1.8.0-security.patch: golang.org/x/net v0.58.0 -> v0.60.0
+    (and the minimum versions it requires: x/crypto v0.57.0, x/sync v0.23.0,
+    x/sys v0.48.0, x/text v0.42.0; "go" directive 1.25.0 -> 1.26.0).
+ 2. It is compiled with Go 1.27.2 (golang:1.27.2-bookworm, pinned by digest) instead
+    of the Go version the official image was built with (1.27.1), to include the
+    fixes of Go 1.27.2 and of x/net v0.60.0 reported by govulncheck.
+ 3. Version metadata is set to v1.8.0 and the commit above.
+
+The build is reproducible from docker/versity/Dockerfile. Nothing else of the
+upstream distribution (the official image, its shell layer or entrypoint) is used.

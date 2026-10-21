@@ -133,6 +133,7 @@ export async function audit(
       actorSnapshot: {
         displayName: actor.displayName,
         username: actor.username,
+        identityKind: actor.invitationOnly ? "INVITATION" : "ACCOUNT",
       },
       action,
       objectType,

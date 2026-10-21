@@ -6,7 +6,7 @@ Este código está preparado para Issues, Discussions, PR, revisiones y demás e
 
 ## Contacto y aplicación
 
-**Responsable de moderación: Project Maintainer, Cristóbal Ruz Escobar.** El canal privado de recepción sigue **PENDING BEFORE PUBLICATION** hasta habilitarlo y verificarlo. No publiques incidentes sensibles en issues ni escribas a un destino supuesto; no se inventa un email.
+**Responsable de moderación: Project Maintainer, Cristóbal Ruz Escobar.** El canal privado de recepción de incidentes de conducta sigue **pendiente de designación y verificación**. GitHub Private Vulnerability Reporting se reserva para vulnerabilidades, no sustituye ese canal. No publiques incidentes sensibles en issues ni escribas a un destino supuesto; no se inventa un email.
 
 Quien reciba un reporte limitará el acceso a la información, escuchará a las personas implicadas cuando sea seguro y aplicará medidas proporcionadas: solicitud de corrección, advertencia, retirada de contenido o restricción temporal/permanente de participación. Se explicará la decisión cuando la privacidad lo permita. No se promete confidencialidad absoluta ni plazos que el proyecto todavía no pueda sostener.
 

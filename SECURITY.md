@@ -2,15 +2,15 @@
 
 ## Error normal o vulnerabilidad
 
-Un bug sin impacto de seguridad corresponde al futuro issue tracker: [Issues previstos](https://github.com/ruzer/Acta/issues) — **PENDING UNTIL PUBLICATION**, no habilitación verificada. Una vulnerabilidad puede exponer datos, permitir acceso indebido o afectar integridad/disponibilidad. **No reportes vulnerabilidades mediante Issues o PR públicos.** No publiques credenciales, datos personales, evidencia real ni reproducciones sensibles.
+Un bug sin impacto de seguridad corresponde a [Issues](https://github.com/ruzer/Acta/issues). Una vulnerabilidad puede exponer datos, permitir acceso indebido o afectar integridad/disponibilidad. **No reportes vulnerabilidades mediante Issues o PR públicos.** No publiques credenciales, datos personales, evidencia real ni reproducciones sensibles.
 
 ## Reporte privado
 
-**PRIVATE SECURITY CONTACT — PENDING BEFORE PUBLICATION.** No existe todavía un canal de recepción del proyecto confirmado. El placeholder no es un destino para enviar reportes; no se pide contactar a una persona conocida ni se inventa un email.
+**GitHub Private Vulnerability Reporting es el canal preferido.** Su habilitación fue verificada mediante la API de GitHub el 2026-10-01; el estado actual no se ha vuelto a consultar durante este cierre local y debe comprobarse en la siguiente fase remota autorizada. Usa [Report a vulnerability](https://github.com/ruzer/Acta/security/advisories/new), en Security del repositorio. GitHub requiere iniciar sesión. No uses Issues o PR públicos para vulnerabilidades.
 
-La opción preferida para publicación es **GitHub Private Vulnerability Reporting**, si el repositorio y configuración lo permiten. No está declarado habilitado. Durante publicación se debe activar, comprobar recepción y documentar el acceso real desde Security / Report a vulnerability; si no está disponible, designar y probar un canal privado equivalente. [Configuración oficial](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/configure-vulnerability-reporting/configure-for-a-repository).
+Incluye versión, impacto y reproducción mínima con datos ficticios. Se coordinará evaluación, corrección y divulgación para evitar exposición innecesaria; no se promete tiempo de respuesta o resolución. No envíes credenciales, evidencia real ni datos sensibles innecesarios. Si no puedes acceder al formulario privado, conserva el reporte privadamente; un issue público no es una alternativa.
 
-Mientras no exista un canal confirmado, conserva el reporte privadamente; no uses un issue público como alternativa. Cuando se habilite, incluye versión, impacto y reproducción mínima con datos ficticios. Se coordinará evaluación, corrección y divulgación para evitar exposición innecesaria; no se promete tiempo de respuesta o resolución. Compartir datos sensibles no es necesario para una primera descripción del impacto.
+La verificación citada corresponde a esa fecha; no demuestra disponibilidad continua ni un plazo de atención. Si la siguiente inspección encuentra la función deshabilitada, su activación o un canal privado equivalente será requisito antes de recibir reportes. No se ha enviado un reporte ficticio. [Configuración oficial](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/configure-vulnerability-reporting/configure-for-a-repository).
 
 ## Versiones y responsabilidad
 

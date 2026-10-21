@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { publicBrandingView } from "@requirements/contracts";
+import {
+  accentContrast,
+  minimumAccentContrast,
+  publicBrandingView,
+} from "@requirements/contracts";
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
   ORGANIZATION_CODE: z
@@ -13,8 +17,15 @@ const envSchema = z.object({
     .default("development"),
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
   COOKIE_SECURE: z.enum(["true", "false"]).default("true"),
+  INVITATION_IDENTITY: z
+    .enum(["NONE", "NAME", "EMAIL", "BOTH"])
+    .default("NAME"),
+  INVITATION_DEFAULT_DAYS: z.coerce.number().int().min(1).max(365).default(7),
+  INVITATION_MAX_DAYS: z.coerce.number().int().min(1).max(365).default(30),
   SESSION_IDLE_MINUTES: z.coerce.number().int().positive().max(120).default(30),
   SESSION_MAX_HOURS: z.coerce.number().int().positive().max(24).default(8),
+  // "disabled" turns the first-run wizard off for installations configured only through the environment.
+  SETUP_WIZARD: z.enum(["auto", "disabled"]).default("auto"),
 });
 export type AppConfig = z.infer<typeof envSchema>;
 export function loadConfig(): AppConfig {
@@ -24,6 +35,8 @@ export function loadConfig(): AppConfig {
       "Configuración incompleta o inválida. Revisa las variables del README.",
     );
   const c = parsed.data;
+  if (c.INVITATION_DEFAULT_DAYS > c.INVITATION_MAX_DAYS)
+    throw new Error("Invitation default lifetime exceeds its maximum.");
   const origin = new URL(c.APP_ORIGIN);
   if (c.NODE_ENV === "production" && c.COOKIE_SECURE !== "true")
     throw new Error("Producción requiere cookies Secure.");
@@ -44,6 +57,8 @@ export function publicBranding() {
     shortName: process.env.APP_SHORT_NAME || "Acta",
     organizationName: process.env.ORGANIZATION_NAME || "My organization",
     logo: process.env.APP_LOGO || "",
+    logoSecondary: process.env.APP_LOGO_SECONDARY || "",
+    secondaryName: process.env.APP_SECONDARY_NAME?.trim() || "",
     favicon: process.env.APP_FAVICON || "",
     accent: process.env.APP_ACCENT || "#2b4d7c",
     locale: process.env.DEFAULT_LOCALE || "es-MX",
@@ -52,7 +67,7 @@ export function publicBranding() {
   if (!config.success)
     throw new Error("Invalid public branding configuration; values omitted");
   const c = config.data;
-  for (const path of [c.logo, c.favicon])
+  for (const path of [c.logo, c.logoSecondary, c.favicon])
     if (
       path &&
       !/^\/branding\/[a-zA-Z0-9_-]+\.(png|jpg|jpeg|webp|ico|svg)$/.test(path)
@@ -64,12 +79,7 @@ export function publicBranding() {
     throw new Error("Invalid locale or timezone");
   }
   // Keep white button text readable; preserve Acta's visual hierarchy.
-  const channels = [1, 3, 5]
-    .map((i) => parseInt(c.accent.slice(i, i + 2), 16) / 255)
-    .map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
-  const luminance =
-    0.2126 * channels[0]! + 0.7152 * channels[1]! + 0.0722 * channels[2]!;
-  if (1.05 / (luminance + 0.05) < 4.5)
+  if (accentContrast(c.accent) < minimumAccentContrast)
     throw new Error(
       "APP_ACCENT must provide contrast of at least 4.5:1 with white",
     );

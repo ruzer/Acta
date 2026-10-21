@@ -35,6 +35,12 @@ export class ExchangeController {
   ) {
     return this.visibility.dashboard(r.actor, p);
   }
+  @Get("decisions") decisions(
+    @Req() r: ActorRequest,
+    @Param("projectId", ParseUUIDPipe) p: string,
+  ) {
+    return this.visibility.decisions(r.actor, p);
+  }
   @Get("traceability") traceability(
     @Req() r: ActorRequest,
     @Param("projectId", ParseUUIDPipe) p: string,

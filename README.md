@@ -7,7 +7,7 @@ Acta es una plataforma open source para convertir preguntas estructuradas, conoc
 ![Editor Escribir: temas y preguntas de un proyecto ficticio](docs/assets/01-editor-write.png)
 *Prepara un cuestionario por temas, con preguntas y seguimientos que se pueden leer de un vistazo.*
 
-Autor y titular: **Cristóbal Ruz Escobar**. Copyright (c) Cristóbal Ruz Escobar. Licencia: **AGPL-3.0-only**; [texto íntegro](LICENSE). La publicación inicial sigue su revisión remota de seguridad.
+Autor y titular: **Cristóbal Ruz Escobar**. Copyright (c) Cristóbal Ruz Escobar. Licencia: [AGPL-3.0-only](LICENSE).
 
 ## Qué problema resuelve
 
@@ -41,8 +41,9 @@ Ser administrador no sustituye el rol de analista para validar decisiones. El á
 ## Características principales
 
 - Cuestionarios por temas, seguimientos y ocho tipos de respuesta, incluida matriz.
-- Editor con vistas **Escribir**, **Organizar** y **Revisar antes de publicar**.
+- Editor con vistas **Escribir**, **Organizar** y **Revisar antes de publicar**. En Organizar, [selecciona preguntas y revisa operaciones por lote](docs/BULK-QUESTIONNAIRE-OPERATIONS.md) para asignar área, agregar participantes o publicar.
 - **Mi trabajo** para participantes: borradores persistentes, envíos y evidencia privada.
+- [Invitaciones privadas mediante enlace](docs/EXTERNAL-INVITATIONS.md) para aportaciones externas sin cuenta: preguntas seleccionadas, vencimiento, revocación y respuestas independientes por invitación.
 - Aclaraciones, comparación de conflictos y decisiones validadas con fuentes identificables.
 - Dashboard, trazabilidad, importación de estructura JSON y exportaciones JSON, CSV y Markdown según permisos.
 - Historial de operaciones y acceso separado por proyecto.
@@ -75,24 +76,33 @@ Para detenerla conservando datos: `docker compose -p requirements-demo stop`. Pa
 
 ## Quiero instalar una instancia vacía
 
-En un directorio separado, copia `.env.example` a `.env` y conserva `DEMO_SEED=false`:
+Hay dos caminos y puedes usar el que prefieras. [Cómo conviven y qué decide cada uno](docs/ADMIN-CENTER.md).
+
+**Guiado** (para empezar): con Docker y Docker Compose 2.24.4 o posterior, en un directorio separado.
+
+```sh
+sh scripts/install.sh
+```
+
+Genera los secretos en volúmenes privados, arranca Acta y muestra una dirección con un código de un solo uso. Ábrela para crear al administrador, nombrar a la institución y elegir la apariencia con un asistente. No editas ningún archivo. Para un servidor con HTTPS: `sh scripts/install.sh --origin https://acta.example.org`.
+
+**Avanzado** (variables de entorno, automatización, CI/CD): copia `.env.example` a `.env`, ajusta lo que necesites y arranca con Compose. El asistente es opcional; apágalo con `SETUP_WIZARD=disabled` si configuras todo por entorno.
 
 ```sh
 cp .env.example .env
 docker compose up --build
-```
-
-Cuando los servicios estén saludables, crea el primer administrador desde otra terminal:
-
-```sh
 docker compose exec backend node scripts/bootstrap-admin.mjs
 ```
 
-Introduce usuario, nombre visible y una contraseña temporal privada de al menos 20 caracteres. El primer acceso exige cambiarla. No existe una contraseña universal; repetir el bootstrap no restablece cuentas existentes.
+`bootstrap-admin` pide usuario, nombre visible y una contraseña temporal privada de al menos 20 caracteres (o recibe JSON por la entrada estándar, sin terminal). El primer acceso exige cambiarla. No existe una contraseña universal; repetir el bootstrap no restablece cuentas existentes.
 
-Abre [localhost:4317](http://localhost:4317). Crea un proyecto desde **Administración → Proyectos** y agrega un tema y una pregunta desde **Escribir**. El formulario exige título breve e identificador externo; usa valores propios y conserva el identificador exactamente. Crea las áreas y usuarios necesarios, agrega miembros al proyecto, asigna participantes concretos y publica las preguntas. Después accede con el participante para responder y con un analista del proyecto para revisar.
+Abre [localhost:4317](http://localhost:4317). Crea un proyecto desde **Administración → Proyectos** y agrega un tema y una pregunta desde **Escribir**. El formulario propone un identificador externo (`P-001`, `P-002`…) y un título breve tomado de tu redacción; puedes cambiarlos y el identificador queda fijo, porque lo usan las importaciones, exportaciones y referencias. «+ Agregar tema» está junto a «Nueva pregunta» en Organizar y al inicio de Escribir. Crea las áreas y usuarios necesarios, agrega miembros al proyecto, asigna participantes concretos y publica las preguntas. Después accede con el participante para responder y con un analista del proyecto para revisar. En **Administración → Configuración** personalizas el nombre, el color, el logotipo y el favicon, y consultas el estado del sistema.
 
 Este arranque local no expone la aplicación a otras computadoras. Para un servidor y HTTPS, sigue [Self-hosting](docs/SELF-HOSTING.md). No borres volúmenes para actualizar o resolver errores.
+
+## Importar tu cuestionario
+
+Prepara un proyecto vacío y carga tus temas y preguntas desde JSON. Puedes partir del [ejemplo mínimo](examples/questionnaire-template.minimal.json) o del [ejemplo completo](examples/questionnaire-template.full.json). Sigue la [guía de importación](docs/IMPORTING-QUESTIONNAIRES.md) para adaptar el archivo, revisar errores y confirmar. Las preguntas quedan en borrador; después asignas participantes y publicas.
 
 ## Self-hosting
 
@@ -123,26 +133,26 @@ También puedes ver [Organizar](docs/assets/02-editor-organize.png), [Responder]
 
 Acta está diseñado para instalarse en infraestructura propia y adaptarse mediante forks. Las organizaciones pueden mantener personalizaciones y sincronizarse con el upstream conforme a AGPL-3.0-only. Las mejoras genéricas son bienvenidas de regreso mediante Pull Requests: contribuir así ayuda a otras instalaciones y reduce divergencia; no es una obligación de enviar PR atribuida a la licencia.
 
-El upstream oficial es [github.com/ruzer/Acta](https://github.com/ruzer/Acta). La publicación de este snapshot y la habilitación de canales se registrarán después del gate remoto; no se presume que ya estén completadas.
+El upstream oficial es [github.com/ruzer/Acta](https://github.com/ruzer/Acta). El código está disponible públicamente. Este checkout prepara **v0.6.0 — Dirección C**, el rediseño visual y de navegación del espacio de trabajo, junto con la actualización de seguridad de VersityGW compilado desde su fuente oficial. La preparación de la versión no implica que su tag o release ya estén publicados. Consulta el [changelog](CHANGELOG.md) y las [releases oficiales](https://github.com/ruzer/Acta/releases) para verificar la versión estable y su commit antes de actualizar; la release anterior es [v0.5.0](https://github.com/ruzer/Acta/releases/tag/v0.5.0).
 
-[Gobernanza](GOVERNANCE.md) · [Forks y sincronización](docs/UPSTREAM-FORKS.md) · [Roadmap](ROADMAP.md) · [Soporte comunitario previsto](SUPPORT.md).
+[Gobernanza](GOVERNANCE.md) · [Forks y sincronización](docs/UPSTREAM-FORKS.md) · [Roadmap](ROADMAP.md) · [Soporte comunitario](SUPPORT.md).
 
 ## Contribuir
 
-La colaboración externa todavía no está abierta. Consulta [CONTRIBUTING](CONTRIBUTING.md) para el recorrido previsto, el mapa del repositorio y los requisitos de una contribución. Para preparar un entorno local: [Desarrollo](docs/DEVELOPMENT.md).
+Consulta [CONTRIBUTING](CONTRIBUTING.md) para el recorrido de contribución, el mapa del repositorio y los requisitos de una contribución. Para preparar un entorno local: [Desarrollo](docs/DEVELOPMENT.md).
 
-Destino previsto: **github.com/ruzer/Acta — PENDING UNTIL PUBLICATION**. [Issues previstos](https://github.com/ruzer/Acta/issues) — PENDING UNTIL PUBLICATION; no se afirma que este canal esté habilitado. La configuración real se verificará durante la fase de publicación.
+[Issues](https://github.com/ruzer/Acta/issues) para bugs y trabajo concreto; [Discussions](https://github.com/ruzer/Acta/discussions) para preguntas e ideas. Su habilitación quedó registrada el 2026-10-01; el estado remoto actual se comprobará en la siguiente revisión autorizada.
 
 [Documentación por audiencia](docs/README.md) · [Contratos por función](docs/CONTRACTS.md) · [Código de conducta](CODE_OF_CONDUCT.md) · [Cambios](CHANGELOG.md)
 
 ## Seguridad
 
-Los errores normales irán al futuro issue tracker. Las vulnerabilidades necesitan un canal privado; no publiques detalles sensibles en un issue.
+Los errores normales se reportan en Issues. Las vulnerabilidades necesitan un canal privado; no publiques detalles sensibles en un issue.
 
-**PRIVATE SECURITY CONTACT — pending. PENDING BEFORE PUBLICATION.** Lee [SECURITY](SECURITY.md).
+El canal preferido es [Report a vulnerability](https://github.com/ruzer/Acta/security/advisories/new). Su habilitación se verificó el 2026-10-01; si no está disponible, conserva el reporte en privado. Lee [SECURITY](SECURITY.md).
 
 ## Licencia
 
-Acta is licensed under the GNU Affero General Public License v3.0.
+Acta está licenciado bajo GNU Affero General Public License v3.0.
 
-**SPDX: AGPL-3.0-only.** Puedes utilizar, estudiar, modificar y redistribuir Acta conforme a [AGPL-3.0](LICENSE). La licencia no exige enviar Pull Requests a Acta. Los componentes de terceros conservan sus propias licencias y [avisos](docs/THIRD-PARTY-NOTICES.md).
+**SPDX: AGPL-3.0-only.** Puedes utilizar, estudiar, modificar y redistribuir Acta conforme a [AGPL-3.0](LICENSE). La licencia no exige enviar Pull Requests a Acta. Los componentes de terceros conservan sus propias licencias y [avisos](docs/THIRD-PARTY-NOTICES.md). Las contribuciones siguen [DCO 1.1](DCO) + Signed-off-by; consulta [CONTRIBUTING](CONTRIBUTING.md) y [GOVERNANCE](GOVERNANCE.md).

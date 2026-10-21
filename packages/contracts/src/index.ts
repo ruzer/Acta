@@ -1,4 +1,17 @@
 import { z } from "zod";
+import {
+  assetCommandView,
+  assetRemoveInput,
+  settingsInput,
+  settingsView,
+  setupChecksView,
+  setupCompleteInput,
+  setupStatusView,
+  setupVerifyInput,
+  setupVerifyView,
+  storageTestView,
+  systemStatusView,
+} from "./installation.js";
 export const roles = ["ADMIN", "ANALYST", "STAKEHOLDER", "VIEWER"] as const;
 export const priorities = ["P0", "P1", "P2", "P3"] as const;
 export const questionTypes = [
@@ -77,6 +90,9 @@ export const publicBrandingView = z.strictObject({
   shortName: z.string().min(1).max(40),
   organizationName: z.string().min(1).max(200),
   logo: z.string(),
+  /** Optional second logo (an area or a collaborating entity) and its name. */
+  logoSecondary: z.string(),
+  secondaryName: z.string().max(200),
   favicon: z.string(),
   accent: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   locale: z.string(),
@@ -106,6 +122,12 @@ export const resetPasswordInput = z.strictObject({
   temporaryPassword: z.string().min(12).max(128),
 });
 export const areaInput = z.strictObject({ code: externalId, name });
+// Areas are renamed or switched on and off; the code stays and nothing is deleted.
+export const areaUpdateInput = z
+  .strictObject({ name: name.optional(), active: z.boolean().optional() })
+  .refine((d) => d.name !== undefined || d.active !== undefined, {
+    message: "Indica el nombre o el estado del área.",
+  });
 export const projectInput = z.strictObject({
   externalId,
   name,
@@ -229,6 +251,117 @@ export const metadataInput = z.strictObject({
   order: z.number().int().nonnegative(),
   expectedVersion: z.number().int().nonnegative(),
 });
+// Bulk commands are additive; individual questionnaire contracts remain available.
+export const bulkQuestions = z
+  .array(
+    z.strictObject({
+      id,
+      expectedVersion: z.number().int().nonnegative(),
+    }),
+  )
+  .min(1)
+  .max(2000)
+  .refine(
+    (xs) => new Set(xs.map((x) => x.id)).size === xs.length,
+    "No repitas preguntas en la selección.",
+  );
+const bulkBase = { requestId: id, questions: bulkQuestions };
+export const bulkAreaInput = z.strictObject({
+  ...bulkBase,
+  targetAreaId: id,
+  sourceAreaId: id.nullable(), // null explicitly means every selected question.
+});
+export const bulkParticipantsInput = z
+  .strictObject({
+    ...bulkBase,
+    participants: z
+      .array(z.strictObject({ projectMemberId: id, required: z.boolean() }))
+      .min(1)
+      .max(20)
+      .refine(
+        (xs) => new Set(xs.map((x) => x.projectMemberId)).size === xs.length,
+        "No repitas participantes.",
+      ),
+  })
+  .refine(
+    (d) => d.questions.length * d.participants.length <= 10000,
+    "El lote excede 10.000 asignaciones. Reduce la selección.",
+  );
+export const bulkPublishInput = z.strictObject(bulkBase);
+const bulkHash = z.string().regex(/^[a-f0-9]{64}$/);
+export const bulkAreaConfirm = bulkAreaInput.extend({ previewHash: bulkHash });
+export const bulkParticipantsConfirm = bulkParticipantsInput.safeExtend({
+  previewHash: bulkHash,
+});
+export const bulkPublishConfirm = bulkPublishInput.extend({
+  previewHash: bulkHash,
+});
+export const bulkOperation = z.enum([
+  "ASSIGN_AREA",
+  "ADD_PARTICIPANTS",
+  "PUBLISH",
+]);
+export const bulkIssue = z.strictObject({
+  message: z.string(),
+  field: z.string(),
+  targetId: id.nullable(),
+});
+export const bulkPreview = z.strictObject({
+  operation: bulkOperation,
+  requestId: id,
+  previewHash: bulkHash,
+  canConfirm: z.boolean(),
+  counts: z.strictObject({
+    selected: z.number().int().nonnegative(),
+    applicable: z.number().int().nonnegative(),
+    ignored: z.number().int().nonnegative(),
+    blocked: z.number().int().nonnegative(),
+    warnings: z.number().int().nonnegative(),
+    newAssignments: z.number().int().nonnegative(),
+    reactivatedAssignments: z.number().int().nonnegative(),
+    existingAssignments: z.number().int().nonnegative(),
+  }),
+  items: z.array(
+    z.strictObject({
+      questionId: id,
+      title: z.string(),
+      state: z.enum([
+        "READY",
+        "ALREADY_PUBLISHED",
+        "WARNING",
+        "BLOCKED",
+        "UNCHANGED",
+      ]),
+      errors: z.array(bulkIssue),
+      warnings: z.array(bulkIssue),
+    }),
+  ),
+  dependencies: z.array(
+    z.strictObject({
+      questionId: id,
+      dependsOnId: id,
+      title: z.string(),
+      kind: z.enum(["GROUP", "CONDITION"]),
+      inSelection: z.boolean(),
+      publication: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]),
+    }),
+  ),
+});
+export const bulkResult = z.strictObject({
+  operation: bulkOperation,
+  requestId: id,
+  changedIds: z.array(id),
+  ignoredIds: z.array(id),
+  newAssignments: z.number().int().nonnegative(),
+  reactivatedAssignments: z.number().int().nonnegative(),
+});
+export type BulkAreaInput = z.infer<typeof bulkAreaInput>;
+export type BulkParticipantsInput = z.infer<typeof bulkParticipantsInput>;
+export type BulkPublishInput = z.infer<typeof bulkPublishInput>;
+export type BulkOperation = z.infer<typeof bulkOperation>;
+export type BulkPreview = z.infer<typeof bulkPreview>;
+export type BulkResult = z.infer<typeof bulkResult>;
+
 export const userView = z.strictObject({
   id,
   username: z.string(),
@@ -697,7 +830,269 @@ export type ClarificationThreadView = z.infer<typeof clarificationThreadView>;
 export type MyClarifications = z.infer<typeof myClarificationsView>;
 
 // Canonical observable boundaries; Nest validates inputs/outputs and the client parses outputs.
+// External invitations are capabilities, never regular account sessions.
+export const invitationIdentityRequirement = z.enum([
+  "NONE",
+  "NAME",
+  "EMAIL",
+  "BOTH",
+]);
+export const invitationIdentity = z.strictObject({
+  name: z.string().trim().min(1).max(200).optional(),
+  email: z.email().max(254).optional(),
+  organization: z.string().trim().min(1).max(200).optional(),
+});
+export const invitationCreateInput = z
+  .strictObject({
+    requestId: id,
+    label: z.string().trim().min(1).max(200),
+    questionIds: z
+      .array(id)
+      .min(1)
+      .max(500)
+      .refine((v) => new Set(v).size === v.length, "No repitas preguntas."),
+    areaId: id,
+    identity: invitationIdentity,
+    nonNominal: z.boolean().default(false),
+    expiresAt: z.iso.datetime().optional(),
+    allowEvidence: z.boolean().default(false),
+  })
+  .superRefine((v, ctx) => {
+    if (v.nonNominal && Object.keys(v.identity).length)
+      ctx.addIssue({
+        code: "custom",
+        path: ["identity"],
+        message: "Una invitación no nominal no registra datos personales.",
+      });
+    if (!v.nonNominal && !v.identity.name && !v.identity.email)
+      ctx.addIssue({
+        code: "custom",
+        path: ["identity"],
+        message: "Indica nombre o correo del destinatario.",
+      });
+  });
+export const invitationCommand = z.strictObject({
+  expectedVersion: z.number().int().nonnegative(),
+});
+export const invitationRenewInput = invitationCommand.extend({
+  expiresAt: z.iso.datetime().optional(),
+});
+export const invitationPolicyInput = invitationCommand.extend({
+  allowNonNominal: z.boolean(),
+});
+export const invitationPolicyView = z.strictObject({
+  allowNonNominal: z.boolean(),
+  expectedVersion: z.number().int().nonnegative(),
+  identityRequirement: invitationIdentityRequirement,
+  defaultDays: z.number().int().positive(),
+  maxDays: z.number().int().positive(),
+});
+export const invitationView = z.strictObject({
+  id,
+  label: z.string(),
+  identity: invitationIdentity,
+  nonNominal: z.boolean(),
+  questionIds: z.array(id),
+  areaId: id,
+  allowEvidence: z.boolean(),
+  createdAt: z.iso.datetime(),
+  expiresAt: z.iso.datetime(),
+  revokedAt: z.iso.datetime().nullable(),
+  firstOpenedAt: z.iso.datetime().nullable(),
+  lockVersion: z.number().int().nonnegative(),
+  status: z.enum([
+    "PENDING",
+    "OPENED",
+    "DRAFT",
+    "PARTIALLY_SUBMITTED",
+    "SUBMITTED",
+    "EXPIRED",
+    "REVOKED",
+  ]),
+  submitted: z.number().int().nonnegative(),
+  total: z.number().int().nonnegative(),
+});
+export const invitationLinkView = z.strictObject({
+  invitation: invitationView,
+  url: z.url(),
+});
+export const invitationListQuery = z.strictObject({
+  page: z.coerce.number().int().min(1).default(1),
+});
+export const invitationListView = z.strictObject({
+  items: z.array(invitationView),
+  page: z.number().int().positive(),
+  total: z.number().int().nonnegative(),
+});
+export const invitationExchangeInput = z.strictObject({
+  token: z.string().regex(/^[A-Za-z0-9_-]{43}$/),
+});
+export const invitationAccessView = z.strictObject({
+  invitationId: id,
+  csrfToken: z.string().length(64),
+  expiresAt: z.iso.datetime(),
+  allowEvidence: z.boolean(),
+  work: personalProjectView,
+});
+export type InvitationView = z.infer<typeof invitationView>;
+export type InvitationAccessView = z.infer<typeof invitationAccessView>;
+export type InvitationCreateInput = z.infer<typeof invitationCreateInput>;
+
 export const contracts = {
+  invitationPolicy: {
+    method: "GET",
+    path: "/projects/:projectId/invitations/policy",
+    output: invitationPolicyView,
+  },
+  setInvitationPolicy: {
+    method: "PUT",
+    path: "/projects/:projectId/invitations/policy",
+    input: invitationPolicyInput,
+    output: invitationPolicyView,
+  },
+  invitations: {
+    method: "GET",
+    path: "/projects/:projectId/invitations",
+    input: invitationListQuery,
+    output: invitationListView,
+  },
+  createInvitation: {
+    method: "POST",
+    path: "/projects/:projectId/invitations",
+    input: invitationCreateInput,
+    output: invitationLinkView,
+  },
+  revokeInvitation: {
+    method: "POST",
+    path: "/projects/:projectId/invitations/:id/revoke",
+    input: invitationCommand,
+    output: invitationView,
+  },
+  renewInvitation: {
+    method: "POST",
+    path: "/projects/:projectId/invitations/:id/renew",
+    input: invitationRenewInput,
+    output: invitationLinkView,
+  },
+  invitationExchange: {
+    method: "POST",
+    path: "/invitations/access/exchange",
+    input: invitationExchangeInput,
+    output: invitationAccessView,
+  },
+  invitationAccess: {
+    method: "GET",
+    path: "/invitations/access",
+    output: invitationAccessView,
+  },
+  invitationLogout: {
+    method: "POST",
+    path: "/invitations/access/logout",
+    output: okView,
+  },
+  invitationResponse: {
+    method: "GET",
+    path: "/invitations/access/questions/:id",
+    output: responseView,
+  },
+  invitationSave: {
+    method: "PUT",
+    path: "/invitations/access/questions/:id/draft",
+    input: saveDraftInput,
+    output: responseView,
+  },
+  invitationSubmit: {
+    method: "POST",
+    path: "/invitations/access/questions/:id/submit",
+    input: responseCommand,
+    output: responseView,
+  },
+  invitationAttach: {
+    method: "POST",
+    path: "/invitations/access/questions/:id/evidence/attach",
+    input: evidenceCommand,
+    output: responseView,
+  },
+  invitationRemove: {
+    method: "POST",
+    path: "/invitations/access/questions/:id/evidence/remove",
+    input: evidenceCommand,
+    output: responseView,
+  },
+  invitationStage: {
+    transport: "binary" as const,
+    method: "POST",
+    path: "/invitations/access/questions/:id/evidence",
+    input: stageEvidenceInput,
+    output: evidenceView,
+  },
+  invitationDownload: {
+    transport: "binary" as const,
+    method: "GET",
+    path: "/invitations/access/evidence/:id/download",
+    output: evidenceView,
+  },
+  invitationClarifications: {
+    method: "GET",
+    path: "/invitations/access/questions/:id/clarifications",
+    output: myClarificationsView,
+  },
+  invitationReply: {
+    method: "POST",
+    path: "/invitations/access/questions/:id/clarifications/reply",
+    input: replyClarificationInput,
+    output: reviewResult,
+  },
+
+  setupStatus: {
+    method: "GET",
+    path: "/setup/status",
+    output: setupStatusView,
+  },
+  setupVerify: {
+    method: "POST",
+    path: "/setup/verify",
+    input: setupVerifyInput,
+    output: setupVerifyView,
+  },
+  setupChecks: {
+    method: "POST",
+    path: "/setup/checks",
+    input: setupVerifyInput,
+    output: setupChecksView,
+  },
+  setupComplete: {
+    method: "POST",
+    path: "/setup/complete",
+    input: setupCompleteInput,
+    output: okView,
+  },
+  settings: { method: "GET", path: "/settings", output: settingsView },
+  updateSettings: {
+    method: "POST",
+    path: "/settings",
+    input: settingsInput,
+    output: settingsView,
+  },
+  uploadBrandingAsset: {
+    transport: "binary" as const,
+    method: "POST",
+    path: "/settings/assets/:kind",
+    output: assetCommandView,
+  },
+  removeBrandingAsset: {
+    method: "POST",
+    path: "/settings/assets/:kind/remove",
+    input: assetRemoveInput,
+    output: assetCommandView,
+  },
+  systemStatus: { method: "GET", path: "/system", output: systemStatusView },
+  storageTest: {
+    method: "POST",
+    path: "/system/storage-test",
+    input: z.strictObject({}),
+    output: storageTestView,
+  },
   branding: {
     method: "GET",
     path: "/configuration/public",
@@ -882,6 +1277,12 @@ export const contracts = {
     input: areaInput,
     output: areaView,
   },
+  updateArea: {
+    method: "POST",
+    path: "/areas/:id",
+    input: areaUpdateInput,
+    output: areaView,
+  },
   projects: { method: "GET", path: "/projects", output: z.array(projectView) },
   createProject: {
     method: "POST",
@@ -933,6 +1334,42 @@ export const contracts = {
     path: "/projects/:projectId/questions/reorder",
     input: reorderQuestionsInput,
     output: structureResult,
+  },
+  bulkAreaPreview: {
+    method: "POST",
+    path: "/projects/:projectId/questions/bulk/area/preview",
+    input: bulkAreaInput,
+    output: bulkPreview,
+  },
+  bulkAreaConfirm: {
+    method: "POST",
+    path: "/projects/:projectId/questions/bulk/area/confirm",
+    input: bulkAreaConfirm,
+    output: bulkResult,
+  },
+  bulkParticipantsPreview: {
+    method: "POST",
+    path: "/projects/:projectId/questions/bulk/participants/preview",
+    input: bulkParticipantsInput,
+    output: bulkPreview,
+  },
+  bulkParticipantsConfirm: {
+    method: "POST",
+    path: "/projects/:projectId/questions/bulk/participants/confirm",
+    input: bulkParticipantsConfirm,
+    output: bulkResult,
+  },
+  bulkPublishPreview: {
+    method: "POST",
+    path: "/projects/:projectId/questions/bulk/publish/preview",
+    input: bulkPublishInput,
+    output: bulkPreview,
+  },
+  bulkPublishConfirm: {
+    method: "POST",
+    path: "/projects/:projectId/questions/bulk/publish/confirm",
+    input: bulkPublishConfirm,
+    output: bulkResult,
   },
   createReference: {
     method: "POST",
@@ -1170,6 +1607,8 @@ export const historyQuery = z.strictObject({
   pageSize: z.coerce.number().int().min(1).max(50).default(25),
   objectType: z.string().max(100).optional(),
   actorId: z.uuid().optional(),
+  /** Every account, or every external invitation, instead of one actor. */
+  actorKind: z.enum(["ACCOUNT", "INVITATION"]).optional(),
   action: z.string().max(100).optional(),
   from: z.iso.datetime().optional(),
   to: z.iso.datetime().optional(),
@@ -1186,13 +1625,50 @@ export const auditSummary = z.strictObject({
   exportType: z.string().nullable(),
   scope: z.string().nullable(),
 });
+/** What an event is about, in words: the question (or the invitation) behind an otherwise opaque identifier. */
+export const auditSubject = z.strictObject({
+  kind: z.enum(["QUESTION", "INVITATION"]),
+  id: z.uuid(),
+  reference: z.string().nullable(),
+  label: z.string(),
+});
+export const historyItem = auditSummary.extend({
+  subject: auditSubject.nullable(),
+});
 export const historyView = z.strictObject({
-  items: z.array(auditSummary),
+  items: z.array(historyItem),
   total: z.number().int(),
   page: z.number().int(),
   pageSize: z.number().int(),
+  /** Accounts with events in the project, plus the selected actor if it is an invitation. */
   actors: z.array(z.strictObject({ id: z.uuid(), displayName: z.string() })),
+  /** How many external invitations have events (they are one choice, not one option each). */
+  invitationActors: z.number().int().nonnegative(),
 });
+/**
+ * One line of the decisions register: the decision in force for a question (or,
+ * when it was reopened, the latest earlier one), as an excerpt. The full text
+ * stays in the question's review.
+ */
+export const decisionRegisterEntry = z.strictObject({
+  questionId: z.uuid(),
+  state: z.enum(["CURRENT", "REOPENED"]),
+  excerpt: z.string(),
+  truncated: z.boolean(),
+  scope: z.string(),
+  hasExceptions: z.boolean(),
+  decidedAt: z.iso.datetime(),
+  decidedBy: z.string(),
+  /** REOPENED only: when and why the decision stopped being in force. */
+  endedAt: z.iso.datetime().nullable(),
+  endedReason: z.string().nullable(),
+  /** Earlier decisions kept as history, not counting the one shown when REOPENED. */
+  previous: z.number().int().nonnegative(),
+});
+export const decisionRegisterView = z.strictObject({
+  entries: z.array(decisionRegisterEntry),
+});
+export type DecisionRegisterEntry = z.infer<typeof decisionRegisterEntry>;
 export const exportInput = z.strictObject({
   format: z.enum(["JSON", "CSV", "MARKDOWN"]),
   scope: z.enum(["full", "validated-decisions"]),
@@ -1333,3 +1809,4 @@ export const validatedDecisionsExportDocument = z.strictObject({
 });
 
 export * from "./participant.js";
+export * from "./installation.js";

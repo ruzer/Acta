@@ -1,0 +1,146 @@
+[
+  {
+    "screen": "01-login",
+    "violations": 0,
+    "violationNodes": 0,
+    "incompleteRules": 0,
+    "incompleteNodes": 0,
+    "passes": 28,
+    "engine": {
+      "name": "axe-core",
+      "version": "4.13.0"
+    }
+  },
+  {
+    "screen": "02-editor",
+    "violations": 0,
+    "violationNodes": 0,
+    "incompleteRules": 1,
+    "incompleteNodes": 12,
+    "passes": 40,
+    "engine": {
+      "name": "axe-core",
+      "version": "4.13.0"
+    }
+  },
+  {
+    "screen": "03-crear-pregunta",
+    "violations": 0,
+    "violationNodes": 0,
+    "incompleteRules": 0,
+    "incompleteNodes": 0,
+    "passes": 28,
+    "engine": {
+      "name": "axe-core",
+      "version": "4.13.0"
+    }
+  },
+  {
+    "screen": "04-crear-error",
+    "violations": 0,
+    "violationNodes": 0,
+    "incompleteRules": 0,
+    "incompleteNodes": 0,
+    "passes": 32,
+    "engine": {
+      "name": "axe-core",
+      "version": "4.13.0"
+    }
+  },
+  {
+    "screen": "05-organizar",
+    "violations": 0,
+    "violationNodes": 0,
+    "incompleteRules": 1,
+    "incompleteNodes": 1,
+    "passes": 44,
+    "engine": {
+      "name": "axe-core",
+      "version": "4.13.0"
+    }
+  },
+  {
+    "screen": "06-revisar",
+    "violations": 0,
+    "violationNodes": 0,
+    "incompleteRules": 0,
+    "incompleteNodes": 0,
+    "passes": 38,
+    "engine": {
+      "name": "axe-core",
+      "version": "4.13.0"
+    }
+  },
+  {
+    "screen": "07-asignar",
+    "violations": 0,
+    "violationNodes": 0,
+    "incompleteRules": 1,
+    "incompleteNodes": 1,
+    "passes": 22,
+    "engine": {
+      "name": "axe-core",
+      "version": "4.13.0"
+    }
+  },
+  {
+    "screen": "08-editar",
+    "violations": 0,
+    "violationNodes": 0,
+    "incompleteRules": 0,
+    "incompleteNodes": 0,
+    "passes": 29,
+    "engine": {
+      "name": "axe-core",
+      "version": "4.13.0"
+    }
+  },
+  {
+    "screen": "09-publicar",
+    "violations": 0,
+    "violationNodes": 0,
+    "incompleteRules": 1,
+    "incompleteNodes": 1,
+    "passes": 17,
+    "engine": {
+      "name": "axe-core",
+      "version": "4.13.0"
+    }
+  },
+  {
+    "screen": "10-mi-trabajo",
+    "violations": 0,
+    "violationNodes": 0,
+    "incompleteRules": 0,
+    "incompleteNodes": 0,
+    "passes": 36,
+    "engine": {
+      "name": "axe-core",
+      "version": "4.13.0"
+    }
+  },
+  {
+    "screen": "11-responder-matriz",
+    "violations": 0,
+    "violationNodes": 0,
+    "incompleteRules": 0,
+    "incompleteNodes": 0,
+    "passes": 41,
+    "engine": {
+      "name": "axe-core",
+      "version": "4.13.0"
+    }
+  },
+  {
+    "screen": "12-matriz-error",
+    "violations": 0,
+    "violationNodes": 0,
+    "incompleteRules": 0,
+    "incompleteNodes": 0,
+    "passes": 41,
+    "engine": {
+      "name": "axe-core",
+      "version": "4.13.0"
+    }
+  }
+]

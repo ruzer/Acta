@@ -1,0 +1,698 @@
+{
+  "checkpoint": 7,
+  "records": [
+    {
+      "id": "V-27 projects",
+      "width": 1440,
+      "h1": "Mis proyectos",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 projects",
+      "width": 1024,
+      "h1": "Mis proyectos",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 projects",
+      "width": 768,
+      "h1": "Mis proyectos",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 projects",
+      "width": 390,
+      "h1": "Mis proyectos",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 projects",
+      "width": 320,
+      "h1": "Mis proyectos",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 review-inbox",
+      "width": 1440,
+      "h1": "Revisar respuestas",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 review-inbox",
+      "width": 1024,
+      "h1": "Revisar respuestas",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 review-inbox",
+      "width": 768,
+      "h1": "Revisar respuestas",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 review-inbox",
+      "width": 390,
+      "h1": "Revisar respuestas",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 review-inbox",
+      "width": 320,
+      "h1": "Revisar respuestas",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 attention",
+      "width": 1440,
+      "h1": "Atención",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 attention",
+      "width": 1024,
+      "h1": "Atención",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 attention",
+      "width": 768,
+      "h1": "Atención",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 attention",
+      "width": 390,
+      "h1": "Atención",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 attention",
+      "width": 320,
+      "h1": "Atención",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 questionnaire",
+      "width": 1440,
+      "h1": "Cuestionario",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 questionnaire",
+      "width": 1024,
+      "h1": "Cuestionario",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 questionnaire",
+      "width": 768,
+      "h1": "Cuestionario",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 questionnaire",
+      "width": 390,
+      "h1": "Cuestionario",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 questionnaire",
+      "width": 320,
+      "h1": "Cuestionario",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 decisions",
+      "width": 1440,
+      "h1": "Decisiones",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 decisions",
+      "width": 1024,
+      "h1": "Decisiones",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 decisions",
+      "width": 768,
+      "h1": "Decisiones",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 decisions",
+      "width": 390,
+      "h1": "Decisiones",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 decisions",
+      "width": 320,
+      "h1": "Decisiones",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 invitations",
+      "width": 1440,
+      "h1": "Invitaciones",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 invitations",
+      "width": 1024,
+      "h1": "Invitaciones",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 invitations",
+      "width": 768,
+      "h1": "Invitaciones",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 invitations",
+      "width": 390,
+      "h1": "Invitaciones",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 invitations",
+      "width": 320,
+      "h1": "Invitaciones",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 members",
+      "width": 1440,
+      "h1": "Miembros del proyecto",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 members",
+      "width": 1024,
+      "h1": "Miembros del proyecto",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 members",
+      "width": 768,
+      "h1": "Miembros del proyecto",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 members",
+      "width": 390,
+      "h1": "Miembros del proyecto",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 members",
+      "width": 320,
+      "h1": "Miembros del proyecto",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 import",
+      "width": 1440,
+      "h1": "Importar cuestionario",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 import",
+      "width": 1024,
+      "h1": "Importar cuestionario",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 import",
+      "width": 768,
+      "h1": "Importar cuestionario",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 import",
+      "width": 390,
+      "h1": "Importar cuestionario",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 import",
+      "width": 320,
+      "h1": "Importar cuestionario",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 export",
+      "width": 1440,
+      "h1": "Exportar proyecto",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 export",
+      "width": 1024,
+      "h1": "Exportar proyecto",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 export",
+      "width": 768,
+      "h1": "Exportar proyecto",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 export",
+      "width": 390,
+      "h1": "Exportar proyecto",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 export",
+      "width": 320,
+      "h1": "Exportar proyecto",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 history",
+      "width": 1440,
+      "h1": "Bitácora del proyecto",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 history",
+      "width": 1024,
+      "h1": "Bitácora del proyecto",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 history",
+      "width": 768,
+      "h1": "Bitácora del proyecto",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 history",
+      "width": 390,
+      "h1": "Bitácora del proyecto",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 history",
+      "width": 320,
+      "h1": "Bitácora del proyecto",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 traceability",
+      "width": 1440,
+      "h1": "Trazabilidad",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 traceability",
+      "width": 1024,
+      "h1": "Trazabilidad",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 traceability",
+      "width": 768,
+      "h1": "Trazabilidad",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 traceability",
+      "width": 390,
+      "h1": "Trazabilidad",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 traceability",
+      "width": 320,
+      "h1": "Trazabilidad",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 admin",
+      "width": 1440,
+      "h1": "Administración",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 admin",
+      "width": 1024,
+      "h1": "Administración",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 admin",
+      "width": 768,
+      "h1": "Administración",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 admin",
+      "width": 390,
+      "h1": "Administración",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 admin",
+      "width": 320,
+      "h1": "Administración",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 password",
+      "width": 1440,
+      "h1": "Cambiar contraseña",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 password",
+      "width": 1024,
+      "h1": "Cambiar contraseña",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 password",
+      "width": 768,
+      "h1": "Cambiar contraseña",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 password",
+      "width": 390,
+      "h1": "Cambiar contraseña",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 password",
+      "width": 320,
+      "h1": "Cambiar contraseña",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 not-found",
+      "width": 1440,
+      "h1": "Página no encontrada",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 not-found",
+      "width": 1024,
+      "h1": "Página no encontrada",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 not-found",
+      "width": 768,
+      "h1": "Página no encontrada",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 not-found",
+      "width": 390,
+      "h1": "Página no encontrada",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-27 not-found",
+      "width": 320,
+      "h1": "Página no encontrada",
+      "size": 26,
+      "weight": 600
+    },
+    {
+      "id": "V-23 tablas",
+      "width": 1440,
+      "overflow": false,
+      "label": "none",
+      "display": "table-row",
+      "headVisible": true,
+      "tableWidth": 1096
+    },
+    {
+      "id": "V-23 tablas",
+      "width": 1024,
+      "overflow": false,
+      "label": "none",
+      "display": "table-row",
+      "headVisible": true,
+      "tableWidth": 896
+    },
+    {
+      "id": "V-23 tablas",
+      "width": 768,
+      "overflow": false,
+      "label": "none",
+      "display": "table-row",
+      "headVisible": true,
+      "tableWidth": 640
+    },
+    {
+      "id": "V-23 tablas",
+      "width": 390,
+      "overflow": false,
+      "label": "\"Estado\" / \"\"",
+      "display": "block",
+      "headVisible": false,
+      "tableWidth": 358
+    },
+    {
+      "id": "V-23 tablas",
+      "width": 320,
+      "overflow": false,
+      "label": "\"Estado\" / \"\"",
+      "display": "block",
+      "headVisible": false,
+      "tableWidth": 288
+    },
+    {
+      "id": "V-23 administración",
+      "tabs": [
+        "Usuarios",
+        "Áreas",
+        "Proyectos"
+      ]
+    },
+    {
+      "id": "V-24 invitaciones",
+      "width": 1440,
+      "rowWidth": 1094
+    },
+    {
+      "id": "V-24 invitaciones",
+      "width": 1024,
+      "rowWidth": 894
+    },
+    {
+      "id": "V-24 invitaciones",
+      "width": 768,
+      "rowWidth": 638
+    },
+    {
+      "id": "V-24 invitaciones",
+      "width": 390,
+      "rowWidth": 356
+    },
+    {
+      "id": "V-24 invitaciones",
+      "width": 320,
+      "rowWidth": 286
+    },
+    {
+      "id": "V-27 cuestionario",
+      "width": 1440,
+      "tableTop": 407.3125
+    },
+    {
+      "id": "V-27 cuestionario",
+      "width": 1024,
+      "tableTop": 423.3125
+    },
+    {
+      "id": "V-27 cuestionario",
+      "width": 768,
+      "tableTop": 510.328125
+    },
+    {
+      "id": "V-27 cuestionario",
+      "width": 390,
+      "tableTop": 452.546875
+    },
+    {
+      "id": "V-27 cuestionario",
+      "width": 320,
+      "tableTop": 455.296875
+    },
+    {
+      "id": "V-27 proyectos",
+      "width": 1440,
+      "cards": 5
+    },
+    {
+      "id": "V-27 proyectos",
+      "width": 1024,
+      "cards": 5
+    },
+    {
+      "id": "V-27 proyectos",
+      "width": 768,
+      "cards": 5
+    },
+    {
+      "id": "V-27 proyectos",
+      "width": 390,
+      "cards": 5
+    },
+    {
+      "id": "V-27 proyectos",
+      "width": 320,
+      "cards": 5
+    },
+    {
+      "id": "V-27 login",
+      "width": 1440
+    },
+    {
+      "id": "V-27 login",
+      "width": 1024
+    },
+    {
+      "id": "V-27 login",
+      "width": 768
+    },
+    {
+      "id": "V-27 login",
+      "width": 390
+    },
+    {
+      "id": "V-27 login",
+      "width": 320
+    },
+    {
+      "id": "V-25 asistente",
+      "width": 1440
+    },
+    {
+      "id": "V-25 asistente",
+      "width": 1024
+    },
+    {
+      "id": "V-25 asistente",
+      "width": 768
+    },
+    {
+      "id": "V-25 asistente",
+      "width": 390
+    },
+    {
+      "id": "V-25 asistente",
+      "width": 320
+    },
+    {
+      "id": "V-26 lector",
+      "width": 1440,
+      "family": "\"Acta Plex Serif\", Charter, \"Iowan Old Style\", \"Palatino Linotype\", Georgia, serif",
+      "size": 18,
+      "titleSize": 13.5
+    },
+    {
+      "id": "V-26 lector",
+      "width": 1024,
+      "family": "\"Acta Plex Serif\", Charter, \"Iowan Old Style\", \"Palatino Linotype\", Georgia, serif",
+      "size": 18,
+      "titleSize": 13.5
+    },
+    {
+      "id": "V-26 lector",
+      "width": 768,
+      "family": "\"Acta Plex Serif\", Charter, \"Iowan Old Style\", \"Palatino Linotype\", Georgia, serif",
+      "size": 18,
+      "titleSize": 13.5
+    },
+    {
+      "id": "V-26 lector",
+      "width": 390,
+      "family": "\"Acta Plex Serif\", Charter, \"Iowan Old Style\", \"Palatino Linotype\", Georgia, serif",
+      "size": 18,
+      "titleSize": 13.5
+    },
+    {
+      "id": "V-26 lector",
+      "width": 320,
+      "family": "\"Acta Plex Serif\", Charter, \"Iowan Old Style\", \"Palatino Linotype\", Georgia, serif",
+      "size": 18,
+      "titleSize": 13.5
+    }
+  ]
+}

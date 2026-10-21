@@ -273,12 +273,42 @@ export async function loadGraph(
   const { project, member } = await access.project(tx, actor, projectId, [
     "STAKEHOLDER",
   ]);
+  return {
+    graph: await loadAssignedResponseGraph(tx, actor, projectId, member.id),
+    project,
+    member,
+  };
+}
+// Internal projection for authorized review/recomputation, including retained
+// submissions after invitation expiry. Never use this as endpoint authorization.
+export async function loadAssignedResponseGraph(
+  tx: Tx,
+  actor: User,
+  projectId: string,
+  memberId: string,
+) {
+  const invitation = actor.invitationOnly
+    ? await tx.responseInvitation.findFirst({
+        where: {
+          respondentId: actor.id,
+          projectId,
+          organizationId: actor.organizationId,
+          scopeSealed: true,
+        },
+        include: { questions: true },
+      })
+    : null;
+  if (actor.invitationOnly && !invitation)
+    throw new Error("Missing invitation scope");
   const questions = await tx.question.findMany({
     where: {
       projectId,
       publication: "PUBLISHED",
+      ...(invitation
+        ? { id: { in: invitation.questions.map((q) => q.questionId) } }
+        : {}),
       QuestionAssignment_question: {
-        some: { projectMemberId: member.id, active: true },
+        some: { projectMemberId: memberId, active: true },
       },
     },
     include: questionInclude,
@@ -292,5 +322,5 @@ export async function loadGraph(
     },
     include: responseInclude,
   });
-  return { graph: new ResponseGraph(questions, responses), project, member };
+  return new ResponseGraph(questions, responses);
 }

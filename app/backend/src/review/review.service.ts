@@ -94,6 +94,7 @@ export class ReviewService {
             actorSnapshot: {
               displayName: r.actor.displayName,
               username: r.actor.username,
+              identityKind: r.actor.invitationOnly ? "INVITATION" : "ACCOUNT",
             },
             action: operation,
             objectType: "Question",
@@ -121,7 +122,6 @@ export class ReviewService {
         questionId: q,
         projectMemberId: member.id,
         active: true,
-        member: { area: { active: true } },
       },
     });
     if (!a) throw new NotFoundException("No se encontró la pregunta asignada.");

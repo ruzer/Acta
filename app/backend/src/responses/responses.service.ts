@@ -1,3 +1,4 @@
+import { invitationAccess } from "../common/invitation-access.js";
 import {
   recomputeReview,
   invalidateValidation,
@@ -83,6 +84,11 @@ export class ResponsesService {
     );
   }
   async authorizeUpload(actor: User, p: string, q: string) {
+    if (
+      actor.invitationOnly &&
+      !(await invitationAccess(this.db, actor, p)).allowEvidence
+    )
+      throw new NotFoundException("No se encontró la evidencia.");
     (await loadGraph(this.db, this.access, actor, p)).graph.question(q);
     if (
       await this.db.questionDisposition.findFirst({
@@ -104,6 +110,13 @@ export class ResponsesService {
     work: (tx: Tx) => Promise<T>,
   ) {
     return this.access.mutate(r.actor, p, ["STAKEHOLDER"], async (tx) => {
+      if (
+        r.actor.invitationOnly &&
+        (operation.startsWith("EVIDENCE_") ||
+          operation === "DRAFT_EVIDENCE_REMOVED") &&
+        !(await invitationAccess(tx, r.actor, p)).allowEvidence
+      )
+        throw new NotFoundException("No se encontró la evidencia.");
       const { graph } = await loadGraph(tx, this.access, r.actor, p);
       graph.question(q);
       const payloadHash = sha256(canonical({ p, q, operation, payload }));
@@ -139,6 +152,7 @@ export class ResponsesService {
           actorSnapshot: {
             displayName: r.actor.displayName,
             username: r.actor.username,
+            identityKind: r.actor.invitationOnly ? "INVITATION" : "ACCOUNT",
           },
           action: operation,
           objectType: "Response",
@@ -295,6 +309,7 @@ export class ResponsesService {
               id: r.actor.id,
               displayName: r.actor.displayName,
               username: r.actor.username,
+              identityKind: r.actor.invitationOnly ? "INVITATION" : "ACCOUNT",
             },
             areaSnapshot: { id: area.id, code: area.code, name: area.name },
             conditionContext: jsonValue(draft.conditionContext),
@@ -495,12 +510,24 @@ export class ResponsesService {
   async download(r: CommandContext, p: string, id: string) {
     return this.db.$transaction(
       async (tx) => {
-        const { member } = await this.access.project(tx, r.actor, p);
+        const { member, invitation } = await this.access.project(
+          tx,
+          r.actor,
+          p,
+        );
         const e = await tx.evidence.findFirst({
           where: { id, projectId: p },
           include: { response: true, RevisionEvidence_evidence: true },
         });
         if (!e || !["READY", "STAGED"].includes(e.status))
+          throw new NotFoundException("No se encontró la evidencia.");
+        if (
+          invitation &&
+          (!invitation.allowEvidence ||
+            !invitation.questions.some(
+              (q) => q.questionId === e.response.questionId,
+            ))
+        )
           throw new NotFoundException("No se encontró la evidencia.");
         let allowed = false;
         if (

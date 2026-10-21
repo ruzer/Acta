@@ -1,0 +1,223 @@
+{
+  "screen": "01-login",
+  "url": "http://localhost:4441/",
+  "timestamp": "2026-10-06T05:08:53.095Z",
+  "testEngine": {
+    "name": "axe-core",
+    "version": "4.13.0"
+  },
+  "testEnvironment": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+    "windowWidth": 1440,
+    "windowHeight": 1000,
+    "orientationAngle": 0,
+    "orientationType": "landscape-primary"
+  },
+  "violations": [],
+  "incomplete": [],
+  "passes": [
+    {
+      "id": "aria-allowed-attr",
+      "impact": null,
+      "nodes": 2
+    },
+    {
+      "id": "aria-conditional-attr",
+      "impact": null,
+      "nodes": 2
+    },
+    {
+      "id": "aria-hidden-body",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "aria-prohibited-attr",
+      "impact": null,
+      "nodes": 2
+    },
+    {
+      "id": "aria-valid-attr-value",
+      "impact": null,
+      "nodes": 2
+    },
+    {
+      "id": "aria-valid-attr",
+      "impact": null,
+      "nodes": 2
+    },
+    {
+      "id": "autocomplete-valid",
+      "impact": null,
+      "nodes": 2
+    },
+    {
+      "id": "avoid-inline-spacing",
+      "impact": null,
+      "nodes": 3
+    },
+    {
+      "id": "button-name",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "color-contrast",
+      "impact": null,
+      "nodes": 9
+    },
+    {
+      "id": "document-title",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "duplicate-id-aria",
+      "impact": null,
+      "nodes": 2
+    },
+    {
+      "id": "empty-heading",
+      "impact": null,
+      "nodes": 2
+    },
+    {
+      "id": "form-field-multiple-labels",
+      "impact": null,
+      "nodes": 2
+    },
+    {
+      "id": "heading-order",
+      "impact": null,
+      "nodes": 2
+    },
+    {
+      "id": "html-has-lang",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "html-lang-valid",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "label-title-only",
+      "impact": null,
+      "nodes": 2
+    },
+    {
+      "id": "label",
+      "impact": null,
+      "nodes": 2
+    },
+    {
+      "id": "landmark-main-is-top-level",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-no-duplicate-main",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-one-main",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-unique",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "meta-viewport-large",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "meta-viewport",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "nested-interactive",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "page-has-heading-one",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "region",
+      "impact": null,
+      "nodes": 16
+    }
+  ],
+  "inapplicable": [
+    "accesskeys",
+    "area-alt",
+    "aria-allowed-role",
+    "aria-braille-equivalent",
+    "aria-command-name",
+    "aria-deprecated-role",
+    "aria-dialog-name",
+    "aria-hidden-focus",
+    "aria-input-field-name",
+    "aria-meter-name",
+    "aria-progressbar-name",
+    "aria-required-attr",
+    "aria-required-children",
+    "aria-required-parent",
+    "aria-roles",
+    "aria-tab-name",
+    "aria-text",
+    "aria-toggle-field-name",
+    "aria-tooltip-name",
+    "aria-treeitem-name",
+    "blink",
+    "bypass",
+    "definition-list",
+    "dlitem",
+    "empty-table-header",
+    "frame-focusable-content",
+    "frame-tested",
+    "frame-title-unique",
+    "frame-title",
+    "html-xml-lang-mismatch",
+    "image-alt",
+    "image-redundant-alt",
+    "input-button-name",
+    "input-image-alt",
+    "landmark-banner-is-top-level",
+    "landmark-contentinfo-is-top-level",
+    "landmark-no-duplicate-banner",
+    "landmark-no-duplicate-contentinfo",
+    "link-in-text-block",
+    "link-name",
+    "list",
+    "listitem",
+    "marquee",
+    "meta-refresh",
+    "object-alt",
+    "presentation-role-conflict",
+    "role-img-alt",
+    "scope-attr-valid",
+    "scrollable-region-focusable",
+    "select-name",
+    "server-side-image-map",
+    "skip-link",
+    "summary-name",
+    "svg-img-alt",
+    "tabindex",
+    "table-duplicate-name",
+    "td-headers-attr",
+    "th-has-data-cells",
+    "valid-lang",
+    "video-caption",
+    "no-autoplay-audio"
+  ]
+}

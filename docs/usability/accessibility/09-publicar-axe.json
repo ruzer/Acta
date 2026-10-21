@@ -1,0 +1,226 @@
+{
+  "screen": "09-publicar",
+  "url": "http://localhost:4441/projects/4a0de27d-fe9d-4d9b-aa6b-bf4179c18e6a/editor",
+  "timestamp": "2026-10-06T05:16:17.226Z",
+  "testEngine": {
+    "name": "axe-core",
+    "version": "4.13.0"
+  },
+  "testEnvironment": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+    "windowWidth": 1440,
+    "windowHeight": 1000,
+    "orientationAngle": 0,
+    "orientationType": "landscape-primary"
+  },
+  "violations": [],
+  "incomplete": [
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "tags": [
+        "cat.color",
+        "wcag2aa",
+        "wcag143",
+        "TTv5",
+        "TT13.c",
+        "EN-301-549",
+        "EN-9.1.4.3",
+        "ACT",
+        "RGAAv4",
+        "RGAA-3.2.1"
+      ],
+      "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+      "nodes": [
+        {
+          "any": [
+            {
+              "id": "color-contrast",
+              "data": {
+                "contrastRatio": 0,
+                "fontSize": "12.0pt (16px)",
+                "fontWeight": "normal",
+                "messageKey": "elmPartiallyObscuring",
+                "expectedContrastRatio": "4.5:1"
+              },
+              "relatedNodes": [],
+              "impact": "serious",
+              "message": "Element's background color could not be determined because it partially overlaps other elements"
+            }
+          ],
+          "all": [],
+          "none": [],
+          "impact": "serious",
+          "html": "<p>El contenido quedará protegido y estará disponible para los participantes asignados. Revisa las opciones y condiciones antes de continuar.</p>",
+          "target": [
+            "dialog > p"
+          ],
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+        }
+      ]
+    }
+  ],
+  "passes": [
+    {
+      "id": "aria-allowed-attr",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "aria-allowed-role",
+      "impact": null,
+      "nodes": 7
+    },
+    {
+      "id": "aria-conditional-attr",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "aria-hidden-body",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "aria-hidden-focus",
+      "impact": null,
+      "nodes": 10
+    },
+    {
+      "id": "aria-prohibited-attr",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "aria-valid-attr-value",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "aria-valid-attr",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "button-name",
+      "impact": null,
+      "nodes": 2
+    },
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "nodes": 4
+    },
+    {
+      "id": "duplicate-id-aria",
+      "impact": null,
+      "nodes": 7
+    },
+    {
+      "id": "empty-heading",
+      "impact": null,
+      "nodes": 2
+    },
+    {
+      "id": "heading-order",
+      "impact": null,
+      "nodes": 2
+    },
+    {
+      "id": "meta-viewport-large",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "meta-viewport",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "nested-interactive",
+      "impact": null,
+      "nodes": 2
+    },
+    {
+      "id": "region",
+      "impact": null,
+      "nodes": 7
+    }
+  ],
+  "inapplicable": [
+    "accesskeys",
+    "area-alt",
+    "aria-braille-equivalent",
+    "aria-command-name",
+    "aria-deprecated-role",
+    "aria-dialog-name",
+    "aria-input-field-name",
+    "aria-meter-name",
+    "aria-progressbar-name",
+    "aria-required-attr",
+    "aria-required-children",
+    "aria-required-parent",
+    "aria-roles",
+    "aria-tab-name",
+    "aria-text",
+    "aria-toggle-field-name",
+    "aria-tooltip-name",
+    "aria-treeitem-name",
+    "autocomplete-valid",
+    "avoid-inline-spacing",
+    "blink",
+    "bypass",
+    "definition-list",
+    "dlitem",
+    "document-title",
+    "empty-table-header",
+    "form-field-multiple-labels",
+    "frame-focusable-content",
+    "frame-tested",
+    "frame-title-unique",
+    "frame-title",
+    "html-has-lang",
+    "html-lang-valid",
+    "html-xml-lang-mismatch",
+    "image-alt",
+    "image-redundant-alt",
+    "input-button-name",
+    "input-image-alt",
+    "label-title-only",
+    "label",
+    "landmark-banner-is-top-level",
+    "landmark-contentinfo-is-top-level",
+    "landmark-main-is-top-level",
+    "landmark-no-duplicate-banner",
+    "landmark-no-duplicate-contentinfo",
+    "landmark-no-duplicate-main",
+    "landmark-one-main",
+    "landmark-unique",
+    "link-in-text-block",
+    "link-name",
+    "list",
+    "listitem",
+    "marquee",
+    "meta-refresh",
+    "object-alt",
+    "page-has-heading-one",
+    "presentation-role-conflict",
+    "role-img-alt",
+    "scope-attr-valid",
+    "scrollable-region-focusable",
+    "select-name",
+    "server-side-image-map",
+    "skip-link",
+    "summary-name",
+    "svg-img-alt",
+    "tabindex",
+    "table-duplicate-name",
+    "td-headers-attr",
+    "th-has-data-cells",
+    "valid-lang",
+    "video-caption",
+    "no-autoplay-audio"
+  ]
+}

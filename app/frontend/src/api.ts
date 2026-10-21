@@ -1,4 +1,8 @@
-import { contracts, errorView } from "@requirements/contracts";
+import {
+  contracts,
+  errorView,
+  type BrandingAssetKind,
+} from "@requirements/contracts";
 import { z } from "zod";
 let csrfToken = "";
 export function setCsrf(value: string) {
@@ -15,7 +19,7 @@ export class ApiFailure extends Error {
 }
 type Key = Exclude<
   keyof typeof contracts,
-  "stageEvidence" | "downloadEvidence"
+  "stageEvidence" | "downloadEvidence" | "uploadBrandingAsset"
 >;
 export async function api<K extends Key>(
   key: K,
@@ -111,6 +115,39 @@ export async function uploadEvidence(
     throw new ApiFailure(
       r.status,
       e.success ? e.data.message : "No se pudo cargar el archivo.",
+    );
+  }
+  return c.output.parse(body);
+}
+/** Logo or favicon: the bytes travel as they are, the version of the settings they were chosen against in a header. */
+export async function uploadBrandingAsset(
+  kind: BrandingAssetKind,
+  expectedVersion: number,
+  file: File,
+) {
+  const c = contracts.uploadBrandingAsset;
+  const r = await fetch(`/api/v1${c.path.replace(":kind", kind)}`, {
+    method: "POST",
+    credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/octet-stream",
+      "X-CSRF-Token": csrfToken,
+      "X-Expected-Version": String(expectedVersion),
+    },
+    body: file,
+  }).catch(() => {
+    throw new ApiFailure(
+      0,
+      "La carga no se confirmó. Conserva el archivo e inténtalo de nuevo.",
+    );
+  });
+  const body: unknown = await r.json().catch(() => null);
+  if (!r.ok) {
+    if (r.status === 401) window.dispatchEvent(new Event("session-expired"));
+    const e = errorView.safeParse(body);
+    throw new ApiFailure(
+      r.status,
+      e.success ? e.data.message : "No se pudo cargar la imagen.",
     );
   }
   return c.output.parse(body);

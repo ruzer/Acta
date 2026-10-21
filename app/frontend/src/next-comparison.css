@@ -1,0 +1,13 @@
+.next-comparison {
+  margin-block: 1rem;
+}
+.next-comparison-count {
+  font-weight: 650;
+}
+.ac-comparison-intro {
+  margin: 0 0 12px;
+}
+.review-page .project-workbench .pw-tools {
+  padding-block: 0;
+  border-bottom: 0;
+}

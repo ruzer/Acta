@@ -66,7 +66,8 @@ async function change(username, password) {
 try {
   assert.equal((await api("/health")).storage, "ok");
   const branding = await api("/configuration/public");
-  assert.equal(branding.appName, process.env.APP_NAME);
+  // Appearance left to the application falls back to the product default.
+  assert.equal(branding.appName, process.env.APP_NAME || "Acta");
   assert.ok(!("S3_SECRET_KEY" in branding));
   let state;
   if (process.argv.includes("--verify")) {

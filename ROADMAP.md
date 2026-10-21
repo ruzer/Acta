@@ -5,7 +5,7 @@ Prioridades sin fechas ni compromiso de implementación. Esta lista no declara f
 ## Now
 
 - Titularidad, autorización, AGPL-3.0-only, maintainer y DCO 1.1: resueltos por el titular el 2026-10-01. Conservar avisos de terceros.
-- Habilitar y verificar contactos privados de seguridad/moderación y canales comunitarios.
+- Designar y verificar el contacto privado de moderación. Revalidar en la próxima fase remota el canal de seguridad y los canales comunitarios registrados como habilitados el 2026-10-01.
 - Revisar esta estructura upstream, documentación y plantillas; configurar los canales/CI solo en la fase de publicación autorizada.
 - Preparar la primera release pre-1.0 siguiendo [RELEASING](docs/RELEASING.md).
 
@@ -19,5 +19,7 @@ Prioridades sin fechas ni compromiso de implementación. Esta lista no declara f
 
 - Reconsiderar plataformas y almacenamiento adicionales según resultados y aportes de la comunidad.
 - Evaluar mejoras genéricas provenientes de forks mediante el proceso de contribución, sin prometer un ecosistema de plugins o nuevas integraciones.
+- Webhooks y correo saliente: solo existe un [diseño mínimo](docs/INTEGRATIONS-DESIGN.md); implementarlos requiere revisión de seguridad propia (SSRF, firma, datos mínimos, auditoría).
+- Cambio de proveedor de almacenamiento, rotación de credenciales y migración de evidencia desde la aplicación: hoy son procedimientos de infraestructura.
 
 No se programa HA, migración automática de proveedores, nuevos tipos de pregunta o internacionalización completa. Son propuestas posibles, no deuda aprobada ni compromisos de esta hoja de ruta.

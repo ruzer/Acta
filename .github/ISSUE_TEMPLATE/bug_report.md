@@ -3,7 +3,7 @@ name: Bug report
 about: Reportar un fallo reproducible sin información sensible
 ---
 
-<!-- PENDING UNTIL PUBLICATION. No reportes vulnerabilidades aquí: consulta SECURITY.md. El canal privado sigue pendiente. -->
+<!-- No reportes vulnerabilidades aquí: consulta SECURITY.md para el canal privado y su estado de verificación. -->
 ## Qué ocurrió
 
 Resultado esperado y observado.

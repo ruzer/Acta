@@ -4,21 +4,26 @@
 
 `.env.example` funciona como inicio local sin editar: origen loopback, cookies no Secure solo en loopback, demo desactivada y secretos generados por `secrets-init`. Para producción configurar `APP_ORIGIN=https://…`, `NODE_ENV=production`, `COOKIE_SECURE=true` y TLS externo. Configuración inválida impide arrancar; no se imprimen valores secretos.
 
-`ORGANIZATION_CODE` es el código interno de instalación (DEFAULT por defecto), nunca un campo de login. `ORGANIZATION_NAME` se usa al bootstrap/demo y en branding. El nombre inicial queda persistido en Organization; no existe una pantalla para renombrar organizaciones existentes. Cambiar el código de despliegue no mueve usuarios ni crea acceso cruzado. Cambiar el nombre de despliegue no sobrescribe registros existentes automáticamente.
+`ORGANIZATION_CODE` es el código interno de instalación (DEFAULT por defecto), nunca un campo de login. `ORGANIZATION_NAME` es solo el nombre **inicial** (el asistente lo propone; `bootstrap-admin` y la demo lo usan): queda persistido en Organization y se renombra en **Administración → Configuración**. Cambiar el código de despliegue no mueve usuarios ni crea acceso cruzado. Cambiar `ORGANIZATION_NAME` después de instalar no sobrescribe el registro existente.
 
 ## Opcional / branding
 
-| Variable               | Default               | Regla                                                                                        |
+Hay una regla de precedencia: **si defines la variable (no vacía), la infraestructura manda**; Acta muestra el valor como «administrado externamente» y no deja cambiarlo desde **Configuración**. Si la dejas vacía o ausente, el valor lo elige un administrador en la aplicación y, si nadie lo eligió, vale el predeterminado. [Detalle](ADMIN-CENTER.md#regla-de-precedencia).
+
+| Variable               | Predeterminado        | Regla                                                                                        |
 | ---------------------- | --------------------- | -------------------------------------------------------------------------------------------- |
 | APP_NAME               | Acta | Nombre visible / título, hasta 100 caracteres                                                |
 | APP_SHORT_NAME         | Acta                  | Hasta 40 caracteres                                                                          |
-| ORGANIZATION_NAME      | Example Organization       | Nombre inicial y contexto de instalación                                                     |
-| APP_LOGO / APP_FAVICON | vacío                 | Ruta local `/branding/archivo.png` (png/jpg/jpeg/webp/ico/svg), sin traversal ni URL externa |
+| ORGANIZATION_NAME      | (sin valor)           | Nombre **inicial** de la institución; después vive en la base de datos y se cambia en Configuración |
+| APP_LOGO / APP_FAVICON | vacío                 | Ruta local `/branding/archivo.png` (png/jpg/jpeg/webp/ico/svg), sin traversal ni URL externa. Sin ellas, el logotipo y el favicon se suben en Configuración (PNG/JPEG e ICO, sin SVG) |
+| APP_LOGO_SECONDARY     | vacío                 | Segundo logotipo opcional (área o entidad colaboradora): misma regla que `APP_LOGO`. Se muestra en el acceso y en las invitaciones externas |
+| APP_SECONDARY_NAME     | vacío                 | Nombre de esa entidad (hasta 200 caracteres); se escribe bajo el nombre de la institución en el acceso |
 | APP_ACCENT             | #2b4d7c               | Hexadecimal; contraste mínimo 4.5:1 sobre blanco                                             |
 | DEFAULT_LOCALE         | es-MX                 | Locale válido para formato; no implica traducción de toda la UI                              |
 | DEFAULT_TIMEZONE       | UTC                   | Zona IANA válida para fechas de revisión/participante                                        |
+| SETUP_WIZARD           | auto                  | `auto`: ofrece el asistente de primera instalación mientras no haya administrador. `disabled`: lo apaga (crea al administrador con `bootstrap-admin`) |
 
-Añadir assets propios en `app/frontend/public/branding/` y reconstruir frontend, o montar un directorio de assets revisados en `/usr/share/nginx/html/branding` de solo lectura. No incorporar logos con restricciones sin permiso. Solo estos datos públicos salen por `/api/v1/configuration/public`; nunca se expone el entorno completo.
+`.env.example` deja comentadas las variables de apariencia para que copiarlo no las fije. Añadir assets propios en `app/frontend/public/branding/` y reconstruir frontend, o montar un directorio de assets revisados en `/usr/share/nginx/html/branding` de solo lectura, sigue funcionando para `APP_LOGO`/`APP_FAVICON`. No incorporar logos con restricciones sin permiso. Solo estos datos públicos salen por `/api/v1/configuration/public`; nunca se expone el entorno completo.
 
 ## Secretos y persistencia
 
@@ -69,3 +74,56 @@ VersityGW se inicia sin debug, LDAP, WebUI, métricas externas ni endpoints adic
 ## Identidad por defecto
 
 APP_NAME y APP_SHORT_NAME usan **Acta**. Una instalación puede cambiarlos mediante configuración sin editar código; ORGANIZATION_NAME conserva su significado independiente. APP_LOGO/APP_FAVICON vacíos usan el wordmark sin inventar un logo. El nombre técnico del proyecto Compose y los volúmenes existentes se conservan para no alterar persistencia.
+
+## Invitaciones externas (en desarrollo)
+
+| Variable | Predeterminado | Regla |
+| --- | --- | --- |
+| `INVITATION_IDENTITY` | `NAME` | `NONE`, `NAME`, `EMAIL` o `BOTH`: datos registrados del destinatario, no identidad verificada |
+| `INVITATION_DEFAULT_DAYS` | `7` | Entre 1 y 365; no puede superar el máximo |
+| `INVITATION_MAX_DAYS` | `30` | Entre 1 y 365; limita el vencimiento definido al crear o renovar |
+
+El archivo Compose pasa estas variables al backend. Una invitación no nominal
+requiere además la autorización explícita de un ADMIN del proyecto y
+`INVITATION_IDENTITY=NONE`. No habilita formularios públicos generales.
+Cambiar los plazos predeterminados no modifica invitaciones ya emitidas.
+La renovación conserva la misma aportación, cambia el enlace y revoca sus
+sesiones anteriores. Una revocación no se deshace mediante renovación.
+
+El enlace se intercambia por una cookie separada de las cuentas. En producción
+requiere la misma configuración HTTPS y Secure existente. La sesión temporal
+no supera `SESSION_MAX_HOURS` ni el vencimiento de la invitación. El enlace
+original permite volver antes del vencimiento; no se guarda en localStorage,
+sessionStorage ni en el historial una vez abierto.
+
+Los límites usan ventanas fijas y PostgreSQL, compartidos entre procesos:
+
+| Alcance | Límite |
+|---|---|
+| Enlace reconocido | 30 intercambios por 15 minutos |
+| Sesión de invitación válida | 240 solicitudes por minuto |
+| Intercambios inválidos por conexión de red | 30 por 15 minutos |
+| Accesos inválidos por conexión de red | 240 por minuto |
+| Protección agregada de intercambios por red | 6.000 por 15 minutos |
+| Protección agregada de accesos por red | 24.000 por minuto |
+
+Las sesiones y enlaces válidos no consumen el límite de intentos inválidos.
+Un proxy o NAT comparte los límites agregados de red, pero cada invitado conserva
+su límite de sesión. No se confía en `X-Forwarded-For` enviado por el cliente.
+El proxy frontal debe limitar también conexiones, cuerpos y tráfico antes de
+llegar a la aplicación; estos límites no sustituyen protección de red contra DDoS.
+
+Los buckets conservan hashes temporales de alcance, nunca tokens en claro;
+se eliminan al caducar durante solicitudes posteriores. No identifican a una
+persona. El backend registra `INVITATION_ACCESS_DENIED` en el primer rechazo
+de cada bucket y `INVITATION_RATE_LIMITED` al alcanzar su primer bloqueo.
+Estos eventos operativos solo contienen el tipo y categoría: no incluyen IP,
+identidad, URL, token, cookie, encabezados ni cuerpo. Deben conservarse según
+la política de logs de la instalación. La bitácora del proyecto conserva las
+acciones atribuidas a la invitación y a quien la creó.
+
+No registrar cuerpos, cookies, tokens ni enlaces privados en herramientas de
+observación o soporte. Consulta la [guía de invitaciones](EXTERNAL-INVITATIONS.md).
+
+La entrega de esta capacidad sigue sujeta al gate de interfaz, seguridad e
+integración descrito en [el plan de invitaciones](EXTERNAL-INVITATIONS-DESIGN.md).

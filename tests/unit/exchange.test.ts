@@ -5,7 +5,10 @@ import {
   csvCell,
   markdownText,
 } from "../../app/backend/src/exchange/renderers.js";
-import { metrics } from "../../app/backend/src/visibility/visibility.service.js";
+import {
+  excerpt,
+  metrics,
+} from "../../app/backend/src/visibility/visibility.service.js";
 describe("2E boundaries", () => {
   it("rejects escaped duplicate keys, prototype keys, depth and invalid UTF8", () => {
     for (const s of [
@@ -50,5 +53,28 @@ describe("2E boundaries", () => {
     expect(m.closure.numerator).toBe(2);
     expect(m.submission.numerator).toBe(2);
     expect(metrics([]).validation.percentage).toBeNull();
+  });
+});
+describe("decision excerpts", () => {
+  it("keeps a short text whole, on one line", () => {
+    expect(excerpt("  Se adopta\n el registro  único. ", 240)).toEqual({
+      text: "Se adopta el registro único.",
+      truncated: false,
+    });
+  });
+  it("cuts a long text at a word and says so, never returning the document", () => {
+    const text = "palabra ".repeat(200) + "FINAL-SECRETO";
+    const cut = excerpt(text, 100);
+    expect(cut.truncated).toBe(true);
+    expect(cut.text.length).toBeLessThanOrEqual(101);
+    expect(cut.text.endsWith("palabra…")).toBe(true);
+    expect(cut.text).not.toContain("FINAL-SECRETO");
+  });
+  it("cuts a long unbroken text at the limit and a text of exactly the limit stays whole", () => {
+    expect(excerpt("x".repeat(150), 100).text).toBe("x".repeat(100) + "…");
+    expect(excerpt("y".repeat(100), 100)).toEqual({
+      text: "y".repeat(100),
+      truncated: false,
+    });
   });
 });

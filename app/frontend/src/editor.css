@@ -7,7 +7,7 @@
 .qe-shell h2,
 .qe-shell h3,
 .qe-shell h4 {
-  font-family: "Acta Manrope", sans-serif;
+  font-family: "Acta Plex Sans", sans-serif;
 }
 .qe-shell h1 {
   font-size: clamp(1.5rem, 3vw, 2rem);
@@ -63,6 +63,35 @@
 .qe-topic > header {
   padding-bottom: 16px;
   border-bottom: 1px solid var(--av-line);
+}
+.qe-topic-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.qe-chevron {
+  display: inline-flex;
+  transition: transform 120ms;
+}
+.qe-chevron.open {
+  transform: rotate(90deg);
+}
+.qe-chevron .participant-icon {
+  width: 18px;
+  height: 18px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .qe-chevron {
+    transition: none;
+  }
 }
 .qe-editorial-row {
   display: flex;
@@ -355,46 +384,79 @@
 }
 .qe-readiness {
   max-width: 920px;
+  display: grid;
+  gap: 16px;
+}
+.qe-readiness > * {
+  margin-block: 0;
+}
+.qe-readiness h3 {
+  font: 600 20px / 1.3 var(--ac-font-ui);
+}
+.qe-readiness h4 {
+  margin: 0 0 8px;
+  font: 600 var(--ac-text-body) / 1.4 var(--ac-font-ui);
 }
 .qe-readiness > section {
-  margin: 32px 0;
+  margin: 8px 0 0;
 }
 .qe-issue {
   display: flex;
   gap: 24px;
   align-items: center;
   justify-content: space-between;
-  padding: 20px;
-  background: white;
-  border-bottom: 1px solid var(--av-line);
-  border-left: 3px solid var(--av-muted);
+  margin-bottom: 8px;
+  padding: 16px 20px;
+  background: var(--ac-surface);
+  border: 1px solid var(--ac-line);
+  border-left: 3px solid var(--ac-muted);
+  border-radius: var(--ac-radius-surface);
 }
 .qe-issue > div {
   min-width: 0;
   flex: 1;
 }
 .qe-issue h5 {
-  font-size: 1rem;
-  line-height: 1.5;
-  margin: 0 0 8px;
+  margin: 0 0 4px;
+  font: 600 var(--ac-text-body) / 1.5 var(--ac-font-ui);
   overflow-wrap: anywhere;
 }
 .qe-issue p {
-  margin: 0 0 8px;
+  margin: 0 0 4px;
 }
 .qe-issue-error {
-  border-left-color: var(--av-conflict);
+  border-left-color: var(--ac-danger);
 }
 .qe-issue-advertencia {
-  border-left-color: var(--av-amber);
+  border-left-color: var(--ac-warning);
 }
-.qe-publication > div {
+.qe-publication > p {
+  max-width: 70ch;
+  margin: 0 0 12px;
+  color: var(--ac-muted);
+}
+.qe-drafts {
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+  background: var(--ac-surface);
+  border: 1px solid var(--ac-line);
+  border-radius: var(--ac-radius-surface);
+}
+.qe-drafts > li {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 20px;
-  padding: 16px 0;
-  border-bottom: 1px solid var(--av-line);
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--ac-line);
+}
+.qe-drafts > li:last-child {
+  border-bottom: 0;
+}
+.qe-drafts > li > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 @media (max-width: 600px) {
   .qe-issue {
@@ -402,9 +464,10 @@
     align-items: stretch;
     gap: 8px;
   }
-  .qe-publication > div {
+  .qe-drafts > li {
     flex-direction: column;
     align-items: stretch;
+    gap: 8px;
   }
 }
 .qe-preview-entry {
@@ -446,4 +509,111 @@
 /* Text stays legible throughout disclosure; do not fade form labels. */
 .qe-shell .av-advanced[open] > .av-advanced-content {
   animation: none;
+}
+/* Batch controls share editor surfaces; participant screens are unaffected. */
+.qe-selection-controls,
+.qe-bulk-bar,
+.qe-bulk-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.qe-selection-controls {
+  margin: 16px 0;
+}
+.qe-selection-status {
+  font-weight: 600;
+}
+.qe-bulk-bar {
+  padding: 12px;
+  margin-bottom: 12px;
+  background: var(--av-paper);
+  border: 1px solid var(--av-line);
+  border-radius: 6px;
+}
+.qe-row-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--av-line);
+}
+.qe-row-checkbox input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primary);
+}
+.qe-bulk-dialog {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.qe-bulk-dialog > p,
+.qe-bulk-dialog h3 {
+  margin: 0;
+}
+.qe-bulk-dialog fieldset {
+  border: 1px solid var(--av-line);
+  border-radius: 6px;
+  padding: 12px;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.qe-bulk-dialog .check {
+  min-height: 44px;
+}
+.qe-bulk-dialog select {
+  max-width: 100%;
+}
+.qe-bulk-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  margin: 0;
+}
+.qe-bulk-counts dd {
+  margin: 4px 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.qe-bulk-items {
+  padding-left: 20px;
+}
+.qe-bulk-items > li {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--av-line);
+  overflow-wrap: anywhere;
+}
+.qe-bulk-issue {
+  padding: 8px 0;
+}
+.qe-bulk-dialog summary {
+  min-height: 44px;
+  cursor: pointer;
+  padding: 12px 0;
+}
+.qe-group-select {
+  border-block: 1px solid var(--av-line);
+  padding: 12px 0;
+  margin: 16px 0;
+}
+@media (max-width: 600px) {
+  .qe-bulk-bar > button,
+  .qe-bulk-footer > button,
+  .qe-selection-controls > button {
+    flex: 1 1 100%;
+    white-space: normal;
+  }
+  .qe-bulk-issue button {
+    white-space: normal;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+}
+/* Adding a topic is a page-level action: it sits above the list, not after hundreds of questions. */
+.qe-topic-add {
+  margin-bottom: 12px;
 }

@@ -132,6 +132,7 @@ test("editor: Escribir, alta de tema y pregunta contextual sin orden manual", as
 }) => {
   await login(page, "admin");
   await page.goto(`/projects/${projectId}/editor`);
+  await page.getByRole("tab", { name: "Escribir", exact: true }).click();
   await page
     .getByRole("button", { name: "+ Agregar tema", exact: true })
     .click();
@@ -199,7 +200,9 @@ test("editor: galería responsive, tabs, inspector único, MATRIX y condiciones"
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.getByRole("tab", { name: "Escribir" }).focus();
   await page.keyboard.press("End");
-  await expect(page.getByRole("tab", { name: "Revisar" })).toBeFocused();
+  await expect(
+    page.getByRole("tab", { name: "Revisar publicación" }),
+  ).toBeFocused();
   await page.keyboard.press("Home");
   await expect(page.getByRole("tab", { name: "Escribir" })).toBeFocused();
   for (const [title, name] of [
@@ -233,22 +236,33 @@ test("editor: galería responsive, tabs, inspector único, MATRIX y condiciones"
       .evaluate((el) => getComputedStyle(el).animationName),
   ).toBe("none");
 });
-test("editor: Revisar dirige a principal y publicación individual conserva dependencias", async ({
+test("editor: Revisar distingue alcance conjunto y publicación individual conserva dependencias", async ({
   page,
 }) => {
   await login(page, "admin");
   await page.goto(`/projects/${projectId}/editor`);
-  await page.getByRole("tab", { name: "Revisar" }).click();
+  await page.getByRole("tab", { name: "Revisar publicación" }).click();
   await expect(
-    page.getByRole("heading", { name: /Errores · resuelve/ }),
+    page.getByRole("heading", { name: /Advertencias · revisa/ }),
   ).toBeVisible();
   await shot(page, "revisar-con-problemas");
   await axe(page);
   const issue = page
     .getByRole("article")
     .filter({ hasText: "¿Cómo funciona el proceso ficticio número 9?" })
-    .filter({ hasText: "Publica primero" });
-  await issue.getByRole("button", { name: "Ir a corregir" }).click();
+    .filter({ hasText: "Para publicarla por separado" });
+  await expect(
+    issue.getByRole("button", { name: "Revisar publicación conjunta" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", {
+      name: "Publicar: Pregunta ficticia 9",
+      exact: true,
+    }),
+  ).toBeDisabled();
+  await page
+    .getByRole("button", { name: "Publicar: Pregunta ficticia 1", exact: true })
+    .click();
   await expect(
     page
       .getByRole("dialog")
@@ -336,13 +350,14 @@ test("editor: revisión vacía sin incidencias y error avanzado conserva foco y 
     description: "",
   });
   await page.goto(`/projects/${p.id}/editor`);
-  await page.getByRole("tab", { name: "Revisar" }).click();
+  await page.getByRole("tab", { name: "Revisar publicación" }).click();
   await expect(
     page.getByRole("heading", { name: "Sin incidencias detectadas." }),
   ).toBeVisible();
   await shot(page, "revisar-sin-problemas");
   await axe(page);
   await page.goto(`/projects/${projectId}/editor`);
+  await page.getByRole("tab", { name: "Escribir", exact: true }).click();
   await page
     .getByRole("button", { name: "+ Agregar pregunta", exact: true })
     .first()
@@ -389,6 +404,7 @@ test("editor: editar tema, cancelar, conflicto real conserva contenido y teclado
   await login(page, "admin");
   await page.setViewportSize({ width: 390, height: 1000 });
   await page.goto(`/projects/${largeId}/editor`);
+  await page.getByRole("tab", { name: "Escribir", exact: true }).click();
   const trigger = page.getByLabel("Acciones del tema Tema ficticio 1", {
     exact: true,
   });
@@ -440,6 +456,7 @@ test("editor: reorder temas/preguntas y traslado de 300 preguntas usa una petici
 }) => {
   await login(page, "admin");
   await page.goto(`/projects/${largeId}/editor`);
+  await page.getByRole("tab", { name: "Escribir", exact: true }).click();
   let snapshot = await call(page, `/projects/${largeId}/questionnaire`);
   const topic = snapshot.sections[0],
     second = snapshot.sections[1];

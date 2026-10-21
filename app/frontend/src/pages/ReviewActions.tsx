@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { contracts, type ReviewDetail } from "@requirements/contracts";
 import { api, ApiFailure, formValues } from "../api";
 import { Alert, Button, Checkbox, Dialog, Select, Textarea } from "../ui";
+import { SourcePicker } from "./SourcePicker";
 export type ReviewAction =
   | "requestClarification"
   | "closeClarification"
@@ -28,6 +29,7 @@ export function ReviewActionDialog({
   action,
   threadId,
   conflictId,
+  responseRevisionId,
   onClose,
   onDone,
   refresh,
@@ -36,6 +38,8 @@ export function ReviewActionDialog({
   action: ReviewAction;
   threadId?: string;
   conflictId?: string;
+  /** Contribution the clarification is about, when the action starts from one. */
+  responseRevisionId?: string;
   onClose: () => void;
   onDone: () => void;
   refresh: () => Promise<unknown>;
@@ -45,6 +49,9 @@ export function ReviewActionDialog({
     [dirty, setDirty] = useState(false),
     [conflict, setConflict] = useState(false);
   const request = useRef({ key: "", id: "" });
+  const aboutSubmission = responseRevisionId
+    ? d.submissions.find((s) => s.id === responseRevisionId && s.current)
+    : undefined;
   const t = d.threads.find((t) => t.id === threadId),
     c = d.conflicts.find((c) => c.id === conflictId);
   const sources =
@@ -79,7 +86,10 @@ export function ReviewActionDialog({
       ...(action === "requestClarification"
         ? {
             body: v.body,
-            responseRevisionId: t?.responseRevisionId ?? v.responseRevisionId,
+            responseRevisionId:
+              t?.responseRevisionId ??
+              responseRevisionId ??
+              v.responseRevisionId,
             threadId: t?.id ?? null,
             expectedThreadVersion: t?.lockVersion ?? null,
           }
@@ -122,9 +132,22 @@ export function ReviewActionDialog({
         requestId: request.current.id,
       });
       if (!parsed.success) {
+        // The missing piece is usually the sources, which can sit below the
+        // visible part of the dialog: say so and bring the first one into view.
+        const noSource = pickSources && !fd.getAll("sources").length;
         setError(
-          "Completa los campos obligatorios y selecciona las fuentes necesarias.",
+          noSource
+            ? action === "markConflict"
+              ? "Selecciona al menos dos envíos de participantes distintos."
+              : "Selecciona al menos una respuesta que sustente la decisión."
+            : "Completa los campos obligatorios y selecciona las fuentes necesarias.",
         );
+        if (noSource)
+          requestAnimationFrame(() =>
+            form
+              .querySelector<HTMLInputElement>('input[name="sources"]')
+              ?.focus(),
+          );
         return;
       }
       await api(
@@ -179,7 +202,13 @@ export function ReviewActionDialog({
           </legend>
           {action === "requestClarification" && (
             <>
-              {!t && (
+              {!t && aboutSubmission && (
+                <p className="hint">
+                  Aportación de {aboutSubmission.respondent.displayName} · envío
+                  #{aboutSubmission.number}
+                </p>
+              )}
+              {!t && !aboutSubmission && (
                 <Select
                   name="responseRevisionId"
                   label="Respuesta sobre la que necesitas aclaración"
@@ -199,6 +228,7 @@ export function ReviewActionDialog({
               <Textarea
                 label="Pregunta de aclaración"
                 name="body"
+                data-autofocus={!!t || !!aboutSubmission || undefined}
                 required
                 maxLength={10000}
               />
@@ -213,6 +243,7 @@ export function ReviewActionDialog({
               <Textarea
                 label="Decisión acordada"
                 name="decisionText"
+                data-autofocus
                 required
                 maxLength={10000}
               />
@@ -248,6 +279,7 @@ export function ReviewActionDialog({
               <Textarea
                 label="Resolución del conflicto"
                 name="resolutionText"
+                data-autofocus
                 required
                 maxLength={10000}
               />
@@ -265,7 +297,13 @@ export function ReviewActionDialog({
             "markConflict",
             "closeClarification",
           ].includes(action) && (
-            <Textarea label="Motivo" name="reason" required maxLength={10000} />
+            <Textarea
+              label="Motivo"
+              name="reason"
+              data-autofocus
+              required
+              maxLength={10000}
+            />
           )}
           {action === "markNotApplicable" && (
             <Textarea
@@ -282,23 +320,20 @@ export function ReviewActionDialog({
             </p>
           )}
           {pickSources && (
-            <fieldset>
-              <legend>Fuentes utilizadas</legend>
-              <p className="hint">
-                Selecciona{" "}
-                {action === "markConflict"
+            <SourcePicker
+              legend="Fuentes utilizadas"
+              hint={`Selecciona ${
+                action === "markConflict"
                   ? "al menos dos envíos de participantes distintos"
-                  : "las respuestas enviadas que sustentan esta decisión"}
-                .
-              </p>
-              {sources.map((s) => (
-                <Checkbox
-                  key={s.id}
-                  name="sources"
-                  value={s.id}
-                  label={`${s.respondent.displayName} · envío #${s.number}${s.current ? "" : " · histórico"}`}
-                />
-              ))}
+                  : "las respuestas enviadas que sustentan esta decisión"
+              }.`}
+              sources={sources}
+              question={d.question}
+              // With a single current submission it is the only possible
+              // source of a decision: start with it chosen (still editable).
+              preselect={action === "validateQuestion" && sources.length === 1}
+              onChange={() => setDirty(true)}
+            >
               {action === "validateQuestion" && (
                 <>
                   {d.threads
@@ -325,7 +360,7 @@ export function ReviewActionDialog({
                     ))}
                 </>
               )}
-            </fieldset>
+            </SourcePicker>
           )}
         </fieldset>
         <div className="actions">

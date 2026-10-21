@@ -1,0 +1,275 @@
+{
+  "screen": "11-responder-matriz",
+  "url": "http://localhost:4441/projects/86abfdce-5616-498c-8d09-2e37c6350c92/respond/d6af968e-29c2-4ee1-858c-558af369b8f4",
+  "timestamp": "2026-10-06T05:17:45.325Z",
+  "testEngine": {
+    "name": "axe-core",
+    "version": "4.13.0"
+  },
+  "testEnvironment": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+    "windowWidth": 1440,
+    "windowHeight": 1000,
+    "orientationAngle": 0,
+    "orientationType": "landscape-primary"
+  },
+  "violations": [],
+  "incomplete": [],
+  "passes": [
+    {
+      "id": "aria-allowed-attr",
+      "impact": null,
+      "nodes": 6
+    },
+    {
+      "id": "aria-allowed-role",
+      "impact": null,
+      "nodes": 2
+    },
+    {
+      "id": "aria-conditional-attr",
+      "impact": null,
+      "nodes": 6
+    },
+    {
+      "id": "aria-deprecated-role",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "aria-hidden-body",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "aria-hidden-focus",
+      "impact": null,
+      "nodes": 5
+    },
+    {
+      "id": "aria-progressbar-name",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "aria-prohibited-attr",
+      "impact": null,
+      "nodes": 6
+    },
+    {
+      "id": "aria-required-attr",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "aria-roles",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "aria-valid-attr-value",
+      "impact": null,
+      "nodes": 6
+    },
+    {
+      "id": "aria-valid-attr",
+      "impact": null,
+      "nodes": 6
+    },
+    {
+      "id": "avoid-inline-spacing",
+      "impact": null,
+      "nodes": 3
+    },
+    {
+      "id": "button-name",
+      "impact": null,
+      "nodes": 3
+    },
+    {
+      "id": "bypass",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "color-contrast",
+      "impact": null,
+      "nodes": 23
+    },
+    {
+      "id": "document-title",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "duplicate-id-aria",
+      "impact": null,
+      "nodes": 8
+    },
+    {
+      "id": "empty-heading",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "form-field-multiple-labels",
+      "impact": null,
+      "nodes": 4
+    },
+    {
+      "id": "heading-order",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "html-has-lang",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "html-lang-valid",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "label-title-only",
+      "impact": null,
+      "nodes": 4
+    },
+    {
+      "id": "label",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-banner-is-top-level",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-main-is-top-level",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-no-duplicate-banner",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-no-duplicate-main",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-one-main",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "landmark-unique",
+      "impact": null,
+      "nodes": 2
+    },
+    {
+      "id": "link-name",
+      "impact": null,
+      "nodes": 2
+    },
+    {
+      "id": "meta-viewport-large",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "meta-viewport",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "nested-interactive",
+      "impact": null,
+      "nodes": 18
+    },
+    {
+      "id": "page-has-heading-one",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "region",
+      "impact": null,
+      "nodes": 55
+    },
+    {
+      "id": "select-name",
+      "impact": null,
+      "nodes": 3
+    },
+    {
+      "id": "skip-link",
+      "impact": null,
+      "nodes": 1
+    },
+    {
+      "id": "summary-name",
+      "impact": null,
+      "nodes": 2
+    },
+    {
+      "id": "tabindex",
+      "impact": null,
+      "nodes": 1
+    }
+  ],
+  "inapplicable": [
+    "accesskeys",
+    "area-alt",
+    "aria-braille-equivalent",
+    "aria-command-name",
+    "aria-dialog-name",
+    "aria-input-field-name",
+    "aria-meter-name",
+    "aria-required-children",
+    "aria-required-parent",
+    "aria-tab-name",
+    "aria-text",
+    "aria-toggle-field-name",
+    "aria-tooltip-name",
+    "aria-treeitem-name",
+    "autocomplete-valid",
+    "blink",
+    "definition-list",
+    "dlitem",
+    "empty-table-header",
+    "frame-focusable-content",
+    "frame-tested",
+    "frame-title-unique",
+    "frame-title",
+    "html-xml-lang-mismatch",
+    "image-alt",
+    "image-redundant-alt",
+    "input-button-name",
+    "input-image-alt",
+    "landmark-contentinfo-is-top-level",
+    "landmark-no-duplicate-contentinfo",
+    "link-in-text-block",
+    "list",
+    "listitem",
+    "marquee",
+    "meta-refresh",
+    "object-alt",
+    "presentation-role-conflict",
+    "role-img-alt",
+    "scope-attr-valid",
+    "scrollable-region-focusable",
+    "server-side-image-map",
+    "svg-img-alt",
+    "table-duplicate-name",
+    "td-headers-attr",
+    "th-has-data-cells",
+    "valid-lang",
+    "video-caption",
+    "no-autoplay-audio"
+  ]
+}

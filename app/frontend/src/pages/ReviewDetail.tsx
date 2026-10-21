@@ -1,29 +1,101 @@
 import {
   AnalystStatus,
-  ConflictComparison,
   DecisionRecord,
+  DispositionRecord,
 } from "./AnalystVisual";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useParams } from "react-router-dom";
-import { api } from "../api";
 import {
-  Alert,
-  Button,
-  EmptyState,
-  ErrorState,
-  LoadingState,
-  Select,
-} from "../ui";
+  Link,
+  useParams,
+  useLocation,
+  useSearchParams,
+} from "react-router-dom";
+import { api } from "../api";
+import { typeLabels, type dashboardView } from "@requirements/contracts";
+import type { z } from "zod";
+import {
+  ActionMenu,
+  QuestionBand,
+  MetaLine,
+  StateCard,
+  TabNav,
+  TabPanel,
+  Timeline,
+} from "../ui/semantic";
+import { useMediaQuery } from "../ui/useMediaQuery";
+import { ParticipantIcon } from "./ParticipantIcon";
+import { deriveTurn } from "./review-turn";
+import { ReviewContrast } from "./ReviewContrast";
+import { ClarificationThread } from "./ReviewThreads";
+import { buildTimeline } from "./review-timeline";
+import "../direction-c-review.css";
+import { rememberWorkbenchFocus, workbenchPath } from "../workbench-context";
+import { ContributionSet } from "./ContributionSet";
+import { Alert, Button, ErrorState, LoadingState } from "../ui";
 import {
   ReviewActionDialog,
   actionLabels,
   type ReviewAction,
 } from "./ReviewActions";
-import { dateText, SubmittedAnswer, ThreadMessages } from "./ReviewShared";
+import { dateText } from "./ReviewShared";
+import { nextToReview } from "./attention-data";
 export function ReviewDetail() {
-  const { projectId = "", id = "" } = useParams(),
-    client = useQueryClient();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const contrastHeading = useRef<HTMLHeadingElement>(null);
+  const questionHeading = useRef<HTMLHeadingElement>(null);
+  function changeTab(value: string, contribution?: string) {
+    const next = new URLSearchParams(searchParams);
+    next.set("tab", value);
+    if (contribution) next.set("aportacion", contribution);
+    else next.delete("aportacion");
+    setSearchParams(next, {
+      replace: true,
+      state: location.state,
+      preventScrollReset: true,
+    });
+  }
+
+  const savedSearch = (location.state as { reviewSearch?: unknown } | null)
+    ?.reviewSearch;
+  const questionnaireReturn =
+    (location.state as { questionnaireReturn?: unknown } | null)
+      ?.questionnaireReturn === true;
+  const { projectId = "", id = "" } = useParams();
+  const reviewSearch =
+    typeof savedSearch === "string"
+      ? new URLSearchParams(savedSearch).toString()
+      : new URLSearchParams({ projectId }).toString();
+  const source = (
+    location.state as {
+      workbenchReturn?: { view?: unknown; search?: unknown };
+    } | null
+  )?.workbenchReturn;
+  const sourceView =
+    source?.view === "decisions" || source?.view === "attention"
+      ? source.view
+      : null;
+  const sourcePath = sourceView
+    ? workbenchPath(
+        projectId,
+        sourceView,
+        typeof source?.search === "string" ? source.search : "",
+      )
+    : null;
+  // Opened from the project log: go back to the log with the filters it had.
+  const logTo = (location.state as { logReturn?: unknown } | null)?.logReturn;
+  const logBase = `/projects/${projectId}/history`;
+  const logPath =
+    typeof logTo === "string" &&
+    (logTo === logBase || logTo.startsWith(logBase + "?"))
+      ? logTo
+      : null;
+  const projects = useQuery({
+    queryKey: ["projects"],
+    queryFn: () => api("projects"),
+  });
+  const client = useQueryClient();
   const q = useQuery({
     queryKey: ["review", projectId, id],
     queryFn: () => api("getReviewDetail", { projectId, id }),
@@ -33,8 +105,57 @@ export function ReviewDetail() {
       action: ReviewAction;
       threadId?: string;
       conflictId?: string;
+      responseRevisionId?: string;
     } | null>(null),
     [message, setMessage] = useState("");
+  const [freeComparisonOpen, setFreeComparisonOpen] = useState(false);
+  const [compareFrom, setCompareFrom] = useState<string | undefined>();
+  // < 760 px: secondary actions live in a "Más acciones" menu, not a select.
+  const compact = useMediaQuery("(max-width: 759px)");
+  // Moving between "Aportaciones" and "Contraste" changes the tab; the target
+  // can only take focus once its panel is rendered visible, so the request is
+  // recorded here and fulfilled after the commit that selects the tab instead
+  // of guessing with a timer. It is one-shot: any later tab change clears it.
+  const focusOnTab = useRef<"contrast" | "contributions" | "pane" | null>(null);
+  const requestedTab = searchParams.get("tab");
+  useEffect(() => {
+    const wanted = focusOnTab.current;
+    focusOnTab.current = null;
+    // "pane" is the open contribution, which lives in the Aportaciones tab.
+    if (
+      !wanted ||
+      (wanted === "pane" ? "contributions" : wanted) !== requestedTab
+    )
+      return;
+    if (wanted === "contrast") contrastHeading.current?.focus();
+    else if (wanted === "pane")
+      document
+        .querySelector<HTMLElement>(
+          "#review-tabs-panel-contributions .ac-contribution-pane h2",
+        )
+        ?.focus();
+    else
+      (
+        document.querySelector<HTMLButtonElement>(
+          "#review-tabs-panel-contributions .ac-contribution-list-panel > .button",
+        ) ?? document.getElementById("review-tabs-tab-contributions")
+      )?.focus();
+  }, [requestedTab]);
+  // A successful command can remove the control that held focus (validating
+  // removes "Registrar decisión"), but only in the commit that renders the
+  // refreshed review. A timer cannot know when that commit happens: a frame that
+  // fires first finds the old control still focused and leaves focus lost once
+  // it goes. The request records the review's last update and is fulfilled by
+  // the first commit that renders newer data, and only if focus was lost.
+  const anchorSince = useRef<number | null>(null);
+  useEffect(() => {
+    const since = anchorSince.current;
+    if (since === null || q.dataUpdatedAt <= since) return;
+    anchorSince.current = null;
+    const active = document.activeElement;
+    if (!active || active === document.body || !active.isConnected)
+      questionHeading.current?.focus();
+  }, [q.dataUpdatedAt]);
   const returnFocus = useRef<HTMLElement | null>(null);
   function setAction(next: typeof action) {
     if (next && !action)
@@ -52,7 +173,6 @@ export function ReviewDetail() {
     );
   const d = q.data,
     current = d.submissions.filter((s) => s.current),
-    historical = d.submissions.filter((s) => !s.current),
     openConflict = d.conflicts.find((c) => c.status === "OPEN"),
     openThread = d.threads.find((t) => t.status !== "CLOSED");
   const primary: ReviewAction =
@@ -66,296 +186,488 @@ export function ReviewDetail() {
             ? "validateQuestion"
             : "markPending";
   async function done() {
+    anchorSince.current =
+      client.getQueryState(["review", projectId, id])?.dataUpdatedAt ?? 0;
     setAction(null);
     setMessage("Revisión registrada. El historial se conserva.");
     await client.invalidateQueries({ queryKey: ["review"] });
     await client.invalidateQueries({ queryKey: ["review-inbox"] });
     await client.invalidateQueries({ queryKey: ["my-work"] });
+    await client.invalidateQueries({ queryKey: ["dashboard", projectId] });
+    await client.invalidateQueries({ queryKey: ["questionnaire", projectId] });
   }
+  const hasCurrentDecision = d.validations.some((v) => !v.invalidatedAt);
+  const currentProject = projects.data?.find(
+    (project) => project.id === projectId,
+  );
+  // An analyst is read-only only because the project is archived; every other
+  // role simply does not review.
+  const turn = deriveTurn(d, {
+    archived:
+      currentProject?.role === "ANALYST" &&
+      currentProject.lifecycle === "ARCHIVED",
+  });
+  // UX-09: the team that reviews always gets the four tabs; a read-only
+  // reader only gets the ones that have something to show (with what the
+  // server already filters for that role).
+  const readOnly = !d.canReview;
+  const available = {
+    contributions: true,
+    contrast: !readOnly || d.conflicts.length > 0 || current.length >= 2,
+    decision:
+      !readOnly || d.validations.length > 0 || d.dispositions.length > 0,
+    history:
+      !readOnly ||
+      d.threads.length > 0 ||
+      d.dispositions.length > 0 ||
+      d.references.length > 0,
+  };
+  type TabKey = keyof typeof available;
+  const isAvailable = (value: string | null): value is TabKey =>
+    !!value && Object.hasOwn(available, value) && available[value as TabKey];
+  const selectedTab = searchParams.get("tab");
+  const preferredTab: TabKey =
+    hasCurrentDecision || d.status === "NOT_APPLICABLE"
+      ? "decision"
+      : openConflict
+        ? "contrast"
+        : "contributions";
+  const tab: TabKey = isAvailable(selectedTab)
+    ? selectedTab
+    : isAvailable(preferredTab)
+      ? preferredTab
+      : "contributions";
+  const projectRole = currentProject?.role;
+  // DEV-01/02: reuse only an existing dashboard cache, never fetch per question.
+  const cached =
+    projectRole === "ADMIN" || projectRole === "ANALYST"
+      ? client
+          .getQueryData<z.infer<typeof dashboardView>>(["dashboard", projectId])
+          ?.questions.find((question) => question.id === id)
+      : undefined;
+  // Offer the next question of the list this review was opened from, in the
+  // same order and under the same filters. It reads the dashboard already
+  // cached (never fetches) and only when coming from Atención.
+  const dashboardQuestions =
+    d.canReview && sourceView === "attention"
+      ? client.getQueryData<z.infer<typeof dashboardView>>([
+          "dashboard",
+          projectId,
+        ])?.questions
+      : undefined;
+  const next = dashboardQuestions
+    ? nextToReview(
+        dashboardQuestions,
+        typeof source?.search === "string" ? source.search : "",
+        id,
+      )
+    : undefined;
+  // v0.5.0 withheld "Registrar decisión" while a clarification was open; the
+  // backend refuses to validate until every thread is closed.
+  const validationBlocked = primary === "validateQuestion" && !!openThread;
+  const otherActions = [
+    ...new Set<ReviewAction>([
+      ...((!turn.action || primary !== turn.action) &&
+      primary !== "reopenQuestion" &&
+      !validationBlocked
+        ? [primary]
+        : []),
+      "requestClarification",
+      "markPartial",
+      "markPending",
+      "markConflict",
+      "markNotApplicable",
+    ]),
+  ];
+  function chooseAction(value: ReviewAction) {
+    setAction({
+      action: value,
+      threadId: value === "closeClarification" ? openThread?.id : undefined,
+      conflictId: value === "resolveConflict" ? openConflict?.id : undefined,
+    });
+  }
+  const otherControls = d.canReview && (
+    <ActionMenu
+      label={compact ? "Más acciones" : "Otras acciones"}
+      items={otherActions.map((item) => ({
+        value: item,
+        label: actionLabels[item],
+      }))}
+      onSelect={(value) => chooseAction(value as ReviewAction)}
+    />
+  );
+  const participants = d.participants.length > 0 && (
+    <details className="ac-review-participants">
+      <summary>Participantes ({d.participants.length})</summary>
+      <ul>
+        {d.participants.map((person) => (
+          <li key={person.memberId}>
+            {person.person.displayName} · {person.area} ·{" "}
+            {person.required ? "Aportación requerida" : "Aportación opcional"} ·{" "}
+            {person.applicability !== "ENABLED"
+              ? "Fuera del recorrido actual"
+              : person.currentRevisionId
+                ? "Respuesta recibida"
+                : "Falta respuesta"}
+          </li>
+        ))}
+      </ul>
+    </details>
+  );
+  const openThreadAction = (
+    next: ReviewAction,
+    options: {
+      threadId?: string;
+      conflictId?: string;
+      responseRevisionId?: string;
+    },
+  ) => setAction({ action: next, ...options });
+  function threadsFor(submissionId?: string) {
+    return d.threads
+      .filter(
+        (thread) => !submissionId || thread.responseRevisionId === submissionId,
+      )
+      .map((thread) => (
+        <ClarificationThread
+          key={thread.id}
+          thread={thread}
+          data={d}
+          onAction={openThreadAction}
+          showTarget={!submissionId}
+        />
+      ));
+  }
+  const timeline = buildTimeline(d).map((event) => ({
+    ...event,
+    date: dateText(event.at),
+    dateTime: event.at,
+  }));
+  const currentDecisions = d.validations.filter((v) => !v.invalidatedAt);
+  const historicalDecisions = d.validations.filter((v) => v.invalidatedAt);
+  const currentDispositions = d.dispositions.filter((n) => !n.revokedAt);
+  const historicalDispositions = d.dispositions.filter((n) => n.revokedAt);
+  const reopen = () => setAction({ action: "reopenQuestion" });
   return (
-    <div className="review-page av-scope">
-      <Link
-        className="back"
-        to={d.canReview ? "/review" : `/projects/${projectId}`}
-      >
-        {d.canReview ? "← Revisión" : "← Proyecto"}
-      </Link>
-      <p className="eyebrow">
-        {d.projectName} · {d.question.sectionTitle}
-      </p>
-      <h1>{d.question.title}</h1>
-      <p className="lead">{d.question.question}</p>
-      <AnalystStatus status={d.status} />
-      {message && <Alert>{message}</Alert>}
-      {d.pendingReviewReason && (
-        <Alert>Pendiente: {d.pendingReviewReason}</Alert>
-      )}
-      {d.partialReviewReason && (
-        <Alert>Falta información: {d.partialReviewReason}</Alert>
-      )}
-      {d.canReview && (
-        <div className="review-toolbar">
-          {openThread?.status === "WAITING_STAKEHOLDER" && !openConflict ? (
-            <p>Esperando la aclaración del participante.</p>
-          ) : (
-            <Button
-              onClick={() =>
-                setAction({
-                  action: primary,
-                  threadId:
-                    primary === "closeClarification"
-                      ? openThread?.id
-                      : undefined,
-                  conflictId: openConflict?.id,
-                })
-              }
-            >
-              {actionLabels[primary]}
-            </Button>
-          )}
-          <Select
-            label="Otras acciones"
-            value=""
-            onChange={(e) => {
-              if (e.target.value)
-                setAction({ action: e.target.value as ReviewAction });
-            }}
+    <div className="review-page av-scope ac-review">
+      <div className="ac-review-back">
+        {" "}
+        <Link
+          className="back"
+          to={
+            sourcePath ??
+            logPath ??
+            (questionnaireReturn
+              ? `/projects/${projectId}/editor`
+              : d.canReview
+                ? `/review?${reviewSearch}`
+                : `/projects/${projectId}`)
+          }
+        >
+          {sourceView
+            ? sourceView === "attention"
+              ? "← Atención"
+              : "← Decisiones"
+            : logPath
+              ? "← Bitácora"
+              : questionnaireReturn
+                ? "← Cuestionario"
+                : d.canReview
+                  ? "← Revisar respuestas"
+                  : "← Proyecto"}
+        </Link>
+        {next && (
+          <Link
+            className="ac-review-next"
+            to={`/projects/${projectId}/review/${next.id}`}
+            state={location.state}
+            aria-label={`Siguiente por revisar: ${next.title}`}
+            onClick={() =>
+              rememberWorkbenchFocus(client, projectId, "attention", next.id)
+            }
           >
-            <option value="">Selecciona una acción</option>
-            {(
-              [
-                "requestClarification",
-                "markPartial",
-                "markPending",
-                "markConflict",
-                "markNotApplicable",
-              ] as ReviewAction[]
-            ).map((a) => (
-              <option key={a} value={a}>
-                {actionLabels[a]}
-              </option>
-            ))}
-          </Select>
-        </div>
-      )}
-      {!d.canReview && <p className="hint">Consulta de solo lectura.</p>}
-      {d.validations.length > 0 && (
-        <section aria-labelledby="decisions-title">
-          <h2 id="decisions-title">Decisiones registradas</h2>
-          {d.validations
-            .filter((v) => !v.invalidatedAt)
-            .map((v) => (
-              <DecisionRecord key={v.id} data={d} validation={v} />
-            ))}
-          {d.validations.some((v) => v.invalidatedAt) && (
-            <details>
-              <summary>
-                Decisiones históricas (
-                {d.validations.filter((v) => v.invalidatedAt).length})
-              </summary>
-              {d.validations
-                .filter((v) => v.invalidatedAt)
-                .map((v) => (
-                  <DecisionRecord key={v.id} data={d} validation={v} />
-                ))}
+            Siguiente por revisar →
+          </Link>
+        )}
+      </div>
+      <div className="ac-review-heading">
+        <div>
+          <QuestionBand
+            headingRef={questionHeading}
+            question={d.question.question}
+            title={[
+              d.question.sectionTitle,
+              cached?.externalId,
+              d.question.title,
+              typeLabels[d.question.type],
+              d.question.required ? "Obligatoria" : "Opcional",
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+            metadata={
+              <MetaLine
+                items={[
+                  cached?.areaName,
+                  d.participants.length
+                    ? `${d.participants.filter((person) => person.currentRevisionId).length} de ${d.participants.length} enviaron`
+                    : null,
+                ]}
+              />
+            }
+          />
+          {d.question.helpText && (
+            <details className="ac-question-help">
+              <summary>Texto de ayuda para quien responde</summary>
+              <p>{d.question.helpText}</p>
             </details>
           )}
-        </section>
-      )}
-      <section aria-labelledby="received">
-        <h2 id="received">Respuestas recibidas</h2>
-        {current.length === 0 ? (
-          <EmptyState title="Sin respuestas vigentes">
-            Las aportaciones aparecerán cuando los participantes las envíen.
-          </EmptyState>
-        ) : (
-          current.map((s) => (
-            <article className="review-submission" key={s.id}>
-              <h3>{s.respondent.displayName}</h3>
-              <p>{s.area.name}</p>
-              <SubmittedAnswer
-                revision={s}
-                question={d.question}
-                projectId={projectId}
-              />
-            </article>
-          ))
-        )}
-        {historical.length > 0 && (
-          <details>
-            <summary>Envíos históricos ({historical.length})</summary>
-            {historical.map((s) => (
-              <article className="review-submission" key={s.id}>
-                <h3>
-                  {s.respondent.displayName} · envío #{s.number}
-                </h3>
-                <p>{s.area.name}</p>
-                <SubmittedAnswer
-                  revision={s}
-                  question={d.question}
-                  projectId={projectId}
-                />
-              </article>
-            ))}
-          </details>
-        )}
-      </section>
-      {d.participants.length > 0 && (
-        <section>
-          <h2>Participantes</h2>
-          <ul>
-            {d.participants.map((p) => (
-              <li key={p.memberId}>
-                {p.person.displayName} · {p.area} ·{" "}
-                {p.required ? "Aportación requerida" : "Aportación opcional"} ·{" "}
-                {p.applicability !== "ENABLED"
-                  ? "Fuera del recorrido actual"
-                  : p.currentRevisionId
-                    ? "Respuesta recibida"
-                    : "Falta respuesta"}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-      {d.threads.length > 0 && (
-        <section>
-          <h2>Aclaraciones</h2>
-          {d.threads.map((t) => (
-            <article key={t.id} className="review-submission">
-              <h3>
-                Aclaración sobre{" "}
-                {
-                  d.submissions.find((s) => s.id === t.responseRevisionId)
-                    ?.respondent.displayName
-                }{" "}
-                · envío #
-                {
-                  d.submissions.find((s) => s.id === t.responseRevisionId)
-                    ?.number
+        </div>
+        <StateCard
+          title={turn.title}
+          status={
+            <div className="ac-review-state-labels">
+              {turn.label && <p className="ac-turn-label">{turn.label}</p>}
+              <AnalystStatus status={d.status} />
+            </div>
+          }
+          action={
+            d.canReview && turn.action ? (
+              <Button
+                onClick={() =>
+                  setAction({
+                    action: turn.action!,
+                    threadId: turn.threadId,
+                    conflictId: turn.conflictId,
+                  })
                 }
-              </h3>
-              <ThreadMessages thread={t} />
-              {d.canReview && t.status === "WAITING_ANALYST" && (
-                <div className="actions">
-                  <Button
-                    onClick={() =>
-                      setAction({
-                        action: "closeClarification",
-                        threadId: t.id,
-                      })
-                    }
-                  >
-                    Cerrar aclaración
-                  </Button>
+              >
+                {actionLabels[turn.action]}
+              </Button>
+            ) : undefined
+          }
+          otherActions={otherControls}
+        >
+          <p>{turn.detail}</p>
+          {d.pendingReviewReason && <p>Pendiente: {d.pendingReviewReason}</p>}
+          {d.partialReviewReason && (
+            <p>Falta información: {d.partialReviewReason}</p>
+          )}
+        </StateCard>
+      </div>
+      {message && <Alert>{message}</Alert>}
+      <TabNav
+        id="review-tabs"
+        label="Contenido de la revisión"
+        value={tab}
+        onChange={changeTab}
+        items={[
+          { value: "contributions", label: `Aportaciones (${current.length})` },
+          {
+            value: "contrast",
+            label: "Contraste",
+            // UX-06: the conflict is visible from any tab, not only inside it.
+            ...(openConflict && {
+              indicator: (
+                <span className="ac-tab-indicator" title="Conflicto abierto">
+                  <ParticipantIcon name="flag" />
+                </span>
+              ),
+              description: "Conflicto abierto",
+            }),
+          },
+          { value: "decision", label: "Decisión" },
+          { value: "history", label: "Historial" },
+        ].filter((item) => available[item.value as TabKey])}
+      />
+      <TabPanel
+        id="review-tabs"
+        value="contributions"
+        active={tab === "contributions"}
+      >
+        <ContributionSet
+          key={d.question.id}
+          data={d}
+          renderThreads={threadsFor}
+          openId={searchParams.get("aportacion") ?? undefined}
+          renderActions={(submissionId) => {
+            const submission = d.submissions.find((s) => s.id === submissionId);
+            const asking = d.threads.some(
+              (t) =>
+                t.responseRevisionId === submissionId && t.status !== "CLOSED",
+            );
+            if (!submission?.current) return undefined;
+            return (
+              <>
+                {d.canReview && !asking && (
                   <Button
                     tone="secondary"
+                    aria-label={`Pedir aclaración a ${submission.respondent.displayName}`}
                     onClick={() =>
                       setAction({
                         action: "requestClarification",
-                        threadId: t.id,
+                        responseRevisionId: submissionId,
                       })
                     }
                   >
-                    Preguntar nuevamente
+                    Pedir aclaración
                   </Button>
-                </div>
-              )}
-            </article>
-          ))}
-        </section>
-      )}
-      {d.conflicts.length > 0 && (
-        <section>
-          <h2>Conflictos</h2>
-          {d.conflicts.map((c) => (
-            <article key={c.id} className="review-submission">
-              <h3>
-                {c.status === "OPEN"
-                  ? "Conflicto abierto"
-                  : "Conflicto resuelto"}
-              </h3>
-              <p className="answer-text">{c.reason}</p>
-              <p className="hint">
-                Registrado por {c.openedBy.displayName} · {dateText(c.openedAt)}
-              </p>
-              <details open={c.status === "OPEN"}>
-                <summary>Comparar respuestas en conflicto</summary>
-                <ConflictComparison data={d} conflict={c} />
-              </details>
-              <p className="hint">
-                Resolver este conflicto no valida la pregunta. La decisión se
-                registra por separado.
-              </p>
-              {c.resolution ? (
-                <>
-                  <p className="answer-text">
-                    <strong>Resolución: </strong>
-                    {c.resolution.resolutionText}
-                  </p>
-                  <p>
-                    {c.resolution.resolvedBy.displayName} ·{" "}
-                    {dateText(c.resolution.resolvedAt)}
-                  </p>
-                  <p>
-                    Fuentes:{" "}
-                    {c.resolution.sources
-                      .map((source) => {
-                        const s = d.submissions.find(
-                          (s) => s.id === source.responseRevisionId,
-                        );
-                        return `${s?.respondent.displayName} #${s?.number}`;
-                      })
-                      .join(", ")}
-                  </p>
-                </>
-              ) : (
-                d.canReview && (
+                )}
+                {current.length >= 2 && (
                   <Button
-                    onClick={() =>
-                      setAction({ action: "resolveConflict", conflictId: c.id })
-                    }
+                    tone="secondary"
+                    aria-label={`Contrastar la aportación de ${submission.respondent.displayName} con otra`}
+                    onClick={() => {
+                      setCompareFrom(submissionId);
+                      setFreeComparisonOpen(true);
+                      focusOnTab.current = "contrast";
+                      changeTab("contrast");
+                    }}
                   >
-                    Resolver conflicto
+                    Contrastar con otra
                   </Button>
-                )
+                )}
+              </>
+            );
+          }}
+          onCompare={() => {
+            setCompareFrom(undefined);
+            setFreeComparisonOpen(true);
+            focusOnTab.current = "contrast";
+            changeTab("contrast");
+          }}
+        />
+        {participants}
+      </TabPanel>
+      {available.contrast && (
+        <TabPanel id="review-tabs" value="contrast" active={tab === "contrast"}>
+          <ReviewContrast
+            compareFrom={compareFrom}
+            data={d}
+            headingRef={contrastHeading}
+            onBack={() => {
+              focusOnTab.current = "contributions";
+              changeTab("contributions");
+            }}
+            freeOpen={freeComparisonOpen}
+            setFreeOpen={setFreeComparisonOpen}
+            onAction={openThreadAction}
+          />
+        </TabPanel>
+      )}
+      {available.decision && (
+        <TabPanel id="review-tabs" value="decision" active={tab === "decision"}>
+          <div
+            className={`ac-decision-layout${timeline.length ? " ac-decision-layout-with-aside" : ""}`}
+          >
+            <div className="ac-decision-main">
+              {currentDecisions.map((v) => (
+                <DecisionRecord
+                  key={v.id}
+                  data={d}
+                  validation={v}
+                  onReopen={d.canReview ? reopen : undefined}
+                  onOpenContribution={(submissionId) => {
+                    focusOnTab.current = "pane";
+                    changeTab("contributions", submissionId);
+                  }}
+                />
+              ))}
+              {d.status === "NOT_APPLICABLE" &&
+                currentDispositions.map((n) => (
+                  <DispositionRecord key={n.id} disposition={n} />
+                ))}
+              {d.canReview &&
+                d.status === "NOT_APPLICABLE" &&
+                currentDispositions.length > 0 && (
+                  <Button tone="tertiary" onClick={reopen}>
+                    Reabrir pregunta
+                  </Button>
+                )}
+              {!d.validations.length && d.status !== "NOT_APPLICABLE" && (
+                <p>No hay decisiones registradas.</p>
               )}
-            </article>
-          ))}
-        </section>
+              {!hasCurrentDecision &&
+                historicalDecisions.length > 0 &&
+                d.status !== "NOT_APPLICABLE" && (
+                  <p>
+                    No hay una decisión vigente.{" "}
+                    {historicalDecisions.length === 1
+                      ? "La decisión anterior se conserva"
+                      : "Las decisiones anteriores se conservan"}{" "}
+                    como antecedente.
+                  </p>
+                )}
+              {(historicalDecisions.length > 0 ||
+                (d.status === "NOT_APPLICABLE" &&
+                  historicalDispositions.length > 0)) && (
+                <details className="ac-decision-history">
+                  <summary>
+                    Decisiones históricas (
+                    {historicalDecisions.length +
+                      (d.status === "NOT_APPLICABLE"
+                        ? historicalDispositions.length
+                        : 0)}
+                    )
+                  </summary>
+                  {historicalDecisions.map((v) => (
+                    <DecisionRecord key={v.id} data={d} validation={v} />
+                  ))}
+                  {d.status === "NOT_APPLICABLE" &&
+                    historicalDispositions.map((n) => (
+                      <DispositionRecord key={n.id} disposition={n} />
+                    ))}
+                </details>
+              )}
+            </div>
+            {timeline.length > 0 && (
+              <aside className="ac-decision-aside">
+                <h2>Cómo se llegó aquí</h2>
+                <Timeline
+                  label="Cómo se llegó a esta decisión"
+                  events={timeline}
+                />
+              </aside>
+            )}
+          </div>
+        </TabPanel>
       )}
-      {d.dispositions.length > 0 && (
-        <details>
-          <summary>Decisiones de no aplica</summary>
-          {d.dispositions.map((n) => (
-            <article key={n.id}>
-              <h3>
-                {n.revokedAt ? "Decisión histórica" : "No aplica vigente"}
-              </h3>
-              <p>{n.reason}</p>
-              <p>Alcance: {n.scope}</p>
-              <p>
-                {n.markedBy.displayName} · {dateText(n.markedAt)}
-              </p>
-              {n.revokedAt && <p>Reabierta: {n.revokeReason}</p>}
-            </article>
-          ))}
-        </details>
+      {available.history && (
+        <TabPanel id="review-tabs" value="history" active={tab === "history"}>
+          <h2>Historial de la pregunta</h2>
+          {timeline.length > 0 && (
+            <section className="ac-history-timeline">
+              <Timeline label="Cronología de la pregunta" events={timeline} />
+            </section>
+          )}
+          {d.threads.length > 0 && (
+            <section>
+              <h3>Aclaraciones</h3>
+              {threadsFor()}
+            </section>
+          )}
+          {d.dispositions.length > 0 && (
+            <details>
+              <summary>Decisiones de no aplica</summary>
+              {d.dispositions.map((n) => (
+                <DispositionRecord key={n.id} disposition={n} />
+              ))}
+            </details>
+          )}
+          <details>
+            <summary>Ver trazabilidad</summary>
+            {d.references.length ? (
+              <ul>
+                {d.references.map((r) => (
+                  <li key={r.id}>
+                    {r.externalId} · {r.label} · {r.scopeNote}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>Esta pregunta no tiene referencias vinculadas.</p>
+            )}
+          </details>
+        </TabPanel>
       )}
-      <details>
-        <summary>Ver trazabilidad</summary>
-        {d.references.length ? (
-          <ul>
-            {d.references.map((r) => (
-              <li key={r.id}>
-                {r.externalId} · {r.label} · {r.scopeNote}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>Esta pregunta no tiene referencias vinculadas.</p>
-        )}
-      </details>
       {action && (
         <ReviewActionDialog
           {...action}

@@ -4,7 +4,9 @@ import { Link, useSearchParams } from "react-router-dom";
 import { priorities, reviewStates } from "@requirements/contracts";
 import { api } from "../api";
 import { Button, EmptyState, ErrorState, LoadingState, Select } from "../ui";
+import { PageHeader } from "../ui/semantic";
 import { dateText, reviewLabels } from "./ReviewShared";
+import { plural } from "../ui/plural";
 export function ReviewInbox() {
   const [params, setParams] = useSearchParams();
   const input = Object.fromEntries(params);
@@ -26,10 +28,10 @@ export function ReviewInbox() {
       <Link className="back" to="/">
         ← Mis proyectos
       </Link>
-      <h1>Revisión</h1>
-      <p className="lead">
-        Consulta las aportaciones y decide qué necesita seguimiento.
-      </p>
+      <PageHeader
+        title="Revisar respuestas"
+        lead="Consulta las aportaciones y decide qué necesita seguimiento."
+      />
       <div className="review-filters">
         <Select
           label="Estado"
@@ -92,7 +94,13 @@ export function ReviewInbox() {
         <ErrorState error={q.error} retry={() => void q.refetch()} />
       ) : (
         <>
-          <p role="status">{q.data.total} preguntas encontradas</p>
+          <p role="status">
+            {plural(
+              q.data.total,
+              "pregunta encontrada",
+              "preguntas encontradas",
+            )}
+          </p>
           {q.data.items.length === 0 ? (
             <EmptyState title="No hay preguntas para estos filtros">
               Las preguntas publicadas de los proyectos donde eres analista
@@ -108,6 +116,7 @@ export function ReviewInbox() {
                   <h2>
                     <Link
                       to={`/projects/${item.projectId}/review/${item.questionId}`}
+                      state={{ reviewSearch: params.toString() }}
                     >
                       {item.question}
                     </Link>

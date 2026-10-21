@@ -46,3 +46,9 @@ Gate válido para el estado vacío observado. Antes del push se comprobará de n
 Git se inicializó con historia nueva en main después de confirmar el remoto vacío y el escaneo local sin secretos. El staging coincide con el inventario público. Las comprobaciones iniciales detectaron únicamente CRLF/espacios originales en dos OFL y tres CSV de inventarios: .gitattributes preserva sus bytes y acota esas excepciones, sin relajar controles de código ni Gitleaks. LICENSE, DCO, fuentes y avisos siguen íntegros.
 
 El autor confirmó expresamente la identidad de correo para la autoría y Signed-off-by del commit inicial. Titularidad, licencia, maintainer e identidad del commit están resueltos. El push continúa condicionado a la comprobación inmediata del remoto.
+
+## Publicación inicial comprobada
+
+El 2026-10-01 se creó el commit raíz `ca2c5ee38df791b96f85e9c88f30264a0d1f5068`, con DCO y el mensaje previsto. Tras añadir origin, fetch y ls-remote confirmaron de nuevo ausencia de refs; el push normal creó main sin sustituir historia. El repositorio se hizo público. README, hero, LICENSE, DCO y plantillas se comprobaron mediante acceso anónimo. GitHub detecta AGPL-3.0.
+
+Issues, Discussions, Private Vulnerability Reporting, Dependabot alerts/security updates, secret scanning y push protection se habilitaron y verificaron por API. La actualización documental posterior refleja únicamente esos canales realmente activos. El resultado de CI debe consultarse en Actions; publicación del código no equivale a release formal. No hay tag ni release 0.2.0 ni imágenes publicadas.
