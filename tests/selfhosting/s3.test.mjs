@@ -5,6 +5,8 @@ import {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
+  DeleteObjectCommand,
+  GetBucketPolicyCommand,
 } from "@aws-sdk/client-s3";
 import {
   S3Storage,
@@ -89,6 +91,47 @@ test("S3 real: missing object and oversized stored object are rejected", async (
     }),
   );
   await assert.rejects(() => storage.read(key), /EvidenceTooLarge/);
+});
+test("S3 real: invalid credentials cannot read an existing private object", async () => {
+  const key = await storage.put(Buffer.from("private authentication fixture"));
+  keys.push(key);
+  for (const accessKeyId of [
+    config.options.credentials.accessKeyId,
+    randomUUID(),
+  ]) {
+    const invalid = new S3Client({
+      ...config.options,
+      credentials: { accessKeyId, secretAccessKey: randomUUID() },
+    });
+    try {
+      await assert.rejects(
+        () =>
+          invalid.send(
+            new GetObjectCommand({
+              Bucket: config.bucket,
+              Key: objectKey(key),
+            }),
+          ),
+        (error) => error.$metadata?.httpStatusCode === 403,
+      );
+    } finally {
+      invalid.destroy();
+    }
+  }
+});
+
+test("S3 real: application account cannot write/delete outside its prefix or read policy", async () => {
+  const Key = `outside-prefix/${randomUUID()}`;
+  for (const command of [
+    new PutObjectCommand({ Bucket: config.bucket, Key, Body: "forbidden" }),
+    new DeleteObjectCommand({ Bucket: config.bucket, Key }),
+    new GetBucketPolicyCommand({ Bucket: config.bucket }),
+  ]) {
+    await assert.rejects(
+      () => client.send(command),
+      (error) => error.$metadata?.httpStatusCode === 403,
+    );
+  }
 });
 test("S3 unavailable: health/write/read fail instead of pretending persistence", async () => {
   const previous = process.env.S3_ENDPOINT;

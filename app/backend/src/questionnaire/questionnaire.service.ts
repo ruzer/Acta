@@ -28,7 +28,7 @@ import {
 } from "@requirements/contracts";
 import { Database } from "../database/database.module.js";
 import { AccessService } from "../administration/access.service.js";
-import { assignableArea } from "../administration/area-rules.js";
+import { assignableArea, lockAreas } from "../administration/area-rules.js";
 import { AdministrationService } from "../administration/administration.service.js";
 import {
   CommandContext,
@@ -926,6 +926,16 @@ export class QuestionnaireService {
       this.version(q, d.expectedVersion);
       if (q.publication === "ARCHIVED")
         throw new ConflictException("La pregunta está archivada.");
+      // A new assignment goes to a participant whose area must still be active when it commits.
+      if (d.active)
+        await lockAreas(tx, [
+          (
+            await tx.projectMember.findFirst({
+              where: { id: d.projectMemberId, projectId: p },
+              select: { areaId: true },
+            })
+          )?.areaId,
+        ]);
       const m = await tx.projectMember.findFirst({
         where: {
           id: d.projectMemberId,

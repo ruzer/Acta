@@ -2,11 +2,13 @@
 
 ## Alcance y evidencia de verificación
 
-Esta receta reproduce los comandos de copia y restauración ensayados con el despliegue DEFAULT, VersityGW 1.8.0, PostgreSQL del Compose y Linux ARM64, el 2026-09-30. Se parametrizaron nombre de proyecto y directorio privado; no depende de archivos de otra instalación.
+Esta receta reproduce los comandos de copia y restauración ensayados con el despliegue DEFAULT de entonces, VersityGW 1.8.0, PostgreSQL del Compose y Linux ARM64, el 2026-09-30. Se parametrizaron nombre de proyecto y directorio privado; no depende de archivos de otra instalación.
 
 El ensayo anterior incluyó dump, archivos de volúmenes detenidos, destrucción **solo de volúmenes TEST**, restauración y comprobación por API de login, revisión enviada, decisión vigente, fuentes y SHA-256 de evidencia. Resultados: [manifiesto](../PUBLIC-SNAPSHOT-MANIFEST.md). Esta revisión editorial no repite la destrucción de volúmenes.
 
 No se afirma verificación para otro provider, AMD64, HA, cambio de versión de PostgreSQL ni migración entre almacenes. El cifrado, retención y copia externa dependen del operador: se requieren para proteger los datos, pero no se prescribe una herramienta de cifrado ensayada.
+
+El default actual utiliza VersityGW 1.9.0 y conserva el mismo layout POSIX/sidecar/IAM. La actualización y persistencia están documentadas en [S3-PROVIDERS](S3-PROVIDERS.md); el restore completo con 1.9.0 no se volvió a ensayar y no se presenta como verificado por esta actualización.
 
 ## Qué debes conservar
 

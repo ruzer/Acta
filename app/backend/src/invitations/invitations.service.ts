@@ -10,6 +10,7 @@ import { z } from "zod";
 import * as C from "@requirements/contracts";
 import { Database } from "../database/database.module.js";
 import { AccessService } from "../administration/access.service.js";
+import { lockAreas } from "../administration/area-rules.js";
 import { CommandContext, Tx, audit, serialize } from "../common/http.js";
 import { loadConfig } from "../common/config.js";
 import { hash } from "../auth/auth.service.js";
@@ -214,6 +215,7 @@ export class InvitationsService {
           throw new ConflictException(
             "Esta invitación ya fue creada. Consulta la lista; renueva el enlace si lo perdiste.",
           );
+        await lockAreas(tx, [d.areaId]);
         if (
           !(await tx.area.findFirst({
             where: {

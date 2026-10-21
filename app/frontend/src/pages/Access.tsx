@@ -206,13 +206,21 @@ export function Projects({
         title="Mis proyectos"
         lead="Accede al cuestionario, las respuestas y el trabajo de cada proyecto."
       />
+      {isOrganizationAdmin && q.data.length > 0 && (
+        <p className="hint">
+          Aquí aparecen los proyectos en los que participas. Los demás de la
+          institución están en{" "}
+          <Link to="/admin">Administración → Proyectos</Link>.
+        </p>
+      )}
       {q.data.length === 0 ? (
         <EmptyState title="Aún no tienes proyectos">
           {isOrganizationAdmin ? (
             <>
-              Crea tu primer proyecto desde{" "}
-              <Link to="/admin">Administración → Proyectos</Link>. Después
-              podrás preparar o importar su cuestionario.
+              No participas en ningún proyecto todavía. Los de la institución
+              están en <Link to="/admin">Administración → Proyectos</Link>,
+              donde también puedes crear uno y después preparar o importar su
+              cuestionario.
             </>
           ) : (
             "La administración debe asignarte una membresía para comenzar."

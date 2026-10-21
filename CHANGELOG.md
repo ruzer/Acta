@@ -17,6 +17,18 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ### Added
 
+- **Administración → Proyectos lista todos los proyectos de la institución.**
+  Antes mostraba solo aquellos en los que la cuenta tenía membresía, así que otra
+  persona administradora no veía un proyecto creado por su colega, y «Mis
+  proyectos» y Administración parecían lo mismo. Ahora «Mis proyectos» sigue
+  siendo donde participas y Administración → Proyectos muestra todos, con su
+  estado, quién los administra («Sin administrador activo» si no hay ninguno) y
+  tu acceso; ofrece «Miembros» y, solo si participas, «Abrir». La lista es solo
+  de metadatos: no da acceso a respuestas, evidencias ni decisiones, que siguen
+  exigiendo membresía, y unirse es un acto explícito y auditado. No hace falta un
+  rol SUPERADMIN; ver [Administración y visibilidad de proyectos](docs/PROJECT-ADMINISTRATION.md).
+  Operación nueva: `GET /administration/projects` (solo administración de la
+  institución).
 - **Administración de áreas.** En Administración → Áreas se puede **renombrar**,
   **desactivar** y **reactivar** un área, y consultar las desactivadas con
   «Mostrar áreas desactivadas». El código no cambia y no existe borrado.
@@ -27,6 +39,13 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   invitaciones. Solo la administración de la institución puede hacerlo y cada
   cambio queda en la bitácora como «Área actualizada» (`AREA_UPDATED`, con el
   antes y el después). Operación nueva: `POST /areas/:id`.
+- **Desactivar un área no deja pasar trabajo nuevo, ni en carrera.** Quien
+  asigna trabajo a un área (pregunta, miembro, invitación, operación masiva o
+  importación) la bloquea en lectura antes de comprobar que sigue activa, y
+  desactivarla la bloquea en escritura: si ambas coinciden, la desactivación
+  espera o el cambio nuevo se rechaza con su error junto al campo. Antes, una
+  pregunta guardada en el mismo instante podía quedar en un área ya desactivada.
+  Las asignaciones y el acceso de los participantes existentes no cambian.
 
 ### Changed
 
