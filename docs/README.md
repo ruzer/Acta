@@ -5,7 +5,7 @@ El idioma editorial principal es **español**, conforme a la documentación y la
 | Audiencia | Empieza aquí | Consulta después |
 |---|---|---|
 | Usuarios | [Producto y primeros pasos](../README.md) | [Galería](assets/README.md) |
-| Operadores | [Self-hosting](SELF-HOSTING.md) | [Instalación guiada y Configuración](ADMIN-CENTER.md), [Configuración](CONFIGURATION.md), [Backup/restore](BACKUP-RESTORE.md), [Proveedores S3](S3-PROVIDERS.md), [Administración y visibilidad de proyectos](PROJECT-ADMINISTRATION.md) |
+| Operadores | [Self-hosting](SELF-HOSTING.md) | [Instalación guiada y Configuración](ADMIN-CENTER.md), [Configuración](CONFIGURATION.md), [Backup/restore](BACKUP-RESTORE.md), [Proveedores S3](S3-PROVIDERS.md), [Administración y visibilidad de proyectos](PROJECT-ADMINISTRATION.md), [IP del cliente detrás de un proxy](PROXY-TRUST.md) |
 | Desarrolladores | [Desarrollo](DEVELOPMENT.md) | [Arquitectura](ARCHITECTURE.md), [Dominio](DOMAIN-MODEL.md), [Contratos por función](CONTRACTS.md) |
 | Contribuidores | [Contribuir](../CONTRIBUTING.md) | [Gobernanza](../GOVERNANCE.md), [Forks](UPSTREAM-FORKS.md), [Seguridad](../SECURITY.md), [Conducta](../CODE_OF_CONDUCT.md) |
 

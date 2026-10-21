@@ -65,6 +65,14 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   área existente (renombrada o desactivada) y los formularios muestran un error
   junto al campo cuando se elige un área desactivada.
 
+### Security
+
+- Documentada la limitación de los límites por dirección detrás de un proxy: el
+  backend ve la del contenedor nginx, así que diez accesos fallidos de cualquier
+  persona bloquean los accesos 15 minutos. Se publica una
+  [propuesta basada en proxies confiables](docs/PROXY-TRUST.md); no cambia ningún
+  comportamiento y no se confía en `X-Forwarded-For` todavía.
+
 ## 0.8.0 — 2026-10-13
 
 Instalación guiada, Centro de Configuración y personalización institucional con
