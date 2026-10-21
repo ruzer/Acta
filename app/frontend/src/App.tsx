@@ -417,7 +417,8 @@ export function App() {
   return (
     <QueryClientProvider client={client}>
       <BrandingProvider>
-        <RouterProvider router={router} />
+        {/* URL-backed controlled inputs must update before the next input event. */}
+        <RouterProvider router={router} useTransitions={false} />
       </BrandingProvider>
     </QueryClientProvider>
   );

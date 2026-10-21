@@ -337,6 +337,9 @@ for (const width of [1440, 390]) {
 test("ACTA NEXT: decisiones conserva sus filtros al volver de la decisión vigente", async ({
   page,
 }) => {
+  // Expose overlapping URL transitions on slower devices without delaying input.
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 6 });
   await login(page, "analyst");
   await page.goto(`/projects/${fixture.project.id}/decisions`);
   const question = fixture.questions[3];

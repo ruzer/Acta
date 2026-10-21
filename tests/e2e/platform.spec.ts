@@ -191,8 +191,11 @@ test("administración, edición, guardado, publicación y contenido protegido", 
     .getByRole("link", { name: "Editar cuestionario" })
     .click();
   await expect(
-    page.getByRole("heading", { name: "Proyecto demostración", exact: true }),
+    page.getByRole("heading", { name: "Cuestionario", level: 1, exact: true }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("navigation", { name: "Contexto de página", exact: true }),
+  ).toContainText("Proyecto demostración");
   await accessible(page);
   await page.screenshot({
     path: "artifacts/editor-desktop.png",
@@ -257,8 +260,15 @@ test("viewer no puede abrir editor y la denegación se explica", async ({
     .getByRole("link", { name: "Consultar preguntas" })
     .click();
   await expect(
-    page.getByRole("heading", { name: "Proyecto demostración", exact: true }),
+    page.getByRole("heading", {
+      name: "Preguntas publicadas",
+      level: 1,
+      exact: true,
+    }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("navigation", { name: "Contexto de página", exact: true }),
+  ).toContainText("Proyecto demostración");
   await page.goto(page.url() + "/editor");
   await expect(page.getByRole("alert")).toContainText(
     "Tu perfil no permite esta acción",
