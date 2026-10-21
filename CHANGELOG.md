@@ -18,6 +18,13 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   invitaciones. Solo la administración de la institución puede hacerlo y cada
   cambio queda en la bitácora como «Área actualizada» (`AREA_UPDATED`, con el
   antes y el después). Operación nueva: `POST /areas/:id`.
+- **Desactivar un área no deja pasar trabajo nuevo, ni en carrera.** Quien
+  asigna trabajo a un área (pregunta, miembro, invitación, operación masiva o
+  importación) la bloquea en lectura antes de comprobar que sigue activa, y
+  desactivarla la bloquea en escritura: si ambas coinciden, la desactivación
+  espera o el cambio nuevo se rechaza con su error junto al campo. Antes, una
+  pregunta guardada en el mismo instante podía quedar en un área ya desactivada.
+  Las asignaciones y el acceso de los participantes existentes no cambian.
 
 ### Changed
 
