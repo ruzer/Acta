@@ -12,6 +12,11 @@ import {
 } from "../../app/backend/src/settings/appearance";
 import { inspectImage } from "../../app/backend/src/settings/branding-image";
 import { publicBranding } from "../../app/backend/src/common/config";
+import { readFileSync } from "node:fs";
+import {
+  appearanceVariables,
+  assetVariables,
+} from "../../app/backend/src/settings/appearance";
 import { SettingsService } from "../../app/backend/src/settings/settings.service";
 import {
   codeIsValid,
@@ -237,6 +242,21 @@ describe("second logo from the environment", () => {
     const branding = publicBranding();
     expect([branding.logoSecondary, branding.secondaryName]).toEqual(["", ""]);
   });
+});
+
+describe("Compose passes every appearance variable", () => {
+  // A variable the backend reads but Compose does not pass silently does nothing in a Docker install.
+  const compose = readFileSync("docker-compose.yml", "utf8");
+  const names = [
+    ...Object.values(appearanceVariables),
+    ...Object.values(assetVariables),
+  ];
+  it.each(names)(
+    "%s reaches the backend and stays empty by default",
+    (name) => {
+      expect(compose).toContain(`      ${name}: \${${name}:-}`);
+    },
+  );
 });
 
 describe("public branding without a database", () => {

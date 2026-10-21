@@ -14,6 +14,7 @@ Prioridades sin fechas ni compromiso de implementación. Esta lista no declara f
 - Verificar Linux AMD64 y documentar evidencia real; no confundir disponibilidad upstream con prueba de Acta.
 - Evaluar ensayos de SeaweedFS y endpoints externos únicamente si existe capacidad de mantenimiento y necesidad; hoy siguen sin verificar. No cambiar el default. [S3-PROVIDERS](docs/S3-PROVIDERS.md).
 - Publicar mediciones de recursos si se obtienen; todavía no existen mínimos publicados.
+- Dirección IP del cliente detrás de un proxy: hoy los límites por dirección ven la del contenedor nginx y se comparten. [Propuesta con proxies confiables](docs/PROXY-TRUST.md), sin implementar.
 
 ## Later
 

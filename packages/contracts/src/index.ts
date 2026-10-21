@@ -406,6 +406,18 @@ export const projectView = z.strictObject({
   lockVersion: z.number().int(),
   questionCount: z.number().int(),
 });
+// What organization administration may see of every project: where it is and who runs it, never its content.
+export const organizationProjectView = z.strictObject({
+  id,
+  externalId: z.string(),
+  name: z.string(),
+  description: z.string(),
+  lifecycle: z.enum(["ACTIVE", "ARCHIVED"]),
+  myRole: z.enum(roles).nullable(),
+  admins: z.array(z.string()).max(5),
+  adminCount: z.number().int().nonnegative(),
+  memberCount: z.number().int().nonnegative(),
+});
 export const sectionView = sectionInput.extend({ id });
 export const referenceView = referenceInput.extend({ id });
 export const questionView = questionInput.extend({
@@ -1284,6 +1296,11 @@ export const contracts = {
     output: areaView,
   },
   projects: { method: "GET", path: "/projects", output: z.array(projectView) },
+  organizationProjects: {
+    method: "GET",
+    path: "/administration/projects",
+    output: z.array(organizationProjectView),
+  },
   createProject: {
     method: "POST",
     path: "/projects",
