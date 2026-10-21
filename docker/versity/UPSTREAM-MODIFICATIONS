@@ -1,22 +1,23 @@
-Modifications to Versity Gateway (versitygw) made by this project
+Build of Versity Gateway (versitygw) distributed by Acta
 
 versitygw is © Versity Software, Inc. and distributed under the Apache License 2.0
-(see UPSTREAM-LICENSE and UPSTREAM-NOTICE, unchanged copies of the files in the
-upstream source tree).
+(see UPSTREAM-LICENSE and UPSTREAM-NOTICE, unchanged copies verified against the
+upstream v1.9.0 source tree).
 
-The binary shipped in this project's images is built from the official source of
-release v1.8.0 (commit fd04bc1df2656298577b82667a4195c77f8c7563 of
-https://github.com/versity/versitygw) with these changes, stated here as the
-Apache-2.0 license requires:
+The binary shipped in this project's images is built from official release
+v1.9.0, commit ca4c8d30f579a5ac3dd8c91bbfa8340c69dac0ac of
+https://github.com/versity/versitygw.
 
- 1. No source file of versitygw is modified. Only its dependency manifests are
-    changed by versitygw-v1.8.0-security.patch: golang.org/x/net v0.58.0 -> v0.60.0
-    (and the minimum versions it requires: x/crypto v0.57.0, x/sync v0.23.0,
-    x/sys v0.48.0, x/text v0.42.0; "go" directive 1.25.0 -> 1.26.0).
- 2. It is compiled with Go 1.27.2 (golang:1.27.2-bookworm, pinned by digest) instead
-    of the Go version the official image was built with (1.27.1), to include the
-    fixes of Go 1.27.2 and of x/net v0.60.0 reported by govulncheck.
- 3. Version metadata is set to v1.8.0 and the commit above.
+ 1. No upstream source or dependency manifest is modified. Release v1.9.0 already
+    includes golang.org/x/net v0.60.0; the former v1.8.0 dependency patch is removed.
+ 2. The compiler is Go 1.27.3, using golang:1.27.3-bookworm pinned to image-index
+    digest sha256:5c3e9b43cfd3bb95c7937462e29d87ada57b481a96fa23ad0eb61778d7a00110.
+    This includes the crypto/x509 fix for GO-2026-6809 (CVE-2026-111943).
+ 3. Version metadata identifies v1.9.0, the commit above and its UTC commit time.
+    CGO is disabled, dependencies use go.sum and -mod=readonly, and automatic
+    Go toolchain downloads are disabled.
 
-The build is reproducible from docker/versity/Dockerfile. Nothing else of the
-upstream distribution (the official image, its shell layer or entrypoint) is used.
+The build is described in docker/versity/Dockerfile and app/backend/Dockerfile
+(storage-init target). The official runtime image and entrypoint are not used;
+Acta retains its existing unprivileged Node/Debian wrapper and POSIX sidecar layout.
+Dependency license sources are inventoried in docs/STORAGE-DEPENDENCY-LICENSES.csv.
