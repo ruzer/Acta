@@ -83,6 +83,11 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   persona bloquean los accesos 15 minutos. Se publica una
   [propuesta basada en proxies confiables](docs/PROXY-TRUST.md); no cambia ningún
   comportamiento y no se confía en `X-Forwarded-For` todavía.
+- La imagen opcional de **MinIO legado** se compila con Go 1.26.10. Con Go 1.26.9
+  y 1.27.2 el binario incluía GO-2026-6809 (`crypto/x509`), corregido en 1.26.10
+  y 1.27.3. No cambia el almacenamiento por defecto (VersityGW). El binario de
+  MinIO conserva avisos de sus propias dependencias, que dependen de esa release
+  fija y no del compilador; por eso sigue siendo «legacy, no recomendado».
 
 ## 0.8.0 — 2026-10-13
 
