@@ -572,6 +572,7 @@ progress {
   }
   .grid2 {
     grid-template-columns: 1fr;
+    row-gap: 1rem;
   }
   .option-row {
     grid-template-columns: 1fr;

@@ -344,11 +344,13 @@ export function EditorWorkspace(props: EditorProps) {
           )}
           {mode === i && i === 0 && (
             <>
-              <div className="qe-topic-add">
-                <Button tone="secondary" onClick={onCreateTopic}>
-                  + Agregar tema
-                </Button>
-              </div>
+              {data.sections.length > 0 && (
+                <div className="qe-topic-add">
+                  <Button tone="secondary" onClick={onCreateTopic}>
+                    + Agregar tema
+                  </Button>
+                </div>
+              )}
               {data.questions.length > 1 && (
                 <p className="hint">
                   Para asignar participantes o publicar varias preguntas juntas,
@@ -368,7 +370,12 @@ export function EditorWorkspace(props: EditorProps) {
                 </p>
               )}
               {!data.sections.length && (
-                <EmptyState title="Todavía no hay preguntas.">
+                <EmptyState
+                  title="Todavía no hay preguntas."
+                  action={
+                    <Button onClick={onCreateTopic}>+ Agregar tema</Button>
+                  }
+                >
                   Agrega el primer tema para comenzar.
                 </EmptyState>
               )}

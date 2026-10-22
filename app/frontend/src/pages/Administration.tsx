@@ -262,22 +262,24 @@ export function Administration({ me }: { me: Me }) {
                         <Button
                           tone="tertiary"
                           aria-label={`Renombrar ${a.name}`}
-                          onClick={() =>
-                            setEditArea({ id: a.id, name: a.name })
-                          }
+                          onClick={() => {
+                            setSaved("");
+                            setEditArea({ id: a.id, name: a.name });
+                          }}
                         >
                           Renombrar
                         </Button>
                         <Button
                           tone={a.active ? "danger" : "secondary"}
                           aria-label={`${a.active ? "Desactivar" : "Reactivar"} ${a.name}`}
-                          onClick={() =>
+                          onClick={() => {
+                            setSaved("");
                             setAreaState({
                               id: a.id,
                               name: a.name,
                               active: !a.active,
-                            })
-                          }
+                            });
+                          }}
                         >
                           {a.active ? "Desactivar" : "Reactivar"}
                         </Button>
@@ -520,7 +522,7 @@ export function Administration({ me }: { me: Me }) {
             {areaState.name}.{" "}
             {areaState.active
               ? "Volverá a poder elegirse para preguntas, participantes e invitaciones."
-              : "Dejará de poder elegirse para nuevas preguntas, participantes e invitaciones. Lo que ya la usa se conserva y sigue funcionando: preguntas, asignaciones, participantes e invitaciones. Las preguntas en borrador de esta área deberán pasar a otra antes de publicarse. Puedes reactivarla cuando quieras."}
+              : "Dejará de poder elegirse para nuevas preguntas, participantes e invitaciones. Lo que ya la usa (preguntas, asignaciones, participantes e invitaciones) se conserva y sigue funcionando. Las preguntas en borrador de esta área deberán pasar a otra antes de publicarse. Puedes reactivarla cuando quieras."}
           </p>
           <Button
             tone={areaState.active ? "secondary" : "danger"}

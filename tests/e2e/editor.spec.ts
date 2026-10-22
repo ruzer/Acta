@@ -170,6 +170,43 @@ test("editor: Escribir, alta de tema y pregunta contextual sin orden manual", as
     topic.getByText("¿Se registra el proceso ficticio?", { exact: true }),
   ).toBeVisible();
 });
+test("editor: Agregar tema y Nueva pregunta conviven en Organizar sin taparse", async ({
+  page,
+}) => {
+  await login(page, "admin");
+  await page.goto(`/projects/${projectId}/editor`);
+  await page.getByRole("tab", { name: "Organizar", exact: true }).click();
+  const topic = page.getByRole("button", {
+    name: "+ Agregar tema",
+    exact: true,
+  });
+  const question = page.getByRole("button", {
+    name: "Nueva pregunta",
+    exact: true,
+  });
+  // Visible is not enough: both buttons once shared one grid cell and one covered the other.
+  for (const width of [1440, 1024, 900, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    const a = (await topic.boundingBox())!;
+    const b = (await question.boundingBox())!;
+    const overlap =
+      a.x < b.x + b.width &&
+      b.x < a.x + a.width &&
+      a.y < b.y + b.height &&
+      b.y < a.y + a.height;
+    expect(overlap, `se superponen a ${width}px`).toBe(false);
+    for (const button of [topic, question])
+      expect(
+        await button.evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          return el.contains(
+            document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2),
+          );
+        }),
+        `un botón queda tapado a ${width}px`,
+      ).toBe(true);
+  }
+});
 test("editor: galería responsive, tabs, inspector único, MATRIX y condiciones", async ({
   page,
 }) => {

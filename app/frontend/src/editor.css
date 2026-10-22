@@ -617,3 +617,18 @@
 .qe-topic-add {
   margin-bottom: 12px;
 }
+/* Topic header: title on the left; count and menu on the right, the menu on the same edge as each question's menu. */
+@media (min-width: 801px) {
+  .qe-topic > header h3 {
+    margin-right: auto;
+  }
+  .qe-topic > header > .hint {
+    order: 2;
+  }
+  .qe-topic > header > .qe-menu {
+    order: 3;
+  }
+}
+.qe-topic > div > .hint {
+  margin-block: 12px;
+}

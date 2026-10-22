@@ -14,6 +14,17 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   Docker. Siguen vacías por defecto y la precedencia no cambia: una variable
   definida manda y se muestra como «administrado externamente». Una prueba
   comprueba que Compose pase todas las variables de apariencia.
+- **«+ Agregar tema» vuelve a verse en Organizar con preguntas.** En pantallas
+  de 900 px o más quedaba exactamente debajo de «Nueva pregunta» y no se veía;
+  ahora cada botón tiene su columna, alineada con los filtros. Una prueba
+  comprueba que ninguno tape al otro a 1440, 1024, 900 y 390 px.
+- **Ajustes visuales de captura y administración.** Sin temas, Escribir ofrece
+  «+ Agregar tema» como acción principal dentro del aviso, igual que Organizar;
+  en el encabezado de cada tema la cuenta y el menú quedan en el borde derecho;
+  «1 pregunta» ya no se escribe «1 preguntas»; los campos apilados del formulario
+  de pregunta en móvil tienen separación; y el diálogo de desactivar un área no
+  repite la lista de lo que se conserva ni deja detrás el aviso de la acción
+  anterior.
 
 ### Added
 
