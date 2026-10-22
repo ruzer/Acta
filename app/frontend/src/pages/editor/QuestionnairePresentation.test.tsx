@@ -589,6 +589,21 @@ it.each([0, 3, 304])(
   },
 );
 
+it("el encabezado de cada tema cuenta en singular y en plural", () => {
+  const one = dataFor(1);
+  render(
+    <Organize
+      {...handlers}
+      data={{
+        ...one,
+        questions: one.questions.map((q) => ({ ...q, groupParentId: null })),
+      }}
+    />,
+  );
+  expect(screen.getByText("1 pregunta", { exact: true })).toBeInTheDocument();
+  expect(screen.queryByText("1 preguntas")).toBeNull();
+});
+
 it("Escribir ofrece Agregar tema al inicio, antes de los temas, y una sola vez", () => {
   render(<EditorWorkspace {...handlers} data={dataFor(304)} initialMode={0} />);
   const buttons = screen.getAllByRole("button", { name: "+ Agregar tema" });

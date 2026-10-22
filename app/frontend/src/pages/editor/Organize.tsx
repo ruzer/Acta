@@ -786,12 +786,12 @@ export function Organize(
                       }
                     </h2>
                     <span>
-                      {
+                      {plural(
                         questions.filter(
                           (row) => row.sectionId === group.sectionId,
-                        ).length
-                      }{" "}
-                      preguntas
+                        ).length,
+                        "pregunta",
+                      )}
                     </span>
                   </th>
                 </tr>

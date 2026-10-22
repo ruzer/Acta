@@ -724,14 +724,18 @@
   }
   .an-questionnaire .qe-compact > .an-approach-hint {
     grid-row: 1;
-    grid-column: 2 / 4;
+    grid-column: 2;
     margin: 0;
     align-self: center;
   }
+  /* «+ Agregar tema» and «Nueva pregunta» each take their own column; sharing one cell hid the first. */
   .an-approach > .button:not(.ac-filter-toggle) {
     grid-row: 1;
     grid-column: 4;
-    justify-self: end;
+    justify-self: stretch;
+  }
+  .an-approach > .button:not(.ac-filter-toggle):nth-last-child(2) {
+    grid-column: 3;
   }
   .an-approach > .field {
     grid-row: 2;
