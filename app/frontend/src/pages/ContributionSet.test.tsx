@@ -237,7 +237,7 @@ it("abrir por teclado muestra una sola aportación y volver restaura foco y filt
   );
   expect(screen.getByRole("status")).toHaveTextContent("1 de 12 aportaciones");
   const trigger = screen.getByRole("button", {
-    name: "Abrir aportación de Actor 10",
+    name: /^Abrir aportación de Actor 10(?!\d)/,
   });
   trigger.focus();
   await user.keyboard("{Enter}");
@@ -253,7 +253,9 @@ it("abrir por teclado muestra una sola aportación y volver restaura foco y filt
   );
   await waitFor(() =>
     expect(
-      screen.getByRole("button", { name: "Abrir aportación de Actor 10" }),
+      screen.getByRole("button", {
+        name: /^Abrir aportación de Actor 10(?!\d)/,
+      }),
     ).toHaveFocus(),
   );
   expect(screen.getByRole("searchbox")).toHaveValue("operacion");
@@ -282,7 +284,7 @@ it("una revisión que pierde vigencia sale del conjunto y queda disponible en hi
   const many = data(3);
   const { rerender } = render(<ContributionSet data={many} />);
   await user.click(
-    screen.getByRole("button", { name: "Abrir aportación de Actor 1" }),
+    screen.getByRole("button", { name: /^Abrir aportación de Actor 1(?!\d)/ }),
   );
   rerender(
     <ContributionSet
@@ -297,7 +299,9 @@ it("una revisión que pierde vigencia sale del conjunto y queda disponible en hi
   );
   expect(screen.getByRole("heading", { name: "2 aportaciones" })).toHaveFocus();
   expect(
-    screen.queryByRole("button", { name: "Abrir aportación de Actor 1" }),
+    screen.queryByRole("button", {
+      name: /^Abrir aportación de Actor 1(?!\d)/,
+    }),
   ).not.toBeInTheDocument();
   expect(screen.getByText("Envíos históricos (1)")).toBeVisible();
 });
@@ -340,7 +344,7 @@ it("volver enfoca el conjunto cuando la aportación dejó de coincidir con el fi
     "conflict",
   );
   await user.click(
-    screen.getByRole("button", { name: "Abrir aportación de Actor 1" }),
+    screen.getByRole("button", { name: /^Abrir aportación de Actor 1(?!\d)/ }),
   );
   rerender(<ContributionSet data={{ ...many, conflicts: [] }} />);
   await user.click(
@@ -378,7 +382,7 @@ it("comparar y volver conserva el filtro del conjunto y devuelve foco al dispara
     screen.getAllByRole("button", { name: /Abrir aportación de/ }),
   ).toHaveLength(1);
   expect(
-    screen.getByRole("button", { name: "Abrir aportación de Actor 10" }),
+    screen.getByRole("button", { name: /^Abrir aportación de Actor 10(?!\d)/ }),
   ).toBeVisible();
 });
 
@@ -404,13 +408,13 @@ it("C: en escritorio 50 aportaciones preselecciona una sola respuesta completa y
     screen.queryByText("Contexto completo 2", { exact: false }),
   ).not.toBeInTheDocument();
   const first = screen.getByRole("button", {
-    name: "Abrir aportación de Actor 1",
+    name: /^Abrir aportación de Actor 1(?!\d)/,
   });
   first.focus();
   await user.keyboard("{ArrowDown}{Enter}");
   expect(screen.getByRole("heading", { name: "Actor 2" })).toHaveFocus();
   expect(
-    screen.getByRole("button", { name: "Abrir aportación de Actor 2" }),
+    screen.getByRole("button", { name: /^Abrir aportación de Actor 2(?!\d)/ }),
   ).toHaveAttribute("aria-pressed", "true");
   expect(
     screen.getByText("Contexto completo 2", { exact: false }),
@@ -489,7 +493,7 @@ it("UX-06: en escritorio abre la aportación con la aclaración pendiente, no la
   render(<ContributionSet data={withThread(data(12), 7, "WAITING_ANALYST")} />);
   expect(shownPerson()).toBe("Actor 8");
   expect(
-    screen.getByRole("button", { name: "Abrir aportación de Actor 8" }),
+    screen.getByRole("button", { name: /^Abrir aportación de Actor 8(?!\d)/ }),
   ).toHaveAttribute("aria-pressed", "true");
 });
 it("UX-06: sin aclaración usa el conflicto abierto, y sin ninguno conserva el orden actual", () => {
@@ -522,7 +526,7 @@ it("UX-06: una elección explícita de la persona se respeta y no la deshace la 
   const user = userEvent.setup();
   render(<ContributionSet data={withThread(data(12), 7, "WAITING_ANALYST")} />);
   await user.click(
-    screen.getByRole("button", { name: "Abrir aportación de Actor 3" }),
+    screen.getByRole("button", { name: /^Abrir aportación de Actor 3(?!\d)/ }),
   );
   expect(shownPerson()).toBe("Actor 3");
 });
@@ -543,7 +547,9 @@ it("UX-06: en pantallas estrechas abre directo en la aportación relevante y «�
   // The way back lands on the contribution that was open.
   await waitFor(() =>
     expect(
-      screen.getByRole("button", { name: "Abrir aportación de Actor 8" }),
+      screen.getByRole("button", {
+        name: /^Abrir aportación de Actor 8(?!\d)/,
+      }),
     ).toHaveFocus(),
   );
 });

@@ -257,7 +257,7 @@ test("la configuración: secciones accesibles, cambio visible al instante y vuel
     });
     await expect(name).toBeVisible();
     const back = page.getByRole("button", {
-      name: "Volver al valor predeterminado de nombre de la aplicación",
+      name: /^Usar el valor predeterminado \(.*\) de nombre de la aplicación$/,
     });
     if (await back.count()) {
       await back.click();

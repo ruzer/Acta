@@ -173,7 +173,7 @@ function ResetButton({
         tone="tertiary"
         onClick={onReset}
         disabled={busy}
-        aria-label={`Volver al valor predeterminado de ${name}`}
+        aria-label={`Usar el valor predeterminado (${fallback}) de ${name}`}
       >
         Usar el valor predeterminado ({fallback})
       </Button>

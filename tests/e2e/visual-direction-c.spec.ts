@@ -1602,7 +1602,6 @@ test.describe("Direction C · review", () => {
         if (width < 900 && item.count > 1) {
           const trigger = page.getByRole("button", {
             name: `Abrir aportación de ${current[0]!.respondent.displayName}`,
-            exact: true,
           });
           await trigger.focus();
           await page.keyboard.press("Enter");
@@ -1658,7 +1657,6 @@ test.describe("Direction C · review", () => {
           await expect(
             page.getByRole("button", {
               name: `Abrir aportación de ${current[0]!.respondent.displayName}`,
-              exact: true,
             }),
           ).toBeFocused();
         }
