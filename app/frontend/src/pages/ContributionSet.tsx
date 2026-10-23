@@ -281,7 +281,7 @@ export function ContributionSet({
                       .trim();
                     return {
                       id: s.id,
-                      label: `Abrir aportación de ${s.respondent.displayName}`,
+                      action: "Abrir aportación de",
                       buttonRef: (node) => {
                         if (node) buttons.current.set(s.id, node);
                         else buttons.current.delete(s.id);

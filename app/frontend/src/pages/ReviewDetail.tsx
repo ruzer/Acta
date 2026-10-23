@@ -514,7 +514,7 @@ export function ReviewDetail() {
                 {current.length >= 2 && (
                   <Button
                     tone="secondary"
-                    aria-label={`Contrastar la aportación de ${submission.respondent.displayName} con otra`}
+                    aria-label={`Contrastar con otra, a partir de la aportación de ${submission.respondent.displayName}`}
                     onClick={() => {
                       setCompareFrom(submissionId);
                       setFreeComparisonOpen(true);

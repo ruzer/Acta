@@ -185,7 +185,7 @@ it("General muestra de solo lectura lo que define la infraestructura", async () 
   ).toBeVisible();
   expect(
     screen.getByRole("button", {
-      name: "Volver al valor predeterminado de formato regional",
+      name: /^Usar el valor predeterminado \(.*\) de formato regional$/,
     }),
   ).toBeVisible();
 });
@@ -264,7 +264,7 @@ it("un valor de la infraestructura se muestra sin poder editarse ni restablecers
   // Solo lo guardado desde Acta se puede devolver a su valor predeterminado.
   expect(
     screen.getByRole("button", {
-      name: "Volver al valor predeterminado de nombre corto",
+      name: /^Usar el valor predeterminado \(.*\) de nombre corto$/,
     }),
   ).toBeVisible();
   expect(

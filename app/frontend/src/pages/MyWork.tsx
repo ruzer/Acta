@@ -19,7 +19,6 @@ import {
 } from "./ParticipantFlow";
 import { Callout, ProgressCard } from "../ui/semantic";
 import { ParticipantIcon } from "./ParticipantIcon";
-import { plural } from "../ui/plural";
 // Frontend density heuristic, not a domain limit; tools remain available below it.
 const SCALE_THRESHOLD = 20;
 export function PersonalProgress({ projectId }: { projectId: string }) {
@@ -364,7 +363,6 @@ function Topic({
         <button
           aria-expanded={expanded}
           aria-controls={`topic-${section.id}`}
-          aria-label={`${section.title}, ${plural(section.questions.length, "pregunta")}`}
           onClick={() => setOpen(!open)}
           disabled={forceOpen}
         >
@@ -375,9 +373,13 @@ function Topic({
           >
             <ParticipantIcon name="chevron" />
           </span>
-          {section.title}
+          {section.title}{" "}
           <span className="participant-topic-count">
             {section.questions.length}
+            <span className="sr-only">
+              {" "}
+              {section.questions.length === 1 ? "pregunta" : "preguntas"}
+            </span>
           </span>
         </button>
       </h3>

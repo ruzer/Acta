@@ -202,7 +202,8 @@ export function ContributionRail({
   items: {
     id: string;
     content: ReactNode;
-    label?: string;
+    /** Spoken lead-in ("Abrir aportación de"); the button's name is that plus its visible content (WCAG 2.5.3). */
+    action?: string;
     buttonRef?: (element: HTMLButtonElement | null) => void;
   }[];
   selected: string | null;
@@ -233,7 +234,6 @@ export function ContributionRail({
           <li key={item.id}>
             <button
               type="button"
-              aria-label={item.label}
               aria-pressed={selected === item.id}
               onKeyDown={(event) => navigate(event, index)}
               onClick={() => onSelect(item.id)}
@@ -243,6 +243,11 @@ export function ContributionRail({
                 item.buttonRef?.(element);
               }}
             >
+              {item.action && (
+                <>
+                  <span className="sr-only">{item.action}</span>{" "}
+                </>
+              )}
               {item.content}
             </button>
           </li>

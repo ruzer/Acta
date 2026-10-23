@@ -965,7 +965,7 @@ it("CP5: la aportación abierta ofrece «Pedir aclaración» a su lado; con una 
   const first = open.submissions[0]!.respondent.displayName;
   await user.click(
     await screen.findByRole("button", {
-      name: `Abrir aportación de ${first}`,
+      name: new RegExp(`^Abrir aportación de ${first}(?!\\d)`),
     }),
   );
   expect(
@@ -1005,7 +1005,9 @@ it("CP5: la aclaración se ve como un intercambio pegado a su aportación: quié
   const user = userEvent.setup();
   await user.click(
     await screen.findByRole("button", {
-      name: `Abrir aportación de ${submission.respondent.displayName}`,
+      name: new RegExp(
+        `^Abrir aportación de ${submission.respondent.displayName}(?!\\d)`,
+      ),
     }),
   );
   const pane = screen.getByRole("article", {
@@ -1099,12 +1101,12 @@ it("CP5: «Contrastar con otra» junto a una aportación abre Contraste con esa 
   const user = userEvent.setup();
   await user.click(
     await screen.findByRole("button", {
-      name: "Abrir aportación de Tercera Persona",
+      name: /^Abrir aportación de Tercera Persona(?!\d)/,
     }),
   );
   await user.click(
     screen.getByRole("button", {
-      name: "Contrastar la aportación de Tercera Persona con otra",
+      name: "Contrastar con otra, a partir de la aportación de Tercera Persona",
     }),
   );
   expect(screen.getByRole("tab", { name: "Contraste" })).toHaveAttribute(
