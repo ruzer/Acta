@@ -78,12 +78,25 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ### Security
 
+- **Node 26 LTS** en todas las imágenes (backend, frontend, almacenamiento y
+  scripts; antes 24.21.0) y en el CI. Node 26 es LTS desde el 28 de octubre de
+  2026; `engines` ya admitía `>=24.15 <27`, así que Node 24 sigue permitido.
+- **Dependencias de ejecución actualizadas:** Zod 4.6.7 en backend, frontend y
+  contratos corrige el agotamiento de memoria al validar colecciones grandes;
+  NestJS (`common`, `core` y `platform-express`) 12.3.2 incorpora Multer 2.5.0,
+  que corrige una denegación de servicio con `fileFilter` asíncrono pendiente.
+  Acta no configura `fileFilter`, por lo que la exposición a ese caso era baja,
+  pero el aviso bloqueaba el control de seguridad de dependencias.
+- **VersityGW 1.10.0** (almacenamiento por defecto, antes 1.9.0), compilado con
+  Go 1.27.3. Incluye `klauspost/compress` 1.20.3, que corrige GO-2026-6865
+  (pánico con tramas de dos bloques); el control `govulncheck` del binario
+  fallaba por ese aviso. LICENSE y NOTICE se verificaron idénticos a la release.
 - Documentada la limitación de los límites por dirección detrás de un proxy: el
   backend ve la del contenedor nginx, así que diez accesos fallidos de cualquier
   persona bloquean los accesos 15 minutos. Se publica una
   [propuesta basada en proxies confiables](docs/PROXY-TRUST.md); no cambia ningún
   comportamiento y no se confía en `X-Forwarded-For` todavía.
-- La imagen opcional de **MinIO legado** se compila con Go 1.26.10. Con Go 1.26.9
+- La imagen opcional de **MinIO legado** se compila con Go 1.27.3. Con Go 1.26.9
   y 1.27.2 el binario incluía GO-2026-6809 (`crypto/x509`), corregido en 1.26.10
   y 1.27.3. No cambia el almacenamiento por defecto (VersityGW). El binario de
   MinIO conserva avisos de sus propias dependencias, que dependen de esa release

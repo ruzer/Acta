@@ -54,9 +54,14 @@ export class Errors implements ExceptionFilter {
       code = "INVALID_JSON";
       message = "La solicitud no contiene JSON válido.";
     } else if (
-      error instanceof Error &&
-      "type" in error &&
-      error.type === "entity.too.large"
+      (error instanceof Error &&
+        "type" in error &&
+        error.type === "entity.too.large") ||
+      (error instanceof HttpException &&
+        error.getStatus() === 413 &&
+        error.cause instanceof Error &&
+        "type" in error.cause &&
+        error.cause.type === "entity.too.large")
     ) {
       status = 413;
       code = "PAYLOAD_TOO_LARGE";

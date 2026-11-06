@@ -2,18 +2,18 @@ Build of Versity Gateway (versitygw) distributed by Acta
 
 versitygw is © Versity Software, Inc. and distributed under the Apache License 2.0
 (see UPSTREAM-LICENSE and UPSTREAM-NOTICE, unchanged copies verified against the
-upstream v1.9.0 source tree).
+upstream v1.10.0 source tree).
 
 The binary shipped in this project's images is built from official release
-v1.9.0, commit ca4c8d30f579a5ac3dd8c91bbfa8340c69dac0ac of
+v1.10.0, commit 72f75bd0f4c67a7663d3c56b80f05a44f6732db8 of
 https://github.com/versity/versitygw.
 
- 1. No upstream source or dependency manifest is modified. Release v1.9.0 already
-    includes golang.org/x/net v0.60.0; the former v1.8.0 dependency patch is removed.
+ 1. No upstream source or dependency manifest is modified. Release v1.10.0 already
+    includes golang.org/x/net v0.61.0; the former v1.8.0 dependency patch is removed.
  2. The compiler is Go 1.27.3, using golang:1.27.3-bookworm pinned to image-index
     digest sha256:5c3e9b43cfd3bb95c7937462e29d87ada57b481a96fa23ad0eb61778d7a00110.
     This includes the crypto/x509 fix for GO-2026-6809 (CVE-2026-111943).
- 3. Version metadata identifies v1.9.0, the commit above and its UTC commit time.
+ 3. Version metadata identifies v1.10.0, the commit above and its UTC commit time.
     CGO is disabled, dependencies use go.sum and -mod=readonly, and automatic
     Go toolchain downloads are disabled.
 

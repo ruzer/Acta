@@ -4,7 +4,7 @@ Evaluación inicial: **2026-09-30**. Actualización de seguridad del default: **
 
 ## Decisión
 
-**VersityGW 1.9.0 — DEFAULT — instalación sencilla.** Se conserva para el despliegue single-host de evidencia. No se agregan productos, SDK específicos, selectores UI ni enums al dominio. La API utiliza exclusivamente `S3Storage`, claves estables y configuración S3.
+**VersityGW 1.10.0 — DEFAULT — instalación sencilla.** Se conserva para el despliegue single-host de evidencia. No se agregan productos, SDK específicos, selectores UI ni enums al dominio. La API utiliza exclusivamente `S3Storage`, claves estables y configuración S3.
 
 Garage no satisface el contrato de escrituras condicionales del adaptador; no se incluye un override que obligue a debilitarlo. SeaweedFS queda como candidato avanzado **no verificado**, sin Compose incluido. MinIO se conserva únicamente para instalaciones anteriores y pruebas de compatibilidad; no es una recomendación de seguridad.
 
@@ -14,7 +14,7 @@ En Single host/Distributed se describe upstream; Tested/Backup/ARM64/AMD64 descr
 
 | Provider / versión evaluada | Clasificación | Self-hosted | Single host | Distributed | Tested | Backup tested | ARM64 | AMD64 |
 |---|---|---|---|---|---|---|---|---|
-| VersityGW 1.9.0 | DEFAULT + VERIFIED | Sí | Sí, POSIX incluido | Gateway sobre storage compartido; no replicación del disco local incluida | 41/41 + recorrido API + actualización desde 1.8.0 | Ensayo histórico con 1.8.0; no repetido con 1.9.0 | Linux verificado localmente | Consultar CI de la revisión |
+| VersityGW 1.10.0 | DEFAULT + VERIFIED | Sí | Sí, POSIX incluido | Gateway sobre storage compartido; no replicación del disco local incluida | 41/41 + recorrido API con 1.9.0; con 1.10.0 lo cubre el CI de la revisión | Ensayo histórico con 1.8.0; no repetido con 1.9.0 ni 1.10.0 | Linux verificado localmente | Consultar CI de la revisión |
 | Garage 2.4.1 | NOT SUPPORTED por el contrato actual | Sí | Upstream lo permite; recomienda redundancia para producción | Sí, upstream | No ejecutado; incompatibilidad documentada | No | Binario upstream, app no ensayada | Binario upstream, app no ensayada |
 | SeaweedFS 4.48 | CANDIDATE / NOT VERIFIED | Sí | `weed mini` agrupa servicios | Sí, upstream | No ejecutado | No | Asset upstream, app no ensayada | Asset upstream, app no ensayada |
 | MinIO RELEASE.2025-10-15T17-29-55Z | LEGACY, no recomendado | Sí | Override existente | Upstream; no incluido aquí | 21/21 + recorrido API | Sí, destructivo TEST | Linux verificado (funcional) | No ensayado |
@@ -38,11 +38,15 @@ El esquema todavía conserva el valor **MINIO** de registros históricos, leído
 
 ## VersityGW
 
-El default compila la release oficial **1.9.0**, commit `ca4c8d30f579a5ac3dd8c91bbfa8340c69dac0ac`, con **Go 1.27.3** fijado por digest. No se modifica código ni dependencias upstream: `golang.org/x/net` v0.60.0 ya está incluido y se retira el parche local de 1.8.0. LICENSE/NOTICE se conservan íntegros, verificados contra la nueva release; ver [modificaciones del build](../docker/versity/UPSTREAM-MODIFICATIONS) e [inventario de licencias](STORAGE-DEPENDENCY-LICENSES.csv).
+El default compila la release oficial **1.10.0**, commit `72f75bd0f4c67a7663d3c56b80f05a44f6732db8`, con **Go 1.27.3** fijado por digest. No se modifica código ni dependencias upstream: `golang.org/x/net` v0.61.0 ya está incluido y se retira el parche local de 1.8.0. LICENSE/NOTICE se conservan íntegros, verificados contra la nueva release; ver [modificaciones del build](../docker/versity/UPSTREAM-MODIFICATIONS) e [inventario de licencias](STORAGE-DEPENDENCY-LICENSES.csv).
 
 La misma etapa de compilación se usa en `docker/versity/Dockerfile` y `app/backend/Dockerfile` (aprovisionamiento). El backend de aplicación no recibe ese binario ni las credenciales root. Se conservan el wrapper sin privilegios, POSIX con metadata sidecar, IAM local, política por prefijo y healthcheck `/_health` más `HeadBucket`. No cambia la API de Acta ni la configuración S3. Single-host no es HA.
 
 Correcciones: Go 1.27.3 resuelve **GO-2026-6809 / CVE-2026-111943** (`crypto/x509`). VersityGW 1.9.0 corrige **GHSA-7qcr-88c3-f9p7** (path traversal mediante uploadId y borrado múltiple) y **GHSA-5gjv-3vhq-4chv** (cuerpos chunked sin consumir y reutilización de conexiones). El despliegue estándar no activa keepalive ni usa multipart; eso limita el alcance probado, pero no justifica conservar una versión afectada. El gate `govulncheck` sigue siendo obligatorio y no certifica ausencia de todas las vulnerabilidades de aplicación o del sistema operativo.
+
+### Actualización 1.9.0 → 1.10.0
+
+Release oficial del 2026-10-22, compilada con Go 1.27.3. Incluye `klauspost/compress` v1.20.3: la 1.9.0 traía v1.20.1, afectada por **GO-2026-6865** (pánico con tramas de dos bloques; `govulncheck` en modo binario lo marcaba como alcanzable). Entre sus correcciones figuran el listado POSIX, las claves literales con fiber v3.6 y el registro de la IP del cliente tras un proxy de confianza; no se evaluó su efecto sobre configuraciones externas al default, que deben revisar las [notas de la release](https://github.com/versity/versitygw/releases/tag/v1.10.0). El procedimiento de actualización es el mismo que desde 1.8.0 (abajo). Verificación: el CI de la revisión (build de ambas imágenes y `govulncheck` en modo binario); no se repitió el ensayo manual de actualización con volúmenes existentes ni el restore completo.
 
 ### Actualización desde 1.8.0
 
