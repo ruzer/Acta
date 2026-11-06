@@ -5,7 +5,7 @@ x-backend-build: &backend-build
   target: runtime
 services:
   secrets-init:
-    image: node:24.21.0-bookworm-slim
+    image: node:26.13.0-bookworm-slim
     entrypoint: [node, /opt/init-secrets.mjs]
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}

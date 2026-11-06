@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
-        with: { node-version: "24", cache: npm }
+        with: { node-version: "26", cache: npm }
       - run: npm ci
       - name: Create isolated runtime role
         run: PGPASSWORD=disposable-ci-owner-only psql -h localhost -U requirements_owner -d requirements -f docker/postgres-init.sql

@@ -8,7 +8,7 @@ El ensayo anterior incluyó dump, archivos de volúmenes detenidos, destrucción
 
 No se afirma verificación para otro provider, AMD64, HA, cambio de versión de PostgreSQL ni migración entre almacenes. El cifrado, retención y copia externa dependen del operador: se requieren para proteger los datos, pero no se prescribe una herramienta de cifrado ensayada.
 
-El default actual utiliza VersityGW 1.9.0 y conserva el mismo layout POSIX/sidecar/IAM. La actualización y persistencia están documentadas en [S3-PROVIDERS](S3-PROVIDERS.md); el restore completo con 1.9.0 no se volvió a ensayar y no se presenta como verificado por esta actualización.
+El default actual utiliza VersityGW 1.10.0 y conserva el mismo layout POSIX/sidecar/IAM. La actualización y persistencia están documentadas en [S3-PROVIDERS](S3-PROVIDERS.md); el restore completo con 1.9.0 y 1.10.0 no se volvió a ensayar y no se presenta como verificado por esta actualización.
 
 ## Qué debes conservar
 
@@ -51,7 +51,7 @@ dc stop object-storage
 for suffix in objectdata evidence db-secrets api-secrets object-secrets provision-secrets; do
   docker run --rm --user 0 \
     -v "${project}_$suffix:/source:ro" -v "$backup:/backup" \
-    node:24.21.0-bookworm-slim \
+    node:26.13.0-bookworm-slim \
     sh -c 'tar -C /source -cpf "/backup/$1.tar" .' sh "$suffix"
 done
 ```
@@ -80,7 +80,7 @@ for suffix in objectdata evidence db-secrets api-secrets object-secrets provisio
     "${project}_$suffix" >/dev/null
   docker run --rm --user 0 \
     -v "${project}_$suffix:/target" -v "$backup:/backup:ro" \
-    node:24.21.0-bookworm-slim \
+    node:26.13.0-bookworm-slim \
     sh -c 'tar -C /target -xpf "/backup/$1.tar"' sh "$suffix"
 done
 dc up -d --wait --no-build postgres
