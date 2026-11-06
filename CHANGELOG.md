@@ -78,6 +78,12 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ### Security
 
+- **Dependencias de ejecución actualizadas:** Zod 4.6.7 en backend, frontend y
+  contratos corrige el agotamiento de memoria al validar colecciones grandes;
+  NestJS (`common`, `core` y `platform-express`) 12.3.2 incorpora Multer 2.5.0,
+  que corrige una denegación de servicio con `fileFilter` asíncrono pendiente.
+  Acta no configura `fileFilter`, por lo que la exposición a ese caso era baja,
+  pero el aviso bloqueaba el control de seguridad de dependencias.
 - Documentada la limitación de los límites por dirección detrás de un proxy: el
   backend ve la del contenedor nginx, así que diez accesos fallidos de cualquier
   persona bloquean los accesos 15 minutos. Se publica una
