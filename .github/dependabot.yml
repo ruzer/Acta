@@ -7,12 +7,27 @@ updates:
   - package-ecosystem: docker
     directory: /app/backend
     schedule: {interval: weekly}
+    ignore:
+      # Mantener Node 24 LTS hasta validar una migración coordinada.
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: docker
     directory: /app/frontend
     schedule: {interval: weekly}
+    ignore:
+      # Mantener Node 24 LTS hasta validar una migración coordinada.
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]
+      # Conservar la línea estable NGINX 1.30.x y recibir sus parches.
+      - dependency-name: nginxinc/nginx-unprivileged
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
   - package-ecosystem: docker
     directory: /docker/minio
     schedule: {interval: weekly}
+    ignore:
+      # Go 1.26.10 corrige GO-2026-6809; 1.27.2 lo reintroduce en este binario.
+      - dependency-name: golang
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule: {interval: weekly}
