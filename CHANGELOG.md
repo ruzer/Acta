@@ -25,6 +25,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   de pregunta en móvil tienen separación; y el diálogo de desactivar un área no
   repite la lista de lo que se conserva ni deja detrás el aviso de la acción
   anterior.
+- **Captura en Organizar en móvil.** «+ Agregar tema» y «Nueva pregunta»
+  comparten una fila sin taparse; Preparar/Analizar conserva su propia fila.
 
 ### Added
 

@@ -635,7 +635,6 @@
     gap: var(--ac-space-2);
   }
   .an-approach > [role="group"] {
-    flex: 1 1 auto;
     padding: 2px;
   }
   .an-approach > [role="group"] .button,
