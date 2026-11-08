@@ -28,6 +28,9 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 - **Captura en Organizar en móvil.** «+ Agregar tema» y «Nueva pregunta»
   comparten una fila sin taparse; Preparar/Analizar conserva su propia fila.
 
+- El nombre del participante se muestra completo junto al icono y al logotipo, también en móvil y modo oscuro.
+- Los títulos reciben el foco de navegación sin un recuadro visible; los controles conservan su indicador de foco por teclado.
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**
