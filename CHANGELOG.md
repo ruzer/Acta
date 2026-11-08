@@ -35,6 +35,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   la búsqueda, el área y el tema ya no pierde el área de la URL antes de abrir
   una decisión; al regresar se recupera el contexto completo. No cambian las
   rutas ni las dependencias.
+- **Captura en Organizar en móvil.** «+ Agregar tema» y «Nueva pregunta»
+  comparten una fila sin taparse; Preparar/Analizar conserva su propia fila.
 
 ### Added
 
