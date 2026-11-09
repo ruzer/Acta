@@ -67,6 +67,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   y conserva la misma regla de eliminación de objetos huérfanos o rechazados sin
   vínculos, evitando una consulta adicional por cada archivo.
 
+- **Caché del frontend sin perder cabeceras de seguridad.** El shell HTML se
+  revalida y los assets con nombre versionado se conservan un año como inmutables;
+  las rutas SPA mantienen las cuatro cabeceras y el proxy de la API no cambia.
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**
