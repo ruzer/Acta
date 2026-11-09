@@ -100,7 +100,7 @@ const client = new QueryClient({
 // Presentation context lasts for this authenticated session; logout clears it.
 client.setQueryDefaults(["questionnaire-context"], { gcTime: Infinity });
 client.setQueryDefaults(["workbench-context"], { gcTime: Infinity });
-function RouteFocus() {
+export function RouteFocus() {
   const location = useLocation();
   useEffect(() => {
     const main = document.querySelector("main");
@@ -114,11 +114,24 @@ function RouteFocus() {
       return true;
     };
     if (focusHeading()) return;
+    function stopWaiting() {
+      observer.disconnect();
+      window.clearTimeout(timeout);
+    }
     const observer = new MutationObserver(() => {
-      if (focusHeading()) observer.disconnect();
+      const active = document.activeElement;
+      if (
+        (active &&
+          active !== main &&
+          active !== document.body &&
+          main.contains(active)) ||
+        focusHeading()
+      )
+        stopWaiting();
     });
+    const timeout = window.setTimeout(stopWaiting, 5000);
     observer.observe(main, { childList: true, subtree: true });
-    return () => observer.disconnect();
+    return stopWaiting;
   }, [location.pathname]);
   return null;
 }

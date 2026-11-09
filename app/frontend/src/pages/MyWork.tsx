@@ -88,6 +88,7 @@ export function ParticipantHome({
         <p className="participant-subtitle">Mi trabajo</p>
       </div>
       <Welcome
+        refreshing={results.some((q) => q.isFetching)}
         items={candidates.map((c) => c.q)}
         progress={{
           sent: entries.reduce((n, p) => n + p.data.progress.sent, 0),
@@ -114,11 +115,13 @@ export function ParticipantHome({
   );
 }
 export function Welcome({
+  refreshing = false,
   items,
   href,
   progress,
   waiting,
 }: {
+  refreshing?: boolean;
   items: PersonalQuestion[];
   href?: string;
   progress: { sent: number; total: number; drafts: number };
@@ -181,7 +184,9 @@ export function Welcome({
           {waiting[0]!.question}
         </Callout>
       )}
-      {href ? (
+      {refreshing ? (
+        <p role="status">Actualizando tu avance…</p>
+      ) : href ? (
         <div className="participant-progress-actions">
           <Link className="button primary participant-continue" to={href}>
             Continuar <ParticipantIcon name="arrow" />
@@ -216,6 +221,7 @@ export function MyWork() {
         <p className="participant-subtitle">{q.data.projectName}</p>
       </div>
       <Welcome
+        refreshing={q.isFetching}
         items={items}
         progress={{
           sent: q.data.progress.sent,
