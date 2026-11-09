@@ -127,6 +127,12 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   Cada corrida de main tiene un grupo propio, para conservar tanto las pendientes
   como las que ya se ejecutan; continúan la ejecución manual y la semanal.
 
+- **Retención horaria de autenticación.** Elimina por lotes intentos de más de
+  7 días, sesiones vencidas o revocadas hace más de 30 días y buckets caducados;
+  conserva la auditoría y evita limpiar buckets en cada acceso por invitación.
+  Una migración concede al rol de aplicación el borrado de las dos tablas de
+  sesiones, sin ampliar los permisos de la bitácora ni del contenido.
+
 ### Security
 
 - **Vite 8.3.5**, tras la corrección de seguridad de 8.3.1 a 8.3.4, incorpora

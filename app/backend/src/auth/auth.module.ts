@@ -1,3 +1,4 @@
+import { AuthMaintenanceService } from "./auth-maintenance.service.js";
 import { Global, Module } from "@nestjs/common";
 import { APP_GUARD } from "@nestjs/core";
 import { InvitationAuthService } from "./invitation-auth.service.js";
@@ -9,9 +10,10 @@ import { AuthController } from "./auth.controller.js";
   controllers: [AuthController],
   providers: [
     AuthService,
+    AuthMaintenanceService,
     InvitationAuthService,
     { provide: APP_GUARD, useClass: AuthGuard },
   ],
-  exports: [AuthService, InvitationAuthService],
+  exports: [AuthService, InvitationAuthService, AuthMaintenanceService],
 })
 export class AuthModule {}
