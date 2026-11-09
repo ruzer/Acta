@@ -104,7 +104,8 @@
   padding-right: 16px;
   border-right: 1px solid var(--ac-line);
 }
-.participant-brand > span {
+.participant-brand-icon {
+  flex-shrink: 0;
   display: grid;
   place-items: center;
   width: 28px;
@@ -114,8 +115,15 @@
   border-radius: 6px;
 }
 .acta-participant .participant-brand {
+  min-width: 0;
+  max-width: 100%;
+  flex-shrink: 1;
   color: var(--ac-ink);
   font-weight: 700;
+}
+.participant-brand .brand-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .participant-project-name {
   font-size: var(--ac-text-body);
@@ -850,7 +858,7 @@
     --ac-info-line: #3b5472;
   }
   .acta-participant .button.primary,
-  .acta-participant .participant-brand > span {
+  .acta-participant .participant-brand-icon {
     color: #0d1520;
   }
   .acta-participant .ac-step-done .ac-step-mark {

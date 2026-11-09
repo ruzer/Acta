@@ -52,7 +52,7 @@ export function ParticipantHeader({
         </>
       ) : (
         <Link className="participant-brand" to="/">
-          <span>
+          <span className="participant-brand-icon">
             <ParticipantIcon />
           </span>
           <Brand short />

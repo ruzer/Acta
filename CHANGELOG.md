@@ -37,10 +37,20 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   rutas ni las dependencias.
 - **Captura en Organizar en móvil.** «+ Agregar tema» y «Nueva pregunta»
   comparten una fila sin taparse; Preparar/Analizar conserva su propia fila.
-
-- Mi trabajo explica cuántas preguntas condicionales aún no cuentan en el avance; Responder muestra una posición breve y clara.
-- Trazabilidad presenta los tipos en español y sus tres cifras como un resumen separado.
-- Importar avisa si el proyecto ya contiene estructura y deshabilita la subida, conservando los ejemplos y la validación del servidor.
+- **El nombre del participante ya no se recorta.** En la cabecera del
+  participante, el nombre se muestra completo junto al icono y al logotipo,
+  también en móvil, con nombres largos y en modo oscuro.
+- **Los títulos ya no muestran un recuadro de foco.** Al navegar, el foco sigue
+  yendo al título, pero sin el recuadro; los botones, enlaces y campos conservan
+  su indicador de foco por teclado.
+- **Mi trabajo explica las preguntas condicionales.** Junto al avance indica
+  cuántas preguntas dependen aún de tus respuestas o quedan fuera del recorrido,
+  y Responder muestra solo «Pregunta N de M». El cálculo del avance no cambia.
+- **Trazabilidad se lee en español.** Los tipos de referencia usan las mismas
+  etiquetas del editor y las tres cifras se presentan como un resumen.
+- **Importar avisa antes de subir el archivo.** Si el proyecto ya contiene
+  estructura, lo dice, enlaza a Cuestionario y deshabilita la subida; los
+  ejemplos siguen disponibles. El servidor mantiene su validación.
 
 ### Added
 
