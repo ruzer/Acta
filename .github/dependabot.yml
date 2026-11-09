@@ -4,6 +4,16 @@ updates:
     directory: /
     schedule: {interval: weekly}
     open-pull-requests-limit: 5
+    # Familias que deben subir juntas: un PR por familia en vez de uno por paquete.
+    groups:
+      react:
+        patterns: ["react", "react-dom"]
+      nestjs:
+        patterns: ["@nestjs/*"]
+      prisma:
+        patterns: ["prisma", "@prisma/*"]
+      zod:
+        patterns: ["zod"]
   - package-ecosystem: docker
     directory: /app/backend
     schedule: {interval: weekly}
@@ -17,6 +27,20 @@ updates:
   - package-ecosystem: docker
     directory: /docker/minio
     schedule: {interval: weekly}
+  - package-ecosystem: docker
+    # Compila VersityGW (almacenamiento por defecto) y lo usa el control govulncheck del CI.
+    # Su etapa de compilación debe seguir idéntica a la de app/backend/Dockerfile.
+    directory: /docker/versity
+    schedule: {interval: weekly}
+  - package-ecosystem: docker-compose
+    # Solo PostgreSQL: la imagen de Node ya la sigue cada Dockerfile.
+    directory: /
+    schedule: {interval: weekly}
+    ignore:
+      - dependency-name: node
+      # Un cambio de versión mayor de PostgreSQL exige un plan de migración.
+      - dependency-name: postgres
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule: {interval: weekly}
