@@ -2,7 +2,12 @@ import { test as base, expect } from "@playwright/test";
 import type { SettingsView } from "@requirements/contracts";
 
 function expectDefaultBranding(settings: SettingsView) {
-  for (const key of ["logo", "logoSecondary", "secondaryName"] as const)
+  for (const key of [
+    "logo",
+    "logoSecondary",
+    "secondaryName",
+    "shortName",
+  ] as const)
     expect(settings[key].source, `${key} debe quedar predeterminado`).toBe(
       "default",
     );
@@ -69,6 +74,14 @@ export const test = base.extend<{ restoreBranding: () => Promise<void> }>({
             expect(response.status(), "Restablecer entidad secundaria").toBe(
               201,
             );
+          }
+          const identity = await settings();
+          if (identity.shortName.source === "saved") {
+            const response = await request.post("/api/v1/settings", {
+              headers: headers(),
+              data: { expectedVersion: identity.version, reset: ["shortName"] },
+            });
+            expect(response.status(), "Restablecer nombre corto").toBe(201);
           }
           expectDefaultBranding(await settings());
         }
