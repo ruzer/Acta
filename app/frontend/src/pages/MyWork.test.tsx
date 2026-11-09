@@ -7,6 +7,37 @@ import type { PersonalProjectView } from "@requirements/contracts";
 import { ProjectWork, Welcome } from "./MyWork";
 import { ParticipantNotice } from "./ParticipantFlow";
 afterEach(cleanup);
+it("no ofrece un destino en caché mientras actualiza el avance y usa el nuevo al terminar", () => {
+  const summary = {
+    items: [],
+    progress: { sent: 0, total: 2, drafts: 1 },
+    waiting: [],
+  };
+  const { rerender } = render(
+    <MemoryRouter>
+      <Welcome {...summary} refreshing href="/projects/p/respond/old" />
+    </MemoryRouter>,
+  );
+  expect(
+    screen.queryByRole("link", { name: "Continuar" }),
+  ).not.toBeInTheDocument();
+  expect(screen.getByRole("status")).toHaveTextContent(
+    "Actualizando tu avance…",
+  );
+  expect(
+    screen.queryByText("No tienes acciones pendientes por ahora."),
+  ).not.toBeInTheDocument();
+  rerender(
+    <MemoryRouter>
+      <Welcome {...summary} refreshing={false} href="/projects/p/respond/new" />
+    </MemoryRouter>,
+  );
+  expect(screen.getByRole("link", { name: "Continuar" })).toHaveAttribute(
+    "href",
+    "/projects/p/respond/new",
+  );
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
+});
 it("300 preguntas: listado acotado, búsqueda por texto, filtro y tema colapsable por teclado", async () => {
   const data: PersonalProjectView = {
     projectName: "Proyecto ficticio",

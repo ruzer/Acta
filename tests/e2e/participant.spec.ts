@@ -234,14 +234,45 @@ test("guardar intacta, recuperar tras logout, prioridad borrador y consulta recu
   );
   expect(consulting.draft.consultationRequested).toBe(true);
   await open(page, 1);
+  await expect(page.locator(".participant-header-context")).toHaveText(
+    "Pregunta 2 de 8",
+  );
+  const refreshStarted = Promise.withResolvers<void>();
+  const releaseRefresh = Promise.withResolvers<void>();
+  await page.route(`**/api/v1/projects/${projectId}/my-work`, async (route) => {
+    refreshStarted.resolve();
+    await releaseRefresh.promise;
+    await route.continue();
+  });
   await page
     .getByLabel("Tu respuesta", { exact: true })
     .fill("Procedimiento ficticio persistente");
-  await page.getByRole("button", { name: "Guardar y salir" }).click();
-  await expect(
-    page.locator(".participant-work-row").filter({ hasText: questions[0] }),
-  ).toContainText("Por consultar");
-  await page.getByRole("link", { name: "Continuar", exact: true }).click();
+  const continueLink = page.getByRole("link", {
+    name: "Continuar",
+    exact: true,
+  });
+  try {
+    await page.getByRole("button", { name: "Guardar y salir" }).click();
+    await refreshStarted.promise;
+    await expect(page).toHaveURL(new RegExp(`/projects/${projectId}/work$`));
+    await expect(
+      page.locator(".participant-work-row").filter({ hasText: questions[0] }),
+    ).toContainText("Por consultar");
+    await expect(continueLink).toHaveCount(0);
+    await expect(
+      page.getByRole("status").filter({ hasText: "Actualizando tu avance…" }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("No tienes acciones pendientes por ahora."),
+    ).toHaveCount(0);
+  } finally {
+    releaseRefresh.resolve();
+  }
+  await expect(continueLink).toHaveAttribute(
+    "href",
+    `/projects/${projectId}/respond/${ids[1]}`,
+  );
+  await continueLink.click();
   await expect(page).toHaveURL(new RegExp(ids[1] + "$"));
   await expect(page.getByLabel("Tu respuesta", { exact: true })).toHaveValue(
     "Procedimiento ficticio persistente",

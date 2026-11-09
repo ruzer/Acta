@@ -71,6 +71,11 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   revalida y los assets con nombre versionado se conservan un año como inmutables;
   las rutas SPA mantienen las cuatro cabeceras y el proxy de la API no cambia.
 
+- **«Continuar» espera un destino actualizado.** Al guardar un borrador, Mi
+  trabajo y el inicio del participante muestran «Actualizando tu avance…»
+  mientras se refresca la consulta, sin ofrecer el enlace anterior ni retrasar
+  la navegación. El guardado, las prioridades y la API no cambian.
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**
