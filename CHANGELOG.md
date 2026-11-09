@@ -53,8 +53,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   ejemplos siguen disponibles. El servidor mantiene su validación.
 
 - **Los fallos de acceso de una dirección no bloquean otras detrás de nginx.**
-  Compose entrega la IP de cliente validada; el límite sigue siendo diez fallos
-  en quince minutos por cuenta o dirección. Sistema muestra el estado del proxy.
+  Compose entrega la IP de cliente validada a los límites de acceso.
+  Sistema muestra el estado del proxy.
 - **Las capturas E2E no modifican la documentación versionada.** Dirección C y
   el asistente usan `test-results/design-evidence` por defecto; todos respetan
   `ACTA_DIRECTION_C_EVIDENCE_DIR` y se conservan las imágenes históricas.
@@ -161,6 +161,11 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   una versión corregida dentro de su rango y el aviso mantenía abierta la alerta
   de Dependabot. Solo afecta a lint y pruebas, no a lo que se despliega; lint,
   tipos y pruebas unitarias pasan con la versión 11.
+- **El límite de acceso distingue cuenta y dirección.** En quince minutos se
+  permiten hasta 10 fallos por cuenta+IP, 30 por IP y 100 por cuenta; cada fallo
+  cuenta en los tres. Se conservan los candados concurrentes, la respuesta para
+  cuentas inexistentes y el flujo de acceso correcto. Diez fallos desde otra IP
+  ya no bloquean por sí solos al administrador legítimo.
 
 ## 0.8.0 — 2026-10-13
 

@@ -6,6 +6,22 @@
 
 `ORGANIZATION_CODE` es el código interno de instalación (DEFAULT por defecto), nunca un campo de login. `ORGANIZATION_NAME` es solo el nombre **inicial** (el asistente lo propone; `bootstrap-admin` y la demo lo usan): queda persistido en Organization y se renombra en **Administración → Configuración**. Cambiar el código de despliegue no mueve usuarios ni crea acceso cruzado. Cambiar `ORGANIZATION_NAME` después de instalar no sobrescribe el registro existente.
 
+## Límites de inicio de sesión
+
+En una ventana de 15 minutos, cada acceso fallido cuenta en los tres límites:
+
+| Alcance | Fallos antes de bloquear |
+|---|---:|
+| Misma cuenta y dirección IP | 10 |
+| Misma IP, aunque cambie la cuenta | 30 |
+| Misma cuenta, aunque cambie la IP | 100 |
+
+Al alcanzar cualquiera se devuelve 429, con la misma respuesta para cuentas
+existentes e inexistentes. Diez fallos desde una dirección no bloquean por sí
+solos a esa cuenta desde otra; 100 fallos distribuidos sí alcanzan el límite
+agregado de cuenta. Los accesos correctos no reinician la ventana de fallos.
+Los códigos del asistente y las invitaciones mantienen sus límites propios.
+
 ## Dirección de cliente / proxies
 
 | Variable | Predeterminado | Regla |

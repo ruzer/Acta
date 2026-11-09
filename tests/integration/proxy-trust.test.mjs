@@ -103,7 +103,7 @@ test("setup codes: ten failures from A block A, not a valid code from B", async 
     10,
   );
 });
-test("login: ten nonexistent accounts from A do not block viewer or admin from B", async () => {
+test("login: thirty nonexistent accounts from A block A, not viewer or admin from B", async () => {
   Object.assign(process.env, { DEMO_SEED: "true", DEMO_PASSWORD: password });
   const seed = spawnSync(process.execPath, ["app/backend/dist/seed.js"], {
     encoding: "utf8",
@@ -111,7 +111,7 @@ test("login: ten nonexistent accounts from A do not block viewer or admin from B
   });
   assert.equal(seed.status, 0, seed.stderr);
   await db.loginAttempt.deleteMany();
-  for (let i = 0; i < 10; i++) assert.equal(await login(`missing_${i}`), 401);
+  for (let i = 0; i < 30; i++) assert.equal(await login(`missing_${i}`), 401);
   assert.equal(await login("viewer"), 429);
   assert.equal(await login("viewer", b), 201);
   assert.equal(await login("admin", b), 201);
@@ -119,7 +119,7 @@ test("login: ten nonexistent accounts from A do not block viewer or admin from B
     await db.loginAttempt.count({
       where: { ipKeyHash: sha(a), success: false },
     }),
-    10,
+    30,
   );
   assert.equal(
     await db.loginAttempt.count({
@@ -128,15 +128,37 @@ test("login: ten nonexistent accounts from A do not block viewer or admin from B
     2,
   );
 });
-test("the account limit still applies across different client addresses", async () => {
+test("the 100-failure account limit still applies across different client addresses", async () => {
   await db.loginAttempt.deleteMany();
-  for (let i = 0; i < 10; i++)
+  for (let i = 0; i < 100; i++)
     assert.equal(
-      await login("viewer", `192.0.2.${40 + i}`, "incorrect-example-password"),
+      await login(
+        "viewer",
+        `192.0.2.${40 + Math.floor(i / 10)}`,
+        "incorrect-example-password",
+      ),
       401,
     );
   assert.equal(await login("viewer", b), 429);
   assert.equal(await login("admin", b), 201);
+});
+test("login: ten bad admin passwords from A do not block the real admin from B", async () => {
+  await db.loginAttempt.deleteMany();
+  for (let i = 0; i < 10; i++)
+    assert.equal(await login("admin", a, "incorrect-example-password"), 401);
+  assert.equal(await login("admin", b), 201);
+  assert.equal(await login("admin", a), 429);
+});
+test("concurrent attempts cannot exceed the account and address pair limit", async () => {
+  await db.loginAttempt.deleteMany();
+  const statuses = await Promise.all(
+    Array.from({ length: 11 }, () =>
+      login("admin", a, "incorrect-example-password"),
+    ),
+  );
+  assert.equal(statuses.filter((status) => status === 401).length, 10);
+  assert.equal(statuses.filter((status) => status === 429).length, 1);
+  assert.equal(await db.loginAttempt.count({ where: { success: false } }), 10);
 });
 test("mapped IPv4 and canonical IPv6 use one hashed network key", async () => {
   await db.loginAttempt.deleteMany();

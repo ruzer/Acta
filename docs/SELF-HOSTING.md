@@ -59,7 +59,7 @@ Para acceso estable, utiliza el reverse proxy que ya operes (Caddy, Nginx o Trae
 
 **Integración de proxy: guía operativa, no receta TLS verificada para un proxy específico.** Un proxy en otro contenedor no puede alcanzar el host mediante su propio 127.0.0.1; necesita una red/topología explícita. No expongas DB o almacenamiento para resolverlo. No uses CORS comodín ni desactives CSRF.
 
-Verifica `docker compose exec frontend nginx -t` y el estado «Dirección IP del cliente» en Configuración → Sistema. Antes de abrir el servicio, ensaya en una instancia ficticia que diez fallos desde A no bloquean un acceso válido desde B y que una cabecera falsificada no altera la dirección. Docker Desktop o NAT pueden ocultar la IP original; no se corrige confiando en cualquier encabezado. Procedimiento y cómo volver a cero: [IP detrás del proxy](PROXY-TRUST.md).
+Verifica `docker compose exec frontend nginx -t` y el estado «Dirección IP del cliente» en Configuración → Sistema. Antes de abrir el servicio, ensaya en una instancia ficticia que diez contraseñas incorrectas de una cuenta desde A no bloquean su acceso válido desde B y que una cabecera falsificada no altera la dirección. Docker Desktop o NAT pueden ocultar la IP original; no se corrige confiando en cualquier encabezado. Procedimiento y cómo volver a cero: [IP detrás del proxy](PROXY-TRUST.md).
 
 ## Dónde se guardan los datos
 
