@@ -76,6 +76,11 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   mientras se refresca la consulta, sin ofrecer el enlace anterior ni retrasar
   la navegación. El guardado, las prioridades y la API no cambian.
 
+- **El foco de ruta respeta la navegación por teclado.** Si el título tarda
+  en aparecer, deja de esperarlo cuando detecta el foco en un control de la
+  página o después de cinco segundos. Conserva el enfoque inicial al resolver
+  las rutas diferidas y limpia la espera al salir.
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**
