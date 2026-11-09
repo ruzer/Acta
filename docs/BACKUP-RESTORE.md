@@ -8,7 +8,7 @@ El ensayo anterior incluyó dump, archivos de volúmenes detenidos, destrucción
 
 No se afirma verificación para otro provider, AMD64, HA, cambio de versión de PostgreSQL ni migración entre almacenes. El cifrado, retención y copia externa dependen del operador: se requieren para proteger los datos, pero no se prescribe una herramienta de cifrado ensayada.
 
-El default actual utiliza VersityGW 1.10.0 y conserva el mismo layout POSIX/sidecar/IAM. La actualización y persistencia están documentadas en [S3-PROVIDERS](S3-PROVIDERS.md); el restore completo con 1.9.0 y 1.10.0 no se volvió a ensayar y no se presenta como verificado por esta actualización.
+El default actual utiliza VersityGW 1.10.0 y conserva el mismo layout POSIX/sidecar/IAM. El 2026-11-07 se repitió esta receta en Linux ARM64: backup coordinado de una instalación 1.9.0, actualización conservando sus volúmenes y restore de la copia en un destino vacío con 1.10.0. Se restauraron DB, seis volúmenes y secretos; login, respuesta enviada, decisión/fuente, privacidad y SHA-256 de evidencia pasaron, también después de un restart. Se usaron exclusivamente fixtures y volúmenes propios de TEST, sin destruir el origen. Revisiones exactas, hashes y límites: [ensayo 1.10.0](S3-PROVIDERS.md#verificación-de-seguridad-y-compatibilidad-1100-2026-11-07). Esta transición ensayada no autoriza a cambiar arbitrariamente las versiones de una restauración.
 
 ## Qué debes conservar
 
