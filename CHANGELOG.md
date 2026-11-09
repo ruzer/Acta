@@ -111,6 +111,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   `docker-compose.yml` (sin saltos de versión mayor). El CI se ejecuta además
   cada lunes, para que un aviso nuevo de dependencias o de `govulncheck` aparezca
   de forma programada y no en medio de otro cambio.
+- **CI sin corridas duplicadas por rama.** Los pushes ejecutan CI solo en main;
+  los PR conservan todos sus checks y cancelan únicamente sus corridas obsoletas.
+  Cada corrida de main tiene un grupo propio, para conservar tanto las pendientes
+  como las que ya se ejecutan; continúan la ejecución manual y la semanal.
 
 ### Security
 
