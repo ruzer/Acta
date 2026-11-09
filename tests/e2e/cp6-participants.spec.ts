@@ -17,7 +17,7 @@ import {
 // without inventing anything the product does not do.
 const folder =
   (process.env.ACTA_DIRECTION_C_EVIDENCE_DIR ??
-    "docs/design/acta-direction-c-evidence") + "/cp6";
+    "test-results/design-evidence") + "/cp6";
 const records: Record<string, unknown>[] = [];
 test.use({
   locale: "es-MX",

@@ -19,7 +19,7 @@ import {
 // that stack into labelled cards on a phone, and no screen of its own.
 const folder =
   (process.env.ACTA_DIRECTION_C_EVIDENCE_DIR ??
-    "docs/design/acta-direction-c-evidence") + "/cp7";
+    "test-results/design-evidence") + "/cp7";
 const records: Record<string, unknown>[] = [];
 test.use({
   locale: "es-MX",

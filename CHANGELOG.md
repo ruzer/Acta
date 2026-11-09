@@ -55,6 +55,9 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 - **Los fallos de acceso de una dirección no bloquean otras detrás de nginx.**
   Compose entrega la IP de cliente validada; el límite sigue siendo diez fallos
   en quince minutos por cuenta o dirección. Sistema muestra el estado del proxy.
+- **Las capturas E2E no modifican la documentación versionada.** Dirección C y
+  el asistente usan `test-results/design-evidence` por defecto; todos respetan
+  `ACTA_DIRECTION_C_EVIDENCE_DIR` y se conservan las imágenes históricas.
 
 ### Added
 

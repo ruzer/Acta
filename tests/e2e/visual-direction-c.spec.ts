@@ -14,7 +14,7 @@ const widths = [
 ] as const;
 const output =
   process.env.ACTA_DIRECTION_C_EVIDENCE_DIR ??
-  "docs/design/acta-direction-c-evidence";
+  "test-results/design-evidence";
 const records: unknown[] = [];
 
 test.describe("Direction C · foundation", () => {

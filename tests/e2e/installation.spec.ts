@@ -13,7 +13,9 @@ const widths = [
   [390, 844],
   [320, 640],
 ] as const;
-const evidence = "docs/design/acta-direction-c-evidence/installation";
+const evidence =
+  (process.env.ACTA_DIRECTION_C_EVIDENCE_DIR ?? "test-results/design-evidence") +
+  "/installation";
 test.use({
   locale: "es-MX",
   reducedMotion: "reduce",
