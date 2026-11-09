@@ -685,22 +685,34 @@ export class ResponsesService {
       });
     }
     let removed = 0;
-    for (const key of await this.storage.candidates(before)) {
-      const e = await this.db.evidence.findFirst({
-        where: { backend: this.storage.backend, storageKey: key },
-        include: {
-          DraftEvidence_evidence: true,
-          RevisionEvidence_evidence: true,
+    const keys = await this.storage.candidates(before);
+    for (let offset = 0; offset < keys.length; offset += 1000) {
+      const batch = keys.slice(offset, offset + 1000);
+      const records = await this.db.evidence.findMany({
+        where: { backend: this.storage.backend, storageKey: { in: batch } },
+        select: {
+          storageKey: true,
+          status: true,
+          _count: {
+            select: {
+              DraftEvidence_evidence: true,
+              RevisionEvidence_evidence: true,
+            },
+          },
         },
       });
-      if (
-        !e ||
-        (e.status === "REJECTED" &&
-          !e.DraftEvidence_evidence.length &&
-          !e.RevisionEvidence_evidence.length)
-      ) {
-        await this.storage.remove(key);
-        removed++;
+      const byKey = new Map(records.map((e) => [e.storageKey, e]));
+      for (const key of batch) {
+        const e = byKey.get(key);
+        if (
+          !e ||
+          (e.status === "REJECTED" &&
+            !e._count.DraftEvidence_evidence &&
+            !e._count.RevisionEvidence_evidence)
+        ) {
+          await this.storage.remove(key);
+          removed++;
+        }
       }
     }
     return { removed, expired };

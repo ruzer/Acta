@@ -63,6 +63,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   La autorización y la auditoría usan transacciones cortas; solo se registra la
   descarga después de leer y verificar los bytes, sin cambiar permisos ni errores.
 
+- **Reconciliación de evidencia por lotes.** Consulta hasta 1.000 claves por vez
+  y conserva la misma regla de eliminación de objetos huérfanos o rechazados sin
+  vínculos, evitando una consulta adicional por cada archivo.
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**
