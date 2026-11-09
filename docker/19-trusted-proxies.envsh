@@ -1,0 +1,28 @@
+#!/bin/sh
+# Sourced before nginx's 20-envsubst-on-templates.sh; never interpolate raw configuration.
+ACTA_REAL_IP_DIRECTIVES=$(printf '%s' "${TRUSTED_PROXY_CIDRS:-}" | awk '
+function invalid() { print "TRUSTED_PROXY_CIDRS: lista CIDR inválida" > "/dev/stderr"; exit 1 }
+BEGIN { RS = "," }
+{
+  gsub(/^[ \t]+|[ \t]+$/, "")
+  if ($0 !~ /^[0-9a-fA-F.:]+\/[0-9]+$/) invalid()
+  split($0, cidr, "/")
+  if (index(cidr[1], ":")) {
+    if (cidr[2] > 128) invalid()
+    # nginx validates the IPv6 address when loading the rendered configuration.
+  } else {
+    if (cidr[2] > 32 || split(cidr[1], octets, ".") != 4) invalid()
+    for (i = 1; i <= 4; i++) if (octets[i] !~ /^[0-9]+$/ || octets[i] > 255) invalid()
+  }
+  print "set_real_ip_from " $0 ";"
+}') || exit 1
+# awk does not emit a final empty record for a trailing comma.
+case "${TRUSTED_PROXY_CIDRS:-}" in *,) echo 'TRUSTED_PROXY_CIDRS: lista CIDR inválida' >&2; exit 1;; esac
+if [ -n "$ACTA_REAL_IP_DIRECTIVES" ]; then
+  ACTA_REAL_IP_DIRECTIVES="$ACTA_REAL_IP_DIRECTIVES
+real_ip_header X-Forwarded-For;
+real_ip_recursive on;"
+fi
+export ACTA_REAL_IP_DIRECTIVES
+# Only substitute this generated value; nginx variables must remain literal.
+export NGINX_ENVSUBST_FILTER='^ACTA_REAL_IP_DIRECTIVES$'

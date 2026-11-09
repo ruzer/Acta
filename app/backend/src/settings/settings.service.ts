@@ -482,6 +482,7 @@ export class SettingsService {
         origin: origin.origin,
         https: origin.protocol === "https:",
         secureCookies: config.COOKIE_SECURE === "true",
+        clientIpFromProxy: config.TRUSTED_PROXY_HOPS > 0,
         sessionIdleMinutes: config.SESSION_IDLE_MINUTES,
         sessionMaxHours: config.SESSION_MAX_HOURS,
         invitationIdentity: config.INVITATION_IDENTITY,

@@ -236,6 +236,7 @@ export const systemStatusView = z.strictObject({
     origin: z.string(),
     https: z.boolean(),
     secureCookies: z.boolean(),
+    clientIpFromProxy: z.boolean(),
     sessionIdleMinutes: z.number().int(),
     sessionMaxHours: z.number().int(),
     invitationIdentity: z.enum(["NONE", "NAME", "EMAIL", "BOTH"]),

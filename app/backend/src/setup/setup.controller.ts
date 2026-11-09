@@ -1,3 +1,4 @@
+import { clientIp } from "../common/client-ip.js";
 import { Body, Controller, Get, HttpCode, Post, Req } from "@nestjs/common";
 import { z } from "zod";
 import { setupCompleteInput, setupVerifyInput } from "@requirements/contracts";
@@ -23,7 +24,7 @@ export class SetupController {
     @Req() r: ActorRequest,
     @Body(new SchemaPipe(setupVerifyInput)) d: z.infer<typeof setupVerifyInput>,
   ) {
-    return this.service.verify(d.token, r.ip || "unknown");
+    return this.service.verify(d.token, clientIp(r));
   }
   @HttpCode(200)
   @Post("checks")
@@ -31,13 +32,13 @@ export class SetupController {
     @Req() r: ActorRequest,
     @Body(new SchemaPipe(setupVerifyInput)) d: z.infer<typeof setupVerifyInput>,
   ) {
-    return this.service.checks(d.token, r.ip || "unknown");
+    return this.service.checks(d.token, clientIp(r));
   }
   @Post("complete") complete(
     @Req() r: ActorRequest,
     @Body(new SchemaPipe(setupCompleteInput))
     d: z.infer<typeof setupCompleteInput>,
   ) {
-    return this.service.complete(d, r.ip || "unknown", r.requestId);
+    return this.service.complete(d, clientIp(r), r.requestId);
   }
 }

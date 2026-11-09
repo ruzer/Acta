@@ -52,6 +52,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   estructura, lo dice, enlaza a Cuestionario y deshabilita la subida; los
   ejemplos siguen disponibles. El servidor mantiene su validación.
 
+- **Los fallos de acceso de una dirección no bloquean otras detrás de nginx.**
+  Compose entrega la IP de cliente validada; el límite sigue siendo diez fallos
+  en quince minutos por cuenta o dirección. Sistema muestra el estado del proxy.
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**
@@ -127,11 +131,12 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   consumir y reutilización de conexiones). Go 1.27.3 corrige además
   GO-2026-6809 en `crypto/x509`. LICENSE y NOTICE se verificaron idénticos a la
   release; alcance y límites en [Proveedores S3](docs/S3-PROVIDERS.md).
-- Documentada la limitación de los límites por dirección detrás de un proxy: el
-  backend ve la del contenedor nginx, así que diez accesos fallidos de cualquier
-  persona bloquean los accesos 15 minutos. Se publica una
-  [propuesta basada en proxies confiables](docs/PROXY-TRUST.md); no cambia ningún
-  comportamiento y no se confía en `X-Forwarded-For` todavía.
+- **Dirección de cliente mediante proxies configurados.** nginx sobrescribe
+  `X-Forwarded-For` y solo acepta direcciones de proxies en `TRUSTED_PROXY_CIDRS`.
+  `TRUSTED_PROXY_HOPS` vale cero en código y uno en el Compose con backend privado;
+  las direcciones se validan y normalizan antes del hash. Login, invitaciones y
+  códigos del asistente conservan sus límites. Un NAT puede seguir compartiendo
+  dirección; [configuración y comprobación](docs/PROXY-TRUST.md).
 - La imagen opcional de **MinIO legado** se compila con Go 1.27.3. Con Go 1.26.9
   y 1.27.2 el binario incluía GO-2026-6809 (`crypto/x509`), corregido en 1.26.10
   y 1.27.3. No cambia el almacenamiento por defecto (VersityGW). El binario de

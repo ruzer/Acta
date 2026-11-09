@@ -53,10 +53,13 @@ Para acceso estable, utiliza el reverse proxy que ya operes (Caddy, Nginx o Trae
 1. Configura DNS y un certificado válido para el dominio elegido.
 2. En `.env` (o con `sh scripts/install.sh --origin https://…` en una instalación nueva), establece APP_ORIGIN al origen HTTPS exacto, NODE_ENV=production y COOKIE_SECURE=true. Mantén DEMO_SEED=false.
 3. Configura el proxy al loopback del frontend y conserva sus límites de carga/timeouts. El proxy necesita permitir el tamaño de evidencia autorizado; Nginx incluido limita cuerpos a 21 MiB.
-4. Aplica configuración con `docker compose up --build -d --wait` y prueba login, cambio de contraseña y upload/download autorizado desde el origen HTTPS.
-5. Restringe puertos de administración y protege acceso a Docker y backups.
+4. Configura `TRUSTED_PROXY_CIDRS` con los CIDRs reales del proxy externo. Mantén `TRUSTED_PROXY_HOPS=1` con el Compose base, cuyo backend no publica puerto; si cambias esa topología, usa 0 hasta asegurar que solo recibe tráfico confiable. nginx sobrescribe `X-Forwarded-For`, no agrega el enviado por el cliente.
+5. Aplica configuración con `docker compose up --build -d --wait` y prueba login, cambio de contraseña y upload/download autorizado desde el origen HTTPS.
+6. Restringe puertos de administración y protege acceso a Docker y backups.
 
 **Integración de proxy: guía operativa, no receta TLS verificada para un proxy específico.** Un proxy en otro contenedor no puede alcanzar el host mediante su propio 127.0.0.1; necesita una red/topología explícita. No expongas DB o almacenamiento para resolverlo. No uses CORS comodín ni desactives CSRF.
+
+Verifica `docker compose exec frontend nginx -t` y el estado «Dirección IP del cliente» en Configuración → Sistema. Antes de abrir el servicio, ensaya en una instancia ficticia que diez fallos desde A no bloquean un acceso válido desde B y que una cabecera falsificada no altera la dirección. Docker Desktop o NAT pueden ocultar la IP original; no se corrige confiando en cualquier encabezado. Procedimiento y cómo volver a cero: [IP detrás del proxy](PROXY-TRUST.md).
 
 ## Dónde se guardan los datos
 

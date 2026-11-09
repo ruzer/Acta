@@ -1,3 +1,4 @@
+import { clientIp } from "../common/client-ip.js";
 import {
   CanActivate,
   ExecutionContext,
@@ -39,7 +40,7 @@ export class AuthGuard implements CanActivate {
     )
       throw new ForbiddenException("Se requiere una solicitud JSON.");
     if (this.reflector.get<boolean>("invitationExchange", context.getHandler()))
-      await this.invitations.beforeExchange(req.body, req.ip || "unknown");
+      await this.invitations.beforeExchange(req.body, clientIp(req));
     if (
       this.reflector.getAllAndOverride<boolean>("public", [
         context.getHandler(),
@@ -58,7 +59,7 @@ export class AuthGuard implements CanActivate {
       const access = await this.invitations.authenticate(
         typeof token === "string" ? token : "",
         req.get("x-invitation-id") || "",
-        req.ip || "unknown",
+        clientIp(req),
       );
       if (
         !safe &&

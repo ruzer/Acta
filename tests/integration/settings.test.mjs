@@ -587,6 +587,7 @@ test("system status reports the installation without exposing any secret", async
   assert.equal(s.storage.provider, "LOCAL");
   assert.equal(s.storage.status, "ok");
   assert.equal(s.security.origin, origin);
+  assert.equal(s.security.clientIpFromProxy, false);
   const text = JSON.stringify(s);
   for (const secret of [
     password,

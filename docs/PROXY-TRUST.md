@@ -1,51 +1,61 @@
-# Dirección IP del cliente detrás de un proxy: propuesta
+# Dirección IP del cliente detrás de un proxy
 
-**Estado: propuesta, no implementada.** Hoy no se confía en ningún encabezado `X-Forwarded-For`; este documento prepara el cambio para revisarlo antes de escribir código.
+**Estado: implementado.** Acta distingue las direcciones de cliente que recibe a través de proxies configurados. No modifica los límites ni las reglas por cuenta, invitación o sesión.
 
-## El problema
+## Qué resuelve
 
-El backend toma `req.ip` y, como Express no tiene `trust proxy`, `req.ip` es la dirección del par TCP. En Docker ese par es el contenedor nginx del frontend (y detrás de él, el proxy de la institución). Todas las personas llegan con la misma dirección.
+Antes, Express veía la dirección TCP del nginx del frontend. Diez accesos fallidos de usuarios inexistentes desde un cliente podían provocar un 429 también para otras personas, incluida administración, durante 15 minutos.
 
-Los límites por dirección usan esa clave: inicio de sesión (10 fallos en 15 minutos por cuenta **o** por dirección), intercambio de invitaciones y códigos del asistente de instalación. Con una sola dirección, diez fallos de cualquiera bloquean los accesos de todos durante 15 minutos. Es un problema de **disponibilidad**, no de confidencialidad: el límite sigue frenando la fuerza bruta, pero de forma global.
+Ahora la cadena es: cliente → proxy externo opcional → nginx de Acta → backend. Cada límite recibe una dirección validada y normalizada antes de calcular su hash. IPv4 y su representación IPv6 mapeada comparten clave; IPv6 usa su representación canónica. Si falta una dirección válida, se usa el par TCP. No se guardan direcciones en claro en las tablas de límites.
 
-## Lo que no se puede hacer
+## Dos fronteras de confianza
 
-- **Confiar en `X-Forwarded-For` tal como llega.** Un cliente puede enviarlo y elegir la dirección que se registra: esquivaría el límite o culparía a otra persona.
-- Activar `trust proxy` como `true`, que confía en toda la cadena.
-- Aceptar el encabezado del par que no sea un proxy configurado.
+1. **nginx de Acta:** `TRUSTED_PROXY_CIDRS` es una lista separada por comas de CIDRs IPv4/IPv6 de los proxies externos autorizados. El arranque valida la lista y nginx valida las direcciones al cargar su configuración. Se genera un `set_real_ip_from` por CIDR, `real_ip_header X-Forwarded-For` y `real_ip_recursive on`. Solo se acepta el encabezado si el par pertenece a esa lista; se elige la primera dirección no confiable desde la derecha.
+2. **Backend:** `TRUSTED_PROXY_HOPS` acepta enteros de 0 a 3. Configura el número de saltos de confianza de Express. **El código usa 0 por defecto**; Vite y las ejecuciones directas siguen ignorando encabezados de cliente si no se configura otra cosa.
 
-## Propuesta: confiar solo en proxies configurados
+nginx siempre **sobrescribe** `X-Forwarded-For` con `$remote_addr`, una sola dirección. Nunca usa `$proxy_add_x_forwarded_for`. Sin CIDRs, el encabezado enviado por el cliente no decide esa dirección: se usa el par TCP de nginx. También se sobrescriben los encabezados de host y esquema enviados al backend.
 
-Dos piezas, ninguna activa por defecto, de modo que sin configurar nada el comportamiento es exactamente el actual.
+**Compose usa 1 por defecto.** Es una decisión deliberada distinta de la propuesta inicial: el archivo base solo publica el frontend, en loopback; el backend no tiene `ports` y pertenece a las redes privadas `web` y `data` del proyecto. `web` conecta frontend y backend; los servicios de datos son internos. Son redes bridge, no redes Docker con `internal: true` (se conserva la conectividad saliente). El acceso al host Docker y a esas redes es de confianza administrativa: no conectes contenedores ajenos o no confiables.
 
-1. **El nginx del frontend reescribe el encabezado**, no lo agrega. Con `ngx_http_realip_module` y una lista `TRUSTED_PROXY_CIDRS` (los proxies de la institución, p. ej. `10.20.0.5/32`):
-   - `set_real_ip_from` por cada CIDR y `real_ip_header X-Forwarded-For` con `real_ip_recursive on`: nginx solo toma el encabezado de un par confiable y se queda con la primera dirección no confiable contando desde la derecha.
-   - `proxy_set_header X-Forwarded-For $remote_addr;` (nunca `$proxy_add_x_forwarded_for`): el backend recibe una sola entrada, puesta por nginx. Cualquier valor enviado por el cliente se descarta.
-   - Sin `TRUSTED_PROXY_CIDRS`, nginx no confía en el encabezado y publica su par directo; sigue siendo seguro.
-2. **El backend confía en un salto**: `TRUSTED_PROXY_HOPS` (entero de 0 a 3; por defecto 0) aplica `app.set("trust proxy", n)`. Con `1` toma la entrada puesta por nginx, que es la única que existe. El backend solo es alcanzable desde el contenedor del frontend (red interna `web`), así que no recibe tráfico directo de clientes.
+El número de saltos **no es una lista de direcciones autorizadas**. Si un override publica el backend, permite acceso directo de clientes o introduce rutas más cortas, deja `TRUSTED_PROXY_HOPS=0` hasta asegurar la topología. No uses `true` ni aumentes saltos para resolver errores por tanteo. El nginx incluido entrega una sola entrada incluso cuando existe un proxy externo; no necesita 2 saltos.
 
-Si falta el encabezado o no es una dirección válida, se usa el par TCP. La clave se sigue guardando con hash, como hoy.
+## Configuración
 
-## Compatibilidad y despliegue
+### Sin proxy externo
 
-- Sin configuración nueva no cambia nada. Quien despliegue debe definir los CIDR del proxy y `TRUSTED_PROXY_HOPS=1` juntos; uno sin el otro se queda en el comportamiento actual.
-- El proxy de la institución debe enviar `X-Forwarded-For` con la dirección real; si lo reenvía sin cambios, nginx lo trata como no confiable salvo que su par esté en la lista.
-- `Administración → Configuración → Sistema` debería mostrar si la dirección de cliente se está leyendo de un proxy configurado (solo estado, sin valores).
-- nginx-unprivileged admite plantillas con variables de entorno (`/etc/nginx/templates/*.template`), lo que evita editar el archivo a mano.
+Con el Compose base no hace falta añadir variables: hops=1 y CIDRs vacíos. nginx entrega la dirección de su cliente TCP. Docker Desktop, un túnel o NAT pueden sustituir esa dirección: Acta no puede recuperar información que la red ya eliminó.
 
-## Pruebas necesarias antes de activarlo
+### Con proxy externo
 
-1. Unitaria: un `X-Forwarded-For` enviado por un par no confiable se ignora; el de un par confiable se respeta; sin encabezado o con uno inválido se usa el par.
-2. Integración con PostgreSQL: dos direcciones distintas detrás del proxy no comparten el límite de acceso; una misma dirección sí.
-3. Compose: `nginx -t` con y sin `TRUSTED_PROXY_CIDRS`, y una petición con `X-Forwarded-For` falsificado que no cambia la dirección registrada.
-4. Documentar en [SELF-HOSTING](SELF-HOSTING.md) la configuración del proxy y cómo comprobarla.
+En el `.env` privado, define únicamente los CIDRs reales de ese proxy, preferiblemente direcciones individuales `/32` o `/128`. Ejemplo documental (sustituir; no es una dirección operativa):
 
-## Alternativas consideradas
+```dotenv
+TRUSTED_PROXY_HOPS=1
+TRUSTED_PROXY_CIDRS=192.0.2.10/32,2001:db8::10/128
+```
 
-- **Limitar en el proxy de la institución** (`limit_req` por dirección real): útil de inmediato y sin cambios en Acta; no sustituye el límite por cuenta.
-- **Protocolo PROXY**: entrega la dirección real sin encabezados, pero exige que todos los saltos lo hablen.
-- **Dejarlo como está** y documentar la limitación: válido para instalaciones pequeñas con pocas personas.
+El proxy externo debe sobrescribir o construir correctamente `X-Forwarded-For`; no basta con reenviar un valor que el cliente eligió. Evita confiar en toda una LAN, `0.0.0.0/0` o `::/0`. Si el par que nginx observa cambia por NAT, configura y verifica ese salto real, sin ampliar la lista a ciegas.
 
-## Riesgos
+Aplica la configuración manteniendo el nombre del proyecto Compose y sus volúmenes:
 
-Una lista de CIDR demasiado amplia convierte a cualquier cliente de esa red en confiable. Direcciones IPv6 y IPv4 mapeadas deben normalizarse antes de calcular la clave. Un cambio de dirección real a media ventana reinicia el conteo de esa persona, lo que es aceptable.
+```sh
+docker compose up --build -d --wait backend frontend
+```
+
+Para volver al comportamiento conservador, una línea en `.env`: `TRUSTED_PROXY_HOPS=0`; vuelve a ejecutar el comando anterior. Esto desactiva la lectura del proxy en el backend, **pero vuelve a compartir el límite por la dirección de nginx**. No elimina intentos almacenados ni reinicia sus ventanas.
+
+## Cómo comprobarlo
+
+1. Revisa `docker compose config`: solo el frontend debe publicar un puerto. Revisa también cualquier override y las redes conectadas. No compartas la salida completa: puede incluir secretos.
+2. Ejecuta `docker compose exec frontend nginx -t`. Una lista malformada debe impedir el arranque, no abrir confianza. `nginx -T` permite al operador comprobar los `set_real_ip_from` y que se usa `$remote_addr`, sin publicar esa configuración.
+3. En **Administración → Configuración → Sistema**, «Dirección IP del cliente» muestra «Desde un proxy configurado» cuando el backend tiene saltos habilitados, o «Desde la conexión directa» con cero. Es el estado de configuración, no una certificación de que la infraestructura preserve cada IP; no muestra direcciones, CIDRs ni número de saltos.
+4. **Solo en una instalación de prueba**, con dos direcciones TCP distintas, intenta diez accesos con nombres ficticios inexistentes desde A. A debe recibir 429 en el siguiente acceso; una cuenta ficticia correcta desde B debe entrar. Comprueba por separado que diez fallos sobre la misma cuenta siguen bloqueándola aunque cambie la dirección.
+5. Repite enviando un `X-Forwarded-For` arbitrario desde un par fuera de la lista: no debe cambiar la clave registrada ni el límite. Con un proxy autorizado, verifica que clientes distintos producen claves diferentes. Las pruebas automatizadas también cubren códigos del asistente, invitaciones y normalización.
+
+No ejecutes pruebas de bloqueo sobre cuentas ni instalaciones productivas. Un grupo detrás del mismo NAT seguirá compartiendo la dirección pública y su límite: este cambio separa direcciones, no identifica personas ni elimina el límite por IP.
+
+## Referencias técnicas
+
+- [Express: aplicación detrás de proxies](https://expressjs.com/en/guide/behind-proxies/).
+- [nginx: módulo realip y cadena recursiva](https://nginx.org/en/docs/http/ngx_http_realip_module.html).
+- [Imagen nginx-unprivileged](https://github.com/nginx/docker-nginx-unprivileged): se conserva su entrada de arranque y la sustitución de plantillas, acotada a las directivas generadas.

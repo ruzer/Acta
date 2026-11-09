@@ -1,3 +1,4 @@
+import { clientIp } from "../common/client-ip.js";
 import { Body, Controller, Get, Post, Req, Res } from "@nestjs/common";
 import { Response } from "express";
 import { z } from "zod";
@@ -21,7 +22,7 @@ export class AuthController {
     @Req() req: ActorRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { token, body } = await this.auth.login(dto, req.ip || "unknown");
+    const { token, body } = await this.auth.login(dto, clientIp(req));
     res.cookie("fgeo_session", token, {
       httpOnly: true,
       secure: loadConfig().COOKIE_SECURE === "true",
