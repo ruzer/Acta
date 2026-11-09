@@ -25,6 +25,16 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   de pregunta en móvil tienen separación; y el diálogo de desactivar un área no
   repite la lista de lo que se conserva ni deja detrás el aviso de la acción
   anterior.
+- **Finalización simultánea del asistente de instalación.** Si otra solicitud
+  termina la instalación entre la comprobación inicial y la lectura bloqueada
+  del código, se devuelve el 409 de «instalación completada», que permite salir
+  del asistente, en lugar de un 403 y un intento fallido registrado por error.
+  Los códigos inválidos o vencidos siguen devolviendo 403 mientras la instalación
+  está pendiente.
+- **Decisiones conserva los cambios consecutivos de filtros.** Cambiar rápido
+  la búsqueda, el área y el tema ya no pierde el área de la URL antes de abrir
+  una decisión; al regresar se recupera el contexto completo. No cambian las
+  rutas ni las dependencias.
 - **Captura en Organizar en móvil.** «+ Agregar tema» y «Nueva pregunta»
   comparten una fila sin taparse; Preparar/Analizar conserva su propia fila.
 
@@ -80,6 +90,11 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ### Security
 
+- **Vite 8.3.5**, tras la corrección de seguridad de 8.3.1 a 8.3.4, incorpora
+  las correcciones de GHSA-587h-7wmj-h5pm y avisos relacionados de `launch-editor`.
+  El aviso alto afectaba a Vite hasta 8.3.2 en esa línea y permitía eludir una
+  comprobación de rutas en Windows. Afecta al servidor de desarrollo, no al
+  frontend estático servido por nginx.
 - **Node 26 LTS** en todas las imágenes (backend, frontend, almacenamiento y
   scripts; antes 24.21.0) y en el CI. Node 26 es LTS desde el 28 de octubre de
   2026; `engines` ya admitía `>=24.15 <27`, así que Node 24 sigue permitido.
@@ -92,7 +107,12 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 - **VersityGW 1.10.0** (almacenamiento por defecto, antes 1.9.0), compilado con
   Go 1.27.3. Incluye `klauspost/compress` 1.20.3, que corrige GO-2026-6865
   (pánico con tramas de dos bloques); el control `govulncheck` del binario
-  fallaba por ese aviso. LICENSE y NOTICE se verificaron idénticos a la release.
+  fallaba por ese aviso. Respecto de la 1.8.0 incluida en Acta v0.8.0, conserva
+  las correcciones de 1.9.0 para GHSA-7qcr-88c3-f9p7 (path traversal mediante
+  `uploadId` y borrado múltiple) y GHSA-5gjv-3vhq-4chv (cuerpos chunked sin
+  consumir y reutilización de conexiones). Go 1.27.3 corrige además
+  GO-2026-6809 en `crypto/x509`. LICENSE y NOTICE se verificaron idénticos a la
+  release; alcance y límites en [Proveedores S3](docs/S3-PROVIDERS.md).
 - Documentada la limitación de los límites por dirección detrás de un proxy: el
   backend ve la del contenedor nginx, así que diez accesos fallidos de cualquier
   persona bloquean los accesos 15 minutos. Se publica una
@@ -312,7 +332,7 @@ Rediseño visual y de presentación del frontend, sin funcionalidad nueva de
 dominio. Es compatible con los contratos, el backend y la persistencia de v0.5.0:
 el código de backend, los contratos, Prisma, las migraciones, los permisos y las
 reglas de publicación no cambian. Las únicas modificaciones fuera del frontend y
-la documentación son las de la compilación de VersityGW descritas en *Security*.
+la documentación son las de la compilación de VersityGW descritas en _Security_.
 
 ### Added / Improved
 
@@ -452,7 +472,6 @@ prepara la versión; su publicación se confirma por el tag y la release oficial
   y explica el siguiente paso sin atribuir la ausencia de preguntas a filtros.
 
 Ver [alcance, verificación, capturas y límites](docs/design/ACTA-NEXT-IMPLEMENTATION.md).
-
 
 ## 0.4.0
 
