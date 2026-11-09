@@ -70,6 +70,7 @@ const system = {
     origin: "https://acta.example.org",
     https: true,
     secureCookies: true,
+    clientIpFromProxy: false,
     sessionIdleMinutes: 30,
     sessionMaxHours: 8,
     invitationIdentity: "NAME",
@@ -441,8 +442,21 @@ it("el sistema informa versión, seguridad y límites sin mostrar credenciales",
   expect(await screen.findByText("Acta 0.8.0")).toBeVisible();
   expect(screen.getByText("https://acta.example.org")).toBeVisible();
   expect(screen.getByText(/Se cierra tras 30 minutos/)).toBeVisible();
+  expect(screen.getByText("Desde la conexión directa")).toBeVisible();
   expect(document.body.textContent).not.toMatch(
     /DATABASE_URL|S3_SECRET|requirements_app/,
   );
+  expect(screen.queryByRole("textbox")).toBeNull();
+});
+
+it("el sistema muestra solo el estado del proxy configurado", async () => {
+  mount("system", {
+    systemStatus: () => ({
+      ...system,
+      security: { ...system.security, clientIpFromProxy: true },
+    }),
+  });
+  expect(await screen.findByText("Desde un proxy configurado")).toBeVisible();
+  expect(document.body.textContent).not.toMatch(/TRUSTED_PROXY|CIDR|saltos/);
   expect(screen.queryByRole("textbox")).toBeNull();
 });

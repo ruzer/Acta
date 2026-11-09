@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
 import { NestFactory } from "@nestjs/core";
+import { NestExpressApplication } from "@nestjs/platform-express";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import { json } from "express";
@@ -10,10 +11,11 @@ import { loadConfig } from "./common/config.js";
 import { Errors } from "./common/http.js";
 export async function createApp() {
   const config = loadConfig();
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ["error", "warn"],
     bodyParser: false,
   });
+  app.set("trust proxy", config.TRUSTED_PROXY_HOPS);
   app.use(helmet());
   app.use(json({ limit: "256kb", strict: true }));
   app.use(cookieParser());

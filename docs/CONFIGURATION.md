@@ -6,6 +6,15 @@
 
 `ORGANIZATION_CODE` es el código interno de instalación (DEFAULT por defecto), nunca un campo de login. `ORGANIZATION_NAME` es solo el nombre **inicial** (el asistente lo propone; `bootstrap-admin` y la demo lo usan): queda persistido en Organization y se renombra en **Administración → Configuración**. Cambiar el código de despliegue no mueve usuarios ni crea acceso cruzado. Cambiar `ORGANIZATION_NAME` después de instalar no sobrescribe el registro existente.
 
+## Dirección de cliente / proxies
+
+| Variable | Predeterminado | Regla |
+|---|---|---|
+| `TRUSTED_PROXY_HOPS` | 0 en código; 1 en Compose | Entero de 0 a 3. El backend confía en ese número de saltos. Mantener 0 si es accesible directamente por clientes. El Compose base no publica su puerto. |
+| `TRUSTED_PROXY_CIDRS` | vacío | Lista de CIDRs IPv4/IPv6 separados por comas, solo para nginx. Vacío: ignora el encabezado del cliente. Inválido: falla el arranque. |
+
+nginx siempre sobrescribe `X-Forwarded-For` con una dirección determinada por su frontera de confianza. Los límites y hashes no cambian; IPv4 mapeada e IPv6 se normalizan antes del hash. Sistema muestra únicamente el estado de lectura por proxy, sin valores. [Configuración, verificación y límites de NAT/Docker Desktop](PROXY-TRUST.md).
+
 ## Opcional / branding
 
 Hay una regla de precedencia: **si defines la variable (no vacía), la infraestructura manda**; Acta muestra el valor como «administrado externamente» y no deja cambiarlo desde **Configuración**. Si la dejas vacía o ausente, el valor lo elige un administrador en la aplicación y, si nadie lo eligió, vale el predeterminado. [Detalle](ADMIN-CENTER.md#regla-de-precedencia).
@@ -108,8 +117,9 @@ Los límites usan ventanas fijas y PostgreSQL, compartidos entre procesos:
 | Protección agregada de accesos por red | 24.000 por minuto |
 
 Las sesiones y enlaces válidos no consumen el límite de intentos inválidos.
-Un proxy o NAT comparte los límites agregados de red, pero cada invitado conserva
-su límite de sesión. No se confía en `X-Forwarded-For` enviado por el cliente.
+Un NAT comparte los límites agregados de red, pero cada invitado conserva
+su límite de sesión. Un proxy configurado puede preservar direcciones distintas;
+no se confía en `X-Forwarded-For` enviado directamente por un cliente.
 El proxy frontal debe limitar también conexiones, cuerpos y tráfico antes de
 llegar a la aplicación; estos límites no sustituyen protección de red contra DDoS.
 

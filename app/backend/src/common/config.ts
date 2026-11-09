@@ -16,6 +16,7 @@ const envSchema = z.object({
     .enum(["development", "test", "production"])
     .default("development"),
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
+  TRUSTED_PROXY_HOPS: z.coerce.number().int().min(0).max(3).default(0),
   COOKIE_SECURE: z.enum(["true", "false"]).default("true"),
   INVITATION_IDENTITY: z
     .enum(["NONE", "NAME", "EMAIL", "BOTH"])

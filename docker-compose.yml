@@ -105,6 +105,7 @@ services:
       DEFAULT_TIMEZONE: ${DEFAULT_TIMEZONE:-}
       SETUP_WIZARD: ${SETUP_WIZARD:-auto}
       APP_ORIGIN: ${APP_ORIGIN:-http://localhost:4317}
+      TRUSTED_PROXY_HOPS: ${TRUSTED_PROXY_HOPS:-1}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       INVITATION_IDENTITY: ${INVITATION_IDENTITY:-NAME}
       INVITATION_DEFAULT_DAYS: ${INVITATION_DEFAULT_DAYS:-7}
@@ -145,6 +146,8 @@ services:
     cap_drop: [ALL]
     restart: unless-stopped
   frontend:
+    environment:
+      TRUSTED_PROXY_CIDRS: ${TRUSTED_PROXY_CIDRS:-}
     build: {context: ., dockerfile: app/frontend/Dockerfile}
     ports: ['127.0.0.1:${APP_PORT:-4317}:8080']
     depends_on:

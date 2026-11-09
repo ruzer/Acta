@@ -822,6 +822,14 @@ function SystemSection() {
           </dd>
         </div>
         <div>
+          <dt>Dirección IP del cliente</dt>
+          <dd>
+            {s.security.clientIpFromProxy
+              ? "Desde un proxy configurado"
+              : "Desde la conexión directa"}
+          </dd>
+        </div>
+        <div>
           <dt>Sesión</dt>
           <dd>
             Se cierra tras {s.security.sessionIdleMinutes} minutos sin uso y

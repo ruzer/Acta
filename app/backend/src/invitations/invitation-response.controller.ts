@@ -1,3 +1,4 @@
+import { clientIp } from "../common/client-ip.js";
 import {
   Body,
   Controller,
@@ -71,11 +72,7 @@ export class InvitationResponseController {
     d: z.infer<typeof C.invitationExchangeInput>,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const session = await this.auth.exchange(
-      d.token,
-      r.requestId,
-      r.ip || "unknown",
-    );
+    const session = await this.auth.exchange(d.token, r.requestId, clientIp(r));
     r.actor = session.actor;
     r.sessionId = session.sessionId;
     r.csrfToken = session.csrfToken;
