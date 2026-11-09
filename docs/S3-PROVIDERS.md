@@ -14,7 +14,7 @@ En Single host/Distributed se describe upstream; Tested/Backup/ARM64/AMD64 descr
 
 | Provider / versión evaluada | Clasificación | Self-hosted | Single host | Distributed | Tested | Backup tested | ARM64 | AMD64 |
 |---|---|---|---|---|---|---|---|---|
-| VersityGW 1.10.0 | DEFAULT + VERIFIED | Sí | Sí, POSIX incluido | Gateway sobre storage compartido; no replicación del disco local incluida | 41/41 + recorrido API con 1.9.0; con 1.10.0 lo cubre el CI de la revisión | Ensayo histórico con 1.8.0; no repetido con 1.9.0 ni 1.10.0 | Linux verificado localmente | Consultar CI de la revisión |
+| VersityGW 1.10.0 | DEFAULT + VERIFIED | Sí | Sí, POSIX incluido | Gateway sobre storage compartido; no replicación del disco local incluida | 41/41 + recorrido API, actualización 1.9.0 → 1.10.0 y restart (2026-11-07) | Restore en destino 1.10.0 vacío, dump + seis volúmenes y SHA-256 (2026-11-07) | Linux verificado localmente | Consultar CI de la revisión |
 | Garage 2.4.1 | NOT SUPPORTED por el contrato actual | Sí | Upstream lo permite; recomienda redundancia para producción | Sí, upstream | No ejecutado; incompatibilidad documentada | No | Binario upstream, app no ensayada | Binario upstream, app no ensayada |
 | SeaweedFS 4.48 | CANDIDATE / NOT VERIFIED | Sí | `weed mini` agrupa servicios | Sí, upstream | No ejecutado | No | Asset upstream, app no ensayada | Asset upstream, app no ensayada |
 | MinIO RELEASE.2025-10-15T17-29-55Z | LEGACY, no recomendado | Sí | Override existente | Upstream; no incluido aquí | 21/21 + recorrido API | Sí, destructivo TEST | Linux verificado (funcional) | No ensayado |
@@ -46,7 +46,7 @@ Correcciones: Go 1.27.3 resuelve **GO-2026-6809 / CVE-2026-111943** (`crypto/x50
 
 ### Actualización 1.9.0 → 1.10.0
 
-Release oficial del 2026-10-22, compilada con Go 1.27.3. Incluye `klauspost/compress` v1.20.3: la 1.9.0 traía v1.20.1, afectada por **GO-2026-6865** (pánico con tramas de dos bloques; `govulncheck` en modo binario lo marcaba como alcanzable). Entre sus correcciones figuran el listado POSIX, las claves literales con fiber v3.6 y el registro de la IP del cliente tras un proxy de confianza; no se evaluó su efecto sobre configuraciones externas al default, que deben revisar las [notas de la release](https://github.com/versity/versitygw/releases/tag/v1.10.0). El procedimiento de actualización es el mismo que desde 1.8.0 (abajo). Verificación: el CI de la revisión (build de ambas imágenes y `govulncheck` en modo binario); no se repitió el ensayo manual de actualización con volúmenes existentes ni el restore completo.
+Release oficial del 2026-10-22, compilada con Go 1.27.3. Incluye `klauspost/compress` v1.20.3: la 1.9.0 traía v1.20.1, afectada por **GO-2026-6865** (pánico con tramas de dos bloques; `govulncheck` en modo binario lo marcaba como alcanzable). Entre sus correcciones figuran el listado POSIX, las claves literales con fiber v3.6 y el registro de la IP del cliente tras un proxy de confianza; no se evaluó su efecto sobre configuraciones externas al default, que deben revisar las [notas de la release](https://github.com/versity/versitygw/releases/tag/v1.10.0). El procedimiento de actualización es el mismo que desde 1.8.0 (abajo). Verificación local de actualización con volúmenes existentes y restore completo: [ensayo 1.10.0 del 2026-11-07](#verificación-de-seguridad-y-compatibilidad-1100-2026-11-07). El CI se consulta por separado sobre el SHA de cada revisión.
 
 ### Actualización desde 1.8.0
 
@@ -165,6 +165,33 @@ Linux ARM64, stack descartable separado, sin usar datos ni volúmenes existentes
 
 El cambio conserva `start.mjs`, el aprovisionador, Compose y el adaptador S3. El CI de cada PR ejecuta además `verify`, `secrets`, `selfhosting` y `guided-install`; su resultado se consulta sobre el SHA exacto, no se deduce de las pruebas locales. No se probó Object Lock, HA ni migración a otro proveedor. La receta de backup/restore conserva su evidencia histórica separada.
 
+## Verificación de seguridad y compatibilidad 1.10.0 (2026-11-07)
+
+Ensayo ejecutado en contenedores Linux ARM64 sobre Docker Desktop, con datos ficticios y proyectos, puertos, redes y volúmenes propios. Base de Acta: `fd91bb9b5d357828222af2356d037caaa04eb446` (VersityGW 1.9.0); destino: `3b35795e1a93f32c6cf5ff6529ca20fd16bd638f` (1.10.0). No se usaron instalaciones existentes.
+
+| Comprobación ejecutada | Resultado |
+|---|---|
+| Instalación limpia 1.9.0 y `scripts/selfhost-smoke.mjs` | PASS: bootstrap, usuarios ficticios, pregunta, respuesta enviada, decisión/fuente, evidencia y acceso privado |
+| Backup coordinado con escritores detenidos | PASS: `pg_dump -Fc` y seis tar, etiquetas de los siete volúmenes comprobadas; configuración y hashes guardados privadamente |
+| Actualización de solo `object-storage` y `storage-init` a 1.10.0 | PASS: mismos volúmenes, configuración e identidades; backend/frontend conservados de la base 1.9.0 durante esta comprobación |
+| `scripts/selfhost-smoke.mjs --verify` después de actualizar | PASS: login, respuesta, decisión/fuente, descarga autorizada con SHA-256 idéntico y acceso anónimo denegado |
+| Restore del backup 1.9.0 en siete volúmenes nuevos, con imágenes de la revisión destino 1.10.0 | PASS: misma receta de dump/tar y secretos restaurados antes de iniciar; `pg_restore --exit-on-error`, migraciones oficiales y smoke completo de persistencia |
+| Restart de PostgreSQL, storage, backend y frontend del destino restaurado | PASS: healthchecks y smoke de persistencia nuevamente correctos |
+| `scripts/test-storage-container.mjs`, en otro bucket/DB nuevos con 1.10.0 | **41/41 PASS**, 0 fallos, 0 skips: 17 respuestas/evidencia, 18 invitaciones y 6 S3 |
+| `govulncheck` v1.8.0, modo binario | Exit 0: **0 vulnerabilidades alcanzables**, 0 en paquetes importados; 3 avisos solo a nivel de módulo, detallados abajo |
+
+Ambos Dockerfiles produjeron el mismo binario VersityGW, SHA-256 `df9c886146d1d62f6144e4fb5a0b74c5bd7f835282263f8a52ea4ab9b32737c7`; servicio ejecutado como `node` (UID 1000). Se utilizó Go 1.27.3 con el digest del CI, sin editar Dockerfiles ni dependencias. La evidencia ficticia mantuvo SHA-256 `dbe04b8414d49f61c5a48b1b81402793a67aedb7dd405a44791660b8f12fe476` antes de actualizar, tras actualizar, tras restaurar y después del restart.
+
+La comparación de archivos antes/después de actualizar confirmó bytes idénticos en objetos, metadata sidecar, marcador y archivo IAM vigente. No hubo conversión de objetos ni reinicialización de IAM. El aprovisionador rotó la copia interna `.backup` de IAM; esa copia histórica cambió, no las identidades vigentes. No se afirma identidad binaria de todo el volumen.
+
+El escaneo detallado informó **GO-2026-6866** y **GO-2026-6860** en `golang.org/x/net` v0.61.0 (HTML; corrección disponible en v0.62.0), y **GO-2026-5932** en `golang.org/x/crypto` v0.58.0 (`openpgp`). El binario no importa los paquetes afectados según el análisis. No se suprimieron avisos; este PASS no significa que todos los módulos requeridos estén libres de vulnerabilidades.
+
+Se siguió [BACKUP-RESTORE](BACKUP-RESTORE.md) usando un destino nuevo, sin destruir el origen. El restore 1.9.0 → 1.10.0 es evidencia de esta transición concreta: no sustituye la recomendación operativa de restaurar primero las imágenes correspondientes a una copia. No hubo cambios de migraciones entre las dos revisiones. La suite destructiva de reconciliación se ejecutó en un tercer proyecto, nunca sobre el bucket del fixture preservado.
+
+Incidencias del entorno: se agotó la reserva automática de subredes de Docker; se usaron overrides privados con subredes libres, sin eliminar redes existentes. Al iniciar solo los dos servicios de storage, Compose `up --wait --no-deps` devolvió error al finalizar normalmente `storage-init` (exit 0); se comprobó ese exit y la salud de `object-storage` antes de iniciar los escritores conservados. No falló el aprovisionamiento ni se cambió la receta de backup/restore. Secretos, dumps, logs y overrides permanecieron fuera de Git.
+
+No se ensayaron AMD64, Object Lock, multipart, HA, corte abrupto de energía, downgrade, otros proveedores ni producción. No se repitieron las pruebas internas del proveedor en modo fuente; el gate de seguridad utilizado fue el modo binario del CI. Los resultados anteriores son locales y no sustituyen el CI del PR.
+
 ## Registro de ejecución del snapshot
 
 Ejecutado el 2026-09-30 desde este snapshot, Linux ARM64, sin reutilizar bases ni buckets de instalaciones existentes:
@@ -185,7 +212,7 @@ El alcance y la fecha de las pruebas completas de aplicación se consultan en el
 
 ## Backup y migración
 
-Procedimiento y precauciones: [BACKUP-RESTORE](BACKUP-RESTORE.md). En ambos ensayos incluidos, backup coordinado sin escritores, `pg_dump -Fc`, archivo de objectdata/evidence y secretos, comprobación de etiquetas de los siete volúmenes de TEST, eliminación de esos volúmenes, creación/restauración y validación de la revisión enviada, evidencia y SHA-256 por la API. No se eliminaron volúmenes de instalaciones existentes.
+Procedimiento y precauciones: [BACKUP-RESTORE](BACKUP-RESTORE.md). En los ensayos históricos del snapshot, backup coordinado sin escritores, `pg_dump -Fc`, archivo de objectdata/evidence y secretos, comprobación de etiquetas de los siete volúmenes de TEST, eliminación de esos volúmenes, creación/restauración y validación de la revisión enviada, evidencia y SHA-256 por la API. No se eliminaron volúmenes de instalaciones existentes.
 
 **Cambiar `S3_ENDPOINT` no mueve objetos.** Migrar requiere ventana sin escrituras (o un procedimiento de doble sincronización explícito), backup recuperable, copiar objetos preservando claves exactas y metadata necesaria, verificar inventario/tamaños y SHA-256 contra Evidence, aprovisionar política privada/credenciales del destino, cambiar configuración y verificar descargas autorizadas e históricas. Mantener origen congelado para retorno controlado. No copiar un volumen interno de Versity como si fuera un volumen Garage/SeaweedFS/MinIO. No se construyó herramienta de migración ni se ensayó migración entre providers.
 
