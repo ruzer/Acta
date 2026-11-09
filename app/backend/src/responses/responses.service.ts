@@ -508,7 +508,7 @@ export class ResponsesService {
     );
   }
   async download(r: CommandContext, p: string, id: string) {
-    return this.db.$transaction(
+    const e = await this.db.$transaction(
       async (tx) => {
         const { member, invitation } = await this.access.project(
           tx,
@@ -589,8 +589,14 @@ export class ResponsesService {
         }
         if (!allowed)
           throw new NotFoundException("No se encontró la evidencia.");
-        const bytes = await verifiedBytes(this.storage, e);
-        await audit(
+        return e;
+      },
+      { timeout: 15000 },
+    );
+    const bytes = await verifiedBytes(this.storage, e);
+    await this.db.$transaction(
+      (tx) =>
+        audit(
           tx,
           r.actor,
           "EVIDENCE_DOWNLOADED",
@@ -600,11 +606,10 @@ export class ResponsesService {
           null,
           { sha256: e.sha256 },
           r.requestId,
-        );
-        return { bytes, evidence: presentEvidence(e) };
-      },
+        ),
       { timeout: 15000 },
     );
+    return { bytes, evidence: presentEvidence(e) };
   }
   async recompute(tx: Tx, actor: User, p: string) {
     return recomputeReview(tx, this.access, actor, p);
@@ -680,22 +685,34 @@ export class ResponsesService {
       });
     }
     let removed = 0;
-    for (const key of await this.storage.candidates(before)) {
-      const e = await this.db.evidence.findFirst({
-        where: { backend: this.storage.backend, storageKey: key },
-        include: {
-          DraftEvidence_evidence: true,
-          RevisionEvidence_evidence: true,
+    const keys = await this.storage.candidates(before);
+    for (let offset = 0; offset < keys.length; offset += 1000) {
+      const batch = keys.slice(offset, offset + 1000);
+      const records = await this.db.evidence.findMany({
+        where: { backend: this.storage.backend, storageKey: { in: batch } },
+        select: {
+          storageKey: true,
+          status: true,
+          _count: {
+            select: {
+              DraftEvidence_evidence: true,
+              RevisionEvidence_evidence: true,
+            },
+          },
         },
       });
-      if (
-        !e ||
-        (e.status === "REJECTED" &&
-          !e.DraftEvidence_evidence.length &&
-          !e.RevisionEvidence_evidence.length)
-      ) {
-        await this.storage.remove(key);
-        removed++;
+      const byKey = new Map(records.map((e) => [e.storageKey, e]));
+      for (const key of batch) {
+        const e = byKey.get(key);
+        if (
+          !e ||
+          (e.status === "REJECTED" &&
+            !e._count.DraftEvidence_evidence &&
+            !e._count.RevisionEvidence_evidence)
+        ) {
+          await this.storage.remove(key);
+          removed++;
+        }
       }
     }
     return { removed, expired };

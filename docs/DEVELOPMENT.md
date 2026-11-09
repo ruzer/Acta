@@ -110,3 +110,10 @@ Las pruebas modifican datos: necesitan una demo nueva para cada ejecución compl
 - No elimines volúmenes para resolver errores de credenciales: [Configuración](CONFIGURATION.md).
 
 [Contratos](CONTRACTS.md) · [Arquitectura](ARCHITECTURE.md) · [Contribuir](../CONTRIBUTING.md).
+
+### Capturas E2E
+
+Las pruebas de Dirección C y del asistente guardan capturas y métricas en
+`test-results/design-evidence` (ignorado por Git). `ACTA_DIRECTION_C_EVIDENCE_DIR`
+permite elegir otro destino de trabajo. Las imágenes de `docs/design/` son
+referencias históricas versionadas y las pruebas no deben regenerarlas por defecto.

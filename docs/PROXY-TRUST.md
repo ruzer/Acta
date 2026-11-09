@@ -1,6 +1,6 @@
 # Dirección IP del cliente detrás de un proxy
 
-**Estado: implementado.** Acta distingue las direcciones de cliente que recibe a través de proxies configurados. No modifica los límites ni las reglas por cuenta, invitación o sesión.
+**Estado: implementado.** Acta distingue las direcciones de cliente que recibe a través de proxies configurados. La dirección normalizada alimenta los [límites de inicio de sesión](CONFIGURATION.md#límites-de-inicio-de-sesión), invitaciones y códigos del asistente.
 
 ## Qué resuelve
 
@@ -49,7 +49,7 @@ Para volver al comportamiento conservador, una línea en `.env`: `TRUSTED_PROXY_
 1. Revisa `docker compose config`: solo el frontend debe publicar un puerto. Revisa también cualquier override y las redes conectadas. No compartas la salida completa: puede incluir secretos.
 2. Ejecuta `docker compose exec frontend nginx -t`. Una lista malformada debe impedir el arranque, no abrir confianza. `nginx -T` permite al operador comprobar los `set_real_ip_from` y que se usa `$remote_addr`, sin publicar esa configuración.
 3. En **Administración → Configuración → Sistema**, «Dirección IP del cliente» muestra «Desde un proxy configurado» cuando el backend tiene saltos habilitados, o «Desde la conexión directa» con cero. Es el estado de configuración, no una certificación de que la infraestructura preserve cada IP; no muestra direcciones, CIDRs ni número de saltos.
-4. **Solo en una instalación de prueba**, con dos direcciones TCP distintas, intenta diez accesos con nombres ficticios inexistentes desde A. A debe recibir 429 en el siguiente acceso; una cuenta ficticia correcta desde B debe entrar. Comprueba por separado que diez fallos sobre la misma cuenta siguen bloqueándola aunque cambie la dirección.
+4. **Solo en una instalación de prueba**, con dos direcciones TCP distintas, intenta diez contraseñas incorrectas de la misma cuenta ficticia desde A. Esa cuenta debe recibir 429 desde A y entrar con su contraseña correcta desde B. Comprueba también los límites agregados: 30 fallos con cuentas distintas bloquean A; 100 fallos de una cuenta repartidos entre varias direcciones bloquean esa cuenta. Todos usan una ventana de 15 minutos.
 5. Repite enviando un `X-Forwarded-For` arbitrario desde un par fuera de la lista: no debe cambiar la clave registrada ni el límite. Con un proxy autorizado, verifica que clientes distintos producen claves diferentes. Las pruebas automatizadas también cubren códigos del asistente, invitaciones y normalización.
 
 No ejecutes pruebas de bloqueo sobre cuentas ni instalaciones productivas. Un grupo detrás del mismo NAT seguirá compartiendo la dirección pública y su límite: este cambio separa direcciones, no identifica personas ni elimina el límite por IP.

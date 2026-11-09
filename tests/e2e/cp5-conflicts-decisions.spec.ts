@@ -18,7 +18,7 @@ import {
 // are the ones of CODEX-VISUAL-ACCEPTANCE §6.4 and §6.5.
 const folder =
   (process.env.ACTA_DIRECTION_C_EVIDENCE_DIR ??
-    "docs/design/acta-direction-c-evidence") + "/cp5";
+    "test-results/design-evidence") + "/cp5";
 const records: Record<string, unknown>[] = [];
 test.use({
   locale: "es-MX",

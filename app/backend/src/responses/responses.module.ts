@@ -1,3 +1,4 @@
+import { AuthMaintenanceService } from "../auth/auth-maintenance.service.js";
 import { EvidenceHttpService } from "./evidence-http.service.js";
 import { Global, Module, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
 import { ResponsesService } from "./responses.service.js";
@@ -16,12 +17,20 @@ import { evidenceLimits } from "./file-validation.js";
 })
 export class ResponsesModule implements OnModuleInit, OnModuleDestroy {
   private timer?: ReturnType<typeof setInterval>;
-  constructor(private readonly service: ResponsesService) {}
+  constructor(
+    private readonly service: ResponsesService,
+    private readonly authMaintenance: AuthMaintenanceService,
+  ) {}
   async onModuleInit() {
     evidenceLimits();
     await this.service.reconcile();
     this.timer = setInterval(
       () => {
+        void this.authMaintenance
+          .cleanup()
+          .catch(() =>
+            console.error(JSON.stringify({ kind: "AuthMaintenanceFailed" })),
+          );
         void this.service
           .reconcile()
           .catch(() =>

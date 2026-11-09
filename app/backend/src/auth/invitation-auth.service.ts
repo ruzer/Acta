@@ -43,15 +43,10 @@ export class InvitationAuthService {
     // Capability limits apply only after verification. Untrusted values never
     // allocate one bucket per arbitrary token or forwarding header.
     const key = hash(`invitation:${category}:${bucket}:${subject}`);
-    const count = await this.db.$transaction(async (tx) => {
-      await tx.invitationRateBucket.deleteMany({
-        where: { expiresAt: { lt: new Date(now) } },
-      });
-      return tx.invitationRateBucket.upsert({
-        where: { key },
-        create: { key, count: 1, expiresAt: new Date((bucket + 1) * windowMs) },
-        update: { count: { increment: 1 } },
-      });
+    const count = await this.db.invitationRateBucket.upsert({
+      where: { key },
+      create: { key, count: 1, expiresAt: new Date((bucket + 1) * windowMs) },
+      update: { count: { increment: 1 } },
     });
     // Operational security events are bounded per bucket. No token, identity,
     // IP, header, URL, or request body reaches the logger.

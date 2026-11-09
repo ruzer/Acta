@@ -6,6 +6,22 @@
 
 `ORGANIZATION_CODE` es el código interno de instalación (DEFAULT por defecto), nunca un campo de login. `ORGANIZATION_NAME` es solo el nombre **inicial** (el asistente lo propone; `bootstrap-admin` y la demo lo usan): queda persistido en Organization y se renombra en **Administración → Configuración**. Cambiar el código de despliegue no mueve usuarios ni crea acceso cruzado. Cambiar `ORGANIZATION_NAME` después de instalar no sobrescribe el registro existente.
 
+## Límites de inicio de sesión
+
+En una ventana de 15 minutos, cada acceso fallido cuenta en los tres límites:
+
+| Alcance | Fallos antes de bloquear |
+|---|---:|
+| Misma cuenta y dirección IP | 10 |
+| Misma IP, aunque cambie la cuenta | 30 |
+| Misma cuenta, aunque cambie la IP | 100 |
+
+Al alcanzar cualquiera se devuelve 429, con la misma respuesta para cuentas
+existentes e inexistentes. Diez fallos desde una dirección no bloquean por sí
+solos a esa cuenta desde otra; 100 fallos distribuidos sí alcanzan el límite
+agregado de cuenta. Los accesos correctos no reinician la ventana de fallos.
+Los códigos del asistente y las invitaciones mantienen sus límites propios.
+
 ## Dirección de cliente / proxies
 
 | Variable | Predeterminado | Regla |
@@ -124,7 +140,7 @@ El proxy frontal debe limitar también conexiones, cuerpos y tráfico antes de
 llegar a la aplicación; estos límites no sustituyen protección de red contra DDoS.
 
 Los buckets conservan hashes temporales de alcance, nunca tokens en claro;
-se eliminan al caducar durante solicitudes posteriores. No identifican a una
+se eliminan mediante el mantenimiento horario después de caducar. No identifican a una
 persona. El backend registra `INVITATION_ACCESS_DENIED` en el primer rechazo
 de cada bucket y `INVITATION_RATE_LIMITED` al alcanzar su primer bloqueo.
 Estos eventos operativos solo contienen el tipo y categoría: no incluyen IP,
@@ -137,3 +153,12 @@ observación o soporte. Consulta la [guía de invitaciones](EXTERNAL-INVITATIONS
 
 La entrega de esta capacidad sigue sujeta al gate de interfaz, seguridad e
 integración descrito en [el plan de invitaciones](EXTERNAL-INVITATIONS-DESIGN.md).
+
+## Retención de datos de autenticación
+
+Cada hora, el backend elimina en lotes de hasta 1.000 filas los intentos de
+acceso de más de 7 días, las sesiones de cuenta o invitación vencidas o
+revocadas hace más de 30 días y los buckets de invitación caducados. Las
+solicitudes de invitación ya no ejecutan la limpieza. La bitácora `AuditEvent`
+no se elimina; tampoco se borran usuarios, invitaciones, respuestas o decisiones.
+Los límites vigentes de autenticación no dependen de estos registros antiguos.

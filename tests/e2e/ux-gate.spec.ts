@@ -20,7 +20,7 @@ const widths = [
 ] as const;
 const evidence =
   (process.env.ACTA_DIRECTION_C_EVIDENCE_DIR ??
-    "docs/design/acta-direction-c-evidence") + "/ux-gate";
+    "test-results/design-evidence") + "/ux-gate";
 const records: Record<string, unknown>[] = [];
 const bottomNav = 64; // the mobile tab bar covers the foot of the viewport
 

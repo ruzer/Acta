@@ -1345,3 +1345,139 @@ test("invited writes roll back on audit/storage failure, reconcile orphans and s
     "unavailable storage does not erase the submitted history",
   );
 });
+
+test("hourly retention deletes bounded old authentication rows, preserves recent rows and all audit events", async () => {
+  const { AuthMaintenanceService } =
+    await import("../../app/backend/dist/auth/auth-maintenance.service.js");
+  const now = new Date();
+  const daysAgo = (days) => new Date(now.getTime() - days * 86400000);
+  const prefix = "maintenance-" + randomUUID();
+  await db.loginAttempt.createMany({
+    data: Array.from({ length: 1005 }, () => ({
+      accountKeyHash: prefix,
+      ipKeyHash: prefix,
+      occurredAt: daysAgo(8),
+      success: false,
+    })),
+  });
+  const recentAttempt = await db.loginAttempt.create({
+    data: {
+      accountKeyHash: prefix,
+      ipKeyHash: prefix,
+      occurredAt: daysAgo(7),
+      success: false,
+    },
+  });
+  const { InvitationsService } =
+    await import("../../app/backend/dist/invitations/invitations.service.js");
+  const { invitation } = await app
+    .get(InvitationsService)
+    .create(context(analyst), project.id, {
+      requestId: randomUUID(),
+      label: "Retention fixture",
+      questionIds: [question.id],
+      areaId: area.id,
+      identity: { name: "Example Recipient" },
+      nonNominal: false,
+      allowEvidence: false,
+    });
+  const cases = [
+    { expiresAt: daysAgo(31), revokedAt: null },
+    { expiresAt: daysAgo(-1), revokedAt: daysAgo(31) },
+    { expiresAt: daysAgo(30), revokedAt: null },
+    { expiresAt: daysAgo(-1), revokedAt: daysAgo(30) },
+    { expiresAt: daysAgo(-1), revokedAt: null },
+  ];
+  const sessions = [],
+    invited = [];
+  for (const dates of cases) {
+    sessions.push(
+      await db.session.create({
+        data: {
+          ...dates,
+          userId: admin.id,
+          tokenHash: randomBytes(32).toString("hex"),
+          csrfSecretHash: randomBytes(32).toString("hex"),
+        },
+      }),
+    );
+    invited.push(
+      await db.invitationSession.create({
+        data: {
+          ...dates,
+          invitationId: invitation.id,
+          tokenHash: randomBytes(32).toString("hex"),
+        },
+      }),
+    );
+  }
+  const expiredKey = randomBytes(32).toString("hex");
+  const currentKey = randomBytes(32).toString("hex");
+  await db.invitationRateBucket.createMany({
+    data: [
+      { key: expiredKey, count: 1, expiresAt: daysAgo(1) },
+      { key: currentKey, count: 1, expiresAt: daysAgo(-1) },
+    ],
+  });
+  const privileges =
+    await db.$queryRaw`SELECT has_table_privilege(current_user, '"Session"', 'DELETE') AS sessions,
+    has_table_privilege(current_user, '"InvitationSession"', 'DELETE') AS invitations,
+    has_table_privilege(current_user, '"AuditEvent"', 'DELETE') AS audit`;
+  assert.deepEqual(privileges, [
+    { sessions: true, invitations: true, audit: false },
+  ]);
+  const auditBefore = await db.auditEvent.findMany({ orderBy: { id: "asc" } });
+  const batches = [];
+  const maintenance = new AuthMaintenanceService({
+    $executeRaw: async (query) => {
+      const result = await db.$executeRaw(query);
+      batches.push(result);
+      return result;
+    },
+  });
+  await maintenance.cleanup(now);
+  assert.ok(batches.length >= 5);
+  assert.ok(batches.every((count) => count <= 1000));
+  assert.equal(batches[0], 1000);
+  assert.equal(batches[1], 5);
+  assert.deepEqual(
+    (await db.loginAttempt.findMany({ where: { accountKeyHash: prefix } })).map(
+      (r) => r.id,
+    ),
+    [recentAttempt.id],
+  );
+  for (const [model, rows] of [
+    [db.session, sessions],
+    [db.invitationSession, invited],
+  ]) {
+    assert.deepEqual(
+      (
+        await model.findMany({
+          where: { id: { in: rows.map((r) => r.id) } },
+          orderBy: { id: "asc" },
+        })
+      ).map((r) => r.id),
+      rows
+        .slice(2)
+        .map((r) => r.id)
+        .sort(),
+    );
+  }
+  assert.equal(
+    await db.invitationRateBucket.count({ where: { key: expiredKey } }),
+    0,
+  );
+  assert.equal(
+    await db.invitationRateBucket.count({ where: { key: currentKey } }),
+    1,
+  );
+  assert.deepEqual(
+    await db.auditEvent.findMany({ orderBy: { id: "asc" } }),
+    auditBefore,
+  );
+  await maintenance.cleanup(now);
+  assert.deepEqual(
+    await db.auditEvent.findMany({ orderBy: { id: "asc" } }),
+    auditBefore,
+  );
+});

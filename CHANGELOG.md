@@ -53,8 +53,23 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   ejemplos siguen disponibles. El servidor mantiene su validación.
 
 - **Los fallos de acceso de una dirección no bloquean otras detrás de nginx.**
-  Compose entrega la IP de cliente validada; el límite sigue siendo diez fallos
-  en quince minutos por cuenta o dirección. Sistema muestra el estado del proxy.
+  Compose entrega la IP de cliente validada a los límites de acceso.
+  Sistema muestra el estado del proxy.
+- **Las capturas E2E no modifican la documentación versionada.** Dirección C y
+  el asistente usan `test-results/design-evidence` por defecto; todos respetan
+  `ACTA_DIRECTION_C_EVIDENCE_DIR` y se conservan las imágenes históricas.
+
+- **Descargar evidencia libera la conexión durante la lectura del almacenamiento.**
+  La autorización y la auditoría usan transacciones cortas; solo se registra la
+  descarga después de leer y verificar los bytes, sin cambiar permisos ni errores.
+
+- **Reconciliación de evidencia por lotes.** Consulta hasta 1.000 claves por vez
+  y conserva la misma regla de eliminación de objetos huérfanos o rechazados sin
+  vínculos, evitando una consulta adicional por cada archivo.
+
+- **Caché del frontend sin perder cabeceras de seguridad.** El shell HTML se
+  revalida y los assets con nombre versionado se conservan un año como inmutables;
+  las rutas SPA mantienen las cuatro cabeceras y el proxy de la API no cambia.
 
 ### Added
 
@@ -111,6 +126,21 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   `docker-compose.yml` (sin saltos de versión mayor). El CI se ejecuta además
   cada lunes, para que un aviso nuevo de dependencias o de `govulncheck` aparezca
   de forma programada y no en medio de otro cambio.
+- **CI sin corridas duplicadas por rama.** Los pushes ejecutan CI solo en main;
+  los PR conservan todos sus checks y cancelan únicamente sus corridas obsoletas.
+  Cada corrida de main tiene un grupo propio, para conservar tanto las pendientes
+  como las que ya se ejecutan; continúan la ejecución manual y la semanal.
+
+- **Retención horaria de autenticación.** Elimina por lotes intentos de más de
+  7 días, sesiones vencidas o revocadas hace más de 30 días y buckets caducados;
+  conserva la auditoría y evita limpiar buckets en cada acceso por invitación.
+  Una migración concede al rol de aplicación el borrado de las dos tablas de
+  sesiones, sin ampliar los permisos de la bitácora ni del contenido.
+
+- **Las pantallas de gestión se cargan cuando se abren.** Administración, editor,
+  revisión, ajustes, intercambio y visibilidad usan carga diferida con un estado
+  accesible y foco en el título al terminar. Acceso, instalación y participante
+  permanecen en la carga inicial.
 
 ### Security
 
@@ -154,6 +184,11 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   una versión corregida dentro de su rango y el aviso mantenía abierta la alerta
   de Dependabot. Solo afecta a lint y pruebas, no a lo que se despliega; lint,
   tipos y pruebas unitarias pasan con la versión 11.
+- **El límite de acceso distingue cuenta y dirección.** En quince minutos se
+  permiten hasta 10 fallos por cuenta+IP, 30 por IP y 100 por cuenta; cada fallo
+  cuenta en los tres. Se conservan los candados concurrentes, la respuesta para
+  cuentas inexistentes y el flujo de acceso correcto. Diez fallos desde otra IP
+  ya no bloquean por sí solos al administrador legítimo.
 
 ## 0.8.0 — 2026-10-13
 

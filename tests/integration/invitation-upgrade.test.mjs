@@ -32,7 +32,7 @@ test(
       await mkdir(previous);
       const added = "202610060001_response_invitations";
       for (const entry of await readdir(migrations)) {
-        if (entry !== added)
+        if (entry < added || entry === "migration_lock.toml")
           await cp(join(migrations, entry), join(previous, entry), {
             recursive: true,
           });

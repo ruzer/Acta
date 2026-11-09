@@ -1062,6 +1062,50 @@ test("Evidencia exige CSRF y no permite reescribir identidad ni añadir archivos
   assert.equal(await db.validation.count(), 0);
   assert.equal(await db.clarificationThread.count(), 0);
 });
+test(
+  "Una lectura lenta no retiene una transacción ni audita antes de verificar los bytes",
+  { timeout: 15000 },
+  async (t) => {
+    const row = await db.evidence.findUniqueOrThrow({
+      where: { id: historicalEvidence.id },
+    });
+    const provider = storage.resolve?.(row.backend) ?? storage;
+    const originalRead = provider.read.bind(provider);
+    const entered = Promise.withResolvers();
+    const release = Promise.withResolvers();
+    t.mock.method(provider, "read", async (key) => {
+      if (key === row.storageKey) {
+        entered.resolve();
+        await release.promise;
+      }
+      return originalRead(key);
+    });
+    const auditWhere = { objectId: row.id, action: "EVIDENCE_DOWNLOADED" };
+    const before = await db.auditEvent.count({ where: auditWhere });
+    const pending = req(`/projects/${project.id}/evidence/${row.id}/download`);
+    let result;
+    try {
+      await Promise.race([
+        entered.promise,
+        pending.then(() => {
+          throw new Error("Download did not reach the storage read");
+        }),
+      ]);
+      const transactions =
+        await owner.query(`SELECT count(*)::int AS count FROM pg_stat_activity
+      WHERE datname=current_database() AND pid<>pg_backend_pid()
+        AND state='idle in transaction'`);
+      assert.equal(transactions.rows[0].count, 0);
+      assert.equal(await db.auditEvent.count({ where: auditWhere }), before);
+    } finally {
+      release.resolve();
+      result = await pending;
+    }
+    assert.equal(result.status, 200);
+    assert.deepEqual(result.data, pdf);
+    assert.equal(await db.auditEvent.count({ where: auditWhere }), before + 1);
+  },
+);
 test("Descarga deniega proyecto ajeno, otra persona, viewer, asignación retirada y sesión revocada", async () => {
   const url = `/projects/${project.id}/evidence/${historicalEvidence.id}/download`;
   for (const session of [other, viewer])

@@ -1,13 +1,9 @@
 import { ProjectShell } from "./shell/ProjectShell";
 import { OrganizationShell } from "./shell/OrganizationShell";
 import { PageHeader } from "./ui/semantic";
-import { ProjectDecisions } from "./pages/ProjectDecisions";
-import { Invitations } from "./pages/Invitations";
 import { InvitedResponse } from "./pages/InvitedResponse";
 import { BrandingProvider, Brand } from "./branding";
-import { Dashboard, Traceability, History } from "./pages/Visibility";
-import { ImportStructure, ExportProject } from "./pages/Exchange";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import {
   createBrowserRouter,
   RouterProvider,
@@ -26,10 +22,7 @@ import type { Me } from "@requirements/contracts";
 import { api, setCsrf } from "./api";
 import { Alert, Button, LoadingState, Dialog } from "./ui";
 import { Login, Password, Participant, Projects } from "./pages/Access";
-import { Administration, Members } from "./pages/Administration";
-import { Settings } from "./pages/Settings";
 import { Setup } from "./pages/Setup";
-import { Editor } from "./pages/Editor";
 import { MyWork } from "./pages/MyWork";
 import { ParticipantHeader } from "./pages/ParticipantShell";
 import {
@@ -39,9 +32,66 @@ import {
 } from "./pages/ParticipantFlow";
 import "./participant.css";
 import { Respond } from "./pages/Respond";
-import { ReviewInbox } from "./pages/ReviewInbox";
-import { ReviewDetail } from "./pages/ReviewDetail";
 import { Clarifications } from "./pages/Clarifications";
+const ProjectDecisions = lazy(() =>
+  import("./pages/ProjectDecisions").then((module) => ({
+    default: module.ProjectDecisions,
+  })),
+);
+const Invitations = lazy(() =>
+  import("./pages/Invitations").then((module) => ({
+    default: module.Invitations,
+  })),
+);
+const Dashboard = lazy(() =>
+  import("./pages/Visibility").then((module) => ({
+    default: module.Dashboard,
+  })),
+);
+const Traceability = lazy(() =>
+  import("./pages/Visibility").then((module) => ({
+    default: module.Traceability,
+  })),
+);
+const History = lazy(() =>
+  import("./pages/Visibility").then((module) => ({ default: module.History })),
+);
+const ImportStructure = lazy(() =>
+  import("./pages/Exchange").then((module) => ({
+    default: module.ImportStructure,
+  })),
+);
+const ExportProject = lazy(() =>
+  import("./pages/Exchange").then((module) => ({
+    default: module.ExportProject,
+  })),
+);
+const Administration = lazy(() =>
+  import("./pages/Administration").then((module) => ({
+    default: module.Administration,
+  })),
+);
+const Members = lazy(() =>
+  import("./pages/Administration").then((module) => ({
+    default: module.Members,
+  })),
+);
+const Settings = lazy(() =>
+  import("./pages/Settings").then((module) => ({ default: module.Settings })),
+);
+const Editor = lazy(() =>
+  import("./pages/Editor").then((module) => ({ default: module.Editor })),
+);
+const ReviewInbox = lazy(() =>
+  import("./pages/ReviewInbox").then((module) => ({
+    default: module.ReviewInbox,
+  })),
+);
+const ReviewDetail = lazy(() =>
+  import("./pages/ReviewDetail").then((module) => ({
+    default: module.ReviewDetail,
+  })),
+);
 const client = new QueryClient({
   defaultOptions: {
     queries: { retry: false, refetchOnWindowFocus: false, staleTime: 30000 },
@@ -53,10 +103,22 @@ client.setQueryDefaults(["workbench-context"], { gcTime: Infinity });
 function RouteFocus() {
   const location = useLocation();
   useEffect(() => {
-    const heading = document.querySelector<HTMLElement>("main h1");
-    heading?.setAttribute("tabindex", "-1");
-    heading?.focus();
-    window.scrollTo(0, 0);
+    const main = document.querySelector("main");
+    if (!main) return;
+    const focusHeading = () => {
+      const heading = main.querySelector<HTMLElement>("h1");
+      if (!heading) return false;
+      heading.setAttribute("tabindex", "-1");
+      heading.focus();
+      window.scrollTo(0, 0);
+      return true;
+    };
+    if (focusHeading()) return;
+    const observer = new MutationObserver(() => {
+      if (focusHeading()) observer.disconnect();
+    });
+    observer.observe(main, { childList: true, subtree: true });
+    return () => observer.disconnect();
   }, [location.pathname]);
   return null;
 }
@@ -208,115 +270,118 @@ function Session() {
     >
       {participant && <ParticipantNotice />}
       {error && <Alert error>{error}</Alert>}
-      {me.user.mustChangePassword ? (
-        <Password
-          required
-          onDone={() =>
-            signedOut(
-              "Contraseña actualizada. Inicia sesión con tu nueva contraseña.",
-            )
-          }
-        />
-      ) : (
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <Projects
-                displayName={me.user.displayName}
-                isOrganizationAdmin={me.user.isOrganizationAdmin}
-              />
+      <Suspense fallback={<LoadingState />}>
+        {me.user.mustChangePassword ? (
+          <Password
+            required
+            onDone={() =>
+              signedOut(
+                "Contraseña actualizada. Inicia sesión con tu nueva contraseña.",
+              )
             }
           />
-          <Route path="/review" element={<ReviewInbox />} />
-          <Route
-            path="/projects/:projectId/decisions"
-            element={<ProjectDecisions />}
-          />
-          <Route
-            path="/projects/:projectId/invitations"
-            element={<Invitations />}
-          />
-          <Route
-            path="/projects/:projectId/dashboard"
-            element={<Dashboard />}
-          />
-          <Route
-            path="/projects/:projectId/traceability"
-            element={<Traceability />}
-          />
-          <Route path="/projects/:projectId/history" element={<History />} />
-          <Route
-            path="/projects/:projectId/import"
-            element={<ImportStructure />}
-          />
-          <Route
-            path="/projects/:projectId/export"
-            element={<ExportProject />}
-          />
-          <Route
-            path="/projects/:projectId/review/:id"
-            element={<ReviewDetail />}
-          />
-          <Route
-            path="/projects/:projectId/clarifications/:id"
-            element={<Clarifications />}
-          />
-          <Route
-            path="/password"
-            element={
-              <Password
-                onDone={() =>
-                  signedOut(
-                    "Contraseña actualizada. Inicia sesión con tu nueva contraseña.",
-                  )
-                }
-              />
-            }
-          />
-          <Route path="/admin" element={<Administration me={me} />} />
-          <Route
-            path="/admin/settings"
-            element={<Navigate to="/admin/settings/general" replace />}
-          />
-          <Route
-            path="/admin/settings/:section"
-            element={<Settings me={me} />}
-          />
-          <Route
-            path="/projects/:projectId/receipt"
-            element={<SessionReceipt />}
-          />
-          <Route
-            path="/projects/:projectId/submitted/:id"
-            element={<SubmittedResponse />}
-          />
-          <Route path="/projects/:projectId/work" element={<MyWork />} />
-          <Route
-            path="/projects/:projectId/respond/:id"
-            element={<Respond />}
-          />
-          <Route path="/projects/:projectId" element={<Participant />} />
-          <Route path="/projects/:projectId/editor" element={<Editor />} />
-          <Route path="/projects/:projectId/members" element={<Members />} />
-          <Route
-            path="*"
-            element={
-              <>
-                <PageHeader
-                  title="Página no encontrada"
-                  lead="La dirección no existe o no tienes acceso a ella."
+        ) : (
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <Projects
+                  displayName={me.user.displayName}
+                  isOrganizationAdmin={me.user.isOrganizationAdmin}
                 />
-                <p>
-                  <Link className="button primary" to="/">
-                    Volver a mis proyectos
-                  </Link>
-                </p>
-              </>
-            }
-          />
-        </Routes>
-      )}
+              }
+            />
+            <Route path="/review" element={<ReviewInbox />} />
+            <Route
+              path="/projects/:projectId/decisions"
+              element={<ProjectDecisions />}
+            />
+            <Route
+              path="/projects/:projectId/invitations"
+              element={<Invitations />}
+            />
+            <Route
+              path="/projects/:projectId/dashboard"
+              element={<Dashboard />}
+            />
+            <Route
+              path="/projects/:projectId/traceability"
+              element={<Traceability />}
+            />
+            <Route path="/projects/:projectId/history" element={<History />} />
+            <Route
+              path="/projects/:projectId/import"
+              element={<ImportStructure />}
+            />
+            <Route
+              path="/projects/:projectId/export"
+              element={<ExportProject />}
+            />
+            <Route
+              path="/projects/:projectId/review/:id"
+              element={<ReviewDetail />}
+            />
+            <Route
+              path="/projects/:projectId/clarifications/:id"
+              element={<Clarifications />}
+            />
+            <Route
+              path="/password"
+              element={
+                <Password
+                  onDone={() =>
+                    signedOut(
+                      "Contraseña actualizada. Inicia sesión con tu nueva contraseña.",
+                    )
+                  }
+                />
+              }
+            />
+            <Route path="/admin" element={<Administration me={me} />} />
+            <Route
+              path="/admin/settings"
+              element={<Navigate to="/admin/settings/general" replace />}
+            />
+            <Route
+              path="/admin/settings/:section"
+              element={<Settings me={me} />}
+            />
+            <Route
+              path="/projects/:projectId/receipt"
+              element={<SessionReceipt />}
+            />
+            <Route
+              path="/projects/:projectId/submitted/:id"
+              element={<SubmittedResponse />}
+            />
+            <Route path="/projects/:projectId/work" element={<MyWork />} />
+            <Route
+              path="/projects/:projectId/respond/:id"
+              element={<Respond />}
+            />
+            <Route path="/projects/:projectId" element={<Participant />} />
+            <Route path="/projects/:projectId/editor" element={<Editor />} />
+            <Route path="/projects/:projectId/members" element={<Members />} />
+            <Route
+              path="*"
+              element={
+                <>
+                  <PageHeader
+                    title="Página no encontrada"
+                    lead="La dirección no existe o no tienes acceso a ella."
+                  />
+                  <p>
+                    <Link className="button primary" to="/">
+                      Volver a mis proyectos
+                    </Link>
+                  </p>
+                </>
+              }
+            />
+          </Routes>
+        )}
+        <RouteFocus key={location.pathname} />
+      </Suspense>
     </main>
   );
   return (
@@ -405,7 +470,6 @@ function Session() {
           />
         </Dialog>
       )}
-      <RouteFocus />
     </div>
   );
 }

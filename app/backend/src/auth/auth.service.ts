@@ -69,14 +69,15 @@ export class AuthService {
     const attempt = await this.db.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${ipKeyHash}, 0))::text`;
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${accountKeyHash}, 1))::text`;
-      const attempts = await tx.loginAttempt.count({
-        where: {
-          occurredAt: { gte: since },
-          OR: [{ accountKeyHash }, { ipKeyHash }],
-          success: false,
-        },
-      });
-      if (attempts >= 10)
+      const failures = { occurredAt: { gte: since }, success: false };
+      const [pairAttempts, ipAttempts, accountAttempts] = await Promise.all([
+        tx.loginAttempt.count({
+          where: { ...failures, accountKeyHash, ipKeyHash },
+        }),
+        tx.loginAttempt.count({ where: { ...failures, ipKeyHash } }),
+        tx.loginAttempt.count({ where: { ...failures, accountKeyHash } }),
+      ]);
+      if (pairAttempts >= 10 || ipAttempts >= 30 || accountAttempts >= 100)
         throw new HttpException(
           "Demasiados intentos. Intenta de nuevo más tarde.",
           429,
