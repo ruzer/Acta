@@ -185,3 +185,46 @@ it("el avance se dice con palabras y sin inventar envíos; la aclaración pendie
   ).toHaveAttribute("href", "/projects/p/clarifications/q");
   expect(screen.getByText(/Guardar y salir/)).toBeVisible();
 });
+
+it.each([
+  [0, 0, []],
+  [1, 0, ["1 pregunta adicional depende de tus respuestas."]],
+  [
+    2,
+    1,
+    [
+      "2 preguntas adicionales dependen de tus respuestas.",
+      "1 pregunta queda fuera del recorrido según tus respuestas.",
+    ],
+  ],
+  [0, 2, ["2 preguntas quedan fuera del recorrido según tus respuestas."]],
+] as const)(
+  "explica %i pendientes de condición y %i excluidas sin cambiar el avance",
+  (pending, excluded, labels) => {
+    const items = [
+      ...Array.from({ length: pending }, () => ({
+        applicability: "UNDETERMINED",
+      })),
+      ...Array.from({ length: excluded }, () => ({
+        applicability: "DISABLED",
+      })),
+    ] as PersonalProjectView["sections"][number]["questions"];
+    render(
+      <MemoryRouter>
+        <Welcome
+          items={items}
+          progress={{ sent: 1, total: 7, drafts: 0 }}
+          waiting={[]}
+        />
+      </MemoryRouter>,
+    );
+    for (const label of labels)
+      expect(screen.getByText(label, { exact: true })).toBeVisible();
+    expect(
+      screen.queryAllByText(/adicional.*depende|fuera del recorrido/),
+    ).toHaveLength(labels.length);
+    expect(
+      screen.getByRole("img", { name: "1 de 7 preguntas enviadas" }),
+    ).toBeVisible();
+  },
+);

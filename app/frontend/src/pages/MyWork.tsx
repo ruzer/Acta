@@ -125,6 +125,10 @@ export function Welcome({
   waiting: { href: string; question: string; title: string }[];
 }) {
   const counts = participantCounts(items);
+  const undetermined = items.filter(
+    (q) => q.applicability === "UNDETERMINED",
+  ).length;
+  const excluded = items.filter((q) => q.applicability === "DISABLED").length;
   return (
     <section className="participant-welcome" aria-label="Resumen de Mi trabajo">
       <ProgressCard
@@ -137,6 +141,20 @@ export function Welcome({
           <ParticipantIcon name="info" /> Usa “Guardar y salir” para conservar
           tu borrador y retomarlo después.
         </p>
+        {undetermined > 0 && (
+          <p>
+            {undetermined === 1
+              ? "1 pregunta adicional depende de tus respuestas."
+              : `${undetermined} preguntas adicionales dependen de tus respuestas.`}
+          </p>
+        )}
+        {excluded > 0 && (
+          <p>
+            {excluded === 1
+              ? "1 pregunta queda fuera del recorrido según tus respuestas."
+              : `${excluded} preguntas quedan fuera del recorrido según tus respuestas.`}
+          </p>
+        )}
         {counts.consultation > 0 && (
           <p>
             Requieren atención: {counts.attention} aclaraciones y{" "}

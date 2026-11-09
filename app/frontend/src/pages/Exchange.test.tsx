@@ -1,5 +1,11 @@
 import { afterEach, describe, it, expect, vi } from "vitest";
-import { render, screen, cleanup, within } from "@testing-library/react";
+import {
+  render,
+  screen,
+  cleanup,
+  within,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
@@ -36,19 +42,31 @@ const preview = {
   errors: [],
   canConfirm: true,
 };
-function setup() {
-  vi.mocked(api).mockResolvedValue([
-    {
-      id: "example",
-      externalId: "EXP-001",
-      name: "Proyecto de ejemplo",
-      description: "",
-      lifecycle: "ACTIVE",
-      role: "ANALYST",
-      lockVersion: 1,
-      questionCount: 0,
-    },
-  ] as never);
+function setup(
+  structure: Record<string, unknown[]> | Error = {
+    sections: [],
+    questions: [],
+    references: [],
+  },
+) {
+  vi.mocked(api).mockImplementation(async (key) => {
+    if (key === "questionnaire") {
+      if (structure instanceof Error) throw structure;
+      return structure as never;
+    }
+    return [
+      {
+        id: "example",
+        externalId: "EXP-001",
+        name: "Proyecto de ejemplo",
+        description: "",
+        lifecycle: "ACTIVE",
+        role: "ANALYST",
+        lockVersion: 1,
+        questionCount: 0,
+      },
+    ] as never;
+  });
   render(
     <QueryClientProvider
       client={
@@ -68,6 +86,44 @@ function setup() {
   return userEvent.setup();
 }
 describe("Import guidance without a new import contract", () => {
+  it.each(["sections", "questions", "references"])(
+    "blocks a project with %s before selecting a file",
+    async (collection) => {
+      setup({
+        sections: [],
+        questions: [],
+        references: [],
+        [collection]: [{}],
+      });
+      expect(
+        await screen.findByText(
+          "Este proyecto ya contiene estructura. La importación requiere un proyecto vacío.",
+        ),
+      ).toBeVisible();
+      expect(screen.getByLabelText("Archivo JSON")).toBeDisabled();
+      expect(
+        screen.getByRole("button", { name: "Revisar archivo" }),
+      ).toBeDisabled();
+      expect(
+        screen.getByRole("link", { name: "Ir al cuestionario" }),
+      ).toHaveAttribute("href", "/projects/example/editor");
+      expect(
+        screen.getByRole("link", { name: "Descargar ejemplo completo" }),
+      ).toBeVisible();
+      expect(exchangeRequest).not.toHaveBeenCalled();
+    },
+  );
+  it("does not offer an import when checking structure fails", async () => {
+    setup(new Error("No se pudo consultar el cuestionario."));
+    expect(
+      await screen.findByText("No se pudo consultar el cuestionario."),
+    ).toBeVisible();
+    expect(screen.getByLabelText("Archivo JSON")).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Revisar archivo" }),
+    ).toBeDisabled();
+  });
+
   it("says the project's own identifier where the file is chosen", async () => {
     setup();
     expect(
@@ -92,6 +148,9 @@ describe("Import guidance without a new import contract", () => {
     });
     const user = setup();
     await screen.findByText("EXP-001", { selector: "code" });
+    await waitFor(() =>
+      expect(screen.getByLabelText("Archivo JSON")).toBeEnabled(),
+    );
     await user.upload(
       screen.getByLabelText("Archivo JSON"),
       new File(["{}"], "example.json", { type: "application/json" }),
@@ -138,6 +197,9 @@ describe("Import guidance without a new import contract", () => {
       ],
     });
     const user = setup();
+    await waitFor(() =>
+      expect(screen.getByLabelText("Archivo JSON")).toBeEnabled(),
+    );
     await user.upload(
       screen.getByLabelText("Archivo JSON"),
       new File(["{}"], "example.json", { type: "application/json" }),
@@ -156,6 +218,9 @@ describe("Import guidance without a new import contract", () => {
     expect(
       screen.getByRole("button", { name: "Confirmar importación" }),
     ).toBeDisabled();
+    await waitFor(() =>
+      expect(screen.getByLabelText("Archivo JSON")).toBeEnabled(),
+    );
     await user.upload(
       screen.getByLabelText("Archivo JSON"),
       new File(["{}"], "corrected.json", { type: "application/json" }),
@@ -170,6 +235,9 @@ describe("Import guidance without a new import contract", () => {
       .mockResolvedValueOnce({ counts });
     const user = setup(),
       file = new File(["{}"], "example.json", { type: "application/json" });
+    await waitFor(() =>
+      expect(screen.getByLabelText("Archivo JSON")).toBeEnabled(),
+    );
     await user.upload(screen.getByLabelText("Archivo JSON"), file);
     await user.click(screen.getByRole("button", { name: "Revisar archivo" }));
     const region = await screen.findByRole("region", { name: "Vista previa" });
@@ -209,6 +277,9 @@ describe("Import guidance without a new import contract", () => {
         errors: [{ path, message: "Propiedad no permitida." }],
       });
       const user = setup();
+      await waitFor(() =>
+        expect(screen.getByLabelText("Archivo JSON")).toBeEnabled(),
+      );
       await user.upload(
         screen.getByLabelText("Archivo JSON"),
         new File(["{}"], "example.json", { type: "application/json" }),
@@ -232,6 +303,9 @@ describe("Import guidance without a new import contract", () => {
       ],
     });
     const user = setup();
+    await waitFor(() =>
+      expect(screen.getByLabelText("Archivo JSON")).toBeEnabled(),
+    );
     await user.upload(
       screen.getByLabelText("Archivo JSON"),
       new File(["{}"], "example.json", { type: "application/json" }),
