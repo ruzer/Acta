@@ -27,16 +27,7 @@ import type { OrganizeContext } from "./editor/questionnaire-presentation";
 import "../editor.css";
 import { ProjectWorkbench } from "./ProjectWorkbench";
 import { rememberWorkbenchItem } from "../workbench-context";
-const refLabels = {
-  QUESTION: "Pregunta",
-  BUSINESS_RULE: "Regla de negocio",
-  REQUIREMENT: "Requerimiento",
-  CAPABILITY: "Capacidad",
-  WORKFLOW: "Flujo de trabajo",
-  DOCUMENT: "Documento",
-  CODE: "Código",
-  OTHER: "Otra referencia",
-};
+import { referenceTypeLabels } from "../reference-labels";
 export function Editor() {
   const { projectId = "" } = useParams();
   const qc = useQueryClient();
@@ -512,7 +503,7 @@ export function Editor() {
             <Select label="Tipo de referencia" name="type">
               {referenceTypes.map((t) => (
                 <option key={t} value={t}>
-                  {refLabels[t]}
+                  {referenceTypeLabels[t]}
                 </option>
               ))}
             </Select>

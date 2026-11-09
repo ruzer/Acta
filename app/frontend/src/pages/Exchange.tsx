@@ -90,6 +90,17 @@ export function ImportStructure() {
     queryKey: ["projects"],
     queryFn: () => api("projects"),
   });
+  const structure = useQuery({
+    queryKey: ["questionnaire", projectId],
+    queryFn: () => api("questionnaire", { projectId }),
+    staleTime: 0,
+  });
+  const hasStructure =
+    !!structure.data &&
+    (structure.data.sections.length > 0 ||
+      structure.data.questions.length > 0 ||
+      structure.data.references.length > 0);
+  const unavailable = !structure.data || !!structure.error || hasStructure;
   const projectExternalId = projects.data?.find(
     (p) => p.id === projectId,
   )?.externalId;
@@ -105,7 +116,7 @@ export function ImportStructure() {
     if (preview) heading.current?.focus();
   }, [preview]);
   async function review() {
-    if (!file) return;
+    if (!file || unavailable) return;
     setBusy(true);
     setError("");
     setPreview(undefined);
@@ -125,7 +136,7 @@ export function ImportStructure() {
     }
   }
   async function confirm() {
-    if (!file || !preview) return;
+    if (!file || !preview || unavailable) return;
     setBusy(true);
     setError("");
     try {
@@ -171,6 +182,24 @@ export function ImportStructure() {
         </>
       ) : (
         <>
+          {structure.isPending && <LoadingState />}
+          {structure.error && (
+            <ErrorState
+              error={structure.error}
+              retry={() => void structure.refetch()}
+            />
+          )}
+          {hasStructure && (
+            <Alert>
+              <p>
+                Este proyecto ya contiene estructura. La importación requiere un
+                proyecto vacío.
+              </p>
+              <Link to={`/projects/${projectId}/editor`}>
+                Ir al cuestionario
+              </Link>
+            </Alert>
+          )}
           <h2>¿No tienes un archivo?</h2>
           <p>
             Descarga un ejemplo y adapta sus textos. El mínimo tiene un tema y
@@ -228,7 +257,7 @@ export function ImportStructure() {
             label="Archivo JSON"
             type="file"
             accept=".json,application/json"
-            disabled={busy}
+            disabled={busy || unavailable}
             hint="Máximo 5 MiB. No incluye respuestas ni participantes."
             onChange={(e) => {
               const f = e.target.files?.[0];
@@ -241,7 +270,10 @@ export function ImportStructure() {
               } else setFile(f);
             }}
           />
-          <Button disabled={!file || busy} onClick={() => void review()}>
+          <Button
+            disabled={!file || busy || unavailable}
+            onClick={() => void review()}
+          >
             {busy ? "Procesando…" : "Revisar archivo"}
           </Button>
           {preview && (
@@ -316,6 +348,7 @@ export function ImportStructure() {
               <Button
                 disabled={
                   busy ||
+                  unavailable ||
                   !preview.canConfirm ||
                   (preview.missingAreas.length > 0 && !areas)
                 }

@@ -46,8 +46,7 @@ export function ParticipantHeader({
           </span>
           {topic && position >= 0 && (
             <span className="participant-header-context">
-              Pregunta {position + 1} de {sequence.length} · no es el número de
-              envíos
+              Pregunta {position + 1} de {sequence.length}
             </span>
           )}
         </>

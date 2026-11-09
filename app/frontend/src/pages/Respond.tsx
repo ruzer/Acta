@@ -401,7 +401,7 @@ function ResponseEditor({
       <div className="participant-step-meta">
         <span>
           {server.question.position
-            ? `Pregunta ${server.question.position} de ${server.question.total} · no es el número de envíos`
+            ? `Pregunta ${server.question.position} de ${server.question.total}`
             : "Fuera del recorrido actual"}
         </span>
       </div>

@@ -1,6 +1,7 @@
 import { ProjectAttention } from "./ProjectAttention";
 import { ProjectWorkbench } from "./ProjectWorkbench";
-import { PageHeader } from "../ui/semantic";
+import { referenceTypeLabels } from "../reference-labels";
+import { FactGrid, PageHeader } from "../ui/semantic";
 import { auditActions, auditObjects } from "./audit-labels";
 import { AnalystStatus } from "./AnalystVisual";
 import { useState } from "react";
@@ -210,12 +211,28 @@ export function Traceability() {
         title="Trazabilidad"
         lead="La validación corresponde a una pregunta. Nunca se propaga a sus referencias."
       />
-      <p>
-        Preguntas publicadas con referencias: {q.data.questionsWithReferences}.
-        Sin referencias: {q.data.questionsWithoutReferences}. Referencias
-        relacionadas:{" "}
-        {q.data.references.filter((r) => r.questions.length).length}.
-      </p>
+      <FactGrid
+        facts={[
+          {
+            id: "with-references",
+            icon: "paperclip",
+            label: "Preguntas publicadas con referencias",
+            value: q.data.questionsWithReferences,
+          },
+          {
+            id: "without-references",
+            icon: "list",
+            label: "Sin referencias",
+            value: q.data.questionsWithoutReferences,
+          },
+          {
+            id: "related-references",
+            icon: "paperclip",
+            label: "Referencias relacionadas",
+            value: q.data.references.filter((r) => r.questions.length).length,
+          },
+        ]}
+      />
       {params.size > 0 && (
         <Button tone="secondary" onClick={() => setParams({})}>
           Ver todas las referencias
@@ -231,7 +248,7 @@ export function Traceability() {
                 <Link to={`?referenceId=${r.id}`}>{r.externalId}</Link> ·{" "}
                 {r.label}
               </h2>
-              <p>{r.type}</p>
+              <p>{referenceTypeLabels[r.type]}</p>
               {r.description && <p>{r.description}</p>}
               {r.url && (
                 <a href={r.url} target="_blank" rel="noreferrer">
