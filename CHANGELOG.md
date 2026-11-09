@@ -28,6 +28,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 - **Captura en Organizar en móvil.** «+ Agregar tema» y «Nueva pregunta»
   comparten una fila sin taparse; Preparar/Analizar conserva su propia fila.
 
+- Mi trabajo explica cuántas preguntas condicionales aún no cuentan en el avance; Responder muestra una posición breve y clara.
+- Trazabilidad presenta los tipos en español y sus tres cifras como un resumen separado.
+- Importar avisa si el proyecto ya contiene estructura y deshabilita la subida, conservando los ejemplos y la validación del servidor.
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**
