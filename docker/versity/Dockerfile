@@ -1,7 +1,7 @@
 # Official Versity Gateway v1.10.0 (Apache-2.0), unmodified source and dependencies.
 # Pin the Go security update by digest and the release source by verified commit.
 # Keep this stage identical in app/backend/Dockerfile so the build cache is shared.
-FROM golang:1.27.3-bookworm@sha256:5c3e9b43cfd3bb95c7937462e29d87ada57b481a96fa23ad0eb61778d7a00110 AS versitygw-build
+FROM golang:1.27.3-bookworm@sha256:dc0963f32053e4bc451d24d87e3892d42d01021b61f093e98eb95c0352bb84b0 AS versitygw-build
 ARG VERSITYGW_COMMIT=72f75bd0f4c67a7663d3c56b80f05a44f6732db8
 WORKDIR /src
 RUN git init -q . \
