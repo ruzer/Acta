@@ -105,6 +105,12 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   avance. La importación indica ahora con el nombre actual por qué rechaza un
   área existente (renombrada o desactivada) y los formularios muestran un error
   junto al campo cuando se elige un área desactivada.
+- **Dependabot y CI.** Dependabot agrupa las familias que deben subir juntas
+  (React y React DOM, NestJS, Prisma, Zod) en un solo PR, y sigue también
+  `docker/versity/Dockerfile` (VersityGW) y la imagen de PostgreSQL de
+  `docker-compose.yml` (sin saltos de versión mayor). El CI se ejecuta además
+  cada lunes, para que un aviso nuevo de dependencias o de `govulncheck` aparezca
+  de forma programada y no en medio de otro cambio.
 
 ### Security
 
@@ -142,6 +148,12 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   y 1.27.3. No cambia el almacenamiento por defecto (VersityGW). El binario de
   MinIO conserva avisos de sus propias dependencias, que dependen de esa release
   fija y no del compilador; por eso sigue siendo «legacy, no recomendado».
+- **minimatch 11.0.5** en las herramientas de desarrollo (`overrides`). ESLint y
+  typescript-eslint piden minimatch 10, que tiene GHSA-g3hv-75wg-m249
+  (denegación de servicio por amplificación con patrones de glob); no existía
+  una versión corregida dentro de su rango y el aviso mantenía abierta la alerta
+  de Dependabot. Solo afecta a lint y pruebas, no a lo que se despliega; lint,
+  tipos y pruebas unitarias pasan con la versión 11.
 
 ## 0.8.0 — 2026-10-13
 
