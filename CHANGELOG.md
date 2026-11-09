@@ -59,6 +59,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   el asistente usan `test-results/design-evidence` por defecto; todos respetan
   `ACTA_DIRECTION_C_EVIDENCE_DIR` y se conservan las imágenes históricas.
 
+- **Descargar evidencia libera la conexión durante la lectura del almacenamiento.**
+  La autorización y la auditoría usan transacciones cortas; solo se registra la
+  descarga después de leer y verificar los bytes, sin cambiar permisos ni errores.
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**

@@ -508,7 +508,7 @@ export class ResponsesService {
     );
   }
   async download(r: CommandContext, p: string, id: string) {
-    return this.db.$transaction(
+    const e = await this.db.$transaction(
       async (tx) => {
         const { member, invitation } = await this.access.project(
           tx,
@@ -589,8 +589,14 @@ export class ResponsesService {
         }
         if (!allowed)
           throw new NotFoundException("No se encontró la evidencia.");
-        const bytes = await verifiedBytes(this.storage, e);
-        await audit(
+        return e;
+      },
+      { timeout: 15000 },
+    );
+    const bytes = await verifiedBytes(this.storage, e);
+    await this.db.$transaction(
+      (tx) =>
+        audit(
           tx,
           r.actor,
           "EVIDENCE_DOWNLOADED",
@@ -600,11 +606,10 @@ export class ResponsesService {
           null,
           { sha256: e.sha256 },
           r.requestId,
-        );
-        return { bytes, evidence: presentEvidence(e) };
-      },
+        ),
       { timeout: 15000 },
     );
+    return { bytes, evidence: presentEvidence(e) };
   }
   async recompute(tx: Tx, actor: User, p: string) {
     return recomputeReview(tx, this.access, actor, p);
