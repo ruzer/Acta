@@ -133,6 +133,11 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   Una migración concede al rol de aplicación el borrado de las dos tablas de
   sesiones, sin ampliar los permisos de la bitácora ni del contenido.
 
+- **Las pantallas de gestión se cargan cuando se abren.** Administración, editor,
+  revisión, ajustes, intercambio y visibilidad usan carga diferida con un estado
+  accesible y foco en el título al terminar. Acceso, instalación y participante
+  permanecen en la carga inicial.
+
 ### Security
 
 - **Vite 8.3.5**, tras la corrección de seguridad de 8.3.1 a 8.3.4, incorpora
