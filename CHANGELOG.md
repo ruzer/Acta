@@ -128,6 +128,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   El ensayo de actualización y restauración desde 1.10.0 se documenta en
   [Proveedores S3](docs/S3-PROVIDERS.md).
 
+- **Compatibilidad con main actualizado:** se revalidó la actualización de
+  VersityGW 1.11.0 tras incorporar NestJS 12.4.0 desde main, sin conflictos ni
+  cambios adicionales en la aplicación.
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**

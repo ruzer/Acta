@@ -305,6 +305,13 @@ con el valor directo 0 de CI pasó completa, sin editar código ni aserciones.
 Las 44 pruebas S3 incluyen los casos nuevos y los añadidos previamente en main;
 no se compara su cifra sin contexto con las 41 históricas de 2026-11-07.
 
+Al abrir el PR, main avanzó a `27381c7a7d2a869e5e303efddc34a099ea57ba4f`
+(NestJS 12.4.0). Se incorporó mediante merge sin conflictos y se repitieron
+`npm ci`, Prisma, lint, typecheck, build, 657 unitarias y las 173 pruebas de
+integración con PostgreSQL nuevo: todas pasaron. El ensayo Docker/S3 descrito
+arriba conserva su base original; no se atribuye a esta repetición del gate
+de aplicación un nuevo ensayo completo de imágenes o backup.
+
 No se ejecutaron E2E de navegador generales, AMD64 local, Object Lock, HA,
 downgrade, otros proveedores, caída artificial del almacén IAM, virtual-hosted,
 ni producción. Tampoco se certifica toda la API S3, todos los fallos multipart
