@@ -99,10 +99,8 @@ it("decisión exige fuentes y envía contenido completo; fallo de red conserva t
     "Fuentes revisadas",
   );
   const source = screen.getByRole("checkbox", { name: /Participante · envío/ });
-  // A single submission is the obvious source: it starts chosen. Without any
-  // source the decision is refused, and the message brings the first into view.
-  expect(source).toBeChecked();
-  await user.click(source);
+  // Selecting a source is an explicit analytical decision, even with only one.
+  expect(source).not.toBeChecked();
   await user.click(
     screen.getByRole("button", { name: "Registrar como validada" }),
   );
@@ -110,7 +108,9 @@ it("decisión exige fuentes y envía contenido completo; fallo de red conserva t
   expect(screen.getByRole("alert")).toHaveTextContent(
     "Selecciona al menos una respuesta que sustente la decisión.",
   );
-  await waitFor(() => expect(source).toHaveFocus());
+  await waitFor(() =>
+    expect(screen.getByRole("alert").parentElement).toHaveFocus(),
+  );
   await user.click(source);
   await user.click(
     screen.getByRole("button", { name: "Registrar como validada" }),
@@ -132,7 +132,7 @@ it("decisión exige fuentes y envía contenido completo; fallo de red conserva t
     decisionText: "Decisión explícita",
   });
 });
-it("con varias respuestas vigentes no se elige ninguna fuente por defecto", () => {
+it("con dos respuestas no se preselecciona ninguna y se pueden seleccionar todas", async () => {
   const first = data.submissions[0]!;
   render(
     <ReviewActionDialog
@@ -153,6 +153,14 @@ it("con varias respuestas vigentes no se elige ninguna fuente por defecto", () =
     name: /Participante · envío/,
   });
   expect(sources).toHaveLength(2);
+  for (const source of sources) expect(source).not.toBeChecked();
+  await userEvent.click(
+    screen.getByRole("button", { name: "Seleccionar todas" }),
+  );
+  for (const source of sources) expect(source).toBeChecked();
+  await userEvent.click(
+    screen.getByRole("button", { name: "Quitar selección" }),
+  );
   for (const source of sources) expect(source).not.toBeChecked();
 });
 it("al abrir una decisión el foco empieza en su primer campo, no en «Cerrar»", () => {
@@ -249,7 +257,7 @@ it("con muchas fuentes la lista cuenta las elegidas, las elige todas de una vez 
   await user.click(screen.getByRole("button", { name: "Quitar selección" }));
   expect(screen.getByRole("status")).toHaveTextContent("0 seleccionadas de 8");
 });
-it("con pocas fuentes no se añaden controles de selección en bloque", () => {
+it("con una sola fuente no se añaden controles de selección en bloque", () => {
   render(
     <ReviewActionDialog
       data={data}
@@ -263,4 +271,46 @@ it("con pocas fuentes no se añaden controles de selección en bloque", () => {
     screen.queryByRole("button", { name: "Seleccionar todas" }),
   ).not.toBeInTheDocument();
   expect(screen.queryByRole("status")).not.toBeInTheDocument();
+});
+
+it("marca obligatorios, asocia errores en español y enfoca el resumen sin burbujas nativas", async () => {
+  render(
+    <ReviewActionDialog
+      data={{ ...data, partialReviewReason: "Falta una aportación" }}
+      action="validateQuestion"
+      onClose={vi.fn()}
+      onDone={vi.fn()}
+      refresh={vi.fn()}
+    />,
+  );
+  const submit = screen.getByRole("button", {
+    name: "Registrar como validada",
+  });
+  expect(submit.closest("form")).toHaveAttribute("novalidate");
+  const fields = [
+    "Decisión acordada",
+    "Alcance",
+    "Comentario interno",
+    "Cómo se atendió la información faltante",
+  ];
+  for (const label of fields) {
+    const field = screen.getByLabelText(label);
+    expect(field).toBeRequired();
+    expect(field).toHaveAccessibleDescription(
+      "Obligatorio para registrar la decisión.",
+    );
+  }
+  await userEvent.click(submit);
+  expect(api).not.toHaveBeenCalled();
+  await waitFor(() =>
+    expect(screen.getByRole("alert").parentElement).toHaveFocus(),
+  );
+  for (const label of fields) {
+    const field = screen.getByLabelText(label);
+    expect(field).toHaveAttribute("aria-invalid", "true");
+    expect(field).toHaveAccessibleDescription(/Escribe|Explica/);
+  }
+  expect(screen.getByRole("checkbox")).toHaveAccessibleDescription(
+    "Selecciona al menos una respuesta que sustente la decisión.",
+  );
 });

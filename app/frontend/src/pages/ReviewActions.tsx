@@ -45,9 +45,11 @@ export function ReviewActionDialog({
   refresh: () => Promise<unknown>;
 }) {
   const [error, setError] = useState(""),
+    [fieldErrors, setFieldErrors] = useState<Record<string, string>>({}),
     [busy, setBusy] = useState(false),
     [dirty, setDirty] = useState(false),
     [conflict, setConflict] = useState(false);
+  const errorSummary = useRef<HTMLDivElement>(null);
   const request = useRef({ key: "", id: "" });
   const aboutSubmission = responseRevisionId
     ? d.submissions.find((s) => s.id === responseRevisionId && s.current)
@@ -131,6 +133,38 @@ export function ReviewActionDialog({
         ...payload,
         requestId: request.current.id,
       });
+      if (action === "validateQuestion") {
+        const messages: Record<string, string> = {
+          decisionText: "Escribe la decisión acordada.",
+          scope: "Escribe el alcance de la decisión.",
+          validationComment: "Escribe el comentario interno.",
+          coverageExplanation:
+            "Explica cómo se atendió la información faltante.",
+          responseRevisionIds:
+            "Selecciona al menos una respuesta que sustente la decisión.",
+        };
+        const errors: Record<string, string> = {};
+        if (!parsed.success)
+          for (const issue of parsed.error.issues) {
+            const field = String(issue.path[0]);
+            errors[field] =
+              issue.code === "too_big"
+                ? field.endsWith("Ids")
+                  ? "Selecciona como máximo 200 fuentes por tipo."
+                  : "Usa como máximo 10 000 caracteres."
+                : (messages[field] ?? "Revisa este campo.");
+          }
+        if (d.partialReviewReason && !v.coverageExplanation?.trim())
+          errors.coverageExplanation = messages.coverageExplanation!;
+        setFieldErrors(errors);
+        if (Object.keys(errors).length) {
+          setError(
+            "Revisa los campos indicados antes de registrar la decisión.",
+          );
+          requestAnimationFrame(() => errorSummary.current?.focus());
+          return;
+        }
+      }
       if (!parsed.success) {
         // The missing piece is usually the sources, which can sit below the
         // visible part of the dialog: say so and bring the first one into view.
@@ -172,6 +206,7 @@ export function ReviewActionDialog({
   return (
     <Dialog title={actionLabels[action]} onClose={close}>
       <form
+        noValidate={action === "validateQuestion"}
         onChange={() => setDirty(true)}
         onSubmit={(e) => {
           e.preventDefault();
@@ -179,7 +214,20 @@ export function ReviewActionDialog({
         }}
       >
         <p>{d.question.title}</p>
-        {error && <Alert error>{error}</Alert>}
+        {error && (
+          <div ref={errorSummary} tabIndex={-1}>
+            <Alert error>
+              {error}
+              {Object.keys(fieldErrors).length > 0 && (
+                <ul>
+                  {Object.entries(fieldErrors).map(([field, message]) => (
+                    <li key={field}>{message}</li>
+                  ))}
+                </ul>
+              )}
+            </Alert>
+          </div>
+        )}
         {conflict && (
           <Button
             tone="secondary"
@@ -243,6 +291,8 @@ export function ReviewActionDialog({
               <Textarea
                 label="Decisión acordada"
                 name="decisionText"
+                hint="Obligatorio para registrar la decisión."
+                error={fieldErrors.decisionText}
                 data-autofocus
                 required
                 maxLength={10000}
@@ -250,6 +300,8 @@ export function ReviewActionDialog({
               <Textarea
                 label="Alcance"
                 name="scope"
+                hint="Obligatorio para registrar la decisión."
+                error={fieldErrors.scope}
                 required
                 maxLength={10000}
               />
@@ -261,6 +313,8 @@ export function ReviewActionDialog({
               <Textarea
                 label="Comentario interno"
                 name="validationComment"
+                hint="Obligatorio para registrar la decisión."
+                error={fieldErrors.validationComment}
                 required
                 maxLength={10000}
               />
@@ -268,6 +322,8 @@ export function ReviewActionDialog({
                 <Textarea
                   label="Cómo se atendió la información faltante"
                   name="coverageExplanation"
+                  hint="Obligatorio para registrar la decisión."
+                  error={fieldErrors.coverageExplanation}
                   required
                   maxLength={10000}
                 />
@@ -329,9 +385,7 @@ export function ReviewActionDialog({
               }.`}
               sources={sources}
               question={d.question}
-              // With a single current submission it is the only possible
-              // source of a decision: start with it chosen (still editable).
-              preselect={action === "validateQuestion" && sources.length === 1}
+              error={fieldErrors.responseRevisionIds}
               onChange={() => setDirty(true)}
             >
               {action === "validateQuestion" && (

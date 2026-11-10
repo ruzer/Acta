@@ -18,7 +18,7 @@ export function SourcePicker({
   hint,
   sources,
   question,
-  preselect,
+  error,
   onChange,
   children,
 }: {
@@ -26,8 +26,7 @@ export function SourcePicker({
   hint: string;
   sources: ReviewDetail["submissions"];
   question: ReviewDetail["question"];
-  /** Start with every source chosen (only meaningful for a single one). */
-  preselect: boolean;
+  error?: string;
   onChange: () => void;
   /** Extra checkboxes that belong to the same fieldset. */
   children?: ReactNode;
@@ -35,7 +34,7 @@ export function SourcePicker({
   const list = useRef<HTMLDivElement>(null);
   const prefix = useId();
   const long = sources.length > LONG_SOURCE_LIST;
-  const [picked, setPicked] = useState(preselect ? sources.length : 0);
+  const [picked, setPicked] = useState(0);
   const count = () =>
     list.current?.querySelectorAll("input:checked").length ?? 0;
   // The submissions can change under an open dialog (a refreshed conflict):
@@ -49,10 +48,18 @@ export function SourcePicker({
     onChange();
   }
   return (
-    <fieldset>
+    <fieldset
+      aria-describedby={error ? `${prefix}-error` : undefined}
+      aria-invalid={!!error}
+    >
       <legend>{legend}</legend>
       <p className="hint">{hint}</p>
-      {long && (
+      {error && (
+        <p id={`${prefix}-error`} className="field-error">
+          {error}
+        </p>
+      )}
+      {sources.length > 1 && (
         <div className="source-tools">
           <span role="status">
             {plural(picked, "seleccionada", "seleccionadas")} de{" "}
@@ -79,8 +86,11 @@ export function SourcePicker({
               <Checkbox
                 name="sources"
                 value={s.id}
-                defaultChecked={preselect}
-                aria-describedby={long ? hintId : undefined}
+                aria-describedby={
+                  [error ? `${prefix}-error` : "", long ? hintId : ""]
+                    .filter(Boolean)
+                    .join(" ") || undefined
+                }
                 label={`${s.respondent.displayName} · envío #${s.number}${s.current ? "" : " · histórico"}`}
               />
               {long && (

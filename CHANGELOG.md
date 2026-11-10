@@ -91,6 +91,11 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   el punto final. Los ajustes de invitaciones quedan plegados debajo de la lista
   e indican con claridad qué datos personales exige la instalación.
 
+- **Registrar decisión muestra errores accesibles en español.** Los campos
+  obligatorios están indicados, cada error se asocia a su campo y el resumen
+  recibe el foco. Ninguna fuente se preselecciona; con dos o más se puede
+  seleccionar todo explícitamente. Se conservan los requisitos del servidor.
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**
