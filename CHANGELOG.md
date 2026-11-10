@@ -158,6 +158,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   fixture a un proyecto nuevo, compara recuentos y verifica respuesta, decisión,
   invitación y evidencia; registra duración y limpia solo sus dos proyectos.
 
+- **Guía operativa de copias y simulacros.** Documenta scripts, programación,
+  ventana sin escritores, secretos, retención y assets externos; conserva la
+  receta manual y separa evidencia local de verificación pendiente en CI.
+
 ### Changed
 
 - **Capturar un cuestionario pide menos.** «+ Agregar tema» sale de un menú
