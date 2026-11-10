@@ -116,6 +116,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Restauración con comprobaciones claras:** compara versión, commit y migraciones antes de operar; informa imágenes ausentes, configuración distinta y permisos de la copia sin falsos avisos por reconstruir imágenes.
 
+- **Guía de recuperación actualizada:** distingue construcción y descarga de imágenes, explica los avisos y límites de verificación, y registra el ensayo remoto del PR #107 y el simulacro local.
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**
