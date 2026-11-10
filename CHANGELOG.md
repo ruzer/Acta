@@ -150,6 +150,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   seis volúmenes y configuración privada, registra hashes y recuentos de control
   y reanuda los servicios que estaban activos; una copia fallida queda INCOMPLETE.
 
+- **Verificación y restauración en destino nuevo.** Los scripts comprueban el
+  inventario, SHA-256, tar, firma del dump y recuentos; rechazan copias incompletas,
+  destinos con datos y cambios mayores de PostgreSQL, sin borrar ni sobrescribir.
+
 ### Changed
 
 - **Capturar un cuestionario pide menos.** «+ Agregar tema» sale de un menú
