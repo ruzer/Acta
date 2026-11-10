@@ -71,7 +71,7 @@ Verifica `docker compose exec frontend nginx -t` y el estado «Dirección IP del
 | db-secrets / api-secrets | Credenciales propietarias y limitadas de aplicación |
 | object-secrets / provision-secrets | Identidad del almacenamiento y aprovisionamiento |
 
-El nombre real suele llevar el prefijo del proyecto Compose. Conserva ese nombre al actualizar y comprueba los volúmenes antes de operar. `stop`, `restart` y recrear contenedores conservan volúmenes; eliminarlos destruye los datos que contienen. Usa [el backup coordinado](BACKUP-RESTORE.md).
+El nombre real suele llevar el prefijo del proyecto Compose. Conserva ese nombre al actualizar y comprueba los volúmenes antes de operar. `stop`, `restart` y recrear contenedores conservan volúmenes; eliminarlos destruye los datos que contienen. Usa [los scripts de backup, verificación y restauración](BACKUP-RESTORE.md#scripts-para-operadores) o su receta manual. Los scripts requieren Node en el host, crean copias privadas fuera de Git y restauran únicamente en un proyecto nuevo; no borran datos. Verifica también los assets externos de marca y ensaya la recuperación antes de depender de una copia.
 
 ## Secretos y privacidad
 

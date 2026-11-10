@@ -39,5 +39,21 @@ docker compose down --volumes
 
 El smoke guarda credenciales aleatorias de su fixture en el volumen evidence, con permiso 0600, únicamente para comprobar reinicio/restauración. No usar ese archivo como mecanismo de bootstrap productivo ni copiarlo a Git. La instalación normal usa `bootstrap-admin.mjs` y no crea ese fixture.
 
+## Ida y vuelta de backup en selfhosting
+
+Después de comprobar restart, el CI usa `scripts/backup.sh` sobre `readiness-ci`,
+`verify-backup.sh` sin Docker y `restore.sh` en `readiness-ci-restore`, con volúmenes
+nuevos y etiquetas comprobadas. Reutiliza la caché de build, detiene el origen para
+liberar su puerto y ejecuta ambos smoke con `--verify` en el destino. El estado
+privado del fixture viaja en `evidence`; no se suben backups como artifacts. La
+limpieza `always()` se limita a esos dos nombres explícitos. Los nombres de los
+checks requeridos no cambian.
+
+El paso registra su duración y avisa si supera 10 minutos: requiere revisión,
+no omisión de comprobaciones. El ensayo local ARM64 pasó; el resultado AMD64 se
+comprueba en la corrida real del PR, no se deduce de la configuración. Para una
+instalación arbitraria usa hashes/recuentos y las comprobaciones funcionales de
+[Backup y restauración](BACKUP-RESTORE.md#scripts-para-operadores); los fixtures
+siguen siendo exclusivos de instalaciones desechables.
 
 [Suite S3 y límites](S3-PROVIDERS.md) · [Backup y restauración](BACKUP-RESTORE.md).

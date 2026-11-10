@@ -146,6 +146,22 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   pregunta guardada en el mismo instante podía quedar en un área ya desactivada.
   Las asignaciones y el acceso de los participantes existentes no cambian.
 
+- **Backup coordinado sin sobrescrituras.** `scripts/backup.sh` conserva el dump,
+  seis volúmenes y configuración privada, registra hashes y recuentos de control
+  y reanuda los servicios que estaban activos; una copia fallida queda INCOMPLETE.
+
+- **Verificación y restauración en destino nuevo.** Los scripts comprueban el
+  inventario, SHA-256, tar, firma del dump y recuentos; rechazan copias incompletas,
+  destinos con datos y cambios mayores de PostgreSQL, sin borrar ni sobrescribir.
+
+- **CI ejercita backup y restauración completa.** El job `selfhosting` copia el
+  fixture a un proyecto nuevo, compara recuentos y verifica respuesta, decisión,
+  invitación y evidencia; registra duración y limpia solo sus dos proyectos.
+
+- **Guía operativa de copias y simulacros.** Documenta scripts, programación,
+  ventana sin escritores, secretos, retención y assets externos; conserva la
+  receta manual y separa evidencia local de verificación pendiente en CI.
+
 ### Changed
 
 - **Capturar un cuestionario pide menos.** «+ Agregar tema» sale de un menú

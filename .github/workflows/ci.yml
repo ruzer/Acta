@@ -100,6 +100,8 @@ jobs:
       COMPOSE_PROJECT_NAME: readiness-ci
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: "26" }
       - run: cp .env.example .env
       - name: Docker-only install with empty volumes
         run: docker compose up --build -d --wait
@@ -120,9 +122,37 @@ jobs:
           docker compose up -d --wait
           docker compose exec -T -e SELFHOST_SMOKE_ALLOWED=true backend node scripts/selfhost-smoke.mjs --verify
           docker compose exec -T -e SELFHOST_SMOKE_ALLOWED=true backend node scripts/invitation-proxy-smoke.mjs --verify
+      - name: Backup and restore into an empty project
+        run: |
+          set -eu
+          umask 077
+          started=$(date +%s)
+          backup_parent=$(mktemp -d "$RUNNER_TEMP/acta-backup.XXXXXX")
+          scripts/backup.sh --project readiness-ci --out "$backup_parent/snapshot"
+          scripts/verify-backup.sh "$backup_parent/snapshot"
+          docker compose -p readiness-ci-restore build
+          docker compose -p readiness-ci stop
+          scripts/restore.sh --project readiness-ci-restore --backup "$backup_parent/snapshot"
+          docker compose -p readiness-ci-restore exec -T -e SELFHOST_SMOKE_ALLOWED=true backend node scripts/selfhost-smoke.mjs --verify
+          docker compose -p readiness-ci-restore exec -T -e SELFHOST_SMOKE_ALLOWED=true backend node scripts/invitation-proxy-smoke.mjs --verify
+          elapsed=$(( $(date +%s) - started ))
+          echo "Backup/restore, cached build and functional verification: ${elapsed}s" | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ "$elapsed" -gt 600 ]; then
+            echo "::warning::Backup round trip exceeded 10 minutes; review timing before integration."
+          fi
       - name: Remove disposable CI volumes
         if: always()
-        run: docker compose down --volumes
+        run: |
+          set -eu
+          for project in readiness-ci readiness-ci-restore; do
+            for suffix in pgdata objectdata evidence db-secrets api-secrets object-secrets provision-secrets; do
+              volume="${project}_${suffix}"
+              if docker volume inspect "$volume" >/dev/null 2>&1; then
+                test "$(docker volume inspect -f '{{index .Labels "com.docker.compose.project"}}' "$volume")" = "$project"
+              fi
+            done
+            docker compose -p "$project" down --volumes
+          done
 
   guided-install:
     runs-on: ubuntu-latest

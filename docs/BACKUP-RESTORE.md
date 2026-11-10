@@ -1,6 +1,139 @@
 # Backup y restauración — PostgreSQL + VersityGW
 
+## Scripts para operadores
+
+Los tres scripts automatizan la receta manual de abajo, sin cambiar el formato de
+PostgreSQL ni de los objetos. Admiten el Compose DEFAULT con VersityGW local y sus
+siete volúmenes con nombres estándar. No sirven para S3 externo, MinIO legacy,
+volúmenes externos ni nombres personalizados. Ante un fallo se detienen y conservan
+lo que alcanzaron a copiar/restaurar; **no borran backups, directorios ni volúmenes**.
+
+Requisitos del host: POSIX `sh`, Docker/Compose, `tar` y Node compatible con
+`engines` de `package.json` (ensayado con Node 26). No requieren `npm install`,
+`jq`, Python ni paquetes nuevos. Node usa solo sus APIs incorporadas para JSON y
+hashes en streaming; `verify-backup.sh` no necesita Docker. El auxiliar de tar se
+lee del `FROM node:… AS runtime` de `app/backend/Dockerfile`, sin duplicar su versión.
+Git es opcional: cuando existe, se registra commit/describe.
+
+Ejecuta los scripts de la raíz del despliegue que deseas operar. Usan el `.env`
+de esa raíz y todos los `docker-compose.override*.yml` presentes, en orden de
+nombre; no cargan `.env` como código shell. No admiten `COMPOSE_FILE`,
+`COMPOSE_PROFILES` ni `COMPOSE_ENV_FILES`. Conserva las variables efectivas en ese
+`.env`: valores exportados en la terminal también pueden prevalecer en Compose,
+pero **no se copian automáticamente**. No ejecutes operaciones concurrentes sobre
+el proyecto durante backup/restauración; reserva una ventana de mantenimiento y
+detén cualquier escritor externo antes de comenzar.
+
+### Copiar y verificar
+
+El padre de salida debe existir, ser privado y estar fuera de cualquier árbol
+Git; la carpeta de cada copia debe ser nueva. Se crea con modo `0700` y los
+archivos quedan `0600`. No se reemplaza una copia anterior.
+
+```sh
+./scripts/backup.sh --project acta --out /srv/private-backups/acta-20261110T020000Z
+./scripts/verify-backup.sh /srv/private-backups/acta-20261110T020000Z
+```
+
+`--project` puede omitirse únicamente en backup si `COMPOSE_PROJECT_NAME` ya está
+definido. Antes de mutar Docker se comprueban configuración y etiquetas de los
+siete volúmenes. PostgreSQL y object-storage deben estar ejecutándose; las
+migraciones y el aprovisionamiento deben haber terminado (se rechazan si siguen activos). Se detienen
+frontend/backend, se hace `pg_dump -Fc`, se comprueba con `pg_restore --list`, se
+capturan recuentos mediante una transacción de solo lectura y se detiene storage
+antes de los seis tar. El trap intenta reanudar **solo los servicios previamente
+activos**, con `up -d --wait --no-build --no-deps`, también si falla la copia.
+Si la reanudación falla, el script informa error: verifica el estado del origen.
+
+`manifest.json` se publica al final, después de reanudar los servicios. Registra
+fecha UTC, proyecto, versión/commit, PostgreSQL, VersityGW, imágenes en uso con sus
+IDs, archivos/tamaños/SHA-256 y ocho recuentos: migraciones aplicadas, proyectos,
+temas, preguntas, revisiones de respuesta, validaciones, evidencias y assets de
+marca. Un fallo deja el marcador `INCOMPLETE` sin manifiesto válido; nunca uses
+esa carpeta para restaurar. La verificación también rechaza carpetas terminadas
+en `.INCOMPLETE`, archivos extra/ausentes, enlaces, inventarios alterados o tar
+ilegibles/con rutas inseguras. No edites manualmente un manifiesto para forzar PASS.
+
+### Restaurar y ensayar la recuperación
+
+1. Conserva el origen y elige otro nombre Compose; el destino debe estar aislado.
+   Prepara una copia separada del código correspondiente al backup y las imágenes.
+2. Copia privadamente `.env` y los overrides guardados a esa raíz. Ajusta solo
+   puerto/origen/red del simulacro si hace falta, sin cambiar identidades ni
+   secretos restaurados. No expongas el destino. Los scripts no copian archivos
+   sobre la configuración de un checkout existente.
+3. Desde la raíz del destino, construye las imágenes sin iniciar servicios:
+
+   ```sh
+   docker compose -p acta-restore-drill build
+   ./scripts/restore.sh --project acta-restore-drill --backup /srv/private-backups/acta-20261110T020000Z
+   ```
+
+4. El script verifica primero la copia sin Docker y rechaza cualquier contenedor
+   o cualquiera de los siete volúmenes existentes del destino. Si el código o los
+   IDs de imagen difieren, avisa; si cambia la versión mayor de PostgreSQL, rechaza.
+   No convierte automáticamente una copia de otro proveedor.
+5. Crea y etiqueta los siete volúmenes, extrae los seis tar, inicia solo PostgreSQL
+   con `--no-deps` (secretos restaurados antes de secrets-init), restaura como
+   `requirements_owner`, compara recuentos, inicia el resto y compara de nuevo.
+   Un fallo deja un destino parcial que **no debe exponerse ni reutilizarse**:
+   conserva el diagnóstico y elige otro destino vacío. Nunca se detiene el origen.
+6. Completa las comprobaciones funcionales de la sección 4 de la receta manual.
+   En una instalación real usa cuentas y una muestra conocida autorizadas; no
+   ejecutes los generadores de fixtures sobre sus datos. Programa simulacros
+   periódicos con la frecuencia de tu política, registra duración, versión,
+   recuentos y comprobaciones de acceso/hash; compara con tus objetivos de recuperación.
+
+### Programación, privacidad y límites
+
+Ejemplo de cron semanal a las 02:00, en la zona horaria del host, con el directorio
+privado ya creado y una ventana sin escritores acordada. Ajusta frecuencia y rutas;
+asegura que Docker y Node estén en el PATH de cron y que una corrida no se solape
+con otra. Los `%` están escapados para cron:
+
+```cron
+0 2 * * 0 umask 077; cd /srv/acta && ./scripts/backup.sh --project acta --out "/srv/private-backups/acta-$(date -u +\%Y\%m\%dT\%H\%M\%SZ)" >> /srv/private-backups/cron.log 2>&1
+```
+
+Las copias incluyen secretos y hashes de contraseñas. Cifra y copia fuera del host
+con las herramientas aprobadas por tu organización; aquí **no se verifica ninguna
+herramienta de cifrado ni transporte**. La retención y eliminación deliberada de
+copias antiguas son tareas del operador; los scripts no implementan retención.
+Protege también los logs y controla espacio libre antes de cada ventana.
+
+`verify-backup.sh` comprueba inventario, bytes, tamaños, hashes, listado tar y firma
+`PGDMP`; **no ejecuta pg_restore ni certifica autenticidad del manifiesto**. Solo
+restaura copias de procedencia confiable. Los recuentos del restore detectan pérdida
+de filas en las tablas seleccionadas; no certifican todo el contenido ni la
+integridad SHA-256 de cada objeto de evidencia. Login, permisos, decisiones,
+invitaciones y descargas conocidas requieren las comprobaciones funcionales.
+
+Los logos cargados en Configuración se guardan en `BrandingAsset.content` en
+PostgreSQL y sí viajan en el dump. Los archivos propios referidos por `APP_LOGO`,
+`APP_LOGO_SECONDARY` o `APP_FAVICON` bajo `/branding/`, otros assets incluidos en
+imágenes y archivos montados desde el host **no viven necesariamente en los siete
+volúmenes**. Conserva aparte esos assets y las imágenes/código correspondientes;
+copiar el override conserva la referencia, no los archivos externos. Los scripts
+no los descubren ni copian automáticamente.
+
 ## Alcance y evidencia de verificación
+
+**Automatización, 2026-11-10 — Linux ARM64 en Docker Desktop:** instalación nueva
+con fixtures, dump + seis tar + configuración, restauración en siete volúmenes
+nuevos, igualdad de ocho recuentos y ambos smoke de persistencia/invitaciones
+pasaron. Se confirmó respuesta enviada, decisión y fuente, SHA-256, sesión de
+invitación y denegaciones de acceso. Una copia con tar alterado fue rechazada sin
+invocar Docker; un destino existente fue rechazado sin sobrescribir.
+
+El ensayo necesitó un override privado de red porque Docker agotó su reserva
+automática de subredes. No se eliminaron redes ni datos ajenos. Duración local de
+la secuencia equivalente al nuevo paso de CI: **64 segundos**, incluyendo build
+con caché y comprobaciones. No es una estimación de recuperación para datos reales.
+
+El job `selfhosting` añade la misma ida y vuelta en `ubuntu-latest`, mide segundos
+en el resumen y avisa si supera 600 s. **AMD64/CI remoto: pendiente de resultado del
+PR**; configurar el paso no acredita que ya pasó. No se afirman HA, cambio mayor de
+PostgreSQL ni otros proveedores. La receta manual histórica se conserva a continuación.
 
 Esta receta reproduce los comandos de copia y restauración ensayados con el despliegue DEFAULT de entonces, VersityGW 1.8.0, PostgreSQL del Compose y Linux ARM64, el 2026-09-30. Se parametrizaron nombre de proyecto y directorio privado; no depende de archivos de otra instalación.
 
