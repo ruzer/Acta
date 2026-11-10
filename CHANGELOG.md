@@ -132,6 +132,16 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   VersityGW 1.11.0 tras incorporar NestJS 12.4.0 desde main, sin conflictos ni
   cambios adicionales en la aplicación.
 
+- **Ajustes visuales de Escribir, Organizar y Administración.** En Escribir, el
+  aviso hacia «Organizar preguntas» es un enlace dentro de la frase (antes era
+  un botón con borde que rompía el renglón) y en cada tema la cuenta de
+  preguntas va antes del menú también en móvil. En Organizar, el filtro de
+  temas usa el mismo borde que la búsqueda y los otros filtros. En
+  Administración → Áreas, «Renombrar» se alinea con las etiquetas de la tarjeta
+  en móvil, y en Mis proyectos la nota para administración deja espacio antes
+  de la primera tarjeta. Una prueba E2E comprueba cada caso; no cambian reglas
+  de negocio ni permisos.
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**

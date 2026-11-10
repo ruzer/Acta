@@ -365,6 +365,9 @@ legend {
 .project-list .button {
   flex-shrink: 0;
 }
+.hint + .project-list {
+  margin-top: var(--ac-space-4);
+}
 .back {
   display: inline-block;
   margin-bottom: 1.5rem;
@@ -1133,6 +1136,10 @@ section.narrow {
   .data-table .table-links {
     justify-content: flex-start;
     padding-top: 6px;
+  }
+  /* Flush with the card's labels, like the links in the Projects cards. */
+  .data-table .actions > .button.tertiary {
+    padding-inline: 0;
   }
 }
 

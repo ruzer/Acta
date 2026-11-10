@@ -352,7 +352,7 @@ export function EditorWorkspace(props: EditorProps) {
                 </div>
               )}
               {data.questions.length > 1 && (
-                <p className="hint">
+                <p className="hint qe-inline-hint">
                   Para asignar participantes o publicar varias preguntas juntas,
                   usa{" "}
                   <Button
