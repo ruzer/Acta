@@ -118,6 +118,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Guía de recuperación actualizada:** distingue construcción y descarga de imágenes, explica los avisos y límites de verificación, y registra el ensayo remoto del PR #107 y el simulacro local.
 
+- **Exporte Markdown tolerante a snapshots incompletos:** comparte con Revisión la lectura de nombres y usa respaldos para autor y área. Conserva las fuentes y los formatos JSON/CSV; es robustez ante datos históricos o editados fuera de la aplicación.
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**

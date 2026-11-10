@@ -18,6 +18,7 @@ import {
 import { Database } from "../database/database.module.js";
 import { AccessService } from "../administration/access.service.js";
 import { Tx, CommandContext, audit } from "../common/http.js";
+import { snapshotName } from "../common/snapshot.js";
 import {
   VisibilityService,
   auditSelect,
@@ -352,12 +353,9 @@ export class ExportService {
                 where,
                 orderBy: { order: "asc" },
               });
-              const snapshotName = (snapshot: Prisma.JsonValue) =>
-                z.object({ displayName: z.string() }).parse(snapshot)
-                  .displayName;
               const sourceLabel = (id: string) => {
                 const revision = responseRevisions.find((r) => r.id === id)!;
-                return `${md(snapshotName(revision.respondentSnapshot))} (envío ${revision.number})`;
+                return `${md(snapshotName(revision.respondentSnapshot, "displayName", "Autor no registrado"))} (envío ${revision.number})`;
               };
               for (const section of sections) {
                 out.push(`## ${md(section.title)}`);
@@ -401,20 +399,24 @@ export class ExportService {
                             order,
                           })),
                       });
-                    const author = z
-                      .object({
-                        displayName: z.string(),
-                        identityKind: z
-                          .enum(["ACCOUNT", "INVITATION"])
-                          .default("ACCOUNT"),
-                      })
-                      .parse(r.respondentSnapshot);
-                    const area = z
-                      .object({ name: z.string() })
-                      .parse(r.areaSnapshot);
+                    const author = snapshotName(
+                      r.respondentSnapshot,
+                      "displayName",
+                      "Autor no registrado",
+                    );
+                    const identityKind = snapshotName(
+                      r.respondentSnapshot,
+                      "identityKind",
+                      "ACCOUNT",
+                    );
+                    const area = snapshotName(
+                      r.areaSnapshot,
+                      "name",
+                      "Área no registrada",
+                    );
                     out.push(
                       `#### Envío ${r.number}`,
-                      `Autor: ${md(author.displayName)} (${author.identityKind === "INVITATION" ? "persona invitada" : "cuenta"}) · Área: ${md(area.name)} · Fecha: ${r.createdAt.toISOString()}`,
+                      `Autor: ${md(author)} (${identityKind === "INVITATION" ? "persona invitada" : "cuenta"}) · Área: ${md(area)} · Fecha: ${r.createdAt.toISOString()}`,
                       md(
                         answerText(
                           question,

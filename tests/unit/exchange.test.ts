@@ -5,6 +5,7 @@ import {
   type ResponseQuestionView,
   type ResponseContent,
 } from "@requirements/contracts";
+import { snapshotName } from "../../app/backend/src/common/snapshot.js";
 import { parseExactJson } from "../../app/backend/src/exchange/strict-json.js";
 import {
   csvCell,
@@ -180,5 +181,44 @@ describe("readable Markdown", () => {
     expect(markdownText("FORM-DEMO-01 · 2026-11-09T12:41:00.000Z")).toBe(
       "FORM-DEMO-01 · 2026-11-09T12:41:00.000Z",
     );
+  });
+});
+
+describe("historical snapshot display names", () => {
+  it.each([{}, [], null, 42, "unexpected", { displayName: false, name: 42 }])(
+    "falls back for malformed snapshots %j",
+    (snapshot) => {
+      expect(snapshotName(snapshot, "displayName", "Autor no registrado")).toBe(
+        "Autor no registrado",
+      );
+      expect(snapshotName(snapshot, "name", "Área no registrada")).toBe(
+        "Área no registrada",
+      );
+      expect(snapshotName(snapshot, "identityKind", "ACCOUNT")).toBe("ACCOUNT");
+    },
+  );
+  it("preserves valid names and invitation kind, escaping only for Markdown", () => {
+    const snapshot = {
+      displayName: "Persona <ficticia>",
+      name: "Área [ejemplo]",
+      identityKind: "INVITATION",
+    };
+    expect(snapshotName(snapshot, "displayName", "fallback")).toBe(
+      snapshot.displayName,
+    );
+    expect(
+      markdownText(snapshotName(snapshot, "displayName", "fallback")),
+    ).toBe("Persona &lt;ficticia&gt;");
+    expect(snapshotName(snapshot, "name", "fallback")).toBe(snapshot.name);
+    expect(snapshotName(snapshot, "identityKind", "ACCOUNT")).toBe(
+      "INVITATION",
+    );
+    expect(
+      snapshotName(
+        { displayName: "Cuenta histórica" },
+        "identityKind",
+        "ACCOUNT",
+      ),
+    ).toBe("ACCOUNT");
   });
 });
