@@ -618,16 +618,34 @@
   margin-bottom: 12px;
 }
 /* Topic header: title on the left; count and menu on the right, the menu on the same edge as each question's menu. */
-@media (min-width: 801px) {
-  .qe-topic > header h3 {
-    margin-right: auto;
-  }
-  .qe-topic > header > .hint {
-    order: 2;
-  }
-  .qe-topic > header > .qe-menu {
-    order: 3;
-  }
+.qe-topic > header h3 {
+  margin-right: auto;
+}
+.qe-topic > header > .hint {
+  order: 2;
+}
+.qe-topic > header > .qe-menu {
+  order: 3;
+}
+/* A pointer to another mode reads as part of the sentence, not as a boxed button. */
+.qe-inline-hint {
+  margin-block-end: var(--ac-space-4);
+}
+.qe-inline-hint .button.secondary {
+  display: inline;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ac-accent);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.qe-inline-hint .button.secondary:hover {
+  background: none;
+  text-decoration-thickness: 2px;
 }
 .qe-topic > div > .hint {
   margin-block: 12px;

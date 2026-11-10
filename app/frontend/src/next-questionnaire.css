@@ -103,7 +103,7 @@
   gap: var(--ac-space-2);
   min-height: 44px;
   padding: var(--ac-space-2) var(--ac-space-3);
-  border: 1px solid var(--ac-line-2);
+  border: 1px solid var(--ac-muted);
   border-radius: var(--ac-radius-control);
   background: var(--ac-surface);
   color: var(--ac-ink-2);
