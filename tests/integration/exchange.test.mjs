@@ -2,7 +2,7 @@ import { before, after, test } from "node:test";
 import assert from "node:assert/strict";
 import { randomBytes, randomUUID } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtemp, rm, readFile } from "node:fs/promises";
+import { mkdtemp, rm, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { config } from "dotenv";
@@ -38,7 +38,13 @@ async function req(url, { session = analyst, method = "GET", body } = {}) {
       Origin: origin,
       "Content-Type": "application/json",
       ...(session
-        ? { Cookie: session.cookie, "X-CSRF-Token": session.csrf }
+        ? {
+            Cookie: session.cookie,
+            "X-CSRF-Token": session.csrf,
+            ...(session.invitationId
+              ? { "X-Invitation-Id": session.invitationId }
+              : {}),
+          }
         : {}),
     },
     ...(method === "GET" ? {} : { body: JSON.stringify(body ?? {}) }),
@@ -945,3 +951,162 @@ for (const kind of ["minimal", "full"]) {
     assert.equal(await db.importBatch.count({ where: { projectId: p.id } }), 1);
   });
 }
+
+test("Markdown renders a complete decided question with account and invitation sources", async () => {
+  const p = await emptyProject("MARKDOWN-DEMO");
+  const file = template(p.externalId, "MARKDOWN-AREA");
+  file.questions = [
+    { ...file.questions[0], externalId: "FORM-DEMO-01", references: [] },
+  ];
+  file.conditions = [];
+  file.traceabilityReferences = [];
+  const preview = await importFile(p, file);
+  assert.equal(preview.status, 201);
+  assert.equal(
+    (await importFile(p, file, confirmation(preview.data))).status,
+    201,
+  );
+  const q = (await ok(`/projects/${p.id}/questionnaire`)).questions[0];
+  const base = `/projects/${p.id}/questions/${q.id}`;
+  const area = await db.area.findFirstOrThrow({
+    where: { code: "MARKDOWN-AREA" },
+  });
+  const m = await ok(`/projects/${p.id}/members`, {
+    session: admin,
+    method: "POST",
+    body: {
+      userId: stakeholder.user.id,
+      role: "STAKEHOLDER",
+      areaId: area.id,
+      active: true,
+    },
+  });
+  await ok(base + "/assign", {
+    method: "POST",
+    body: {
+      projectMemberId: m.id,
+      required: true,
+      active: true,
+      expectedVersion: q.lockVersion,
+    },
+  });
+  const assigned = (await ok(`/projects/${p.id}/questionnaire`)).questions[0];
+  await ok(base + "/publish", {
+    method: "POST",
+    body: { expectedVersion: assigned.lockVersion },
+  });
+  const v = await ok(base + "/response", { session: stakeholder });
+  const draft = await ok(base + "/response/draft", {
+    session: stakeholder,
+    method: "PUT",
+    body: {
+      requestId: randomUUID(),
+      expectedVersion: v.lockVersion,
+      answer: true,
+      comment: "",
+      example: "",
+      consultationRequested: false,
+    },
+  });
+  const account = await ok(base + "/response/submit", {
+    session: stakeholder,
+    method: "POST",
+    body: {
+      requestId: randomUUID(),
+      expectedVersion: draft.lockVersion,
+    },
+  });
+  const link = await ok(`/projects/${p.id}/invitations`, {
+    method: "POST",
+    body: {
+      requestId: randomUUID(),
+      label: "Revisión mobile 1",
+      questionIds: [q.id],
+      areaId: area.id,
+      identity: { name: "Persona ficticia" },
+      nonNominal: false,
+      allowEvidence: false,
+    },
+  });
+  const entered = await req("/invitations/access/exchange", {
+    session: null,
+    method: "POST",
+    body: {
+      token: new URL(link.url).hash.slice(1),
+    },
+  });
+  assert.equal(entered.status, 201);
+  const guest = {
+    cookie: entered.headers
+      .getSetCookie()
+      .find((cookie) => cookie.startsWith("acta_invitation_session="))
+      .split(";")[0],
+    csrf: entered.data.csrfToken,
+    invitationId: entered.data.invitationId,
+  };
+  const guestBase = `/invitations/access/questions/${q.id}`;
+  const gv = await ok(guestBase, { session: guest });
+  const gd = await ok(guestBase + "/draft", {
+    session: guest,
+    method: "PUT",
+    body: {
+      requestId: randomUUID(),
+      expectedVersion: gv.lockVersion,
+      answer: true,
+      comment: "Coincide con el proceso ficticio.",
+      example: "",
+      consultationRequested: false,
+    },
+  });
+  const invitation = await ok(guestBase + "/submit", {
+    session: guest,
+    method: "POST",
+    body: {
+      requestId: randomUUID(),
+      expectedVersion: gd.lockVersion,
+    },
+  });
+  const review = await ok(base + "/review");
+  await ok(base + "/review/validate", {
+    method: "POST",
+    body: {
+      ...decision([account.revisions[0].id, invitation.revisions[0].id]),
+      requestId: randomUUID(),
+      expectedVersion: review.lockVersion,
+    },
+  });
+  const full = (await exported("JSON", analyst, "full", p)).data;
+  assert.equal(full.formatVersion, "1.0");
+  const [a, b] = full.responseRevisions;
+  const validation = full.validations[0];
+  const md = await exported("MARKDOWN", analyst, "full", p);
+  assert.equal(md.status, 201);
+  if (process.env.ACTA_MARKDOWN_SAMPLE_PATH)
+    await writeFile(process.env.ACTA_MARKDOWN_SAMPLE_PATH, md.text);
+  const exportedAt = md.text.split("\n")[2].slice("Exportado: ".length);
+  const expected =
+    [
+      "# Cuestionario ficticio de intercambio",
+      `Exportado: ${exportedAt}`,
+      "Documento funcional; no es un backup. Los binarios se descargan con autorización.",
+      "## Tema ficticio",
+      "### FORM-DEMO-01 — ¿Se requiere seguimiento?",
+      "Estado: Validada · Prioridad: P1",
+      "Versión de pregunta: 1",
+      "#### Envío 1",
+      `Autor: ${a.respondentSnapshot.displayName} (cuenta) · Área: Equipo ficticio de intercambio · Fecha: ${a.createdAt}`,
+      "Sí",
+      "#### Envío 1",
+      `Autor: Invitación: Revisión mobile 1 (persona invitada) · Área: Equipo ficticio de intercambio · Fecha: ${b.createdAt}`,
+      "Sí",
+      "Comentario: Coincide con el proceso ficticio.",
+      "#### Decisión validada vigente",
+      "Decisión ficticia documentada",
+      "Alcance: Procedimiento de prueba",
+      "Comentario: Revisado contra las fuentes",
+      `Analista: ${validation.validatedBy.displayName} · Fecha: ${validation.validatedAt}`,
+      `Fuentes: ${a.respondentSnapshot.displayName} (envío 1), Invitación: Revisión mobile 1 (envío 1)`,
+      `ID de validación: ${validation.id}`,
+    ].join("\n\n") + "\n";
+  assert.equal(md.text, expected);
+});

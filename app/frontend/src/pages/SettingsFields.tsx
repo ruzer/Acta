@@ -192,7 +192,7 @@ export function BrandingPreview({
             {secondaryName && (
               <p className="brand-preview-secondary">{secondaryName}</p>
             )}
-            <p>{appName} · Questions. Evidence. Decisions.</p>
+            <p>{appName} · Preguntas. Evidencia. Decisiones.</p>
             <p>
               <span className="brand-preview-link">Un enlace de ejemplo</span>
             </p>

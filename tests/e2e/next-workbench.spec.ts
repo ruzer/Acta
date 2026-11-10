@@ -521,8 +521,11 @@ test("Direction C: listado completo conserva apertura, foco y retorno", async ({
   const path = `/projects/${fixture.project.id}/dashboard`;
   await page.goto(path);
   const disclosure = page.locator(".ac-attention-all");
-  await expect(disclosure).not.toHaveAttribute("open");
+  await expect(disclosure).toHaveAttribute("open");
   await disclosure.locator("summary").click();
+  await expect(disclosure).not.toHaveAttribute("open");
+  await disclosure.locator("summary").focus();
+  await page.keyboard.press("Enter");
   const list = page.getByRole("list", {
     name: "Casos de atención",
     exact: true,

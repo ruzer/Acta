@@ -79,7 +79,7 @@ export function Login({
           <p className="access-secondary">{branding.secondaryName}</p>
         )}
         <p className="access-product">
-          <Brand logo={false} /> · Questions. Evidence. Decisions.
+          <Brand logo={false} /> · Preguntas. Evidencia. Decisiones.
         </p>
       </div>
       <section className="access-form">

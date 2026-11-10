@@ -611,6 +611,35 @@ export type PersonalProjectView = z.infer<typeof personalProjectView>;
 export type EvidenceView = z.infer<typeof evidenceView>;
 export type ResponseQuestionView = z.infer<typeof responseQuestionView>;
 
+export function answerText(
+  q: Pick<ResponseQuestionView, "type" | "options" | "config">,
+  a: ResponseContent["answer"],
+): string {
+  if (a === null) return "Sin valor; consulta el comentario.";
+  if (typeof a === "boolean") return a ? "Sí" : "No";
+  if (q.type === "SINGLE_CHOICE")
+    return q.options.find((o) => o.value === a)?.label ?? String(a);
+  if (Array.isArray(a))
+    return (
+      a
+        .map((v) => q.options.find((o) => o.value === v)?.label ?? v)
+        .join(", ") || "Sin selección"
+    );
+  if (typeof a === "object") {
+    const cfg = q.config as {
+      rows: { key: string; label: string }[];
+      columns: { key: string; label: string }[];
+    };
+    return cfg.rows
+      .map(
+        (r) =>
+          `${r.label}: ${cfg.columns.find((c) => c.key === a[r.key])?.label ?? "Sin selección"}`,
+      )
+      .join("\n");
+  }
+  return String(a);
+}
+
 // Phase 2D: exact submitted sources and explicit human review.
 export const reviewCommand = responseCommand;
 const reviewReason = z.string().trim().min(1).max(10000);

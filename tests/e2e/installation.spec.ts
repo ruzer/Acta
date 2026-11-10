@@ -234,9 +234,13 @@ test("la configuración: secciones accesibles, cambio visible al instante y vuel
     await page.getByRole("button", { name: "Guardar identidad" }).click();
     await expect(page.getByText("Configuración guardada.")).toBeVisible();
     // The title of the page follows without a reload, and survives one.
-    await expect(page).toHaveTitle(renamed);
+    await expect(page).toHaveTitle(
+      `${await page.locator("main h1").innerText()} · ${renamed}`,
+    );
     await page.reload();
-    await expect(page).toHaveTitle(renamed);
+    await expect(page).toHaveTitle(
+      `${await page.locator("main h1").innerText()} · ${renamed}`,
+    );
     await expect(
       page.getByRole("textbox", {
         name: "Nombre de la aplicación",
@@ -266,7 +270,9 @@ test("la configuración: secciones accesibles, cambio visible al instante y vuel
       await expect(name).toHaveValue("Acta");
     }
   }
-  await expect(page).not.toHaveTitle(renamed);
+  await expect(page).toHaveTitle(
+    `${await page.locator("main h1").innerText()} · Acta`,
+  );
 });
 
 /** A valid PNG of a flat color, built from its specification. */
@@ -391,7 +397,7 @@ test("los dos logotipos: se eligen con vista previa, aparecen en el acceso con j
       );
       expect(sizes[1]!.height).toBeLessThanOrEqual(sizes[0]!.height);
       await expect(page.locator(".access-product")).toContainText(
-        "Questions. Evidence. Decisions.",
+        "Preguntas. Evidencia. Decisiones.",
       );
       await checkedPage(page, evidence, "login-two-logos", width, {
         capture: false,

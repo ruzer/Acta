@@ -1,5 +1,10 @@
 // @vitest-environment node
 import { describe, it, expect } from "vitest";
+import {
+  answerText,
+  type ResponseQuestionView,
+  type ResponseContent,
+} from "@requirements/contracts";
 import { parseExactJson } from "../../app/backend/src/exchange/strict-json.js";
 import {
   csvCell,
@@ -41,7 +46,9 @@ describe("2E boundaries", () => {
     expect(s).not.toContain("<script>");
     expect(s).not.toContain("[x](javascript:");
     expect(s).not.toContain("\n# title");
-    expect(markdownText("http://localhost/path")).not.toContain("http:");
+    expect(markdownText("http://localhost/path")).toBe(
+      "http:&#47;/localhost/path",
+    );
   });
   it("does not count not-applicable or conflict as validated; coverage independent", () => {
     const m = metrics([
@@ -76,5 +83,69 @@ describe("decision excerpts", () => {
       text: "y".repeat(100),
       truncated: false,
     });
+  });
+});
+
+describe("readable Markdown", () => {
+  it.each([
+    ["YES_NO", true, "Sí"],
+    ["YES_NO", false, "No"],
+    ["SINGLE_CHOICE", "A", "Opción A"],
+    ["MULTIPLE_CHOICE", ["B", "A"], "Opción B, Opción A"],
+    ["SHORT_TEXT", "Texto breve", "Texto breve"],
+    ["LONG_TEXT", "Una línea\nOtra línea", "Una línea\nOtra línea"],
+    ["DATE", "2026-11-09", "2026-11-09"],
+    ["NUMBER", "42.25", "42.25"],
+    [
+      "MATRIX",
+      { first: "A", second: "B" },
+      "Primera: Opción A\nSegunda: Opción B",
+    ],
+  ])("shares the interface formatter for %s", (type, value, expected) => {
+    const question = {
+      type: type as ResponseQuestionView["type"],
+      options: [
+        { value: "A", label: "Opción A", order: 0 },
+        { value: "B", label: "Opción B", order: 1 },
+      ],
+      config: {
+        rows: [
+          { key: "first", label: "Primera" },
+          { key: "second", label: "Segunda" },
+        ],
+        columns: [
+          { key: "A", label: "Opción A" },
+          { key: "B", label: "Opción B" },
+        ],
+      },
+    };
+    expect(answerText(question, value as ResponseContent["answer"])).toBe(
+      expected,
+    );
+  });
+  it.each([
+    ["<script>alert(1)</script>", "&lt;script&gt;alert(1)&lt;/script&gt;"],
+    ["[x](javascript:alert(1))", "\\[x\\](javascript:alert(1))"],
+    ["![i](http://x/y.png)", "!\\[i\\](http:&#47;/x/y.png)"],
+    ["```js\nalert(1)\n```", "\\`\\`\\`js  \nalert(1)  \n\\`\\`\\`"],
+    [
+      "# título\n- lista\n> cita\n| tabla |",
+      "\\# título  \n\\- lista  \n&gt; cita  \n\\| tabla \\|",
+    ],
+    [
+      "1. paso\n+ paso\n===\n~~borrar~~",
+      "1\\. paso  \n\\+ paso  \n\\===  \n\\~\\~borrar\\~\\~",
+    ],
+    [
+      "    bloque\n&amp;lt;script&amp;gt;",
+      "&#32;&#32;&#32;&#32;bloque  \n&amp;amp;lt;script&amp;amp;gt;",
+    ],
+  ])("neutralizes active Markdown/HTML: %s", (input, expected) => {
+    expect(markdownText(input)).toBe(expected);
+  });
+  it("keeps punctuation in identifiers and ISO dates intact", () => {
+    expect(markdownText("FORM-DEMO-01 · 2026-11-09T12:41:00.000Z")).toBe(
+      "FORM-DEMO-01 · 2026-11-09T12:41:00.000Z",
+    );
   });
 });

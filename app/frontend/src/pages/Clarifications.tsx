@@ -335,7 +335,7 @@ export function Clarifications() {
                         <li className="ac-thread-closed">
                           <p className="hint">
                             Cerrada por {t.closedBy?.displayName} ·{" "}
-                            {dateText(t.closedAt)}. {t.closeReason}
+                            {dateText(t.closedAt, true)} {t.closeReason}
                           </p>
                         </li>
                       )}

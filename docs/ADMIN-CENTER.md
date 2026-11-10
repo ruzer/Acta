@@ -80,7 +80,7 @@ Los cambios se ven al instante, sin recompilar el frontend ni reiniciar Docker: 
 - **Logotipo principal** = la identidad de la institución. Va más grande: en la pantalla de acceso (sobre el nombre), en la barra lateral (como marca única en la barra estrecha) y en el encabezado móvil.
 - **Segundo logotipo** (opcional) = una entidad colaboradora, un área responsable o una identidad complementaria. Va más pequeño, después de un separador: en la pantalla de acceso (con el nombre de la entidad escrito bajo el de la institución) y en el encabezado de las **invitaciones externas**, que es donde quien responde necesita ver quién pregunta. No aparece en la navegación, los encabezados ni las pantallas administrativas, para no añadir ruido.
 - En pantallas estrechas las marcas se apilan, la principal primero. Las proporciones siempre se conservan (nada se estira ni se recorta).
-- Sin segundo logotipo, nada cambia ni se reserva espacio. Acta sigue siendo reconocible: su nombre y «Questions. Evidence. Decisions.» permanecen en el acceso.
+- Sin segundo logotipo, nada cambia ni se reserva espacio. Acta sigue siendo reconocible: su nombre y «Preguntas. Evidencia. Decisiones.» permanecen en el acceso.
 
 Cada guardado usa la **versión** que la persona vio: si otra persona cambió algo mientras tanto, se rechaza con `409` y no se pierde ningún cambio ajeno.
 

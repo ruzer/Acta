@@ -1,9 +1,11 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as apiModule from "./api";
-import { BrandingProvider, Marks } from "./branding";
+import { BrandingProvider, Marks, formatDate } from "./branding";
+import { MemoryRouter, Routes, Route, Link } from "react-router-dom";
+import userEvent from "@testing-library/user-event";
 import { Login } from "./pages/Access";
 
 afterEach(() => {
@@ -79,7 +81,9 @@ it("el acceso sin logotipos se ve como siempre: institución y producto", async 
   expect(await screen.findByText("Fiscalía General")).toBeVisible();
   expect(container.querySelector(".institution-marks")).toBeNull();
   expect(container.querySelector(".access-secondary")).toBeNull();
-  expect(screen.getByText(/Questions\. Evidence\. Decisions\./)).toBeVisible();
+  expect(
+    screen.getByText(/Preguntas\. Evidencia\. Decisiones\./),
+  ).toBeVisible();
 });
 
 it("el acceso pone primero la identidad: marcas, institución, entidad y por último el producto", async () => {
@@ -109,7 +113,7 @@ it("el acceso pone primero la identidad: marcas, institución, entidad y por úl
   ).toBeVisible();
   // El producto sigue reconocible y su logotipo no se repite en esa línea.
   const product = container.querySelector(".access-product")!;
-  expect(product).toHaveTextContent("Acta · Questions. Evidence. Decisions.");
+  expect(product).toHaveTextContent("Acta · Preguntas. Evidencia. Decisiones.");
   expect(product.querySelector("img")).toBeNull();
   // La entidad ya está escrita: su imagen no repite el nombre para lectores de pantalla.
   expect(
@@ -122,4 +126,50 @@ it("con solo el logotipo principal el acceso lo muestra grande y sin segunda mar
   await screen.findByText("Fiscalía General");
   expect(container.querySelectorAll(".institution-marks img")).toHaveLength(1);
   expect(container.querySelector(".institution-mark-secondary")).toBeNull();
+});
+
+it.each(["2026-11-17T00:41:00.000Z", "2026-11-17T13:41:00.000Z"])(
+  "una fecha al final de una oración lleva un solo punto: %s",
+  (date) => {
+    const text = formatDate(date, true);
+    expect(text).toBe(formatDate(date).replace(/\.$/, "") + ".");
+    expect(text).not.toContain("..");
+  },
+);
+
+it("el título sigue cuatro pantallas y conserva el nombre configurable sin mover el foco", async () => {
+  vi.spyOn(apiModule, "api").mockResolvedValue(
+    branding({ appName: "Acta demo" }) as never,
+  );
+  const user = userEvent.setup();
+  const pages = ["Atención", "Cuestionario", "Revisión", "Invitaciones"];
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <BrandingProvider>
+        <MemoryRouter initialEntries={["/0"]}>
+          <nav>
+            {pages.map((name, i) => (
+              <Link key={name} to={`/${i}`}>
+                {name}
+              </Link>
+            ))}
+          </nav>
+          <main>
+            <Routes>
+              {pages.map((name, i) => (
+                <Route key={name} path={`/${i}`} element={<h1>{name}</h1>} />
+              ))}
+            </Routes>
+          </main>
+        </MemoryRouter>
+      </BrandingProvider>
+    </QueryClientProvider>,
+  );
+  await screen.findByRole("heading", { name: pages[0] });
+  for (const name of pages) {
+    const link = screen.getByRole("link", { name });
+    await user.click(link);
+    await waitFor(() => expect(document.title).toBe(`${name} · Acta demo`));
+    expect(link).toHaveFocus();
+  }
 });

@@ -467,7 +467,7 @@ function Session() {
       )}
       {!participant && !project && !organizationPage && (
         <footer className="footer">
-          <Brand /> · Questions. Evidence. Decisions.
+          <Brand /> · Preguntas. Evidencia. Decisiones.
         </footer>
       )}
       {expired && (

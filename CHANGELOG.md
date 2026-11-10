@@ -81,6 +81,26 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   página o después de cinco segundos. Conserva el enfoque inicial al resolver
   las rutas diferidas y limpia la espera al salir.
 
+- **Exporte Markdown legible para revisión.** Agrupa por tema y pregunta, usa
+  nombres de autores y áreas, respuestas y estados de la interfaz y fuentes por
+  envío. Omite excepciones vacías y conserva el ID de validación al final, sin
+  cambiar JSON, CSV ni la protección frente a contenido hostil.
+
+- **Textos y títulos de pantalla más claros.** El lema se muestra en español,
+  cada pestaña identifica la pantalla y la instalación, y las fechas no duplican
+  el punto final. Los ajustes de invitaciones quedan plegados debajo de la lista
+  e indican con claridad qué datos personales exige la instalación.
+
+- **Registrar decisión muestra errores accesibles en español.** Los campos
+  obligatorios están indicados, cada error se asocia a su campo y el resumen
+  recibe el foco. Ninguna fuente se preselecciona; con dos o más se puede
+  seleccionar todo explícitamente. Se conservan los requisitos del servidor.
+
+- **Atención abre la lista completa y prioriza los casos accionables.** Primero
+  muestra conflictos, aclaraciones, respuestas listas para decidir y parciales
+  con aportaciones; conserva el orden del cuestionario dentro de cada grupo y
+  la carga por tramos. No infiere qué aportaciones ya fueron revisadas.
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**

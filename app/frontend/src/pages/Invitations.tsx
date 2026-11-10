@@ -641,43 +641,6 @@ export function Invitations() {
         </p>
       </details>
       {error && <Alert error>{error}</Alert>}
-      {admin && policy.data && (
-        <section aria-label="Permiso para invitaciones no nominales">
-          <h2>Invitaciones no nominales</h2>
-          <p>
-            La instalación exige:{" "}
-            {
-              {
-                NONE: "ningún dato obligatorio",
-                NAME: "nombre",
-                EMAIL: "correo",
-                BOTH: "nombre y correo",
-              }[policy.data.identityRequirement]
-            }
-            .
-          </p>
-          <Checkbox
-            label="Permitir invitaciones sin datos personales en este proyecto"
-            checked={policy.data.allowNonNominal}
-            disabled={busy || policy.data.identityRequirement !== "NONE"}
-            onChange={(e) => {
-              setBusy(true);
-              setError("");
-              void api(
-                "setInvitationPolicy",
-                { projectId },
-                {
-                  expectedVersion: policy.data.expectedVersion,
-                  allowNonNominal: e.target.checked,
-                },
-              )
-                .then(() => policy.refetch())
-                .catch((e: Error) => setError(e.message))
-                .finally(() => setBusy(false));
-            }}
-          />
-        </section>
-      )}
       <div className="ac-list-toolbar">
         <Select
           label="Vigencia"
@@ -822,6 +785,43 @@ export function Invitations() {
             </div>
           )}
         </>
+      )}
+      {admin && policy.data && (
+        <details className="ac-help">
+          <summary>Ajustes de invitaciones</summary>
+          <p>
+            Para crear una invitación, esta instalación{" "}
+            {
+              {
+                NONE: "no pide datos personales obligatorios",
+                NAME: "pide el nombre de la persona",
+                EMAIL: "pide el correo de la persona",
+                BOTH: "pide el nombre y el correo de la persona",
+              }[policy.data.identityRequirement]
+            }
+            .
+          </p>
+          <Checkbox
+            label="Permitir invitaciones sin datos personales en este proyecto"
+            checked={policy.data.allowNonNominal}
+            disabled={busy || policy.data.identityRequirement !== "NONE"}
+            onChange={(e) => {
+              setBusy(true);
+              setError("");
+              void api(
+                "setInvitationPolicy",
+                { projectId },
+                {
+                  expectedVersion: policy.data.expectedVersion,
+                  allowNonNominal: e.target.checked,
+                },
+              )
+                .then(() => policy.refetch())
+                .catch((e: Error) => setError(e.message))
+                .finally(() => setBusy(false));
+            }}
+          />
+        </details>
       )}
       {creating &&
         (questionnaire.isPending ? (
