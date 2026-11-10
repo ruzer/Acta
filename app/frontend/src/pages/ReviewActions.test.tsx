@@ -1,5 +1,11 @@
 import { afterEach, beforeAll, expect, it, vi } from "vitest";
-import { render, screen, cleanup, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  cleanup,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 import { reviewDetailView } from "@requirements/contracts";
@@ -314,3 +320,92 @@ it("marca obligatorios, asocia errores en español y enfoca el resumen sin burbu
     "Selecciona al menos una respuesta que sustente la decisión.",
   );
 });
+
+it.each(["individual", "todas"])(
+  "limpia solo el error corregido y quita el resumen al completar, selección %s",
+  async (selection) => {
+    const user = userEvent.setup();
+    const first = data.submissions[0]!;
+    render(
+      <ReviewActionDialog
+        data={{
+          ...data,
+          submissions: [
+            first,
+            { ...first, id: "00000000-0000-4000-8000-000000000009", number: 2 },
+          ],
+        }}
+        action="validateQuestion"
+        onClose={vi.fn()}
+        onDone={vi.fn()}
+        refresh={vi.fn()}
+      />,
+    );
+    const submit = screen.getByRole("button", {
+      name: "Registrar como validada",
+    });
+    const fields = ["Decisión acordada", "Alcance", "Comentario interno"].map(
+      (label) => screen.getByLabelText(label),
+    );
+    const sources = screen.getByRole("group", { name: "Fuentes utilizadas" });
+    const source = within(sources).getAllByRole("checkbox")[0]!;
+    await user.click(submit);
+    await waitFor(() =>
+      expect(screen.getByRole("alert").parentElement).toHaveFocus(),
+    );
+    expect(
+      within(screen.getByRole("alert")).getAllByRole("listitem"),
+    ).toHaveLength(4);
+    for (const field of fields)
+      expect(field).toHaveAttribute("aria-invalid", "true");
+    expect(sources).toHaveAttribute("aria-invalid", "true");
+    expect(source).toHaveAccessibleDescription(
+      "Selecciona al menos una respuesta que sustente la decisión.",
+    );
+
+    await user.type(fields[0]!, "Decisión ficticia");
+    expect(fields[0]).toHaveFocus();
+    expect(fields[0]).not.toHaveAttribute("aria-invalid", "true");
+    expect(fields[0]).toHaveAccessibleDescription(
+      "Obligatorio para registrar la decisión.",
+    );
+    expect(
+      screen.queryByText("Escribe la decisión acordada."),
+    ).not.toBeInTheDocument();
+    expect(
+      within(screen.getByRole("alert")).getAllByRole("listitem"),
+    ).toHaveLength(3);
+    for (const field of fields.slice(1))
+      expect(field).toHaveAttribute("aria-invalid", "true");
+    expect(sources).toHaveAttribute("aria-invalid", "true");
+
+    await user.type(fields[1]!, "Alcance ficticio");
+    await user.type(fields[2]!, "Comentario ficticio");
+    expect(
+      within(screen.getByRole("alert")).getAllByRole("listitem"),
+    ).toHaveLength(1);
+    if (selection === "todas")
+      await user.click(
+        screen.getByRole("button", { name: "Seleccionar todas" }),
+      );
+    else await user.click(source);
+    expect(sources).not.toHaveAttribute("aria-invalid", "true");
+    expect(sources).not.toHaveAttribute("aria-describedby");
+    expect(source).not.toHaveAttribute("aria-describedby");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(api).not.toHaveBeenCalled();
+
+    // Editing does not revalidate; a new submit still enforces the same contract.
+    await user.clear(fields[0]!);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    await user.click(submit);
+    expect(
+      within(screen.getByRole("alert")).getAllByRole("listitem"),
+    ).toHaveLength(1);
+    expect(fields[0]).toHaveAttribute("aria-invalid", "true");
+    await waitFor(() =>
+      expect(screen.getByRole("alert").parentElement).toHaveFocus(),
+    );
+    expect(api).not.toHaveBeenCalled();
+  },
+);

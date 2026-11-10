@@ -24,7 +24,11 @@ import {
   safeAudit,
 } from "../visibility/visibility.service.js";
 import { ReviewReadService } from "../review/review-read.service.js";
-import { csvDocument, markdownText as md } from "./renderers.js";
+import {
+  csvDocument,
+  markdownHeading,
+  markdownText as md,
+} from "./renderers.js";
 // Static allowlist: never includes User, Session, ResponseDraft or DraftEvidence.
 const tables = [
   "Section",
@@ -369,7 +373,7 @@ export class ExportService {
                       (v) => v.questionId === q.id && !v.invalidatedAt,
                     );
                   out.push(
-                    `### ${md(q.externalId)} — ${md(def.question)}`,
+                    `### ${md(q.externalId)} — ${markdownHeading(def.question)}`,
                     `Estado: ${statusLabels[q.status]} · Prioridad: ${q.priority}`,
                     `Versión de pregunta: ${def.number}`,
                   );

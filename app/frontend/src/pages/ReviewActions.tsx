@@ -78,6 +78,22 @@ export function ReviewActionDialog({
     )
       onClose();
   }
+  function edited(name: string) {
+    setDirty(true);
+    const field =
+      name === "sources"
+        ? "responseRevisionIds"
+        : name === "messages"
+          ? "clarificationMessageIds"
+          : name === "resolutions"
+            ? "conflictResolutionIds"
+            : name;
+    if (!fieldErrors[field]) return;
+    const remaining = { ...fieldErrors };
+    delete remaining[field];
+    setFieldErrors(remaining);
+    if (!Object.keys(remaining).length) setError("");
+  }
   async function submit(form: HTMLFormElement) {
     const v = formValues(form),
       fd = new FormData(form);
@@ -207,7 +223,7 @@ export function ReviewActionDialog({
     <Dialog title={actionLabels[action]} onClose={close}>
       <form
         noValidate={action === "validateQuestion"}
-        onChange={() => setDirty(true)}
+        onChange={(event) => edited(event.target.getAttribute("name") ?? "")}
         onSubmit={(e) => {
           e.preventDefault();
           void submit(e.currentTarget);
@@ -386,7 +402,7 @@ export function ReviewActionDialog({
               sources={sources}
               question={d.question}
               error={fieldErrors.responseRevisionIds}
-              onChange={() => setDirty(true)}
+              onChange={() => edited("sources")}
             >
               {action === "validateQuestion" && (
                 <>

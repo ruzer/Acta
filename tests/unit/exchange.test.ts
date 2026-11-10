@@ -8,6 +8,7 @@ import {
 import { parseExactJson } from "../../app/backend/src/exchange/strict-json.js";
 import {
   csvCell,
+  markdownHeading,
   markdownText,
 } from "../../app/backend/src/exchange/renderers.js";
 import {
@@ -87,6 +88,38 @@ describe("decision excerpts", () => {
 });
 
 describe("readable Markdown", () => {
+  it.each([
+    ["¿Qué significa este signo? #", "¿Qué significa este signo? \\#"],
+    [
+      "¿Qué significan estos signos? ##",
+      "¿Qué significan estos signos? \\#\\#",
+    ],
+    [
+      " Primera línea\nsegunda  línea\tcon detalles ",
+      "Primera línea segunda línea con detalles",
+    ],
+    ["#", "\\#"],
+    ["##", "\\##"],
+    ["Texto con # intermedio", "Texto con # intermedio"],
+  ])(
+    "keeps the whole question in its Markdown heading: %s",
+    (input, expected) => {
+      expect(markdownHeading(input)).toBe(expected);
+    },
+  );
+  it("keeps line breaks and spacing in non-heading Markdown", () => {
+    expect(markdownText("Primera línea\nsegunda  línea")).toBe(
+      "Primera línea  \nsegunda  línea",
+    );
+  });
+  it.each([
+    "ftp://x.y",
+    "file:///etc/passwd",
+    "sftp://x.y",
+    "custom+demo://x.y",
+  ])("neutralizes every scheme separator: %s", (input) => {
+    expect(markdownText(input)).toBe(input.replace("://", ":&#47;/"));
+  });
   it.each([
     ["YES_NO", true, "Sí"],
     ["YES_NO", false, "No"],

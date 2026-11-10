@@ -23,10 +23,16 @@ export function markdownText(value: unknown): string {
       .replace(/^([ \t]*\d+)([.)])(?=\s)/gm, "$1\\$2")
       .replace(/^[ \t]+/gm, (space) => "&#32;".repeat(space.length))
       // GFM also auto-links bare URLs/emails; neutralize those without escaping dates/codes.
-      .replace(/\b(https?:)\/\//gi, "$1&#47;/")
+      .replace(/:\/\//g, ":&#47;/")
       .replace(/\bwww\./gi, "www&#46;")
       .replaceAll("@", "&#64;")
       .replaceAll("\n", "  \n")
+  );
+}
+export function markdownHeading(value: string) {
+  return markdownText(value.replace(/\s+/g, " ").trim()).replace(
+    / (#+)$/,
+    (_, hashes: string) => ` ${"\\#".repeat(hashes.length)}`,
   );
 }
 export const csvFields = [
