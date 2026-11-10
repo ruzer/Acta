@@ -1,10 +1,10 @@
 # Proveedores S3 para self-hosting
 
-Evaluación inicial: **2026-09-30**. Actualización de seguridad del default: **2026-10-20**. Este documento distingue capacidades declaradas por upstream de pruebas ejecutadas con Acta. No certifica toda la API S3, alta disponibilidad ni ausencia de vulnerabilidades. La licencia principal de Acta es AGPL-3.0-only.
+Evaluación inicial: **2026-09-30**. Última actualización del default: **2026-11-10**. Este documento distingue capacidades declaradas por upstream de pruebas ejecutadas con Acta. No certifica toda la API S3, alta disponibilidad ni ausencia de vulnerabilidades. La licencia principal de Acta es AGPL-3.0-only.
 
 ## Decisión
 
-**VersityGW 1.10.0 — DEFAULT — instalación sencilla.** Se conserva para el despliegue single-host de evidencia. No se agregan productos, SDK específicos, selectores UI ni enums al dominio. La API utiliza exclusivamente `S3Storage`, claves estables y configuración S3.
+**VersityGW 1.11.0 — DEFAULT — instalación sencilla.** Se conserva para el despliegue single-host de evidencia. No se agregan productos, SDK específicos, selectores UI ni enums al dominio. La API utiliza exclusivamente `S3Storage`, claves estables y configuración S3.
 
 Garage no satisface el contrato de escrituras condicionales del adaptador; no se incluye un override que obligue a debilitarlo. SeaweedFS queda como candidato avanzado **no verificado**, sin Compose incluido. MinIO se conserva únicamente para instalaciones anteriores y pruebas de compatibilidad; no es una recomendación de seguridad.
 
@@ -14,7 +14,7 @@ En Single host/Distributed se describe upstream; Tested/Backup/ARM64/AMD64 descr
 
 | Provider / versión evaluada | Clasificación | Self-hosted | Single host | Distributed | Tested | Backup tested | ARM64 | AMD64 |
 |---|---|---|---|---|---|---|---|---|
-| VersityGW 1.10.0 | DEFAULT + VERIFIED | Sí | Sí, POSIX incluido | Gateway sobre storage compartido; no replicación del disco local incluida | 41/41 + recorrido API, actualización 1.9.0 → 1.10.0 y restart (2026-11-07) | Restore en destino 1.10.0 vacío, dump + seis volúmenes y SHA-256 (2026-11-07) | Linux verificado localmente | Consultar CI de la revisión |
+| VersityGW 1.11.0 | DEFAULT + VERIFIED | Sí | Sí, POSIX incluido | Gateway sobre storage compartido; no replicación del disco local incluida | 44/44 + API, actualización 1.10.0 → 1.11.0 y restart (2026-11-10) | Scripts de backup/restore a destino 1.11.0 nuevo, ocho recuentos y ambos smoke (2026-11-10) | Linux verificado localmente | Pendiente del CI de esta revisión |
 | Garage 2.4.1 | NOT SUPPORTED por el contrato actual | Sí | Upstream lo permite; recomienda redundancia para producción | Sí, upstream | No ejecutado; incompatibilidad documentada | No | Binario upstream, app no ensayada | Binario upstream, app no ensayada |
 | SeaweedFS 4.48 | CANDIDATE / NOT VERIFIED | Sí | `weed mini` agrupa servicios | Sí, upstream | No ejecutado | No | Asset upstream, app no ensayada | Asset upstream, app no ensayada |
 | MinIO RELEASE.2025-10-15T17-29-55Z | LEGACY, no recomendado | Sí | Override existente | Upstream; no incluido aquí | 21/21 + recorrido API | Sí, destructivo TEST | Linux verificado (funcional) | No ensayado |
@@ -38,11 +38,91 @@ El esquema todavía conserva el valor **MINIO** de registros históricos, leído
 
 ## VersityGW
 
-El default compila la release oficial **1.10.0**, commit `72f75bd0f4c67a7663d3c56b80f05a44f6732db8`, con **Go 1.27.3** fijado por digest. No se modifica código ni dependencias upstream: `golang.org/x/net` v0.61.0 ya está incluido y se retira el parche local de 1.8.0. LICENSE/NOTICE se conservan íntegros, verificados contra la nueva release; ver [modificaciones del build](../docker/versity/UPSTREAM-MODIFICATIONS) e [inventario de licencias](STORAGE-DEPENDENCY-LICENSES.csv).
+El default compila la release oficial **1.11.0**, commit `e42ae7ab8107201e64e52ee024824e8cab3683b3`, con **Go 1.27.3** fijado por digest. No se modifica código ni dependencias upstream: `golang.org/x/net` v0.62.0 ya está incluido y se retira el parche local de 1.8.0. LICENSE/NOTICE se conservan íntegros, verificados contra la nueva release; ver [modificaciones del build](../docker/versity/UPSTREAM-MODIFICATIONS) e [inventario de licencias](STORAGE-DEPENDENCY-LICENSES.csv).
 
 La misma etapa de compilación se usa en `docker/versity/Dockerfile` y `app/backend/Dockerfile` (aprovisionamiento). El backend de aplicación no recibe ese binario ni las credenciales root. Se conservan el wrapper sin privilegios, POSIX con metadata sidecar, IAM local, política por prefijo y healthcheck `/_health` más `HeadBucket`. No cambia la API de Acta ni la configuración S3. Single-host no es HA.
 
 Correcciones: Go 1.27.3 resuelve **GO-2026-6809 / CVE-2026-111943** (`crypto/x509`). VersityGW 1.9.0 corrige **GHSA-7qcr-88c3-f9p7** (path traversal mediante uploadId y borrado múltiple) y **GHSA-5gjv-3vhq-4chv** (cuerpos chunked sin consumir y reutilización de conexiones). El despliegue estándar no activa keepalive ni usa multipart; eso limita el alcance probado, pero no justifica conservar una versión afectada. El gate `govulncheck` sigue siendo obligatorio y no certifica ausencia de todas las vulnerabilidades de aplicación o del sistema operativo.
+
+### Actualización 1.10.0 → 1.11.0
+
+Release oficial del 2026-11-06; tag verificado en el commit
+`e42ae7ab8107201e64e52ee024824e8cab3683b3`, fecha UTC del commit
+`2026-11-06T22:51:18Z`. Su `go.mod` exige Go 1.26.0: se conserva Go 1.27.3
+con el mismo digest, sin modificar fuente ni dependencias del proveedor.
+
+Las [notas oficiales](https://github.com/versity/versitygw/releases/tag/v1.11.0)
+describen limpieza de sidecars multipart, correcciones de carreras POSIX al subir
+mientras se borran directorios y de listados, `DeleteObjects` con namespace S3,
+enrutamiento virtual-hosted por el host firmado e invalidación de la caché IAM
+al crear/actualizar cuentas. Acta conserva POSIX, sidecars, IAM local (`--iam-dir`),
+cuenta acotada, claves y política existentes, y `S3_FORCE_PATH_STYLE=true`.
+La nueva caché de IAM **standalone** y sus opciones no se activan aquí; la
+invalidación de la caché de cuentas sí corresponde al wrapper del IAM local.
+
+Una credencial inexistente continúa siendo `InvalidAccessKeyId`/403; una firma
+incorrecta, `SignatureDoesNotMatch`/403. La revisión de ambos tags confirma que
+el middleware ya separaba `ErrNoSuchUser` de otros errores IAM en 1.10.0:
+no se presenta el anuncio de errores internos como un cambio nuevo de ese
+middleware entre estas dos etiquetas. Fallos internos no se deben convertir
+en credenciales inválidas. Acta no depende del nombre IAM para autorizar al
+usuario: el SDK rechaza la operación, health falla con 503 y `verifiedBytes`
+traduce cualquier fallo de lectura/integridad a su 503 existente. No se cambia
+el backend, ni se prueba una caída artificial del almacén IAM en este ensayo.
+
+`go.mod` mantiene su conjunto de módulos: 0 añadidos, 0 retirados, 34 versiones
+distintas. `go.sum` sustituye 70 líneas por 70 (35 módulos); además de los de
+la tabla cambia `github.com/shamaton/msgpack/v3` v3.2.3 → v3.2.6, sin entrada
+directa en `go.mod`. El inventario de licencias se regenera desde esta fuente
+con go-licenses v2.0.1; no se reutiliza el inventario anterior de 1.9.0.
+El binario enlaza 77 módulos en ambas versiones (31 versiones distintas).
+El inventario pasa de 88 a 90 entradas: añade `sdk/storage/internal/sasurl`
+(Azure, MIT) y `smithy-go/transport/http/protocol/internal/json/internal/stdlib`
+(BSD-3-Clause). No desaparecen entradas ni cambian los conjuntos de licencias
+por paquete; se conservan las varias entradas de componentes con avisos
+múltiples, como `klauspost/compress`, y las obligaciones MPL-2.0.
+No hay licencias desconocidas en el reporte; el escáner advierte que no analiza
+las dependencias internas de archivos ensamblador/no-Go.
+
+| Módulo en `go.mod` | 1.10.0 | 1.11.0 |
+|---|---|---|
+| `github.com/Azure/azure-sdk-for-go/sdk/azcore` | v1.23.3 | v1.24.0 |
+| `github.com/Azure/azure-sdk-for-go/sdk/storage/azblob` | v1.8.2 | v1.8.3 |
+| `github.com/andybalholm/brotli` | v1.2.6 | v1.2.7 |
+| `github.com/aws/aws-sdk-go-v2` | v1.47.3 | v1.47.5 |
+| `github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream` | v1.7.22 | v1.7.25 |
+| `github.com/aws/aws-sdk-go-v2/config` | v1.33.9 | v1.33.13 |
+| `github.com/aws/aws-sdk-go-v2/credentials` | v1.20.9 | v1.20.13 |
+| `github.com/aws/aws-sdk-go-v2/feature/ec2/imds` | v1.20.3 | v1.20.5 |
+| `github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager` | v0.4.16 | v0.5.2 |
+| `github.com/aws/aws-sdk-go-v2/internal/configsources` | v1.5.6 | v1.5.8 |
+| `github.com/aws/aws-sdk-go-v2/internal/endpoints/v2` | v2.8.6 | v2.8.8 |
+| `github.com/aws/aws-sdk-go-v2/internal/v4a` | v1.5.6 | v1.5.8 |
+| `github.com/aws/aws-sdk-go-v2/service/iam` | v1.64.4 | v1.64.6 |
+| `github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding` | v1.13.21 | v1.13.23 |
+| `github.com/aws/aws-sdk-go-v2/service/internal/checksum` | v1.11.7 | v1.11.9 |
+| `github.com/aws/aws-sdk-go-v2/service/internal/presigned-url` | v1.14.6 | v1.14.8 |
+| `github.com/aws/aws-sdk-go-v2/service/internal/s3shared` | v1.20.6 | v1.20.8 |
+| `github.com/aws/aws-sdk-go-v2/service/s3` | v1.114.3 | v1.114.6 |
+| `github.com/aws/aws-sdk-go-v2/service/signin` | v1.10.4 | v1.12.1 |
+| `github.com/aws/aws-sdk-go-v2/service/sso` | v1.38.4 | v1.39.1 |
+| `github.com/aws/aws-sdk-go-v2/service/ssooidc` | v1.43.4 | v1.44.1 |
+| `github.com/aws/aws-sdk-go-v2/service/sts` | v1.51.4 | v1.51.6 |
+| `github.com/aws/smithy-go` | v1.28.5 | v1.28.7 |
+| `github.com/goccy/go-json` | v0.11.2 | v0.12.0 |
+| `github.com/gofiber/schema` | v1.8.8 | v1.9.2 |
+| `github.com/gofiber/utils/v2` | v2.6.2 | v2.6.3 |
+| `github.com/hashicorp/go-rootcerts` | v1.0.2 | v1.1.0 |
+| `github.com/klauspost/cpuid/v2` | v2.4.1 | v2.4.2 |
+| `github.com/molecule-man/go-brrr` | v1.3.0 | v1.3.1 |
+| `github.com/nats-io/nats.go` | v1.54.0 | v1.55.0 |
+| `github.com/rabbitmq/amqp091-go` | v1.15.0 | v1.16.0 |
+| `github.com/valyala/fasthttp` | v1.75.0 | v1.77.0 |
+| `go.yaml.in/yaml/v3` | v3.0.5 | v3.0.6 |
+| `golang.org/x/net` | v0.61.0 | v0.62.0 |
+
+Se aplica la misma ventana sin escritores y receta de backup/restore; no se
+convierte el formato de los objetos ni se reinicializan identidades.
 
 ### Actualización 1.9.0 → 1.10.0
 
@@ -164,6 +244,79 @@ Linux ARM64, stack descartable separado, sin usar datos ni volúmenes existentes
 - Actualización real **1.8.0 → 1.9.0**: se creó primero una instalación 1.8.0 con el smoke existente, se detuvieron escritores, se reconstruyeron únicamente `object-storage` y `storage-init`, y se inició con los mismos volúmenes y configuración. `scripts/selfhost-smoke.mjs --verify` confirmó login, respuesta, decisión/fuente, evidencia con el mismo SHA-256 y privacidad. No se convirtieron objetos ni se reinicializó IAM.
 
 El cambio conserva `start.mjs`, el aprovisionador, Compose y el adaptador S3. El CI de cada PR ejecuta además `verify`, `secrets`, `selfhosting` y `guided-install`; su resultado se consulta sobre el SHA exacto, no se deduce de las pruebas locales. No se probó Object Lock, HA ni migración a otro proveedor. La receta de backup/restore conserva su evidencia histórica separada.
+
+## Verificación de seguridad y compatibilidad 1.11.0 (2026-11-10)
+
+Ensayo real en Linux ARM64 (`aarch64`) sobre Docker Desktop, con datos ficticios,
+puertos y tres proyectos/volúmenes propios. Base Acta:
+`9fb08b0ddc897914af7b8af6a4ee2e303c9439c9` (incluye el lote C, PR #108).
+Fuente destino de VersityGW: `e42ae7ab8107201e64e52ee024824e8cab3683b3`.
+No se utilizaron instalaciones existentes ni se cambió código de aplicación.
+
+| Comprobación ejecutada | Resultado local |
+|---|---|
+| Instalación limpia 1.10.0, `selfhost-smoke` e `invitation-proxy-smoke` | PASS: usuarios ficticios, respuesta, decisión/fuente, evidencia, acceso privado e invitación |
+| Contrato S3/backend de la base 1.10.0, antes de crear el fixture | **44/44 PASS**, 0 skips: 18 respuestas, 19 invitaciones y 7 S3 |
+| `backup.sh` → `verify-backup.sh` | PASS: dump `PGDMP`, seis tar, configuración y manifiesto; nueve archivos verificados |
+| Actualizar solo `object-storage` y `storage-init` a 1.11.0 | PASS: conserva volúmenes e identidades; IDs de los contenedores backend/frontend/PostgreSQL sin cambios |
+| Ambos smoke `--verify`, tras actualizar y tras reiniciar | PASS: respuesta, decisión/fuente, SHA-256, login, privacidad y sesión/aportación de invitación conservados |
+| Contrato en otro bucket y DB nuevos con 1.11.0 | **44/44 PASS**, 0 skips, mismas pruebas y aserciones que en 1.10.0 |
+| Multipart de 18 MiB (tres partes de 6 MiB), listado y `DeleteObjects` | PASS en ambas versiones: bytes y hash exactos, borrado sin errores, listado vacío y lectura posterior 404 |
+| Credencial inexistente / firma incorrecta | Sin diferencia: `InvalidAccessKeyId`/403 y `SignatureDoesNotMatch`/403 respectivamente |
+| Privacidad y creación condicional concurrente | PASS: anónimo/prefijo ajeno/políticas denegados; una creación y un rechazo 412, sin sobrescritura |
+| `restore.sh` del backup 1.10.0 en siete volúmenes nuevos con 1.11.0 | PASS: ocho recuentos iguales antes/después del arranque y ambos smoke `--verify` |
+| Reinicio del destino restaurado y ambos smoke `--verify` | PASS: respuesta, decisión/fuente, evidencia con SHA-256 y sesión de invitación persistentes |
+| `go mod verify`, después de compilar; manifiestos upstream | PASS; `go.mod` y `go.sum` sin cambios |
+| `govulncheck` v1.8.0, modo binario detallado | Exit 0: 0 vulnerabilidades alcanzables, 0 en paquetes importados; 1 aviso de módulo, detallado abajo |
+
+Los ocho recuentos de la copia y del destino fueron: 13 migraciones, 2 proyectos,
+1 tema, 2 preguntas, 2 revisiones enviadas, 1 validación, 2 evidencias y
+0 assets de branding. Se restauraron secretos antes del arranque. Los avisos
+por `.env` y override distintos son esperados: el destino usa otro puerto y
+otras redes. No se alteró ni destruyó el origen para restaurar.
+
+Gateway y aprovisionador contienen el mismo binario, SHA-256
+`f0090e7ad693fddd8c7cd66b62695a192a6d07d04f728fdfece4684e7de5f0f7`.
+Servicio ejecutado como `node` (UID 1000). Los hashes de objetos, sidecars e IAM
+vigente son idénticos antes/después de actualizar. Solo cambia `users.json.backup`,
+la copia interna histórica de IAM que rota el aprovisionador.
+
+La base 1.10.0 tuvo 0 avisos alcanzables, 0 en paquetes importados y 3 a nivel
+de módulo. Con 1.11.0 desaparecen **GO-2026-6866** y **GO-2026-6860** al incorporar
+`golang.org/x/net` v0.62.0. Permanece **GO-2026-5932** en `golang.org/x/crypto`
+v0.58.0 por `openpgp`, paquete no importado por este binario. No se suprimieron
+avisos ni se modificaron dependencias del proveedor; este resultado no significa
+que todos los módulos requeridos estén libres de vulnerabilidades.
+
+**Condiciones del ensayo:** las descargas de Go sufrieron EOF/errores HTTP/2
+y la construcción estándar local se canceló tras quedar sin progreso. Para
+completar el ensayo se usaron Dockerfiles temporales con `GODEBUG=http2client=0`
+solo en la etapa de compilación y cachés propias, precargadas desde el build
+1.10.0 verificado. TLS, `go.sum`, `-mod=readonly`, Go 1.27.3 y su digest, fuente,
+flags de compilación y metadata de versión se conservaron. El runtime no tiene
+`GODEBUG`. Ese ajuste de red/caché **no está en los Dockerfiles publicados**;
+el build estándar de esos archivos queda a cargo del CI. Los resultados de
+este ensayo no se presentan como un PASS de CI ni como reproducibilidad bit a bit.
+
+Validación de Acta: lint, typecheck, build y **657/657 unitarias en 54 archivos**;
+integración completa **173/173**, 0 skips. La primera integración tuvo 172/173
+porque el runner de pruebas heredó `TRUSTED_PROXY_HOPS=1` del Compose; repetida
+con el valor directo 0 de CI pasó completa, sin editar código ni aserciones.
+Las 44 pruebas S3 incluyen los casos nuevos y los añadidos previamente en main;
+no se compara su cifra sin contexto con las 41 históricas de 2026-11-07.
+
+Al abrir el PR, main avanzó a `27381c7a7d2a869e5e303efddc34a099ea57ba4f`
+(NestJS 12.4.0). Se incorporó mediante merge sin conflictos y se repitieron
+`npm ci`, Prisma, lint, typecheck, build, 657 unitarias y las 173 pruebas de
+integración con PostgreSQL nuevo: todas pasaron. El ensayo Docker/S3 descrito
+arriba conserva su base original; no se atribuye a esta repetición del gate
+de aplicación un nuevo ensayo completo de imágenes o backup.
+
+No se ejecutaron E2E de navegador generales, AMD64 local, Object Lock, HA,
+downgrade, otros proveedores, caída artificial del almacén IAM, virtual-hosted,
+ni producción. Tampoco se certifica toda la API S3, todos los fallos multipart
+ni las pruebas internas completas del proveedor. El CI y su `selfhosting`
+se consultan sobre el SHA del PR; no se anticipa su resultado.
 
 ## Verificación de seguridad y compatibilidad 1.10.0 (2026-11-07)
 

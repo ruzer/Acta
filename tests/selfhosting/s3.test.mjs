@@ -7,6 +7,11 @@ import {
   GetObjectCommand,
   DeleteObjectCommand,
   GetBucketPolicyCommand,
+  CreateMultipartUploadCommand,
+  UploadPartCommand,
+  CompleteMultipartUploadCommand,
+  ListObjectsV2Command,
+  DeleteObjectsCommand,
 } from "@aws-sdk/client-s3";
 import {
   S3Storage,
@@ -112,12 +117,85 @@ test("S3 real: invalid credentials cannot read an existing private object", asyn
               Key: objectKey(key),
             }),
           ),
-        (error) => error.$metadata?.httpStatusCode === 403,
+        (error) => {
+          assert.equal(error.$metadata?.httpStatusCode, 403);
+          assert.equal(
+            error.name,
+            accessKeyId === config.options.credentials.accessKeyId
+              ? "SignatureDoesNotMatch"
+              : "InvalidAccessKeyId",
+          );
+          return true;
+        },
       );
     } finally {
       invalid.destroy();
     }
   }
+});
+
+test("S3 real: multipart preserves 18 MiB, listing and batch deletion", async () => {
+  const key = randomUUID();
+  keys.push(key);
+  const Key = objectKey(key);
+  const common = { Bucket: config.bucket, Key };
+  const { UploadId } = await client.send(
+    new CreateMultipartUploadCommand(common),
+  );
+  assert.ok(UploadId);
+  const bytes = Buffer.alloc(18 * 1024 * 1024, 0x61);
+  const Parts = [];
+  for (let n = 0; n < 3; n++) {
+    const { ETag } = await client.send(
+      new UploadPartCommand({
+        ...common,
+        UploadId,
+        PartNumber: n + 1,
+        Body: bytes.subarray(n * 6 * 1024 * 1024, (n + 1) * 6 * 1024 * 1024),
+      }),
+    );
+    Parts.push({ PartNumber: n + 1, ETag });
+  }
+  await client.send(
+    new CompleteMultipartUploadCommand({
+      ...common,
+      UploadId,
+      MultipartUpload: { Parts },
+    }),
+  );
+  assert.deepEqual(
+    await verifiedBytes(storage, {
+      backend: "S3",
+      storageKey: key,
+      byteSize: BigInt(bytes.length),
+      sha256: sha256(bytes),
+    }),
+    bytes,
+  );
+  const list = () =>
+    client.send(
+      new ListObjectsV2Command({ Bucket: config.bucket, Prefix: Key }),
+    );
+  assert.deepEqual(
+    (await list()).Contents?.map((item) => item.Key),
+    [Key],
+  );
+  const deleted = await client.send(
+    new DeleteObjectsCommand({
+      Bucket: config.bucket,
+      Delete: { Objects: [{ Key }] },
+    }),
+  );
+  assert.equal(deleted.Errors?.length ?? 0, 0);
+  assert.deepEqual(
+    deleted.Deleted?.map((item) => item.Key),
+    [Key],
+  );
+  assert.equal((await list()).Contents?.length ?? 0, 0);
+  await assert.rejects(
+    () => storage.read(key),
+    (error) => error.$metadata?.httpStatusCode === 404,
+  );
 });
 
 test("S3 real: application account cannot write/delete outside its prefix or read policy", async () => {
