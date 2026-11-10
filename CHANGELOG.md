@@ -221,6 +221,11 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   accesible y foco en el título al terminar. Acceso, instalación y participante
   permanecen en la carga inicial.
 
+- **Dependencias consolidadas y verificadas.** React Router pasa a 7.18.5,
+  el plugin de React para Vite a 6.2.1, jsdom a 31.0.0 y los tipos de Node a
+  26.6.6. Las propuestas de Dependabot se validan juntas, sin modificar código
+  de la aplicación, contratos ni pruebas existentes.
+
 ### Security
 
 - **Vite 8.3.5**, tras la corrección de seguridad de 8.3.1 a 8.3.4, incorpora
