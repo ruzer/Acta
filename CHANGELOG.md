@@ -114,6 +114,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   al corregir el último se retira el resumen. La validación y el foco al fallar
   siguen ocurriendo al enviar, también al seleccionar fuentes en conjunto.
 
+- **Restauración con comprobaciones claras:** compara versión, commit y migraciones antes de operar; informa imágenes ausentes, configuración distinta y permisos de la copia sin falsos avisos por reconstruir imágenes.
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**
