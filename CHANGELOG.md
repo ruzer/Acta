@@ -120,6 +120,14 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Exporte Markdown tolerante a snapshots incompletos:** comparte con Revisión la lectura de nombres y usa respaldos para autor y área. Conserva las fuentes y los formatos JSON/CSV; es robustez ante datos históricos o editados fuera de la aplicación.
 
+- **VersityGW 1.11.0 como almacenamiento incluido.** Se fija la release oficial
+  en el gateway y su aprovisionador, conservando Go 1.27.3, POSIX, IAM y la
+  configuración existentes. Incluye correcciones de multipart, carreras de
+  archivos y listados; se actualizan las atribuciones de dependencias y se
+  comprueban cargas multipart, borrado múltiple y errores de credenciales.
+  El ensayo de actualización y restauración desde 1.10.0 se documenta en
+  [Proveedores S3](docs/S3-PROVIDERS.md).
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**
