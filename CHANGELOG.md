@@ -109,6 +109,11 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   se unifican espacios y saltos de línea y se protegen los signos `#` finales;
   el cuerpo del documento y las exportaciones JSON/CSV no cambian.
 
+- **Los errores de Registrar decisión se limpian al corregir cada campo.**
+  Desaparecen el aviso y su asociación accesible, sin borrar los demás errores;
+  al corregir el último se retira el resumen. La validación y el foco al fallar
+  siguen ocurriendo al enviar, también al seleccionar fuentes en conjunto.
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**
