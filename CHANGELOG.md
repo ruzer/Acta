@@ -105,6 +105,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   FTP y otros protocolos no se convierten en enlaces activos al renderizar;
   se conserva el resto del escapado y el formato de JSON y CSV.
 
+- **Los encabezados Markdown conservan la pregunta completa.** Solo en el título
+  se unifican espacios y saltos de línea y se protegen los signos `#` finales;
+  el cuerpo del documento y las exportaciones JSON/CSV no cambian.
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**

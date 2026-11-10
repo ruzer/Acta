@@ -29,6 +29,12 @@ export function markdownText(value: unknown): string {
       .replaceAll("\n", "  \n")
   );
 }
+export function markdownHeading(value: string) {
+  return markdownText(value.replace(/\s+/g, " ").trim()).replace(
+    / (#+)$/,
+    (_, hashes: string) => ` ${"\\#".repeat(hashes.length)}`,
+  );
+}
 export const csvFields = [
   "projectExternalId",
   "sectionExternalId",
