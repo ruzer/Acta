@@ -1137,9 +1137,9 @@ section.narrow {
     justify-content: flex-start;
     padding-top: 6px;
   }
-  /* The button's own padding would indent its text from the card's labels. */
-  .data-table .actions > .button.tertiary:first-child {
-    margin-inline-start: -1rem;
+  /* Flush with the card's labels, like the links in the Projects cards. */
+  .data-table .actions > .button.tertiary {
+    padding-inline: 0;
   }
 }
 
