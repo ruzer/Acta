@@ -17,6 +17,16 @@ test -n "$backup" || fail 'Falta --backup.'
 case "$backup" in *:*|*,*) fail 'Ruta de backup no soportada.';; esac
 "$root/scripts/verify-backup.sh" "$backup"
 backup=$(CDPATH='' cd -- "$backup" && pwd -P)
+node "$metadata" compatibility "$backup" "$root"
+# Compare names, never disclose configuration values; drills may intentionally differ.
+for file in "$root/.env" "$root"/docker-compose.override*.yml "$backup"/docker-compose.override*.yml; do
+  name=${file##*/}
+  case "$name" in *\**) continue;; esac
+  case "$file" in "$backup"/*) test ! -e "$root/$name" || continue;; esac
+  if ! cmp -s "$root/$name" "$backup/$name"; then
+    printf '%s\n' "AVISO: $name difiere de la copia o falta; confirme la configuración del destino." >&2
+  fi
+done
 deployment_check
 # Every destination check is read-only. A Docker error is not an empty destination.
 containers=$(docker ps -aq --filter "label=com.docker.compose.project=$project")
@@ -28,14 +38,12 @@ done
 dc config --format json | node "$metadata" config "$project"
 pg_image=$(dc config --format json | node "$metadata" postgres-image)
 image_names=$(dc config --images)
-image_ids=''
-for image in $image_names; do
-  id=$(docker image inspect -f '{{.Id}}' "$image")
-  image_ids="$image_ids $id"
+for image in $image_names "$helper"; do
+  docker image inspect "$image" >/dev/null 2>&1 ||
+    fail "Falta la imagen local $image. Ejecute docker compose -p $project build y docker compose -p $project pull --ignore-buildable antes de restaurar."
 done
-docker image inspect "$helper" >/dev/null
 version=$(docker run --rm --pull never --network none --entrypoint postgres "$pg_image" --version)
-node "$metadata" compatibility "$backup" "$root" "$version" "$image_ids"
+node "$metadata" postgres-compatibility "$backup" "$version"
 # The operator must serialize restores to a project; never share this target.
 for suffix in $suffixes; do
   docker volume create --label "com.docker.compose.project=$project" \

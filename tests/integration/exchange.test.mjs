@@ -1110,3 +1110,96 @@ test("Markdown renders a complete decided question with account and invitation s
     ].join("\n\n") + "\n";
   assert.equal(md.text, expected);
 });
+
+// Only the owner of this disposable database simulates old/manual JSONB rows.
+// Current application writers always save complete snapshots.
+test("Markdown tolerates incomplete historical snapshots without changing JSON or CSV", async () => {
+  const p = await db.project.findFirstOrThrow({
+    where: { externalId: "MARKDOWN-DEMO" },
+  });
+  const revisions = await db.responseRevision.findMany({
+    where: { projectId: p.id },
+  });
+  const csvBefore = await exported("CSV", analyst, "full", p);
+  async function replaceSnapshots(values) {
+    await owner.query("BEGIN");
+    try {
+      await owner.query("SET LOCAL session_replication_role = replica");
+      for (const value of values)
+        await owner.query(
+          'UPDATE "ResponseRevision" SET "respondentSnapshot"=$1::jsonb, "areaSnapshot"=$2::jsonb WHERE id=$3::uuid',
+          [
+            JSON.stringify(value.respondentSnapshot),
+            JSON.stringify(value.areaSnapshot),
+            value.id,
+          ],
+        );
+      await owner.query("COMMIT");
+    } catch (error) {
+      await owner.query("ROLLBACK");
+      throw error;
+    }
+  }
+  try {
+    for (const snapshot of [
+      {},
+      [],
+      42,
+      "unexpected",
+      null,
+      { displayName: 42, name: false },
+    ]) {
+      await replaceSnapshots(
+        revisions.map((r) => ({
+          id: r.id,
+          respondentSnapshot: snapshot,
+          areaSnapshot: snapshot,
+        })),
+      );
+      const md = await exported("MARKDOWN", analyst, "full", p);
+      assert.equal(md.status, 201, md.text);
+      assert.equal(
+        (
+          md.text.match(
+            /Autor: Autor no registrado \(cuenta\) · Área: Área no registrada/g,
+          ) ?? []
+        ).length,
+        2,
+      );
+      assert.ok(
+        md.text.includes(
+          "Fuentes: Autor no registrado (envío 1), Autor no registrado (envío 1)",
+        ),
+      );
+      const json = (await exported("JSON", analyst, "full", p)).data;
+      for (const r of json.responseRevisions) {
+        assert.deepEqual(r.respondentSnapshot, snapshot);
+        assert.deepEqual(r.areaSnapshot, snapshot);
+      }
+      const csv = await exported("CSV", analyst, "full", p);
+      assert.equal(csv.status, 201);
+      const normalizeTime = (text) =>
+        text.replace(
+          /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/g,
+          "TIMESTAMP",
+        );
+      assert.equal(normalizeTime(csv.text), normalizeTime(csvBefore.text));
+    }
+    await replaceSnapshots(
+      revisions.map((r) => ({
+        id: r.id,
+        respondentSnapshot: { displayName: "Persona histórica" },
+        areaSnapshot: { name: "Área histórica" },
+      })),
+    );
+    const legacy = await exported("MARKDOWN", analyst, "full", p);
+    assert.equal(legacy.status, 201);
+    assert.ok(
+      legacy.text.includes(
+        "Autor: Persona histórica (cuenta) · Área: Área histórica",
+      ),
+    );
+  } finally {
+    await replaceSnapshots(revisions);
+  }
+});

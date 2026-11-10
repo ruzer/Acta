@@ -5,6 +5,7 @@ import * as C from "@requirements/contracts";
 import { Database } from "../database/database.module.js";
 import { AccessService } from "../administration/access.service.js";
 import { serialize, Tx } from "../common/http.js";
+import { snapshotName } from "../common/snapshot.js";
 import { coverage, questionCoverage } from "./review-state.js";
 import { presentEvidence, loadGraph } from "../responses/response-graph.js";
 import { ReviewService } from "./review.service.js";
@@ -193,17 +194,6 @@ export class ReviewReadService {
           visibleIds.add(s.responseRevisionId);
     const viewer = member.role === "VIEWER" || decisionsOnly,
       v = question.QuestionRevision_questionRecord[0]!;
-    const snapshotName = (
-      snapshot: Prisma.JsonValue,
-      key: string,
-      fallback: string,
-    ) =>
-      snapshot &&
-      typeof snapshot === "object" &&
-      !Array.isArray(snapshot) &&
-      typeof snapshot[key] === "string"
-        ? snapshot[key]
-        : fallback;
     const pendingEvent =
       !viewer && question.pendingReview
         ? await tx.auditEvent.findFirst({

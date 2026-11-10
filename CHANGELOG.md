@@ -114,6 +114,12 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   al corregir el último se retira el resumen. La validación y el foco al fallar
   siguen ocurriendo al enviar, también al seleccionar fuentes en conjunto.
 
+- **Restauración con comprobaciones claras:** compara versión, commit y migraciones antes de operar; informa imágenes ausentes, configuración distinta y permisos de la copia sin falsos avisos por reconstruir imágenes.
+
+- **Guía de recuperación actualizada:** distingue construcción y descarga de imágenes, explica los avisos y límites de verificación, y registra el ensayo remoto del PR #107 y el simulacro local.
+
+- **Exporte Markdown tolerante a snapshots incompletos:** comparte con Revisión la lectura de nombres y usa respaldos para autor y área. Conserva las fuentes y los formatos JSON/CSV; es robustez ante datos históricos o editados fuera de la aplicación.
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**
@@ -161,6 +167,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 - **Guía operativa de copias y simulacros.** Documenta scripts, programación,
   ventana sin escritores, secretos, retención y assets externos; conserva la
   receta manual y separa evidencia local de verificación pendiente en CI.
+
+- **Escaneo de código y acciones agrupadas:** CodeQL analiza JavaScript/TypeScript en PR, main y semanalmente; Dependabot agrupa las acciones en una propuesta semanal. No se alteran los checks requeridos.
 
 ### Changed
 

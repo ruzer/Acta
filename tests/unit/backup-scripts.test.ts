@@ -212,6 +212,7 @@ function backupFixture() {
   const files = ["database.dump", ".env", ...suffixes.map((s) => `${s}.tar`)];
   const manifest = {
     formatVersion: 1,
+    commit: null,
     postgresVersion: "18.6",
     actaVersion: "0.8.0",
     images: [{ ID: "fixture" }],
@@ -252,6 +253,13 @@ function backupFixture() {
     join(deployment, "app/backend/Dockerfile"),
   );
   writeFileSync(join(deployment, ".env"), "# Fixture only\n");
+  writeFileSync(
+    join(deployment, "package.json"),
+    JSON.stringify({ version: manifest.actaVersion }),
+  );
+  mkdirSync(join(deployment, "app/backend/prisma/migrations"), {
+    recursive: true,
+  });
   return { ...f, backup, deployment, manifest };
 }
 describe("verify backup without Docker", () => {
@@ -395,11 +403,9 @@ describe("restore compatibility and counts", () => {
       "node",
       [
         "scripts/backup-manifest.mjs",
-        "compatibility",
+        "postgres-compatibility",
         f.backup,
-        process.cwd(),
         "postgres (PostgreSQL) 19.1",
-        "fixture",
       ],
       { env: f.env, encoding: "utf8" },
     );
@@ -407,22 +413,60 @@ describe("restore compatibility and counts", () => {
     expect(r.stderr).toMatch(/Cambio mayor/);
     expect(existsSync(f.calls)).toBe(false);
   });
-  it("warns without blocking a same-major code/image difference", () => {
+  it.each(["version", "commit"])(
+    "warns without blocking a %s difference",
+    (kind) => {
+      const f = backupFixture();
+      if (kind === "version") f.manifest.actaVersion = "0.1.0";
+      else Object.assign(f.manifest, { commit: "old-commit" });
+      writeFileSync(
+        join(f.backup, "manifest.json"),
+        JSON.stringify(f.manifest),
+      );
+      const r = compatibility(f);
+      expect(r.status, r.stderr).toBe(0);
+      expect(r.stderr).toContain("AVISO: versión de Acta o commit distintos");
+    },
+  );
+  it("does not compare image IDs when the code and migrations match", () => {
     const f = backupFixture();
-    const r = spawnSync(
-      "node",
-      [
-        "scripts/backup-manifest.mjs",
-        "compatibility",
-        f.backup,
-        process.cwd(),
-        "postgres (PostgreSQL) 18.6",
-        "different-image",
-      ],
-      { env: f.env, encoding: "utf8" },
-    );
+    f.manifest.images[0].ID = "rebuilt-image";
+    writeFileSync(join(f.backup, "manifest.json"), JSON.stringify(f.manifest));
+    const r = compatibility(f);
     expect(r.status, r.stderr).toBe(0);
-    expect(r.stderr).toMatch(/AVISO:/);
+    expect(r.stderr).toBe("");
+  });
+  it("rejects a newer backup before restore invokes Docker", () => {
+    const f = backupFixture();
+    f.manifest.controlCounts.migrations = 1;
+    writeFileSync(join(f.backup, "manifest.json"), JSON.stringify(f.manifest));
+    const r = restore(f);
+    expect(r.status).not.toBe(0);
+    expect(r.stderr).toContain("la copia es más nueva que el código");
+    expect(existsSync(f.calls)).toBe(false);
+  });
+  it("warns about pending migrations, counting only directories containing migration.sql", () => {
+    const f = backupFixture();
+    const migrations = join(f.deployment, "app/backend/prisma/migrations");
+    mkdirSync(join(migrations, "first"));
+    writeFileSync(join(migrations, "first/migration.sql"), "-- fixture");
+    mkdirSync(join(migrations, "not-a-migration"));
+    writeFileSync(join(migrations, "migration_lock.toml"), "");
+    const r = compatibility(f);
+    expect(r.status, r.stderr).toBe(0);
+    expect(r.stderr).toContain("este código aplicará 1 migraciones al iniciar");
+    expect(existsSync(f.calls)).toBe(false);
+  });
+  it("only warns if the migrations directory cannot be read", () => {
+    const f = backupFixture();
+    rmSync(join(f.deployment, "app/backend/prisma/migrations"), {
+      recursive: true,
+    });
+    f.manifest.controlCounts.migrations = 1;
+    writeFileSync(join(f.backup, "manifest.json"), JSON.stringify(f.manifest));
+    const r = compatibility(f);
+    expect(r.status, r.stderr).toBe(0);
+    expect(r.stderr).toContain("no se pudo leer el directorio de migraciones");
   });
   it("compares all eight control counts", () => {
     const f = backupFixture();
@@ -442,4 +486,153 @@ describe("restore compatibility and counts", () => {
       expect(run({ ...f.manifest.controlCounts, [key]: 1 }).status).not.toBe(0);
     expect(existsSync(f.calls)).toBe(false);
   });
+});
+
+function compatibility(f: ReturnType<typeof backupFixture>) {
+  return spawnSync(
+    "node",
+    ["scripts/backup-manifest.mjs", "compatibility", f.backup, f.deployment],
+    { env: f.env, encoding: "utf8" },
+  );
+}
+function restore(f: ReturnType<typeof backupFixture>) {
+  return spawnSync(
+    "sh",
+    [
+      join(f.deployment, "scripts/restore.sh"),
+      "--project",
+      "fixture",
+      "--backup",
+      f.backup,
+    ],
+    { env: f.env, encoding: "utf8" },
+  );
+}
+it.each(["permissions", "incomplete"])(
+  "gives a specific message for %s",
+  (kind) => {
+    const f = backupFixture();
+    if (kind === "permissions") chmodSync(f.backup, 0o755);
+    else writeFileSync(join(f.backup, "INCOMPLETE"), "unfinished");
+    const r = restore(f);
+    expect(r.status).not.toBe(0);
+    if (kind === "permissions") {
+      expect(r.stderr).toContain(
+        "El directorio de la copia debe tener modo 700",
+      );
+      expect(r.stderr).toContain("chmod 700 tras confirmar");
+      expect(r.stderr).not.toContain("INCOMPLETE");
+    } else expect(r.stderr).toContain("Backup INCOMPLETE");
+    expect(existsSync(f.calls)).toBe(false);
+  },
+);
+it.each([".env", "docker-compose.override.yml"])(
+  "warns before Docker when %s differs or is missing",
+  (name) => {
+    const f = backupFixture();
+    const content = Buffer.from("# private fixture values must not be printed");
+    writeFileSync(join(f.backup, name), content);
+    f.manifest.files = f.manifest.files.filter((v) => v.path !== name);
+    f.manifest.files.push({
+      path: name,
+      size: content.length,
+      sha256: createHash("sha256").update(content).digest("hex"),
+    });
+    writeFileSync(join(f.backup, "manifest.json"), JSON.stringify(f.manifest));
+    for (const state of ["different", "missing", "same"]) {
+      if (state === "missing") rmSync(join(f.deployment, name));
+      else
+        writeFileSync(
+          join(f.deployment, name),
+          state === "same" ? content : "# another fixture",
+        );
+      const r = restore(f);
+      if (state === "same") expect(r.stderr).not.toContain(`AVISO: ${name}`);
+      else
+        expect(r.stderr).toContain(
+          `AVISO: ${name} difiere de la copia o falta`,
+        );
+      expect(r.stderr).not.toContain(content.toString());
+    }
+  },
+);
+it("warns for an override only present at the destination", () => {
+  const f = backupFixture();
+  writeFileSync(
+    join(f.deployment, "docker-compose.override-new.yml"),
+    "# fixture",
+  );
+  expect(restore(f).stderr).toContain("AVISO: docker-compose.override-new.yml");
+});
+it("names missing images with build and pull instructions, without downloading", () => {
+  const f = backupFixture();
+  // Reuse the project's real Compose shape without contacting a Docker daemon.
+  const config = {
+    volumes: Object.fromEntries(
+      [
+        "pgdata",
+        "objectdata",
+        "evidence",
+        "db-secrets",
+        "api-secrets",
+        "object-secrets",
+        "provision-secrets",
+      ].map((v) => [v, { name: `fixture_${v}` }]),
+    ),
+    services: {
+      postgres: {
+        image: "postgres:18.6-bookworm",
+        environment: {
+          POSTGRES_USER: "requirements_owner",
+          POSTGRES_DB: "requirements",
+        },
+        volumes: [
+          { type: "volume", source: "pgdata", target: "/var/lib/postgresql" },
+        ],
+      },
+      backend: {
+        environment: {
+          STORAGE_PROVIDER: "S3",
+          S3_ENDPOINT: "http://object-storage:9000",
+        },
+        volumes: [
+          {
+            type: "volume",
+            source: "evidence",
+            target: "/app/.private-evidence",
+          },
+        ],
+      },
+      "object-storage": {
+        build: { dockerfile: "docker/versity/Dockerfile" },
+        volumes: [{ type: "volume", source: "objectdata", target: "/data" }],
+      },
+    },
+  };
+  writeFileSync(join(f.dir, "config.json"), JSON.stringify(config));
+  writeFileSync(
+    join(f.dir, "bin/docker"),
+    `#!/bin/sh
+printf '%s\n' "$*" >> "$DOCKER_CALLS"
+case "$*" in
+  'ps -aq'*|'volume ls'*) :;;
+  *'config --format json') cat "${join(f.dir, "config.json")}";;
+  *'config --images') printf 'postgres:18.6-bookworm\n';;
+  'image inspect'*) printf 'No such image\n' >&2; exit 1;;
+  *) exit 90;;
+esac
+`,
+    { mode: 0o700 },
+  );
+  const r = restore(f);
+  expect(r.status).not.toBe(0);
+  expect(r.stderr).toContain("Falta la imagen local postgres:18.6-bookworm");
+  expect(r.stderr).toContain("docker compose -p fixture build");
+  expect(r.stderr).toContain(
+    "docker compose -p fixture pull --ignore-buildable",
+  );
+  expect(r.stderr).not.toContain("No such image");
+  expect(readFileSync(f.calls, "utf8")).not.toMatch(
+    /(?:^|\s)(?:create|run|up|stop|pull|build)(?:\s|$)/m,
+  );
 });

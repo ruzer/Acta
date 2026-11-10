@@ -180,11 +180,14 @@ export async function verifyBackup(directory) {
   if (
     !st.isDirectory() ||
     st.isSymbolicLink() ||
-    (st.mode & 0o777) !== 0o700 ||
     basename(directory).endsWith(".INCOMPLETE") ||
     (await exists(join(directory, "INCOMPLETE")))
   )
-    error("Backup INCOMPLETE o directorio inseguro (se requiere modo 700).");
+    error("Backup INCOMPLETE o directorio inseguro.");
+  if ((st.mode & 0o777) !== 0o700)
+    error(
+      "El directorio de la copia debe tener modo 700 (¿se copió o movió sin conservar permisos?). Corrige con chmod 700 tras confirmar que la copia es de confianza",
+    );
   const m = await readManifest(directory);
   const names = m.files.map((f) => f.path);
   if (
@@ -275,11 +278,8 @@ async function main() {
       error("Imagen PostgreSQL inválida.");
     console.log(image);
   } else if (mode === "compatibility") {
-    const [directory, root, version, ids] = args;
+    const [directory, root] = args;
     const m = await readManifest(directory);
-    const major = version.match(/PostgreSQL\) (\d+)\./)?.[1];
-    if (!major || major !== m.postgresVersion.split(".")[0])
-      error("Cambio mayor de PostgreSQL: restauración rechazada.");
     const code = json(
       await readFile(join(root, "package.json"), "utf8"),
     ).version;
@@ -292,14 +292,44 @@ async function main() {
     } catch {
       /* Packaged code without Git. */
     }
-    if (
-      code !== m.actaVersion ||
-      commit !== m.commit ||
-      m.images.some((image) => !ids.split(/\s+/).includes(image.ID))
-    )
+    if (code !== m.actaVersion || commit !== m.commit)
       console.error(
-        "AVISO: código o imágenes distintos de la copia; confirme compatibilidad antes de exponer el destino.",
+        "AVISO: versión de Acta o commit distintos de la copia; confirme compatibilidad antes de exponer el destino.",
       );
+    let available;
+    try {
+      const migrations = join(root, "app/backend/prisma/migrations");
+      const entries = await readdir(migrations, { withFileTypes: true });
+      available = 0;
+      for (const entry of entries)
+        if (
+          entry.isDirectory() &&
+          (await exists(join(migrations, entry.name, "migration.sql")))
+        )
+          available++;
+    } catch {
+      available = undefined;
+      console.error(
+        "AVISO: no se pudo leer el directorio de migraciones; confirme la compatibilidad del código.",
+      );
+    }
+    if (available !== undefined) {
+      const applied = m.controlCounts.migrations;
+      if (applied > available)
+        error(
+          `La copia tiene ${applied} migraciones y este código ${available}: restauración rechazada; la copia es más nueva que el código.`,
+        );
+      if (available > applied)
+        console.error(
+          `AVISO: este código aplicará ${available - applied} migraciones al iniciar.`,
+        );
+    }
+  } else if (mode === "postgres-compatibility") {
+    const [directory, version] = args;
+    const m = await readManifest(directory);
+    const major = version.match(/PostgreSQL\) (\d+)\./)?.[1];
+    if (!major || major !== m.postgresVersion.split(".")[0])
+      error("Cambio mayor de PostgreSQL: restauración rechazada.");
   } else if (mode === "counts") {
     const m = await readManifest(args[0]);
     const current = json(args[1]);
