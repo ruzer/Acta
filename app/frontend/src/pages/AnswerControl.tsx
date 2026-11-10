@@ -2,31 +2,7 @@ import { useId } from "react";
 import { ResponseContent, ResponseQuestionView } from "@requirements/contracts";
 import { Button, Checkbox, Input, Radio, Select, Textarea } from "../ui";
 type Value = ResponseContent["answer"];
-export function answerText(q: ResponseQuestionView, a: Value): string {
-  if (a === null) return "Sin valor; consulta el comentario.";
-  if (typeof a === "boolean") return a ? "Sí" : "No";
-  if (q.type === "SINGLE_CHOICE")
-    return q.options.find((o) => o.value === a)?.label ?? String(a);
-  if (Array.isArray(a))
-    return (
-      a
-        .map((v) => q.options.find((o) => o.value === v)?.label ?? v)
-        .join(", ") || "Sin selección"
-    );
-  if (typeof a === "object") {
-    const cfg = q.config as {
-      rows: { key: string; label: string }[];
-      columns: { key: string; label: string }[];
-    };
-    return cfg.rows
-      .map(
-        (r) =>
-          `${r.label}: ${cfg.columns.find((c) => c.key === a[r.key])?.label ?? "Sin selección"}`,
-      )
-      .join("\n");
-  }
-  return String(a);
-}
+export { answerText } from "@requirements/contracts";
 export function AnswerControl({
   question: q,
   value,

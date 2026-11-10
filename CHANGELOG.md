@@ -81,6 +81,11 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   página o después de cinco segundos. Conserva el enfoque inicial al resolver
   las rutas diferidas y limpia la espera al salir.
 
+- **Exporte Markdown legible para revisión.** Agrupa por tema y pregunta, usa
+  nombres de autores y áreas, respuestas y estados de la interfaz y fuentes por
+  envío. Omite excepciones vacías y conserva el ID de validación al final, sin
+  cambiar JSON, CSV ni la protección frente a contenido hostil.
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**

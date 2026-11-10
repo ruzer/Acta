@@ -7,6 +7,10 @@ import {
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import {
+  answerText,
+  responseContent,
+  responseQuestionView,
+  statusLabels,
   exportInput,
   projectExportDocument,
   validatedDecisionsExportDocument,
@@ -337,97 +341,147 @@ export class ExportService {
             } else {
               const out = [
                 `# ${md(project.name)}`,
-                `Exportado: ${md(exportedAt)}`,
+                `Exportado: ${exportedAt}`,
                 "Documento funcional; no es un backup. Los binarios se descargan con autorización.",
               ];
-              for (const q of questions) {
-                const def = questionRevisions.find(
-                    (r) =>
-                      r.questionId === q.id &&
-                      r.number === q.currentRevisionNumber,
-                  )!,
-                  v = validations.find(
-                    (v) => v.questionId === q.id && !v.invalidatedAt,
-                  );
-                out.push(
-                  `## ${md(q.externalId)}`,
-                  `Estado: ${md(q.status)}`,
-                  md(def.question),
-                  `Versión de pregunta: ${def.number}`,
-                );
-                const responseIds = new Set(
-                  responses
-                    .filter((r) => r.questionId === q.id)
-                    .map((r) => r.id),
-                );
-                for (const r of responseRevisions.filter((r) =>
-                  responseIds.has(r.responseId),
+              const options = await tx.questionOption.findMany({
+                where,
+                orderBy: { order: "asc" },
+              });
+              const snapshotName = (snapshot: Prisma.JsonValue) =>
+                z.object({ displayName: z.string() }).parse(snapshot)
+                  .displayName;
+              const sourceLabel = (id: string) => {
+                const revision = responseRevisions.find((r) => r.id === id)!;
+                return `${md(snapshotName(revision.respondentSnapshot))} (envío ${revision.number})`;
+              };
+              for (const section of sections) {
+                out.push(`## ${md(section.title)}`);
+                for (const q of questions.filter(
+                  (q) => q.sectionId === section.id,
                 )) {
-                  out.push(
-                    `### Envío ${r.number}`,
-                    `Autor: ${md(r.respondentSnapshot)} · Área: ${md(r.areaSnapshot)} · Fecha: ${md(r.createdAt.toISOString())}`,
-                    md(r.answer),
-                    md(r.comment),
-                    md(r.example),
-                  );
-                  for (const link of revisionEvidence.filter(
-                    (l) => l.responseRevisionId === r.id,
-                  )) {
-                    const e = evidenceView.find(
-                      (e) => e.id === link.evidenceId,
-                    )!;
-                    out.push(
-                      `Evidencia: [${md(e.originalName)}](${e.downloadUrl}) · SHA256: ${e.sha256}`,
+                  const def = questionRevisions.find(
+                      (r) =>
+                        r.questionId === q.id &&
+                        r.number === q.currentRevisionNumber,
+                    )!,
+                    v = validations.find(
+                      (v) => v.questionId === q.id && !v.invalidatedAt,
                     );
-                  }
-                }
-                if (!v) out.push("Sin decisión validada vigente.");
-                else {
                   out.push(
-                    "### Decisión validada vigente",
-                    md(v.decisionText),
-                    `Alcance: ${md(v.scope)}`,
-                    `Comentario: ${md(v.validationComment)}`,
-                    `Excepciones: ${md(v.exceptions)}`,
-                    `Analista: ${md(v.validatedBy.displayName)} · Fecha: ${md(v.validatedAt.toISOString())}`,
-                    `Validación: ${v.id}`,
-                    `Fuentes: ${validationSources
-                      .filter((s) => s.validationId === v.id)
-                      .map((s) => s.responseRevisionId)
-                      .join(", ")}`,
+                    `### ${md(q.externalId)} — ${md(def.question)}`,
+                    `Estado: ${statusLabels[q.status]} · Prioridad: ${q.priority}`,
+                    `Versión de pregunta: ${def.number}`,
                   );
-                  for (const link of validationMessages.filter(
-                    (m) => m.validationId === v.id,
+                  const responseIds = new Set(
+                    responses
+                      .filter((r) => r.questionId === q.id)
+                      .map((r) => r.id),
+                  );
+                  for (const r of responseRevisions.filter((r) =>
+                    responseIds.has(r.responseId),
                   )) {
-                    const m = messages.find(
-                      (m) => m.id === link.clarificationMessageId,
+                    const revision = questionRevisions.find(
+                      (q) => q.id === r.questionRevisionId,
                     )!;
+                    const question = responseQuestionView
+                      .pick({ type: true, config: true, options: true })
+                      .parse({
+                        type: revision.type,
+                        config: revision.config,
+                        options: options
+                          .filter((o) => o.questionRevisionId === revision.id)
+                          .map(({ value, label, order }) => ({
+                            value,
+                            label,
+                            order,
+                          })),
+                      });
+                    const author = z
+                      .object({
+                        displayName: z.string(),
+                        identityKind: z
+                          .enum(["ACCOUNT", "INVITATION"])
+                          .default("ACCOUNT"),
+                      })
+                      .parse(r.respondentSnapshot);
+                    const area = z
+                      .object({ name: z.string() })
+                      .parse(r.areaSnapshot);
                     out.push(
-                      `Aclaración utilizada (${m.id}, ${md(m.createdAt.toISOString())}): ${md(m.body)}`,
+                      `#### Envío ${r.number}`,
+                      `Autor: ${md(author.displayName)} (${author.identityKind === "INVITATION" ? "persona invitada" : "cuenta"}) · Área: ${md(area.name)} · Fecha: ${r.createdAt.toISOString()}`,
+                      md(
+                        answerText(
+                          question,
+                          responseContent.shape.answer.parse(r.answer),
+                        ),
+                      ),
                     );
+                    if (r.comment) out.push(`Comentario: ${md(r.comment)}`);
+                    if (r.example) out.push(`Ejemplo: ${md(r.example)}`);
+                    for (const link of revisionEvidence.filter(
+                      (l) => l.responseRevisionId === r.id,
+                    )) {
+                      const e = evidenceView.find(
+                        (e) => e.id === link.evidenceId,
+                      )!;
+                      out.push(
+                        `Evidencia: [${md(e.originalName)}](${e.downloadUrl}) · SHA256: ${e.sha256}`,
+                      );
+                    }
                   }
-                  for (const link of validationResolutions.filter(
-                    (r) => r.validationId === v.id,
-                  )) {
-                    const r = resolutions.find(
-                      (r) => r.id === link.conflictResolutionId,
-                    )!;
+                  if (!v) out.push("Sin decisión validada vigente.");
+                  else {
                     out.push(
-                      `Resolución utilizada (${r.id}): ${md(r.resolutionText)}`,
-                      `Fuentes de resolución: ${resolutionSources
-                        .filter((s) => s.resolutionId === r.id)
-                        .map((s) => s.responseRevisionId)
+                      "#### Decisión validada vigente",
+                      md(v.decisionText),
+                      `Alcance: ${md(v.scope)}`,
+                      `Comentario: ${md(v.validationComment)}`,
+                      ...(v.exceptions
+                        ? [`Excepciones: ${md(v.exceptions)}`]
+                        : []),
+                      `Analista: ${md(v.validatedBy.displayName)} · Fecha: ${v.validatedAt.toISOString()}`,
+                      `Fuentes: ${validationSources
+                        .filter((s) => s.validationId === v.id)
+                        .map((s) => sourceLabel(s.responseRevisionId))
                         .join(", ")}`,
                     );
+                    for (const link of validationMessages.filter(
+                      (m) => m.validationId === v.id,
+                    )) {
+                      const m = messages.find(
+                        (m) => m.id === link.clarificationMessageId,
+                      )!;
+                      out.push(
+                        `Aclaración utilizada (${m.createdAt.toISOString()}): ${md(m.body)}`,
+                      );
+                    }
+                    for (const link of validationResolutions.filter(
+                      (r) => r.validationId === v.id,
+                    )) {
+                      const r = resolutions.find(
+                        (r) => r.id === link.conflictResolutionId,
+                      )!;
+                      out.push(
+                        `Resolución utilizada: ${md(r.resolutionText)}`,
+                        `Fuentes de resolución: ${resolutionSources
+                          .filter((s) => s.resolutionId === r.id)
+                          .map((s) => sourceLabel(s.responseRevisionId))
+                          .join(", ")}`,
+                      );
+                    }
                   }
-                }
-                out.push("### Referencias");
-                for (const l of links.filter((l) => l.questionId === q.id)) {
-                  const r = references.find((r) => r.id === l.referenceId)!;
-                  out.push(
-                    `${md(r.type)} · ${md(r.externalId)} · ${md(r.label)}${r.url?.startsWith("https://") ? " · " + md(r.url) : ""}`,
-                    md(l.scopeNote),
-                  );
+                  if (links.some((l) => l.questionId === q.id))
+                    out.push("#### Referencias");
+                  for (const l of links.filter((l) => l.questionId === q.id)) {
+                    const r = references.find((r) => r.id === l.referenceId)!;
+                    out.push(
+                      `${md(r.type)} · ${md(r.externalId)} · ${md(r.label)}${r.url?.startsWith("https://") ? " · " + md(r.url) : ""}`,
+                      ...(l.scopeNote ? [md(l.scopeNote)] : []),
+                    );
+                  }
+                  if (v) out.push(`ID de validación: ${v.id}`);
                 }
               }
               content = out.join("\n\n") + "\n";

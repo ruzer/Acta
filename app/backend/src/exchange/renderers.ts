@@ -11,14 +11,23 @@ export function csvCell(value: unknown) {
 }
 export function markdownText(value: unknown): string {
   const s = typeof value === "string" ? value : JSON.stringify(value ?? "");
-  return s
-    .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replace(/[\\`*_{}[\]()#+.!|~-]/g, "\\$&")
-    .replaceAll("\n", "\n\n")
-    .replaceAll(":", "&#58;");
+  return (
+    s
+      .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, "")
+      .replace(/\r\n?/g, "\n")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replace(/[\\`*_[\]|~]/g, "\\$&")
+      .replace(/^([ \t]*)([#+\-=])/gm, "$1\\$2")
+      .replace(/^([ \t]*\d+)([.)])(?=\s)/gm, "$1\\$2")
+      .replace(/^[ \t]+/gm, (space) => "&#32;".repeat(space.length))
+      // GFM also auto-links bare URLs/emails; neutralize those without escaping dates/codes.
+      .replace(/\b(https?:)\/\//gi, "$1&#47;/")
+      .replace(/\bwww\./gi, "www&#46;")
+      .replaceAll("@", "&#64;")
+      .replaceAll("\n", "  \n")
+  );
 }
 export const csvFields = [
   "projectExternalId",

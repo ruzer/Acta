@@ -164,23 +164,29 @@ UTF-8, encabezados estables, coma, escape de comillas/saltos de línea. Neutrali
 
 ## Exportación C: Markdown
 
-Documento con fecha/alcance y secciones por externalId. Para VALIDATED: pregunta y versión, decisión validada, alcance/excepciones, revisiones fuentes con respuesta original, evidencias con metadatos/hash y enlaces autenticados, analista, fecha, comentario, hilos/resolución citados y todas las referencias. Para otros estados: “Sin decisión validada vigente”; no presentar un borrador como respuesta aprobada. Un anexo puede incluir validaciones anteriores claramente revocadas para ADMIN/ANALYST.
+Documento para revisión humana, ordenado por tema y pregunta. Incluye nombre y tipo de autor (cuenta o persona invitada), área, fecha ISO y cada envío con las mismas etiquetas de respuesta de la interfaz, incluidas opciones y matrices. Los estados se muestran en español; las prioridades conservan P0–P3, como en el editor.
 
-Ejemplo de estructura, sin valores ficticiamente aprobados:
+Para una decisión vigente incluye alcance, comentario, fuentes identificadas por autor y número de envío, evidencias con hash y enlaces autenticados, analista, fecha, aclaraciones/resoluciones citadas y referencias. Omite excepciones vacías y deja el ID de validación al final. Para otros estados indica «Sin decisión validada vigente»; un borrador no se presenta como respuesta aprobada.
 
 ```markdown
-## FORM-01
-Estado: ANSWERED
-Pregunta: ¿La solicitud necesita autorización antes de atenderse?
-Decisión validada: Sin decisión validada vigente.
-Respuesta enviada: [contenido de la revisión autorizada]
-Evidencia: [nombre, SHA-256, enlace autenticado]
-Validado por: —
-Fecha de validación: —
-Relacionada con: QUESTION/Q-001; BUSINESS_RULE/RN-001; REQUIREMENT/REQ-001
+## Solicitudes
+
+### FORM-01 — ¿La solicitud necesita autorización antes de atenderse?
+
+Estado: Respondida · Prioridad: P1
+
+Versión de pregunta: 1
+
+#### Envío 1
+
+Autor: Participante demo (cuenta) · Área: Equipo demo · Fecha: 2026-11-09T12:00:00.000Z
+
+Sí
+
+Sin decisión validada vigente.
 ```
 
-Escapar HTML/Markdown aportado por usuarios; enlaces solo HTTPS o descargas propias autorizadas. El exportador entrega un documento para revisión humana; no publica ni modifica repositorios externos.
+El texto aportado por usuarios se escapa para impedir HTML, enlaces automáticos y sintaxis Markdown activa; los enlaces de descarga propios requieren autorización. El documento no publica ni modifica repositorios externos. JSON conserva `formatVersion: "1.0"` y CSV conserva sus columnas; este formato no sustituye un backup.
 
 ## Implementación 2E y precisiones operativas
 
