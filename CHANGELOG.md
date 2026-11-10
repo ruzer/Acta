@@ -96,6 +96,11 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   recibe el foco. Ninguna fuente se preselecciona; con dos o más se puede
   seleccionar todo explícitamente. Se conservan los requisitos del servidor.
 
+- **Atención abre la lista completa y prioriza los casos accionables.** Primero
+  muestra conflictos, aclaraciones, respuestas listas para decidir y parciales
+  con aportaciones; conserva el orden del cuestionario dentro de cada grupo y
+  la carga por tramos. No infiere qué aportaciones ya fueron revisadas.
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**

@@ -43,7 +43,7 @@ async function checked(page: Page, id: string, width: number) {
 }
 
 for (const count of [12, 54, 304]) {
-  test(`UX-01/03: Atención con ${count} preguntas deja el trabajo a la vista, pliega lo que espera y no repite preguntas`, async ({
+  test(`UX-01/03: Atención con ${count} preguntas abre la lista completa y conserva el trabajo agrupado al plegarla`, async ({
     page,
     baseURL,
   }) => {
@@ -55,6 +55,18 @@ for (const count of [12, 54, 304]) {
       await page.setViewportSize({ width, height });
       await page.goto(path);
       await expect(page.locator("main h1")).toHaveText("Atención");
+      const all = page.locator("details.ac-attention-all");
+      await expect(all).toHaveAttribute("open", "");
+      const allRows = all.locator(".ac-queue-row");
+      await expect(allRows).toHaveCount(count <= 60 ? count : 50);
+      const allIds = await allRows.locator("[data-workbench-id]").evaluateAll(
+        (els) => els.map((e) => (e as HTMLElement).dataset.workbenchId),
+      );
+      expect(new Set(allIds).size).toBe(allIds.length);
+      await checked(page, `UX01-expanded-n${count}`, width);
+      // Keep the original compact queue budgets after explicitly folding the full list.
+      await all.locator("summary").click();
+      await expect(all).not.toHaveAttribute("open", "");
       const queue = page.getByRole("region", { name: "Qué requiere atención" });
       const rows = queue.locator(".ac-queue-row");
       await expect(rows).toHaveCount(
@@ -162,7 +174,7 @@ for (const count of [12, 54, 304]) {
       await expect(page.locator("main h1")).toBeVisible();
       await page.getByRole("link", { name: "← Atención", exact: true }).click();
       await expect(waiting).toHaveAttribute("open", "");
-      await expect(page.locator(`[data-workbench-id="${id}"]`)).toBeFocused();
+      await expect(waiting.locator(`[data-workbench-id="${id}"]`)).toBeFocused();
     }
     // Filters keep working over the whole list and keep the rest of the URL.
     await page

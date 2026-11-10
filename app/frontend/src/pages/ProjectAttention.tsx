@@ -108,12 +108,20 @@ export function ProjectAttention({
     ready: data.questions.filter((q) => q.status === "ANSWERED").length,
   };
   const casesReady = task !== "clarifications" || clarificationReady;
+  const attentionRank = (q: AttentionDashboard["questions"][number]) => {
+    if (q.status === "CONFLICT") return 0;
+    if (q.status === "CLARIFICATION_REQUIRED") return 1;
+    if (q.status === "ANSWERED") return 2;
+    if (q.status === "PARTIAL" && q.submittedRespondents > 0) return 3;
+    if (q.status === "NOT_REVIEWED") return 4;
+    return 5;
+  };
   const items = attentionQuestions(
     data.questions,
     task,
     status,
     clarifications.data?.clarificationIds ?? [],
-  );
+  ).sort((a, b) => attentionRank(a) - attentionRank(b));
   function filterTask(nextTask: AttentionTask) {
     const next = new URLSearchParams(params);
     next.set("task", nextTask);
@@ -479,17 +487,17 @@ export function ProjectAttention({
                   })}
                   <details
                     className="ac-attention-all ac-attention-fold"
-                    open={isOpen("all", false)}
+                    open={isOpen("all", true)}
                     onToggle={(event) =>
                       setOpen(
                         "all",
                         event.currentTarget.open,
-                        isOpen("all", false),
+                        isOpen("all", true),
                       )
                     }
                   >
                     <summary>Todas las preguntas ({items.length})</summary>
-                    {isOpen("all", false) &&
+                    {isOpen("all", true) &&
                       rowList(
                         "all",
                         "Casos de atención",

@@ -427,7 +427,7 @@ const fold = (name: RegExp) =>
     .map((node) => node.closest("details"))
     .find(Boolean)!;
 
-it("UX-01: con 304 preguntas el trabajo accionable se ve y lo demás empieza plegado con su conteo", async () => {
+it("UX-01: con 304 preguntas la lista completa abre por tramos y los grupos secundarios conservan su conteo", async () => {
   const data = mockScale();
   renderScale(client(), data);
   const working = await screen.findByRole("list", { name: "Te toca a ti" });
@@ -440,9 +440,9 @@ it("UX-01: con 304 preguntas el trabajo accionable se ve y lo demás empieza ple
   expect(within(waiting).getByText("124 preguntas")).toBeVisible();
   expect(waiting.querySelectorAll(".ac-queue-row")).toHaveLength(0);
   expect(fold(/Sin participantes asignados/)).not.toHaveAttribute("open");
-  expect(fold(/Todas las preguntas \(304\)/)).not.toHaveAttribute("open");
-  // 24 working + 12 clarification rows, not the 304 + 160 of the old queue.
-  expect(queueRows()).toBe(24 + 12);
+  expect(fold(/Todas las preguntas \(304\)/)).toHaveAttribute("open");
+  // The complete list adds its first 50 rows; it still does not render all 304.
+  expect(queueRows()).toBe(24 + 12 + 50);
 });
 
 it("UX-01: un grupo largo se revela de 50 en 50, conserva el foco en la primera fila nueva y no rinde de más", async () => {
@@ -472,7 +472,7 @@ it("UX-01: un grupo largo se revela de 50 en 50, conserva el foco en la primera 
   expect(
     within(waiting).queryByRole("button", { name: /Mostrar/ }),
   ).not.toBeInTheDocument();
-  expect(queueRows()).toBe(24 + 12 + 124);
+  expect(queueRows()).toBe(24 + 12 + 124 + 50);
 });
 
 it("UX-01: un grupo de trabajo largo se revela de 25 en 25, con el foco en la primera fila nueva", async () => {
@@ -504,7 +504,9 @@ it("UX-01: un grupo de trabajo largo se revela de 25 en 25, con el foco en la pr
   await user.click(screen.getByRole("button", { name: "Mostrar 19 más" }));
   expect(rowsIn(working)).toHaveLength(94);
   expect(
-    screen.queryByRole("button", { name: /^Mostrar \d+ más$/ }),
+    within(working.closest("section")!).queryByRole("button", {
+      name: /^Mostrar \d+ más$/,
+    }),
   ).not.toBeInTheDocument();
 });
 
@@ -531,13 +533,20 @@ it("UX-04: la fila ya no repite una frase fija: da la fecha de la última aporta
     within(other).queryByText(/Última aportación/),
   ).not.toBeInTheDocument();
 });
-it("UX-03: una pregunta con conflicto y aclaración abierta aparece una vez y la fila conserva ambas señales", async () => {
+it("UX-03: una pregunta con conflicto y aclaración aparece una vez en cada lista y conserva ambas señales", async () => {
   const data = mockScale();
   renderScale(client(), data);
   await screen.findByRole("list", { name: "Te toca a ti" });
   await settled();
-  const links = screen.getAllByRole("link", { name: /: Caso 0$/ });
+  const links = within(
+    screen.getByRole("list", { name: "Te toca a ti" }),
+  ).getAllByRole("link", { name: /: Caso 0$/ });
   expect(links).toHaveLength(1);
+  expect(
+    within(
+      screen.getByRole("list", { name: "Casos de atención" }),
+    ).getAllByRole("link", { name: /: Caso 0$/ }),
+  ).toHaveLength(1);
   expect(links[0]).toHaveAccessibleName("Resolver conflicto: Caso 0");
   const row = links[0]!.closest(".ac-queue-row") as HTMLElement;
   expect(within(row).getByText("Conflicto")).toBeVisible();
@@ -598,7 +607,11 @@ it("UX-01: lo abierto y lo revelado se restauran al volver de una revisión, inc
       /En espera de otras personas/,
     ),
   );
-  await user.click(screen.getByRole("button", { name: "Mostrar 50 más" }));
+  await user.click(
+    within(fold(/En espera de otras personas/)).getByRole("button", {
+      name: "Mostrar 50 más",
+    }),
+  );
   first.unmount();
   // Back from a review: the same session context, a fresh mount.
   renderScale(cache, data);
@@ -631,9 +644,9 @@ it("UX-01: si el contexto guardado apunta a una fila de un grupo plegado, ese gr
   expect(
     within(waiting).getByRole("link", { name: /: Caso 150$/ }),
   ).toHaveAttribute("data-workbench-id", "q-150");
-  // Only the section that lists the row opens; the full list stays folded and
-  // the question is rendered once, so focus restoration has a single target.
-  expect(fold(/Todas las preguntas \(304\)/)).not.toHaveAttribute("open");
+  // The restored group reveals its deep row. The complete list stays open
+  // with only its first 50 rows, without duplicating that deep focus target.
+  expect(fold(/Todas las preguntas \(304\)/)).toHaveAttribute("open");
   expect(screen.getAllByRole("link", { name: /: Caso 150$/ })).toHaveLength(1);
 });
 
@@ -652,4 +665,60 @@ it("sin preguntas publicadas, el analista ve cómo llegar al cuestionario; quien
   expect(
     screen.queryByRole("link", { name: "Ir al cuestionario" }),
   ).not.toBeInTheDocument();
+});
+
+it("la lista completa abre y prioriza estados de atención, conservando el orden en cada grupo", async () => {
+  const statuses = [
+    "PENDING",
+    "PARTIAL",
+    "ANSWERED",
+    "CONFLICT",
+    "NOT_REVIEWED",
+    "CLARIFICATION_REQUIRED",
+    "ANSWERED",
+    "PARTIAL",
+    "VALIDATED",
+    "NOT_APPLICABLE",
+  ] as const;
+  const data: AttentionDashboard = {
+    ...dashboard(0),
+    questions: statuses.map((status, i) => ({
+      ...base.questions[0]!,
+      id: `q-${i}`,
+      title: `Caso ${i}`,
+      status,
+      submittedRespondents: i === 1 ? 0 : 1,
+    })),
+  };
+  mockScale(data);
+  const user = userEvent.setup();
+  renderScale(client(), data);
+  const list = await screen.findByRole("list", { name: "Casos de atención" });
+  expect(list.closest("details")).toHaveAttribute("open");
+  const order = () =>
+    [...list.querySelectorAll("a[data-workbench-id]")].map((link) =>
+      link.getAttribute("data-workbench-id"),
+    );
+  expect(order()).toEqual([
+    "q-3",
+    "q-5",
+    "q-2",
+    "q-6",
+    "q-7",
+    "q-4",
+    "q-0",
+    "q-1",
+    "q-8",
+    "q-9",
+  ]);
+  expect(data.questions.map((q) => q.id)).toEqual(
+    statuses.map((_, i) => `q-${i}`),
+  );
+  const summary = within(list.closest("details")!).getByText(
+    /Todas las preguntas/,
+  );
+  await user.click(summary);
+  expect(summary.closest("details")).not.toHaveAttribute("open");
+  await user.click(summary);
+  expect(summary.closest("details")).toHaveAttribute("open");
 });
