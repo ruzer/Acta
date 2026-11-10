@@ -154,6 +154,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   inventario, SHA-256, tar, firma del dump y recuentos; rechazan copias incompletas,
   destinos con datos y cambios mayores de PostgreSQL, sin borrar ni sobrescribir.
 
+- **CI ejercita backup y restauración completa.** El job `selfhosting` copia el
+  fixture a un proyecto nuevo, compara recuentos y verifica respuesta, decisión,
+  invitación y evidencia; registra duración y limpia solo sus dos proyectos.
+
 ### Changed
 
 - **Capturar un cuestionario pide menos.** «+ Agregar tema» sale de un menú
