@@ -87,6 +87,12 @@ describe("decision excerpts", () => {
 });
 
 describe("readable Markdown", () => {
+  it.each(["ftp://x.y", "file:///etc/passwd", "sftp://x.y", "custom+demo://x.y"])(
+    "neutralizes every scheme separator: %s",
+    (input) => {
+      expect(markdownText(input)).toBe(input.replace("://", ":&#47;/"));
+    },
+  );
   it.each([
     ["YES_NO", true, "Sí"],
     ["YES_NO", false, "No"],

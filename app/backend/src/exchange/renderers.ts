@@ -23,7 +23,7 @@ export function markdownText(value: unknown): string {
       .replace(/^([ \t]*\d+)([.)])(?=\s)/gm, "$1\\$2")
       .replace(/^[ \t]+/gm, (space) => "&#32;".repeat(space.length))
       // GFM also auto-links bare URLs/emails; neutralize those without escaping dates/codes.
-      .replace(/\b(https?:)\/\//gi, "$1&#47;/")
+      .replace(/:\/\//g, ":&#47;/")
       .replace(/\bwww\./gi, "www&#46;")
       .replaceAll("@", "&#64;")
       .replaceAll("\n", "  \n")
