@@ -297,7 +297,11 @@ it("el rechazo del backend mantiene el resumen y enfoca el error sin anunciar é
   ).not.toBeInTheDocument();
 });
 
-function mountList(search = "") {
+function mountList(
+  search = "",
+  role = "ANALYST",
+  identityRequirement = "NONE",
+) {
   vi.spyOn(apiModule, "api").mockImplementation((async (key: string) =>
     key === "invitations"
       ? { items: [], page: 1, total: 0 }
@@ -309,14 +313,14 @@ function mountList(search = "") {
               name: "Proyecto",
               description: "",
               lifecycle: "ACTIVE",
-              role: "ANALYST",
+              role,
               lockVersion: 1,
               questionCount: 0,
             },
           ]
         : key === "questionnaire"
           ? questionnaire
-          : policy) as never);
+          : { ...policy, identityRequirement }) as never);
   render(
     <QueryClientProvider
       client={
@@ -351,3 +355,28 @@ it("el filtro de vencimiento sin resultados dice que ninguna vence pronto", asyn
     await screen.findByText("Ninguna invitación vence en los próximos 7 días."),
   ).toBeVisible();
 });
+
+it.each([
+  ["NONE", "no pide datos personales obligatorios"],
+  ["NAME", "pide el nombre de la persona"],
+  ["EMAIL", "pide el correo de la persona"],
+  ["BOTH", "pide el nombre y el correo de la persona"],
+])(
+  "los ajustes de %s quedan después de la lista y explican qué datos se piden",
+  async (identity, text) => {
+    mountList("", "ADMIN", identity);
+    const empty = await screen.findByText(/Todavía no hay invitaciones/);
+    const toggle = screen.getByText("Ajustes de invitaciones");
+    expect(toggle.closest("details")).not.toHaveAttribute("open");
+    expect(
+      empty.compareDocumentPosition(toggle) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "Crear invitación" }),
+    ).toBeVisible();
+    await userEvent.click(toggle);
+    expect(
+      screen.getByText(`Para crear una invitación, esta instalación ${text}.`),
+    ).toBeVisible();
+  },
+);

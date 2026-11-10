@@ -30,8 +30,8 @@ export const threadLabels = {
   WAITING_ANALYST: "Lista para revisar",
   CLOSED: "Aclaración cerrada",
 };
-export const dateText = (date: string | null) =>
-  date ? formatDate(date) : "Sin aportaciones";
+export const dateText = (date: string | null, endSentence = false) =>
+  date ? formatDate(date, endSentence) : "Sin aportaciones";
 /** Downloads one evidence file through the authenticated API; errors stay next to the files. */
 function useEvidenceDownload(projectId: string) {
   const [error, setError] = useState("");
@@ -230,7 +230,7 @@ export function ThreadMessages({
       </ol>
       {t.closedAt && (
         <p className="hint">
-          Cerrada por {t.closedBy?.displayName} · {dateText(t.closedAt)}.{" "}
+          Cerrada por {t.closedBy?.displayName} · {dateText(t.closedAt, true)}{" "}
           {t.closeReason}
         </p>
       )}

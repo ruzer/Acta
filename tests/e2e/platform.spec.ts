@@ -36,7 +36,7 @@ test("login accesible con teclado, escritorio y móvil", async ({ page }) => {
     }),
   ).toBeVisible();
   await expect(
-    page.getByText("Acta · Questions. Evidence. Decisions.", { exact: true }),
+    page.getByText("Acta · Preguntas. Evidencia. Decisiones.", { exact: true }),
   ).toBeVisible();
   await expect(page.locator("input")).toHaveCount(2);
   await expect(

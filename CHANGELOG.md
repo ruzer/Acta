@@ -86,6 +86,11 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   envío. Omite excepciones vacías y conserva el ID de validación al final, sin
   cambiar JSON, CSV ni la protección frente a contenido hostil.
 
+- **Textos y títulos de pantalla más claros.** El lema se muestra en español,
+  cada pestaña identifica la pantalla y la instalación, y las fechas no duplican
+  el punto final. Los ajustes de invitaciones quedan plegados debajo de la lista
+  e indican con claridad qué datos personales exige la instalación.
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**

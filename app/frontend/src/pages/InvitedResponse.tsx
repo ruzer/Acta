@@ -729,7 +729,7 @@ function InvitedQuestion({
           </p>
           <p className="hint">
             Guardar conserva un borrador para continuar con este enlace hasta{" "}
-            {formatDate(expiresAt)}. Enviar entrega esta respuesta para
+            {formatDate(expiresAt, true)} Enviar entrega esta respuesta para
             revisión.
           </p>
           <div className="invitation-actions">

@@ -89,7 +89,7 @@ export function ClarificationThread({
         <li className="ac-thread-closed">
           <p className="hint">
             Cerrada por {thread.closedBy?.displayName} ·{" "}
-            {dateText(thread.closedAt)}. {thread.closeReason}
+            {dateText(thread.closedAt, true)} {thread.closeReason}
           </p>
         </li>
       )}

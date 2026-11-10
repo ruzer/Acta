@@ -18,12 +18,13 @@ const defaults: PublicBranding = {
 };
 const BrandingContext = createContext(defaults);
 let formatting = { locale: defaults.locale, timezone: defaults.timezone };
-export function formatDate(date: string) {
-  return new Intl.DateTimeFormat(formatting.locale, {
+export function formatDate(date: string, endSentence = false) {
+  const formatted = new Intl.DateTimeFormat(formatting.locale, {
     dateStyle: "medium",
     timeStyle: "short",
     timeZone: formatting.timezone,
   }).format(new Date(date));
+  return endSentence ? `${formatted.replace(/\.$/, "")}.` : formatted;
 }
 export function useBranding() {
   return useContext(BrandingContext);
@@ -36,7 +37,19 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
   });
   useEffect(() => {
     if (!q.data) return;
-    document.title = q.data.appName;
+    const updateTitle = () => {
+      const heading =
+        document.querySelector("main h1") ?? document.querySelector("h1");
+      const title = heading?.textContent?.trim();
+      document.title = title ? `${title} · ${q.data.appName}` : q.data.appName;
+    };
+    updateTitle();
+    const observer = new MutationObserver(updateTitle);
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
     document.documentElement.lang = q.data.locale;
     document.documentElement.style.setProperty(
       "--installation-accent",
@@ -50,6 +63,7 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
       link.href = q.data.favicon;
       if (!icon) document.head.append(link);
     } else icon?.remove();
+    return () => observer.disconnect();
   }, [q.data]);
   if (q.isPending) return <LoadingState />;
   if (q.error)
