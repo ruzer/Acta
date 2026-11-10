@@ -146,6 +146,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   pregunta guardada en el mismo instante podía quedar en un área ya desactivada.
   Las asignaciones y el acceso de los participantes existentes no cambian.
 
+- **Backup coordinado sin sobrescrituras.** `scripts/backup.sh` conserva el dump,
+  seis volúmenes y configuración privada, registra hashes y recuentos de control
+  y reanuda los servicios que estaban activos; una copia fallida queda INCOMPLETE.
+
 ### Changed
 
 - **Capturar un cuestionario pide menos.** «+ Agregar tema» sale de un menú
