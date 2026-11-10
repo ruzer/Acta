@@ -142,6 +142,12 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   de la primera tarjeta. Una prueba E2E comprueba cada caso; no cambian reglas
   de negocio ni permisos.
 
+- **CodeQL ignora los mockups de diseño.** Su primera corrida reportó una alerta
+  `js/xss-through-dom` en `docs/design/mockups/original/…prototype.html`, un
+  prototipo estático conservado como evidencia que no se compila, empaqueta ni
+  sirve. Una configuración excluye `docs/design/**` del análisis; el código del
+  producto sigue analizándose sin cambios y los checks requeridos no cambian.
+
 ### Added
 
 - **Administración → Proyectos lista todos los proyectos de la institución.**

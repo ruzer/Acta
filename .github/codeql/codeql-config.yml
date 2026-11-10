@@ -1,0 +1,5 @@
+name: Acta CodeQL
+# docs/design guarda mockups estáticos como evidencia histórica: no se compilan,
+# no se empaquetan en las imágenes y no se sirven. El código del producto sí se analiza.
+paths-ignore:
+  - docs/design/**
