@@ -12,7 +12,7 @@
     "@requirements/contracts": "0.8.0",
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "react-router-dom": "7.18.4",
+    "react-router-dom": "7.18.5",
     "@tanstack/react-query": "5.106.0",
     "react-hook-form": "7.91.0",
     "@hookform/resolvers": "5.9.1",
@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "vite": "8.3.6",
-    "@vitejs/plugin-react": "6.1.1",
+    "@vitejs/plugin-react": "6.2.1",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0"
   }
