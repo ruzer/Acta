@@ -166,6 +166,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   ventana sin escritores, secretos, retención y assets externos; conserva la
   receta manual y separa evidencia local de verificación pendiente en CI.
 
+- **Escaneo de código y acciones agrupadas:** CodeQL analiza JavaScript/TypeScript en PR, main y semanalmente; Dependabot agrupa las acciones en una propuesta semanal. No se alteran los checks requeridos.
+
 ### Changed
 
 - **Capturar un cuestionario pide menos.** «+ Agregar tema» sale de un menú

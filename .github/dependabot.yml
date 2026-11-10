@@ -44,3 +44,7 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule: {interval: weekly}
+    # Un solo PR semanal para las acciones del repositorio.
+    groups:
+      actions:
+        patterns: ["*"]
