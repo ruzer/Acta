@@ -38,18 +38,18 @@ El esquema todavía conserva el valor **MINIO** de registros históricos, leído
 
 ## VersityGW
 
-El default compila la release oficial **1.11.0**, commit `e42ae7ab8107201e64e52ee024824e8cab3683b3`, con **Go 1.27.3** fijado por digest. No se modifica código ni dependencias upstream: `golang.org/x/net` v0.62.0 ya está incluido y se retira el parche local de 1.8.0. LICENSE/NOTICE se conservan íntegros, verificados contra la nueva release; ver [modificaciones del build](../docker/versity/UPSTREAM-MODIFICATIONS) e [inventario de licencias](STORAGE-DEPENDENCY-LICENSES.csv).
+El default compila la release oficial **1.11.0**, commit `e42ae7ab8107201e64e52ee024824e8cab3683b3`, con **Go 1.27.4** fijado por digest. No se modifica código ni dependencias upstream: `golang.org/x/net` v0.62.0 ya está incluido y se retira el parche local de 1.8.0. LICENSE/NOTICE se conservan íntegros, verificados contra la nueva release; ver [modificaciones del build](../docker/versity/UPSTREAM-MODIFICATIONS) e [inventario de licencias](STORAGE-DEPENDENCY-LICENSES.csv).
 
 La misma etapa de compilación se usa en `docker/versity/Dockerfile` y `app/backend/Dockerfile` (aprovisionamiento). El backend de aplicación no recibe ese binario ni las credenciales root. Se conservan el wrapper sin privilegios, POSIX con metadata sidecar, IAM local, política por prefijo y healthcheck `/_health` más `HeadBucket`. No cambia la API de Acta ni la configuración S3. Single-host no es HA.
 
-Correcciones: Go 1.27.3 resuelve **GO-2026-6809 / CVE-2026-111943** (`crypto/x509`). VersityGW 1.9.0 corrige **GHSA-7qcr-88c3-f9p7** (path traversal mediante uploadId y borrado múltiple) y **GHSA-5gjv-3vhq-4chv** (cuerpos chunked sin consumir y reutilización de conexiones). El despliegue estándar no activa keepalive ni usa multipart; eso limita el alcance probado, pero no justifica conservar una versión afectada. El gate `govulncheck` sigue siendo obligatorio y no certifica ausencia de todas las vulnerabilidades de aplicación o del sistema operativo.
+Correcciones: Go 1.27.3 resuelve **GO-2026-6809 / CVE-2026-111943** (`crypto/x509`) y Go 1.27.4 resuelve **GO-2026-6859** (`net/http`, caída del servidor HTTP/1 por una condición de carrera con `MaxBytesReader`; `govulncheck` la marcaba en el binario). VersityGW 1.9.0 corrige **GHSA-7qcr-88c3-f9p7** (path traversal mediante uploadId y borrado múltiple) y **GHSA-5gjv-3vhq-4chv** (cuerpos chunked sin consumir y reutilización de conexiones). El despliegue estándar no activa keepalive ni usa multipart; eso limita el alcance probado, pero no justifica conservar una versión afectada. El gate `govulncheck` sigue siendo obligatorio y no certifica ausencia de todas las vulnerabilidades de aplicación o del sistema operativo.
 
 ### Actualización 1.10.0 → 1.11.0
 
 Release oficial del 2026-11-06; tag verificado en el commit
 `e42ae7ab8107201e64e52ee024824e8cab3683b3`, fecha UTC del commit
-`2026-11-06T22:51:18Z`. Su `go.mod` exige Go 1.26.0: se conserva Go 1.27.3
-con el mismo digest, sin modificar fuente ni dependencias del proveedor.
+`2026-11-06T22:51:18Z`. Su `go.mod` exige Go 1.26.0: se usa Go 1.27.4
+fijado por digest, sin modificar fuente ni dependencias del proveedor.
 
 Las [notas oficiales](https://github.com/versity/versitygw/releases/tag/v1.11.0)
 describen limpieza de sidecars multipart, correcciones de carreras POSIX al subir

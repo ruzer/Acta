@@ -244,6 +244,13 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ### Security
 
+- **Go 1.27.4** (antes 1.27.3) en la compilación de VersityGW y de la imagen
+  opcional de MinIO legado, y en el control `govulncheck` del CI, fijado por
+  digest. Corrige GO-2026-6859 en `net/http` (caída del servidor HTTP/1 por una
+  condición de carrera con `MaxBytesReader`), publicado después de la última
+  ejecución verde y que hacía fallar el control del binario de almacenamiento.
+  Sustituye a las menciones de Go 1.27.3 de las entradas anteriores. No cambia la
+  versión de VersityGW ni el almacenamiento por defecto.
 - **Vite 8.3.5**, tras la corrección de seguridad de 8.3.1 a 8.3.4, incorpora
   las correcciones de GHSA-587h-7wmj-h5pm y avisos relacionados de `launch-editor`.
   El aviso alto afectaba a Vite hasta 8.3.2 en esa línea y permitía eludir una
