@@ -112,6 +112,8 @@ El despliegue incluido usa **frontend + backend + PostgreSQL + VersityGW**, con 
 - **VersityGW** guarda los archivos adjuntos en almacenamiento privado dentro de tu infraestructura, mediante la API S3. Es el proveedor self-hosted por defecto verificado.
 - Los volúmenes Docker conservan datos y secretos entre reinicios. Un backup completo necesita base de datos, archivos y configuración; exportar JSON no sustituye ese backup.
 
+Antes de actualizar desde v0.8.0, consulta las [notas de v0.9.0](docs/releases/v0.9.0.md): incluyen backup, migración y actualización conjunta de frontend/backend.
+
 [Instalar en servidor y actualizar](docs/SELF-HOSTING.md) · [Configuración](docs/CONFIGURATION.md) · [Backup y restauración](docs/BACKUP-RESTORE.md) · [Almacenamiento avanzado](docs/S3-PROVIDERS.md)
 
 La interfaz usa fuentes y recursos locales, sin analytics ni CDN obligatorios. El build descarga dependencias públicas. Un almacenamiento externo recibe objetos únicamente si el operador lo configura. No se promete alta disponibilidad ni compatibilidad con cualquier endpoint S3.
