@@ -6,6 +6,24 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
+Sin cambios adicionales por anunciar.
+
+## 0.9.0 — 2026-11-11
+
+Administración institucional, revisión y exportes más claros, y operación con
+backup/restauración verificados. Incluye los PR de administración
+[#45](https://github.com/ruzer/Acta/pull/45) y
+[#47](https://github.com/ruzer/Acta/pull/47)–[#50](https://github.com/ruzer/Acta/pull/50),
+seguridad y mantenimiento [#101](https://github.com/ruzer/Acta/pull/101),
+[#103](https://github.com/ruzer/Acta/pull/103),
+[#107](https://github.com/ruzer/Acta/pull/107) y
+[#108](https://github.com/ruzer/Acta/pull/108), y almacenamiento
+[#114](https://github.com/ruzer/Acta/pull/114) y
+[#119](https://github.com/ruzer/Acta/pull/119). **Una migración aditiva de permisos
+y una incompatibilidad acotada en Sistema**: actualizar frontend/backend juntos
+y recargar las pestañas. Alcance completo, otros PR e instrucciones en las
+[notas de 0.9.0](docs/releases/v0.9.0.md).
+
 ### Fixed
 
 - **Docker Compose** ahora pasa `APP_LOGO_SECONDARY` y `APP_SECONDARY_NAME` al
@@ -121,7 +139,7 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 - **Exporte Markdown tolerante a snapshots incompletos:** comparte con Revisión la lectura de nombres y usa respaldos para autor y área. Conserva las fuentes y los formatos JSON/CSV; es robustez ante datos históricos o editados fuera de la aplicación.
 
 - **VersityGW 1.11.0 como almacenamiento incluido.** Se fija la release oficial
-  en el gateway y su aprovisionador, conservando Go 1.27.3, POSIX, IAM y la
+  en el gateway y su aprovisionador, compilada con Go 1.27.4; conserva POSIX, IAM y la
   configuración existentes. Incluye correcciones de multipart, carreras de
   archivos y listados; se actualizan las atribuciones de dependencias y se
   comprueban cargas multipart, borrado múltiple y errores de credenciales.
@@ -194,7 +212,7 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Guía operativa de copias y simulacros.** Documenta scripts, programación,
   ventana sin escritores, secretos, retención y assets externos; conserva la
-  receta manual y separa evidencia local de verificación pendiente en CI.
+  receta manual y distingue los ensayos locales de los ejecutados en CI.
 
 - **Escaneo de código y acciones agrupadas:** CodeQL analiza JavaScript/TypeScript en PR, main y semanalmente; Dependabot agrupa las acciones en una propuesta semanal. No se alteran los checks requeridos.
 
@@ -242,15 +260,24 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   26.6.6. Las propuestas de Dependabot se validan juntas, sin modificar código
   de la aplicación, contratos ni pruebas existentes.
 
+- **nginx 1.30.5 → 1.30.6** en la imagen del frontend, dentro de la línea estable.
+
+- **Actualización conjunta de frontend y backend.** `GET /api/v1/system` añade
+  `security.clientIpFromProxy` a un contrato estricto: la pantalla Sistema de un
+  cliente v0.8.0 rechaza la respuesta nueva y un cliente 0.9.0 rechaza la anterior.
+  Actualiza ambos servicios juntos y recarga las pestañas abiertas (recarga
+  forzada o cerrar y abrir). Hasta entonces Sistema puede no cargar; los forks
+  que consuman esa ruta deben incorporar el campo. Es una incompatibilidad
+  acotada anunciada en este MINOR pre-1.0; no se suaviza el contrato.
+
 ### Security
 
 - **Go 1.27.4** (antes 1.27.3) en la compilación de VersityGW y de la imagen
-  opcional de MinIO legado, y en el control `govulncheck` del CI, fijado por
-  digest. Corrige GO-2026-6859 en `net/http` (caída del servidor HTTP/1 por una
-  condición de carrera con `MaxBytesReader`), publicado después de la última
+  opcional de MinIO legado, y en el control `govulncheck` del CI; VersityGW y
+  el control fijan la imagen por digest. Corrige GO-2026-6859 en `net/http`
+  (caída del servidor HTTP/1 por una condición de carrera con `MaxBytesReader`), publicado después de la última
   ejecución verde y que hacía fallar el control del binario de almacenamiento.
-  Sustituye a las menciones de Go 1.27.3 de las entradas anteriores. No cambia la
-  versión de VersityGW ni el almacenamiento por defecto.
+  No cambia la versión de VersityGW ni el almacenamiento por defecto.
 - **Vite 8.3.5**, tras la corrección de seguridad de 8.3.1 a 8.3.4, incorpora
   las correcciones de GHSA-587h-7wmj-h5pm y avisos relacionados de `launch-editor`.
   El aviso alto afectaba a Vite hasta 8.3.2 en esa línea y permitía eludir una
@@ -265,9 +292,9 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   que corrige una denegación de servicio con `fileFilter` asíncrono pendiente.
   Acta no configura `fileFilter`, por lo que la exposición a ese caso era baja,
   pero el aviso bloqueaba el control de seguridad de dependencias.
-- **VersityGW 1.10.0** (almacenamiento por defecto, antes 1.9.0), compilado con
-  Go 1.27.3. Incluye `klauspost/compress` 1.20.3, que corrige GO-2026-6865
-  (pánico con tramas de dos bloques); el control `govulncheck` del binario
+- **VersityGW 1.11.0** (antes 1.8.0 en Acta v0.8.0), compilado con
+  Go 1.27.4. Conserva desde 1.10.0 `klauspost/compress` 1.20.3, que corrige
+  GO-2026-6865 (pánico con tramas de dos bloques); el control `govulncheck` del binario
   fallaba por ese aviso. Respecto de la 1.8.0 incluida en Acta v0.8.0, conserva
   las correcciones de 1.9.0 para GHSA-7qcr-88c3-f9p7 (path traversal mediante
   `uploadId` y borrado múltiple) y GHSA-5gjv-3vhq-4chv (cuerpos chunked sin
@@ -280,7 +307,7 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   las direcciones se validan y normalizan antes del hash. Login, invitaciones y
   códigos del asistente conservan sus límites. Un NAT puede seguir compartiendo
   dirección; [configuración y comprobación](docs/PROXY-TRUST.md).
-- La imagen opcional de **MinIO legado** se compila con Go 1.27.3. Con Go 1.26.9
+- La imagen opcional de **MinIO legado** se compila con Go 1.27.4. Con Go 1.26.9
   y 1.27.2 el binario incluía GO-2026-6809 (`crypto/x509`), corregido en 1.26.10
   y 1.27.3. No cambia el almacenamiento por defecto (VersityGW). El binario de
   MinIO conserva avisos de sus propias dependencias, que dependen de esa release

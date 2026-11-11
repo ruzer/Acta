@@ -14,6 +14,45 @@ Se prepara [Semantic Versioning](https://semver.org/lang/es/) en formato **MAJOR
 
 El contrato público incluye API documentada, configuración, formatos de intercambio y requisitos de actualización/persistencia. No basta con que TypeScript compile para afirmar compatibilidad. Antes de 1.0 no se promete estabilidad absoluta; los cambios incompatibles deben anunciarse, agruparse en un incremento MINOR de `0.x` y acompañarse de instrucciones de migración. PATCH seguirá reservado para cambios compatibles. Una corrección de seguridad que rompa compatibilidad debe decirlo y usar la versión apropiada.
 
+### Preparación de 0.9.0 — Operación, seguridad y revisión
+
+La base es [v0.8.0](https://github.com/ruzer/Acta/releases/tag/v0.8.0).
+**0.9.0** empaqueta los cambios ya integrados: administración de áreas y visibilidad
+institucional de proyectos, captura y revisión, exporte Markdown, proxies y
+límites de acceso, retención de autenticación, backup/restauración automatizados,
+CodeQL, Node 26 y VersityGW 1.11.0 compilado con Go 1.27.4, que corrige
+GO-2026-6859 (`net/http`, caída de HTTP/1 por una carrera con `MaxBytesReader`).
+nginx pasa de 1.30.5 a 1.30.6. La base verificada es
+`9ab6cabb3b9e1b5ffa0d4232926e5a6ef5625ad8`, con el PR #119 integrado.
+Los PR y límites se identifican en las
+[notas de la versión](releases/v0.9.0.md).
+
+Se mantiene MINOR de `0.x` con **una incompatibilidad acotada y anunciada**:
+`GET /api/v1/system` añade `security.clientIpFromProxy` a una salida estricta.
+Los clientes y servidores de 0.8.0 y 0.9.0 no deben mezclarse para esa pantalla.
+El resto del diff de contratos es aditivo. La migración
+`202611090001_auth_retention` solo concede DELETE de sesiones al rol de aplicación;
+no modifica ni borra filas durante la migración. El mantenimiento posterior sí
+elimina registros de autenticación caducados con la retención documentada.
+
+Para actualizar: respaldar y verificar la copia, actualizar **frontend y backend
+juntos**, aplicar migraciones oficiales, recargar las pestañas abiertas y verificar
+Sistema, login, proyectos y evidencia. Los forks deben adaptar el contrato de
+Sistema, fusionar la migración y probar en su propia rama. Las notas explican cómo
+usar los helpers de backup antes de actualizar una instalación v0.8.0.
+
+Se actualizan únicamente versiones internas y documentación; no dependencias
+externas. El PR exige `verify`, `secrets`, `selfhosting`, `guided-install` y
+`codeql` verdes y merge manual. Después, solo con autorización expresa, verificar
+el CI y CodeQL del commit exacto resultante de main, crear allí el tag **anotado**
+`v0.9.0` y comprobar el CI del tag. El workflow CI no se dispara por push de tags:
+utiliza su disparador manual existente, `gh workflow run ci.yml --ref v0.9.0`, y
+comprueba que la ejecución resuelve el mismo SHA antes de declarar el gate verde.
+Publica la Release como **Latest** únicamente en la fase autorizada; no confundas
+el CI de main con una ejecución del tag.
+No crear imágenes Docker ni actualizar downstreams. La fecha del changelog y el
+PR de preparación no equivalen a una release publicada.
+
 ### Preparación de 0.8.0 — Instalación guiada, Configuración y segundo logotipo
 
 La base es [v0.7.0](https://github.com/ruzer/Acta/releases/tag/v0.7.0).
