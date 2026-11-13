@@ -15,6 +15,13 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   al instalar la actualización aislada de Vite. No cambian contratos,
   migraciones ni la versión de Acta.
 
+### Added
+
+- **Informe de decisiones para imprimir o guardar como PDF.** Presenta preguntas,
+  respuesta final, responsables, fechas y fuentes legibles con la marca de la
+  instalación. Reutiliza el exporte autorizado de decisiones vigentes y oculta
+  la navegación al imprimir; no amplía permisos ni incluye borradores.
+
 ## 0.9.0 — 2026-11-11
 
 Administración institucional, revisión y exportes más claros, y operación con

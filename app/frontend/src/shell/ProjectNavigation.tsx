@@ -108,6 +108,7 @@ export function ProjectToolsMenu({
             <Link to={`${path}/history`}>Bitácora</Link>
           </>
         )}
+        <Link to={`${path}/report`}>Informe para imprimir</Link>
         <Link to={`${path}/export`}>
           {role === "VIEWER" ? "Exportar decisiones vigentes" : "Exportar"}
         </Link>
