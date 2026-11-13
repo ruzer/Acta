@@ -6,6 +6,9 @@ elige la impresora o la opción de guardar PDF de tu navegador. Revisa su vista
 previa antes de guardar. Desactiva los encabezados/pies del navegador si no
 quieres que añada la URL de la página.
 
+El perfil Consulta entra por **Más herramientas** y regresa a **Preguntas
+publicadas**; no accede a la gestión de Decisiones.
+
 El informe presenta las preguntas publicadas con decisión vigente, su respuesta
 final, quién la registró, fechas, alcance, excepciones y fuentes seleccionadas:
 aportaciones (con autor/área), aclaraciones y resoluciones. Los archivos de

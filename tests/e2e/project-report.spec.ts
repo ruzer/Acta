@@ -5,6 +5,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { PDFDocument } from "pdf-lib";
 import { login } from "./login-helper";
+import { smallTargets } from "./fixtures/page-checks";
 import {
   apiSession,
   seedDocumentCases,
@@ -40,7 +41,14 @@ for (const username of ["admin", "analyst", "viewer"]) {
     page,
   }) => {
     await login(page, username);
-    await page.goto(`/projects/${cases.project.id}/report`);
+    if (username === "viewer") {
+      await page.goto(`/projects/${cases.project.id}`);
+      await page
+        .locator(".ac-shell-sidebar")
+        .getByText("Más herramientas", { exact: true })
+        .click();
+    } else await page.goto(`/projects/${cases.project.id}/decisions`);
+    await page.getByRole("link", { name: "Informe para imprimir" }).click();
     await expect(
       page.getByRole("heading", { name: "Informe de decisiones" }),
     ).toBeVisible();
@@ -67,7 +75,7 @@ for (const username of ["admin", "analyst", "viewer"]) {
     expect(await page.locator(".project-report").innerText()).not.toMatch(
       /[a-f0-9]{8}-[a-f0-9]{4}-|VALIDATED|LONG_TEXT|Comentario interno ficticio/,
     );
-    for (const width of [1440, 390]) {
+    for (const width of [1440, 768, 390]) {
       await page.setViewportSize({ width, height: 1000 });
       expect(
         (
@@ -81,6 +89,11 @@ for (const username of ["admin", "analyst", "viewer"]) {
           () => document.documentElement.scrollWidth <= innerWidth,
         ),
       ).toBe(true);
+      if (width <= 899)
+        expect(
+          await smallTargets(page),
+          `objetivos táctiles del informe a ${width}px`,
+        ).toEqual([]);
       if (username === "analyst" && process.env.ACTA_REPORT_EVIDENCE_DIR)
         await page.screenshot({
           path: `${process.env.ACTA_REPORT_EVIDENCE_DIR}/report-after-${width}.png`,
@@ -108,6 +121,20 @@ for (const username of ["admin", "analyst", "viewer"]) {
     });
     expect((await PDFDocument.load(bytes)).getPageCount()).toBeGreaterThan(0);
     await page.emulateMedia({ media: "screen" });
+    await page
+      .getByRole("link", {
+        name:
+          username === "viewer"
+            ? "Volver a preguntas publicadas"
+            : "Volver a decisiones",
+      })
+      .click();
+    await expect(page).toHaveURL(
+      new RegExp(
+        `/projects/${cases.project.id}${username === "viewer" ? "" : "/decisions"}$`,
+      ),
+    );
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   });
 }
 test("informe: un participante no recibe el exporte ni se amplía su acceso", async ({

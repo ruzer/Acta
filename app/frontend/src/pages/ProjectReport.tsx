@@ -33,6 +33,8 @@ export function ProjectReport() {
       <ErrorState error={query.error} retry={() => void query.refetch()} />
     );
   const data = query.data;
+  const canManage =
+    data.exportScope.role === "ADMIN" || data.exportScope.role === "ANALYST";
   const decisions = data.decisions.filter(
     (item) =>
       item.status === "VALIDATED" &&
@@ -41,7 +43,12 @@ export function ProjectReport() {
   return (
     <div className="project-report">
       <div className="report-actions">
-        <Link to={`/projects/${projectId}/decisions`}>Volver a decisiones</Link>
+        <Link
+          className="button secondary"
+          to={`/projects/${projectId}${canManage ? "/decisions" : ""}`}
+        >
+          {canManage ? "Volver a decisiones" : "Volver a preguntas publicadas"}
+        </Link>
         <Button onClick={() => window.print()} disabled={!decisions.length}>
           Imprimir o guardar como PDF
         </Button>

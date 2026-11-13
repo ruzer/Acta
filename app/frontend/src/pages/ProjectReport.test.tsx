@@ -68,6 +68,9 @@ it("solicita solo el exporte autorizado y presenta decisión vigente sin UUID, J
   data.decisions[0]!.submissions.push(copy);
   setup(data);
   await screen.findByRole("heading", { name: "Informe de decisiones" });
+  expect(
+    screen.getByRole("link", { name: "Volver a preguntas publicadas" }),
+  ).toHaveAttribute("href", `/projects/${fixture.projectId}`);
   expect(exchangeRequest).toHaveBeenCalledWith(
     fixture.projectId,
     "exports",

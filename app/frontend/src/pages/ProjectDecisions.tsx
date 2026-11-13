@@ -172,7 +172,9 @@ export function ProjectDecisions() {
       role={data.role}
       active="decisions"
       actions={
-        <Link to={`/projects/${projectId}/report`}>Informe para imprimir</Link>
+        <Link className="button secondary" to={`/projects/${projectId}/report`}>
+          Informe para imprimir
+        </Link>
       }
     >
       <section aria-label="Decisiones vigentes">

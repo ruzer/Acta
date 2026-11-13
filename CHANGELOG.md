@@ -15,6 +15,11 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   al instalar la actualización aislada de Vite. No cambian contratos,
   migraciones ni la versión de Acta.
 
+- **Acciones del informe accesibles al tacto.** Los enlaces para abrir el informe
+  y volver a decisiones reutilizan el botón secundario de 44 px de altura mínima,
+  también en tablet y móvil. El lector regresa a Preguntas publicadas, sin ofrecer
+  acceso a la gestión de decisiones.
+
 ### Added
 
 - **Importación sencilla desde CSV.** Plantilla de siete columnas en español, cinco
