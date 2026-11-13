@@ -15,6 +15,12 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   al instalar la actualización aislada de Vite. No cambian contratos,
   migraciones ni la versión de Acta.
 
+### Added
+
+- **Importación sencilla desde CSV.** Plantilla de siete columnas en español, cinco
+  tipos de pregunta y errores con fila/columna. Reutiliza la revisión y confirmación
+  de JSON, los permisos de áreas y los límites; conserva códigos y textos literales.
+
 ## 0.9.0 — 2026-11-11
 
 Administración institucional, revisión y exportes más claros, y operación con
