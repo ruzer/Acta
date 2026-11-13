@@ -17,6 +17,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ### Added
 
+- **Importación sencilla desde CSV.** Plantilla de siete columnas en español, cinco
+  tipos de pregunta y errores con fila/columna. Reutiliza la revisión y confirmación
+  de JSON, los permisos de áreas y los límites; conserva códigos y textos literales.
+
 - **Diseño de creación de usuarios en lote, pendiente de aprobación.** Describe
   validación por fila, creación atómica, permisos institucionales y entrega única
   de contraseñas temporales. Es una propuesta documental; no añade funcionalidad.

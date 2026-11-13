@@ -1,0 +1,4 @@
+Tema;Código;Pregunta;Texto de ayuda;Tipo;Obligatoria;Área responsable
+Servicios;REQ-001;¿Se recibe la solicitud por escrito?;Responde según el procedimiento actual.;Sí/No;Sí;Equipo de servicios
+Servicios;REQ-01;¿Cómo se registra la solicitud?;;Texto largo;No;Equipo de servicios
+Planificación;REQ-003;¿En qué fecha se revisará el procedimiento?;;Fecha;No;Equipo de servicios

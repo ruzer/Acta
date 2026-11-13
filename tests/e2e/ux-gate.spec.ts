@@ -517,7 +517,7 @@ test("UX-02 (residual): la página se monta una sola vez dentro del shell y cons
     },
   );
   await page.goto(`/projects/${fixture.project.id}/import`);
-  const input = page.getByLabel("Archivo JSON");
+  const input = page.getByLabel("Archivo JSON o CSV");
   await input.setInputFiles({
     name: "ficticio.json",
     mimeType: "application/json",

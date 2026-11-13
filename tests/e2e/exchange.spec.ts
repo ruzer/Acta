@@ -80,7 +80,7 @@ test("B/C/F admin imports fictitious JSON after preview; invalid file writes not
   await page.goto(`/projects/${invalidId}/import`);
   const bad = template("INVALID-" + suffix, "E2E-AREA-" + suffix);
   bad.questions[0].sectionExternalId = "MISSING";
-  await page.getByLabel("Archivo JSON").setInputFiles({
+  await page.getByLabel("Archivo JSON o CSV").setInputFiles({
     name: "invalid.json",
     mimeType: "application/json",
     buffer: Buffer.from(JSON.stringify(bad)),
@@ -99,7 +99,7 @@ test("B/C/F admin imports fictitious JSON after preview; invalid file writes not
   ).toEqual([]);
   await axe(page);
   await page.goto(`/projects/${projectId}/import`);
-  await page.getByLabel("Archivo JSON").setInputFiles({
+  await page.getByLabel("Archivo JSON o CSV").setInputFiles({
     name: "ficticio.json",
     mimeType: "application/json",
     buffer: Buffer.from(JSON.stringify(template(code, "E2E-AREA-" + suffix))),

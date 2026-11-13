@@ -100,7 +100,7 @@ describe("Import guidance without a new import contract", () => {
           "Este proyecto ya contiene estructura. La importación requiere un proyecto vacío.",
         ),
       ).toBeVisible();
-      expect(screen.getByLabelText("Archivo JSON")).toBeDisabled();
+      expect(screen.getByLabelText("Archivo JSON o CSV")).toBeDisabled();
       expect(
         screen.getByRole("button", { name: "Revisar archivo" }),
       ).toBeDisabled();
@@ -118,7 +118,7 @@ describe("Import guidance without a new import contract", () => {
     expect(
       await screen.findByText("No se pudo consultar el cuestionario."),
     ).toBeVisible();
-    expect(screen.getByLabelText("Archivo JSON")).toBeDisabled();
+    expect(screen.getByLabelText("Archivo JSON o CSV")).toBeDisabled();
     expect(
       screen.getByRole("button", { name: "Revisar archivo" }),
     ).toBeDisabled();
@@ -149,10 +149,10 @@ describe("Import guidance without a new import contract", () => {
     const user = setup();
     await screen.findByText("EXP-001", { selector: "code" });
     await waitFor(() =>
-      expect(screen.getByLabelText("Archivo JSON")).toBeEnabled(),
+      expect(screen.getByLabelText("Archivo JSON o CSV")).toBeEnabled(),
     );
     await user.upload(
-      screen.getByLabelText("Archivo JSON"),
+      screen.getByLabelText("Archivo JSON o CSV"),
       new File(["{}"], "example.json", { type: "application/json" }),
     );
     await user.click(screen.getByRole("button", { name: "Revisar archivo" }));
@@ -174,7 +174,7 @@ describe("Import guidance without a new import contract", () => {
     expect(
       screen.getByRole("link", { name: "Descargar ejemplo completo" }),
     ).toHaveAttribute("download", "questionnaire-template.full.json");
-    const summary = screen.getByText("Cómo preparar el archivo");
+    const summary = screen.getByText("Cómo preparar el archivo JSON");
     summary.focus();
     await user.keyboard("{Enter}");
     // Browser smoke covers native details keyboard behavior; here verify its semantic control.
@@ -198,10 +198,10 @@ describe("Import guidance without a new import contract", () => {
     });
     const user = setup();
     await waitFor(() =>
-      expect(screen.getByLabelText("Archivo JSON")).toBeEnabled(),
+      expect(screen.getByLabelText("Archivo JSON o CSV")).toBeEnabled(),
     );
     await user.upload(
-      screen.getByLabelText("Archivo JSON"),
+      screen.getByLabelText("Archivo JSON o CSV"),
       new File(["{}"], "example.json", { type: "application/json" }),
     );
     await user.click(screen.getByRole("button", { name: "Revisar archivo" }));
@@ -219,10 +219,10 @@ describe("Import guidance without a new import contract", () => {
       screen.getByRole("button", { name: "Confirmar importación" }),
     ).toBeDisabled();
     await waitFor(() =>
-      expect(screen.getByLabelText("Archivo JSON")).toBeEnabled(),
+      expect(screen.getByLabelText("Archivo JSON o CSV")).toBeEnabled(),
     );
     await user.upload(
-      screen.getByLabelText("Archivo JSON"),
+      screen.getByLabelText("Archivo JSON o CSV"),
       new File(["{}"], "corrected.json", { type: "application/json" }),
     );
     expect(
@@ -236,9 +236,9 @@ describe("Import guidance without a new import contract", () => {
     const user = setup(),
       file = new File(["{}"], "example.json", { type: "application/json" });
     await waitFor(() =>
-      expect(screen.getByLabelText("Archivo JSON")).toBeEnabled(),
+      expect(screen.getByLabelText("Archivo JSON o CSV")).toBeEnabled(),
     );
-    await user.upload(screen.getByLabelText("Archivo JSON"), file);
+    await user.upload(screen.getByLabelText("Archivo JSON o CSV"), file);
     await user.click(screen.getByRole("button", { name: "Revisar archivo" }));
     const region = await screen.findByRole("region", { name: "Vista previa" });
     expect(
@@ -278,10 +278,10 @@ describe("Import guidance without a new import contract", () => {
       });
       const user = setup();
       await waitFor(() =>
-        expect(screen.getByLabelText("Archivo JSON")).toBeEnabled(),
+        expect(screen.getByLabelText("Archivo JSON o CSV")).toBeEnabled(),
       );
       await user.upload(
-        screen.getByLabelText("Archivo JSON"),
+        screen.getByLabelText("Archivo JSON o CSV"),
         new File(["{}"], "example.json", { type: "application/json" }),
       );
       await user.click(screen.getByRole("button", { name: "Revisar archivo" }));
@@ -304,10 +304,10 @@ describe("Import guidance without a new import contract", () => {
     });
     const user = setup();
     await waitFor(() =>
-      expect(screen.getByLabelText("Archivo JSON")).toBeEnabled(),
+      expect(screen.getByLabelText("Archivo JSON o CSV")).toBeEnabled(),
     );
     await user.upload(
-      screen.getByLabelText("Archivo JSON"),
+      screen.getByLabelText("Archivo JSON o CSV"),
       new File(["{}"], "example.json", { type: "application/json" }),
     );
     await user.click(screen.getByRole("button", { name: "Revisar archivo" }));
