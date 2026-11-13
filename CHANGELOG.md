@@ -15,6 +15,12 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   al instalar la actualización aislada de Vite. No cambian contratos,
   migraciones ni la versión de Acta.
 
+### Added
+
+- **Diseño de creación de usuarios en lote, pendiente de aprobación.** Describe
+  validación por fila, creación atómica, permisos institucionales y entrega única
+  de contraseñas temporales. Es una propuesta documental; no añade funcionalidad.
+
 ## 0.9.0 — 2026-11-11
 
 Administración institucional, revisión y exportes más claros, y operación con
