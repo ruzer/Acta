@@ -171,6 +171,11 @@ export function ProjectDecisions() {
       projectName={data.projectName}
       role={data.role}
       active="decisions"
+      actions={
+        <Link className="button secondary" to={`/projects/${projectId}/report`}>
+          Informe para imprimir
+        </Link>
+      }
     >
       <section aria-label="Decisiones vigentes">
         <div className="pw-decisions-heading">

@@ -33,6 +33,11 @@ import {
 import "./participant.css";
 import { Respond } from "./pages/Respond";
 import { Clarifications } from "./pages/Clarifications";
+const ProjectReport = lazy(() =>
+  import("./pages/ProjectReport").then((module) => ({
+    default: module.ProjectReport,
+  })),
+);
 const ProjectDecisions = lazy(() =>
   import("./pages/ProjectDecisions").then((module) => ({
     default: module.ProjectDecisions,
@@ -305,6 +310,10 @@ function Session() {
               }
             />
             <Route path="/review" element={<ReviewInbox />} />
+            <Route
+              path="/projects/:projectId/report"
+              element={<ProjectReport />}
+            />
             <Route
               path="/projects/:projectId/decisions"
               element={<ProjectDecisions />}

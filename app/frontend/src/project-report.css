@@ -1,0 +1,90 @@
+.project-report {
+  max-width: 78ch;
+  margin-inline: auto;
+  overflow-wrap: anywhere;
+}
+.report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+.report-heading {
+  border-bottom: 2px solid var(--installation-accent);
+  padding-bottom: 1rem;
+}
+.report-heading h2 {
+  margin-block: 0.5rem;
+}
+.report-decision {
+  padding-block: 1.5rem;
+  border-bottom: 1px solid currentColor;
+}
+.report-theme {
+  font-weight: 600;
+}
+.report-text {
+  white-space: pre-wrap;
+}
+.report-sources {
+  padding-inline-start: 1.5rem;
+}
+.report-sources li {
+  padding-bottom: 0.5rem;
+}
+.report-footer {
+  margin-top: 2rem;
+}
+@media print {
+  @page acta-report {
+    margin: 16mm;
+  }
+  body:has(.project-report) {
+    background: white;
+    color: black;
+  }
+  body:has(.project-report) .ac-shell-sidebar,
+  body:has(.project-report) .ac-shell-context,
+  body:has(.project-report) .ac-shell-mobile,
+  body:has(.project-report) .skip,
+  .project-report .report-actions {
+    display: none !important;
+  }
+  body:has(.project-report) .ac-shell,
+  body:has(.project-report) .ac-shell-workspace,
+  body:has(.project-report) main.container {
+    display: block;
+    padding: 0;
+    margin: 0;
+    width: auto;
+    max-width: none;
+    min-height: 0;
+  }
+  .project-report {
+    page: acta-report;
+    max-width: none;
+    font-size: 11pt;
+    line-height: 1.45;
+    color: black;
+    background: white;
+  }
+  .project-report h1,
+  .project-report h2,
+  .project-report h3 {
+    color: black;
+    break-after: avoid;
+  }
+  .project-report p {
+    orphans: 3;
+    widows: 3;
+  }
+  .report-heading,
+  .report-sources li {
+    break-inside: avoid;
+  }
+  .report-decision {
+    padding-block: 1rem;
+  }
+}
