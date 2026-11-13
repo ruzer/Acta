@@ -1,10 +1,10 @@
 # Importar un cuestionario
 
-Puedes preparar temas y preguntas fuera de Acta y cargarlos juntos en un proyecto vacío. La importación usa un archivo JSON: primero lo revisas y solo después confirmas. No necesitas conocer los identificadores internos de la aplicación.
+Puedes preparar temas y preguntas fuera de Acta y cargarlos juntos en un proyecto vacío. La importación admite CSV sencillo o JSON: primero lo revisas y solo después confirmas. No necesitas conocer los identificadores internos de la aplicación.
 
 ## Cuándo utilizar importación
 
-Úsala si ya tienes un cuestionario que quieres preparar como archivo. Para pocas preguntas también puedes utilizar **Escribir → Agregar tema → Agregar pregunta**. Acta todavía no importa directamente Excel, CSV, Word ni PDF.
+Úsala si ya tienes un cuestionario que quieres preparar como archivo. Para pocas preguntas también puedes utilizar **Escribir → Agregar tema → Agregar pregunta**. Acta no importa .xlsx, Word ni PDF; guarda tu hoja de cálculo como CSV UTF-8.
 
 ## Antes de comenzar
 
@@ -12,6 +12,41 @@ Puedes preparar temas y preguntas fuera de Acta y cargarlos juntos en un proyect
 2. Crea un proyecto **vacío y activo**. Anota su identificador externo: aparece en la creación/administración del proyecto.
 3. Abre **Importar** dentro del proyecto. Si ya tiene temas, preguntas, referencias o una importación previa, no se puede importar otra estructura, aunque los elementos estén archivados. **No hay mezcla, actualización ni reemplazo** de contenido existente.
 4. Prepara las áreas responsables. Un Administrador puede confirmar la creación de las faltantes; un Analista debe pedir que se creen primero. Crear un área no asigna participantes.
+
+## Plantilla sencilla CSV
+
+Descarga [la plantilla CSV](../examples/questionnaire-template.csv) desde **Importar**.
+Conserva las siete columnas: **Tema, Código, Pregunta, Texto de ayuda, Tipo,
+Obligatoria, Área responsable**. Los encabezados no distinguen mayúsculas ni acentos.
+Solo Texto de ayuda puede quedar vacío. Tipo admite Sí/No, Texto corto, Texto largo,
+Fecha y Número; Obligatoria admite Sí o No. No incluyas otras columnas o tipos.
+
+Guarda en **CSV UTF-8**, con o sin BOM, separado por coma o punto y coma. Las celdas
+con separadores, comillas o saltos se entrecomillan; las comillas interiores se duplican.
+Acta indica la fila (línea de inicio de la celda) y columna del error. Una fila vacía
+intermedia se rechaza; no se descarta. Los límites máximos son 5 MiB (también para el
+JSON convertido), 100 temas y 2000 preguntas; los límites menores configurados en el
+servidor siguen aplicándose durante la revisión.
+
+Mantén Código como texto: **REQ-001 y REQ-01 son distintos**. Los valores se conservan
+literalmente: Acta no evalúa fórmulas ni convierte números o fechas. Al exportar CSV,
+los valores potencialmente interpretables como fórmulas se protegen con un apóstrofo;
+el original almacenado no cambia. No habilites fórmulas al abrir archivos de origen desconocido.
+
+Los temas siguen su primera aparición y las preguntas el orden de filas. El código
+sirve de título breve; la prioridad inicial es P2. No se infieren seguimientos,
+condiciones, opciones, matrices ni referencias. El nombre y descripción del proyecto
+se conservan. Para esas estructuras avanzadas utiliza JSON.
+
+Escribe **Área responsable** exactamente como el nombre del catálogo. Acta reutiliza
+su código; para áreas nuevas genera códigos sin colisión y muestra la creación en
+la revisión habitual. Solo Administración puede confirmarla. Si hay nombres de área
+ambiguos o el catálogo alcanza el límite de consulta de 500 áreas, usa JSON con
+códigos explícitos; no se adivinan áreas.
+
+CSV se convierte en `questionnaire-template` 1.0 en el navegador y pasa por el parser,
+la vista previa y la confirmación existentes. Se envían los mismos bytes en ambos
+pasos. Las preguntas quedan en borrador; no se agregan participantes ni respuestas.
 
 ## Opción rápida: partir del ejemplo mínimo
 

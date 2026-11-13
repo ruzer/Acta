@@ -17,6 +17,8 @@ import { PageHeader } from "../ui/semantic";
 import minimalTemplateUrl from "../../../../examples/questionnaire-template.minimal.json?url";
 import fullTemplateUrl from "../../../../examples/questionnaire-template.full.json?url";
 import { plural } from "../ui/plural";
+import { csvQuestionnaire } from "../questionnaire-csv";
+import csvTemplateUrl from "../../../../examples/questionnaire-template.csv?url";
 
 function importIssueContext(path: string): string {
   const parts = path.split("/").slice(1);
@@ -105,6 +107,7 @@ export function ImportStructure() {
     (p) => p.id === projectId,
   )?.externalId;
   const [file, setFile] = useState<File>(),
+    [preparedFile, setPreparedFile] = useState<File>(),
     [preview, setPreview] = useState<z.infer<typeof C.importPreviewView>>(),
     [result, setResult] = useState<z.infer<typeof C.importResultView>>(),
     [areas, setAreas] = useState(false),
@@ -120,14 +123,58 @@ export function ImportStructure() {
     setBusy(true);
     setError("");
     setPreview(undefined);
+    setAreas(false);
     try {
+      let payload = file;
+      let location: ((path: string) => string) | undefined;
+      if (/\.csv$/i.test(file.name)) {
+        const project = projects.data?.find((p) => p.id === projectId);
+        if (!project)
+          throw new Error(
+            "No se pudo consultar el proyecto. Vuelve a intentarlo.",
+          );
+        const catalog = await api("areas");
+        // El catálogo existente devuelve hasta 500 áreas; no adivinar cuáles faltan.
+        if (catalog.length >= 500)
+          throw new Error(
+            "El catálogo de áreas es demasiado grande para resolver nombres con seguridad. Utiliza la plantilla JSON con los códigos de área.",
+          );
+        const converted = csvQuestionnaire(
+          new Uint8Array(await file.arrayBuffer()),
+          {
+            externalId: project.externalId,
+            name: project.name,
+            description: project.description,
+          },
+          catalog,
+        );
+        payload = new File([converted.json], "questionnaire-template.json", {
+          type: "application/json",
+        });
+        location = converted.location;
+      }
+      setPreparedFile(payload);
       const p = await exchangeRequest(
         projectId,
         "imports/preview",
         C.importPreviewView,
-        { file },
+        { file: payload },
       );
-      setPreview(p);
+      setPreview(
+        location
+          ? {
+              ...p,
+              errors: p.errors.map((issue) => ({
+                ...issue,
+                message: `${location!(issue.path)}: ${issue.message}`,
+              })),
+              warnings: p.warnings.map((issue) => ({
+                ...issue,
+                message: `${location!(issue.path)}: ${issue.message}`,
+              })),
+            }
+          : p,
+      );
       requestId.current = crypto.randomUUID();
     } catch (e) {
       setError((e as Error).message);
@@ -145,7 +192,7 @@ export function ImportStructure() {
         "imports/confirm",
         C.importResultView,
         {
-          file,
+          file: preparedFile ?? file,
           command: C.importConfirmInput.parse({
             payloadHash: preview.payloadHash,
             expectedProjectVersion: preview.expectedProjectVersion,
@@ -223,8 +270,26 @@ export function ImportStructure() {
               </a>
             </li>
           </ul>
+          <p>
+            Para comenzar, descarga la plantilla CSV, complétala en tu hoja de
+            cálculo y guarda como CSV UTF-8. Cada fila es una pregunta. Mantén
+            los códigos como texto y escribe el nombre del área tal como aparece
+            en Acta. Admitimos Sí/No, Texto corto, Texto largo, Fecha y Número;
+            Obligatoria lleva Sí o No. Después revisa la vista previa antes de
+            confirmar.
+          </p>
+          <p>
+            <a href={csvTemplateUrl} download="questionnaire-template.csv">
+              Descargar plantilla CSV
+            </a>
+          </p>
+          <p>
+            CSV conserva el nombre del proyecto; usa el código como título breve
+            y prioridad normal (P2). Para opciones, matrices, seguimientos o
+            condiciones, utiliza JSON.
+          </p>
           <details>
-            <summary>Cómo preparar el archivo</summary>
+            <summary>Cómo preparar el archivo JSON</summary>
             <p>
               Crea un proyecto vacío. Copia su identificador externo exactamente
               en <code>project.externalId</code> dentro del archivo. Los
@@ -242,30 +307,35 @@ export function ImportStructure() {
             <p>
               Guarda como JSON en UTF-8, selecciona el archivo y pulsa Revisar
               archivo. Si corriges algo, vuelve a seleccionarlo. No se mezclan
-              ni reemplazan cuestionarios existentes. Excel, CSV y el JSON de
-              exportación no son plantillas de importación.
+              ni reemplazan cuestionarios existentes. Los archivos .xlsx y el
+              JSON de exportación no son plantillas de importación.
             </p>
           </details>
           <h2>1. Seleccionar archivo</h2>
           {projectExternalId && (
             <p>
-              El archivo debe llevar <code>project.externalId</code> igual al
-              identificador de este proyecto: <code>{projectExternalId}</code>.
+              El archivo JSON debe llevar <code>project.externalId</code> igual
+              al identificador de este proyecto:{" "}
+              <code>{projectExternalId}</code>.
             </p>
           )}
           <Input
-            label="Archivo JSON"
+            label="Archivo JSON o CSV"
             type="file"
-            accept=".json,application/json"
+            accept=".json,.csv,application/json,text/csv"
             disabled={busy || unavailable}
             hint="Máximo 5 MiB. No incluye respuestas ni participantes."
             onChange={(e) => {
               const f = e.target.files?.[0];
               setPreview(undefined);
+              setPreparedFile(undefined);
               setAreas(false);
               setError("");
               if (f && f.size > 5 * 1024 * 1024) {
                 setError("El archivo supera 5 MiB.");
+                setFile(undefined);
+              } else if (f && !/\.(json|csv)$/i.test(f.name)) {
+                setError("Selecciona un archivo JSON o CSV UTF-8.");
                 setFile(undefined);
               } else setFile(f);
             }}
