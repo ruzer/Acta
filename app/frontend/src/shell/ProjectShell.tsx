@@ -42,6 +42,7 @@ export function ProjectShell({
       members: "Miembros",
       import: "Importar estructura",
       export: "Exportar",
+      report: "Informe",
       traceability: "Trazabilidad",
       history: "Bitácora",
     }[segment ?? ""] ??
