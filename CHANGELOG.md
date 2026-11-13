@@ -17,6 +17,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ### Added
 
+- **Importación sencilla desde CSV.** Plantilla de siete columnas en español, cinco
+  tipos de pregunta y errores con fila/columna. Reutiliza la revisión y confirmación
+  de JSON, los permisos de áreas y los límites; conserva códigos y textos literales.
+
 - **Informe de decisiones para imprimir o guardar como PDF.** Presenta preguntas,
   respuesta final, responsables, fechas y fuentes legibles con la marca de la
   instalación. Reutiliza el exporte autorizado de decisiones vigentes y oculta

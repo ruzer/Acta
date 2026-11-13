@@ -66,7 +66,7 @@ for (const kind of ["minimal", "full"] as const) {
     const invalid = structuredClone(file);
     invalid.questions[0].sectionExternalId = "MISSING";
     async function select(data: unknown) {
-      await page.getByLabel("Archivo JSON").setInputFiles({
+      await page.getByLabel("Archivo JSON o CSV").setInputFiles({
         name: "questionnaire.json",
         mimeType: "application/json",
         buffer: Buffer.from(JSON.stringify(data)),
