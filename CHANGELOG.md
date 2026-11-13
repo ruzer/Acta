@@ -6,7 +6,14 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
-Sin cambios adicionales por anunciar.
+### Fixed
+
+- **Actualizaciones de dependencias consolidadas.** NestJS common/core/platform-express
+  pasan juntos a 12.4.2, Argon2 a 0.45.2, dotenv a 18.0.10,
+  `@hookform/resolvers` a 7.0.5 y Vite a 8.3.7. El lockfile conserva una sola
+  copia de Vite y Rolldown para evitar el error de tipos del plugin de React
+  al instalar la actualización aislada de Vite. No cambian contratos,
+  migraciones ni la versión de Acta.
 
 ## 0.9.0 — 2026-11-11
 
