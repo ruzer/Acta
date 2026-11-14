@@ -9,6 +9,8 @@ import {
 } from "@nestjs/common";
 import { z } from "zod";
 import {
+  bulkUsersInput,
+  bulkUsersConfirmInput,
   areaInput,
   areaUpdateInput,
   createUserInput,
@@ -19,9 +21,13 @@ import {
 } from "@requirements/contracts";
 import { ActorRequest, SchemaPipe } from "../common/http.js";
 import { AdministrationService } from "./administration.service.js";
+import { BulkUsersService } from "./bulk-users.service.js";
 @Controller()
 export class AdministrationController {
-  constructor(private readonly service: AdministrationService) {}
+  constructor(
+    private readonly service: AdministrationService,
+    private readonly bulkUsers: BulkUsersService,
+  ) {}
   @Get("organization") organization(@Req() r: ActorRequest) {
     return this.service.organization(r.actor);
   }
@@ -33,6 +39,19 @@ export class AdministrationController {
     @Body(new SchemaPipe(createUserInput)) d: z.infer<typeof createUserInput>,
   ) {
     return this.service.createUser(r, d);
+  }
+  @Post("users/bulk/preview") previewUsers(
+    @Req() r: ActorRequest,
+    @Body(new SchemaPipe(bulkUsersInput)) d: z.infer<typeof bulkUsersInput>,
+  ) {
+    return this.bulkUsers.preview(r.actor, d);
+  }
+  @Post("users/bulk/confirm") confirmUsers(
+    @Req() r: ActorRequest,
+    @Body(new SchemaPipe(bulkUsersConfirmInput))
+    d: z.infer<typeof bulkUsersConfirmInput>,
+  ) {
+    return this.bulkUsers.confirm(r.actor, d);
   }
   @Post("users/:id/set-active") setActive(
     @Req() r: ActorRequest,

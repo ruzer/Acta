@@ -42,6 +42,7 @@ export const auditActions: Record<string, string> = {
   STORAGE_CONNECTION_TESTED: "Conexión de almacenamiento probada",
   SECTION_UPDATED: "Tema actualizado",
   SECTIONS_REORDERED: "Temas reordenados",
+  USERS_BATCH_CREATED: "Usuarios creados en lote",
   USER_CREATED: "Usuario creado",
   VALIDATION_INVALIDATED: "Validación invalidada",
 };
