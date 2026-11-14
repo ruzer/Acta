@@ -273,10 +273,10 @@ export function ImportStructure() {
           <p>
             Para comenzar, descarga la plantilla CSV, complétala en tu hoja de
             cálculo y guarda como CSV UTF-8. Cada fila es una pregunta. Mantén
-            los códigos como texto y escribe el nombre del área tal como aparece
-            en Acta. Admitimos Sí/No, Texto corto, Texto largo, Fecha y Número;
-            Obligatoria lleva Sí o No. Después revisa la vista previa antes de
-            confirmar.
+            los códigos como texto. Los nombres de temas y áreas no distinguen
+            mayúsculas, acentos ni espacios sobrantes. Admitimos Sí/No, Texto
+            corto, Texto largo, Fecha y Número; Obligatoria lleva Sí o No.
+            Después revisa la vista previa antes de confirmar.
           </p>
           <p>
             <a href={csvTemplateUrl} download="questionnaire-template.csv">
@@ -284,9 +284,11 @@ export function ImportStructure() {
             </a>
           </p>
           <p>
-            CSV conserva el nombre del proyecto; usa el código como título breve
-            y prioridad normal (P2). Para opciones, matrices, seguimientos o
-            condiciones, utiliza JSON.
+            Puedes añadir un Título breve; si lo dejas vacío o no incluyes esa
+            columna, lo obtenemos de la pregunta. Ignoramos las filas totalmente
+            vacías. CSV conserva el nombre del proyecto y usa prioridad normal
+            (P2). Para opciones, matrices, seguimientos o condiciones, utiliza
+            JSON.
           </p>
           <details>
             <summary>Cómo preparar el archivo JSON</summary>
