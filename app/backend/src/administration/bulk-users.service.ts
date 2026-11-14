@@ -71,6 +71,15 @@ export class BulkUsersService {
         areaId: area?.id ?? null,
       };
     });
+    const columnOrder = ["Usuario", "Nombre", "Proyecto", "Rol", "Área"];
+    parsed.errors.sort((a, b) => {
+      const general = (e: typeof a) => e.row === 0 || e.column === "Fila";
+      return (
+        Number(general(b)) - Number(general(a)) ||
+        a.row - b.row ||
+        columnOrder.indexOf(a.column) - columnOrder.indexOf(b.column)
+      );
+    });
     const preview = serialize(C.bulkUsersPreview, {
       rows: rows.map(({ projectId: _p, areaId: _a, ...row }) => row),
       errors: parsed.errors,

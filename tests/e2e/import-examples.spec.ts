@@ -36,7 +36,7 @@ for (const kind of ["minimal", "full"] as const) {
     await page.goto(`/projects/${project.id}/import`);
     const help = page
       .locator("summary")
-      .filter({ hasText: "Cómo preparar el archivo" });
+      .filter({ hasText: "Avanzado: importar con JSON" });
     await help.focus();
     await page.keyboard.press("Enter");
     await expect(
@@ -66,7 +66,7 @@ for (const kind of ["minimal", "full"] as const) {
     const invalid = structuredClone(file);
     invalid.questions[0].sectionExternalId = "MISSING";
     async function select(data: unknown) {
-      await page.getByLabel("Archivo JSON o CSV").setInputFiles({
+      await page.getByLabel("Archivo CSV o JSON").setInputFiles({
         name: "questionnaire.json",
         mimeType: "application/json",
         buffer: Buffer.from(JSON.stringify(data)),

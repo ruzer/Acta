@@ -309,3 +309,15 @@ it("reactivar un área desactivada envía solo el estado", async () => {
   await vi.waitFor(() => expect(calls).toHaveLength(1));
   expect(calls[0]).toEqual([{ id: "a" }, { active: true }]);
 });
+
+it("las dos formas de crear usuarios comparten las acciones de la cabecera", () => {
+  mount([]);
+  const single = screen.getByRole("button", {
+    name: "Crear usuario",
+  });
+  const bulk = screen.getByRole("button", {
+    name: "Crear varios usuarios",
+  });
+  expect(single.closest("header")).not.toBeNull();
+  expect(bulk.closest("header")).toBe(single.closest("header"));
+});

@@ -33,7 +33,7 @@ async function project(page: Page) {
   });
 }
 async function upload(page: Page, csv: string) {
-  await page.getByLabel("Archivo JSON o CSV").setInputFiles({
+  await page.getByLabel("Archivo CSV o JSON").setInputFiles({
     name: "cuestionario.csv",
     mimeType: "text/csv",
     buffer: Buffer.from(csv),
@@ -135,7 +135,7 @@ test("CSV: errores por fila, revisión sin escrituras, confirmación e integrida
     projects.find((item: { id: string }) => item.id === p.id),
   ).toMatchObject({ name: p.name, description: p.description });
   await page.goto(`/projects/${p.id}/import`);
-  await expect(page.getByLabel("Archivo JSON o CSV")).toBeDisabled();
+  await expect(page.getByLabel("Archivo CSV o JSON")).toBeDisabled();
 });
 test("CSV: normaliza temas y catálogo, admite título y conserva filas físicas sin duplicar", async ({
   page,
@@ -262,5 +262,50 @@ test("CSV: Analista reutiliza áreas y no puede crear faltantes", async ({
     ).toBeVisible();
   } finally {
     await context.close();
+  }
+});
+
+test("CSV primero, columnas explicadas y JSON avanzado accesible con teclado", async ({
+  page,
+}) => {
+  await login(page, "admin");
+  const p = await project(page);
+  await page.goto(`/projects/${p.id}/import`);
+  for (const width of [1280, 390]) {
+    await page.setViewportSize({ width, height: 1000 });
+    const guide = page.getByRole("region", {
+      name: "Preparar tu cuestionario",
+    });
+    await expect(guide.getByRole("listitem")).toHaveCount(3);
+    await expect(
+      guide.getByRole("link", { name: "Descargar plantilla CSV" }),
+    ).toBeVisible();
+    const summary = page
+      .locator("summary")
+      .filter({ hasText: "Avanzado: importar con JSON" });
+    await expect(summary.locator("..")).not.toHaveAttribute("open", "");
+    await expect(
+      page.getByText("project.externalId", { exact: true }),
+    ).toBeHidden();
+    await expect(
+      page.getByRole("link", { name: "Descargar ejemplo mínimo" }),
+    ).toBeHidden();
+    await expect(page.getByLabel("Archivo CSV o JSON")).toBeVisible();
+    await summary.focus();
+    await page.keyboard.press("Enter");
+    await expect(
+      page.getByText("project.externalId", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Descargar ejemplo mínimo" }),
+    ).toBeVisible();
+    await summary.focus();
+    await page.keyboard.press("Enter");
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   }
 });

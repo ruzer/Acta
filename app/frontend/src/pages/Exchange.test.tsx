@@ -100,7 +100,7 @@ describe("Import guidance without a new import contract", () => {
           "Este proyecto ya contiene estructura. La importación requiere un proyecto vacío.",
         ),
       ).toBeVisible();
-      expect(screen.getByLabelText("Archivo JSON o CSV")).toBeDisabled();
+      expect(screen.getByLabelText("Archivo CSV o JSON")).toBeDisabled();
       expect(
         screen.getByRole("button", { name: "Revisar archivo" }),
       ).toBeDisabled();
@@ -108,8 +108,8 @@ describe("Import guidance without a new import contract", () => {
         screen.getByRole("link", { name: "Ir al cuestionario" }),
       ).toHaveAttribute("href", "/projects/example/editor");
       expect(
-        screen.getByRole("link", { name: "Descargar ejemplo completo" }),
-      ).toBeVisible();
+        screen.getByText("Descargar ejemplo completo").closest("details"),
+      ).not.toHaveAttribute("open");
       expect(exchangeRequest).not.toHaveBeenCalled();
     },
   );
@@ -118,14 +118,15 @@ describe("Import guidance without a new import contract", () => {
     expect(
       await screen.findByText("No se pudo consultar el cuestionario."),
     ).toBeVisible();
-    expect(screen.getByLabelText("Archivo JSON o CSV")).toBeDisabled();
+    expect(screen.getByLabelText("Archivo CSV o JSON")).toBeDisabled();
     expect(
       screen.getByRole("button", { name: "Revisar archivo" }),
     ).toBeDisabled();
   });
 
-  it("says the project's own identifier where the file is chosen", async () => {
-    setup();
+  it("says the project's identifier inside advanced JSON help", async () => {
+    const user = setup();
+    await user.click(screen.getByText("Avanzado: importar con JSON"));
     expect(
       await screen.findByText("EXP-001", { selector: "code" }),
     ).toBeVisible();
@@ -149,10 +150,10 @@ describe("Import guidance without a new import contract", () => {
     const user = setup();
     await screen.findByText("EXP-001", { selector: "code" });
     await waitFor(() =>
-      expect(screen.getByLabelText("Archivo JSON o CSV")).toBeEnabled(),
+      expect(screen.getByLabelText("Archivo CSV o JSON")).toBeEnabled(),
     );
     await user.upload(
-      screen.getByLabelText("Archivo JSON o CSV"),
+      screen.getByLabelText("Archivo CSV o JSON"),
       new File(["{}"], "example.json", { type: "application/json" }),
     );
     await user.click(screen.getByRole("button", { name: "Revisar archivo" }));
@@ -168,18 +169,18 @@ describe("Import guidance without a new import contract", () => {
   });
   it("offers downloadable examples and keyboard-accessible preparation help", async () => {
     const user = setup();
+    await user.click(screen.getByText("Avanzado: importar con JSON"));
     expect(
       screen.getByRole("link", { name: "Descargar ejemplo mínimo" }),
     ).toHaveAttribute("download", "questionnaire-template.minimal.json");
     expect(
       screen.getByRole("link", { name: "Descargar ejemplo completo" }),
     ).toHaveAttribute("download", "questionnaire-template.full.json");
-    const summary = screen.getByText("Cómo preparar el archivo JSON");
+    const summary = screen.getByText("Avanzado: importar con JSON");
     summary.focus();
     await user.keyboard("{Enter}");
     // Browser smoke covers native details keyboard behavior; here verify its semantic control.
     expect(summary.tagName).toBe("SUMMARY");
-    await user.click(summary);
     expect(
       screen.getByText(/Copia su identificador externo exactamente/),
     ).toBeVisible();
@@ -198,10 +199,10 @@ describe("Import guidance without a new import contract", () => {
     });
     const user = setup();
     await waitFor(() =>
-      expect(screen.getByLabelText("Archivo JSON o CSV")).toBeEnabled(),
+      expect(screen.getByLabelText("Archivo CSV o JSON")).toBeEnabled(),
     );
     await user.upload(
-      screen.getByLabelText("Archivo JSON o CSV"),
+      screen.getByLabelText("Archivo CSV o JSON"),
       new File(["{}"], "example.json", { type: "application/json" }),
     );
     await user.click(screen.getByRole("button", { name: "Revisar archivo" }));
@@ -219,10 +220,10 @@ describe("Import guidance without a new import contract", () => {
       screen.getByRole("button", { name: "Confirmar importación" }),
     ).toBeDisabled();
     await waitFor(() =>
-      expect(screen.getByLabelText("Archivo JSON o CSV")).toBeEnabled(),
+      expect(screen.getByLabelText("Archivo CSV o JSON")).toBeEnabled(),
     );
     await user.upload(
-      screen.getByLabelText("Archivo JSON o CSV"),
+      screen.getByLabelText("Archivo CSV o JSON"),
       new File(["{}"], "corrected.json", { type: "application/json" }),
     );
     expect(
@@ -236,9 +237,9 @@ describe("Import guidance without a new import contract", () => {
     const user = setup(),
       file = new File(["{}"], "example.json", { type: "application/json" });
     await waitFor(() =>
-      expect(screen.getByLabelText("Archivo JSON o CSV")).toBeEnabled(),
+      expect(screen.getByLabelText("Archivo CSV o JSON")).toBeEnabled(),
     );
-    await user.upload(screen.getByLabelText("Archivo JSON o CSV"), file);
+    await user.upload(screen.getByLabelText("Archivo CSV o JSON"), file);
     await user.click(screen.getByRole("button", { name: "Revisar archivo" }));
     const region = await screen.findByRole("region", { name: "Vista previa" });
     expect(
@@ -278,10 +279,10 @@ describe("Import guidance without a new import contract", () => {
       });
       const user = setup();
       await waitFor(() =>
-        expect(screen.getByLabelText("Archivo JSON o CSV")).toBeEnabled(),
+        expect(screen.getByLabelText("Archivo CSV o JSON")).toBeEnabled(),
       );
       await user.upload(
-        screen.getByLabelText("Archivo JSON o CSV"),
+        screen.getByLabelText("Archivo CSV o JSON"),
         new File(["{}"], "example.json", { type: "application/json" }),
       );
       await user.click(screen.getByRole("button", { name: "Revisar archivo" }));
@@ -304,10 +305,10 @@ describe("Import guidance without a new import contract", () => {
     });
     const user = setup();
     await waitFor(() =>
-      expect(screen.getByLabelText("Archivo JSON o CSV")).toBeEnabled(),
+      expect(screen.getByLabelText("Archivo CSV o JSON")).toBeEnabled(),
     );
     await user.upload(
-      screen.getByLabelText("Archivo JSON o CSV"),
+      screen.getByLabelText("Archivo CSV o JSON"),
       new File(["{}"], "example.json", { type: "application/json" }),
     );
     await user.click(screen.getByRole("button", { name: "Revisar archivo" }));
@@ -316,4 +317,34 @@ describe("Import guidance without a new import contract", () => {
     ).toBeVisible();
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
   });
+});
+
+it("CSV primero: tres pasos, columnas explicadas y JSON cerrado en Avanzado", async () => {
+  setup();
+  await screen.findByText("EXP-001", { selector: "code" });
+  const guide = screen.getByRole("region", {
+    name: "Preparar tu cuestionario",
+  });
+  expect(within(guide).getAllByRole("listitem")).toHaveLength(3);
+  expect(
+    within(guide).getByRole("link", { name: "Descargar plantilla CSV" }),
+  ).toBeVisible();
+  for (const column of [
+    "Tema",
+    "Código",
+    "Pregunta",
+    "Texto de ayuda",
+    "Tipo",
+    "Obligatoria",
+    "Área responsable",
+    "Título",
+  ]) {
+    expect(within(guide).getByText(column, { exact: true })).toBeVisible();
+  }
+  const summary = screen.getByText("Avanzado: importar con JSON");
+  expect(summary.closest("details")).not.toHaveAttribute("open");
+  expect(
+    screen.getByText("EXP-001", { selector: "code" }).closest("details"),
+  ).toBe(summary.closest("details"));
+  expect(screen.getByLabelText("Archivo CSV o JSON")).toBeInTheDocument();
 });

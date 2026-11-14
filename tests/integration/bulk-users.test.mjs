@@ -440,3 +440,44 @@ test("50 filas y una cuenta en varios proyectos; límites sin escrituras", async
   );
   assert.deepEqual(await counts(), before);
 });
+
+test("ordena errores generales, filas y columnas antes de calcular la huella", async () => {
+  const text =
+    header +
+    [
+      "orden.demo2\tPersona 2\tFALTA\tConsulta\t",
+      `x\tPersona 3\t${project.externalId}\tConsulta\t`,
+      "orden.demo4\tPersona 4\tFALTA\tRol inválido\tFALTA\textra",
+    ].join("\n");
+  const p = await ok("/users/bulk/preview", { text });
+  const order = [
+    [4, "Fila"],
+    [2, "Proyecto"],
+    [3, "Usuario"],
+    [4, "Proyecto"],
+    [4, "Rol"],
+    [4, "Área"],
+  ];
+  assert.deepEqual(
+    p.errors.map((e) => [e.row, e.column]),
+    order,
+  );
+  const { canonical } =
+    await import("../../app/backend/dist/responses/response-graph.js");
+  const { sha256 } =
+    await import("../../app/backend/dist/responses/storage.js");
+  const rows = p.rows.map((r) => ({
+    ...r,
+    projectId: r.projectCode === project.externalId ? project.id : null,
+    areaId: null,
+  }));
+  assert.equal(p.previewHash, sha256(canonical({ rows, errors: p.errors })));
+  assert.equal(
+    (await ok("/users/bulk/preview", { text })).previewHash,
+    p.previewHash,
+  );
+  assert.equal(
+    (await ok("/users/bulk/preview", { text: header })).errors[0].row,
+    0,
+  );
+});
