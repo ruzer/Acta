@@ -119,18 +119,28 @@ export function Administration({ me }: { me: Me }) {
         title="Administración"
         lead="Gestiona el acceso y los espacios de trabajo de tu institución."
         actions={
-          <Button
-            onClick={() => setCreating(tab as "users" | "areas" | "projects")}
-          >
-            <ParticipantIcon name="plus" />
-            {
+          <div className="administration-create-actions">
+            <Button
+              onClick={() => setCreating(tab as "users" | "areas" | "projects")}
+            >
+              <ParticipantIcon name="plus" />
               {
-                users: "Crear usuario",
-                areas: "Crear área",
-                projects: "Crear proyecto",
-              }[tab as "users" | "areas" | "projects"]
-            }
-          </Button>
+                {
+                  users: "Crear usuario",
+                  areas: "Crear área",
+                  projects: "Crear proyecto",
+                }[tab as "users" | "areas" | "projects"]
+              }
+            </Button>
+            {tab === "users" && (
+              <Button
+                tone="secondary"
+                onClick={() => setCreating("bulk-users")}
+              >
+                Crear varios usuarios
+              </Button>
+            )}
+          </div>
         }
       />
       <div className="tabs" aria-label="Administración">
@@ -158,9 +168,6 @@ export function Administration({ me }: { me: Me }) {
       )}
       {tab === "users" && (
         <>
-          <Button tone="secondary" onClick={() => setCreating("bulk-users")}>
-            Crear varios usuarios
-          </Button>
           {users.isPending ? (
             <LoadingState />
           ) : users.error ? (

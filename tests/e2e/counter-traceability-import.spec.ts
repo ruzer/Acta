@@ -120,10 +120,11 @@ test("importación avisa antes de subir y el servidor sigue rechazando estructur
   await expect(
     page.getByRole("link", { name: "Ir al cuestionario", exact: true }),
   ).toHaveAttribute("href", `/projects/${full.id}/editor`);
-  await expect(page.getByLabel("Archivo JSON o CSV")).toBeDisabled();
+  await expect(page.getByLabel("Archivo CSV o JSON")).toBeDisabled();
   await expect(
     page.getByRole("button", { name: "Revisar archivo", exact: true }),
   ).toBeDisabled();
+  await page.getByText("Avanzado: importar con JSON", { exact: true }).click();
   await expect(
     page.getByRole("link", { name: "Descargar ejemplo mínimo" }),
   ).toBeVisible();
@@ -154,9 +155,9 @@ test("importación avisa antes de subir y el servidor sigue rechazando estructur
       "El proyecto ya contiene estructura. La importación requiere un proyecto vacío.",
   });
   await page.goto(`/projects/${empty.id}/import`);
-  await expect(page.getByLabel("Archivo JSON o CSV")).toBeEnabled();
+  await expect(page.getByLabel("Archivo CSV o JSON")).toBeEnabled();
   template.project.externalId = empty.externalId;
-  await page.getByLabel("Archivo JSON o CSV").setInputFiles({
+  await page.getByLabel("Archivo CSV o JSON").setInputFiles({
     name: "example.json",
     mimeType: "application/json",
     buffer: Buffer.from(JSON.stringify(template)),

@@ -1,6 +1,5 @@
 .bulk-users-example {
   overflow: auto;
-  white-space: pre;
   max-width: 100%;
 }
 .bulk-user-card {
@@ -38,5 +37,76 @@
   .bulk-users-sheet dd {
     margin-inline-start: 0;
     overflow-wrap: anywhere;
+  }
+}
+
+.bulk-users-example table {
+  min-width: 36rem;
+}
+.bulk-users-preview span {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.administration-create-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+@media (max-width: 639px) {
+  .administration-create-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+}
+@media (min-width: 640px) {
+  .bulk-users-preview {
+    max-height: 52vh;
+    overflow: auto;
+  }
+  .bulk-users-preview .data-table {
+    overflow: visible;
+    background: var(--ac-surface);
+    border: 1px solid var(--ac-line);
+    border-radius: var(--ac-radius-surface);
+  }
+  .bulk-users-preview table {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+  }
+  .bulk-users-preview thead {
+    display: table-header-group;
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+  .bulk-users-preview tbody {
+    display: table-row-group;
+  }
+  .bulk-users-preview tr {
+    display: table-row;
+    width: auto;
+  }
+  .bulk-users-preview th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 8px;
+  }
+  .bulk-users-preview .data-table td[data-label],
+  .bulk-users-preview .table-scroll.data-table tbody tr:last-child td {
+    display: table-cell;
+    width: auto;
+    padding: 8px;
+    text-align: left;
+  }
+  .bulk-users-preview .data-table td[data-label]::before {
+    display: none;
+  }
+  .bulk-users-preview th:first-child {
+    width: 3.5rem;
   }
 }

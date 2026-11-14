@@ -1,5 +1,12 @@
 import { afterEach, beforeAll, expect, it, vi } from "vitest";
-import { render, screen, cleanup, waitFor, act } from "@testing-library/react";
+import {
+  render,
+  screen,
+  cleanup,
+  waitFor,
+  act,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "@testing-library/jest-dom/vitest";
@@ -199,3 +206,50 @@ it.each(["pagehide", "session-expired"])(
     expect(screen.getByLabelText("Tabla de usuarios")).toHaveValue("");
   },
 );
+
+it("el ejemplo tiene columnas reales y desplazamiento con nombre accesible", () => {
+  setup();
+  const example = screen.getByRole("table", {
+    name: "Ejemplo de tabla de usuarios",
+  });
+  expect(within(example).getAllByRole("columnheader")).toHaveLength(5);
+  for (const heading of within(example).getAllByRole("columnheader"))
+    expect(heading).toHaveAttribute("scope", "col");
+  expect(
+    screen.getByRole("region", { name: "Ejemplo de tabla de usuarios" }),
+  ).toHaveAttribute("tabindex", "0");
+});
+it("la vista previa conserva 50 filas en una tabla y un solo nombre para Participante", async () => {
+  vi.mocked(api).mockResolvedValue({
+    ...preview,
+    users: 50,
+    memberships: 50,
+    rows: Array.from({ length: 50 }, (_, i) => ({
+      ...preview.rows[0]!,
+      line: i + 2,
+      username: `persona${i}`,
+      role: "STAKEHOLDER",
+    })),
+  });
+  setup();
+  await review();
+  const table = screen.getByRole("table", {
+    name: "Usuarios y membresías por crear",
+  });
+  expect(within(table).getAllByRole("row")).toHaveLength(51);
+  expect(
+    within(table).getAllByText("Participante", { exact: true }),
+  ).toHaveLength(50);
+  expect(within(table).queryByText("Área participante")).toBeNull();
+});
+it("nombra al rol como Participante también en la vista previa", async () => {
+  vi.mocked(api).mockResolvedValue({
+    ...preview,
+    rows: [{ ...preview.rows[0]!, role: "STAKEHOLDER" }],
+  });
+  setup();
+  await review();
+  expect(document.getElementById("bulk-cell-2-Rol")).toHaveTextContent(
+    /^Participante$/,
+  );
+});

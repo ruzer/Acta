@@ -26,14 +26,17 @@ async function call(page: Page, path: string, body?: unknown) {
 }
 async function fixture(page: Page) {
   await login(page, "admin");
-  const code = "BULK-" + randomUUID();
+  const code = "BULK-" + randomUUID().slice(0, 8);
   const project = await call(page, "/projects", {
     externalId: code,
     name: "Proyecto ficticio de accesos",
     description: "",
   });
-  const areas = await call(page, "/areas");
-  return { project, area: areas.find((a: { active: boolean }) => a.active) };
+  const area = await call(page, "/areas", {
+    code: "BULK-" + randomUUID().slice(0, 8),
+    name: "Área ficticia de ejemplo",
+  });
+  return { project, area };
 }
 async function capture(page: Page, name: string) {
   if (!process.env.ACTA_BULK_EVIDENCE_DIR) return;
@@ -74,9 +77,11 @@ test("usuarios en lote: corrección, teclado, entrega privada, impresión explí
       .getByRole("button", { name: "Crear varios usuarios", exact: true })
       .focus();
     await page.keyboard.press("Enter");
-    await expect(page.getByLabel("Tabla de usuarios")).toBeFocused();
+    await expect(
+      page.getByRole("textbox", { name: "Tabla de usuarios", exact: true }),
+    ).toBeFocused();
     await page
-      .getByLabel("Tabla de usuarios")
+      .getByRole("textbox", { name: "Tabla de usuarios", exact: true })
       .fill(text.replace("Participante", "Rol no admitido"));
     await page
       .getByRole("button", { name: "Revisar usuarios", exact: true })
@@ -85,7 +90,9 @@ test("usuarios en lote: corrección, teclado, entrega privada, impresión explí
     await expect(
       page.getByRole("button", { name: "Crear 2 cuentas y sus membresías" }),
     ).toBeDisabled();
-    await page.getByLabel("Tabla de usuarios").fill(text);
+    await page
+      .getByRole("textbox", { name: "Tabla de usuarios", exact: true })
+      .fill(text);
     await page
       .getByRole("button", { name: "Revisar usuarios", exact: true })
       .click();
@@ -195,7 +202,9 @@ test("usuarios en lote: corrección, teclado, entrega privada, impresión explí
     await page
       .getByRole("button", { name: "Crear varios usuarios", exact: true })
       .click();
-    await expect(page.getByLabel("Tabla de usuarios")).toHaveValue("");
+    await expect(
+      page.getByRole("textbox", { name: "Tabla de usuarios", exact: true }),
+    ).toHaveValue("");
     await expect(
       page.getByRole("heading", { name: "Entrega de acceso" }),
     ).toHaveCount(0);
@@ -226,7 +235,7 @@ test("una confirmación cuya respuesta se pierde no vuelve a entregar las claves
     .getByRole("button", { name: "Crear varios usuarios", exact: true })
     .click();
   await page
-    .getByLabel("Tabla de usuarios")
+    .getByRole("textbox", { name: "Tabla de usuarios", exact: true })
     .fill(
       `Usuario\tNombre\tProyecto\tRol\tÁrea\n${username}\tPersona ficticia\t${project.externalId}\tConsulta\t`,
     );
@@ -255,4 +264,153 @@ test("una confirmación cuya respuesta se pierde no vuelve a entregar las claves
     page.getByRole("button", { name: "Imprimir hoja de entrega" }),
   ).toHaveCount(0);
   await expect(page.locator("[data-secret]")).toHaveCount(0);
+});
+
+test("lote accesible: ejemplo alineado y acciones juntas a 1280, 800, 640 y 390 px", async ({
+  page,
+}) => {
+  await fixture(page);
+  for (const width of [1280, 800, 640, 390]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.goto("/admin");
+    const header = page.locator(".ac-page-header");
+    const single = header.getByRole("button", {
+      name: "Crear usuario",
+      exact: true,
+    });
+    const bulk = header.getByRole("button", {
+      name: "Crear varios usuarios",
+      exact: true,
+    });
+    await expect(single).toBeVisible();
+    await expect(bulk).toBeVisible();
+    const a = (await single.boundingBox())!,
+      b = (await bulk.boundingBox())!;
+    if (width < 640) expect(b.y).toBeGreaterThanOrEqual(a.y + a.height);
+    else expect(Math.abs(a.y - b.y)).toBeLessThan(2);
+    await bulk.focus();
+    await page.keyboard.press("Enter");
+    const example = page.getByRole("table", {
+      name: "Ejemplo de tabla de usuarios",
+    });
+    await expect(example.getByRole("columnheader")).toHaveCount(5);
+    const region = page.getByRole("region", {
+      name: "Ejemplo de tabla de usuarios",
+    });
+    await region.focus();
+    await expect(region).toBeFocused();
+    for (let i = 0; i < 20; i++) await region.press("ArrowRight");
+    await expect(
+      example.getByRole("cell", { name: "AREA-DEMO", exact: true }),
+    ).toBeInViewport();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+    await page.keyboard.press("Escape");
+  }
+});
+
+test("50 filas compactas, tarjetas móviles y errores ordenados que enfocan su celda", async ({
+  page,
+}) => {
+  const { project, area } = await fixture(page);
+  const prefix = "p" + randomUUID().slice(0, 8);
+  const header = "Usuario\tNombre\tProyecto\tRol\tÁrea\n";
+  const errors =
+    header +
+    [
+      `${prefix}2\tPersona 2\tFALTA\tConsulta\t`,
+      `x\tPersona 3\t${project.externalId}\tConsulta\t`,
+      `${prefix}4\tPersona 4\tFALTA\tRol inválido\tFALTA\textra`,
+    ].join("\n");
+  const fifty =
+    header +
+    Array.from(
+      { length: 50 },
+      (_, i) =>
+        `${prefix}.${i}\tPersona ficticia ${i + 1}\t${project.externalId}\tParticipante\t${area.code}`,
+    ).join("\n");
+  await page.goto("/admin");
+  await page
+    .getByRole("button", { name: "Crear varios usuarios", exact: true })
+    .click();
+  await page
+    .getByRole("textbox", { name: "Tabla de usuarios", exact: true })
+    .fill(errors);
+  await page
+    .getByRole("button", { name: "Revisar usuarios", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Revisar el lote" }),
+  ).toBeFocused();
+  const messages = await page
+    .getByRole("alert")
+    .getByRole("listitem")
+    .allTextContents();
+  expect(messages.map((t) => t.match(/^Fila \d+, [^:]+/)?.[0])).toEqual([
+    "Fila 4, Fila",
+    "Fila 2, Proyecto",
+    "Fila 3, Usuario",
+    "Fila 4, Proyecto",
+    "Fila 4, Rol",
+    "Fila 4, Área",
+  ]);
+  const link = page.getByRole("link", { name: /Fila 4, Área:/ });
+  await link.focus();
+  await page.keyboard.press("Enter");
+  const cell = page.locator("#bulk-cell-4-Área");
+  await expect(cell).toBeFocused();
+  await expect(cell).toHaveAttribute("aria-invalid", "true");
+  const errorId = await cell.getAttribute("aria-describedby");
+  expect(errorId).toContain("bulk-error-5");
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page
+    .getByRole("textbox", { name: "Tabla de usuarios", exact: true })
+    .fill(fifty);
+  await page
+    .getByRole("button", { name: "Revisar usuarios", exact: true })
+    .click();
+  const table = page.getByRole("table", {
+    name: "Usuarios y membresías por crear",
+  });
+  await expect(table.getByRole("row")).toHaveCount(51);
+  await expect(table.getByText("Participante", { exact: true })).toHaveCount(
+    50,
+  );
+  for (const width of [1280, 800, 640, 390]) {
+    await page.setViewportSize({ width, height: 1000 });
+    const first = table.getByRole("row").nth(1);
+    if (width >= 640) {
+      expect(await first.evaluate((e) => getComputedStyle(e).display)).toBe(
+        "table-row",
+      );
+      await expect(first.getByRole("cell").nth(1)).toHaveCSS(
+        "display",
+        "table-cell",
+      );
+      expect((await first.boundingBox())!.height, `${width} px`).toBeLessThan(
+        180,
+      );
+      expect(
+        (await page
+          .getByRole("region", { name: "Filas del lote" })
+          .boundingBox())!.height,
+      ).toBeLessThanOrEqual(520);
+    } else {
+      expect(await first.evaluate((e) => getComputedStyle(e).display)).toBe(
+        "block",
+      );
+    }
+    await table.getByRole("row").last().scrollIntoViewIfNeeded();
+    await expect(page.locator("#bulk-cell-51-Usuario")).toBeInViewport();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  }
 });
