@@ -117,6 +117,77 @@ export const createUserInput = z.strictObject({
   temporaryPassword: z.string().min(12).max(128),
   isOrganizationAdmin: z.boolean().default(false),
 });
+// La tabla no contiene contraseñas; la entrega efímera no se guarda como resultado.
+export const bulkUsersInput = z.strictObject({
+  text: z
+    .string()
+    .min(1)
+    .max(65536)
+    .refine(
+      (v) => new TextEncoder().encode(v).length <= 65536,
+      "La tabla supera 64 KiB.",
+    ),
+});
+export const bulkUsersConfirmInput = bulkUsersInput.extend({
+  requestId: id,
+  previewHash: z.string().regex(/^[a-f0-9]{64}$/),
+});
+export const bulkUserColumns = [
+  "Usuario",
+  "Nombre",
+  "Proyecto",
+  "Rol",
+  "Área",
+  "Fila",
+] as const;
+export const bulkUsersPreview = z.strictObject({
+  rows: z
+    .array(
+      z.strictObject({
+        line: z.number().int().positive(),
+        username: z.string(),
+        displayName: z.string(),
+        projectCode: z.string(),
+        projectName: z.string(),
+        role: z.string(),
+        areaCode: z.string(),
+        areaName: z.string(),
+      }),
+    )
+    .max(50),
+  errors: z.array(
+    z.strictObject({
+      row: z.number().int().nonnegative(),
+      column: z.enum(bulkUserColumns),
+      message: z.string(),
+    }),
+  ),
+  users: z.number().int().nonnegative(),
+  memberships: z.number().int().nonnegative(),
+  canConfirm: z.boolean(),
+  previewHash: z.string().regex(/^[a-f0-9]{64}$/),
+});
+export const bulkUsersReceipt = z.strictObject({
+  users: z
+    .array(z.strictObject({ id, username: z.string(), displayName: name }))
+    .max(50),
+  memberships: z.number().int().nonnegative(),
+});
+export const bulkUsersResult = z.discriminatedUnion("delivery", [
+  bulkUsersReceipt.extend({
+    delivery: z.literal("NEW"),
+    credentials: z
+      .array(
+        z.strictObject({ username: z.string(), temporaryPassword: z.string() }),
+      )
+      .max(50),
+  }),
+  bulkUsersReceipt.extend({ delivery: z.literal("REPLAY") }),
+]);
+export type BulkUsersInput = z.infer<typeof bulkUsersInput>;
+export type BulkUsersConfirmInput = z.infer<typeof bulkUsersConfirmInput>;
+export type BulkUsersPreview = z.infer<typeof bulkUsersPreview>;
+export type BulkUsersResult = z.infer<typeof bulkUsersResult>;
 export const userStateInput = z.strictObject({ active: z.boolean() });
 export const resetPasswordInput = z.strictObject({
   temporaryPassword: z.string().min(12).max(128),
@@ -1293,6 +1364,18 @@ export const contracts = {
     output: organizationView,
   },
   users: { method: "GET", path: "/users", output: z.array(userView) },
+  bulkUsersPreview: {
+    method: "POST",
+    path: "/users/bulk/preview",
+    input: bulkUsersInput,
+    output: bulkUsersPreview,
+  },
+  bulkUsersConfirm: {
+    method: "POST",
+    path: "/users/bulk/confirm",
+    input: bulkUsersConfirmInput,
+    output: bulkUsersResult,
+  },
   createUser: {
     method: "POST",
     path: "/users",

@@ -18,6 +18,7 @@ import {
 } from "../ui";
 import { Avatar, PageHeader, StatusChip } from "../ui/semantic";
 import { ParticipantIcon } from "./ParticipantIcon";
+import { BulkUsers } from "./BulkUsers";
 export function ActionForm({
   children,
   onSubmit,
@@ -84,7 +85,7 @@ export function Administration({ me }: { me: Me }) {
   const [showInactive, setShowInactive] = useState(false);
   const [error, setError] = useState("");
   const [creating, setCreating] = useState<
-    "users" | "areas" | "projects" | null
+    "users" | "areas" | "projects" | "bulk-users" | null
   >(null);
   const [saved, setSaved] = useState("");
   const qc = useQueryClient();
@@ -152,8 +153,14 @@ export function Administration({ me }: { me: Me }) {
       </div>
       {error && <Alert error>{error}</Alert>}
       {saved && <Alert>{saved}</Alert>}
+      {creating === "bulk-users" && (
+        <BulkUsers onClose={() => setCreating(null)} onCreated={refresh} />
+      )}
       {tab === "users" && (
         <>
+          <Button tone="secondary" onClick={() => setCreating("bulk-users")}>
+            Crear varios usuarios
+          </Button>
           {users.isPending ? (
             <LoadingState />
           ) : users.error ? (
@@ -367,7 +374,7 @@ export function Administration({ me }: { me: Me }) {
           )}
         </>
       )}
-      {creating && (
+      {creating && creating !== "bulk-users" && (
         <Dialog
           title={
             {

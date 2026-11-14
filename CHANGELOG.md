@@ -36,9 +36,11 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   instalación. Reutiliza el exporte autorizado de decisiones vigentes y oculta
   la navegación al imprimir; no amplía permisos ni incluye borradores.
 
-- **Diseño de creación de usuarios en lote, pendiente de aprobación.** Describe
-  validación por fila, creación atómica, permisos institucionales y entrega única
-  de contraseñas temporales. Es una propuesta documental; no añade funcionalidad.
+- **Creación segura de usuarios en lote.** Administración institucional puede pegar
+  hasta 50 filas, revisar errores y crear cuentas y membresías de forma atómica.
+  Las contraseñas temporales tecleables se entregan una sola vez, con impresión
+  explícita de una hoja por persona y cambio obligatorio en el primer acceso.
+  Los reintentos conservan solo un recibo sin secretos; no hay nuevas migraciones.
 
 ## 0.9.0 — 2026-11-11
 

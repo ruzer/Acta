@@ -1,0 +1,42 @@
+.bulk-users-example {
+  overflow: auto;
+  white-space: pre;
+  max-width: 100%;
+}
+.bulk-user-card {
+  border-block-start: 1px solid var(--line);
+  padding-block: 1rem;
+}
+.bulk-user-card dd {
+  margin-inline-start: 0;
+  overflow-wrap: anywhere;
+}
+.bulk-user-card dt {
+  font-weight: 600;
+  margin-block-start: 0.5rem;
+}
+.bulk-users-print {
+  display: none;
+}
+@media print {
+  /* Las claves solo se imprimen mediante la acción explícita de entrega. */
+  body:has(.bulk-users-screen) > * {
+    display: none !important;
+  }
+  body > .bulk-users-print {
+    display: block !important;
+    color: #000;
+    background: #fff;
+  }
+  .bulk-users-sheet {
+    break-after: page;
+    padding: 1cm;
+  }
+  .bulk-users-sheet:last-child {
+    break-after: auto;
+  }
+  .bulk-users-sheet dd {
+    margin-inline-start: 0;
+    overflow-wrap: anywhere;
+  }
+}
