@@ -33,13 +33,11 @@ async function project(page: Page) {
   });
 }
 async function upload(page: Page, csv: string) {
-  await page
-    .getByLabel("Archivo JSON o CSV")
-    .setInputFiles({
-      name: "cuestionario.csv",
-      mimeType: "text/csv",
-      buffer: Buffer.from(csv),
-    });
+  await page.getByLabel("Archivo JSON o CSV").setInputFiles({
+    name: "cuestionario.csv",
+    mimeType: "text/csv",
+    buffer: Buffer.from(csv),
+  });
   await page
     .getByRole("button", { name: "Revisar archivo", exact: true })
     .click();
@@ -54,6 +52,17 @@ test("CSV: errores por fila, revisión sin escrituras, confirmación e integrida
   await expect(
     page.getByRole("link", { name: "Descargar plantilla CSV" }),
   ).toHaveAttribute("download", "questionnaire-template.csv");
+  if (process.env.ACTA_CSV_EVIDENCE_DIR) {
+    await mkdir(process.env.ACTA_CSV_EVIDENCE_DIR, { recursive: true });
+    for (const width of [1440, 390]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await page.screenshot({
+        path: `${process.env.ACTA_CSV_EVIDENCE_DIR}/importar-${width}.png`,
+        fullPage: true,
+      });
+    }
+    await page.setViewportSize({ width: 1440, height: 1000 });
+  }
   await upload(
     page,
     header + ";Desconocida\nTema;Q1;Pregunta;;Texto corto;No;" + area,
@@ -127,6 +136,83 @@ test("CSV: errores por fila, revisión sin escrituras, confirmación e integrida
   ).toMatchObject({ name: p.name, description: p.description });
   await page.goto(`/projects/${p.id}/import`);
   await expect(page.getByLabel("Archivo JSON o CSV")).toBeDisabled();
+});
+test("CSV: normaliza temas y catálogo, admite título y conserva filas físicas sin duplicar", async ({
+  page,
+}) => {
+  await login(page, "admin");
+  const p = await project(page);
+  const area = await call(page, "/areas", "POST", {
+    code: "CSV-" + randomUUID(),
+    name: "Área de Atención " + randomUUID(),
+  });
+  const normalizedArea =
+    "  " +
+    area.name
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replaceAll(" ", "   ") +
+    " ";
+  await page.goto(`/projects/${p.id}/import`);
+  await upload(page, "\n" + header + ";Título\n;;;;;;;\nTema;Q1");
+  await expect(page.getByRole("alert")).toContainText(
+    "Fila 4, columna Pregunta",
+  );
+  await upload(
+    page,
+    "\n" +
+      header +
+      ";Título\n;;;;;;;\n" +
+      ` Atención   general ; Q-01 ; ¿Cómo se recibe? ; Ayuda ;Texto corto;Sí;${normalizedArea}; Recepción \n\n` +
+      `atencion GENERAL;Q-02;"¿Quién registra?\nExplica el proceso.";;Texto largo;No;${area.name};\n;;;;;;;\n`,
+  );
+  await expect(
+    page.getByRole("button", { name: "Confirmar importación" }),
+  ).toBeEnabled();
+  await expect(
+    page.getByLabel("Confirmo crear estas áreas en la institución"),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: "Confirmar importación" }).click();
+  await expect(
+    page.getByText("Importación completada: 2 preguntas y 1 tema."),
+  ).toBeVisible();
+  const data = await call(page, `/projects/${p.id}/questionnaire`);
+  expect(data.sections.map((s: { title: string }) => s.title)).toEqual([
+    "Atención general",
+  ]);
+  expect(
+    data.questions.map(
+      (q: {
+        externalId: string;
+        title: string;
+        question: string;
+        responsibleAreaId: string;
+        publication: string;
+      }) => ({
+        externalId: q.externalId,
+        title: q.title,
+        question: q.question,
+        areaId: q.responsibleAreaId,
+        publication: q.publication,
+      }),
+    ),
+  ).toEqual([
+    {
+      externalId: "Q-01",
+      title: "Recepción",
+      question: "¿Cómo se recibe?",
+      areaId: area.id,
+      publication: "DRAFT",
+    },
+    {
+      externalId: "Q-02",
+      title: "¿Quién registra?…",
+      question: "¿Quién registra?\nExplica el proceso.",
+      areaId: area.id,
+      publication: "DRAFT",
+    },
+  ]);
 });
 test("CSV: Analista reutiliza áreas y no puede crear faltantes", async ({
   page,

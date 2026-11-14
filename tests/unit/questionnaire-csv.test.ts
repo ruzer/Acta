@@ -17,6 +17,134 @@ const convert = (
   catalog: { code: string; name: string }[] = [],
 ) => csvQuestionnaire(Buffer.from(text), project, catalog);
 afterEach(() => vi.unstubAllEnvs());
+describe("CSV de hojas de cálculo", () => {
+  it("recorta campos y agrupa temas/áreas sin espacios, acentos ni mayúsculas", () => {
+    const { json } = convert(
+      header +
+        "\n Tema   A ; REQ-001 ; ¿Cómo se registra? ; Ayuda ;Texto corto;Sí; recursos   humanos " +
+        "\nTÉMA a;REQ-01;Otra pregunta;;Texto corto;No;RECURSOS HUMANOS",
+      [{ code: "RH", name: "Recursos Humanos" }],
+    );
+    const data = inspectTemplate(Buffer.from(json));
+    expect(data.errors).toEqual([]);
+    expect(data.data?.sections).toEqual([
+      { externalId: "CSV-TEMA-1", title: "Tema A", order: 0 },
+    ]);
+    expect(data.data?.areas).toEqual([
+      { code: "RH", name: "Recursos Humanos" },
+    ]);
+    expect(data.data?.questions[0]).toMatchObject({
+      externalId: "REQ-001",
+      question: "¿Cómo se registra?",
+      helpText: "Ayuda",
+      responsibleAreaCode: "RH",
+      title: "¿Cómo se registra?",
+    });
+    expect(data.data?.questions[1].sectionExternalId).toBe("CSV-TEMA-1");
+  });
+  it("agrupa áreas nuevas y rechaza códigos repetidos después de recortar", () => {
+    const { json } = convert(
+      header +
+        "\n" +
+        row +
+        "\n" +
+        row.replace("REQ-001", "Q2").replace("Servicios", " SÉRVICIOS  "),
+    );
+    expect(JSON.parse(json).areas).toHaveLength(1);
+    expect(() =>
+      convert(header + "\n" + row + "\n" + row.replace("REQ-001", " REQ-001 ")),
+    ).toThrow(/Fila 3, columna Código/);
+  });
+  it("rechaza áreas ambiguas tras normalizar en vez de escoger una", () => {
+    expect(() =>
+      convert(header + "\n" + row, [
+        { code: "A", name: "Servicios" },
+        { code: "B", name: " SÉRVICIOS " },
+      ]),
+    ).toThrow(/Fila 2, columna Área responsable/);
+  });
+  it.each(["Título", " titulo "])(
+    "admite la columna opcional %s en cualquier posición",
+    (title) => {
+      const { json } = convert(
+        title + ";" + header + "\n Resumen de recepción ;" + row,
+      );
+      expect(JSON.parse(json).questions[0].title).toBe("Resumen de recepción");
+    },
+  );
+  it("deriva títulos sin saltos, conserva la pregunta y marca el recorte", () => {
+    const question = "¿Cómo se registra la solicitud?\n Explica los pasos.";
+    const { json } = convert(
+      header + ';Título\nTema;Q1;"' + question + '";;Texto largo;Sí;Servicios;',
+    );
+    expect(JSON.parse(json).questions[0]).toMatchObject({
+      question,
+      title: "¿Cómo se registra la solicitud?…",
+    });
+  });
+  it("limita el título derivado a 80 caracteres sin cortar palabras", () => {
+    const question =
+      "Describir el procedimiento institucional para recibir y revisar solicitudes antes de su registro definitivo";
+    const { json } = convert(
+      header + "\n" + row.replace("¿Cómo funciona?", question),
+    );
+    const title = JSON.parse(json).questions[0].title;
+    expect(title).toBe(
+      "Describir el procedimiento institucional para recibir y revisar solicitudes…",
+    );
+    expect(title.length).toBeLessThanOrEqual(80);
+  });
+  it("pide un título explícito si la primera palabra no cabe sin cortarse", () => {
+    const input =
+      header + "\n" + row.replace("¿Cómo funciona?", "x".repeat(100));
+    expect(() => convert(input)).toThrow(/Fila 2, columna Título/);
+  });
+  it("localiza el límite del título explícito en su columna", () => {
+    expect(() =>
+      convert(header + ";Título\n" + row + ";" + "x".repeat(201)),
+    ).toThrow(/Fila 2, columna Título/);
+  });
+  it.each(["\n", "\r\n"])(
+    "ignora solo filas vacías y conserva las líneas físicas con %j",
+    (newline) => {
+      const csv = [
+        "",
+        header,
+        "",
+        ";;;;;;",
+        row,
+        "   ",
+        'Tema;Q2;"Pregunta',
+        'multilínea";;Texto corto;Sí;Servicios',
+        "",
+        "Tema;Q3;Pregunta;;Texto corto;;Servicios",
+      ].join(newline);
+      expect(() => convert(csv)).toThrow(/Fila 10, columna Obligatoria/);
+      const { json, location } = convert(
+        csv.replace(";Texto corto;;Servicios", ";Texto corto;Sí;Servicios") +
+          newline +
+          ";;;;;;" +
+          newline,
+      );
+      expect(JSON.parse(json).questions).toHaveLength(3);
+      expect(location("/questions/1/question")).toBe(
+        "Fila 7, columna Pregunta",
+      );
+      expect(location("/questions/2/question")).toBe(
+        "Fila 10, columna Pregunta",
+      );
+    },
+  );
+  it("nombra la columna requerida en una fila parcial", () => {
+    expect(() => convert(header + "\nTema;Q1")).toThrow(
+      /Fila 2, columna Pregunta: Este dato es obligatorio/,
+    );
+  });
+  it("las filas vacías no consumen el límite de preguntas", () => {
+    const { json } = convert(header + "\n" + "\n".repeat(2001) + row);
+    expect(JSON.parse(json).questions).toHaveLength(1);
+  });
+});
 describe("CSV sencillo usa el importador autoritativo", () => {
   it.each([",", ";"])(
     "lee UTF-8, BOM, encabezados normalizados y separador %s",
@@ -39,7 +167,7 @@ describe("CSV sencillo usa el importador autoritativo", () => {
         externalId: "REQ-001",
         type: "SHORT_TEXT",
         required: true,
-        title: "REQ-001",
+        title: "¿Cómo funciona?",
         priority: "P2",
       });
     },
@@ -85,14 +213,16 @@ describe("CSV sencillo usa el importador autoritativo", () => {
     "  =1+1",
     "\t=1+1",
     "\u0001=1+1",
-  ])("no ejecuta ni altera %j; el exporte lo neutraliza", (value) => {
+  ])("no ejecuta %j; recorta bordes y el exporte lo neutraliza", (value) => {
     const { json } = convert(
       header + `\nTema;Q1;${value};;Texto corto;No;Servicios`,
     );
     const parsed = inspectTemplate(Buffer.from(json));
     expect(parsed.errors).toEqual([]);
-    expect(parsed.data?.questions[0].question).toBe(value);
-    expect(csvCell(parsed.data?.questions[0].question)).toBe(`"'${value}"`);
+    expect(parsed.data?.questions[0].question).toBe(value.trim());
+    expect(csvCell(parsed.data?.questions[0].question)).toBe(
+      `"'${value.trim()}"`,
+    );
   });
   it.each([
     [header + ";Estado\n" + row, /Fila 1, columna 8/],
@@ -108,7 +238,10 @@ describe("CSV sencillo usa el importador autoritativo", () => {
     ],
     [header + "\n" + row.replace("REQ-001", "1,2"), /columna Código/],
     [header + "\n" + row + "\n" + row, /Fila 3, columna Código/],
-    [header + "\n" + row + "\n\n" + row.replace("REQ-001", "Q2"), /Fila 3/],
+    [
+      header + "\n" + row + "\n\n" + row.replace("REQ-001", ""),
+      /Fila 4, columna Código/,
+    ],
     [header + "\n" + row + ";dato", /columnas/],
     [header + '\nTema;Q1;"sin cierre', /comillas/],
     [

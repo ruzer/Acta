@@ -9,11 +9,11 @@ const columns = [
   "Obligatoria",
   "Área responsable",
 ] as const;
+const compact = (value: string) => value.trim().replace(/\s+/g, " ");
 const normalize = (value: string) =>
-  value
+  compact(value)
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .trim()
     .toLocaleLowerCase("es");
 const types = {
   "si/no": "YES_NO",
@@ -32,6 +32,24 @@ function invalid(
   throw new Error(`Fila ${line}, columna ${column}: ${message}`);
 }
 
+function questionTitle(question: string, line: number) {
+  const text = compact(question);
+  const sentence = text.match(/^.*?[.!?](?=\s|$)/u)?.[0] ?? text;
+  if (sentence.length <= 80 && sentence === text) return sentence;
+  let title = sentence;
+  if (title.length > 79) {
+    const end = text.slice(0, 80).lastIndexOf(" ");
+    if (end < 1)
+      invalid(
+        line,
+        "Título",
+        "Añade un título breve: la primera palabra no cabe sin cortarse.",
+      );
+    title = text.slice(0, end);
+  }
+  return title + "…";
+}
+
 // Las comillas, separadores y saltos dentro de una celda se leen literalmente; nunca se evalúan fórmulas.
 function rows(text: string): Row[] {
   const result: Row[] = [];
@@ -42,6 +60,13 @@ function rows(text: string): Row[] {
     cells: string[] = [],
     quoted = false,
     closed = false;
+  const addRow = () => {
+    if (cells.some((value) => value.trim())) {
+      result.push({ line: start, cells });
+      if (result.length > 2001)
+        invalid(start, "Pregunta", "El archivo supera 2000 preguntas.");
+    } else if (!result.length) delimiter = "";
+  };
   for (let i = 0; i < text.length; i++) {
     const char = text[i];
     if (quoted) {
@@ -65,13 +90,9 @@ function rows(text: string): Row[] {
       cells.push(cell);
       cell = "";
       closed = false;
-      if (cells.length > columns.length)
-        invalid(start, cells.length, "Hay más columnas de las admitidas.");
     } else if (char === "\n" || char === "\r") {
       cells.push(cell);
-      result.push({ line: start, cells });
-      if (result.length > 2001)
-        invalid(start, 1, "El archivo supera 2000 preguntas.");
+      addRow();
       if (char === "\r" && text[i + 1] === "\n") i++;
       line++;
       start = line;
@@ -91,8 +112,10 @@ function rows(text: string): Row[] {
   }
   if (quoted)
     invalid(start, cells.length + 1, "Falta cerrar las comillas de la celda.");
-  if (cell || cells.length || closed)
-    result.push({ line: start, cells: [...cells, cell] });
+  if (cell || cells.length || closed) {
+    cells.push(cell);
+    addRow();
+  }
   if (!result.length) invalid(1, 1, "El archivo está vacío.");
   return result;
 }
@@ -117,16 +140,20 @@ export function csvQuestionnaire(
   const seen = new Set<string>();
   header.cells.forEach((value, i) => {
     const key = normalize(value);
-    if (!columns.some((column) => normalize(column) === key))
-      invalid(1, i + 1, `La columna «${value}» no está admitida.`);
+    if (![...columns, "Título"].some((column) => normalize(column) === key))
+      invalid(header.line, i + 1, `La columna «${value}» no está admitida.`);
     if (seen.has(key))
-      invalid(1, i + 1, `La columna «${value}» está repetida.`);
+      invalid(header.line, i + 1, `La columna «${value}» está repetida.`);
     seen.add(key);
   });
   indexes.forEach((index, i) => {
-    if (index === -1) invalid(1, columns[i]!, "Falta esta columna.");
+    if (index === -1) invalid(header.line, columns[i]!, "Falta esta columna.");
   });
-  if (!data.length) invalid(2, "Pregunta", "Añade al menos una pregunta.");
+  const titleIndex = header.cells.findIndex(
+    (value) => normalize(value) === "titulo",
+  );
+  if (!data.length)
+    invalid(header.line + 1, "Pregunta", "Añade al menos una pregunta.");
   if (data.length > 2000)
     invalid(data[2000]!.line, "Pregunta", "El archivo supera 2000 preguntas.");
   const template: TemplateInput = {
@@ -144,14 +171,14 @@ export function csvQuestionnaire(
     areaLines: number[] = [];
   const identifiers = new Set<string>();
   for (const row of data) {
-    if (row.cells.length !== columns.length)
+    if (row.cells.length > header.cells.length)
       invalid(
         row.line,
-        Math.min(row.cells.length + 1, columns.length + 1),
-        `Se requieren exactamente ${columns.length} columnas.`,
+        header.cells.length + 1,
+        "Hay más columnas que encabezados. Revisa los separadores y las comillas.",
       );
     const [theme, code, question, helpText, kind, mandatory, areaName] =
-      indexes.map((index) => row.cells[index]!) as [
+      indexes.map((index) => (row.cells[index] ?? "").trim()) as [
         string,
         string,
         string,
@@ -184,21 +211,27 @@ export function csvQuestionnaire(
     if (identifiers.has(code))
       invalid(row.line, "Código", "Este código está repetido.");
     identifiers.add(code);
-    let section = template.sections.find((item) => item.title === theme);
+    let section = template.sections.find(
+      (item) => normalize(item.title) === normalize(theme),
+    );
     if (!section) {
       if (template.sections.length === 100)
         invalid(row.line, "Tema", "El archivo supera 100 temas.");
       section = {
         externalId: `CSV-TEMA-${template.sections.length + 1}`,
-        title: theme,
+        title: compact(theme),
         order: template.sections.length,
       };
       template.sections.push(section);
       sectionLines.push(row.line);
     }
-    let area = template.areas.find((item) => item.name === areaName);
+    let area = template.areas.find(
+      (item) => normalize(item.name) === normalize(areaName),
+    );
     if (!area) {
-      const matches = catalog.filter((item) => item.name === areaName);
+      const matches = catalog.filter(
+        (item) => normalize(item.name) === normalize(areaName),
+      );
       if (matches.length > 1)
         invalid(
           row.line,
@@ -212,14 +245,27 @@ export function csvQuestionnaire(
         )
       )
         number++;
-      area = { code: matches[0]?.code ?? `CSV-AREA-${number}`, name: areaName };
+      area = {
+        code: matches[0]?.code ?? `CSV-AREA-${number}`,
+        name: matches[0]?.name ?? compact(areaName),
+      };
       template.areas.push(area);
       areaLines.push(row.line);
     }
+    if (
+      !templateInput.shape.questions.element.shape.question.safeParse(question)
+        .success
+    )
+      invalid(
+        row.line,
+        "Pregunta",
+        "Revisa el formato o la longitud de este dato.",
+      );
+    const title = compact(row.cells[titleIndex] ?? "");
     template.questions.push({
       externalId: code,
       sectionExternalId: section.externalId,
-      title: code,
+      title: title || questionTitle(question, row.line),
       question,
       helpText,
       priority: "P2",
@@ -236,7 +282,7 @@ export function csvQuestionnaire(
     const [, collection, index, field] = path.split("/");
     const fields: Record<string, string> = {
       externalId: "Código",
-      title: "Código",
+      title: "Título",
       question: "Pregunta",
       helpText: "Texto de ayuda",
       type: "Tipo",

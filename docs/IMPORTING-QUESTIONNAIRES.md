@@ -17,29 +17,40 @@ Puedes preparar temas y preguntas fuera de Acta y cargarlos juntos en un proyect
 
 Descarga [la plantilla CSV](../examples/questionnaire-template.csv) desde **Importar**.
 Conserva las siete columnas: **Tema, Código, Pregunta, Texto de ayuda, Tipo,
-Obligatoria, Área responsable**. Los encabezados no distinguen mayúsculas ni acentos.
-Solo Texto de ayuda puede quedar vacío. Tipo admite Sí/No, Texto corto, Texto largo,
+Obligatoria, Área responsable**. Puedes añadir **Título** en cualquier posición;
+los archivos anteriores sin esa columna siguen funcionando. Los encabezados no
+distinguen mayúsculas, acentos ni espacios sobrantes. Texto de ayuda y Título pueden
+quedar vacíos. Tipo admite Sí/No, Texto corto, Texto largo,
 Fecha y Número; Obligatoria admite Sí o No. No incluyas otras columnas o tipos.
 
 Guarda en **CSV UTF-8**, con o sin BOM, separado por coma o punto y coma. Las celdas
 con separadores, comillas o saltos se entrecomillan; las comillas interiores se duplican.
-Acta indica la fila (línea de inicio de la celda) y columna del error. Una fila vacía
-intermedia se rechaza; no se descarta. Los límites máximos son 5 MiB (también para el
+Acta indica la fila (línea real de inicio del registro) y columna del error. Se ignoran
+solo las filas totalmente vacías, incluidas las que contienen únicamente separadores
+y espacios. Una fila parcial indica la columna obligatoria que falta. Los límites máximos son 5 MiB (también para el
 JSON convertido), 100 temas y 2000 preguntas; los límites menores configurados en el
 servidor siguen aplicándose durante la revisión.
 
-Mantén Código como texto: **REQ-001 y REQ-01 son distintos**. Los valores se conservan
-literalmente: Acta no evalúa fórmulas ni convierte números o fechas. Al exportar CSV,
+Mantén Código como texto: **REQ-001 y REQ-01 son distintos**. Se recortan los espacios
+al principio y al final de Tema, Código, Pregunta, Texto de ayuda y Área responsable.
+En Tema y Área responsable también se reducen los espacios internos repetidos a uno.
+Los saltos y espacios interiores de Pregunta y Texto de ayuda se conservan.
+Acta no evalúa fórmulas ni convierte números o fechas. Al exportar CSV,
 los valores potencialmente interpretables como fórmulas se protegen con un apóstrofo;
 el original almacenado no cambia. No habilites fórmulas al abrir archivos de origen desconocido.
 
-Los temas siguen su primera aparición y las preguntas el orden de filas. El código
-sirve de título breve; la prioridad inicial es P2. No se infieren seguimientos,
+Los temas se agrupan sin distinguir mayúsculas, acentos ni espacios sobrantes;
+conservan la escritura de su primera aparición y las preguntas el orden de filas.
+Título admite hasta 200 caracteres. Si falta o está vacío, se obtiene de la primera
+frase de la pregunta, en una sola línea y con hasta 80 caracteres, sin cortar palabras;
+«…» indica que hay más texto. Si la primera palabra no cabe, se pide un Título explícito.
+El enunciado completo no se recorta. La prioridad inicial es P2. No se infieren seguimientos,
 condiciones, opciones, matrices ni referencias. El nombre y descripción del proyecto
 se conservan. Para esas estructuras avanzadas utiliza JSON.
 
-Escribe **Área responsable** exactamente como el nombre del catálogo. Acta reutiliza
-su código; para áreas nuevas genera códigos sin colisión y muestra la creación en
+**Área responsable** se compara con el catálogo sin distinguir mayúsculas, acentos
+ni espacios sobrantes. Si coincide con una sola área, Acta reutiliza su código y
+nombre del catálogo; para áreas nuevas genera códigos sin colisión y muestra la creación en
 la revisión habitual. Solo Administración puede confirmarla. Si hay nombres de área
 ambiguos o el catálogo alcanza el límite de consulta de 500 áreas, usa JSON con
 códigos explícitos; no se adivinan áreas.
@@ -219,4 +230,4 @@ Un JSON de **exportación** no es una plantilla importable ni un backup completo
 
 El [contrato técnico](IMPORT-FORMAT.md) describe campos y límites. La autoridad ejecutable es `templateInput` junto con el parser estricto, las reglas de preguntas y la validación contextual del backend. No hay un JSON Schema independiente autoritativo: generar solo la forma Zod no comprobaría relaciones, ciclos, configuración según tipo ni permisos. La vista previa de Acta sigue siendo necesaria.
 
-Los ejemplos se prueban automáticamente con el validador de producción y con preview/confirmación HTTP sobre PostgreSQL de test. [Evaluación de Excel/CSV](SIMPLE-IMPORT-PROPOSAL.md): propuesta futura, no una opción de importación disponible.
+Los ejemplos se prueban automáticamente con el validador de producción y con preview/confirmación HTTP sobre PostgreSQL de test. [Alcance de la importación CSV](SIMPLE-IMPORT-PROPOSAL.md): subconjunto implementado; las estructuras avanzadas utilizan JSON.
