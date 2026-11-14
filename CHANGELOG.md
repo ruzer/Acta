@@ -20,6 +20,11 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   también en tablet y móvil. El lector regresa a Preguntas publicadas, sin ofrecer
   acceso a la gestión de decisiones.
 
+- **CSV preparado para hojas de cálculo.** Recorta los bordes de los campos,
+  agrupa temas y áreas sin distinguir acentos, mayúsculas ni espacios sobrantes
+  y rechaza catálogos ambiguos. Admite Título opcional o un resumen del enunciado;
+  ignora solo filas vacías y conserva la línea real en los errores.
+
 ### Added
 
 - **Importación sencilla desde CSV.** Plantilla de siete columnas en español, cinco

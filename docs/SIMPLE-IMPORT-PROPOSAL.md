@@ -3,7 +3,7 @@
 **IMPLEMENTADO: subconjunto CSV.** La especificación de uso vigente está en
 [Importar cuestionarios](IMPORTING-QUESTIONNAIRES.md#plantilla-sencilla-csv).
 
-Se admiten siete columnas, cinco tipos simples y archivos UTF-8 separados por coma
+Se admiten siete columnas y la columna opcional Título, cinco tipos simples y archivos UTF-8 separados por coma
 o punto y coma. La conversión en el navegador reutiliza `questionnaire-template`
 1.0 y la revisión/confirmación del servidor. No hay persistencia, mezcla o reemplazo
 alternativos. No se incorporaron dependencias, .xlsx ni inferencias de condiciones.
