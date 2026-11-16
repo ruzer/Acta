@@ -112,7 +112,7 @@ El despliegue incluido usa **frontend + backend + PostgreSQL + VersityGW**, con 
 - **VersityGW** guarda los archivos adjuntos en almacenamiento privado dentro de tu infraestructura, mediante la API S3. Es el proveedor self-hosted por defecto verificado.
 - Los volúmenes Docker conservan datos y secretos entre reinicios. Un backup completo necesita base de datos, archivos y configuración; exportar JSON no sustituye ese backup.
 
-Antes de actualizar desde v0.8.0, consulta las [notas de v0.9.0](docs/releases/v0.9.0.md): incluyen backup, migración y actualización conjunta de frontend/backend.
+Para preparar la actualización desde v0.9.0, consulta las [notas de v0.10.0](docs/releases/v0.10.0.md): backup previo, frontend y backend juntos y recarga de pestañas; sin migraciones nuevas. La versión 0.10.0 está en preparación, no publicada. Si aún utilizas v0.8.0, revisa también la migración y la incompatibilidad de Sistema de las [notas de v0.9.0](docs/releases/v0.9.0.md).
 
 [Instalar en servidor y actualizar](docs/SELF-HOSTING.md) · [Configuración](docs/CONFIGURATION.md) · [Backup y restauración](docs/BACKUP-RESTORE.md) · [Almacenamiento avanzado](docs/S3-PROVIDERS.md)
 
@@ -135,7 +135,7 @@ También puedes ver [Organizar](docs/assets/02-editor-organize.png), [Responder]
 
 Acta está diseñado para instalarse en infraestructura propia y adaptarse mediante forks. Las organizaciones pueden mantener personalizaciones y sincronizarse con el upstream conforme a AGPL-3.0-only. Las mejoras genéricas son bienvenidas de regreso mediante Pull Requests: contribuir así ayuda a otras instalaciones y reduce divergencia; no es una obligación de enviar PR atribuida a la licencia.
 
-El upstream oficial es [github.com/ruzer/Acta](https://github.com/ruzer/Acta). El código está disponible públicamente. Este checkout prepara **v0.6.0 — Dirección C**, el rediseño visual y de navegación del espacio de trabajo, junto con la actualización de seguridad de VersityGW compilado desde su fuente oficial. La preparación de la versión no implica que su tag o release ya estén publicados. Consulta el [changelog](CHANGELOG.md) y las [releases oficiales](https://github.com/ruzer/Acta/releases) para verificar la versión estable y su commit antes de actualizar; la release anterior es [v0.5.0](https://github.com/ruzer/Acta/releases/tag/v0.5.0).
+El upstream oficial es [github.com/ruzer/Acta](https://github.com/ruzer/Acta). Este checkout prepara **v0.10.0 — CSV, informes y usuarios en lote**. La versión publicada de referencia es [v0.9.0](https://github.com/ruzer/Acta/releases/tag/v0.9.0); esta preparación no crea tag, Release ni imágenes públicas. Consulta el [changelog](CHANGELOG.md), las [notas de preparación](docs/releases/v0.10.0.md) y las [releases oficiales](https://github.com/ruzer/Acta/releases) para verificar la versión autorizada y su commit antes de actualizar.
 
 [Gobernanza](GOVERNANCE.md) · [Forks y sincronización](docs/UPSTREAM-FORKS.md) · [Roadmap](ROADMAP.md) · [Soporte comunitario](SUPPORT.md).
 
