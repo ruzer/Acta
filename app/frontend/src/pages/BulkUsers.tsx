@@ -6,7 +6,7 @@ import {
   type BulkUsersResult,
 } from "@requirements/contracts";
 import { api } from "../api";
-import { Alert, Button, Dialog, Textarea } from "../ui";
+import { Alert, Button, DataTable, Dialog, Textarea } from "../ui";
 import "./bulk-users.css";
 
 const columns = ["Usuario", "Nombre", "Proyecto", "Rol", "Área"] as const;
@@ -190,15 +190,38 @@ export function BulkUsers({
               Para Participante, indica un área. Las cuentas existentes se
               administran individualmente.
             </p>
-            <pre
-              className="bulk-users-example"
+            <div
+              className="table-scroll bulk-users-example"
+              role="region"
               tabIndex={0}
-              aria-label="Ejemplo de tabla con tabuladores"
+              aria-label="Ejemplo de tabla de usuarios"
             >
-              Usuario{"\t"}Nombre{"\t"}Proyecto{"\t"}Rol{"\t"}Área{"\n"}
-              persona.demo{"\t"}Persona de ejemplo{"\t"}PROYECTO-DEMO{"\t"}
-              Participante{"\t"}AREA-DEMO
-            </pre>
+              <table>
+                <caption>Ejemplo de tabla de usuarios</caption>
+                <thead>
+                  <tr>
+                    {columns.map((column) => (
+                      <th scope="col" key={column}>
+                        {column}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    {[
+                      "persona.demo",
+                      "Persona de ejemplo",
+                      "PROYECTO-DEMO",
+                      "Participante",
+                      "AREA-DEMO",
+                    ].map((value, i) => (
+                      <td key={columns[i]}>{value}</td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
             <Textarea
               label="Tabla de usuarios"
               data-autofocus
@@ -262,36 +285,46 @@ export function BulkUsers({
                     cuenta será administradora de la institución.
                   </p>
                 )}
-                {preview.rows.map((row) => (
-                  <section
-                    key={row.line}
-                    className="bulk-user-card"
-                    aria-label={`Fila ${row.line}`}
-                  >
-                    <h4>Fila {row.line}</h4>
-                    <dl>
-                      {[
-                        row.username,
-                        row.displayName,
-                        [row.projectCode, row.projectName]
-                          .filter(Boolean)
-                          .join(" — "),
-                        roleLabels[row.role as keyof typeof roleLabels] ??
-                          row.role,
-                        [row.areaCode, row.areaName]
-                          .filter(Boolean)
-                          .join(" — ") || "Sin área",
-                      ].map((value, i) => {
-                        const errors = preview.errors.flatMap((e, j) =>
-                          e.row === row.line &&
-                          (e.column === columns[i] || e.column === "Fila")
-                            ? [`bulk-error-${j}`]
-                            : [],
-                        );
-                        return (
-                          <div key={columns[i]}>
-                            <dt>{columns[i]}</dt>
-                            <dd
+                <div
+                  className="bulk-users-preview"
+                  role="region"
+                  tabIndex={0}
+                  aria-label="Filas del lote"
+                >
+                  <DataTable
+                    caption="Usuarios y membresías por crear"
+                    columns={[
+                      { label: "Fila" },
+                      ...columns.map((label) => ({ label })),
+                    ]}
+                    rows={preview.rows.map((row) => ({
+                      key: String(row.line),
+                      cells: [
+                        row.line,
+                        ...[
+                          row.username,
+                          row.displayName,
+                          [row.projectCode, row.projectName]
+                            .filter(Boolean)
+                            .join(" — "),
+                          row.role === "STAKEHOLDER"
+                            ? "Participante"
+                            : (roleLabels[
+                                row.role as keyof typeof roleLabels
+                              ] ?? row.role),
+                          [row.areaCode, row.areaName]
+                            .filter(Boolean)
+                            .join(" — ") || "Sin área",
+                        ].map((value, i) => {
+                          const errors = preview.errors.flatMap((e, j) =>
+                            e.row === row.line &&
+                            (e.column === columns[i] || e.column === "Fila")
+                              ? [`bulk-error-${j}`]
+                              : [],
+                          );
+                          return (
+                            <span
+                              key={columns[i]}
                               id={`bulk-cell-${row.line}-${columns[i]}`}
                               tabIndex={-1}
                               aria-invalid={errors.length ? true : undefined}
@@ -300,13 +333,13 @@ export function BulkUsers({
                               }
                             >
                               {value || "Sin dato"}
-                            </dd>
-                          </div>
-                        );
-                      })}
-                    </dl>
-                  </section>
-                ))}
+                            </span>
+                          );
+                        }),
+                      ],
+                    }))}
+                  />
+                </div>
                 <Button
                   disabled={busy || !preview.canConfirm}
                   onClick={() => void confirm()}

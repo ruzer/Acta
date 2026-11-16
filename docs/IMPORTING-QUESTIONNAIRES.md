@@ -9,13 +9,27 @@ Puedes preparar temas y preguntas fuera de Acta y cargarlos juntos en un proyect
 ## Antes de comenzar
 
 1. Entra con un perfil Administrador o Analista autorizado en el proyecto.
-2. Crea un proyecto **vacío y activo**. Anota su identificador externo: aparece en la creación/administración del proyecto.
+2. Crea un proyecto **vacío y activo**. Para la plantilla CSV no necesitas copiar ningún identificador del proyecto.
 3. Abre **Importar** dentro del proyecto. Si ya tiene temas, preguntas, referencias o una importación previa, no se puede importar otra estructura, aunque los elementos estén archivados. **No hay mezcla, actualización ni reemplazo** de contenido existente.
 4. Prepara las áreas responsables. Un Administrador puede confirmar la creación de las faltantes; un Analista debe pedir que se creen primero. Crear un área no asigna participantes.
 
 ## Plantilla sencilla CSV
 
-Descarga [la plantilla CSV](../examples/questionnaire-template.csv) desde **Importar**.
+1. **Descargar plantilla CSV** desde **Importar**: abre [la plantilla](../examples/questionnaire-template.csv) en tu hoja de cálculo.
+2. Completa una fila por pregunta y conserva los encabezados.
+3. Guarda el archivo como **CSV UTF-8**. Selecciónalo en **Archivo CSV o JSON**, pulsa **Revisar archivo** y comprueba el resultado antes de confirmar.
+
+| Columna | Qué escribir |
+| --- | --- |
+| Tema | El asunto que agrupa varias preguntas. |
+| Código | Una clave única por pregunta, por ejemplo REQ-001; consérvala como texto. |
+| Pregunta | El enunciado completo que responderá la persona. |
+| Texto de ayuda | Una explicación adicional; puede quedar vacía. |
+| Tipo | Sí/No, Texto corto, Texto largo, Fecha o Número. |
+| Obligatoria | Sí o No: si se debe responder. |
+| Área responsable | El nombre del área que revisará la pregunta; no asigna personas. |
+| Título | Encabezado breve opcional; si falta, Acta lo obtiene de la pregunta. |
+
 Conserva las siete columnas: **Tema, Código, Pregunta, Texto de ayuda, Tipo,
 Obligatoria, Área responsable**. Puedes añadir **Título** en cualquier posición;
 los archivos anteriores sin esa columna siguen funcionando. Los encabezados no
@@ -59,7 +73,11 @@ CSV se convierte en `questionnaire-template` 1.0 en el navegador y pasa por el p
 la vista previa y la confirmación existentes. Se envían los mismos bytes en ambos
 pasos. Las preguntas quedan en borrador; no se agregan participantes ni respuestas.
 
-## Opción rápida: partir del ejemplo mínimo
+## Avanzado: importar con JSON
+
+En la pantalla, abre **Avanzado: importar con JSON** para descargar ejemplos y consultar el identificador del proyecto. El camino principal usa CSV; los pasos técnicos siguientes solo son necesarios para JSON.
+
+### Partir de un ejemplo
 
 - [Ejemplo mínimo JSON](../examples/questionnaire-template.minimal.json): un tema y dos preguntas, Sí/No y Texto corto.
 - [Ejemplo completo JSON](../examples/questionnaire-template.full.json): diez preguntas en cuatro temas, con los ocho tipos de respuesta.

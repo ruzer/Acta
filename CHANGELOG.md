@@ -25,6 +25,12 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
   y rechaza catálogos ambiguos. Admite Título opcional o un resumen del enunciado;
   ignora solo filas vacías y conserva la línea real en los errores.
 
+- **Importación y alta de usuarios más claras.** Importar empieza con una plantilla
+  CSV, tres pasos y la explicación de sus columnas; JSON queda en la ayuda avanzada.
+  El alta en lote muestra un ejemplo alineado, errores ordenados y una vista previa
+  compacta con tarjetas en móvil, conserva el foco de los errores y usa «Participante»
+  de forma consistente. Las dos acciones de crear usuarios comparten la cabecera.
+
 ### Added
 
 - **Importación sencilla desde CSV.** Plantilla de siete columnas en español, cinco

@@ -213,7 +213,7 @@ export function ImportStructure() {
     <>
       <PageHeader
         title="Importar cuestionario"
-        lead="Seleccionar archivo → Revisar → Confirmar. Se importa estructura en un proyecto vacío; las preguntas quedarán en borrador."
+        lead="Carga temas y preguntas en un proyecto vacío. Primero revisas el archivo; al confirmar, las preguntas quedan en borrador."
       />
       {error && <Alert error>{error}</Alert>}
       {result ? (
@@ -247,54 +247,98 @@ export function ImportStructure() {
               </Link>
             </Alert>
           )}
-          <h2>¿No tienes un archivo?</h2>
-          <p>
-            Descarga un ejemplo y adapta sus textos. El mínimo tiene un tema y
-            dos preguntas; el completo muestra los ocho tipos de respuesta.
-          </p>
-          <ul>
-            <li>
-              <a
-                href={minimalTemplateUrl}
-                download="questionnaire-template.minimal.json"
-              >
-                Descargar ejemplo mínimo
-              </a>
-            </li>
-            <li>
-              <a
-                href={fullTemplateUrl}
-                download="questionnaire-template.full.json"
-              >
-                Descargar ejemplo completo
-              </a>
-            </li>
-          </ul>
-          <p>
-            Para comenzar, descarga la plantilla CSV, complétala en tu hoja de
-            cálculo y guarda como CSV UTF-8. Cada fila es una pregunta. Mantén
-            los códigos como texto. Los nombres de temas y áreas no distinguen
-            mayúsculas, acentos ni espacios sobrantes. Admitimos Sí/No, Texto
-            corto, Texto largo, Fecha y Número; Obligatoria lleva Sí o No.
-            Después revisa la vista previa antes de confirmar.
-          </p>
-          <p>
-            <a href={csvTemplateUrl} download="questionnaire-template.csv">
-              Descargar plantilla CSV
-            </a>
-          </p>
-          <p>
-            Puedes añadir un Título breve; si lo dejas vacío o no incluyes esa
-            columna, lo obtenemos de la pregunta. Ignoramos las filas totalmente
-            vacías. CSV conserva el nombre del proyecto y usa prioridad normal
-            (P2). Para opciones, matrices, seguimientos o condiciones, utiliza
-            JSON.
-          </p>
-          <details>
-            <summary>Cómo preparar el archivo JSON</summary>
+          <section aria-labelledby="import-csv-guide">
+            <h2 id="import-csv-guide">Preparar tu cuestionario</h2>
+            <ol>
+              <li>
+                <a href={csvTemplateUrl} download="questionnaire-template.csv">
+                  Descargar plantilla CSV
+                </a>{" "}
+                y abrirla en tu hoja de cálculo.
+              </li>
+              <li>
+                Completa una fila por pregunta. Conserva los encabezados y usa
+                las columnas como se explica abajo.
+              </li>
+              <li>
+                Guarda el archivo como CSV UTF-8. Selecciónalo aquí y pulsa
+                Revisar archivo antes de confirmar.
+              </li>
+            </ol>
+            <dl>
+              {[
+                ["Tema", "Agrupa las preguntas sobre un mismo asunto."],
+                [
+                  "Código",
+                  "Una clave distinta por pregunta, por ejemplo REQ-001. Consérvala como texto.",
+                ],
+                [
+                  "Pregunta",
+                  "El enunciado completo que responderá la persona.",
+                ],
+                [
+                  "Texto de ayuda",
+                  "Una explicación adicional; puedes dejarla vacía.",
+                ],
+                ["Tipo", "Sí/No, Texto corto, Texto largo, Fecha o Número."],
+                ["Obligatoria", "Sí o No: indica si se debe responder."],
+                [
+                  "Área responsable",
+                  "El nombre del área que revisará la pregunta; no asigna personas.",
+                ],
+                [
+                  "Título",
+                  "Un encabezado breve y opcional. Si falta, Acta lo obtiene de la pregunta.",
+                ],
+              ].map(([name, help]) => (
+                <div key={name}>
+                  <dt>
+                    <strong>{name}</strong>
+                  </dt>
+                  <dd>{help}</dd>
+                </div>
+              ))}
+            </dl>
             <p>
-              Crea un proyecto vacío. Copia su identificador externo exactamente
-              en <code>project.externalId</code> dentro del archivo. Los
+              Los nombres de temas y áreas no distinguen mayúsculas, acentos ni
+              espacios sobrantes. Las filas totalmente vacías se ignoran. Se
+              conserva el nombre del proyecto. No se admiten archivos .xlsx.
+            </p>
+          </section>
+          <details>
+            <summary>Avanzado: importar con JSON</summary>
+            <p>
+              Para opciones, matrices, seguimientos o condiciones, utiliza JSON.
+              El ejemplo mínimo tiene un tema y dos preguntas; el completo
+              muestra los ocho tipos de respuesta.
+            </p>
+            <ul>
+              <li>
+                <a
+                  href={minimalTemplateUrl}
+                  download="questionnaire-template.minimal.json"
+                >
+                  Descargar ejemplo mínimo
+                </a>
+              </li>
+              <li>
+                <a
+                  href={fullTemplateUrl}
+                  download="questionnaire-template.full.json"
+                >
+                  Descargar ejemplo completo
+                </a>
+              </li>
+            </ul>
+            {projectExternalId && (
+              <p>
+                El archivo debe llevar <code>project.externalId</code> igual al
+                identificador de este proyecto: <code>{projectExternalId}</code>
+                .
+              </p>
+            )}
+            <p>
+              Copia su identificador externo exactamente en el archivo. Los
               ejemplos usan EXAMPLE-MINIMAL y EXAMPLE-FULL. El nombre y la
               descripción del archivo serán los del proyecto después de
               importar.
@@ -307,22 +351,15 @@ export function ImportStructure() {
               que ya exista con el mismo código y nombre.
             </p>
             <p>
-              Guarda como JSON en UTF-8, selecciona el archivo y pulsa Revisar
+              Guarda el archivo JSON en UTF-8, selecciónalo y pulsa Revisar
               archivo. Si corriges algo, vuelve a seleccionarlo. No se mezclan
-              ni reemplazan cuestionarios existentes. Los archivos .xlsx y el
-              JSON de exportación no son plantillas de importación.
+              ni reemplazan cuestionarios existentes. El JSON de exportación no
+              es una plantilla de importación.
             </p>
           </details>
           <h2>1. Seleccionar archivo</h2>
-          {projectExternalId && (
-            <p>
-              El archivo JSON debe llevar <code>project.externalId</code> igual
-              al identificador de este proyecto:{" "}
-              <code>{projectExternalId}</code>.
-            </p>
-          )}
           <Input
-            label="Archivo JSON o CSV"
+            label="Archivo CSV o JSON"
             type="file"
             accept=".json,.csv,application/json,text/csv"
             disabled={busy || unavailable}
@@ -337,7 +374,7 @@ export function ImportStructure() {
                 setError("El archivo supera 5 MiB.");
                 setFile(undefined);
               } else if (f && !/\.(json|csv)$/i.test(f.name)) {
-                setError("Selecciona un archivo JSON o CSV UTF-8.");
+                setError("Selecciona un archivo CSV UTF-8 o JSON.");
                 setFile(undefined);
               } else setFile(f);
             }}
