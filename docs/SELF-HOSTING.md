@@ -87,6 +87,13 @@ VersityGW es un servicio S3 para guardar adjuntos privados. Las descargas pasan 
 4. Ejecuta `docker compose up --build -d --wait` con la nueva versión autorizada. El trabajo de migración aplica migraciones versionadas; nunca uses db push. Una instalación existente conserva su configuración y usuarios, y no vuelve a ver el asistente de primera instalación.
 5. Verifica salud, login y una descarga conocida. Cambiar código hacia atrás no revierte automáticamente las migraciones; usa una restauración coordinada si hace falta volver.
 
+La **v0.10.0 está en preparación**. Cuando se publique y autorice, la actualización
+**v0.9.0 → v0.10.0** seguirá las [notas de la versión](releases/v0.10.0.md#actualización-desde-v090):
+backup verificado, mismo proyecto Compose y volúmenes, actualización conjunta de
+frontend/backend y recarga de las pestañas. No hay migraciones ni variables nuevas.
+El frontend nuevo necesita el backend nuevo para crear usuarios en lote; no
+actualices una instalación desde una rama de preparación.
+
 Para actualizar de **v0.8.0 a v0.9.0**, sigue las [notas de la versión](releases/v0.9.0.md#actualización-desde-v080): backup verificado, migración `202611090001_auth_retention`, frontend y backend juntos, y recarga de pestañas. El contrato estricto de Sistema no admite mezclar estas dos versiones. Configura `TRUSTED_PROXY_CIDRS` si existe un proxy externo autorizado; no confíes en cualquier dirección.
 
 La actualización histórica de v0.7.0 a v0.8.0 se conserva en sus [notas](releases/v0.8.0.md#instalación-y-actualización).

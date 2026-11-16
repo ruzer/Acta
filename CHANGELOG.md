@@ -6,6 +6,24 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
+Sin cambios adicionales por anunciar.
+
+## 0.10.0 — 2026-11-16
+
+Cuestionarios desde una hoja de cálculo, informes para imprimir y creación segura
+de usuarios en lote. Reúne la consolidación de dependencias
+[#125](https://github.com/ruzer/Acta/pull/125), CSV
+[#126](https://github.com/ruzer/Acta/pull/126) y
+[#129](https://github.com/ruzer/Acta/pull/129), el informe
+[#127](https://github.com/ruzer/Acta/pull/127), el diseño y alta de usuarios
+[#128](https://github.com/ruzer/Acta/pull/128) y
+[#130](https://github.com/ruzer/Acta/pull/130), y el pulido de uso
+[#131](https://github.com/ruzer/Acta/pull/131). Sin migraciones nuevas ni cambios
+en los contratos existentes. Los dos endpoints nuevos de usuarios en lote
+requieren backend 0.10.0. Instrucciones y límites en las
+[notas de 0.10.0](docs/releases/v0.10.0.md). Esta fecha corresponde a la preparación;
+la publicación requiere autorización posterior.
+
 ### Fixed
 
 - **Actualizaciones de dependencias consolidadas.** NestJS common/core/platform-express

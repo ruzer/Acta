@@ -14,6 +14,33 @@ Se prepara [Semantic Versioning](https://semver.org/lang/es/) en formato **MAJOR
 
 El contrato público incluye API documentada, configuración, formatos de intercambio y requisitos de actualización/persistencia. No basta con que TypeScript compile para afirmar compatibilidad. Antes de 1.0 no se promete estabilidad absoluta; los cambios incompatibles deben anunciarse, agruparse en un incremento MINOR de `0.x` y acompañarse de instrucciones de migración. PATCH seguirá reservado para cambios compatibles. Una corrección de seguridad que rompa compatibilidad debe decirlo y usar la versión apropiada.
 
+### Preparación de 0.10.0 — CSV, informes y usuarios en lote
+
+La base publicada es [v0.9.0](https://github.com/ruzer/Acta/releases/tag/v0.9.0).
+La Fase 1 ya está integrada mediante el PR #131; esta preparación parte de
+`b47d4de95603a3b2c9d57624ccb8526a7c5faf34`: **20 commits y 41 archivos** desde
+v0.9.0, antes de los commits de preparación. Incluye los PR #125–#131.
+Las [notas de 0.10.0](releases/v0.10.0.md) registran versiones reales, contratos,
+resultados locales y límites; no deben sustituirse por resultados heredados.
+
+Es MINOR: CSV convierte al formato existente en el navegador, Informe usa el
+exporte de decisiones existente y usuarios en lote añade dos endpoints. No
+cambian los 88 endpoints anteriores ni hay migraciones después de
+`202611090001_auth_retention`. El frontend 0.10.0 no puede crear usuarios en lote
+con backend 0.9.0; actualizar ambos juntos y recargar las pestañas. Una pestaña
+0.9.0 sigue usando los contratos anteriores, pero no muestra las funciones nuevas.
+No se promete una instalación heterogénea: la comparación de contratos no sustituye
+un ensayo de todos los recorridos con versiones mezcladas.
+
+La preparación solo modifica las cinco versiones/lockfile y documentación.
+Exigir `verify`, `secrets`, `selfhosting`, `guided-install` y `codeql` en verde en
+el SHA final del PR; el maintainer lo fusiona manualmente. **Solo después de nueva
+autorización expresa**: verificar CI/CodeQL del merge exacto, crear allí el tag
+anotado `v0.10.0`, publicar Release «Acta v0.10.0» como Latest con el contenido de
+`docs/releases/v0.10.0.md` y comprobar CI del tag. El workflow CI no escucha tags:
+usar `gh workflow run ci.yml --ref v0.10.0` y verificar que resuelve el mismo SHA.
+No publicar imágenes Docker ni actualizar downstreams en esta preparación.
+
 ### Preparación de 0.9.0 — Operación, seguridad y revisión
 
 La base es [v0.8.0](https://github.com/ruzer/Acta/releases/tag/v0.8.0).
