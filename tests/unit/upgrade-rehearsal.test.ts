@@ -24,6 +24,13 @@ describe("precondiciones del ensayo, sin Docker", () => {
       origin: "http://127.0.0.1:4491",
     });
   });
+  it("permite medir solo con las mismas precondiciones de laboratorio", () => {
+    expect(
+      argumentsForRehearsal(
+        args.map((value) => (value === "prepare" ? "measure" : value)),
+      ).phase,
+    ).toBe("measure");
+  });
   it.each([
     ["--project", "production"],
     ["--project", "acta-upgrade-x;echo"],

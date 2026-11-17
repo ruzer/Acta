@@ -1,10 +1,11 @@
 // Solo fixtures descartables: no opera sobre una instalación institucional.
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
+import { execFile, execFileSync } from "node:child_process";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { lstatSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { promisify } from "node:util";
 import { outputPath, checkConfig } from "./backup-manifest.mjs";
 
 export function argumentsForRehearsal(args) {
@@ -22,8 +23,8 @@ export function argumentsForRehearsal(args) {
     options[key.slice(2)] = args[i + 1];
   }
   assert.ok(
-    ["prepare", "verify"].includes(options.phase),
-    "Fase requerida: prepare o verify.",
+    ["prepare", "verify", "measure"].includes(options.phase),
+    "Fase requerida: prepare, verify o measure.",
   );
   assert.match(
     options.project || "",
@@ -234,6 +235,45 @@ async function run(options) {
   };
   const { chromium } = await import("@playwright/test");
   const browser = await chromium.launch();
+  const importCsv = async (project, area, session) => {
+    const context = await browser.newContext();
+    await context.addCookies([
+      {
+        name: session.cookie.split("=")[0],
+        value: session.cookie.split("=")[1],
+        url: options.origin,
+        httpOnly: true,
+        sameSite: "Lax",
+      },
+    ]);
+    const page = await context.newPage();
+    page.setDefaultTimeout(30000);
+    await page.goto(`${options.origin}/projects/${project.id}/import`);
+    const csv =
+      "Tema;Código;Pregunta;Texto de ayuda;Tipo;Obligatoria;Área responsable\n" +
+      Array.from(
+        { length: 300 },
+        (_, i) =>
+          `Tema ${Math.floor(i / 25) + 1};ENS-${i + 1};¿Cómo se atiende el caso ficticio ${i + 1}?;;Texto corto;Sí;${area.name}`,
+      ).join("\n");
+    await page.getByLabel("Archivo CSV o JSON").setInputFiles({
+      name: "ensayo.csv",
+      mimeType: "text/csv",
+      buffer: Buffer.from(csv),
+    });
+    await page
+      .getByRole("button", { name: "Revisar archivo", exact: true })
+      .click();
+    await page
+      .getByRole("button", { name: "Confirmar importación", exact: true })
+      .click();
+    await page
+      .getByText("Importación completada: 300 preguntas y 12 temas.", {
+        exact: true,
+      })
+      .waitFor();
+    await context.close();
+  };
   let state;
   try {
     if (options.phase === "prepare") {
@@ -327,45 +367,7 @@ async function run(options) {
           session: await login(item.username, password),
         });
       }
-      const context = await browser.newContext();
-      await context.addCookies([
-        {
-          name: "fgeo_session",
-          value: session.cookie.split("=")[1],
-          url: options.origin,
-          httpOnly: true,
-          sameSite: "Lax",
-        },
-      ]);
-      const page = await context.newPage();
-      page.setDefaultTimeout(30000);
-      await page.goto(`${options.origin}/projects/${project.id}/import`);
-      const csv =
-        "Tema;Código;Pregunta;Texto de ayuda;Tipo;Obligatoria;Área responsable\n" +
-        Array.from(
-          { length: 300 },
-          (_, i) =>
-            `Tema ${Math.floor(i / 25) + 1};ENS-${i + 1};¿Cómo se atiende el caso ficticio ${i + 1}?;;Texto corto;Sí;${area.name}`,
-        ).join("\n");
-      await page
-        .getByLabel("Archivo CSV o JSON")
-        .setInputFiles({
-          name: "ensayo.csv",
-          mimeType: "text/csv",
-          buffer: Buffer.from(csv),
-        });
-      await page
-        .getByRole("button", { name: "Revisar archivo", exact: true })
-        .click();
-      await page
-        .getByRole("button", { name: "Confirmar importación", exact: true })
-        .click();
-      await page
-        .getByText("Importación completada: 300 preguntas y 12 temas.", {
-          exact: true,
-        })
-        .waitFor();
-      await context.close();
+      await importCsv(project, area, session);
       const graph = await api(`/projects/${project.id}/questionnaire`, session);
       assert.equal(graph.questions.length, 300);
       assert.equal(graph.sections.length, 12);
@@ -421,6 +423,171 @@ async function run(options) {
         "El estado de origen está incompleto.",
       );
       compareSnapshots(state.snapshot, snapshot());
+    }
+    if (options.phase === "measure") {
+      // Carga acotada sobre el fixture; nunca repetir sobre una instalación de trabajo.
+      const execute = promisify(execFile);
+      const services = ["backend", "frontend", "postgres", "object-storage"];
+      const ids = services.map((service) => dc("ps", "-q", service).trim());
+      assert.ok(ids.every((id) => /^[a-f0-9]{64}$/.test(id)));
+      const samples = { idle: [], load: [] };
+      const sample = async (phase) => {
+        const { stdout } = await execute("docker", [
+          "stats",
+          "--no-stream",
+          "--format",
+          "{{json .}}",
+          ...ids,
+        ]);
+        samples[phase].push(
+          stdout
+            .trim()
+            .split("\n")
+            .map((row) => JSON.parse(row)),
+        );
+      };
+      for (let i = 0; i < 5; i++) await sample("idle");
+      const started = Date.now();
+      let rounds = 0;
+      let loading = true;
+      const sampling = (async () => {
+        while (loading) await sample("load");
+      })();
+      const session = await login(
+        state.fixture.adminUsername,
+        state.fixture.adminPassword,
+      );
+      const account = state.accounts[0];
+      const sharp = (await import("sharp")).default;
+      const bytes = await sharp(randomBytes(1100 * 1100 * 3), {
+        raw: { width: 1100, height: 1100, channels: 3 },
+      })
+        .png()
+        .toBuffer();
+      assert.ok(bytes.length > 3 * 1024 * 1024);
+      let uploaded;
+      let csvMs;
+      try {
+        await Promise.all([
+          ...state.accounts.map(async (user) => {
+            const path = `/projects/${state.projectId}/questions/${user.questionId}`;
+            for (let i = 0; i < 30; i++) {
+              await api(`/projects/${state.projectId}/my-work`, user.session);
+              let response = await api(path + "/response", user.session);
+              response = await api(
+                path + "/response/draft",
+                user.session,
+                "PUT",
+                {
+                  expectedVersion: response.lockVersion,
+                  requestId: randomUUID(),
+                  answer: `Medición ficticia ${i}`,
+                  comment: "",
+                  example: "",
+                  consultationRequested: false,
+                },
+              );
+              await api(path + "/response/submit", user.session, "POST", {
+                expectedVersion: response.lockVersion,
+                requestId: randomUUID(),
+              });
+              rounds++;
+            }
+          }),
+          (async () => {
+            const project = await api("/projects", session, "POST", {
+              externalId: "RESOURCE-CSV",
+              name: "Carga ficticia CSV",
+              description: "Solo medición",
+            });
+            const areas = await api("/areas", session);
+            const area = areas.find((item) => item.code === "UPGRADE");
+            assert.ok(area);
+            const start = Date.now();
+            await importCsv(project, area, session);
+            csvMs = Date.now() - start;
+          })(),
+          (async () => {
+            const response = await raw(
+              `/projects/${state.projectId}/questions/${account.questionId}/evidence`,
+              account.session,
+              "POST",
+              bytes,
+              {
+                "Content-Type": "application/octet-stream",
+                "X-Evidence-Metadata": encodeURIComponent(
+                  JSON.stringify({
+                    requestId: randomUUID(),
+                    originalName: "ruido-ficticio.png",
+                  }),
+                ),
+              },
+            );
+            assert.equal(
+              response.status,
+              201,
+              "No se pudo subir la evidencia de carga.",
+            );
+            uploaded = await response.json();
+          })(),
+        ]);
+      } finally {
+        loading = false;
+        await sampling;
+      }
+      // Adjuntar al terminar evita competir con la propia edición del mismo usuario.
+      const path = `/projects/${state.projectId}/questions/${account.questionId}`;
+      let response = await api(path + "/response", account.session);
+      response = await api(path + "/response/draft", account.session, "PUT", {
+        expectedVersion: response.lockVersion,
+        requestId: randomUUID(),
+        answer: "Evidencia de carga",
+        comment: "",
+        example: "",
+        consultationRequested: false,
+      });
+      response = await api(
+        path + "/response/evidence/attach",
+        account.session,
+        "POST",
+        {
+          expectedVersion: response.lockVersion,
+          requestId: randomUUID(),
+          evidenceId: uploaded.id,
+        },
+      );
+      await api(path + "/response/submit", account.session, "POST", {
+        expectedVersion: response.lockVersion,
+        requestId: randomUUID(),
+      });
+      const downloaded = await raw(
+        `/projects/${state.projectId}/evidence/${uploaded.id}/download`,
+        account.session,
+      );
+      assert.equal(downloaded.status, 200);
+      assert.equal(
+        digest(Buffer.from(await downloaded.arrayBuffer())),
+        uploaded.sha256,
+      );
+      console.log(
+        JSON.stringify({
+          result: "PASS",
+          concurrentUsers: 5,
+          rounds,
+          requestsInUserLoops: rounds * 4,
+          csvQuestions: 300,
+          csvMs,
+          uploadBytes: bytes.length,
+          storedBytes: uploaded.byteSize,
+          evidenceHashVerified: true,
+          elapsedMs: Date.now() - started,
+          samples,
+          databaseBytes: Number(
+            sql("SELECT pg_database_size(current_database())"),
+          ),
+        }),
+      );
+      return;
     }
     assert.ok(
       (await api("/auth/me", state.session)).user.isOrganizationAdmin,

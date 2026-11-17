@@ -16,7 +16,7 @@ Despliegue de un solo host con PostgreSQL y VersityGW, sin alta disponibilidad. 
 
 Docker, Docker Compose **2.24.4+**, conexión para descargar dependencias/imágenes y disco persistente. No necesitas Node, Go ni PostgreSQL en el host.
 
-**No published minimum yet.** No hay mediciones publicadas de CPU, RAM o disco que permitan establecer mínimos. Dimensiona según carga, evidencia, retención y backups, y mide en tu entorno antes de comprometer capacidad. El tamaño máximo por archivo y otros límites están en [Configuración](CONFIGURATION.md); no equivalen a requisitos mínimos del servidor.
+**Sin mínimos garantizados.** Hay [mediciones de referencia](RESOURCE-REFERENCE.md) de CPU, RAM, imágenes y volúmenes con cinco usuarios ficticios concurrentes, importación CSV y evidencia de varios MiB. Son una ejecución breve ARM64, no capacidad garantizada. Dimensiona según carga, evidencia, retención y backups, y mide en tu entorno antes de comprometer capacidad. El tamaño máximo por archivo y otros límites están en [Configuración](CONFIGURATION.md); no equivalen a requisitos mínimos del servidor.
 
 ## Quick Start local
 

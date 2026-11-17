@@ -13,7 +13,7 @@ Prioridades sin fechas ni compromiso de implementación. Esta lista no declara f
 
 - Validar un piloto en el hardware y la virtualización que elija la institución. Linux x86_64 ya está [verificado en CI](docs/VERIFICATION.md#plataformas-y-evidencia-vigente); eso no certifica rendimiento ni cualquier servidor.
 - Evaluar ensayos de SeaweedFS y endpoints externos únicamente si existe capacidad de mantenimiento y necesidad; hoy siguen sin verificar. No cambiar el default. [S3-PROVIDERS](docs/S3-PROVIDERS.md).
-- Publicar mediciones de recursos si se obtienen; todavía no existen mínimos publicados.
+- Repetir las [mediciones de referencia](docs/RESOURCE-REFERENCE.md) en el servidor del piloto y observar crecimiento y concurrencia; no hay mínimos garantizados.
 - Revisar con quien opere el piloto la configuración de [proxies confiables](docs/PROXY-TRUST.md), ya implementada; confiar únicamente en la topología autorizada.
 
 ## Later

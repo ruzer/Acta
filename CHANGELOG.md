@@ -24,6 +24,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Actualización con datos comprobada.** Ensayo reproducible de v0.10.0 a la candidata y restauración en volúmenes nuevos, con huellas por fila, evidencia, informe e invitaciones y continuidad de la sesión anterior.
 
+- **Recursos medidos con carga ficticia.** Referencia reproducible de cinco usuarios concurrentes, CSV de 300 preguntas y evidencia de varios MiB, con consumo de CPU/RAM y tamaños; no representa mínimos ni capacidad garantizados.
+
 ## 0.10.0 — 2026-11-16
 
 Cuestionarios desde una hoja de cálculo, informes para imprimir y creación segura
