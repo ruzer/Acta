@@ -112,7 +112,9 @@ for (const width of [1440, 390])
         page.getByRole("button", { name: "Iniciar sesión" }),
       ).toHaveCount(0);
       expect(
-        (await context.cookies()).some((c) => c.name === "fgeo_session"),
+        (await context.cookies()).some((c) =>
+          ["acta_session", "fgeo_session"].includes(c.name),
+        ),
       ).toBe(false);
       await accessible(page);
       const respond = page.getByRole("button", {

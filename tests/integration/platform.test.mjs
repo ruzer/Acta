@@ -35,7 +35,12 @@ async function request(
       : { body: typeof body === "string" ? body : JSON.stringify(body ?? {}) }),
   });
   const data = await r.json();
-  return { status: r.status, data, cookie: r.headers.get("set-cookie") };
+  return {
+    status: r.status,
+    data,
+    cookie: r.headers.get("set-cookie"),
+    cookieHeaders: r.headers.getSetCookie(),
+  };
 }
 async function login(username, pass = password) {
   const r = await request("/auth/login", {
@@ -363,6 +368,114 @@ test("cookies HttpOnly/SameSite, sesión sin token plano y CSRF/origin obligator
     403,
   );
 });
+for (const secure of [false, true]) {
+  test(`cookie neutral: login conserva atributos (Secure=${secure}) y retira la anterior`, async () => {
+    const previous = {
+      COOKIE_SECURE: process.env.COOKIE_SECURE,
+      APP_ORIGIN: process.env.APP_ORIGIN,
+    };
+    const configuredOrigin = secure
+      ? origin.replace("http:", "https:")
+      : origin;
+    try {
+      process.env.COOKIE_SECURE = String(secure);
+      process.env.APP_ORIGIN = configuredOrigin;
+      const result = await request("/auth/login", {
+        method: "POST",
+        headers: { Origin: configuredOrigin },
+        body: { username: "viewer", password },
+      });
+      assert.equal(result.status, 201);
+      assert.equal(result.cookieHeaders.length, 2);
+      const [current, legacy] = result.cookieHeaders;
+      assert.match(current, /^acta_session=[^;]+;/);
+      assert.match(current, /Max-Age=28800;/);
+      assert.match(legacy, /^fgeo_session=;/);
+      assert.match(legacy, /Expires=Thu, 01 Jan 1970 00:00:00 GMT/);
+      for (const header of result.cookieHeaders) {
+        assert.match(header, /Path=\/;/);
+        assert.match(header, /HttpOnly/);
+        assert.match(header, /SameSite=Lax/);
+        assert.equal(/; Secure(?:;|$)/.test(header), secure);
+      }
+    } finally {
+      Object.assign(process.env, previous);
+    }
+  });
+}
+test("cookie neutral: una sesión anterior sigue válida sin reemisión y conserva CSRF", async () => {
+  const session = await login("viewer");
+  const legacy = {
+    ...session,
+    cookie: session.cookie.replace(/^acta_session=/, "fgeo_session="),
+  };
+  const result = await request("/auth/me", { session: legacy });
+  assert.equal(result.status, 200);
+  assert.equal(result.data.user.id, session.user.id);
+  assert.equal(result.data.csrfToken, session.csrf);
+  assert.deepEqual(result.cookieHeaders, []);
+  const rejected = await request("/auth/logout", {
+    session: legacy,
+    method: "POST",
+    headers: { "X-CSRF-Token": "" },
+  });
+  assert.equal(rejected.status, 403);
+  assert.deepEqual(rejected.cookieHeaders, []);
+  assert.equal((await request("/auth/me", { session: legacy })).status, 200);
+});
+test("cookie neutral: la nueva prevalece y no recurre a la anterior si es inválida", async () => {
+  const current = await login("viewer");
+  const legacy = admin.cookie.replace(/^acta_session=/, "fgeo_session=");
+  const result = await request("/auth/me", {
+    headers: { Cookie: `${current.cookie}; ${legacy}` },
+  });
+  assert.equal(result.status, 200);
+  assert.equal(result.data.user.id, current.user.id);
+  for (const value of ["invalid", ""]) {
+    assert.equal(
+      (
+        await request("/auth/me", {
+          headers: { Cookie: `acta_session=${value}; ${legacy}` },
+        })
+      ).status,
+      401,
+    );
+  }
+});
+for (const name of ["acta_session", "fgeo_session"]) {
+  test(`cookie neutral: logout con ${name} revoca la sesión y borra ambas cookies`, async () => {
+    const session = await login("viewer");
+    const cookie = session.cookie.replace(/^[^=]+=/, name + "=");
+    const result = await request("/auth/logout", {
+      session: { ...session, cookie },
+      method: "POST",
+    });
+    assert.equal(result.status, 201);
+    assert.deepEqual(
+      result.cookieHeaders.map((header) => header.split(";")[0]).sort(),
+      ["acta_session=", "fgeo_session="],
+    );
+    for (const header of result.cookieHeaders) {
+      assert.match(header, /Expires=Thu, 01 Jan 1970 00:00:00 GMT/);
+      assert.match(header, /Path=\/;/);
+      assert.match(header, /HttpOnly/);
+      assert.match(header, /SameSite=Lax/);
+    }
+    for (const cookieName of ["acta_session", "fgeo_session"]) {
+      assert.equal(
+        (
+          await request("/auth/me", {
+            session: {
+              ...session,
+              cookie: session.cookie.replace(/^[^=]+=/, cookieName + "="),
+            },
+          })
+        ).status,
+        401,
+      );
+    }
+  });
+}
 test("aislamiento entre organizaciones, membresía y roles", async () => {
   assert.equal(
     (
@@ -630,10 +743,15 @@ test("contraseña temporal limita acceso y cambiarla revoca sesiones anteriores"
   const s = await login("temporary");
   assert.equal((await request("/projects", { session: s })).status, 403);
   assert.equal((await request("/auth/me", { session: s })).status, 200);
-  await ok(
-    "/auth/change-password",
-    { currentPassword: password, newPassword: password + "-changed" },
-    s,
+  const changed = await request("/auth/change-password", {
+    method: "POST",
+    session: s,
+    body: { currentPassword: password, newPassword: password + "-changed" },
+  });
+  assert.equal(changed.status, 201);
+  assert.deepEqual(
+    changed.cookieHeaders.map((header) => header.split(";")[0]).sort(),
+    ["acta_session=", "fgeo_session="],
   );
   assert.equal((await request("/auth/me", { session: s })).status, 401);
   const fresh = await login("temporary", password + "-changed");

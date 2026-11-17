@@ -23,12 +23,18 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { token, body } = await this.auth.login(dto, clientIp(req));
-    res.cookie("fgeo_session", token, {
+    res.cookie("acta_session", token, {
       httpOnly: true,
       secure: loadConfig().COOKIE_SECURE === "true",
       sameSite: "lax",
       path: "/",
       maxAge: loadConfig().SESSION_MAX_HOURS * 3600000,
+    });
+    res.clearCookie("fgeo_session", {
+      path: "/",
+      httpOnly: true,
+      secure: loadConfig().COOKIE_SECURE === "true",
+      sameSite: "lax",
     });
     return body;
   }
@@ -40,12 +46,13 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     await this.auth.logout(req);
-    res.clearCookie("fgeo_session", {
-      path: "/",
-      httpOnly: true,
-      secure: loadConfig().COOKIE_SECURE === "true",
-      sameSite: "lax",
-    });
+    for (const name of ["acta_session", "fgeo_session"])
+      res.clearCookie(name, {
+        path: "/",
+        httpOnly: true,
+        secure: loadConfig().COOKIE_SECURE === "true",
+        sameSite: "lax",
+      });
     return { ok: true };
   }
   @PasswordAllowed() @Post("change-password") async password(
@@ -54,7 +61,8 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     await this.auth.changePassword(req, dto);
-    res.clearCookie("fgeo_session", { path: "/" });
+    for (const name of ["acta_session", "fgeo_session"])
+      res.clearCookie(name, { path: "/" });
     return { ok: true };
   }
 }

@@ -73,7 +73,10 @@ export class AuthGuard implements CanActivate {
       req.csrfToken = access.csrfToken;
       return true;
     }
-    const token = cookies?.["fgeo_session"];
+    const token =
+      cookies?.["acta_session"] !== undefined
+        ? cookies["acta_session"]
+        : cookies?.["fgeo_session"];
     const { session, csrfToken } = await this.auth.authenticate(
       typeof token === "string" ? token : "",
     );

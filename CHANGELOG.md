@@ -10,6 +10,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Dependencias e inventario de licencias al día.** Se retira `@hookform/resolvers`, que no se utiliza; se conserva `react-hook-form`. Los inventarios npm se regeneran desde el lockfile con un comando reproducible, sin añadir dependencias ni confundir metadatos declarados con autorización de redistribución.
 
+- **Cookie de sesión con nombre propio de Acta.** Los accesos nuevos usan `acta_session` y retiran la cookie anterior. Las sesiones abiertas con `fgeo_session` siguen funcionando durante esta versión; su lectura se retirará en una versión posterior. Cerrar sesión o cambiar la contraseña elimina ambas cookies, conservando las protecciones de autenticación y las invitaciones externas.
+
 ### Fixed
 
 - **Navegación accesible en Administración.** Los botones de Usuarios, Áreas y Proyectos forman un grupo con nombre accesible y conservan su selección y apariencia.
