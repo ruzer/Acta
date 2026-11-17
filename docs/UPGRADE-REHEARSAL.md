@@ -95,18 +95,20 @@ caducada por otra para presentar una continuidad falsa.
 
 Host macOS ARM64, Docker Linux aarch64. Base publicada v0.10.0,
 `f343b70007b8e9aaba91a17dafb98bab04a5aaf8`; código candidato basado en
-`7aaa10c71cdbacc4cb06f8a4b45face93f8c806a`, sin cambios de producto en este ensayo.
+`7aaa10c71cdbacc4cb06f8a4b45face93f8c806a`, sin cambios de producto en este ensayo. Se repitió el gate completo con
+`4b78bc6` (mismo producto que `75dff75`, usado por el destino de restauración);
+los resultados de la tabla corresponden a esta segunda ejecución.
 
 | Comprobación | Resultado real |
 | --- | --- |
 | Preparación por API/UI | PASS: cinco usuarios, CSV de 300 preguntas / 12 temas, 5 publicadas / 295 borradores |
 | Conjunto completo con fixtures | 3 proyectos, 13 temas, 302 preguntas, 7 revisiones, 1 decisión validada, 2 evidencias |
 | Migraciones / marca | 13 / 0 assets en base; iguales tras restaurar |
-| Backup + verificación | PASS; 23 s; 368 542 bytes incluyendo manifiesto; 9 archivos verificados |
-| Actualización en los mismos volúmenes | PASS; 40 s incluyendo construcción con caché |
-| Restauración en volúmenes nuevos | PASS; 34 s sin la construcción previa; ocho recuentos iguales |
+| Backup + verificación | PASS; 20,46 s; 368 841 bytes incluyendo manifiesto; 9 archivos verificados |
+| Actualización en los mismos volúmenes | PASS; 29,85 s incluyendo construcción con caché |
+| Restauración en volúmenes nuevos | PASS; 33,60 s sin la construcción previa; ocho recuentos iguales |
 | Huellas, cookie anterior, evidencia, informe e invitación | PASS antes y después de actualizar y de restaurar |
-| SHA-256 de evidencia | `f857b3bd4323ff74a9a5caefc338904752ec8b2be27c3ea20dc6e798089db721` |
+| SHA-256 de evidencia | `9341f158d49680c2d89bdc3346b24097c1d84b7b07de3180bcf3d50dad0a98ef` |
 
 Los tiempos son de este fixture pequeño y de imágenes con caché. No acreditan una
 base institucional, otras versiones iniciales, S3 externo, HA, cambios mayores de
