@@ -6,7 +6,9 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
-Sin cambios adicionales por anunciar.
+### Changed
+
+- **Dependencias e inventario de licencias al día.** Se retira `@hookform/resolvers`, que no se utiliza; se conserva `react-hook-form`. Los inventarios npm se regeneran desde el lockfile con un comando reproducible, sin añadir dependencias ni confundir metadatos declarados con autorización de redistribución.
 
 ## 0.10.0 — 2026-11-16
 
