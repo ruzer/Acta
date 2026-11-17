@@ -21,8 +21,7 @@ de usuarios en lote. Reúne la consolidación de dependencias
 [#131](https://github.com/ruzer/Acta/pull/131). Sin migraciones nuevas ni cambios
 en los contratos existentes. Los dos endpoints nuevos de usuarios en lote
 requieren backend 0.10.0. Instrucciones y límites en las
-[notas de 0.10.0](docs/releases/v0.10.0.md). Esta fecha corresponde a la preparación;
-la publicación requiere autorización posterior.
+[notas de 0.10.0](docs/releases/v0.10.0.md).
 
 ### Fixed
 
