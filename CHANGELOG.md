@@ -20,6 +20,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Documentación acorde con el producto.** Política de seguridad vigente, capacidades CSV e informes, usuarios en lote integrados y alcance de instalación/restauración en CI Linux x86_64; los resultados históricos conservan su fecha y sus límites.
 
+### Added
+
+- **Actualización con datos comprobada.** Ensayo reproducible de v0.10.0 a la candidata y restauración en volúmenes nuevos, con huellas por fila, evidencia, informe e invitaciones y continuidad de la sesión anterior.
+
 ## 0.10.0 — 2026-11-16
 
 Cuestionarios desde una hoja de cálculo, informes para imprimir y creación segura
