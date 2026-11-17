@@ -16,30 +16,35 @@ El contrato público incluye API documentada, configuración, formatos de interc
 
 ### Preparación de 0.10.0 — CSV, informes y usuarios en lote
 
-La base publicada es [v0.9.0](https://github.com/ruzer/Acta/releases/tag/v0.9.0).
-La Fase 1 ya está integrada mediante el PR #131; esta preparación parte de
+La preparación tomó como referencia publicada [v0.9.0](https://github.com/ruzer/Acta/releases/tag/v0.9.0).
+El pulido de uso se integró mediante el PR #131; el PR #132 partió de
 `b47d4de95603a3b2c9d57624ccb8526a7c5faf34`: **20 commits y 41 archivos** desde
 v0.9.0, antes de los commits de preparación. Incluye los PR #125–#131.
-Las [notas de 0.10.0](releases/v0.10.0.md) registran versiones reales, contratos,
-resultados locales y límites; no deben sustituirse por resultados heredados.
+El PR #132 se integró en `5ebe9781b298d6d2bdd42cea7da56ede151525a4`.
+Las [notas de 0.10.0](releases/v0.10.0.md#evidencia-verificada) registran versiones,
+contratos, resultados locales y CI del PR y del merge, con sus límites.
 
 Es MINOR: CSV convierte al formato existente en el navegador, Informe usa el
 exporte de decisiones existente y usuarios en lote añade dos endpoints. No
-cambian los 88 endpoints anteriores ni hay migraciones después de
+cambian las definiciones anteriores: el conteo reproducible de controladores pasa
+de 97 a 99 rutas y el diff de contratos añade 83 líneas, sin eliminaciones.
+Los comandos están en las [notas](releases/v0.10.0.md#compatibilidad-entre-versiones).
+No hay migraciones después de
 `202611090001_auth_retention`. El frontend 0.10.0 no puede crear usuarios en lote
 con backend 0.9.0; actualizar ambos juntos y recargar las pestañas. Una pestaña
 0.9.0 sigue usando los contratos anteriores, pero no muestra las funciones nuevas.
 No se promete una instalación heterogénea: la comparación de contratos no sustituye
 un ensayo de todos los recorridos con versiones mezcladas.
 
-La preparación solo modifica las cinco versiones/lockfile y documentación.
+El PR #132 solo modificó las cinco versiones/lockfile y documentación.
+Para cualquier ajuste documental previo a publicar se mantiene el proceso:
 Exigir `verify`, `secrets`, `selfhosting`, `guided-install` y `codeql` en verde en
 el SHA final del PR; el maintainer lo fusiona manualmente. **Solo después de nueva
 autorización expresa**: verificar CI/CodeQL del merge exacto, crear allí el tag
 anotado `v0.10.0`, publicar Release «Acta v0.10.0» como Latest con el contenido de
 `docs/releases/v0.10.0.md` y comprobar CI del tag. El workflow CI no escucha tags:
 usar `gh workflow run ci.yml --ref v0.10.0` y verificar que resuelve el mismo SHA.
-No publicar imágenes Docker ni actualizar downstreams en esta preparación.
+Este procedimiento no incluye publicar imágenes Docker ni actualizar downstreams.
 
 ### Preparación de 0.9.0 — Operación, seguridad y revisión
 
