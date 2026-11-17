@@ -14,6 +14,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Navegación accesible en Administración.** Los botones de Usuarios, Áreas y Proyectos forman un grupo con nombre accesible y conservan su selección y apariencia.
 
+- **Altas duplicadas con mensajes claros.** Al crear usuarios, áreas o proyectos, se indica qué nombre de usuario, código o identificador ya existe en la institución. Se conservan los permisos, la protección ante altas simultáneas y el código de error.
+
 ## 0.10.0 — 2026-11-16
 
 Cuestionarios desde una hoja de cálculo, informes para imprimir y creación segura
