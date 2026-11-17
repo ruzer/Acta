@@ -100,6 +100,10 @@ jobs:
     env:
       COMPOSE_PROJECT_NAME: readiness-ci
     steps:
+      - name: Entorno de verificación
+        run: |
+          uname -m
+          docker version
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with: { node-version: "26" }
@@ -161,6 +165,10 @@ jobs:
     env:
       COMPOSE_PROJECT_NAME: guided-ci
     steps:
+      - name: Entorno de verificación
+        run: |
+          uname -m
+          docker version
       - uses: actions/checkout@v7
       - name: Guided installation with the helper (no .env file)
         run: sh scripts/install.sh

@@ -5,16 +5,16 @@ Prioridades sin fechas ni compromiso de implementación. Esta lista no declara f
 ## Now
 
 - Titularidad, autorización, AGPL-3.0-only, maintainer y DCO 1.1: resueltos por el titular el 2026-10-01. Conservar avisos de terceros.
-- Designar y verificar el contacto privado de moderación. Revalidar en la próxima fase remota el canal de seguridad y los canales comunitarios registrados como habilitados el 2026-10-01.
-- Revisar esta estructura upstream, documentación y plantillas; configurar los canales/CI solo en la fase de publicación autorizada.
-- Preparar la primera release pre-1.0 siguiendo [RELEASING](docs/RELEASING.md).
+- Designar y verificar el contacto privado de moderación. El canal privado de seguridad se verificó habilitado el 2026-11-17; mantener su disponibilidad y revisar los canales comunitarios.
+- Mantener las [releases publicadas](https://github.com/ruzer/Acta/releases), la documentación y los controles automáticos.
+- Completar la evidencia de actualización, recuperación y recursos de 0.11.0 siguiendo [RELEASING](docs/RELEASING.md), antes de recomendarla para un piloto institucional.
 
 ## Next
 
-- Verificar Linux AMD64 y documentar evidencia real; no confundir disponibilidad upstream con prueba de Acta.
+- Validar un piloto en el hardware y la virtualización que elija la institución. Linux x86_64 ya está [verificado en CI](docs/VERIFICATION.md#plataformas-y-evidencia-vigente); eso no certifica rendimiento ni cualquier servidor.
 - Evaluar ensayos de SeaweedFS y endpoints externos únicamente si existe capacidad de mantenimiento y necesidad; hoy siguen sin verificar. No cambiar el default. [S3-PROVIDERS](docs/S3-PROVIDERS.md).
 - Publicar mediciones de recursos si se obtienen; todavía no existen mínimos publicados.
-- Dirección IP del cliente detrás de un proxy: hoy los límites por dirección ven la del contenedor nginx y se comparten. [Propuesta con proxies confiables](docs/PROXY-TRUST.md), sin implementar.
+- Revisar con quien opere el piloto la configuración de [proxies confiables](docs/PROXY-TRUST.md), ya implementada; confiar únicamente en la topología autorizada.
 
 ## Later
 

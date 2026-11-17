@@ -1,6 +1,6 @@
 # Acta — manifiesto del snapshot
 
-> Registro histórico de la preparación inicial. Los estados de versión y publicación de cada entrada corresponden a su fecha. Para el estado posterior, consulta el [changelog](CHANGELOG.md) y la [preparación de 0.3.0](docs/releases/v0.3.0.md).
+> Registro histórico de la preparación inicial. Los estados de versión y publicación de cada entrada corresponden a su fecha. Para el estado posterior, consulta el [changelog](CHANGELOG.md) y la [verificación vigente](docs/VERIFICATION.md). Las limitaciones de plataforma que siguen pertenecen al snapshot fechado, no al CI actual.
 
 - **Producto:** Acta.
 - **Tagline:** Questions. Evidence. Decisions.

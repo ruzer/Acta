@@ -71,7 +71,7 @@ El logotipo y el favicon se añaden después, en **Configuración → Apariencia
 | **General** | Formato regional y zona horaria |
 | **Apariencia** | **Identidad**: nombre de la institución, de la aplicación y corto, entidad del segundo logotipo y color principal (verificación de contraste con texto blanco ≥ 4.5:1). **Imágenes**: logotipo principal, segundo logotipo (opcional) y favicon. Una **vista previa** muestra la pestaña, la navegación y la pantalla de acceso con lo que escribes y con las imágenes que eliges *antes* de guardarlas. Sin CSS ni JavaScript propio |
 | **Almacenamiento** | Estado, proveedor, servidor, bucket y región, evidencia por proveedor y **prueba de conexión**. Solo lectura |
-| **Sistema** | Versión, entorno, base de datos, dirección y HTTPS, cookies seguras, sesiones, invitaciones y límites. Solo lectura |
+| **Sistema** | Versión, entorno, base de datos, dirección y HTTPS, cookies seguras, estado de lectura de IP desde proxy configurado, sesiones, invitaciones y límites. Solo lectura |
 
 Los cambios se ven al instante, sin recompilar el frontend ni reiniciar Docker: la pantalla de acceso, el título y el favicon leen la configuración vigente.
 
@@ -106,13 +106,13 @@ Todas las rutas de administración exigen una sesión de administrador de la ins
 | `GET/POST /settings`, `POST /settings/assets/:kind[/remove]` | Administración |
 | `GET /system`, `POST /system/storage-test` | Administración |
 
-## Compatibilidad con instalaciones existentes
+## Compatibilidad con instalaciones anteriores a v0.8.0
 
 - Las migraciones `202610120001_installation_setup_settings` y `202610130001_secondary_logo` solo **agregan** tablas, un valor de enumeración y una columna; no reescriben nada. Los logotipos y ajustes guardados se conservan y una instalación sin segundo logotipo no cambia. Si hay un administrador, registra la instalación como completada: el asistente nunca aparece.
 - Sin ajustes guardados, la apariencia es exactamente la que dicen las variables de entorno. Quien ya definía `APP_NAME` y similares sigue igual y lo ve como «administrado externamente».
 - Usuarios, contraseñas, evidencia, proyectos y sesiones no se tocan. `bootstrap-admin` sigue funcionando (y ahora también cierra el asistente).
 - Un cambio de comportamiento menor: el nombre de la institución que se muestra en la pantalla de acceso y en el encabezado sale siempre de la base de datos (como ya ocurría en la sesión iniciada), no de `ORGANIZATION_NAME`.
-- Actualiza como siempre: backup coordinado y `docker compose up --build -d --wait`. Esta versión **agrega una migración**.
+- Actualiza como siempre: backup coordinado y `docker compose up --build -d --wait`. La transición a v0.8.0 incorpora las dos migraciones indicadas arriba; no se vuelven a aplicar si ya están registradas. Para versiones posteriores sigue las notas de cada versión.
 
 ## Lo que sigue requiriendo infraestructura
 

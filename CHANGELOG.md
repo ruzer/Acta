@@ -18,6 +18,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Altas duplicadas con mensajes claros.** Al crear usuarios, áreas o proyectos, se indica qué nombre de usuario, código o identificador ya existe en la institución. Se conservan los permisos, la protección ante altas simultáneas y el código de error.
 
+- **Documentación acorde con el producto.** Política de seguridad vigente, capacidades CSV e informes, usuarios en lote integrados y alcance de instalación/restauración en CI Linux x86_64; los resultados históricos conservan su fecha y sus límites.
+
 ## 0.10.0 — 2026-11-16
 
 Cuestionarios desde una hoja de cálculo, informes para imprimir y creación segura

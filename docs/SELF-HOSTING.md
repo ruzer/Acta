@@ -1,6 +1,6 @@
 # Self-hosting
 
-Despliegue de un solo host con PostgreSQL y VersityGW, sin alta disponibilidad. Linux ARM64 está verificado; Linux AMD64 todavía no. Acta se distribuye bajo AGPL-3.0-only; los componentes de terceros conservan sus propios avisos.
+Despliegue de un solo host con PostgreSQL y VersityGW, sin alta disponibilidad. Linux ARM64 está verificado localmente y Linux x86_64 en CI (GitHub Actions), dentro del [alcance ensayado](VERIFICATION.md#plataformas-y-evidencia-vigente). El hardware, la virtualización y el rendimiento de una institución requieren validación propia. Acta se distribuye bajo AGPL-3.0-only; los componentes de terceros conservan sus propios avisos.
 
 ## Elegir el recorrido
 
