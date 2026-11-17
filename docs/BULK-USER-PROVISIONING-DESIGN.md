@@ -1,6 +1,6 @@
 # Crear usuarios en lote — diseño aprobado
 
-**Estado: implementado según el diseño aprobado; pendiente de integración.** Se autorizaron los contratos aditivos
+**Estado: implementado e integrado en v0.10.0 mediante los PR [#130](https://github.com/ruzer/Acta/pull/130) y [#131](https://github.com/ruzer/Acta/pull/131).** Se autorizaron los contratos aditivos
 `POST /users/bulk/preview` y `POST /users/bulk/confirm`, sin modificar los
 endpoints existentes, dependencias ni migraciones.
 

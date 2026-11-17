@@ -74,7 +74,8 @@ jobs:
           done
           curl --fail --silent http://localhost:4317/api/v1/health
           npm run test:e2e
-      - run: npm audit --audit-level=high
+      - run: npm audit --omit=dev --audit-level=high
+      - run: node scripts/audit-gate.mjs
       - name: Container builds (no publication)
         run: docker compose --env-file .env.example build backend frontend object-storage storage-init
       - name: Storage vulnerability gate (no publication)
@@ -99,6 +100,10 @@ jobs:
     env:
       COMPOSE_PROJECT_NAME: readiness-ci
     steps:
+      - name: Entorno de verificación
+        run: |
+          uname -m
+          docker version
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with: { node-version: "26" }
@@ -160,6 +165,10 @@ jobs:
     env:
       COMPOSE_PROJECT_NAME: guided-ci
     steps:
+      - name: Entorno de verificación
+        run: |
+          uname -m
+          docker version
       - uses: actions/checkout@v7
       - name: Guided installation with the helper (no .env file)
         run: sh scripts/install.sh

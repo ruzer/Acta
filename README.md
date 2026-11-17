@@ -45,12 +45,13 @@ Ser administrador no sustituye el rol de analista para validar decisiones. El á
 - **Mi trabajo** para participantes: borradores persistentes, envíos y evidencia privada.
 - [Invitaciones privadas mediante enlace](docs/EXTERNAL-INVITATIONS.md) para aportaciones externas sin cuenta: preguntas seleccionadas, vencimiento, revocación y respuestas independientes por invitación.
 - Aclaraciones, comparación de conflictos y decisiones validadas con fuentes identificables.
-- Dashboard, trazabilidad, importación de estructura JSON y exportaciones JSON, CSV y Markdown según permisos.
+- Atención, trazabilidad, importación CSV/JSON, informes para imprimir y exportaciones JSON, CSV y Markdown según permisos.
+- Creación de usuarios en lotes de hasta 50 filas, con contraseñas temporales entregadas una sola vez y cambio obligatorio en el primer acceso.
 - Historial de operaciones y acceso separado por proyecto.
 
 ## Quiero probarlo con datos ficticios
 
-Necesitas Docker, Docker Compose **2.24.4 o posterior**, conexión para descargar imágenes/dependencias y espacio persistente. Plataforma verificada: **Linux ARM64**; Linux AMD64 todavía no verificado. No necesitas instalar Node ni PostgreSQL en tu equipo para este recorrido.
+Necesitas Docker, Docker Compose **2.24.4 o posterior**, conexión para descargar imágenes/dependencias y espacio persistente. Plataformas verificadas: **Linux ARM64 local** y **Linux x86_64 en GitHub Actions**, con el [alcance documentado](docs/VERIFICATION.md#plataformas-y-evidencia-vigente). No necesitas instalar Node ni PostgreSQL en tu equipo para este recorrido.
 
 Usa un directorio y un proyecto Docker exclusivos para evaluación. No actives la demo sobre una instalación con datos reales.
 
@@ -102,7 +103,7 @@ Este arranque local no expone la aplicación a otras computadoras. Para un servi
 
 ## Importar tu cuestionario
 
-Prepara un proyecto vacío y carga tus temas y preguntas desde JSON. Puedes partir del [ejemplo mínimo](examples/questionnaire-template.minimal.json) o del [ejemplo completo](examples/questionnaire-template.full.json). Sigue la [guía de importación](docs/IMPORTING-QUESTIONNAIRES.md) para adaptar el archivo, revisar errores y confirmar. Las preguntas quedan en borrador; después asignas participantes y publicas.
+Prepara un proyecto vacío y carga tus temas y preguntas desde una [plantilla CSV](examples/questionnaire-template.csv) guardada como CSV UTF-8. Para estructuras avanzadas también puedes usar JSON: [ejemplo mínimo](examples/questionnaire-template.minimal.json) o [ejemplo completo](examples/questionnaire-template.full.json). Sigue la [guía de importación](docs/IMPORTING-QUESTIONNAIRES.md) para adaptar el archivo, revisar errores y confirmar. Las preguntas quedan en borrador; después asignas participantes y publicas.
 
 ## Self-hosting
 
@@ -112,13 +113,13 @@ El despliegue incluido usa **frontend + backend + PostgreSQL + VersityGW**, con 
 - **VersityGW** guarda los archivos adjuntos en almacenamiento privado dentro de tu infraestructura, mediante la API S3. Es el proveedor self-hosted por defecto verificado.
 - Los volúmenes Docker conservan datos y secretos entre reinicios. Un backup completo necesita base de datos, archivos y configuración; exportar JSON no sustituye ese backup.
 
-Para actualizar desde v0.9.0, consulta las [notas de v0.10.0](docs/releases/v0.10.0.md): backup previo, frontend y backend juntos y recarga de pestañas; sin migraciones nuevas. Comprueba la versión publicada y su commit en las [releases oficiales](https://github.com/ruzer/Acta/releases) antes de actualizar. Si aún utilizas v0.8.0, revisa también la migración y la incompatibilidad de Sistema de las [notas de v0.9.0](docs/releases/v0.9.0.md).
+Para actualizar desde v0.9.0 o v0.10.0, consulta las [notas de v0.11.0](docs/releases/v0.11.0.md): backup previo, frontend y backend juntos y recarga de pestañas; sin migraciones nuevas. Comprueba la versión publicada y su commit en las [releases oficiales](https://github.com/ruzer/Acta/releases) antes de actualizar. Si aún utilizas v0.8.0, revisa también la migración y la incompatibilidad de Sistema de las [notas de v0.9.0](docs/releases/v0.9.0.md).
 
 [Instalar en servidor y actualizar](docs/SELF-HOSTING.md) · [Configuración](docs/CONFIGURATION.md) · [Backup y restauración](docs/BACKUP-RESTORE.md) · [Almacenamiento avanzado](docs/S3-PROVIDERS.md)
 
 La interfaz usa fuentes y recursos locales, sin analytics ni CDN obligatorios. El build descarga dependencias públicas. Un almacenamiento externo recibe objetos únicamente si el operador lo configura. No se promete alta disponibilidad ni compatibilidad con cualquier endpoint S3.
 
-Resultados y límites: [manifiesto de verificación](PUBLIC-SNAPSHOT-MANIFEST.md). No verificados: Linux AMD64, AWS S3, Ceph, SeaweedFS, multi-node/HA y migración entre proveedores. Recursos mínimos: **No published minimum yet.**
+Resultados vigentes: [verificación](docs/VERIFICATION.md); registro histórico: [manifiesto](PUBLIC-SNAPSHOT-MANIFEST.md). No verificados: hardware o virtualización institucional concreta, AWS S3, Ceph, SeaweedFS, multi-node/HA y migración entre proveedores. Recursos mínimos: **No published minimum yet.**
 
 ## Screenshots
 
@@ -135,7 +136,7 @@ También puedes ver [Organizar](docs/assets/02-editor-organize.png), [Responder]
 
 Acta está diseñado para instalarse en infraestructura propia y adaptarse mediante forks. Las organizaciones pueden mantener personalizaciones y sincronizarse con el upstream conforme a AGPL-3.0-only. Las mejoras genéricas son bienvenidas de regreso mediante Pull Requests: contribuir así ayuda a otras instalaciones y reduce divergencia; no es una obligación de enviar PR atribuida a la licencia.
 
-El upstream oficial es [github.com/ruzer/Acta](https://github.com/ruzer/Acta). Las [notas de v0.10.0 — CSV, informes y usuarios en lote](docs/releases/v0.10.0.md) describen sus cambios, actualización y límites. Consulta el [changelog](CHANGELOG.md) y las [releases oficiales](https://github.com/ruzer/Acta/releases) para verificar la versión publicada, su commit y la autorización de tu instalación antes de actualizar; una versión en los archivos del repositorio no acredita su publicación.
+El upstream oficial es [github.com/ruzer/Acta](https://github.com/ruzer/Acta). Las [notas de v0.11.0 — continuidad y piloto institucional](docs/releases/v0.11.0.md) describen sus cambios, actualización y límites. Consulta el [changelog](CHANGELOG.md) y las [releases oficiales](https://github.com/ruzer/Acta/releases) para verificar la versión publicada, su commit y la autorización de tu instalación antes de actualizar; una versión en los archivos del repositorio no acredita su publicación.
 
 [Gobernanza](GOVERNANCE.md) · [Forks y sincronización](docs/UPSTREAM-FORKS.md) · [Roadmap](ROADMAP.md) · [Soporte comunitario](SUPPORT.md).
 

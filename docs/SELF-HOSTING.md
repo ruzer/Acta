@@ -1,6 +1,6 @@
 # Self-hosting
 
-Despliegue de un solo host con PostgreSQL y VersityGW, sin alta disponibilidad. Linux ARM64 está verificado; Linux AMD64 todavía no. Acta se distribuye bajo AGPL-3.0-only; los componentes de terceros conservan sus propios avisos.
+Despliegue de un solo host con PostgreSQL y VersityGW, sin alta disponibilidad. Linux ARM64 está verificado localmente y Linux x86_64 en CI (GitHub Actions), dentro del [alcance ensayado](VERIFICATION.md#plataformas-y-evidencia-vigente). El hardware, la virtualización y el rendimiento de una institución requieren validación propia. Acta se distribuye bajo AGPL-3.0-only; los componentes de terceros conservan sus propios avisos.
 
 ## Elegir el recorrido
 
@@ -16,7 +16,7 @@ Despliegue de un solo host con PostgreSQL y VersityGW, sin alta disponibilidad. 
 
 Docker, Docker Compose **2.24.4+**, conexión para descargar dependencias/imágenes y disco persistente. No necesitas Node, Go ni PostgreSQL en el host.
 
-**No published minimum yet.** No hay mediciones publicadas de CPU, RAM o disco que permitan establecer mínimos. Dimensiona según carga, evidencia, retención y backups, y mide en tu entorno antes de comprometer capacidad. El tamaño máximo por archivo y otros límites están en [Configuración](CONFIGURATION.md); no equivalen a requisitos mínimos del servidor.
+**Sin mínimos garantizados.** Hay [mediciones de referencia](RESOURCE-REFERENCE.md) de CPU, RAM, imágenes y volúmenes con cinco usuarios ficticios concurrentes, importación CSV y evidencia de varios MiB. Son una ejecución breve ARM64, no capacidad garantizada. Dimensiona según carga, evidencia, retención y backups, y mide en tu entorno antes de comprometer capacidad. El tamaño máximo por archivo y otros límites están en [Configuración](CONFIGURATION.md); no equivalen a requisitos mínimos del servidor.
 
 ## Quick Start local
 
@@ -86,6 +86,13 @@ VersityGW es un servicio S3 para guardar adjuntos privados. Las descargas pasan 
 3. Conserva `.env`, nombre del proyecto Compose y volúmenes. Cambiar de directorio no debe cambiar la identidad del despliegue.
 4. Ejecuta `docker compose up --build -d --wait` con la nueva versión autorizada. El trabajo de migración aplica migraciones versionadas; nunca uses db push. Una instalación existente conserva su configuración y usuarios, y no vuelve a ver el asistente de primera instalación.
 5. Verifica salud, login y una descarga conocida. Cambiar código hacia atrás no revierte automáticamente las migraciones; usa una restauración coordinada si hace falta volver.
+
+Para **v0.10.0 → v0.11.0**, consulta las [notas](releases/v0.11.0.md#actualización-desde-v0100)
+y el [ensayo ejecutado](UPGRADE-REHEARSAL.md). La sesión anterior se conserva;
+los nuevos accesos emiten `acta_session`. Adapta herramientas/proxies que lean
+el nombre anterior. No hay nuevas migraciones ni endpoints. Comprueba siempre
+el tag publicado y la autorización antes de actualizar. El salto directo desde
+v0.9.0 conserva las mismas instrucciones de backup, pero no fue ensayado aquí.
 
 Para actualizar **v0.9.0 → v0.10.0**, verifica primero el tag y su commit en las
 [releases oficiales](https://github.com/ruzer/Acta/releases) y la autorización de
