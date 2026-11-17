@@ -6,7 +6,15 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
-Sin cambios adicionales por anunciar.
+### Changed
+
+- **Dependencias e inventario de licencias al día.** Se retira `@hookform/resolvers`, que no se utiliza; se conserva `react-hook-form`. Los inventarios npm se regeneran desde el lockfile con un comando reproducible, sin añadir dependencias ni confundir metadatos declarados con autorización de redistribución.
+
+### Fixed
+
+- **Navegación accesible en Administración.** Los botones de Usuarios, Áreas y Proyectos forman un grupo con nombre accesible y conservan su selección y apariencia.
+
+- **Altas duplicadas con mensajes claros.** Al crear usuarios, áreas o proyectos, se indica qué nombre de usuario, código o identificador ya existe en la institución. Se conservan los permisos, la protección ante altas simultáneas y el código de error.
 
 ## 0.10.0 — 2026-11-16
 

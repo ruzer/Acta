@@ -1,6 +1,7 @@
 import {
   ArgumentsHost,
   Catch,
+  ConflictException,
   ExceptionFilter,
   HttpException,
   Injectable,
@@ -28,6 +29,7 @@ export function serialize<T>(schema: z.ZodType<T>, value: unknown): T {
   if (!parsed.success) throw new Error("Output contract violation");
   return parsed.data;
 }
+export class DuplicateCreationException extends ConflictException {}
 @Catch()
 @Injectable()
 export class Errors implements ExceptionFilter {
@@ -68,7 +70,10 @@ export class Errors implements ExceptionFilter {
       message = "La solicitud excede el tamaño permitido.";
     } else if (error instanceof HttpException) {
       status = error.getStatus();
-      code = String(status);
+      code =
+        error instanceof DuplicateCreationException
+          ? "CONFLICT"
+          : String(status);
       message = error.message;
       const detail = error.getResponse();
       if (

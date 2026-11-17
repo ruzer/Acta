@@ -237,6 +237,105 @@ test("PostgreSQL real: migración desde base vacía, seed idempotente y ocho tip
   assert.equal(seeded.status, 0, seeded.stderr);
   assert.equal(await db.question.count(), 9);
 });
+for (const [path, model, key, fields, message, action] of [
+  [
+    "/users",
+    "user",
+    "username",
+    () => ({
+      displayName: "Persona ficticia",
+      temporaryPassword: password,
+      isOrganizationAdmin: false,
+    }),
+    "Ya existe un usuario con ese nombre de usuario. Elige otro.",
+    "USER_CREATED",
+  ],
+  [
+    "/areas",
+    "area",
+    "code",
+    () => ({ name: "Área ficticia" }),
+    "Ya existe un área con ese código. Usa otro código o revisa el área existente.",
+    "AREA_CREATED",
+  ],
+  [
+    "/projects",
+    "project",
+    "externalId",
+    () => ({ name: "Proyecto ficticio", description: "" }),
+    "Ya existe un proyecto con ese identificador externo. Usa otro identificador.",
+    "PROJECT_CREATED",
+  ],
+]) {
+  test(`duplicados de ${model}: mensaje claro, aislamiento, permisos y concurrencia`, async () => {
+    const value = `duplicate-${model}`;
+    const body = { ...fields(), [key]: value };
+    // The same key in another institution must not block or disclose anything here.
+    const organization = process.env.ORGANIZATION_CODE;
+    process.env.ORGANIZATION_CODE = "OTHER-DEMO";
+    try {
+      await ok(path, body, otherOrg);
+    } finally {
+      process.env.ORGANIZATION_CODE = organization;
+    }
+    await ok(path, body);
+    const auditBefore = await db.auditEvent.count({
+      where: { organizationId: org.id, action },
+    });
+    const duplicate = await request(path, {
+      session: admin,
+      method: "POST",
+      body,
+    });
+    assert.equal(duplicate.status, 409);
+    assert.equal(duplicate.data.code, "CONFLICT");
+    assert.equal(duplicate.data.message, message);
+    assert.equal(
+      await db.auditEvent.count({ where: { organizationId: org.id, action } }),
+      auditBefore,
+    );
+    for (const code of [value, `${value}-absent`]) {
+      const forbidden = await request(path, {
+        session: analyst,
+        method: "POST",
+        body: { ...body, [key]: code },
+      });
+      assert.equal(forbidden.status, 403);
+      assert.notEqual(forbidden.data.message, message);
+    }
+    // Display names are not unique: only the existing database key is constrained.
+    await ok(path, { ...body, [key]: `${value}-other` });
+    const race = { ...body, [key]: `${value}-race` };
+    const beforeRace = await db.auditEvent.count({
+      where: { organizationId: org.id, action },
+    });
+    const attempts = await Promise.all(
+      [1, 2].map(() =>
+        request(path, { session: admin, method: "POST", body: race }),
+      ),
+    );
+    assert.deepEqual(attempts.map((r) => r.status).sort(), [201, 409]);
+    assert.equal(attempts.find((r) => r.status === 409).data.message, message);
+    assert.equal(attempts.find((r) => r.status === 409).data.code, "CONFLICT");
+    assert.equal(
+      await db[model].count({
+        where: { organizationId: org.id, [key]: race[key] },
+      }),
+      1,
+    );
+    assert.equal(
+      await db.auditEvent.count({ where: { organizationId: org.id, action } }),
+      beforeRace + 1,
+    );
+    if (model === "project") {
+      const created = attempts.find((r) => r.status === 201).data;
+      assert.equal(
+        await db.projectMember.count({ where: { projectId: created.id } }),
+        1,
+      );
+    }
+  });
+}
 test("cookies HttpOnly/SameSite, sesión sin token plano y CSRF/origin obligatorios", async () => {
   assert.match(admin.header, /HttpOnly/);
   assert.match(admin.header, /SameSite=Lax/i);

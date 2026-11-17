@@ -2,7 +2,11 @@
 import { ArgumentsHost, HttpException } from "@nestjs/common";
 import { ExpressAdapter } from "@nestjs/platform-express";
 import { expect, it, vi } from "vitest";
-import { Errors } from "../../app/backend/src/common/http";
+import { Prisma } from "@prisma/client";
+import {
+  DuplicateCreationException,
+  Errors,
+} from "../../app/backend/src/common/http";
 
 const oversizedBody = () =>
   Object.assign(new Error("request entity too large"), {
@@ -53,3 +57,33 @@ it.each([
     requestId: "payload-test",
   });
 });
+
+it("conserva HTTP 409 y CONFLICT para un duplicado de creación", () => {
+  const message =
+    "Ya existe un área con ese código. Usa otro código o revisa el área existente.";
+  const response = respond(new DuplicateCreationException(message));
+  expect(response.status).toHaveBeenCalledWith(409);
+  expect(response.json).toHaveBeenCalledWith({
+    code: "CONFLICT",
+    message,
+    requestId: "payload-test",
+  });
+});
+it.each(["P2002", "P2034"])(
+  "conserva el mensaje genérico fuera de las altas: %s",
+  (code) => {
+    const response = respond(
+      new Prisma.PrismaClientKnownRequestError("Detalle privado de la base", {
+        code,
+        clientVersion: "test",
+      }),
+    );
+    expect(response.status).toHaveBeenCalledWith(409);
+    expect(response.json).toHaveBeenCalledWith({
+      code: "CONFLICT",
+      message:
+        "El registro ya existe o cambió. Actualiza la vista e inténtalo de nuevo.",
+      requestId: "payload-test",
+    });
+  },
+);

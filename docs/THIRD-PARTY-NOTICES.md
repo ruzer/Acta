@@ -1,58 +1,57 @@
 # Third-party notices
 
-Inventory of direct installed dependencies, 2026-09-29. Acta is licensed under AGPL-3.0-only; this inventory is not blanket permission to relicense third-party components. Preserve upstream license and notice files in distributions.
+Inventario reproducible de dependencias npm declaradas en `package-lock.json`. Regenerar con `node scripts/dependency-license-inventory.mjs` desde la raíz. Acta conserva AGPL-3.0-only; este inventario no autoriza a relicenciar terceros ni sustituye sus textos y avisos originales.
 
-| Package                     | Version  | Declared license |
-| --------------------------- | -------- | ---------------- |
-| @aws-sdk/client-s3          | 3.1143.0 | Apache-2.0       |
-| @axe-core/playwright        | 4.13.0   | MPL-2.0          |
-| @eslint/js                  | 10.0.1   | MIT              |
-| @hookform/resolvers         | 5.9.1    | MIT              |
-| @nestjs/common              | 12.1.1   | MIT              |
-| @nestjs/core                | 12.1.1   | MIT              |
-| @nestjs/platform-express    | 12.1.1   | MIT              |
-| @playwright/test            | 1.63.0   | Apache-2.0       |
-| @prisma/adapter-pg          | 7.10.0   | Apache-2.0       |
-| @prisma/client              | 7.10.0   | Apache-2.0       |
-| @tanstack/react-query       | 5.104.0  | MIT              |
-| @testing-library/jest-dom   | 7.0.1    | MIT              |
-| @testing-library/react      | 16.3.3   | MIT              |
-| @testing-library/user-event | 14.6.7   | MIT              |
-| @types/cookie-parser        | 1.4.10   | MIT              |
-| @types/express              | 5.0.6    | MIT              |
-| @types/node                 | 24.19.0  | MIT              |
-| @types/pg                   | 8.23.1   | MIT              |
-| @types/react                | 19.3.0   | MIT              |
-| @types/react-dom            | 19.3.0   | MIT              |
-| @types/yauzl                | 3.4.0    | MIT              |
-| @vitejs/plugin-react        | 6.1.1    | MIT              |
-| argon2                      | 0.45.1   | MIT              |
-| cookie-parser               | 1.4.7    | MIT              |
-| dotenv                      | 18.0.4   | BSD-2-Clause     |
-| eslint                      | 10.11.0  | MIT              |
-| eslint-plugin-react-hooks   | 7.1.1    | MIT              |
-| eslint-plugin-react-refresh | 0.5.7    | MIT              |
-| fast-xml-parser             | 5.11.1   | MIT              |
-| globals                     | 17.12.0  | MIT              |
-| helmet                      | 8.3.0    | MIT              |
-| jsdom                       | 30.1.1   | MIT              |
-| pdf-lib                     | 1.17.1   | MIT              |
-| pg                          | 8.23.0   | MIT              |
-| prettier                    | 3.9.9    | MIT              |
-| prisma                      | 7.10.0   | Apache-2.0       |
-| react                       | 19.3.0   | MIT              |
-| react-dom                   | 19.3.0   | MIT              |
-| react-hook-form             | 7.89.0   | MIT              |
-| react-router-dom            | 7.18.4   | MIT              |
-| reflect-metadata            | 0.2.2    | Apache-2.0       |
-| rxjs                        | 7.8.2    | Apache-2.0       |
-| sharp                       | 0.35.5   | Apache-2.0       |
-| typescript                  | 6.0.3    | Apache-2.0       |
-| typescript-eslint           | 8.71.0   | MIT              |
-| vite                        | 8.3.1    | MIT              |
-| vitest                      | 5.0.2    | MIT              |
-| yauzl                       | 3.4.0    | MIT              |
-| zod                         | 4.6.5    | MIT              |
+| Paquete | Versión | Licencia declarada |
+| --- | --- | --- |
+| @aws-sdk/client-s3 | 3.1143.0 | Apache-2.0 |
+| @axe-core/playwright | 4.14.0 | MPL-2.0 |
+| @eslint/js | 10.0.1 | MIT |
+| @nestjs/common | 12.4.2 | MIT |
+| @nestjs/core | 12.4.2 | MIT |
+| @nestjs/platform-express | 12.4.2 | MIT |
+| @playwright/test | 1.64.1 | Apache-2.0 |
+| @prisma/adapter-pg | 7.10.1 | Apache-2.0 |
+| @prisma/client | 7.10.1 | Apache-2.0 |
+| @tanstack/react-query | 5.106.0 | MIT |
+| @testing-library/jest-dom | 7.0.1 | MIT |
+| @testing-library/react | 16.3.3 | MIT |
+| @testing-library/user-event | 14.6.8 | MIT |
+| @types/cookie-parser | 1.4.10 | MIT |
+| @types/express | 5.0.6 | MIT |
+| @types/node | 26.6.6 | MIT |
+| @types/pg | 8.23.1 | MIT |
+| @types/react-dom | 19.3.0 | MIT |
+| @types/react | 19.3.0 | MIT |
+| @types/yauzl | 3.4.0 | MIT |
+| @vitejs/plugin-react | 6.2.1 | MIT |
+| argon2 | 0.45.2 | MIT |
+| cookie-parser | 1.4.7 | MIT |
+| dotenv | 18.0.10 | BSD-2-Clause |
+| eslint-plugin-react-hooks | 7.1.1 | MIT |
+| eslint-plugin-react-refresh | 0.5.7 | MIT |
+| eslint | 10.14.0 | MIT |
+| fast-xml-parser | 5.12.0 | MIT |
+| globals | 17.14.0 | MIT |
+| helmet | 8.3.0 | MIT |
+| jsdom | 31.0.0 | MIT |
+| pdf-lib | 1.17.1 | MIT |
+| pg | 8.23.1 | MIT |
+| prettier | 3.9.10 | MIT |
+| prisma | 7.10.1 | Apache-2.0 |
+| react-dom | 19.3.1 | MIT |
+| react-hook-form | 7.91.0 | MIT |
+| react-router-dom | 7.18.5 | MIT |
+| react | 19.3.1 | MIT |
+| reflect-metadata | 0.2.2 | Apache-2.0 |
+| rxjs | 7.8.2 | Apache-2.0 |
+| sharp | 0.35.5 | Apache-2.0 |
+| typescript-eslint | 8.72.0 | MIT |
+| typescript | 6.0.3 | Apache-2.0 |
+| vite | 8.3.7 | MIT |
+| vitest | 5.1.0 | MIT |
+| yauzl | 3.4.0 | MIT |
+| zod | 4.6.7 | MIT |
 
 ## Fonts
 
@@ -73,8 +72,8 @@ Manrope and IBM Plex Sans are distributed locally under SIL OFL 1.1. The full li
 The project license is [AGPL-3.0-only](../LICENSE). Inventories classify third-party terms; they are not blanket legal clearance.
 
 - **Source repository**: third-party vendored files are the eleven font files with their three OFL notices and upstream VersityGW license/NOTICE. npm/Go/native binaries are installed or fetched during build, not committed here. A future image distribution has additional obligations; a source URL alone is not a completed corresponding-source offer.
-- **npm**: 599 lock entries now include classification, installed license evidence (or explicit platform-not-installed limitation), registry source and integrity. 577 `ATTRIBUTION REQUIRED`, 7 `COMPATIBLE`, 15 `REVIEW REQUIRED`. No confirmed `INCOMPATIBLE` dependency is silently accepted; absence of that classification is not blanket legal clearance.
-- **Frontend bundle**: the build now collects verbatim license/NOTICE texts for its 13 production dependencies into `third-party-notices.txt`. Fonts retain their own adjacent OFL notices. No application copyright/license is generated. The collector fails if a production package has no license text.
+- **npm**: [586 entradas del lockfile](DEPENDENCY-LICENSES.csv): 565 `ATTRIBUTION REQUIRED`, 17 `REVIEW REQUIRED`, 4 `COMPATIBLE`. Incluye paquetes opcionales de otras plataformas. Versión, licencia declarada, origen e integridad proceden del lockfile; no se afirma haber inspeccionado cada licencia instalada. Las clasificaciones conservan los criterios de la tabla inferior; una licencia desconocida queda como `REVIEW REQUIRED`. No constituye una autorización legal de redistribución.
+- **Frontend bundle**: the build collects verbatim license/NOTICE texts for its installed production dependency closure into `third-party-notices.txt`. Fonts retain their own adjacent OFL notices. No application copyright/license is generated. The collector fails if a production package has no license text.
 - **Storage**: [90 Go package license entries](STORAGE-DEPENDENCY-LICENSES.csv), regenerated with go-licenses v2.0.1 against official v1.11.0 source (`e42ae7ab8107201e64e52ee024824e8cab3683b3`) on 2026-11-10. The Linux ARM64 binary records 77 dependency modules. License classifications: 32 MIT, 29 Apache-2.0, 18 BSD-3-Clause, 5 BSD-2-Clause, 5 MPL-2.0, 1 ISC; no unknown license reported. Preserve all applicable notices and MPL file source. The scanner warns about assembly it cannot analyze. LICENSE and NOTICE match upstream byte-for-byte. Source and dependency manifests are unmodified; compilation uses Go 1.27.4, `CGO_ENABLED=0` and `-buildvcs=false`, with explicit release metadata. This inventory is not a claim of bit-for-bit reproducibility or a complete corresponding-source distribution; see [build modifications](../docker/versity/UPSTREAM-MODIFICATIONS).
 - **Container OS**: 91 Debian packages inventoried in the tested backend. Their `/usr/share/doc/*/copyright` files remain in the image; they are independent distribution components, not automatically relicensed as AGPL. A published multi-platform image requires an exact per-platform SBOM/source/notice bundle. This task does not publish images.
 

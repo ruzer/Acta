@@ -16,13 +16,27 @@ import {
   projectInput,
   projectView,
 } from "@requirements/contracts";
-import { User } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
 import { Database } from "../database/database.module.js";
-import { CommandContext, audit, serialize, Tx } from "../common/http.js";
+import {
+  CommandContext,
+  DuplicateCreationException,
+  audit,
+  serialize,
+  Tx,
+} from "../common/http.js";
 import { hashPassword, publicUser } from "../auth/auth.service.js";
 import { AccessService } from "./access.service.js";
 import { assignableArea } from "./area-rules.js";
 import { ResponsesService } from "../responses/responses.service.js";
+function creationError(error: unknown, message: string): never {
+  if (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2002"
+  )
+    throw new DuplicateCreationException(message);
+  throw error;
+}
 @Injectable()
 export class AdministrationService {
   constructor(
@@ -54,16 +68,23 @@ export class AdministrationService {
     const passwordHash = await hashPassword(d.temporaryPassword);
     return this.db.$transaction(async (tx) => {
       await this.access.organizationAdmin(tx, req.actor);
-      const u = await tx.user.create({
-        data: {
-          organizationId: req.actor.organizationId,
-          username: d.username.toLowerCase(),
-          displayName: d.displayName,
-          passwordHash,
-          mustChangePassword: true,
-          isOrganizationAdmin: d.isOrganizationAdmin,
-        },
-      });
+      const u = await tx.user
+        .create({
+          data: {
+            organizationId: req.actor.organizationId,
+            username: d.username.toLowerCase(),
+            displayName: d.displayName,
+            passwordHash,
+            mustChangePassword: true,
+            isOrganizationAdmin: d.isOrganizationAdmin,
+          },
+        })
+        .catch((error: unknown) =>
+          creationError(
+            error,
+            "Ya existe un usuario con ese nombre de usuario. Elige otro.",
+          ),
+        );
       await audit(
         tx,
         req.actor,
@@ -218,9 +239,16 @@ export class AdministrationService {
   async createArea(req: CommandContext, d: z.infer<typeof areaInput>) {
     return this.db.$transaction(async (tx) => {
       await this.access.organizationAdmin(tx, req.actor);
-      const x = await tx.area.create({
-        data: { organizationId: req.actor.organizationId, ...d },
-      });
+      const x = await tx.area
+        .create({
+          data: { organizationId: req.actor.organizationId, ...d },
+        })
+        .catch((error: unknown) =>
+          creationError(
+            error,
+            "Ya existe un área con ese código. Usa otro código o revisa el área existente.",
+          ),
+        );
       const v = serialize(areaView, {
         id: x.id,
         code: x.code,
@@ -345,9 +373,16 @@ export class AdministrationService {
   async createProject(req: CommandContext, d: z.infer<typeof projectInput>) {
     return this.db.$transaction(async (tx) => {
       await this.access.organizationAdmin(tx, req.actor);
-      const p = await tx.project.create({
-        data: { organizationId: req.actor.organizationId, ...d },
-      });
+      const p = await tx.project
+        .create({
+          data: { organizationId: req.actor.organizationId, ...d },
+        })
+        .catch((error: unknown) =>
+          creationError(
+            error,
+            "Ya existe un proyecto con ese identificador externo. Usa otro identificador.",
+          ),
+        );
       await tx.projectMember.create({
         data: { projectId: p.id, userId: req.actor.id, role: "ADMIN" },
       });
