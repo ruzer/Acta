@@ -143,7 +143,7 @@ export function Administration({ me }: { me: Me }) {
           </div>
         }
       />
-      <div className="tabs" aria-label="Administración">
+      <div className="tabs" role="group" aria-label="Administración">
         {[
           ["users", "Usuarios"],
           ["areas", "Áreas"],

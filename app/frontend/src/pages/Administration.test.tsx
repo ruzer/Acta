@@ -1,5 +1,5 @@
 import { afterEach, beforeAll, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -53,6 +53,17 @@ function mount(projects: unknown[]) {
   );
   return userEvent.setup();
 }
+it("las pestañas forman un grupo accesible y conservan su selección", async () => {
+  const user = mount([]);
+  const group = screen.getByRole("group", { name: "Administración" });
+  const users = within(group).getByRole("button", { name: "Usuarios" });
+  const areas = within(group).getByRole("button", { name: "Áreas" });
+  expect(users).toHaveAttribute("aria-pressed", "true");
+  expect(areas).toHaveAttribute("aria-pressed", "false");
+  await user.click(areas);
+  expect(users).toHaveAttribute("aria-pressed", "false");
+  expect(areas).toHaveAttribute("aria-pressed", "true");
+});
 it("Proyectos lista cada proyecto con su identificador y accesos directos a abrirlo y a sus miembros", async () => {
   const user = mount([
     project("a", "Proyecto A"),
