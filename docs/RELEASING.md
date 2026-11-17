@@ -14,6 +14,30 @@ Se prepara [Semantic Versioning](https://semver.org/lang/es/) en formato **MAJOR
 
 El contrato público incluye API documentada, configuración, formatos de intercambio y requisitos de actualización/persistencia. No basta con que TypeScript compile para afirmar compatibilidad. Antes de 1.0 no se promete estabilidad absoluta; los cambios incompatibles deben anunciarse, agruparse en un incremento MINOR de `0.x` y acompañarse de instrucciones de migración. PATCH seguirá reservado para cambios compatibles. Una corrección de seguridad que rompa compatibilidad debe decirlo y usar la versión apropiada.
 
+### Preparación de 0.11.0 — Continuidad y piloto institucional
+
+Base verificada `7aaa10c71cdbacc4cb06f8a4b45face93f8c806a`: seis commits y 18
+archivos desde v0.10.0, con #134 y #135. Es MINOR por el nuevo nombre de cookie
+con lectura temporal de la anterior y la evidencia de operación. No hay nuevos
+endpoints, migraciones ni dependencias externas. Las [notas](releases/v0.11.0.md)
+registran el diff de contratos, compatibilidad, límites y versiones comprobadas.
+
+Para actualizar: backup verificado, mismo proyecto y volúmenes, frontend/backend
+juntos, revisar consumidores de `fgeo_session` y recargar pestañas. El [ensayo](UPGRADE-REHEARSAL.md)
+comprueba continuidad desde 0.10.0 y restauración; el salto directo desde 0.9.0
+requiere un ensayo de la instalación. Las [mediciones](RESOURCE-REFERENCE.md)
+son referencias, no mínimos garantizados.
+
+Exigir `verify`, `secrets`, `selfhosting`, `guided-install` y `codeql` en verde
+sobre el SHA elegido. El mantenedor revisa y fusiona manualmente. **Solo con
+una autorización expresa posterior**, verificar los cinco checks del merge
+exacto, crear allí el tag anotado `v0.11.0`, publicar «Acta v0.11.0» como Latest
+usando `docs/releases/v0.11.0.md` (convertir enlaces relativos en enlaces absolutos
+al tag), y ejecutar `gh workflow run ci.yml --ref v0.11.0`: CI no escucha push
+de tags. Comprobar que esa ejecución corresponde al mismo SHA. No se publican
+imágenes ni se actualizan downstreams. Notas y versiones en Git no acreditan
+que el tag o la Release ya existan.
+
 ### Preparación de 0.10.0 — CSV, informes y usuarios en lote
 
 La preparación tomó como referencia publicada [v0.9.0](https://github.com/ruzer/Acta/releases/tag/v0.9.0).

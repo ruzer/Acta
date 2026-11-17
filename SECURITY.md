@@ -18,6 +18,26 @@ La política vigente es de atención best effort a la última versión publicada
 
 En futuras contribuciones, las correcciones de seguridad se preparan por el canal privado apropiado antes de abrir un PR público. DCO o aprobación de PR no resuelven un incidente de exposición de secretos. [Preparación de GitHub](docs/GITHUB-SETUP.md).
 
+## Control de dependencias y excepción temporal
+
+CI exige `npm audit --omit=dev --audit-level=high` sin excepciones para las
+dependencias de producción. Después, `node scripts/audit-gate.mjs` revisa el
+reporte **completo**, también las herramientas de desarrollo: cualquier aviso
+alto o crítico no aceptado, un reporte inválido o una excepción caducada bloquea.
+
+El propietario aceptó únicamente [GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf)
+hasta **2027-01-15 inclusive (UTC)**. Al verificar el 2026-11-17, picomatch 4.0.7
+solo entra por herramientas de desarrollo; la auditoría de producción da cero y
+no hay uso en ejecución ni versión corregida publicada. La imagen de backend
+incluye el paquete en disco porque conserva dependencias de construcción; la
+imagen de frontend nginx no lo contiene. Esto es aceptación de riesgo acotada,
+no una corrección ni una promesa de que herramientas de desarrollo sean inocuas.
+
+Revisar al publicarse un parche o, a más tardar, al vencer la excepción. Cuando
+exista una versión corregida compatible, actualizar picomatch, retirar su entrada
+de `scripts/audit-gate.mjs` y las pruebas de esa excepción, y repetir ambos
+controles. No reducir el umbral, excluir todo desarrollo ni usar `audit fix --force`.
+
 ## Operación segura
 
 Usa HTTPS, origen exacto y cookies Secure fuera del entorno local. La API autoriza accesos por sesión, organización, proyecto y asignación; las descargas privadas verifican permisos e integridad. PostgreSQL y object storage no deben exponerse directamente a Internet.

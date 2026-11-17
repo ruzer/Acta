@@ -25,6 +25,33 @@ virtualización institucional concreta, rendimiento, capacidad mínima, alta
 disponibilidad ni proveedores S3 distintos. ARM64 local y x86_64 en CI son
 ensayos separados, no una certificación de todas las plataformas.
 
+## Dependencias: dos controles bloqueantes
+
+```sh
+npm audit --omit=dev --audit-level=high
+node scripts/audit-gate.mjs
+```
+
+El primero revisa producción sin excepciones. El segundo ejecuta `npm audit
+--json` completo, reúne avisos distintos (incluidas sus dependencias transitivas)
+y bloquea cualquier aviso alto/crítico salvo la única excepción autorizada:
+[GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf), hasta
+2027-01-15 inclusive UTC. Imprime el aviso, motivo y caducidad; nunca presenta
+esa aceptación como «cero vulnerabilidades». Un JSON vacío/inválido, errores de
+npm o cadenas sin aviso original fallan. Un reporte válido con
+`vulnerabilities: {}` sí pasa mientras no haya una excepción vencida.
+
+El 2026-11-17: auditoría completa = un aviso de origen, 12 entradas high derivadas;
+auditoría de producción = 0; `npm ls picomatch --omit=dev` = árbol vacío.
+Picomatch 4.0.7 no se importa desde el código de Acta. Su presencia en disco en el
+backend, ausencia en nginx y falta de versión corregida están documentadas en
+[Seguridad](../SECURITY.md#control-de-dependencias-y-excepción-temporal).
+
+Al existir un parche compatible, actualizarlo y borrar la entrada de excepción
+y sus pruebas específicas; repetir ambos comandos. La prueba unitaria del gate
+cubre aceptación exacta, deduplicación, avisos nuevos high/critical, fecha límite,
+reportes válidos vacíos e inválidos. No se cambian nombres de jobs ni protecciones.
+
 ## Prueba de instalación limpia
 
 En una copia descartable de los archivos de repositorio, sin node_modules ni .env real: copiar `.env.example`, utilizar nombre Compose y puerto independientes y ejecutar el comando normal. No montar DB/objetos/secretos de otras instalaciones. Comprobar que los volúmenes no existían y guardar el resultado.

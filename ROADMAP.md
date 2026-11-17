@@ -7,7 +7,7 @@ Prioridades sin fechas ni compromiso de implementación. Esta lista no declara f
 - Titularidad, autorización, AGPL-3.0-only, maintainer y DCO 1.1: resueltos por el titular el 2026-10-01. Conservar avisos de terceros.
 - Designar y verificar el contacto privado de moderación. El canal privado de seguridad se verificó habilitado el 2026-11-17; mantener su disponibilidad y revisar los canales comunitarios.
 - Mantener las [releases publicadas](https://github.com/ruzer/Acta/releases), la documentación y los controles automáticos.
-- Completar la evidencia de actualización, recuperación y recursos de 0.11.0 siguiendo [RELEASING](docs/RELEASING.md), antes de recomendarla para un piloto institucional.
+- Conservar y repetir la evidencia de actualización, recuperación y recursos de [0.11.0](docs/releases/v0.11.0.md); el piloto institucional es la siguiente validación, con autorización y aceptación propias.
 
 ## Next
 

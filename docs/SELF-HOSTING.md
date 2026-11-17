@@ -87,6 +87,13 @@ VersityGW es un servicio S3 para guardar adjuntos privados. Las descargas pasan 
 4. Ejecuta `docker compose up --build -d --wait` con la nueva versión autorizada. El trabajo de migración aplica migraciones versionadas; nunca uses db push. Una instalación existente conserva su configuración y usuarios, y no vuelve a ver el asistente de primera instalación.
 5. Verifica salud, login y una descarga conocida. Cambiar código hacia atrás no revierte automáticamente las migraciones; usa una restauración coordinada si hace falta volver.
 
+Para **v0.10.0 → v0.11.0**, consulta las [notas](releases/v0.11.0.md#actualización-desde-v0100)
+y el [ensayo ejecutado](UPGRADE-REHEARSAL.md). La sesión anterior se conserva;
+los nuevos accesos emiten `acta_session`. Adapta herramientas/proxies que lean
+el nombre anterior. No hay nuevas migraciones ni endpoints. Comprueba siempre
+el tag publicado y la autorización antes de actualizar. El salto directo desde
+v0.9.0 conserva las mismas instrucciones de backup, pero no fue ensayado aquí.
+
 Para actualizar **v0.9.0 → v0.10.0**, verifica primero el tag y su commit en las
 [releases oficiales](https://github.com/ruzer/Acta/releases) y la autorización de
 tu instalación. Sigue las [notas de la versión](releases/v0.10.0.md#actualización-desde-v090):

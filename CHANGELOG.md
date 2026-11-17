@@ -6,6 +6,17 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
+Sin cambios adicionales por anunciar.
+
+## 0.11.0 — 2026-11-17
+
+Correcciones de Administración y cookie de sesión neutral de los PR
+[#134](https://github.com/ruzer/Acta/pull/134) y
+[#135](https://github.com/ruzer/Acta/pull/135), acompañadas de un ensayo de
+actualización/restauración y mediciones de recursos. La sesión anterior sigue
+siendo válida durante esta versión; sin migraciones ni endpoints nuevos.
+Alcance para evaluar un piloto institucional en las [notas de 0.11.0](docs/releases/v0.11.0.md).
+
 ### Changed
 
 - **Dependencias e inventario de licencias al día.** Se retira `@hookform/resolvers`, que no se utiliza; se conserva `react-hook-form`. Los inventarios npm se regeneran desde el lockfile con un comando reproducible, sin añadir dependencias ni confundir metadatos declarados con autorización de redistribución.
@@ -25,6 +36,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 - **Actualización con datos comprobada.** Ensayo reproducible de v0.10.0 a la candidata y restauración en volúmenes nuevos, con huellas por fila, evidencia, informe e invitaciones y continuidad de la sesión anterior.
 
 - **Recursos medidos con carga ficticia.** Referencia reproducible de cinco usuarios concurrentes, CSV de 300 preguntas y evidencia de varios MiB, con consumo de CPU/RAM y tamaños; no representa mínimos ni capacidad garantizados.
+
+### Security
+
+- **Aceptación temporal y explícita de picomatch.** Solo GHSA-fc5q-39xc-vjpf, sin parche publicado y limitado a herramientas de desarrollo, se acepta hasta 2027-01-15 inclusive UTC. Producción mantiene auditoría sin excepciones; el control completo sigue bloqueando cualquier otro aviso alto o crítico y las excepciones vencidas.
 
 ## 0.10.0 — 2026-11-16
 
