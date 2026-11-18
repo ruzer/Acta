@@ -68,6 +68,7 @@ export function OrganizationShell({
     <>
       <p className="ac-account-name">{displayName}</p>
       <nav aria-label="Cuenta">
+        <Link to="/">Mis proyectos</Link>
         <Link to="/password">Mi contraseña</Link>
       </nav>
       <Button tone="tertiary" onClick={onLogout}>

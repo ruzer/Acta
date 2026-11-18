@@ -20,6 +20,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Un solo nombre para importar.** Los enlaces, la ruta de navegación y la guía de Administración dicen «Importar cuestionario», igual que la pantalla a la que llevan.
 
+- **Acceso sin callejones.** Cerrar sesión o cambiar de cuenta lleva al inicio; los permisos denegados y el menú móvil ofrecen volver a Mis proyectos. El acceso y el cambio de contraseña permiten mostrarla; tras cambiarla, solo se conserva el usuario en memoria para volver a entrar.
+
 ### Security
 
 - **Auditoría completa sin excepciones.** Se retira la excepción temporal de picomatch porque GitHub retiró GHSA-fc5q-39xc-vjpf el 2026-11-18T15:38:56Z; CI vuelve a exigir `npm audit --audit-level=high` sin excepciones. La comprobación del 2026-11-18 devuelve cero vulnerabilidades.

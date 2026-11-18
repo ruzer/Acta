@@ -12,6 +12,7 @@ import {
   Route,
   Routes,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
 import {
   useQuery,
@@ -147,9 +148,11 @@ export function RouteFocus() {
  */
 function SignedOut({
   notice,
+  username,
   onLogin,
 }: {
   notice: string;
+  username: string;
   onLogin: (me: Me) => void;
 }) {
   const setup = useQuery({
@@ -163,6 +166,7 @@ function SignedOut({
     return <Setup onFinished={() => setFinished(true)} />;
   return (
     <Login
+      username={username}
       notice={
         finished
           ? "La instalación quedó configurada. Inicia sesión con la cuenta de administración que creaste."
@@ -174,6 +178,8 @@ function SignedOut({
 }
 function Session() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [loginUsername, setLoginUsername] = useState("");
   const [me, setMe] = useState<Me | null>(null);
   const [loading, setLoading] = useState(true);
   const [expired, setExpired] = useState(false);
@@ -233,7 +239,9 @@ function Session() {
     )
       proceed();
   }
-  function signedOut(message: string) {
+  function signedOut(message: string, username = "") {
+    setLoginUsername(username);
+    navigate("/", { replace: true });
     setExpired(false);
     setMe(null);
     setCsrf("");
@@ -245,9 +253,12 @@ function Session() {
     return (
       <SignedOut
         notice={notice}
+        username={loginUsername}
         onLogin={(m) => {
           client.clear();
+          navigate("/", { replace: true });
           setMe(m);
+          setLoginUsername("");
           setNotice("");
         }}
       />
@@ -295,6 +306,7 @@ function Session() {
             onDone={() =>
               signedOut(
                 "Contraseña actualizada. Inicia sesión con tu nueva contraseña.",
+                me.user.username,
               )
             }
           />
@@ -354,6 +366,7 @@ function Session() {
                   onDone={() =>
                     signedOut(
                       "Contraseña actualizada. Inicia sesión con tu nueva contraseña.",
+                      me.user.username,
                     )
                   }
                 />
@@ -485,7 +498,10 @@ function Session() {
             compact
             notice="Tu sesión terminó. Tus cambios siguen en esta pestaña. Inicia sesión para continuar."
             onLogin={(m) => {
-              if (m.user.id !== me.user.id) client.clear();
+              if (m.user.id !== me.user.id) {
+                client.clear();
+                navigate("/", { replace: true });
+              }
               setMe(m);
               setExpired(false);
             }}
