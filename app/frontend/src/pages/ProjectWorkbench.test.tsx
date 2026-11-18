@@ -76,8 +76,11 @@ it.each(["ADMIN", "ANALYST"] as const)(
     );
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(screen.getByText("Contenido del proyecto.")).toBeVisible();
+    await user.click(screen.getByText("Más herramientas"));
+    expect(
+      screen.getByRole("link", { name: "Importar cuestionario" }),
+    ).toHaveAttribute("href", "/projects/project-a/import");
     if (role === "ADMIN") {
-      await user.click(screen.getByText("Más herramientas"));
       expect(screen.getByRole("link", { name: "Miembros" })).toHaveAttribute(
         "href",
         "/projects/project-a/members",
@@ -118,7 +121,7 @@ it("VIEWER conserva consulta y exportación sin acceso al workbench de analistas
     "Decisiones",
     "Invitaciones",
     "Miembros",
-    "Importar estructura",
+    "Importar cuestionario",
     "Trazabilidad",
     "Bitácora",
   ])

@@ -18,6 +18,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Atención según el acceso y el estado del proyecto.** La administración conoce qué puede preparar y consultar; un proyecto archivado indica que solo permite consulta, también al equipo analista.
 
+- **Un solo nombre para importar.** Los enlaces, la ruta de navegación y la guía de Administración dicen «Importar cuestionario», igual que la pantalla a la que llevan.
+
 ## 0.11.0 — 2026-11-17
 
 Correcciones de Administración y cookie de sesión neutral de los PR

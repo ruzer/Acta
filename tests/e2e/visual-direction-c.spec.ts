@@ -13,7 +13,8 @@ const widths = [
   [320, 640],
 ] as const;
 const output =
-  process.env.ACTA_DIRECTION_C_EVIDENCE_DIR ?? "test-results/design-evidence";
+  process.env.ACTA_DIRECTION_C_EVIDENCE_DIR ??
+  "test-results/design-evidence";
 const records: unknown[] = [];
 
 test.describe("Direction C · foundation", () => {
@@ -548,7 +549,7 @@ test.describe("Direction C · shell and attention", () => {
         await expect(
           page.getByText("Te toca a ti", { exact: true }),
         ).toHaveCount(0);
-        for (const name of ["Invitaciones", "Miembros", "Importar estructura"])
+        for (const name of ["Invitaciones", "Miembros", "Importar cuestionario"])
           await expect(
             page.getByRole("link", { name, exact: true }),
           ).toHaveCount(0);

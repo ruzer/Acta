@@ -40,7 +40,7 @@ export function ProjectShell({
     {
       review: "Revisión",
       members: "Miembros",
-      import: "Importar estructura",
+      import: "Importar cuestionario",
       export: "Exportar",
       report: "Informe",
       traceability: "Trazabilidad",

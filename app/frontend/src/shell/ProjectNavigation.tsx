@@ -104,7 +104,7 @@ export function ProjectToolsMenu({
         {canManage && (
           <>
             <Link to={`${path}/traceability`}>Trazabilidad</Link>
-            <Link to={`${path}/import`}>Importar estructura</Link>
+            <Link to={`${path}/import`}>Importar cuestionario</Link>
             <Link to={`${path}/history`}>Bitácora</Link>
           </>
         )}
