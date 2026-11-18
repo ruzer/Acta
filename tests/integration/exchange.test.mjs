@@ -1433,3 +1433,112 @@ test("Fecha límite es opcional, respeta la zona horaria y mantiene los contrato
     else process.env.DEFAULT_TIMEZONE = previous;
   }
 });
+
+test("plantilla reutilizable conserva estructura y reglas sin respuestas ni personas; respeta roles y vista previa oficial", async () => {
+  const source = await emptyProject(`REUSE-SOURCE-${randomUUID()}`);
+  const input = JSON.parse(
+    await readFile(
+      new URL(
+        "../../examples/questionnaire-template.full.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  );
+  input.project.externalId = source.externalId;
+  const preview = await importFile(source, input);
+  assert.deepEqual(preview.data.errors, []);
+  assert.equal(
+    (await importFile(source, input, confirmation(preview.data))).status,
+    201,
+  );
+  const downloaded = await req(
+    `/projects/${source.id}/questionnaire-template?format=csv`,
+    { session: analyst },
+  );
+  assert.equal(downloaded.status, 200);
+  assert.match(downloaded.headers.get("content-type"), /application\/json/);
+  const data = downloaded.data;
+  assert.equal(data.kind, "questionnaire-template");
+  for (const key of [
+    "sections",
+    "questions",
+    "conditions",
+    "traceabilityReferences",
+  ])
+    assert.equal(data[key].length, input[key].length);
+  assert.equal(
+    data.questions.reduce((n, q) => n + q.options.length, 0),
+    input.questions.reduce((n, q) => n + q.options.length, 0),
+  );
+  assert.deepEqual(data.conditions, input.conditions);
+  assert.ok(
+    data.questions.every(
+      (q) =>
+        !Object.hasOwn(q, "id") &&
+        !Object.hasOwn(q, "assignments") &&
+        !Object.hasOwn(q, "responses") &&
+        !Object.hasOwn(q, "evidence") &&
+        !Object.hasOwn(q, "publication"),
+    ),
+  );
+  const fromAnswered = await req(
+    `/projects/${project.id}/questionnaire-template?format=json`,
+    { session: admin },
+  );
+  assert.equal(fromAnswered.status, 200);
+  assert.equal(
+    JSON.stringify(fromAnswered.data).includes("Decisión ficticia documentada"),
+    false,
+  );
+  for (const session of [stakeholder, viewer])
+    assert.equal(
+      (
+        await req(
+          `/projects/${project.id}/questionnaire-template?format=json`,
+          { session },
+        )
+      ).status,
+      403,
+    );
+  assert.equal(
+    (
+      await req(`/projects/${source.id}/questionnaire-template`, {
+        session: other,
+      })
+    ).status,
+    404,
+  );
+  assert.equal(
+    (
+      await req(`/projects/${source.id}/questionnaire-template?format=xml`, {
+        session: admin,
+      })
+    ).status,
+    400,
+  );
+  const target = await emptyProject(`REUSE-TARGET-${randomUUID()}`);
+  data.project = {
+    externalId: target.externalId,
+    name: target.name,
+    description: target.description,
+  };
+  const check = await importFile(target, data);
+  assert.deepEqual(check.data.errors, []);
+  assert.equal(check.data.counts.questions, input.questions.length);
+  const confirm = await importFile(target, data, confirmation(check.data));
+  assert.equal(confirm.status, 201);
+  assert.equal(confirm.data.counts.conditions, input.conditions.length);
+  const imported = await ok(`/projects/${target.id}/questionnaire`);
+  assert.ok(
+    imported.questions.every(
+      (q) => q.publication === "DRAFT" && q.assignments.length === 0,
+    ),
+  );
+  const again = await importFile(target, data);
+  assert.ok(
+    again.data.errors.some((e) =>
+      e.message.includes("proyecto ya contiene estructura"),
+    ),
+  );
+});

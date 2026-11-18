@@ -251,3 +251,11 @@ Un JSON de **exportación** no es una plantilla importable ni un backup completo
 El [contrato técnico](IMPORT-FORMAT.md) describe campos y límites. La autoridad ejecutable es `templateInput` junto con el parser estricto, las reglas de preguntas y la validación contextual del backend. No hay un JSON Schema independiente autoritativo: generar solo la forma Zod no comprobaría relaciones, ciclos, configuración según tipo ni permisos. La vista previa de Acta sigue siendo necesaria.
 
 Los ejemplos se prueban automáticamente con el validador de producción y con preview/confirmación HTTP sobre PostgreSQL de test. [Alcance de la importación CSV](SIMPLE-IMPORT-PROPOSAL.md): subconjunto implementado; las estructuras avanzadas utilizan JSON.
+
+## Reutilizar un cuestionario de Acta
+
+En un proyecto vacío, abre **Importar cuestionario → Usar el cuestionario de otro proyecto**. Elige **Proyecto de origen** y pulsa **Revisar este cuestionario**. Solo aparecen proyectos donde tienes acceso de administración o análisis. La vista previa conserva el nombre y el identificador del destino. Revisa cantidades y áreas antes de **Confirmar importación**; las reglas y permisos son los mismos que al subir un archivo.
+
+Desde **Exportar**, o desde Importar cuando ya existe estructura, pulsa **Descargar este cuestionario como plantilla**. Incluye temas, preguntas (también archivadas), opciones, condiciones, referencias y configuración actual. No lleva respuestas, decisiones, evidencias, personas, asignaciones ni historial. En el destino todas las preguntas se crean como borradores.
+
+La descarga elige CSV con BOM y encabezados en español cuando las columnas sencillas representan los datos. Si hay opciones, condiciones, prioridades distintas de P2, referencias, temas vacíos o texto que el lector CSV transformaría, entrega JSON para conservarlos. Los códigos de pregunta se conservan; en CSV los códigos de tema y posiciones se reconstruyen del orden de filas, como en cualquier importación CSV. JSON conserva los códigos y posiciones originales. En archivos JSON descargados debes ajustar `project.externalId` al destino; **Usar el cuestionario de otro proyecto** lo prepara sin editar archivos. Un proyecto con estructura no admite otra importación.

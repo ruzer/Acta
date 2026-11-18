@@ -30,3 +30,9 @@ Exportar utiliza snapshot coherente, permite únicamente datos funcionales autor
 ## Verificación
 
 T07/T08/T11/T13/T14/T17/T18/T20, HTTP PostgreSQL real, E2E A–F, axe y todos los gates solicitados. Ningún PASS se declara antes de ejecutarlo.
+
+## Plantilla reutilizable (aditivo)
+
+`GET /projects/:id/questionnaire-template?format=csv|json`, predeterminado `csv`, requiere ADMIN/ANALYST del proyecto. STAKEHOLDER y VIEWER reciben 403; un proyecto no accesible, 404. No amplía permisos de administración institucional. La respuesta es un archivo con `Cache-Control: no-store`, nombre fijo seguro y tipo MIME explícito. `format=csv` puede entregar `application/json` cuando el CSV sencillo perdería datos: el cliente determina la extensión por el tipo de respuesta. `format=json` siempre usa `questionnaire-template` 1.0 existente.
+
+Solo selecciona estructura y metadatos de preguntas; no consulta respuestas, usuarios ni evidencia. Reutiliza los límites y el parser oficial antes de entregar el archivo. La lectura consistente conserva condiciones, opciones, referencias y localizadores; una estructura que no puede importarse se rechaza con 400, los límites con 413. Importar desde otro proyecto usa este endpoint y luego los mismos `imports/preview` y `imports/confirm`; no existe un camino de escritura paralelo.

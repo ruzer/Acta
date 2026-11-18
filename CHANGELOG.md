@@ -22,6 +22,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Primeros pasos y ayuda por perfil:** el proyecto nuevo indica los pasos pendientes con datos reales; el menú de cuenta ofrece las guías de cada rol, verificadas contra las etiquetas de la interfaz.
 
+- **Cuestionarios reutilizables:** descarga la estructura sin respuestas ni personas como CSV sencillo o plantilla JSON completa, o úsala desde otro proyecto autorizado con la vista previa y confirmación habituales.
+
 ### Fixed
 
 - **Acceso al proyecto sin jerga.** La administración, el alta de cuentas y los mensajes de ayuda hablan de accesos al proyecto; dar acceso sigue siendo distinto de asignar preguntas.

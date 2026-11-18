@@ -40,7 +40,9 @@ test("Atención y Decisiones ofrecen entregables visibles y CSV en español", as
     .click();
   await page.getByLabel("Formato").selectOption("CSV");
   const download = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Descargar" }).click();
+  await page
+    .getByRole("button", { name: "Descargar exportación", exact: true })
+    .click();
   const bytes = await readFile((await (await download).path())!);
   expect([...bytes.subarray(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
   expect(bytes.toString("utf8")).toMatch(

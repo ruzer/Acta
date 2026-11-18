@@ -443,6 +443,7 @@ test("another organization sees nothing of this one, and this one nothing of it"
       `${secret.id}/decisions`,
       `${secret.id}/participation`,
       `${secret.id}/response-deadline`,
+      `${secret.id}/questionnaire-template`,
     ])
       assert.equal(
         (await request(`/projects/${path}`, { session: otherAdmin })).status,

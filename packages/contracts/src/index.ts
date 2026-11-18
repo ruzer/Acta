@@ -1983,3 +1983,7 @@ export const responseDeadlineInput = z.strictObject({
   responseDueDate: z.iso.date().nullable(),
   expectedVersion: z.number().int().nonnegative(),
 });
+
+export const questionnaireTemplateQuery = z.strictObject({
+  format: z.enum(["csv", "json"]).default("csv"),
+});
