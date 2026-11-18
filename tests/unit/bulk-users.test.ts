@@ -12,6 +12,14 @@ import {
 const header = "Usuario\tNombre\tProyecto\tRol\tÁrea\n";
 const row = "persona.demo\tPersona ficticia\tPROYECTO\tParticipante\tAREA";
 describe("tabla de usuarios", () => {
+  it("explica el límite de filas como accesos a proyectos", () => {
+    expect(parseBulkUsers(header).errors).toContainEqual({
+      row: 0,
+      column: "Fila",
+      message: "Pega entre 1 y 50 filas de accesos a proyectos.",
+    });
+  });
+
   it("normaliza usuario, admite roles legibles y no convierte códigos", () => {
     const p = parseBulkUsers(
       header + row.replace("persona.demo", "Persona.Demo"),

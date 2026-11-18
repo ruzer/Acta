@@ -98,7 +98,9 @@ it("muestra errores por fila vinculados a sus celdas e impide confirmar", async 
     "true",
   );
   expect(
-    screen.getByRole("button", { name: "Crear 1 cuentas y sus membresías" }),
+    screen.getByRole("button", {
+      name: "Crear 1 cuenta y 1 acceso al proyecto",
+    }),
   ).toBeDisabled();
   expect(
     screen.getByRole("heading", { name: "Revisar el lote" }),
@@ -122,7 +124,9 @@ it("entrega efímera sin caché ni almacenamiento e imprime solo por petición, 
   const { client, unmount } = setup();
   const user = await review();
   await user.click(
-    screen.getByRole("button", { name: "Crear 1 cuentas y sus membresías" }),
+    screen.getByRole("button", {
+      name: "Crear 1 cuenta y 1 acceso al proyecto",
+    }),
   );
   await screen.findByRole("heading", { name: "Entrega de acceso" });
   expect(print).not.toHaveBeenCalled();
@@ -153,11 +157,15 @@ it("reintento conserva requestId y el recibo no ofrece una nueva entrega", async
   setup();
   const user = await review();
   await user.click(
-    screen.getByRole("button", { name: "Crear 1 cuentas y sus membresías" }),
+    screen.getByRole("button", {
+      name: "Crear 1 cuenta y 1 acceso al proyecto",
+    }),
   );
   await screen.findByText("Sin conexión");
   await user.click(
-    screen.getByRole("button", { name: "Crear 1 cuentas y sus membresías" }),
+    screen.getByRole("button", {
+      name: "Crear 1 cuenta y 1 acceso al proyecto",
+    }),
   );
   await screen.findByRole("heading", { name: "Entrega de acceso" });
   const calls = vi
@@ -183,7 +191,9 @@ it.each(["pagehide", "session-expired"])(
     setup();
     const user = await review();
     await user.click(
-      screen.getByRole("button", { name: "Crear 1 cuentas y sus membresías" }),
+      screen.getByRole("button", {
+        name: "Crear 1 cuenta y 1 acceso al proyecto",
+      }),
     );
     act(() => {
       window.dispatchEvent(new Event(event));
@@ -234,7 +244,7 @@ it("la vista previa conserva 50 filas en una tabla y un solo nombre para Partici
   setup();
   await review();
   const table = screen.getByRole("table", {
-    name: "Usuarios y membresías por crear",
+    name: "50 cuentas y 50 accesos a proyectos por crear",
   });
   expect(within(table).getAllByRole("row")).toHaveLength(51);
   expect(
@@ -253,3 +263,73 @@ it("nombra al rol como Participante también en la vista previa", async () => {
     /^Participante$/,
   );
 });
+
+it.each([
+  [1, 1, "1 cuenta", "1 acceso al proyecto", "creará", "dará", "creó", "dio"],
+  [
+    3,
+    3,
+    "3 cuentas",
+    "3 accesos a proyectos",
+    "crearán",
+    "darán",
+    "crearon",
+    "dieron",
+  ],
+  [
+    1,
+    3,
+    "1 cuenta",
+    "3 accesos a proyectos",
+    "creará",
+    "darán",
+    "creó",
+    "dieron",
+  ],
+] as const)(
+  "nombra %i cuentas y %i accesos según su propio número",
+  async (
+    users,
+    memberships,
+    accountsText,
+    accessText,
+    futureAccounts,
+    futureAccess,
+    pastAccounts,
+    pastAccess,
+  ) => {
+    vi.mocked(api)
+      .mockResolvedValueOnce({ ...preview, users, memberships })
+      .mockResolvedValueOnce({
+        ...receipt,
+        delivery: "REPLAY",
+        memberships,
+        users: Array.from({ length: users }, (_, i) => ({
+          ...receipt.users[0]!,
+          id: crypto.randomUUID(),
+          username: `persona${i}`,
+        })),
+      });
+    setup();
+    const user = await review();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      `Se ${futureAccounts} ${accountsText} y se ${futureAccess} ${accessText}.`,
+    );
+    expect(
+      screen.getByRole("table", {
+        name: `${accountsText} y ${accessText} por crear`,
+      }),
+    ).toBeVisible();
+    await user.click(
+      screen.getByRole("button", {
+        name: `Crear ${accountsText} y ${accessText}`,
+      }),
+    );
+    await screen.findByRole("heading", { name: "Entrega de acceso" });
+    expect(
+      screen.getByText(
+        `Se ${pastAccounts} ${accountsText} y se ${pastAccess} ${accessText}.`,
+      ),
+    ).toHaveAttribute("role", "status");
+  },
+);

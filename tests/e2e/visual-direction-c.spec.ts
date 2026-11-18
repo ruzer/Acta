@@ -326,7 +326,7 @@ test.describe("Direction C · shell and attention", () => {
           await expect(action).toHaveCount(0);
           await expect(
             page.getByText(
-              /Consulta: las acciones corresponden al equipo analista/,
+              /Puedes preparar el cuestionario y consultar las decisiones\. Revisar respuestas y registrar decisiones corresponde al equipo analista\./,
             ),
           ).toBeVisible();
         }
@@ -549,7 +549,7 @@ test.describe("Direction C · shell and attention", () => {
         await expect(
           page.getByText("Te toca a ti", { exact: true }),
         ).toHaveCount(0);
-        for (const name of ["Invitaciones", "Miembros", "Importar estructura"])
+        for (const name of ["Invitaciones", "Miembros", "Importar cuestionario"])
           await expect(
             page.getByRole("link", { name, exact: true }),
           ).toHaveCount(0);

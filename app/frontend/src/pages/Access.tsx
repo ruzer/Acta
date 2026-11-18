@@ -223,7 +223,7 @@ export function Projects({
               cuestionario.
             </>
           ) : (
-            "La administración debe asignarte una membresía para comenzar."
+            "La administración debe darte acceso al proyecto para comenzar."
           )}
         </EmptyState>
       ) : (

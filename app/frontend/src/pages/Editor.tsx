@@ -302,7 +302,7 @@ export function Editor() {
             className="button secondary"
             to={`/projects/${projectId}/import`}
           >
-            Importar estructura
+            Importar cuestionario
           </Link>
         </p>
       )}

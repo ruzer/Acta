@@ -10,6 +10,16 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Kit de piloto con personas.** Plan ajustable, guion de observación, guías breves de Administración, Participante y Revisión, y plantillas para medir resultados y decidir continuar, ajustar o detener; no sustituye una validación con personas ni certifica producción.
 
+### Fixed
+
+- **Acceso al proyecto sin jerga.** La administración, el alta de cuentas y los mensajes de ayuda hablan de accesos al proyecto; dar acceso sigue siendo distinto de asignar preguntas.
+
+- **Conteos claros al crear cuentas.** La vista previa, la tabla, el botón y la entrega distinguen una cuenta de varias y cuentan por separado los accesos a proyectos.
+
+- **Atención según el acceso y el estado del proyecto.** La administración conoce qué puede preparar y consultar; un proyecto archivado indica que solo permite consulta, también al equipo analista.
+
+- **Un solo nombre para importar.** Los enlaces, la ruta de navegación y la guía de Administración dicen «Importar cuestionario», igual que la pantalla a la que llevan.
+
 ## 0.11.0 — 2026-11-17
 
 Correcciones de Administración y cookie de sesión neutral de los PR

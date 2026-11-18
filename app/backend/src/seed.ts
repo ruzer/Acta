@@ -102,7 +102,7 @@ async function seed() {
         organizationId: org.id,
         externalId: "DEMO-SECUNDARIO",
         name: "Proyecto de ejemplo adicional",
-        description: "Permite comprobar membresías independientes.",
+        description: "Permite comprobar accesos independientes a proyectos.",
       },
       update: {},
     });
