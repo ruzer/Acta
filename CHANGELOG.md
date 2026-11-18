@@ -24,6 +24,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Cuestionarios reutilizables:** descarga la estructura sin respuestas ni personas como CSV sencillo o plantilla JSON completa, o úsala desde otro proyecto autorizado con la vista previa y confirmación habituales.
 
+- **Comprobación de los pendientes menores.** Se conserva el respaldo de nombres ausentes en exportes históricos y se fija una prueba de la columna «Área» en Miembros; ambos comportamientos ya estaban presentes en la base.
+
 ### Fixed
 
 - **Acceso al proyecto sin jerga.** La administración, el alta de cuentas y los mensajes de ayuda hablan de accesos al proyecto; dar acceso sigue siendo distinto de asignar preguntas.
