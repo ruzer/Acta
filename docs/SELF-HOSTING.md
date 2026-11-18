@@ -14,6 +14,8 @@ Despliegue de un solo host con PostgreSQL y VersityGW, sin alta disponibilidad. 
 
 ## Antes de instalar
 
+Si la instalación se usará para evaluar el producto, sigue el [kit de piloto con personas](pilot/README.md). Separa la preparación técnica de la sesión observada y verifica un respaldo antes de empezar. Las guías de uso no sustituyen la aceptación de la infraestructura.
+
 Docker, Docker Compose **2.24.4+**, conexión para descargar dependencias/imágenes y disco persistente. No necesitas Node, Go ni PostgreSQL en el host.
 
 **Sin mínimos garantizados.** Hay [mediciones de referencia](RESOURCE-REFERENCE.md) de CPU, RAM, imágenes y volúmenes con cinco usuarios ficticios concurrentes, importación CSV y evidencia de varios MiB. Son una ejecución breve ARM64, no capacidad garantizada. Dimensiona según carga, evidencia, retención y backups, y mide en tu entorno antes de comprometer capacidad. El tamaño máximo por archivo y otros límites están en [Configuración](CONFIGURATION.md); no equivalen a requisitos mínimos del servidor.
