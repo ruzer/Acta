@@ -1,13 +1,15 @@
+import { plural } from "../ui/plural";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import {
   participationStates,
   participationView,
+  responseDueLabel,
   type ParticipationView,
 } from "@requirements/contracts";
 import { exchangeRequest } from "../api";
-import { formatDate } from "../branding";
+import { formatDate, useBranding } from "../branding";
 import {
   Button,
   DataTable,
@@ -23,9 +25,13 @@ export const participationQuery = (projectId: string) => ({
   queryFn: () => exchangeRequest(projectId, "participation", participationView),
   staleTime: 0,
 });
-export function participationReminder(data: ParticipationView, origin: string) {
+export function participationReminder(
+  data: ParticipationView,
+  origin: string,
+  timezone = "UTC",
+) {
   const pending = data.participants.filter((person) => person.pending > 0);
-  return `Hola. Te recordamos las respuestas pendientes del proyecto «${data.projectName}»:\n${pending.map((person) => `• ${person.name}: ${person.pending} ${person.pending === 1 ? "pregunta obligatoria pendiente" : "preguntas obligatorias pendientes"}.`).join("\n")}\nEntra a ${origin} y abre Mi trabajo. Si necesitas ayuda, avisa a quien coordina el proyecto. Gracias.`;
+  return `Hola. Te recordamos las respuestas pendientes del proyecto «${data.projectName}»:\n${pending.map((person) => `• ${person.name}: ${person.pending} ${person.pending === 1 ? "pregunta obligatoria pendiente" : "preguntas obligatorias pendientes"}.`).join("\n")}${data.responseDueAt ? `\n${responseDueLabel(data.responseDueAt, timezone)}.` : ""}\nEntra a ${origin} y abre Mi trabajo. Si necesitas ayuda, avisa a quien coordina el proyecto. Gracias.`;
 }
 export function ParticipationCard({ projectId }: { projectId: string }) {
   const query = useQuery(participationQuery(projectId));
@@ -38,7 +44,8 @@ export function ParticipationCard({ projectId }: { projectId: string }) {
         <ErrorState error={query.error} retry={() => void query.refetch()} />
       ) : (
         <p>
-          {query.data.participants.length} personas con acceso activo ·{" "}
+          {plural(query.data.participants.length, "persona")} con acceso activo
+          ·{" "}
           {query.data.participants.filter((p) => p.state === "Completo").length}{" "}
           completaron sus preguntas obligatorias.
         </p>
@@ -53,6 +60,7 @@ export function ParticipationCard({ projectId }: { projectId: string }) {
   );
 }
 export function Participation() {
+  const { timezone } = useBranding();
   const { projectId = "" } = useParams();
   const query = useQuery(participationQuery(projectId));
   const [state, setState] = useState("");
@@ -86,7 +94,7 @@ export function Participation() {
       return result || a.name.localeCompare(b.name, "es-MX");
     });
   async function remind() {
-    const text = participationReminder(data, window.location.origin);
+    const text = participationReminder(data, window.location.origin, timezone);
     setFallback("");
     try {
       await navigator.clipboard.writeText(text);
@@ -103,6 +111,18 @@ export function Participation() {
   return (
     <>
       <PageHeader title="Participación" lead={data.projectName} />
+      {data.responseDueAt && (
+        <p>
+          {responseDueLabel(data.responseDueAt, timezone)} ·{" "}
+          {plural(
+            new Date(data.responseDueAt).getTime() < Date.now()
+              ? data.participants.filter((p) => p.pending > 0).length
+              : 0,
+            "persona",
+          )}{" "}
+          con plazo vencido y pendientes.
+        </p>
+      )}
       <p>
         <Link to={`/projects/${projectId}/dashboard`}>Volver a Atención</Link>
       </p>

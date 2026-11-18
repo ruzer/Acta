@@ -47,3 +47,9 @@ Todo acceso al contenido de un proyecto exige **acceso activo** a él; la admini
 En **Atención → Ver participación**, la administración y el equipo analista del proyecto ven quién empezó, quién guarda borradores y quién envió sus respuestas. **Filtrar participación** y **Ordenar participación** ayudan a encontrar pendientes. «Completo» no significa revisado: solo que ya se enviaron las preguntas obligatorias que aplican a esa persona. Si solo tiene preguntas opcionales, debe enviarlas todas para aparecer como completo.
 
 **Copiar recordatorio** prepara un texto con las personas y sus preguntas obligatorias pendientes. Pégalo tú en el medio acordado con el equipo. Acta no envía mensajes ni incluye respuestas o contraseñas. Si el dispositivo no permite copiar, ofrece el texto seleccionable. Un participante o lector no puede abrir este seguimiento; administrar la institución tampoco otorga acceso automático.
+
+## Fecha límite para responder
+
+Al **Crear proyecto**, **Fecha límite para responder (opcional)** puede dejarse vacía. Para cambiarla después, abre **Administración → Proyectos → Fecha límite** en la fila del proyecto y pulsa **Guardar fecha límite**. Borrar el valor quita el plazo. Se guarda hasta el final del día en la zona horaria de la instalación, también si ese día cambia el horario.
+
+Mi trabajo y Atención muestran si falta tiempo, vence hoy o ya venció. Participación cuenta las personas con plazo vencido y preguntas obligatorias pendientes. La fecha solo orienta: **no cierra el proyecto ni impide guardar o enviar**. Cambiarla requiere administración de la institución; la consulta mantiene los accesos del proyecto. Administración institucional puede consultar este dato general sin obtener respuestas ni evidencia.

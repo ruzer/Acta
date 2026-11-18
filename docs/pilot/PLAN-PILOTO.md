@@ -38,7 +38,7 @@ personas por sí sola.
 - [ ] Responsable del piloto, personas, fechas y criterios acordados por escrito.
 - [ ] Instalación separada para el piloto; dirección de acceso probada desde los equipos previstos.
 - [ ] Equipo técnico confirma respaldo previo verificado y cómo recuperar la instalación; registra fecha y responsable, nunca claves.
-- [ ] Proyecto vacío creado; nombre y códigos de proyecto y áreas acordados.
+- [ ] Proyecto vacío creado; nombre y códigos de proyecto y áreas acordados. Fecha límite opcional acordada: solo orienta y no bloquea envíos.
 - [ ] Cuentas creadas con **Crear varios usuarios**; roles y acceso al proyecto revisados. Contraseñas entregadas individualmente.
 - [ ] Cuestionario cargado desde la [plantilla CSV](../../examples/questionnaire-template.csv), revisado y confirmado. No importar de nuevo sobre un proyecto con preguntas.
 - [ ] Áreas, participantes asignados y preguntas autorizadas para publicar comprobados. El resto permanece en borrador.

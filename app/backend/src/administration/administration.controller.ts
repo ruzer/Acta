@@ -16,6 +16,7 @@ import {
   createUserInput,
   memberInput,
   projectInput,
+  responseDeadlineInput,
   resetPasswordInput,
   userStateInput,
 } from "@requirements/contracts";
@@ -86,6 +87,20 @@ export class AdministrationController {
     @Body(new SchemaPipe(areaUpdateInput)) d: z.infer<typeof areaUpdateInput>,
   ) {
     return this.service.updateArea(r, id, d);
+  }
+  @Get("projects/:id/response-deadline") responseDeadline(
+    @Req() r: ActorRequest,
+    @Param("id", ParseUUIDPipe) id: string,
+  ) {
+    return this.service.responseDeadline(r.actor, id);
+  }
+  @Post("projects/:id/response-deadline") setResponseDeadline(
+    @Req() r: ActorRequest,
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body(new SchemaPipe(responseDeadlineInput))
+    d: z.infer<typeof responseDeadlineInput>,
+  ) {
+    return this.service.setResponseDeadline(r, id, d);
   }
   @Get("projects") projects(@Req() r: ActorRequest) {
     return this.service.projects(r.actor);

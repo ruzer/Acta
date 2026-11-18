@@ -1,3 +1,4 @@
+import { ResponseDeadline } from "./ResponseDeadline";
 import { ParticipationCard } from "./Participation";
 import { ProjectAttention } from "./ProjectAttention";
 import { ProjectWorkbench, ProjectDeliverables } from "./ProjectWorkbench";
@@ -104,6 +105,7 @@ export function Dashboard() {
       {data.questions.some((question) => question.status === "VALIDATED") && (
         <p>Ya puedes imprimir el informe</p>
       )}
+      <ResponseDeadline projectId={projectId} />
       <ParticipationCard projectId={projectId} />
       <ProjectAttention
         projectId={projectId}

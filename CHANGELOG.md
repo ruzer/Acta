@@ -18,6 +18,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Seguimiento de participación.** Administración y análisis del proyecto consultan conteos por persona, filtran su avance y copian un recordatorio sin respuestas ni claves. Atención enlaza al seguimiento y explica qué hacer cuando aún no hay envíos; los permisos y la vigencia de las respuestas siguen siendo autoridad del servidor.
 
+- **Fecha límite informativa.** Administración puede fijar o quitar una fecha al crear o editar el plazo del proyecto. Se guarda al final del día en la zona horaria de la instalación y se muestra en Atención, Mi trabajo y Participación, sin bloquear envíos. Una sola migración agrega una columna vacía a los proyectos existentes.
+
 ### Fixed
 
 - **Acceso al proyecto sin jerga.** La administración, el alta de cuentas y los mensajes de ayuda hablan de accesos al proyecto; dar acceso sigue siendo distinto de asignar preguntas.

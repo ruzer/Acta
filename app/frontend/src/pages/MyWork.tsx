@@ -1,3 +1,4 @@
+import { ResponseDeadline } from "./ResponseDeadline";
 import { useState } from "react";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
@@ -219,6 +220,7 @@ export function MyWork() {
       <div>
         <h1>Mi trabajo</h1>
         <p className="participant-subtitle">{q.data.projectName}</p>
+        <ResponseDeadline projectId={projectId} />
       </div>
       <Welcome
         refreshing={q.isFetching}

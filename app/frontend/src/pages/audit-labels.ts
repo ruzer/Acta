@@ -1,5 +1,6 @@
 /** Plain-language names for what the audit log records; the raw code stays visible beside them. */
 export const auditActions: Record<string, string> = {
+  PROJECT_DEADLINE_CHANGED: "Cambió la fecha límite del proyecto",
   AREA_CREATED: "Área creada",
   AREA_UPDATED: "Área actualizada",
   BRANDING_ASSET_CHANGED: "Imagen de la institución cambiada",

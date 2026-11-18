@@ -1339,3 +1339,97 @@ test("Participación agrupa 300 preguntas por 50 personas y excluye accesos inac
   });
   assert.equal(active.data.participants.length, 48);
 });
+
+test("Fecha límite es opcional, respeta la zona horaria y mantiene los contratos anteriores", async () => {
+  const previous = process.env.DEFAULT_TIMEZONE;
+  try {
+    for (const [timezone, expected] of [
+      ["UTC", "2026-11-25T23:59:59.999Z"],
+      ["America/Mexico_City", "2026-11-26T05:59:59.999Z"],
+    ]) {
+      process.env.DEFAULT_TIMEZONE = timezone;
+      const p = await ok("/projects", {
+        session: admin,
+        method: "POST",
+        body: {
+          externalId: `DUE-${randomUUID()}`,
+          name: "Proyecto ficticio con plazo",
+          responseDueDate: "2026-11-25",
+        },
+      });
+      assert.equal(
+        "responseDueAt" in p,
+        false,
+        "La respuesta existente conserva su contrato estricto",
+      );
+      const deadline = await ok(`/projects/${p.id}/response-deadline`, {
+        session: admin,
+      });
+      assert.equal(deadline.responseDueAt, expected);
+      const changed = await ok(`/projects/${p.id}/response-deadline`, {
+        session: admin,
+        method: "POST",
+        body: {
+          responseDueDate: "2020-01-01",
+          expectedVersion: deadline.lockVersion,
+        },
+      });
+      assert.ok(new Date(changed.responseDueAt).getTime() < Date.now());
+      const stale = await req(`/projects/${p.id}/response-deadline`, {
+        session: admin,
+        method: "POST",
+        body: { responseDueDate: null, expectedVersion: deadline.lockVersion },
+      });
+      assert.equal(stale.status, 409);
+      const cleared = await ok(`/projects/${p.id}/response-deadline`, {
+        session: admin,
+        method: "POST",
+        body: { responseDueDate: null, expectedVersion: changed.lockVersion },
+      });
+      assert.equal(cleared.responseDueAt, null);
+      assert.equal(
+        (await db.project.findUniqueOrThrow({ where: { id: p.id } })).lifecycle,
+        "ACTIVE",
+      );
+    }
+    const blank = await emptyProject(`NO-DUE-${randomUUID()}`);
+    assert.equal(
+      (await ok(`/projects/${blank.id}/response-deadline`, { session: admin }))
+        .responseDueAt,
+      null,
+    );
+    for (const session of [analyst, stakeholder, viewer]) {
+      assert.equal(
+        (await req(`/projects/${project.id}/response-deadline`, { session }))
+          .status,
+        200,
+      );
+      assert.equal(
+        (
+          await req(`/projects/${project.id}/response-deadline`, {
+            session,
+            method: "POST",
+            body: { responseDueDate: null, expectedVersion: 0 },
+          })
+        ).status,
+        403,
+      );
+    }
+    const noCsrf = await fetch(
+      origin + `/api/v1/projects/${project.id}/response-deadline`,
+      {
+        method: "POST",
+        headers: {
+          Origin: origin,
+          Cookie: admin.cookie,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ responseDueDate: null, expectedVersion: 0 }),
+      },
+    );
+    assert.equal(noCsrf.status, 403);
+  } finally {
+    if (previous === undefined) delete process.env.DEFAULT_TIMEZONE;
+    else process.env.DEFAULT_TIMEZONE = previous;
+  }
+});

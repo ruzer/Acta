@@ -90,6 +90,7 @@ export class VisibilityService {
           projectName: project.name,
           role: member.role,
           participants: await readParticipation(tx, p),
+          responseDueAt: project.responseDueAt?.toISOString() ?? null,
         });
       },
       { isolationLevel: "RepeatableRead", timeout: 15000 },

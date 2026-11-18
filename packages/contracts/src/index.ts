@@ -1,3 +1,8 @@
+export {
+  endOfResponseDay,
+  responseCalendarDate,
+  responseDueLabel,
+} from "./deadline.js";
 import { z } from "zod";
 import {
   assetCommandView,
@@ -200,6 +205,7 @@ export const areaUpdateInput = z
     message: "Indica el nombre o el estado del área.",
   });
 export const projectInput = z.strictObject({
+  responseDueDate: z.iso.date().nullable().optional(),
   externalId,
   name,
   description: short.default(""),
@@ -1961,9 +1967,19 @@ export const participationPerson = z.strictObject({
   state: z.enum(participationStates),
 });
 export const participationView = z.strictObject({
+  responseDueAt: z.iso.datetime().nullable().optional(),
   projectName: z.string(),
   role: z.enum(["ADMIN", "ANALYST"]),
   participants: z.array(participationPerson),
 });
 export type ParticipationPerson = z.infer<typeof participationPerson>;
 export type ParticipationView = z.infer<typeof participationView>;
+
+export const responseDeadlineView = z.strictObject({
+  responseDueAt: z.iso.datetime().nullable(),
+  lockVersion: z.number().int().nonnegative(),
+});
+export const responseDeadlineInput = z.strictObject({
+  responseDueDate: z.iso.date().nullable(),
+  expectedVersion: z.number().int().nonnegative(),
+});

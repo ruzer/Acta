@@ -207,6 +207,7 @@ model Area {
 }
 
 model Project {
+  responseDueAt                    DateTime?                  @db.Timestamptz(3)
   allowNonNominalInvitations       Boolean                    @default(false)
   invitations                      ResponseInvitation[]
   id                               String                     @id @default(uuid()) @db.Uuid

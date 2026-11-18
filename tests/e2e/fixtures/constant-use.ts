@@ -1,12 +1,12 @@
 import { randomUUID } from "node:crypto";
 import type { Page } from "@playwright/test";
-import type { QuestionView } from "@requirements/contracts";
+import type { QuestionView, ProjectView } from "@requirements/contracts";
 import { command } from "./workbench";
 
 /** Proyecto ficticio separado: no cambia el cuestionario compartido de la demo. */
 export async function draftProject(admin: Page) {
   const suffix = randomUUID();
-  const project = await command<{ id: string }>(admin, "/projects", {
+  const project = await command<ProjectView>(admin, "/projects", {
     externalId: `CONSTANT-${suffix}`,
     name: "Seguimiento ficticio",
     description: "Prueba aislada de uso constante",
