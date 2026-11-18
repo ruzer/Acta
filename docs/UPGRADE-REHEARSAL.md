@@ -14,15 +14,17 @@ encendido: la expiración normal de una sesión no se desactiva para el ensayo.
 
 Desde un clon de Acta, elige tres directorios nuevos, dos nombres Compose exclusivos
 que empiecen por `acta-upgrade-` y dos puertos libres. Ejemplo, sustituyendo los
-nombres si ya existen:
+nombres si ya existen. `ref` fija la versión candidata: cambia su valor por el
+tag o la rama que quieras evaluar; la base del ensayo sigue siendo v0.10.0:
 
 ```sh
 umask 077
 lab=$(mktemp -d /tmp/acta-upgrade.XXXXXX)
 chmod 700 "$lab"
+ref=v0.11.0
 git worktree add --detach "$lab/base" v0.10.0
-git worktree add --detach "$lab/candidate" chore/estable-v0.11.0
-git worktree add --detach "$lab/restore" chore/estable-v0.11.0
+git worktree add --detach "$lab/candidate" "$ref"
+git worktree add --detach "$lab/restore" "$ref"
 cp "$lab/base/.env.example" "$lab/source.env"
 cp "$lab/candidate/.env.example" "$lab/restore.env"
 ```

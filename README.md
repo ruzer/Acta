@@ -107,6 +107,8 @@ Prepara un proyecto vacío y carga tus temas y preguntas desde una [plantilla CS
 
 ## Self-hosting
 
+Para evaluar el uso con personas no técnicas, prepara un [piloto de 5 a 8 personas](docs/pilot/README.md): guías breves, observación sin dirigir, métricas y una decisión de cierre. El piloto con personas es una validación pendiente; el kit no declara el producto validado.
+
 El despliegue incluido usa **frontend + backend + PostgreSQL + VersityGW**, con trabajos de inicialización y migraciones.
 
 - **PostgreSQL** guarda usuarios, proyectos, respuestas, decisiones y referencias a archivos.
