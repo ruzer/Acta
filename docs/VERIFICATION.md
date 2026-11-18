@@ -25,32 +25,27 @@ virtualización institucional concreta, rendimiento, capacidad mínima, alta
 disponibilidad ni proveedores S3 distintos. ARM64 local y x86_64 en CI son
 ensayos separados, no una certificación de todas las plataformas.
 
-## Dependencias: dos controles bloqueantes
+## Dependencias: auditoría completa sin excepciones
 
 ```sh
-npm audit --omit=dev --audit-level=high
-node scripts/audit-gate.mjs
+npm audit --audit-level=high
 ```
 
-El primero revisa producción sin excepciones. El segundo ejecuta `npm audit
---json` completo, reúne avisos distintos (incluidas sus dependencias transitivas)
-y bloquea cualquier aviso alto/crítico salvo la única excepción autorizada:
-[GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf), hasta
-2027-01-15 inclusive UTC. Imprime el aviso, motivo y caducidad; nunca presenta
-esa aceptación como «cero vulnerabilidades». Un JSON vacío/inválido, errores de
-npm o cadenas sin aviso original fallan. Un reporte válido con
-`vulnerabilities: {}` sí pasa mientras no haya una excepción vencida.
-
-El 2026-11-17: auditoría completa = un aviso de origen, 12 entradas high derivadas;
-auditoría de producción = 0; `npm ls picomatch --omit=dev` = árbol vacío.
-Picomatch 4.0.7 no se importa desde el código de Acta. Su presencia en disco en el
-backend, ausencia en nginx y falta de versión corregida están documentadas en
+El comando revisa todas las dependencias, incluidas las herramientas de
+desarrollo. Un aviso alto o crítico bloquea CI; no hay excepciones vigentes.
+La decisión ante un aviso sin parche se describe en
 [Seguridad](../SECURITY.md#control-de-dependencias-y-excepción-temporal).
 
-Al existir un parche compatible, actualizarlo y borrar la entrada de excepción
-y sus pruebas específicas; repetir ambos comandos. La prueba unitaria del gate
-cubre aceptación exacta, deduplicación, avisos nuevos high/critical, fecha límite,
-reportes válidos vacíos e inválidos. No se cambian nombres de jobs ni protecciones.
+**Evidencia histórica del 2026-11-17:** auditoría completa = un aviso de origen,
+12 entradas high derivadas; auditoría de producción = 0;
+`npm ls picomatch --omit=dev` = árbol vacío. En esa revisión, picomatch 4.0.7
+no se importaba desde Acta, estaba en disco en la imagen de backend y no en nginx,
+y no tenía una versión corregida publicada. Se aceptó temporalmente
+[GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf).
+GitHub retiró ese aviso el **2026-11-18T15:38:56Z**. Tras comprobar el retiro y
+obtener `found 0 vulnerabilities` tanto en la auditoría completa como en la de
+producción el 2026-11-18, se retira la excepción y su mecanismo específico.
+Estos resultados corresponden a esas fechas; la auditoría se repite en CI.
 
 ## Prueba de instalación limpia
 
