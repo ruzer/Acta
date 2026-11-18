@@ -7,6 +7,7 @@ import {
 } from "@requirements/contracts";
 import { api } from "../api";
 import { Alert, Button, DataTable, Dialog, Textarea } from "../ui";
+import { plural } from "../ui/plural";
 import "./bulk-users.css";
 
 const columns = ["Usuario", "Nombre", "Proyecto", "Rol", "Área"] as const;
@@ -122,8 +123,15 @@ export function BulkUsers({
               Entrega de acceso
             </h3>
             <p role="status">
-              Se crearon {delivery.users.length} cuentas y{" "}
-              {delivery.memberships} accesos a proyectos.
+              Se {delivery.users.length === 1 ? "creó" : "crearon"}{" "}
+              {plural(delivery.users.length, "cuenta")} y se{" "}
+              {delivery.memberships === 1 ? "dio" : "dieron"}{" "}
+              {plural(
+                delivery.memberships,
+                "acceso al proyecto",
+                "accesos a proyectos",
+              )}
+              .
             </p>
             {delivery.delivery === "NEW" ? (
               <>
@@ -280,9 +288,16 @@ export function BulkUsers({
                   </div>
                 ) : (
                   <p role="status">
-                    Se crearán {preview.users} cuentas y {preview.memberships}{" "}
-                    accesos a proyectos. Los usuarios se muestran en minúsculas.
-                    Ninguna cuenta será administradora de la institución.
+                    Se {preview.users === 1 ? "creará" : "crearán"}{" "}
+                    {plural(preview.users, "cuenta")} y se{" "}
+                    {preview.memberships === 1 ? "dará" : "darán"}{" "}
+                    {plural(
+                      preview.memberships,
+                      "acceso al proyecto",
+                      "accesos a proyectos",
+                    )}
+                    . Los usuarios se muestran en minúsculas. Ninguna cuenta
+                    será administradora de la institución.
                   </p>
                 )}
                 <div
@@ -292,7 +307,7 @@ export function BulkUsers({
                   aria-label="Filas del lote"
                 >
                   <DataTable
-                    caption="Cuentas y accesos a proyectos por crear"
+                    caption={`${plural(preview.users, "cuenta")} y ${plural(preview.memberships, "acceso al proyecto", "accesos a proyectos")} por crear`}
                     columns={[
                       { label: "Fila" },
                       ...columns.map((label) => ({ label })),
@@ -344,7 +359,12 @@ export function BulkUsers({
                   disabled={busy || !preview.canConfirm}
                   onClick={() => void confirm()}
                 >
-                  Crear {preview.users} cuentas y sus accesos a proyectos
+                  Crear {plural(preview.users, "cuenta")} y{" "}
+                  {plural(
+                    preview.memberships,
+                    "acceso al proyecto",
+                    "accesos a proyectos",
+                  )}
                 </Button>
               </section>
             )}

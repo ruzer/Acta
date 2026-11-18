@@ -89,7 +89,7 @@ test("usuarios en lote: corrección, teclado, entrega privada, impresión explí
     await expect(page.getByRole("link", { name: /Fila 2, Rol/ })).toBeVisible();
     await expect(
       page.getByRole("button", {
-        name: "Crear 2 cuentas y sus accesos a proyectos",
+        name: "Crear 2 cuentas y 2 accesos a proyectos",
       }),
     ).toBeDisabled();
     await page
@@ -105,7 +105,7 @@ test("usuarios en lote: corrección, teclado, entrega privada, impresión explí
     await capture(page, "usuarios-vista-previa");
     await page
       .getByRole("button", {
-        name: "Crear 2 cuentas y sus accesos a proyectos",
+        name: "Crear 2 cuentas y 2 accesos a proyectos",
       })
       .click();
     await expect(
@@ -255,11 +255,11 @@ test("una confirmación cuya respuesta se pierde no vuelve a entregar las claves
     } else await route.continue();
   });
   await page
-    .getByRole("button", { name: "Crear 1 cuentas y sus accesos a proyectos" })
+    .getByRole("button", { name: "Crear 1 cuenta y 1 acceso al proyecto" })
     .click();
   await expect(page.getByRole("alert")).toContainText("No hay conexión");
   await page
-    .getByRole("button", { name: "Crear 1 cuentas y sus accesos a proyectos" })
+    .getByRole("button", { name: "Crear 1 cuenta y 1 acceso al proyecto" })
     .click();
   await expect(
     page.getByRole("status").filter({ hasText: "Este lote ya se confirmó" }),
@@ -378,7 +378,7 @@ test("50 filas compactas, tarjetas móviles y errores ordenados que enfocan su c
     .getByRole("button", { name: "Revisar usuarios", exact: true })
     .click();
   const table = page.getByRole("table", {
-    name: "Cuentas y accesos a proyectos por crear",
+    name: "50 cuentas y 50 accesos a proyectos por crear",
   });
   await expect(table.getByRole("row")).toHaveCount(51);
   await expect(table.getByText("Participante", { exact: true })).toHaveCount(
