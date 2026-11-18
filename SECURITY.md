@@ -20,23 +20,13 @@ En futuras contribuciones, las correcciones de seguridad se preparan por el cana
 
 ## Control de dependencias y excepción temporal
 
-CI exige `npm audit --omit=dev --audit-level=high` sin excepciones para las
-dependencias de producción. Después, `node scripts/audit-gate.mjs` revisa el
-reporte **completo**, también las herramientas de desarrollo: cualquier aviso
-alto o crítico no aceptado, un reporte inválido o una excepción caducada bloquea.
+CI exige `npm audit --audit-level=high` sobre todas las dependencias, de
+producción y de desarrollo. No hay excepciones vigentes: un aviso alto o crítico
+bloquea la verificación.
 
-El propietario aceptó únicamente [GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf)
-hasta **2027-01-15 inclusive (UTC)**. Al verificar el 2026-11-17, picomatch 4.0.7
-solo entra por herramientas de desarrollo; la auditoría de producción da cero y
-no hay uso en ejecución ni versión corregida publicada. La imagen de backend
-incluye el paquete en disco porque conserva dependencias de construcción; la
-imagen de frontend nginx no lo contiene. Esto es aceptación de riesgo acotada,
-no una corrección ni una promesa de que herramientas de desarrollo sean inocuas.
-
-Revisar al publicarse un parche o, a más tardar, al vencer la excepción. Cuando
-exista una versión corregida compatible, actualizar picomatch, retirar su entrada
-de `scripts/audit-gate.mjs` y las pruebas de esa excepción, y repetir ambos
-controles. No reducir el umbral, excluir todo desarrollo ni usar `audit fix --force`.
+Si aparece un aviso alto o crítico sin parche publicado, el propietario debe
+decidir en un PR explícito, con motivo y fecha de caducidad. No reducir el umbral,
+excluir todo desarrollo ni usar `audit fix --force`.
 
 ## Operación segura
 

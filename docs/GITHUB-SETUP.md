@@ -35,7 +35,7 @@ Inspección del workflow [CI](../.github/workflows/ci.yml). Está preparado para
 
 | Job existente | Incluye | Política inicial propuesta |
 |---|---|---|
-| `verify` | Install; Prisma generate/validate; lint; typecheck; unit/component; integración PostgreSQL; build frontend/backend; auditoría de producción sin excepciones y auditoría completa con la [excepción temporal documentada](VERIFICATION.md#dependencias-dos-controles-bloqueantes); build contenedores; revisión de vulnerabilidades del binario storage | Required en PR |
+| `verify` | Install; Prisma generate/validate; lint; typecheck; unit/component; integración PostgreSQL; build frontend/backend; [auditoría completa sin excepciones](VERIFICATION.md#dependencias-auditoría-completa-sin-excepciones) (`npm audit --audit-level=high`, producción y desarrollo); build contenedores; revisión de vulnerabilidades del binario storage | Required en PR |
 | `secrets` | Gitleaks sobre toda la historia con redacción y excepciones exactas | Required en PR |
 | `selfhosting` | Instalación Docker aislada, S3 real, bootstrap/evidencia autorizada y persistencia tras reinicio | Required en PR, aunque sea más pesado |
 

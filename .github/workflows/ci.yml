@@ -74,8 +74,7 @@ jobs:
           done
           curl --fail --silent http://localhost:4317/api/v1/health
           npm run test:e2e
-      - run: npm audit --omit=dev --audit-level=high
-      - run: node scripts/audit-gate.mjs
+      - run: npm audit --audit-level=high
       - name: Container builds (no publication)
         run: docker compose --env-file .env.example build backend frontend object-storage storage-init
       - name: Storage vulnerability gate (no publication)
