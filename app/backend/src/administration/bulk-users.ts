@@ -38,7 +38,7 @@ export function parseBulkUsers(text: string) {
     return { rows, errors };
   }
   if (!lines.length || lines.length > 50) {
-    error(0, "Fila", "Pega entre 1 y 50 filas de membresías.");
+    error(0, "Fila", "Pega entre 1 y 50 filas de accesos a proyectos.");
     return { rows, errors };
   }
   const names = new Map<string, string>();

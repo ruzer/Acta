@@ -122,11 +122,13 @@ it.each([true, false])(
         screen.getByRole("link", { name: "Administración → Proyectos" }),
       ).toHaveAttribute("href", "/admin");
       expect(
-        screen.queryByText(/La administración debe asignarte/),
+        screen.queryByText(/La administración debe darte acceso/),
       ).not.toBeInTheDocument();
     } else
       expect(
-        screen.getByText(/La administración debe asignarte/),
+        screen.getByText(
+          "La administración debe darte acceso al proyecto para comenzar.",
+        ),
       ).toBeVisible();
   },
 );

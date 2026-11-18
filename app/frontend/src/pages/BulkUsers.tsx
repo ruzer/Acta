@@ -123,7 +123,7 @@ export function BulkUsers({
             </h3>
             <p role="status">
               Se crearon {delivery.users.length} cuentas y{" "}
-              {delivery.memberships} membresías.
+              {delivery.memberships} accesos a proyectos.
             </p>
             {delivery.delivery === "NEW" ? (
               <>
@@ -281,8 +281,8 @@ export function BulkUsers({
                 ) : (
                   <p role="status">
                     Se crearán {preview.users} cuentas y {preview.memberships}{" "}
-                    membresías. Los usuarios se muestran en minúsculas. Ninguna
-                    cuenta será administradora de la institución.
+                    accesos a proyectos. Los usuarios se muestran en minúsculas.
+                    Ninguna cuenta será administradora de la institución.
                   </p>
                 )}
                 <div
@@ -292,7 +292,7 @@ export function BulkUsers({
                   aria-label="Filas del lote"
                 >
                   <DataTable
-                    caption="Usuarios y membresías por crear"
+                    caption="Cuentas y accesos a proyectos por crear"
                     columns={[
                       { label: "Fila" },
                       ...columns.map((label) => ({ label })),
@@ -344,7 +344,7 @@ export function BulkUsers({
                   disabled={busy || !preview.canConfirm}
                   onClick={() => void confirm()}
                 >
-                  Crear {preview.users} cuentas y sus membresías
+                  Crear {preview.users} cuentas y sus accesos a proyectos
                 </Button>
               </section>
             )}

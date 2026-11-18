@@ -98,7 +98,9 @@ it("muestra errores por fila vinculados a sus celdas e impide confirmar", async 
     "true",
   );
   expect(
-    screen.getByRole("button", { name: "Crear 1 cuentas y sus membresías" }),
+    screen.getByRole("button", {
+      name: "Crear 1 cuentas y sus accesos a proyectos",
+    }),
   ).toBeDisabled();
   expect(
     screen.getByRole("heading", { name: "Revisar el lote" }),
@@ -122,7 +124,9 @@ it("entrega efímera sin caché ni almacenamiento e imprime solo por petición, 
   const { client, unmount } = setup();
   const user = await review();
   await user.click(
-    screen.getByRole("button", { name: "Crear 1 cuentas y sus membresías" }),
+    screen.getByRole("button", {
+      name: "Crear 1 cuentas y sus accesos a proyectos",
+    }),
   );
   await screen.findByRole("heading", { name: "Entrega de acceso" });
   expect(print).not.toHaveBeenCalled();
@@ -153,11 +157,15 @@ it("reintento conserva requestId y el recibo no ofrece una nueva entrega", async
   setup();
   const user = await review();
   await user.click(
-    screen.getByRole("button", { name: "Crear 1 cuentas y sus membresías" }),
+    screen.getByRole("button", {
+      name: "Crear 1 cuentas y sus accesos a proyectos",
+    }),
   );
   await screen.findByText("Sin conexión");
   await user.click(
-    screen.getByRole("button", { name: "Crear 1 cuentas y sus membresías" }),
+    screen.getByRole("button", {
+      name: "Crear 1 cuentas y sus accesos a proyectos",
+    }),
   );
   await screen.findByRole("heading", { name: "Entrega de acceso" });
   const calls = vi
@@ -183,7 +191,9 @@ it.each(["pagehide", "session-expired"])(
     setup();
     const user = await review();
     await user.click(
-      screen.getByRole("button", { name: "Crear 1 cuentas y sus membresías" }),
+      screen.getByRole("button", {
+        name: "Crear 1 cuentas y sus accesos a proyectos",
+      }),
     );
     act(() => {
       window.dispatchEvent(new Event(event));
@@ -234,7 +244,7 @@ it("la vista previa conserva 50 filas en una tabla y un solo nombre para Partici
   setup();
   await review();
   const table = screen.getByRole("table", {
-    name: "Usuarios y membresías por crear",
+    name: "Cuentas y accesos a proyectos por crear",
   });
   expect(within(table).getAllByRole("row")).toHaveLength(51);
   expect(

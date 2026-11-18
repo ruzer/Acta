@@ -635,7 +635,7 @@ export function Members() {
         }
         lead={
           <>
-            La membresía da acceso al proyecto. Para que un participante pueda
+            El acceso al proyecto permite entrar. Para que un participante pueda
             responder, asígnale preguntas en{" "}
             <Link to={`/projects/${projectId}/editor`}>Organizar</Link> y
             publícalas. El área no asigna personas automáticamente.
@@ -670,7 +670,7 @@ export function Members() {
         }))}
       />
       <section className="panel">
-        <h2>Asignar o actualizar membresía</h2>
+        <h2>Asignar o actualizar acceso al proyecto</h2>
         {users.error && (
           <Alert>
             Para incorporar usuarios nuevos, solicita apoyo a la administración
@@ -678,7 +678,7 @@ export function Members() {
           </Alert>
         )}
         <ActionForm
-          label="Guardar membresía"
+          label="Guardar acceso al proyecto"
           onDone={() => void qc.invalidateQueries()}
           onSubmit={(d) =>
             api(
@@ -730,7 +730,11 @@ export function Members() {
                 ))}
             </Select>
           </div>
-          <Checkbox label="Membresía activa" name="active" defaultChecked />
+          <Checkbox
+            label="Acceso al proyecto activo"
+            name="active"
+            defaultChecked
+          />
         </ActionForm>
       </section>
     </>

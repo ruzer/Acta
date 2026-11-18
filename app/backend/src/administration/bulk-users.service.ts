@@ -51,7 +51,7 @@ export class BulkUsersService {
       if (existing.some((u) => u.username === row.username))
         error(
           "Usuario",
-          "El usuario ya existe en esta institución. Gestiona sus membresías desde la pantalla habitual.",
+          "El usuario ya existe en esta institución. Gestiona sus accesos a proyectos desde Administración.",
         );
       if (!project || project.lifecycle !== "ACTIVE")
         error(

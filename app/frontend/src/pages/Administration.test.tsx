@@ -332,3 +332,23 @@ it("las dos formas de crear usuarios comparten las acciones de la cabecera", () 
   expect(single.closest("header")).not.toBeNull();
   expect(bulk.closest("header")).toBe(single.closest("header"));
 });
+
+it("nombra el acceso al proyecto sin confundirlo con preguntas asignadas", async () => {
+  mountApp(["/projects/a/members"]);
+  expect(
+    await screen.findByRole("heading", {
+      name: "Asignar o actualizar acceso al proyecto",
+    }),
+  ).toBeVisible();
+  expect(
+    screen.getByRole("button", { name: "Guardar acceso al proyecto" }),
+  ).toBeVisible();
+  expect(
+    screen.getByRole("checkbox", { name: "Acceso al proyecto activo" }),
+  ).toBeChecked();
+  expect(
+    screen.getByText(/El acceso al proyecto permite entrar/),
+  ).toBeVisible();
+  expect(screen.getByText(/asígnale preguntas en/)).toBeVisible();
+  expect(document.body).not.toHaveTextContent(/membres/i);
+});

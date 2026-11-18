@@ -10,6 +10,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Kit de piloto con personas.** Plan ajustable, guion de observación, guías breves de Administración, Participante y Revisión, y plantillas para medir resultados y decidir continuar, ajustar o detener; no sustituye una validación con personas ni certifica producción.
 
+### Fixed
+
+- **Acceso al proyecto sin jerga.** La administración, el alta de cuentas y los mensajes de ayuda hablan de accesos al proyecto; dar acceso sigue siendo distinto de asignar preguntas.
+
 ## 0.11.0 — 2026-11-17
 
 Correcciones de Administración y cookie de sesión neutral de los PR
