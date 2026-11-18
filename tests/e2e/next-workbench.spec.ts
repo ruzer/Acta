@@ -168,7 +168,7 @@ test("ACTA NEXT: atención conserva el solapamiento y el contexto al volver del 
   await expect(cases.locator(":scope > li")).toHaveCount(1);
   await expect(
     cases.getByRole("link", {
-      name: `Revisar conflicto: ${fixture.questions[0].title}`,
+      name: `Resolver conflicto: ${fixture.questions[0].title}`,
       exact: true,
     }),
   ).toBeVisible();
@@ -179,13 +179,13 @@ test("ACTA NEXT: atención conserva el solapamiento y el contexto al volver del 
   // The same conflicted question also remains in clarification results.
   await expect(
     cases.getByRole("link", {
-      name: `Revisar conflicto: ${fixture.questions[0].title}`,
+      name: `Resolver conflicto: ${fixture.questions[0].title}`,
       exact: true,
     }),
   ).toBeVisible();
   await expect(
     cases.getByRole("link", {
-      name: `Revisar respuestas: ${fixture.questions[1].title}`,
+      name: `Ver aclaración: ${fixture.questions[1].title}`,
       exact: true,
     }),
   ).toBeVisible();
@@ -195,7 +195,7 @@ test("ACTA NEXT: atención conserva el solapamiento y el contexto al volver del 
   await expect(cases.locator(":scope > li")).toHaveCount(1);
   const savedSearch = new URL(page.url()).search;
   const detailLink = cases.getByRole("link", {
-    name: `Revisar conflicto: ${fixture.questions[0].title}`,
+    name: `Resolver conflicto: ${fixture.questions[0].title}`,
     exact: true,
   });
   await detailLink.scrollIntoViewIfNeeded();
@@ -234,7 +234,7 @@ test("ACTA NEXT: atención conserva el solapamiento y el contexto al volver del 
   await expect(cases.locator(":scope > li")).toHaveCount(1);
   await expect(
     cases.getByRole("link", {
-      name: `Revisar respuestas: ${fixture.questions[2].title}`,
+      name: `Revisar y decidir: ${fixture.questions[2].title}`,
       exact: true,
     }),
   ).toBeVisible();
@@ -514,7 +514,7 @@ for (const username of ["admin", "analyst", "viewer", "stakeholder"] as const) {
   });
 }
 
-test("Direction C: listado completo conserva apertura, foco y retorno", async ({
+test("Direction C: otras preguntas conserva apertura, foco y retorno", async ({
   page,
 }) => {
   await login(page, "analyst");
@@ -530,7 +530,7 @@ test("Direction C: listado completo conserva apertura, foco y retorno", async ({
     name: "Casos de atención",
     exact: true,
   });
-  await expect(list.locator(":scope > li")).toHaveCount(54);
+  await expect(list.locator(":scope > li")).toHaveCount(51);
   const question = fixture.questions[53]!;
   const link = list.getByRole("link", {
     name: `Revisar respuestas: ${question.title}`,

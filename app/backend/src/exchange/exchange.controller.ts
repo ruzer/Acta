@@ -51,8 +51,10 @@ export class ExchangeController {
   @Get("dashboard") dashboard(
     @Req() r: ActorRequest,
     @Param("projectId", ParseUUIDPipe) p: string,
+    @Query(new SchemaPipe(C.dashboardQuery))
+    d: z.infer<typeof C.dashboardQuery>,
   ) {
-    return this.visibility.dashboard(r.actor, p);
+    return this.visibility.dashboard(r.actor, p, d.since);
   }
   @Get("participation") participation(
     @Req() r: ActorRequest,

@@ -57,3 +57,9 @@ Mi trabajo y Atención muestran si falta tiempo, vence hoy o ya venció. Partici
 ## Primeros pasos y ayuda
 
 Atención muestra **Primeros pasos** mientras no hay respuestas enviadas. Usa preguntas, accesos y asignaciones actuales para retirar las tareas completadas. Puede replegarse y desaparece con el primer envío. El analista solicita a la administración los accesos que no puede conceder; la tarjeta no amplía permisos. **Ayuda**, en el menú de cuenta, reúne las guías de los roles actuales. La administración institucional ve todas; el lector recibe orientación para consultar sus proyectos.
+
+## Atención sin repeticiones
+
+Una pregunta aparece una sola vez: primero conflictos o respuestas listas, después aclaraciones, pendientes de otras personas y preguntas sin asignación. «Otras preguntas» reúne lo que no entró en esos grupos. Los filtros mantienen las mismas acciones. Los contadores del resumen pueden coincidir porque una pregunta puede tener conflicto y aclaración a la vez.
+
+Atención anuncia los envíos nuevos desde la visita anterior; cuenta cada envío, no los borradores. La fecha de visita se guarda en este navegador por cuenta y proyecto, sin respuestas. La primera visita no anuncia novedades; otro navegador tiene su propio historial.

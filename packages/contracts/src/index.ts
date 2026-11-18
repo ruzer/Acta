@@ -1703,7 +1703,12 @@ export const visibilityQuestion = z.strictObject({
   conditionalWithoutCase: z.boolean(),
   referenceIds: z.array(z.uuid()),
 });
+export const dashboardQuery = z.strictObject({
+  since: z.iso.datetime().optional(),
+});
 export const dashboardView = z.strictObject({
+  newContributions: z.number().int().nonnegative().optional(),
+  contributionsAsOf: z.iso.datetime().optional(),
   projectName: z.string(),
   role: z.enum(["ADMIN", "ANALYST"]),
   metrics: metricsView,

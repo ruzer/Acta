@@ -370,7 +370,7 @@ function Session() {
             />
             <Route
               path="/projects/:projectId/dashboard"
-              element={<Dashboard />}
+              element={<Dashboard userId={me.user.id} />}
             />
             <Route
               path="/projects/:projectId/traceability"

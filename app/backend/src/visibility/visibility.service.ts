@@ -135,7 +135,8 @@ export class VisibilityService {
       };
     });
   }
-  async dashboard(actor: User, p: string) {
+  async dashboard(actor: User, p: string, since?: string) {
+    const asOf = new Date();
     return this.db.$transaction(
       async (tx) => {
         const { project, member } = await this.access.project(tx, actor, p, [
@@ -178,7 +179,23 @@ export class VisibilityService {
               metrics: metrics(g.items),
             });
         }
+        const newContributions =
+          since === undefined
+            ? undefined
+            : await tx.responseRevision.count({
+                where: {
+                  projectId: p,
+                  response: { questionId: { in: questions.map((q) => q.id) } },
+                  createdAt: { gt: new Date(since), lte: asOf },
+                },
+              });
         return serialize(C.dashboardView, {
+          ...(since === undefined
+            ? {}
+            : {
+                newContributions,
+                contributionsAsOf: asOf.toISOString(),
+              }),
           projectName: project.name,
           role: member.role,
           metrics: metrics(questions),

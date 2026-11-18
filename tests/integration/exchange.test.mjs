@@ -1542,3 +1542,35 @@ test("plantilla reutilizable conserva estructura y reglas sin respuestas ni pers
     ),
   );
 });
+
+test("Attention counts each submitted revision since a visit, scoped to its project and opt-in", async () => {
+  const url = `/projects/${project.id}/dashboard`;
+  const before = await ok(url);
+  assert.equal("newContributions" in before, false);
+  assert.equal("contributionsAsOf" in before, false);
+  const since = "2000-01-01T00:00:00.000Z";
+  const result = await ok(`${url}?since=${since}`);
+  const expected = await db.responseRevision.count({
+    where: {
+      projectId: project.id,
+      response: { questionId: { in: before.questions.map((q) => q.id) } },
+      createdAt: {
+        gt: new Date(since),
+        lte: new Date(result.contributionsAsOf),
+      },
+    },
+  });
+  assert.ok(expected > 0);
+  assert.equal(result.newContributions, expected);
+  assert.equal(
+    (await ok(`${url}?since=${result.contributionsAsOf}`)).newContributions,
+    0,
+  );
+  assert.equal((await req(`${url}?since=not-a-date`)).status, 400);
+  for (const session of [stakeholder, viewer])
+    assert.equal((await req(`${url}?since=${since}`, { session })).status, 403);
+  assert.equal(
+    (await req(`${url}?since=${since}`, { session: other })).status,
+    (await req(url, { session: other })).status,
+  );
+});

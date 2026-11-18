@@ -309,7 +309,9 @@ test.describe("Direction C · shell and attention", () => {
             .getByRole("article", { name: "Aclaraciones", exact: true })
             .locator("strong"),
         ).toHaveText("2");
-        await expect(page.getByRole("status")).toHaveText("304 preguntas");
+        await expect(page.locator(".ac-attention-result")).toHaveText(
+          "304 preguntas",
+        );
         const action = page.getByRole("region", {
           name: "Te toca a ti",
           exact: true,

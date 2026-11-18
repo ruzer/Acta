@@ -16,7 +16,7 @@ async function holdLoading(
     release = resolve;
   });
   await page.route(
-    `**/api/v1${apiPath}`,
+    (url) => url.pathname === `/api/v1${apiPath}`,
     async (route) => {
       await held;
       await route.continue();

@@ -38,6 +38,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Carga y navegación legibles en móvil.** Mis proyectos, Mi trabajo, Atención y Responder muestran una carga accesible sin animación; los nombres del menú lateral siguen visibles en anchos intermedios. Las acciones de respuesta permanecen al pie en pantallas pequeñas, respetando el área segura.
 
+- **Atención sin filas repetidas.** Cada pregunta ocupa un solo grupo, conserva la misma acción al filtrar y anuncia los envíos nuevos desde la última visita de esa cuenta y proyecto.
+
 ### Security
 
 - **Auditoría completa sin excepciones.** Se retira la excepción temporal de picomatch porque GitHub retiró GHSA-fc5q-39xc-vjpf el 2026-11-18T15:38:56Z; CI vuelve a exigir `npm audit --audit-level=high` sin excepciones. La comprobación del 2026-11-18 devuelve cero vulnerabilidades.
