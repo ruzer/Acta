@@ -10,6 +10,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Kit de piloto con personas.** Plan ajustable, guion de observación, guías breves de Administración, Participante y Revisión, y plantillas para medir resultados y decidir continuar, ajustar o detener; no sustituye una validación con personas ni certifica producción.
 
+- **Borradores con autoguardado y recuperación.** Los cambios se guardan tras una pausa al escribir, con un máximo de un intento automático cada 30 segundos y sin solicitudes simultáneas. El texto pendiente puede recuperarse en la misma pestaña; la copia se limita a la cuenta y pregunta actuales y se retira al guardar, enviar o terminar la sesión.
+
 ### Fixed
 
 - **Acceso al proyecto sin jerga.** La administración, el alta de cuentas y los mensajes de ayuda hablan de accesos al proyecto; dar acceso sigue siendo distinto de asignar preguntas.

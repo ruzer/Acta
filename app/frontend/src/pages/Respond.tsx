@@ -1,4 +1,12 @@
-import { formatDate as date } from "../branding";
+import { useBranding } from "../branding";
+import { useDraftAutosave } from "../use-draft-autosave";
+import {
+  draftKey,
+  draftText,
+  readDraftText,
+  writeDraftText,
+  removeDraftText,
+} from "../draft-recovery";
 import { useEffect, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -48,7 +56,7 @@ const initial = (v: ResponseView): ResponseContent => {
       }
     : empty;
 };
-export function Respond() {
+export function Respond({ userId }: { userId: string }) {
   const { projectId = "", id = "" } = useParams();
   const q = useQuery({
     queryKey: ["response", projectId, id],
@@ -69,6 +77,7 @@ export function Respond() {
   return (
     <ResponseEditor
       key={projectId + id}
+      userId={userId}
       data={q.data}
       projectId={projectId}
       id={id}
@@ -76,10 +85,12 @@ export function Respond() {
   );
 }
 function ResponseEditor({
+  userId,
   data,
   projectId,
   id,
 }: {
+  userId: string;
   data: ResponseView;
   projectId: string;
   id: string;
@@ -103,6 +114,73 @@ function ResponseEditor({
   const allowNavigation = useRef(false),
     requests = useRef(new Map<string, string>()),
     errorRef = useRef<HTMLDivElement>(null);
+  const branding = useBranding();
+  const backupKey = draftKey(userId, projectId, id);
+  const serverRef = useRef(data),
+    pendingSave = useRef<Promise<ResponseView | null> | null>(null);
+  const busyRef = useRef(false),
+    mounted = useRef(true),
+    sessionActive = useRef(true);
+  const [saving, setSaving] = useState(false),
+    [authenticated, setAuthenticated] = useState(true);
+  const [recovery, setRecovery] = useState(() => {
+    const copy = readDraftText(backupKey);
+    return copy &&
+      JSON.stringify(copy) !==
+        JSON.stringify(draftText(data.question.type, initial(data)))
+      ? copy
+      : null;
+  });
+  const [backupUnavailable, setBackupUnavailable] = useState(false);
+  function working(value: boolean) {
+    busyRef.current = value;
+    setBusy(value);
+  }
+  const savedTime = (value: string) =>
+    new Intl.DateTimeFormat(branding.locale, {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: branding.timezone,
+    }).format(new Date(value));
+  useEffect(() => {
+    mounted.current = true;
+    const expired = () => {
+      sessionActive.current = false;
+      setAuthenticated(false);
+      removeDraftText(backupKey);
+      setRecovery(null);
+    };
+    const restored = (event: Event) => {
+      if ((event as CustomEvent<{ userId: string }>).detail.userId === userId) {
+        sessionActive.current = true;
+        setAuthenticated(true);
+      }
+    };
+    window.addEventListener("session-expired", expired);
+    window.addEventListener("session-restored", restored);
+    return () => {
+      mounted.current = false;
+      window.removeEventListener("session-expired", expired);
+      window.removeEventListener("session-restored", restored);
+    };
+  }, [backupKey, userId]);
+  useEffect(() => {
+    if (!sessionActive.current || recovery) return;
+    const copy = draftText(server.question.type, values);
+    if (
+      JSON.stringify(copy) !==
+      JSON.stringify(draftText(server.question.type, initial(server)))
+    ) {
+      setBackupUnavailable(!writeDraftText(backupKey, copy));
+    } else removeDraftText(backupKey);
+  }, [values, server, backupKey, recovery, authenticated]);
+  useDraftAutosave({
+    changed: JSON.stringify(values),
+    dirty: form.formState.isDirty,
+    enabled: editing && !busy && !hasConflict && authenticated && !recovery,
+    savedAt: server.draft ? Date.parse(server.draft.updatedAt) : 0,
+    save: () => save("stay", true),
+  });
   const dirty = form.formState.isDirty || !!file || !!staged;
   const blocker = useBlocker(() => dirty && !allowNavigation.current);
   useBeforeUnload((e) => {
@@ -154,9 +232,18 @@ function ResponseEditor({
     }
     return c;
   }
-  function accept(v: ResponseView) {
+  function accept(v: ResponseView, sent?: ResponseContent) {
+    const current = form.getValues();
+    serverRef.current = v;
     setServer(v);
     form.reset(initial(v));
+    if (sent)
+      for (const key of Object.keys(current) as (keyof ResponseContent)[]) {
+        if (JSON.stringify(current[key]) !== JSON.stringify(sent[key]))
+          form.setValue(key, current[key], { shouldDirty: true });
+      }
+    removeDraftText(backupKey);
+    setRecovery(null);
     requests.current.clear();
     setHasConflict(false);
     setConflict(null);
@@ -166,31 +253,73 @@ function ResponseEditor({
     const failure =
       e instanceof Error ? e : new Error("No se pudo completar la operación.");
     setError(failure.message);
-    setMessage("No se pudo guardar");
+    setMessage("No se pudo guardar. Tu texto sigue aquí");
     if (e instanceof ApiFailure) {
       setFields(e.fields);
       if (e.status === 409) setHasConflict(true);
     }
   }
-  async function save(destination: "stay" | "exit" | "consult" = "stay") {
-    setBusy(true);
-    setError("");
-    setFields({});
-    setMessage("Guardando…");
+  async function save(
+    destination: "stay" | "exit" | "consult" = "stay",
+    automatic = false,
+  ) {
+    if (
+      !sessionActive.current ||
+      (automatic && (busyRef.current || hasConflict))
+    )
+      return null;
+    if (!automatic) working(true);
+    let own: Promise<ResponseView | null> | null = null;
     try {
-      const payload = {
+      // La acción manual espera el guardado automático antes de tomar su versión.
+      if (pendingSave.current && !(await pendingSave.current)) return null;
+      if (!mounted.current || !sessionActive.current) return null;
+      const sent = {
         ...content(),
         ...(destination === "consult" ? { consultationRequested: true } : {}),
-        expectedVersion: server.lockVersion,
       };
-      const result = await api(
-        "saveDraft",
-        { projectId, id },
-        { ...payload, requestId: requestId("save", payload) },
-      );
-      accept(result);
-      setMessage("Borrador guardado · " + date(result.draft!.updatedAt));
-      if (destination !== "stay" && !file && !staged) {
+      if (
+        automatic &&
+        JSON.stringify(sent) === JSON.stringify(initial(serverRef.current))
+      )
+        return serverRef.current;
+      setError("");
+      setFields({});
+      setSaving(true);
+      setMessage("Guardando…");
+      own = (async () => {
+        let result = serverRef.current;
+        if (
+          !result.draft ||
+          JSON.stringify(sent) !== JSON.stringify(initial(result))
+        ) {
+          const payload = { ...sent, expectedVersion: result.lockVersion };
+          result = await api(
+            "saveDraft",
+            { projectId, id },
+            { ...payload, requestId: requestId("save", payload) },
+          );
+        }
+        if (mounted.current && sessionActive.current) {
+          accept(result, sent);
+          setMessage(
+            "Borrador guardado a las " + savedTime(result.draft!.updatedAt),
+          );
+        }
+        return result;
+      })().catch((e: unknown) => {
+        if (mounted.current) failed(e);
+        return null;
+      });
+      pendingSave.current = own;
+      const result = await own;
+      if (
+        result &&
+        mounted.current &&
+        destination !== "stay" &&
+        !file &&
+        !staged
+      ) {
         const target =
           destination === "consult"
             ? await nextParticipantPath(projectId, id).catch(
@@ -209,23 +338,28 @@ function ResponseEditor({
       }
       return result;
     } catch (e) {
-      failed(e);
+      if (mounted.current) failed(e);
       return null;
     } finally {
-      setBusy(false);
+      if (pendingSave.current === own) pendingSave.current = null;
+      if (mounted.current) {
+        setSaving(false);
+        if (!automatic) working(false);
+      }
     }
   }
   async function submit() {
-    setBusy(true);
+    working(true);
     setError("");
     setFields({});
     try {
-      let current = server;
+      if (pendingSave.current && !(await pendingSave.current)) return;
+      let current = serverRef.current;
       if (form.formState.isDirty || !server.draft) {
         const saved = await save();
         if (!saved) return;
         current = saved;
-        setBusy(true);
+        working(true);
       }
       const payload = { expectedVersion: current.lockVersion };
       const result = await api(
@@ -249,21 +383,22 @@ function ResponseEditor({
     } catch (e) {
       failed(e);
     } finally {
-      setBusy(false);
+      working(false);
     }
   }
   async function attach() {
     if (!file && !staged) return;
-    setBusy(true);
+    working(true);
     setError("");
     setMessage("Adjuntando evidencia…");
     try {
-      let current = server;
+      if (pendingSave.current && !(await pendingSave.current)) return;
+      let current = serverRef.current;
       if (form.formState.isDirty || !server.draft) {
         const saved = await save();
         if (!saved) return;
         current = saved;
-        setBusy(true);
+        working(true);
       }
       let evidence = staged;
       if (!evidence && file) {
@@ -299,16 +434,20 @@ function ResponseEditor({
     } catch (e) {
       failed(e);
     } finally {
-      setBusy(false);
+      working(false);
     }
   }
   async function remove(evidenceId: string) {
-    setBusy(true);
+    working(true);
     setError("");
     try {
+      if (pendingSave.current && !(await pendingSave.current)) return;
       const local = form.getValues(),
         wasDirty = form.formState.isDirty;
-      const payload = { expectedVersion: server.lockVersion, evidenceId };
+      const payload = {
+        expectedVersion: serverRef.current.lockVersion,
+        evidenceId,
+      };
       const result = await api(
         "removeDraftEvidence",
         { projectId, id },
@@ -324,7 +463,7 @@ function ResponseEditor({
     } catch (e) {
       failed(e);
     } finally {
-      setBusy(false);
+      working(false);
     }
   }
   async function download(e: EvidenceView) {
@@ -384,15 +523,15 @@ function ResponseEditor({
   }
   const saveStatus = (
     <p className="save-status" role="status" aria-live="polite">
-      {busy
+      {busy || saving
         ? message || "Procesando…"
         : error
-          ? "No se pudo guardar"
+          ? "No se pudo guardar. Tu texto sigue aquí"
           : dirty
             ? "Cambios sin guardar"
             : message ||
               (server.draft
-                ? `Borrador guardado · ${date(server.draft.updatedAt)}`
+                ? `Borrador guardado a las ${savedTime(server.draft.updatedAt)}`
                 : "")}
     </p>
   );
@@ -446,6 +585,44 @@ function ResponseEditor({
           <Alert>
             Esta pregunta depende de una respuesta anterior enviada. Conservamos
             tu contenido, pero no puedes enviarlo hasta que esté habilitada.
+          </Alert>
+        )}
+        {recovery && (
+          <Alert>
+            <p>
+              Hay texto sin guardar de esta pregunta en esta pestaña. ¿Quieres
+              recuperarlo?
+            </p>
+            <div className="actions">
+              <Button
+                onClick={() => {
+                  for (const [key, value] of Object.entries(recovery))
+                    form.setValue(
+                      key as "answer" | "comment" | "example",
+                      value,
+                      { shouldDirty: true },
+                    );
+                  setRecovery(null);
+                }}
+              >
+                Restaurar texto de esta pestaña
+              </Button>
+              <Button
+                tone="secondary"
+                onClick={() => {
+                  removeDraftText(backupKey);
+                  setRecovery(null);
+                }}
+              >
+                Descartar copia de esta pestaña
+              </Button>
+            </div>
+          </Alert>
+        )}
+        {backupUnavailable && (
+          <Alert>
+            No se pudo guardar una copia en esta pestaña. Conserva esta pantalla
+            hasta que se confirme el guardado.
           </Alert>
         )}
         {error && (

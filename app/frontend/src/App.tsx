@@ -1,3 +1,4 @@
+import { clearDraftTexts } from "./draft-recovery";
 import { ProjectShell } from "./shell/ProjectShell";
 import { OrganizationShell } from "./shell/OrganizationShell";
 import { PageHeader } from "./ui/semantic";
@@ -190,15 +191,25 @@ function Session() {
     void api("me")
       .then((m) => {
         if (active) {
+          clearDraftTexts(m.user.id);
           setCsrf(m.csrfToken);
           setMe(m);
         }
       })
-      .catch(() => {})
+      .catch((error: unknown) => {
+        if (
+          active &&
+          error instanceof Error &&
+          "status" in error &&
+          error.status === 401
+        )
+          clearDraftTexts();
+      })
       .finally(() => {
         if (active) setLoading(false);
       });
     const expired = () => {
+      clearDraftTexts();
       setExpired(true);
       setCsrf("");
     };
@@ -240,6 +251,7 @@ function Session() {
       proceed();
   }
   function signedOut(message: string, username = "") {
+    clearDraftTexts();
     setLoginUsername(username);
     navigate("/", { replace: true });
     setExpired(false);
@@ -255,6 +267,7 @@ function Session() {
         notice={notice}
         username={loginUsername}
         onLogin={(m) => {
+          clearDraftTexts(m.user.id);
           client.clear();
           navigate("/", { replace: true });
           setMe(m);
@@ -392,7 +405,7 @@ function Session() {
             <Route path="/projects/:projectId/work" element={<MyWork />} />
             <Route
               path="/projects/:projectId/respond/:id"
-              element={<Respond />}
+              element={<Respond userId={me.user.id} />}
             />
             <Route path="/projects/:projectId" element={<Participant />} />
             <Route path="/projects/:projectId/editor" element={<Editor />} />
@@ -503,7 +516,13 @@ function Session() {
                 navigate("/", { replace: true });
               }
               setMe(m);
+              clearDraftTexts(m.user.id);
               setExpired(false);
+              window.dispatchEvent(
+                new CustomEvent("session-restored", {
+                  detail: { userId: m.user.id },
+                }),
+              );
             }}
           />
         </Dialog>

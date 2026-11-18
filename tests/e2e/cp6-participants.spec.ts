@@ -161,7 +161,7 @@ test("V-16 · Responder: la pregunta domina, la nota queda junto a los botones y
     page,
     `/projects/${cases.project.id}/respond/${cases.questions.draft.id}`,
   );
-  await expect(page.getByText(/^Borrador guardado · /)).toBeVisible();
+  await expect(page.getByText(/^Borrador guardado a las /)).toBeVisible();
   await expect(page.getByLabel("Tu respuesta", { exact: true })).toHaveValue(
     /Borrador:/,
   );
