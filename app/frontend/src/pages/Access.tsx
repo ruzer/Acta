@@ -194,7 +194,7 @@ export function Projects({
     queryKey: ["projects"],
     queryFn: () => api("projects"),
   });
-  if (q.isPending) return <LoadingState />;
+  if (q.isPending) return <LoadingState skeleton />;
   if (q.error)
     return <ErrorState error={q.error} retry={() => void q.refetch()} />;
   if (q.data.length > 0 && q.data.every((p) => p.role === "STAKEHOLDER"))

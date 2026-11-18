@@ -70,7 +70,7 @@ export function Dashboard() {
     queryFn: () => api("projects"),
   });
   const [dimension, setDimension] = useState("section");
-  if (q.isPending || projects.isPending) return <LoadingState />;
+  if (q.isPending || projects.isPending) return <LoadingState skeleton />;
   if (q.error || projects.error)
     return (
       <ErrorState

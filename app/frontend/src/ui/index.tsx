@@ -196,7 +196,18 @@ export function EmptyState({
     </div>
   );
 }
-export function LoadingState() {
+export function LoadingState({ skeleton = false }: { skeleton?: boolean }) {
+  if (skeleton)
+    return (
+      <div role="status" aria-busy="true" className="loading-skeleton">
+        <span className="sr-only">Cargando información…</span>
+        <div aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
+      </div>
+    );
   return (
     <p role="status" className="loading">
       Cargando información…

@@ -50,7 +50,7 @@ export function ParticipantHome({
       staleTime: 0,
     })),
   });
-  if (results.some((q) => q.isPending)) return <LoadingState />;
+  if (results.some((q) => q.isPending)) return <LoadingState skeleton />;
   const failed = results.find((q) => q.error);
   if (failed)
     return (
@@ -208,7 +208,7 @@ export function MyWork() {
     queryFn: () => api("personalProject", { projectId }),
     staleTime: 0,
   });
-  if (q.isPending) return <LoadingState />;
+  if (q.isPending) return <LoadingState skeleton />;
   if (q.error)
     return <ErrorState error={q.error} retry={() => void q.refetch()} />;
   const items = q.data.sections.flatMap((s) => s.questions),

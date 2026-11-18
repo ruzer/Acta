@@ -64,7 +64,7 @@ export function Respond({ userId }: { userId: string }) {
     staleTime: 0,
     gcTime: 0,
   });
-  if (q.isPending) return <LoadingState />;
+  if (q.isPending) return <LoadingState skeleton />;
   if (q.error)
     return <ErrorState error={q.error} retry={() => void q.refetch()} />;
   if (
@@ -750,46 +750,48 @@ function ResponseEditor({
                   </p>
                 )}
                 {saveStatus}
-                <div className="response-actions">
-                  <Button
-                    className="participant-text-button"
-                    disabled={
-                      busy ||
-                      !!file ||
-                      !!staged ||
-                      server.question.applicability !== "ENABLED"
-                    }
-                    onClick={() => void save("consult")}
-                  >
-                    <ParticipantIcon name="help" />
-                    Necesito consultar esto
-                  </Button>
-                  <div className="actions">
+                <div className="response-footer">
+                  <div className="response-actions">
                     <Button
-                      tone="secondary"
-                      disabled={busy || !!file || !!staged}
-                      onClick={() => void save("exit")}
-                    >
-                      Guardar y salir
-                    </Button>
-                    <Button
-                      type="submit"
+                      className="participant-text-button"
                       disabled={
                         busy ||
                         !!file ||
                         !!staged ||
                         server.question.applicability !== "ENABLED"
                       }
+                      onClick={() => void save("consult")}
                     >
-                      Enviar respuesta <ParticipantIcon name="arrow" />
+                      <ParticipantIcon name="help" />
+                      Necesito consultar esto
                     </Button>
+                    <div className="actions">
+                      <Button
+                        tone="secondary"
+                        disabled={busy || !!file || !!staged}
+                        onClick={() => void save("exit")}
+                      >
+                        Guardar y salir
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={
+                          busy ||
+                          !!file ||
+                          !!staged ||
+                          server.question.applicability !== "ENABLED"
+                        }
+                      >
+                        Enviar respuesta <ParticipantIcon name="arrow" />
+                      </Button>
+                    </div>
                   </div>
+                  <p className="hint">
+                    “Guardar y salir” conserva tu borrador privado, incluso si
+                    aún no respondes. “Enviar respuesta” registra una versión
+                    que no se puede modificar.
+                  </p>
                 </div>
-                <p className="hint">
-                  “Guardar y salir” conserva tu borrador privado, incluso si aún
-                  no respondes. “Enviar respuesta” registra una versión que no
-                  se puede modificar.
-                </p>
               </fieldset>
             </form>
           </>
