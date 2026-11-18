@@ -1,3 +1,4 @@
+import { FirstSteps } from "./FirstSteps";
 import { ResponseDeadline } from "./ResponseDeadline";
 import { ParticipationCard } from "./Participation";
 import { ProjectAttention } from "./ProjectAttention";
@@ -104,6 +105,13 @@ export function Dashboard() {
       />
       {data.questions.some((question) => question.status === "VALIDATED") && (
         <p>Ya puedes imprimir el informe</p>
+      )}
+      {project.lifecycle === "ACTIVE" && (
+        <FirstSteps
+          projectId={projectId}
+          role={data.role}
+          started={data.questions.some((q) => q.submittedRespondents > 0)}
+        />
       )}
       <ResponseDeadline projectId={projectId} />
       <ParticipationCard projectId={projectId} />

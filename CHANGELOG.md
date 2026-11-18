@@ -20,6 +20,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Fecha límite informativa.** Administración puede fijar o quitar una fecha al crear o editar el plazo del proyecto. Se guarda al final del día en la zona horaria de la instalación y se muestra en Atención, Mi trabajo y Participación, sin bloquear envíos. Una sola migración agrega una columna vacía a los proyectos existentes.
 
+- **Primeros pasos y ayuda por perfil:** el proyecto nuevo indica los pasos pendientes con datos reales; el menú de cuenta ofrece las guías de cada rol, verificadas contra las etiquetas de la interfaz.
+
 ### Fixed
 
 - **Acceso al proyecto sin jerga.** La administración, el alta de cuentas y los mensajes de ayuda hablan de accesos al proyecto; dar acceso sigue siendo distinto de asignar preguntas.

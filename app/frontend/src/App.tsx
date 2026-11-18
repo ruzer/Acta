@@ -35,6 +35,9 @@ import {
 import "./participant.css";
 import { Respond } from "./pages/Respond";
 import { Clarifications } from "./pages/Clarifications";
+const Help = lazy(() =>
+  import("./pages/Help").then((module) => ({ default: module.Help })),
+);
 const Participation = lazy(() =>
   import("./pages/Participation").then((module) => ({
     default: module.Participation,
@@ -340,6 +343,15 @@ function Session() {
               }
             />
             <Route path="/review" element={<ReviewInbox />} />
+            <Route
+              path="/help"
+              element={
+                <Help
+                  organizationAdmin={me.user.isOrganizationAdmin}
+                  roles={projects.data?.map((p) => p.role) ?? []}
+                />
+              }
+            />
             <Route
               path="/projects/:projectId/participation"
               element={<Participation />}

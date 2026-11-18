@@ -13,6 +13,8 @@ El piloto con personas sigue pendiente hasta que una institución lo realice y r
 4. Cada persona usa la guía de [Participante](GUIA-PARTICIPANTE.md) o de [Revisión](GUIA-REVISION.md).
 5. La coordinación copia las [plantillas de registro y encuesta](PLANTILLAS.md) y documenta la decisión de cierre.
 
+Las mismas guías están en **Ayuda**, dentro del menú de cuenta. Se muestran según los roles de la persona; la administración institucional puede ver las tres. En proyectos sin respuestas, **Primeros pasos** enlaza las tareas pendientes. La tarjeta se retira al recibir la primera respuesta; una fecha límite no impide responder después.
+
 Las tres guías breves están pensadas para una página cada una. Imprime solo la guía
 correspondiente. Referencia de impresión comprobada: A4, letra de 11 puntos y
 márgenes de 16 mm; revisa la vista previa si usas otro formato. Una guía disponible no equivale a ayuda de otra persona: registra

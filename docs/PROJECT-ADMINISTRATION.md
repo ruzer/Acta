@@ -53,3 +53,7 @@ En **Atención → Ver participación**, la administración y el equipo analista
 Al **Crear proyecto**, **Fecha límite para responder (opcional)** puede dejarse vacía. Para cambiarla después, abre **Administración → Proyectos → Fecha límite** en la fila del proyecto y pulsa **Guardar fecha límite**. Borrar el valor quita el plazo. Se guarda hasta el final del día en la zona horaria de la instalación, también si ese día cambia el horario.
 
 Mi trabajo y Atención muestran si falta tiempo, vence hoy o ya venció. Participación cuenta las personas con plazo vencido y preguntas obligatorias pendientes. La fecha solo orienta: **no cierra el proyecto ni impide guardar o enviar**. Cambiarla requiere administración de la institución; la consulta mantiene los accesos del proyecto. Administración institucional puede consultar este dato general sin obtener respuestas ni evidencia.
+
+## Primeros pasos y ayuda
+
+Atención muestra **Primeros pasos** mientras no hay respuestas enviadas. Usa preguntas, accesos y asignaciones actuales para retirar las tareas completadas. Puede replegarse y desaparece con el primer envío. El analista solicita a la administración los accesos que no puede conceder; la tarjeta no amplía permisos. **Ayuda**, en el menú de cuenta, reúne las guías de los roles actuales. La administración institucional ve todas; el lector recibe orientación para consultar sus proyectos.

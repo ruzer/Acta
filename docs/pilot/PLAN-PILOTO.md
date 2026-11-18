@@ -92,3 +92,5 @@ La persona responsable elige y firma una decisión:
 Registrar: decisión, fecha, responsables, razones, pendientes, próxima revisión,
 y qué se hará con cuentas, archivos y notas del piloto. No borrar información
 necesaria para investigar un incidente ni conservarla indefinidamente sin motivo.
+
+Durante las sesiones, registra si la persona consultó **Primeros pasos** o **Ayuda**, sin confundir esa consulta con la intervención del observador.
