@@ -43,6 +43,7 @@ export function ProjectShell({
       import: "Importar cuestionario",
       export: "Exportar",
       report: "Informe",
+      participation: "Participación",
       traceability: "Trazabilidad",
       history: "Bitácora",
     }[segment ?? ""] ??

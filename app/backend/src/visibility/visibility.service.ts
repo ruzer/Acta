@@ -1,3 +1,4 @@
+import { readParticipation } from "./participation.js";
 import { Injectable } from "@nestjs/common";
 import { User, Prisma } from "@prisma/client";
 import { z } from "zod";
@@ -78,6 +79,22 @@ export class VisibilityService {
     private readonly db: Database,
     private readonly access: AccessService,
   ) {}
+  async participation(actor: User, p: string) {
+    return this.db.$transaction(
+      async (tx) => {
+        const { project, member } = await this.access.project(tx, actor, p, [
+          "ADMIN",
+          "ANALYST",
+        ]);
+        return serialize(C.participationView, {
+          projectName: project.name,
+          role: member.role,
+          participants: await readParticipation(tx, p),
+        });
+      },
+      { isolationLevel: "RepeatableRead", timeout: 15000 },
+    );
+  }
   async items(tx: Tx, p: string) {
     const cv = await coverage(tx, this.access, p);
     const rows = await tx.question.findMany({

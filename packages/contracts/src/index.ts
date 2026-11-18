@@ -1940,3 +1940,30 @@ export const validatedDecisionsExportDocument = z.strictObject({
 
 export * from "./participant.js";
 export * from "./installation.js";
+
+// Vista nueva: no amplía el acceso a respuestas ni cambia las vistas existentes.
+export const participationStates = [
+  "Sin iniciar",
+  "En borrador",
+  "Envió parte",
+  "Completo",
+] as const;
+export const participationPerson = z.strictObject({
+  memberId: z.uuid(),
+  name: z.string(),
+  area: z.string().nullable(),
+  assigned: z.number().int().nonnegative(),
+  required: z.number().int().nonnegative(),
+  drafts: z.number().int().nonnegative(),
+  sent: z.number().int().nonnegative(),
+  pending: z.number().int().nonnegative(),
+  lastActivity: z.iso.datetime().nullable(),
+  state: z.enum(participationStates),
+});
+export const participationView = z.strictObject({
+  projectName: z.string(),
+  role: z.enum(["ADMIN", "ANALYST"]),
+  participants: z.array(participationPerson),
+});
+export type ParticipationPerson = z.infer<typeof participationPerson>;
+export type ParticipationView = z.infer<typeof participationView>;

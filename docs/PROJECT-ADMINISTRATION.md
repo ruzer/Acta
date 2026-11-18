@@ -41,3 +41,9 @@ Todo acceso al contenido de un proyecto exige **acceso activo** a él; la admini
 - **Cuentas desactivadas**: no cuentan como administradoras ni como miembros activos.
 - **Otra institución**: no aparece, y acceder a su proyecto por URL responde 404.
 - **Escalamiento**: ningún rol de proyecto puede agregarse como administrador de otro proyecto ni crear administración de la institución; la lista no cambia ningún permiso existente.
+
+## Seguir la participación
+
+En **Atención → Ver participación**, la administración y el equipo analista del proyecto ven quién empezó, quién guarda borradores y quién envió sus respuestas. **Filtrar participación** y **Ordenar participación** ayudan a encontrar pendientes. «Completo» no significa revisado: solo que ya se enviaron las preguntas obligatorias que aplican a esa persona. Si solo tiene preguntas opcionales, debe enviarlas todas para aparecer como completo.
+
+**Copiar recordatorio** prepara un texto con las personas y sus preguntas obligatorias pendientes. Pégalo tú en el medio acordado con el equipo. Acta no envía mensajes ni incluye respuestas o contraseñas. Si el dispositivo no permite copiar, ofrece el texto seleccionable. Un participante o lector no puede abrir este seguimiento; administrar la institución tampoco otorga acceso automático.

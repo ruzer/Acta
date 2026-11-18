@@ -1215,3 +1215,127 @@ test("Markdown tolerates incomplete historical snapshots without changing JSON o
     await replaceSnapshots(revisions);
   }
 });
+
+test("Participación permite solo administración y análisis del proyecto, sin respuestas ni secretos", async () => {
+  for (const session of [admin, analyst]) {
+    const r = await req(`/projects/${project.id}/participation`, { session });
+    assert.equal(r.status, 200);
+    assert.ok(r.data.participants.some((p) => p.memberId === member.id));
+    for (const p of r.data.participants) {
+      assert.deepEqual(
+        Object.keys(p).sort(),
+        [
+          "memberId",
+          "name",
+          "area",
+          "assigned",
+          "required",
+          "drafts",
+          "sent",
+          "pending",
+          "lastActivity",
+          "state",
+        ].sort(),
+      );
+      assert.ok(
+        ["Sin iniciar", "En borrador", "Envió parte", "Completo"].includes(
+          p.state,
+        ),
+      );
+    }
+  }
+  for (const session of [stakeholder, viewer]) {
+    const r = await req(`/projects/${project.id}/participation`, { session });
+    assert.equal(r.status, 403);
+    assert.equal(r.data.participants, undefined);
+  }
+});
+
+test("Participación agrupa 300 preguntas por 50 personas y excluye accesos inactivos", async () => {
+  const p = await emptyProject("PARTICIPATION-VOLUME");
+  const file = template(p.externalId, "PARTICIPATION-AREA");
+  file.conditions = [];
+  file.traceabilityReferences = [];
+  file.questions = Array.from({ length: 300 }, (_, i) => ({
+    ...file.questions[0],
+    externalId: `P-${i}`,
+    order: i,
+    references: [],
+  }));
+  const preview = await importFile(p, file);
+  assert.deepEqual(preview.data.errors, []);
+  assert.equal(
+    (await importFile(p, file, confirmation(preview.data))).status,
+    201,
+  );
+  const all = await db.question.findMany({ where: { projectId: p.id } });
+  const areaId = all[0].responsibleAreaId;
+  const organizationId = (
+    await db.project.findUniqueOrThrow({ where: { id: p.id } })
+  ).organizationId;
+  const users = Array.from({ length: 50 }, (_, i) => ({
+    id: randomUUID(),
+    organizationId,
+    username: `participation-${i}`,
+    displayName: `Persona ficticia ${i}`,
+  }));
+  await db.user.createMany({ data: users });
+  const members = users.map((u) => ({
+    id: randomUUID(),
+    projectId: p.id,
+    userId: u.id,
+    role: "STAKEHOLDER",
+    areaId,
+  }));
+  await db.projectMember.createMany({ data: members });
+  await db.questionAssignment.createMany({
+    data: members.flatMap((m) =>
+      all.map((q) => ({
+        projectId: p.id,
+        projectMemberId: m.id,
+        questionId: q.id,
+        required: true,
+      })),
+    ),
+  });
+  const command = {
+    requestId: randomUUID(),
+    questions: all.map((q) => ({ id: q.id, expectedVersion: q.lockVersion })),
+  };
+  const publication = await ok(
+    `/projects/${p.id}/questions/bulk/publish/preview`,
+    { session: admin, method: "POST", body: command },
+  );
+  await ok(`/projects/${p.id}/questions/bulk/publish/confirm`, {
+    session: admin,
+    method: "POST",
+    body: { ...command, previewHash: publication.previewHash },
+  });
+  const started = performance.now();
+  const result = await req(`/projects/${p.id}/participation`, {
+    session: analyst,
+  });
+  const elapsed = Math.round(performance.now() - started);
+  assert.equal(result.status, 200, JSON.stringify(result.data));
+  assert.equal(result.data.participants.length, 50);
+  assert.ok(
+    result.data.participants.every(
+      (person) =>
+        person.assigned === 300 &&
+        person.pending === 300 &&
+        person.state === "Sin iniciar",
+    ),
+  );
+  console.log(
+    `participation-volume: 300 preguntas, 50 personas, 15000 asignaciones, ${elapsed} ms, 50 filas sin contenido de respuestas`,
+  );
+  await db.projectMember.update({
+    where: { id: members[0].id },
+    data: { active: false },
+  });
+  await db.user.update({ where: { id: users[1].id }, data: { active: false } });
+  const active = await req(`/projects/${p.id}/participation`, {
+    session: analyst,
+  });
+  assert.equal(active.data.participants.length, 48);
+});

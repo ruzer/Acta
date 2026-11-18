@@ -390,6 +390,22 @@ export function ProjectAttention({
                     </>
                   )}
                 </EmptyState>
+              ) : !task &&
+                !status &&
+                data.questions.every(
+                  (q) =>
+                    q.status === "NOT_REVIEWED" && q.submittedRespondents === 0,
+                ) ? (
+                <EmptyState title="Aún no hay respuestas enviadas">
+                  Revisa las asignaciones y avisa al equipo que puede comenzar.{" "}
+                  <Link to={`/projects/${projectId}/editor`}>
+                    Abrir Cuestionario
+                  </Link>
+                  {" · "}
+                  <Link to={`/projects/${projectId}/participation`}>
+                    Ver participación
+                  </Link>
+                </EmptyState>
               ) : task || status ? (
                 <section
                   className="ac-attention-group"

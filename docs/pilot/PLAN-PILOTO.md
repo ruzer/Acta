@@ -54,7 +54,7 @@ personas por sí sola.
 | 1 | Administración y equipo técnico preparan; coordinación prueba acceso y agenda. | Lista anterior completa y metas acordadas. |
 | 2 | Sesiones individuales: primera entrada, cambio de contraseña, borrador, evidencia y primer envío. | Una hoja por persona, con tiempos y ayudas. |
 | 3 | Participantes vuelven sin sesión guiada y continúan. Analista solicita una aclaración de prueba. | Dudas, retorno al trabajo y aclaración atendida. |
-| 4 | Analista cierra la aclaración, registra una decisión y abre el informe. Administración revisa Atención. | Recorrido de revisión y diferencias entre lo esperado y lo ocurrido. |
+| 4 | Analista cierra la aclaración, registra una decisión y abre el informe. Administración revisa Atención y Participación; copia un recordatorio ficticio sin enviarlo. | Recorrido de revisión y diferencias entre lo esperado y lo ocurrido. |
 | 5 | Encuesta, revisión de incidentes y reunión de cierre. | Decisión explícita, responsables y siguiente fecha. |
 
 Usa el [guion de coordinación](GUIA-COORDINADOR.md). Las decisiones de prueba no

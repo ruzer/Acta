@@ -1,3 +1,4 @@
+import { ParticipationCard } from "./Participation";
 import { ProjectAttention } from "./ProjectAttention";
 import { ProjectWorkbench, ProjectDeliverables } from "./ProjectWorkbench";
 import { referenceTypeLabels } from "../reference-labels";
@@ -103,6 +104,7 @@ export function Dashboard() {
       {data.questions.some((question) => question.status === "VALIDATED") && (
         <p>Ya puedes imprimir el informe</p>
       )}
+      <ParticipationCard projectId={projectId} />
       <ProjectAttention
         projectId={projectId}
         data={data}

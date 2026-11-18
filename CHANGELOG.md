@@ -16,6 +16,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Entregables a la vista.** Atención y Decisiones ofrecen Informe para imprimir y Exportar; una decisión vigente anuncia que el informe está listo. La plantilla y el CSV descargados usan UTF-8 con BOM y encabezados en español, sin cambiar la salida técnica predeterminada para integraciones.
 
+- **Seguimiento de participación.** Administración y análisis del proyecto consultan conteos por persona, filtran su avance y copian un recordatorio sin respuestas ni claves. Atención enlaza al seguimiento y explica qué hacer cuando aún no hay envíos; los permisos y la vigencia de las respuestas siguen siendo autoridad del servidor.
+
 ### Fixed
 
 - **Acceso al proyecto sin jerga.** La administración, el alta de cuentas y los mensajes de ayuda hablan de accesos al proyecto; dar acceso sigue siendo distinto de asignar preguntas.

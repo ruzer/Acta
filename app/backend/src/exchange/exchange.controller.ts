@@ -35,6 +35,12 @@ export class ExchangeController {
   ) {
     return this.visibility.dashboard(r.actor, p);
   }
+  @Get("participation") participation(
+    @Req() r: ActorRequest,
+    @Param("projectId", ParseUUIDPipe) p: string,
+  ) {
+    return this.visibility.participation(r.actor, p);
+  }
   @Get("decisions") decisions(
     @Req() r: ActorRequest,
     @Param("projectId", ParseUUIDPipe) p: string,
