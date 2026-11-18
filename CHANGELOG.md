@@ -12,6 +12,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Borradores con autoguardado y recuperación.** Los cambios se guardan tras una pausa al escribir, con un máximo de un intento automático cada 30 segundos y sin solicitudes simultáneas. El texto pendiente puede recuperarse en la misma pestaña; la copia se limita a la cuenta y pregunta actuales y se retira al guardar, enviar o terminar la sesión.
 
+- **Medición reproducible de guardados simultáneos.** Un ensayo local crea 300 preguntas y 50 participantes ficticios, informa latencias y errores reales y comprueba por qué debe conservarse el recálculo de revisión al guardar borradores. La primera medición registra un límite de capacidad; no acredita operación institucional con esa concurrencia.
+
 ### Fixed
 
 - **Acceso al proyecto sin jerga.** La administración, el alta de cuentas y los mensajes de ayuda hablan de accesos al proyecto; dar acceso sigue siendo distinto de asignar preguntas.
