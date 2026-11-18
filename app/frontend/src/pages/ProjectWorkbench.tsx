@@ -68,3 +68,16 @@ export function ProjectWorkbench({
     </header>
   );
 }
+
+export function ProjectDeliverables({ projectId }: { projectId: string }) {
+  return (
+    <div role="group" aria-label="Entregables" className="actions">
+      <Link className="button secondary" to={`/projects/${projectId}/report`}>
+        Informe para imprimir
+      </Link>
+      <Link className="button secondary" to={`/projects/${projectId}/export`}>
+        Exportar
+      </Link>
+    </div>
+  );
+}

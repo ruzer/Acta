@@ -14,6 +14,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Medición reproducible de guardados simultáneos.** Un ensayo local crea 300 preguntas y 50 participantes ficticios, informa latencias y errores reales y comprueba por qué debe conservarse el recálculo de revisión al guardar borradores. La primera medición registra un límite de capacidad; no acredita operación institucional con esa concurrencia.
 
+- **Entregables a la vista.** Atención y Decisiones ofrecen Informe para imprimir y Exportar; una decisión vigente anuncia que el informe está listo. La plantilla y el CSV descargados usan UTF-8 con BOM y encabezados en español, sin cambiar la salida técnica predeterminada para integraciones.
+
 ### Fixed
 
 - **Acceso al proyecto sin jerga.** La administración, el alta de cuentas y los mensajes de ayuda hablan de accesos al proyecto; dar acceso sigue siendo distinto de asignar preguntas.

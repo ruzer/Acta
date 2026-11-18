@@ -500,6 +500,7 @@ export function ExportProject() {
       const r = await exchangeFetch(projectId, "exports", {
         input: C.exportInput.parse({
           format: viewer ? "JSON" : format,
+          ...(!viewer && format === "CSV" ? { csvHeaders: "es-MX" } : {}),
           scope: viewer ? "validated-decisions" : "full",
           requestId: crypto.randomUUID(),
         }),

@@ -1799,6 +1799,7 @@ export const decisionRegisterView = z.strictObject({
 });
 export type DecisionRegisterEntry = z.infer<typeof decisionRegisterEntry>;
 export const exportInput = z.strictObject({
+  csvHeaders: z.literal("es-MX").optional(),
   format: z.enum(["JSON", "CSV", "MARKDOWN"]),
   scope: z.enum(["full", "validated-decisions"]),
   requestId: z.uuid(),

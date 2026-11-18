@@ -20,7 +20,7 @@ import {
   Select,
 } from "../ui";
 import { RegisterRow } from "../ui/semantic";
-import { ProjectWorkbench } from "./ProjectWorkbench";
+import { ProjectWorkbench, ProjectDeliverables } from "./ProjectWorkbench";
 import { dateText } from "./ReviewShared";
 import { plural } from "../ui/plural";
 
@@ -171,12 +171,11 @@ export function ProjectDecisions() {
       projectName={data.projectName}
       role={data.role}
       active="decisions"
-      actions={
-        <Link className="button secondary" to={`/projects/${projectId}/report`}>
-          Informe para imprimir
-        </Link>
-      }
+      actions={<ProjectDeliverables projectId={projectId} />}
     >
+      {decisions.length > 0 && (
+        <p>Ya puedes imprimir el informe</p>
+      )}
       <section aria-label="Decisiones vigentes">
         <div className="pw-decisions-heading">
           <p>

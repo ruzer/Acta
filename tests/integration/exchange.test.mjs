@@ -283,6 +283,7 @@ async function exported(
   session = analyst,
   scope = "full",
   p = project,
+  csvHeaders,
 ) {
   const r = await fetch(origin + `/api/v1/projects/${p.id}/exports`, {
     method: "POST",
@@ -292,7 +293,12 @@ async function exported(
       "X-CSRF-Token": session.csrf,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ format, scope, requestId: randomUUID() }),
+    body: JSON.stringify({
+      format,
+      scope,
+      requestId: randomUUID(),
+      csvHeaders,
+    }),
   });
   const text = await r.text();
   return {
@@ -595,6 +601,12 @@ test("T08/T11/T18/T20 exported decisions, evidence, escaping, privacy, invalidat
   assert.equal(csv.status, 201);
   assert.ok(csv.text.includes("validationId"));
   assert.ok(csv.text.includes(q.externalId));
+  const readable = await exported("CSV", analyst, "full", project, "es-MX");
+  assert.equal(readable.status, 201);
+  assert.ok(
+    readable.text.startsWith("Proyecto,Tema,Código de pregunta,Título"),
+  );
+  assert.ok(readable.text.includes(q.externalId));
   const limited = await exported("JSON", viewer, "validated-decisions");
   assert.equal(limited.status, 201);
   assert.equal(limited.data.kind, "validated-decisions-export");

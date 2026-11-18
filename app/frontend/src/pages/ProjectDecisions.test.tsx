@@ -394,3 +394,21 @@ it("si los extractos no cargan, el registro sigue siendo la lista de preguntas c
   expect(screen.getByRole("status")).toHaveTextContent("2 decisiones");
   expect(screen.queryByText(/Alcance:/)).not.toBeInTheDocument();
 });
+
+it.each([true, false])(
+  "entregables visibles y aviso solo con una decisión vigente: %s",
+  async (validated) => {
+    serve({ ...data, questions: validated ? data.questions : [] });
+    setup();
+    const group = await screen.findByRole("group", { name: "Entregables" });
+    expect(
+      within(group).getByRole("link", { name: "Informe para imprimir" }),
+    ).toHaveAttribute("href", "/projects/project-a/report");
+    expect(
+      within(group).getByRole("link", { name: "Exportar" }),
+    ).toHaveAttribute("href", "/projects/project-a/export");
+    expect(!!screen.queryByText("Ya puedes imprimir el informe")).toBe(
+      validated,
+    );
+  },
+);

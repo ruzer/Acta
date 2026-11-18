@@ -1,5 +1,5 @@
 import { ProjectAttention } from "./ProjectAttention";
-import { ProjectWorkbench } from "./ProjectWorkbench";
+import { ProjectWorkbench, ProjectDeliverables } from "./ProjectWorkbench";
 import { referenceTypeLabels } from "../reference-labels";
 import { FactGrid, PageHeader } from "../ui/semantic";
 import { auditActions, auditObjects } from "./audit-labels";
@@ -98,7 +98,11 @@ export function Dashboard() {
         projectName={data.projectName}
         role={data.role}
         active="attention"
+        actions={<ProjectDeliverables projectId={projectId} />}
       />
+      {data.questions.some((question) => question.status === "VALIDATED") && (
+        <p>Ya puedes imprimir el informe</p>
+      )}
       <ProjectAttention
         projectId={projectId}
         data={data}

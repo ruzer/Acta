@@ -13,6 +13,8 @@ Puedes preparar temas y preguntas fuera de Acta y cargarlos juntos en un proyect
 3. Abre **Importar** dentro del proyecto. Si ya tiene temas, preguntas, referencias o una importación previa, no se puede importar otra estructura, aunque los elementos estén archivados. **No hay mezcla, actualización ni reemplazo** de contenido existente.
 4. Prepara las áreas responsables. Un Administrador puede confirmar la creación de las faltantes; un Analista debe pedir que se creen primero. Crear un área no asigna participantes.
 
+La plantilla descargable y el CSV de resultados incluyen la marca de codificación UTF-8 (BOM) para que Excel muestre los acentos. La importación acepta archivos con o sin ella. Sus encabezados están en español. El CSV de resultados sigue siendo un resumen; **no** es una plantilla de importación.
+
 ## Plantilla sencilla CSV
 
 1. **Descargar plantilla CSV** desde **Importar**: abre [la plantilla](../examples/questionnaire-template.csv) en tu hoja de cálculo.
