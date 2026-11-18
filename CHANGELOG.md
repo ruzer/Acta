@@ -16,6 +16,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Conteos claros al crear cuentas.** La vista previa, la tabla, el botón y la entrega distinguen una cuenta de varias y cuentan por separado los accesos a proyectos.
 
+- **Atención según el acceso y el estado del proyecto.** La administración conoce qué puede preparar y consultar; un proyecto archivado indica que solo permite consulta, también al equipo analista.
+
 ## 0.11.0 — 2026-11-17
 
 Correcciones de Administración y cookie de sesión neutral de los PR

@@ -314,9 +314,11 @@ export function ProjectAttention({
         Qué requiere atención
       </h2>
       <p className="ac-attention-intro">
-        {canReview
-          ? "Preguntas y pendientes"
-          : "Consulta: las acciones corresponden al equipo analista"}{" "}
+        {lifecycle === "ARCHIVED"
+          ? "El proyecto está archivado y no está activo. Solo puedes consultar la información."
+          : data.role === "ADMIN"
+            ? "Puedes preparar el cuestionario y consultar las decisiones. Revisar respuestas y registrar decisiones corresponde al equipo analista."
+            : "Preguntas y pendientes"}{" "}
         · <strong>{data.projectName}</strong>
       </p>
       <div className="ac-attention-layout">

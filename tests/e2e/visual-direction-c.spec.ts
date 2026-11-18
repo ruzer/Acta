@@ -13,8 +13,7 @@ const widths = [
   [320, 640],
 ] as const;
 const output =
-  process.env.ACTA_DIRECTION_C_EVIDENCE_DIR ??
-  "test-results/design-evidence";
+  process.env.ACTA_DIRECTION_C_EVIDENCE_DIR ?? "test-results/design-evidence";
 const records: unknown[] = [];
 
 test.describe("Direction C · foundation", () => {
@@ -326,7 +325,7 @@ test.describe("Direction C · shell and attention", () => {
           await expect(action).toHaveCount(0);
           await expect(
             page.getByText(
-              /Consulta: las acciones corresponden al equipo analista/,
+              /Puedes preparar el cuestionario y consultar las decisiones\. Revisar respuestas y registrar decisiones corresponde al equipo analista\./,
             ),
           ).toBeVisible();
         }

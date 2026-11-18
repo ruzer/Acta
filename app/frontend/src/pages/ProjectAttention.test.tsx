@@ -400,11 +400,16 @@ function renderScale(
   cache: QueryClient,
   data: AttentionDashboard,
   initial = "/?keep=context",
+  lifecycle: "ACTIVE" | "ARCHIVED" = "ACTIVE",
 ) {
   return render(
     <QueryClientProvider client={cache}>
       <MemoryRouter initialEntries={[initial]}>
-        <ProjectAttention projectId="project" data={data} lifecycle="ACTIVE" />
+        <ProjectAttention
+          projectId="project"
+          data={data}
+          lifecycle={lifecycle}
+        />
         <Location />
       </MemoryRouter>
     </QueryClientProvider>,
@@ -722,3 +727,31 @@ it("la lista completa abre y prioriza estados de atención, conservando el orden
   await user.click(summary);
   expect(summary.closest("details")).toHaveAttribute("open");
 });
+
+it.each([
+  [
+    "ADMIN",
+    "ACTIVE",
+    "Puedes preparar el cuestionario y consultar las decisiones. Revisar respuestas y registrar decisiones corresponde al equipo analista.",
+  ],
+  ["ANALYST", "ACTIVE", "Preguntas y pendientes"],
+  [
+    "ADMIN",
+    "ARCHIVED",
+    "El proyecto está archivado y no está activo. Solo puedes consultar la información.",
+  ],
+  [
+    "ANALYST",
+    "ARCHIVED",
+    "El proyecto está archivado y no está activo. Solo puedes consultar la información.",
+  ],
+] as const)(
+  "explica Atención para %s en un proyecto %s",
+  (role, lifecycle, message) => {
+    const data = mockScale({ ...dashboard(0), role });
+    const { container } = renderScale(client(), data, "/", lifecycle);
+    expect(container.querySelector(".ac-attention-intro")).toHaveTextContent(
+      message,
+    );
+  },
+);
