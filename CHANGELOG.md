@@ -60,6 +60,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Foco en preguntas con errores.** Si el servidor rechaza un campo, el editor espera a que vuelva a estar habilitado antes de enfocarlo y abre los grupos con errores, también con respuestas rápidas.
 
+- **Prueba de pausa del autoguardado.** La comprobación en navegador mide los 60 segundos desde el primer intento con el reloj detenido y una respuesta de error demorada, conservando las aserciones de tiempo y texto sin cambiar el producto.
+
 ### Security
 
 - **Auditoría completa sin excepciones.** Se retira la excepción temporal de picomatch porque GitHub retiró GHSA-fc5q-39xc-vjpf el 2026-11-18T15:38:56Z; CI vuelve a exigir `npm audit --audit-level=high` sin excepciones. La comprobación del 2026-11-18 devuelve cero vulnerabilidades.
