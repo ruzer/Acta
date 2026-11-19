@@ -14,7 +14,7 @@ RUN go mod verify \
     && go build -trimpath -buildvcs=false \
        -ldflags "-X=main.Build=${VERSITYGW_COMMIT} -X=main.BuildTime=2026-11-06T22:51:18Z -X=main.Version=v1.11.0" \
        -o /out/versitygw
-FROM node:26.13.0-bookworm-slim
+FROM node:26.13.1-bookworm-slim
 COPY --from=versitygw-build /out/versitygw /usr/local/bin/versitygw
 COPY docker/versity/UPSTREAM-LICENSE docker/versity/UPSTREAM-NOTICE docker/versity/UPSTREAM-MODIFICATIONS /usr/share/licenses/versitygw/
 COPY docker/versity/start.mjs /opt/start.mjs
