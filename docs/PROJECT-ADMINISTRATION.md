@@ -46,7 +46,7 @@ Todo acceso al contenido de un proyecto exige **acceso activo** a él; la admini
 
 En **Atención → Ver participación**, la administración y el equipo analista del proyecto ven quién empezó, quién guarda borradores y quién envió sus respuestas. **Filtrar participación** y **Ordenar participación** ayudan a encontrar pendientes. «Completo» no significa revisado: solo que ya se enviaron las preguntas obligatorias que aplican a esa persona. Si solo tiene preguntas opcionales, debe enviarlas todas para aparecer como completo.
 
-**Copiar recordatorio** prepara un texto con las personas y sus preguntas obligatorias pendientes. Pégalo tú en el medio acordado con el equipo. Acta no envía mensajes ni incluye respuestas o contraseñas. Si el dispositivo no permite copiar, ofrece el texto seleccionable. Un participante o lector no puede abrir este seguimiento; administrar la institución tampoco otorga acceso automático.
+**Copiar recordatorio** prepara un texto con las personas y sus preguntas obligatorias pendientes. El botón de cada fila prepara el aviso únicamente para esa persona. Pégalo tú en el medio acordado con el equipo. Acta no envía mensajes ni incluye respuestas o contraseñas. Si el dispositivo no permite copiar, ofrece el texto seleccionable. Un participante o lector no puede abrir este seguimiento; administrar la institución tampoco otorga acceso automático.
 
 ## Fecha límite para responder
 

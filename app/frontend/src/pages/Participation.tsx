@@ -93,8 +93,12 @@ export function Participation() {
               : 0;
       return result || a.name.localeCompare(b.name, "es-MX");
     });
-  async function remind() {
-    const text = participationReminder(data, window.location.origin, timezone);
+  async function remind(person?: ParticipationView["participants"][number]) {
+    const text = participationReminder(
+      person ? { ...data, participants: [person] } : data,
+      window.location.origin,
+      timezone,
+    );
     setFallback("");
     try {
       await navigator.clipboard.writeText(text);
@@ -208,6 +212,7 @@ export function Participation() {
             "Obligatorias pendientes",
             "Última actividad",
             "Estado",
+            "Recordatorio",
           ].map((label) => ({ label }))}
           rows={people.map((p) => ({
             key: p.memberId,
@@ -220,6 +225,14 @@ export function Participation() {
               p.pending,
               p.lastActivity ? formatDate(p.lastActivity) : "Sin actividad",
               p.state,
+              <Button
+                tone="secondary"
+                disabled={p.pending === 0}
+                aria-label={`Copiar recordatorio para ${p.name}`}
+                onClick={() => void remind(p)}
+              >
+                Copiar recordatorio
+              </Button>,
             ],
           }))}
         />
