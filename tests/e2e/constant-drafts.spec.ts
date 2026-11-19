@@ -223,16 +223,24 @@ test("tras fallar, el autoguardado espera sesenta segundos y conserva el texto",
   const fixture = await draftProject(admin);
   await admin.close();
   await login(page, "stakeholder");
+  const clockStart = new Date("2026-11-19T12:00:00Z");
+  await page.clock.install({ time: new Date(clockStart.getTime() - 60000) });
   await page.goto(
     `/projects/${fixture.project.id}/respond/${fixture.questions[0].id}`,
   );
   const answer = page.getByLabel("Tu respuesta", { exact: true });
   await expect(answer).toBeVisible();
-  await page.clock.install();
+  await page.clock.pauseAt(clockStart);
   let attempts = 0;
+  let releaseFailure!: () => void;
+  const heldFailure = new Promise<void>((resolve) => {
+    releaseFailure = resolve;
+  });
+  const responseDelay = 1000;
   await page.route("**/response/draft", async (route) => {
     attempts++;
-    if (attempts === 1)
+    if (attempts === 1) {
+      await heldFailure;
       await route.fulfill({
         status: 503,
         contentType: "application/json",
@@ -241,14 +249,20 @@ test("tras fallar, el autoguardado espera sesenta segundos y conserva el texto",
           code: "SERVICE_UNAVAILABLE",
         }),
       });
-    else await route.continue();
+    } else await route.continue();
   });
   await answer.fill("Borrador ficticio conservado tras un fallo.");
   await page.clock.runFor(8000);
+  await expect.poll(() => attempts).toBe(1);
+  const firstAttemptTime = await page.evaluate(() => Date.now());
+  await page.clock.runFor(responseDelay);
+  releaseFailure();
   await expect(page.getByRole("status")).toContainText(
     "No se pudo guardar. Tu texto sigue aquí",
   );
-  await page.clock.runFor(59999);
+  // El plazo nace en el intento, no cuando el navegador recibe el error.
+  await page.clock.runFor(60000 - responseDelay - 1);
+  expect(await page.evaluate(() => Date.now())).toBe(firstAttemptTime + 59999);
   expect(attempts).toBe(1);
   await expect(answer).toHaveValue(
     "Borrador ficticio conservado tras un fallo.",
@@ -258,6 +272,7 @@ test("tras fallar, el autoguardado espera sesenta segundos y conserva el texto",
     "Borrador guardado a las",
   );
   expect(attempts).toBe(2);
+  expect(await page.evaluate(() => Date.now())).toBe(firstAttemptTime + 60000);
 });
 
 for (const action of ["Guardar y salir", "Enviar respuesta"] as const) {
