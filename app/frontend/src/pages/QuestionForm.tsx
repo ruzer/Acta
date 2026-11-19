@@ -186,13 +186,13 @@ export function QuestionForm({
     } else if (focus)
       form?.querySelector<HTMLElement>(".av-form-errors")?.focus();
   }
-  function showErrors(next: Record<string, string>) {
-    setFields(next);
-    requestAnimationFrame(() => {
-      for (const key of Object.keys(next)) revealField(key, false);
-      revealField(Object.keys(next)[0] ?? "");
-    });
-  }
+  useEffect(() => {
+    // Enfocar antes de habilitar los campos descarta el foco en respuestas rápidas.
+    if (busy) return;
+    const names = Object.keys(fields);
+    for (const name of names) revealField(name, false);
+    if (names[0]) revealField(names[0]);
+  }, [fields, busy]);
   useEffect(() => {
     if (focusField) requestAnimationFrame(() => revealField(focusField));
   }, [focusField]);
@@ -214,12 +214,12 @@ export function QuestionForm({
         invalid[el.name] = el.validationMessage;
     }
     if (Object.keys(invalid).length) {
-      showErrors(invalid);
+      setFields(invalid);
       return;
     }
     const parsed = questionInput.safeParse(value);
     if (!parsed.success) {
-      showErrors(
+      setFields(
         Object.fromEntries(
           parsed.error.issues.map((issue) => [
             issue.path.join("."),
@@ -245,7 +245,7 @@ export function QuestionForm({
           `El identificador ${value.externalId} ya se usó. Se propone ${next}; revisa y guarda de nuevo.`,
         );
         setValue((v) => ({ ...v, externalId: next }));
-      } else if (e instanceof ApiFailure) showErrors(e.fields);
+      } else if (e instanceof ApiFailure) setFields(e.fields);
     } finally {
       setBusy(false);
     }

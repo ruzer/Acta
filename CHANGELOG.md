@@ -56,6 +56,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Carga inicial coherente.** El arranque, la comprobación de sesión y las pantallas diferidas usan el mismo esqueleto accesible y sin animación que las pantallas de trabajo.
 
+- **Foco en preguntas con errores.** Si el servidor rechaza un campo, el editor espera a que vuelva a estar habilitado antes de enfocarlo y abre los grupos con errores, también con respuestas rápidas.
+
 ### Security
 
 - **Auditoría completa sin excepciones.** Se retira la excepción temporal de picomatch porque GitHub retiró GHSA-fc5q-39xc-vjpf el 2026-11-18T15:38:56Z; CI vuelve a exigir `npm audit --audit-level=high` sin excepciones. La comprobación del 2026-11-18 devuelve cero vulnerabilidades.
