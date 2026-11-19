@@ -275,7 +275,10 @@ function ResponseEditor({
     let own: Promise<ResponseView | null> | null = null;
     try {
       // La acción manual espera el guardado automático antes de tomar su versión.
-      if (pendingSave.current && !(await pendingSave.current)) return null;
+      if (pendingSave.current) {
+        const previous = await pendingSave.current;
+        if (!previous && automatic) return null;
+      }
       if (!mounted.current || !sessionActive.current) return null;
       const sent = {
         ...content(),
@@ -357,7 +360,7 @@ function ResponseEditor({
     setError("");
     setFields({});
     try {
-      if (pendingSave.current && !(await pendingSave.current)) return;
+      if (pendingSave.current) await pendingSave.current;
       let current = serverRef.current;
       if (form.formState.isDirty || !server.draft) {
         const saved = await save();
