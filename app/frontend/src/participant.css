@@ -546,7 +546,7 @@
   flex-wrap: wrap;
   gap: 8px;
 }
-.acta-participant .response-actions > .participant-text-button {
+.acta-participant .response-page .participant-text-button {
   color: var(--ac-ink-2);
 }
 .acta-participant .save-status {
@@ -791,10 +791,8 @@
     background: var(--ac-surface);
   }
   .acta-participant .response-footer .response-actions {
-    margin: 0 0 8px;
-  }
-  .acta-participant .response-footer > .hint {
     margin: 0;
+    padding-top: 0;
   }
   .acta-participant .formal-contribution input,
   .acta-participant .formal-contribution textarea {

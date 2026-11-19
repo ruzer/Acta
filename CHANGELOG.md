@@ -42,6 +42,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Atención sin filas repetidas.** Cada pregunta ocupa un solo grupo, conserva la misma acción al filtrar y anuncia los envíos nuevos desde la última visita de esa cuenta y proyecto.
 
+- **Más espacio para responder en móvil.** Solo Guardar y salir y Enviar respuesta permanecen al pie; la consulta y la ayuda se desplazan con el contenido.
+
 ### Security
 
 - **Auditoría completa sin excepciones.** Se retira la excepción temporal de picomatch porque GitHub retiró GHSA-fc5q-39xc-vjpf el 2026-11-18T15:38:56Z; CI vuelve a exigir `npm audit --audit-level=high` sin excepciones. La comprobación del 2026-11-18 devuelve cero vulnerabilidades.

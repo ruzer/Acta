@@ -749,22 +749,27 @@ function ResponseEditor({
                     de continuar.
                   </p>
                 )}
+                <Button
+                  className="participant-text-button"
+                  disabled={
+                    busy ||
+                    !!file ||
+                    !!staged ||
+                    server.question.applicability !== "ENABLED"
+                  }
+                  onClick={() => void save("consult")}
+                >
+                  <ParticipantIcon name="help" />
+                  Necesito consultar esto
+                </Button>
+                <p className="hint">
+                  “Guardar y salir” conserva tu borrador privado, incluso si aún
+                  no respondes. “Enviar respuesta” registra una versión que no
+                  se puede modificar.
+                </p>
                 {saveStatus}
                 <div className="response-footer">
                   <div className="response-actions">
-                    <Button
-                      className="participant-text-button"
-                      disabled={
-                        busy ||
-                        !!file ||
-                        !!staged ||
-                        server.question.applicability !== "ENABLED"
-                      }
-                      onClick={() => void save("consult")}
-                    >
-                      <ParticipantIcon name="help" />
-                      Necesito consultar esto
-                    </Button>
                     <div className="actions">
                       <Button
                         tone="secondary"
@@ -786,11 +791,6 @@ function ResponseEditor({
                       </Button>
                     </div>
                   </div>
-                  <p className="hint">
-                    “Guardar y salir” conserva tu borrador privado, incluso si
-                    aún no respondes. “Enviar respuesta” registra una versión
-                    que no se puede modificar.
-                  </p>
                 </div>
               </fieldset>
             </form>
