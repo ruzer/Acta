@@ -174,7 +174,7 @@ function ResponseEditor({
       setBackupUnavailable(!writeDraftText(backupKey, copy));
     } else removeDraftText(backupKey);
   }, [values, server, backupKey, recovery, authenticated]);
-  useDraftAutosave({
+  const resetAutosave = useDraftAutosave({
     changed: JSON.stringify(values),
     dirty: form.formState.isDirty,
     enabled: editing && !busy && !hasConflict && authenticated && !recovery,
@@ -268,11 +268,17 @@ function ResponseEditor({
       (automatic && (busyRef.current || hasConflict))
     )
       return null;
-    if (!automatic) working(true);
+    if (!automatic) {
+      resetAutosave();
+      working(true);
+    }
     let own: Promise<ResponseView | null> | null = null;
     try {
       // La acción manual espera el guardado automático antes de tomar su versión.
-      if (pendingSave.current && !(await pendingSave.current)) return null;
+      if (pendingSave.current) {
+        const previous = await pendingSave.current;
+        if (!previous && automatic) return null;
+      }
       if (!mounted.current || !sessionActive.current) return null;
       const sent = {
         ...content(),
@@ -349,11 +355,12 @@ function ResponseEditor({
     }
   }
   async function submit() {
+    resetAutosave();
     working(true);
     setError("");
     setFields({});
     try {
-      if (pendingSave.current && !(await pendingSave.current)) return;
+      if (pendingSave.current) await pendingSave.current;
       let current = serverRef.current;
       if (form.formState.isDirty || !server.draft) {
         const saved = await save();
@@ -749,22 +756,27 @@ function ResponseEditor({
                     de continuar.
                   </p>
                 )}
+                <Button
+                  className="participant-text-button"
+                  disabled={
+                    busy ||
+                    !!file ||
+                    !!staged ||
+                    server.question.applicability !== "ENABLED"
+                  }
+                  onClick={() => void save("consult")}
+                >
+                  <ParticipantIcon name="help" />
+                  Necesito consultar esto
+                </Button>
+                <p className="hint">
+                  “Guardar y salir” conserva tu borrador privado, incluso si aún
+                  no respondes. “Enviar respuesta” registra una versión que no
+                  se puede modificar.
+                </p>
                 {saveStatus}
                 <div className="response-footer">
                   <div className="response-actions">
-                    <Button
-                      className="participant-text-button"
-                      disabled={
-                        busy ||
-                        !!file ||
-                        !!staged ||
-                        server.question.applicability !== "ENABLED"
-                      }
-                      onClick={() => void save("consult")}
-                    >
-                      <ParticipantIcon name="help" />
-                      Necesito consultar esto
-                    </Button>
                     <div className="actions">
                       <Button
                         tone="secondary"
@@ -786,11 +798,6 @@ function ResponseEditor({
                       </Button>
                     </div>
                   </div>
-                  <p className="hint">
-                    “Guardar y salir” conserva tu borrador privado, incluso si
-                    aún no respondes. “Enviar respuesta” registra una versión
-                    que no se puede modificar.
-                  </p>
                 </div>
               </fieldset>
             </form>

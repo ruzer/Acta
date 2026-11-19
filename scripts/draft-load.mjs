@@ -25,7 +25,39 @@ export function loadConfiguration(env) {
     env.ACTA_LOAD_ADMIN_PASSWORD,
     "Falta ACTA_LOAD_ADMIN_PASSWORD, desde un archivo privado.",
   );
-  return { origin: origin.origin, password: env.ACTA_LOAD_ADMIN_PASSWORD };
+  const mode = env.ACTA_DRAFT_LOAD_MODE ?? "simultaneous";
+  assert.ok(
+    ["simultaneous", "paced"].includes(mode),
+    "Modo de medición no admitido.",
+  );
+  return {
+    origin: origin.origin,
+    password: env.ACTA_LOAD_ADMIN_PASSWORD,
+    mode,
+  };
+}
+export async function scheduleDraftWrites(write, mode) {
+  assert.ok(
+    ["simultaneous", "paced"].includes(mode),
+    "Modo de medición no admitido.",
+  );
+  const results = [],
+    pending = Array.from({ length: 50 }, () => Promise.resolve());
+  const count = mode === "paced" ? 100 : 50;
+  const start = performance.now();
+  for (let n = 0; n < count; n++) {
+    if (mode === "paced" && n > 0)
+      await new Promise((resolve) =>
+        setTimeout(resolve, Math.max(0, start + n * 600 - performance.now())),
+      );
+    const person = n % 50,
+      round = Math.floor(n / 50);
+    // Una cuenta termina su primer guardado antes del segundo, incluso si el servidor tarda.
+    const result = pending[person].then(() => write(person, round));
+    pending[person] = result;
+    results.push(result);
+  }
+  return Promise.all(results);
 }
 export function summarizeDraftWrites(results) {
   assert.ok(
@@ -245,26 +277,28 @@ async function run(options) {
     requestId: randomUUID(),
   });
   const start = performance.now();
-  const results = await Promise.all(
-    sessions.map(async (session, i) => {
-      const t = performance.now();
-      try {
-        const r = await raw(
-          `/projects/${project.id}/questions/${graph.questions[i].id}/response/draft`,
-          session,
-          "PUT",
-          body(`Borrador ficticio ${i + 1}`),
-        );
-        await r.arrayBuffer();
-        return { status: r.status, ms: performance.now() - t };
-      } catch {
-        return { status: 0, ms: performance.now() - t };
-      }
-    }),
-  );
+  const versions = Array(50).fill(0);
+  const results = await scheduleDraftWrites(async (i, round) => {
+    const t = performance.now();
+    try {
+      const r = await raw(
+        `/projects/${project.id}/questions/${graph.questions[i].id}/response/draft`,
+        sessions[i],
+        "PUT",
+        body(`Borrador ficticio ${i + 1}, ronda ${round + 1}`, versions[i]),
+      );
+      if (r.ok) versions[i] = (await r.json()).lockVersion;
+      else await r.arrayBuffer();
+      return { status: r.status, ms: performance.now() - t };
+    } catch {
+      return { status: 0, ms: performance.now() - t };
+    }
+  }, options.mode);
   console.log(
     JSON.stringify({
-      stage: "concurrent-drafts",
+      stage: options.mode === "paced" ? "paced-drafts" : "concurrent-drafts",
+      rounds: options.mode === "paced" ? 2 : 1,
+      intervalMs: options.mode === "paced" ? 600 : 0,
       questions: 300,
       participants: 50,
       elapsedMs: performance.now() - start,

@@ -170,7 +170,7 @@ function SignedOut({
     staleTime: 0,
   });
   const [finished, setFinished] = useState(false);
-  if (setup.isPending) return <LoadingState />;
+  if (setup.isPending) return <LoadingState skeleton />;
   if (setup.data?.state === "PENDING" && !finished)
     return <Setup onFinished={() => setFinished(true)} />;
   return (
@@ -268,7 +268,7 @@ function Session() {
     client.clear();
     setNotice(message);
   }
-  if (loading) return <LoadingState />;
+  if (loading) return <LoadingState skeleton />;
   if (!me)
     return (
       <SignedOut
@@ -305,7 +305,7 @@ function Session() {
     projects.isLoading &&
     location.pathname.startsWith("/projects/")
   )
-    return <LoadingState />;
+    return <LoadingState skeleton />;
   // Every page outside a project shares the same frame as the project pages.
   // Only the forced password change (no navigation until it is done) keeps the
   // minimal legacy header.
@@ -320,7 +320,7 @@ function Session() {
     >
       {participant && <ParticipantNotice />}
       {error && <Alert error>{error}</Alert>}
-      <Suspense fallback={<LoadingState />}>
+      <Suspense fallback={<LoadingState skeleton />}>
         {me.user.mustChangePassword ? (
           <Password
             required

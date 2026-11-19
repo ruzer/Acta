@@ -65,7 +65,7 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
     } else icon?.remove();
     return () => observer.disconnect();
   }, [q.data]);
-  if (q.isPending) return <LoadingState />;
+  if (q.isPending) return <LoadingState skeleton />;
   if (q.error)
     return <ErrorState error={q.error} retry={() => void q.refetch()} />;
   formatting = { locale: q.data.locale, timezone: q.data.timezone };

@@ -26,6 +26,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Comprobación de los pendientes menores.** Se conserva el respaldo de nombres ausentes en exportes históricos y se fija una prueba de la columna «Área» en Miembros; ambos comportamientos ya estaban presentes en la base.
 
+- **Medición de guardados con ritmo espaciado.** El laboratorio puede medir dos rondas de 50 personas, con un inicio cada 0,6 segundos; informa éxitos, fallos y latencias sin optimizar ni cambiar la revisión.
+
 ### Fixed
 
 - **Acceso al proyecto sin jerga.** La administración, el alta de cuentas y los mensajes de ayuda hablan de accesos al proyecto; dar acceso sigue siendo distinto de asignar preguntas.
@@ -41,6 +43,20 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 - **Carga y navegación legibles en móvil.** Mis proyectos, Mi trabajo, Atención y Responder muestran una carga accesible sin animación; los nombres del menú lateral siguen visibles en anchos intermedios. Las acciones de respuesta permanecen al pie en pantallas pequeñas, respetando el área segura.
 
 - **Atención sin filas repetidas.** Cada pregunta ocupa un solo grupo, conserva la misma acción al filtrar y anuncia los envíos nuevos desde la última visita de esa cuenta y proyecto.
+
+- **Más espacio para responder en móvil.** Solo Guardar y salir y Enviar respuesta permanecen al pie; la consulta y la ayuda se desplazan con el contenido.
+
+- **Reintentos de autoguardado con pausa creciente.** Tras fallar, los intentos se espacian a 60, 120 y hasta 300 segundos; un guardado correcto o una acción manual recupera el intervalo de 30 segundos, sin perder el texto pendiente.
+
+- **Guardar o enviar con un solo clic tras un fallo automático.** La acción manual espera el intento pendiente y realiza su propio guardado si falló, conservando la versión y el contenido actuales.
+
+- **Recordatorios individuales.** Cada persona con pendientes tiene un botón para copiar solo su recordatorio; si no se puede usar el portapapeles, el texto queda seleccionado para copiarlo.
+
+- **Participación ordenada por avance.** El orden por estado sigue Sin iniciar, En borrador, Envió parte y Completo; los empates se ordenan por nombre.
+
+- **Carga inicial coherente.** El arranque, la comprobación de sesión y las pantallas diferidas usan el mismo esqueleto accesible y sin animación que las pantallas de trabajo.
+
+- **Foco en preguntas con errores.** Si el servidor rechaza un campo, el editor espera a que vuelva a estar habilitado antes de enfocarlo y abre los grupos con errores, también con respuestas rápidas.
 
 ### Security
 

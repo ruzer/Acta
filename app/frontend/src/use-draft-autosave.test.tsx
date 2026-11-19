@@ -110,6 +110,69 @@ it("no guarda tras desactivar la sesión ni después de desmontar", async () => 
   await advance(40000);
   expect(save).not.toHaveBeenCalled();
 });
+it("retrocede tras fallos hasta cinco minutos y vuelve a treinta segundos al guardar", async () => {
+  const save = vi.fn().mockResolvedValue(null);
+  const { rerender } = renderHook(
+    (props) => useDraftAutosave({ ...props, save }),
+    { initialProps: base },
+  );
+  await advance(8000);
+  expect(save).toHaveBeenCalledTimes(1);
+  for (const [index, delay] of [60000, 120000, 300000, 300000].entries()) {
+    rerender({ ...base, changed: String(index) });
+    await advance(delay - 1);
+    await act(async () => {
+      window.dispatchEvent(new Event("pagehide"));
+    });
+    expect(save).toHaveBeenCalledTimes(index + 1);
+    await advance(1);
+    expect(save).toHaveBeenCalledTimes(index + 2);
+  }
+  save.mockResolvedValue({});
+  await advance(300000);
+  const calls = save.mock.calls.length;
+  await advance(29999);
+  expect(save).toHaveBeenCalledTimes(calls);
+  await advance(1);
+  expect(save).toHaveBeenCalledTimes(calls + 1);
+});
+it("una acción manual reinicia la espera aunque falle el guardado automático en vuelo", async () => {
+  let release!: (result: null) => void;
+  const save = vi
+    .fn()
+    .mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          release = resolve;
+        }),
+    )
+    .mockResolvedValue(null);
+  const { result } = renderHook(() => useDraftAutosave({ ...base, save }));
+  await advance(8000);
+  await act(async () => {
+    result.current();
+    release(null);
+  });
+  await advance(29999);
+  expect(save).toHaveBeenCalledTimes(1);
+  await advance(1);
+  expect(save).toHaveBeenCalledTimes(2);
+});
+it("una fecha de guardado nueva reinicia la pausa y un rechazo también la aumenta", async () => {
+  const save = vi.fn().mockRejectedValue(new Error("Sin conexión"));
+  const { rerender } = renderHook(
+    (props) => useDraftAutosave({ ...props, save }),
+    { initialProps: base },
+  );
+  await advance(8000);
+  await advance(30000);
+  expect(save).toHaveBeenCalledTimes(1);
+  rerender({ ...base, savedAt: Date.now() });
+  await advance(29999);
+  expect(save).toHaveBeenCalledTimes(1);
+  await advance(1);
+  expect(save).toHaveBeenCalledTimes(2);
+});
 it("la copia solo guarda campos de texto, separa identidades y rechaza contenido ajeno al formato", () => {
   const content = {
     answer: ["option-id"],

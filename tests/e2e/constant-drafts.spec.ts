@@ -213,3 +213,95 @@ test("el conflicto automático conserva el texto y al caducar la sesión borra e
     "Texto local que permanece tras el conflicto.",
   );
 });
+
+test("tras fallar, el autoguardado espera sesenta segundos y conserva el texto", async ({
+  page,
+  browser,
+}) => {
+  const admin = await browser.newPage();
+  await login(admin, "admin");
+  const fixture = await draftProject(admin);
+  await admin.close();
+  await login(page, "stakeholder");
+  await page.goto(
+    `/projects/${fixture.project.id}/respond/${fixture.questions[0].id}`,
+  );
+  const answer = page.getByLabel("Tu respuesta", { exact: true });
+  await expect(answer).toBeVisible();
+  await page.clock.install();
+  let attempts = 0;
+  await page.route("**/response/draft", async (route) => {
+    attempts++;
+    if (attempts === 1)
+      await route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        body: JSON.stringify({
+          message: "No se pudo guardar.",
+          code: "SERVICE_UNAVAILABLE",
+        }),
+      });
+    else await route.continue();
+  });
+  await answer.fill("Borrador ficticio conservado tras un fallo.");
+  await page.clock.runFor(8000);
+  await expect(page.getByRole("status")).toContainText(
+    "No se pudo guardar. Tu texto sigue aquí",
+  );
+  await page.clock.runFor(59999);
+  expect(attempts).toBe(1);
+  await expect(answer).toHaveValue(
+    "Borrador ficticio conservado tras un fallo.",
+  );
+  await page.clock.runFor(1);
+  await expect(page.getByRole("status")).toContainText(
+    "Borrador guardado a las",
+  );
+  expect(attempts).toBe(2);
+});
+
+for (const action of ["Guardar y salir", "Enviar respuesta"] as const) {
+  test(`${action} funciona al primer clic mientras falla el autoguardado`, async ({
+    page,
+    browser,
+  }) => {
+    const admin = await browser.newPage();
+    await login(admin, "admin");
+    const fixture = await draftProject(admin);
+    await admin.close();
+    await login(page, "stakeholder");
+    const path = `/projects/${fixture.project.id}/respond/${fixture.questions[0].id}`;
+    await page.goto(path);
+    const answer = page.getByLabel("Tu respuesta", { exact: true });
+    await expect(answer).toBeVisible();
+    await page.clock.install();
+    const started = Promise.withResolvers<void>(),
+      release = Promise.withResolvers<void>();
+    let attempts = 0;
+    await page.route("**/response/draft", async (route) => {
+      attempts++;
+      if (attempts === 1) {
+        started.resolve();
+        await release.promise;
+        await route.fulfill({
+          status: 503,
+          contentType: "application/json",
+          body: JSON.stringify({
+            message: "No se pudo guardar.",
+            code: "SERVICE_UNAVAILABLE",
+          }),
+        });
+      } else await route.continue();
+    });
+    await answer.fill("Texto ficticio que se guarda con un clic.");
+    await page.clock.runFor(8000);
+    await started.promise;
+    try {
+      await page.getByRole("button", { name: action, exact: true }).click();
+    } finally {
+      release.resolve();
+    }
+    await expect(page).not.toHaveURL(new RegExp(`${path}$`));
+    expect(attempts).toBe(2);
+  });
+}

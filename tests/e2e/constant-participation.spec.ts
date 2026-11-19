@@ -92,6 +92,7 @@ test("Participación muestra cuatro estados, filtra, ordena y copia un recordato
       await person.close();
     }
   }
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   for (const role of ["admin", "analyst"]) {
     if (role !== "admin") {
       await page.locator(".ac-mobile-account > summary").click();
@@ -115,10 +116,44 @@ test("Participación muestra cuatro estados, filtra, ordena y copia un recordato
         await expect(
           table.getByRole("cell", { name: state, exact: true }),
         ).toHaveCount(1);
+      await page.getByLabel("Ordenar participación").selectOption("state");
+      await expect(
+        table.locator("tbody tr").locator('td[data-label="Estado"]'),
+      ).toHaveText(["Sin iniciar", "En borrador", "Envió parte", "Completo"]);
       await page.getByLabel("Ordenar participación").selectOption("pending");
       await page.getByLabel("Filtrar participación").selectOption("Completo");
       await expect(table.getByRole("row")).toHaveCount(2);
       await page.getByLabel("Filtrar participación").selectOption("");
+      const individual = table
+        .getByRole("row")
+        .filter({
+          has: page.getByRole("cell", { name: "No inició", exact: true }),
+        })
+        .getByRole("button", {
+          name: "Copiar recordatorio para No inició",
+          exact: true,
+        });
+      await individual.focus();
+      await page.keyboard.press("Enter");
+      await expect(page.getByRole("status")).toContainText(
+        "Recordatorio copiado",
+      );
+      const reminder = await page.evaluate(() =>
+        navigator.clipboard.readText(),
+      );
+      expect(reminder).toContain(
+        "No inició: 2 preguntas obligatorias pendientes",
+      );
+      expect(reminder).toContain(fixture.project.name);
+      expect(reminder).not.toMatch(
+        /Persona con avance|Completó|Contenido de respuesta ficticia privado/,
+      );
+      await expect(
+        table.getByRole("button", {
+          name: "Copiar recordatorio para Completó",
+          exact: true,
+        }),
+      ).toBeDisabled();
       await checkedPage(
         page,
         evidence,
@@ -128,7 +163,9 @@ test("Participación muestra cuatro estados, filtra, ordena y copia un recordato
     }
   }
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-  await page.getByRole("button", { name: "Copiar recordatorio" }).focus();
+  await page
+    .getByRole("button", { name: "Copiar recordatorio", exact: true })
+    .focus();
   await page.keyboard.press("Enter");
   await expect(page.getByRole("status")).toContainText("Recordatorio copiado");
   const copied = await page.evaluate(() => navigator.clipboard.readText());
@@ -141,9 +178,24 @@ test("Participación muestra cuatro estados, filtra, ordena y copia un recordato
       throw new Error("No disponible");
     };
   });
-  await page.getByRole("button", { name: "Copiar recordatorio" }).click();
+  await page
+    .getByRole("button", { name: "Copiar recordatorio", exact: true })
+    .click();
   const fallback = page.getByLabel("Texto del recordatorio para copiar");
   await expect(fallback).toBeFocused();
   await expect(fallback).toHaveValue(copied);
+  await page
+    .getByRole("button", {
+      name: "Copiar recordatorio para No inició",
+      exact: true,
+    })
+    .click();
+  await expect(fallback).toBeFocused();
+  await expect(fallback).toHaveValue(
+    /No inició: 2 preguntas obligatorias pendientes/,
+  );
+  expect(await fallback.inputValue()).not.toMatch(
+    /Persona con avance|Completó|Contenido de respuesta ficticia privado/,
+  );
   await checkedPage(page, evidence, "constant-reminder-fallback", 390);
 });

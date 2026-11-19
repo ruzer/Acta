@@ -3,6 +3,7 @@ import * as apiModule from "../api";
 import { ReviewDetail as ReviewDetailPage } from "./ReviewDetail";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import {
+  act,
   cleanup,
   render,
   screen,
@@ -368,6 +369,42 @@ it("VIS005: abre avanzado aunque el primer error sea de contenido", async () => 
   await waitFor(() =>
     expect(screen.getByLabelText("Pregunta", { exact: true })).toHaveFocus(),
   );
+  expect(
+    screen.getByText("Configuración avanzada").closest("details"),
+  ).toHaveAttribute("open");
+  expect(screen.getByLabelText("Prioridad")).toHaveAccessibleDescription(
+    "Revisa la prioridad.",
+  );
+});
+
+it("VIS005: enfoca el error después de habilitar el formulario aunque el cuadro llegue antes", async () => {
+  let rejectSave!: (reason: Error) => void;
+  const pending = new Promise<void>((_resolve, reject) => {
+    rejectSave = reject;
+  });
+  const { user } = form(vi.fn(() => pending));
+  await basic(user);
+  await user.click(screen.getByRole("button", { name: "Crear pregunta" }));
+  const question = screen.getByLabelText("Pregunta", { exact: true });
+  expect(question).toBeDisabled();
+  const frames: FrameRequestCallback[] = [];
+  vi.spyOn(globalThis, "requestAnimationFrame").mockImplementation((callback) => {
+    frames.push(callback);
+    return frames.length;
+  });
+  await act(async () => {
+    rejectSave(new ApiFailure(400, "Revisar campos", {
+      question: "Revisa la redacción.",
+      priority: "Revisa la prioridad.",
+    }));
+    await Promise.resolve();
+    // Un cuadro no garantiza que React ya haya habilitado los campos.
+    expect(question).toBeDisabled();
+    for (const callback of frames.splice(0)) callback(performance.now());
+  });
+  expect(question).toBeEnabled();
+  expect(question).toHaveFocus();
+  expect(question).toHaveAccessibleDescription("Revisa la redacción.");
   expect(
     screen.getByText("Configuración avanzada").closest("details"),
   ).toHaveAttribute("open");

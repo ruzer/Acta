@@ -9,19 +9,30 @@ test("la gestión se carga al navegar, anuncia la espera y enfoca el título al 
   page.on("request", (request) => requested.push(request.url()));
   await login(page, "admin");
   expect(
-    requested.some((url) => url.includes("/pages/Administration.tsx")),
+    requested.some((url) =>
+      /\/(?:src\/pages\/Administration\.tsx|assets\/Administration-[^/]+\.js)/.test(
+        url,
+      ),
+    ),
   ).toBe(false);
   const release = Promise.withResolvers<void>();
-  await page.route(/\/src\/pages\/Administration\.tsx/, async (route) => {
-    await release.promise;
-    await route.continue();
-  });
+  await page.route(
+    /\/(?:src\/pages\/Administration\.tsx|assets\/Administration-[^/]+\.js)/,
+    async (route) => {
+      await release.promise;
+      await route.continue();
+    },
+  );
   try {
     await page
       .getByRole("link", { name: "Administración", exact: true })
       .click();
     await expect(page.locator("main").getByRole("status")).toHaveText(
       "Cargando información…",
+    );
+    await expect(page.locator("main .loading-skeleton")).toHaveAttribute(
+      "aria-busy",
+      "true",
     );
   } finally {
     release.resolve();

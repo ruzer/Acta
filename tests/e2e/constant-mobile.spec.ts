@@ -15,9 +15,11 @@ async function holdLoading(
   const held = new Promise<void>((resolve) => {
     release = resolve;
   });
+  const requested = Promise.withResolvers<void>();
   await page.route(
     (url) => url.pathname === `/api/v1${apiPath}`,
     async (route) => {
+      requested.resolve();
       await held;
       await route.continue();
     },
@@ -25,6 +27,7 @@ async function holdLoading(
   );
   try {
     await page.goto(url);
+    await requested.promise;
     await expect(
       page.locator('.loading-skeleton[aria-busy="true"]'),
     ).toBeVisible();
@@ -123,4 +126,42 @@ test("Mi trabajo y Responder muestran carga; las acciones móviles permanecen vi
     }
     await checkedPage(page, evidence, "constant-respond", width);
   }
+});
+
+test("el pie a 390×480 deja espacio para responder y fija solo guardar y enviar", async ({
+  page,
+  browser,
+}) => {
+  const admin = await browser.newPage();
+  await login(admin, "admin");
+  const fixture = await draftProject(admin);
+  await admin.close();
+  await login(page, "stakeholder");
+  await page.setViewportSize({ width: 390, height: 480 });
+  await page.goto(
+    `/projects/${fixture.project.id}/respond/${fixture.questions[0].id}`,
+  );
+  const answer = page.getByLabel("Tu respuesta", { exact: true });
+  await answer.focus();
+  await answer.scrollIntoViewIfNeeded();
+  const footer = page.locator(".response-footer");
+  await checkedPage(page, evidence, "polish-response-short-viewport", 390);
+  await expect(footer.getByRole("button")).toHaveCount(2);
+  await expect(
+    footer.getByRole("button", { name: "Guardar y salir", exact: true }),
+  ).toBeInViewport();
+  await expect(
+    footer.getByRole("button", { name: "Enviar respuesta", exact: true }),
+  ).toBeInViewport();
+  await expect(footer.getByText("Necesito consultar esto")).toHaveCount(0);
+  await expect(footer.locator(".hint")).toHaveCount(0);
+  const bar = (await footer.boundingBox())!;
+  const input = (await answer.boundingBox())!;
+  expect(bar.height).toBeLessThanOrEqual(140);
+  expect(bar.y).toBeGreaterThanOrEqual(200);
+  expect(input.y).toBeGreaterThanOrEqual(0);
+  expect(input.y + input.height).toBeLessThanOrEqual(bar.y + 1);
+  await expect(
+    page.getByRole("button", { name: "Necesito consultar esto" }),
+  ).toBeAttached();
 });

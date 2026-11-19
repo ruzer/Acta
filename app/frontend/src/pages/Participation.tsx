@@ -89,12 +89,17 @@ export function Participation() {
           : order === "activity"
             ? (b.lastActivity ?? "").localeCompare(a.lastActivity ?? "")
             : order === "state"
-              ? a.state.localeCompare(b.state, "es-MX")
+              ? participationStates.indexOf(a.state) -
+                participationStates.indexOf(b.state)
               : 0;
       return result || a.name.localeCompare(b.name, "es-MX");
     });
-  async function remind() {
-    const text = participationReminder(data, window.location.origin, timezone);
+  async function remind(person?: ParticipationView["participants"][number]) {
+    const text = participationReminder(
+      person ? { ...data, participants: [person] } : data,
+      window.location.origin,
+      timezone,
+    );
     setFallback("");
     try {
       await navigator.clipboard.writeText(text);
@@ -151,7 +156,7 @@ export function Participation() {
           <option value="name">Nombre (A a Z)</option>
           <option value="pending">Más pendientes primero</option>
           <option value="activity">Actividad más reciente</option>
-          <option value="state">Estado (A a Z)</option>
+          <option value="state">Estado (por avance)</option>
         </Select>
         <Button
           disabled={!data.participants.some((p) => p.pending > 0)}
@@ -208,6 +213,7 @@ export function Participation() {
             "Obligatorias pendientes",
             "Última actividad",
             "Estado",
+            "Recordatorio",
           ].map((label) => ({ label }))}
           rows={people.map((p) => ({
             key: p.memberId,
@@ -220,6 +226,14 @@ export function Participation() {
               p.pending,
               p.lastActivity ? formatDate(p.lastActivity) : "Sin actividad",
               p.state,
+              <Button
+                tone="secondary"
+                disabled={p.pending === 0}
+                aria-label={`Copiar recordatorio para ${p.name}`}
+                onClick={() => void remind(p)}
+              >
+                Copiar recordatorio
+              </Button>,
             ],
           }))}
         />

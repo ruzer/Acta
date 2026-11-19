@@ -15,6 +15,9 @@ export function useDraftAutosave({
   save: () => Promise<unknown>;
 }) {
   const lastAttempt = useRef(savedAt),
+    lastSavedAt = useRef(savedAt),
+    retryDelay = useRef(30000),
+    manualAction = useRef(0),
     running = useRef(false),
     mounted = useRef(true);
   const latestSave = useRef(save);
@@ -29,22 +32,42 @@ export function useDraftAutosave({
     };
   }, []);
   useEffect(() => {
+    if (savedAt !== lastSavedAt.current) {
+      lastSavedAt.current = savedAt;
+      retryDelay.current = 30000;
+    }
     lastAttempt.current = Math.max(lastAttempt.current, savedAt);
     if (!dirty || !enabled) return;
     async function attempt() {
-      if (running.current || Date.now() - lastAttempt.current < 30000) return;
+      if (
+        running.current ||
+        Date.now() - lastAttempt.current < retryDelay.current
+      )
+        return;
       lastAttempt.current = Date.now();
       running.current = true;
+      const action = manualAction.current;
+      let succeeded = false;
       try {
-        await latestSave.current();
+        succeeded = (await latestSave.current()) !== null;
+      } catch {
+        // El guardado conserva y presenta su error; aquí solo se regula el siguiente intento.
       } finally {
+        if (action === manualAction.current)
+          retryDelay.current = succeeded
+            ? 30000
+            : retryDelay.current === 30000
+              ? 60000
+              : retryDelay.current === 60000
+                ? 120000
+                : 300000;
         running.current = false;
         if (mounted.current) setCompleted((n) => n + 1);
       }
     }
     const timer = window.setTimeout(
       () => void attempt(),
-      Math.max(8000, lastAttempt.current + 30000 - Date.now()),
+      Math.max(8000, lastAttempt.current + retryDelay.current - Date.now()),
     );
     const hidden = () => {
       if (document.visibilityState === "hidden") void attempt();
@@ -60,4 +83,10 @@ export function useDraftAutosave({
       window.removeEventListener("pagehide", leaving);
     };
   }, [changed, dirty, enabled, savedAt, completed]);
+  return () => {
+    manualAction.current++;
+    retryDelay.current = 30000;
+    lastAttempt.current = Date.now();
+    setCompleted((n) => n + 1);
+  };
 }
