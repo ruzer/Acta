@@ -157,3 +157,42 @@ por minuto, `2, 2, 1, 2, 2, 1, 2, 2, 1, 2`; intervalo mínimo **35,97 segundos**
 Ninguna ventana de 60 segundos tuvo más de dos eventos. Esta prueba usó pausas reales,
 no el reloj simulado de las pruebas unitarias. El límite corresponde a intentos
 automáticos; pulsar acciones de guardado o envío explícitamente sigue disponible.
+
+## Guardados con ritmo espaciado — 2026-11-19
+
+El modo `ACTA_DRAFT_LOAD_MODE=paced` conserva las 300 preguntas, 50 cuentas y
+15 000 asignaciones ficticias del ensayo anterior. Inicia un guardado cada
+0,6 segundos y realiza dos rondas: 100 peticiones en total. Cada persona
+termina su primer guardado antes de iniciar el segundo y usa la versión que
+confirmó el servidor. No se reintentan los errores. Sin esta variable se conserva
+el modo anterior de 50 guardados simultáneos (`simultaneous`).
+
+Añade `ACTA_DRAFT_LOAD_MODE=paced` al mismo archivo privado del ejemplo anterior.
+El modo se valida antes de crear datos. No cambian el backend, `recomputeReview`,
+el pool ni los límites de transacción.
+
+Medición de esta entrega sobre la base `337db42`, con el backend de esa base en
+un laboratorio Docker ARM64 propio, en un host compartido. Los cambios de este PR
+son de interfaz y del script de medición. La tanda se completó; **no pasó como
+prueba de capacidad**:
+
+| Medida | Resultado observado |
+| --- | ---: |
+| Peticiones / rondas / intervalo | 100 / 2 / 0,6 s |
+| Respuestas HTTP 200 / HTTP 500 | 67 / 33 |
+| Duración total de la tanda | 69,59 s |
+| Mínimo / mediana / percentil 95 / máximo | 2,03 / 9,52 / 15,13 / 21,76 s |
+
+Los 33 errores corresponden a `P2028` en el backend propio y se incluyen en los
+percentiles. Se conserva la comprobación de
+proyección: pedir consulta en un borrador cambió una pregunta de `NOT_REVIEWED`
+a `PENDING`, por lo que no se elimina el recálculo.
+
+Como referencia **independiente proporcionada para este trabajo**, otro ensayo
+sobre `337db42`, también del 2026-11-19 y en un host ARM64 compartido, informó
+0,76 s para un guardado aislado y 100/100 HTTP 200 al mismo ritmo, con mediana
+4,85 s, percentil 95 de 8,8 s y máximo de 9,1 s. No se presenta como resultado
+reproducido por esta entrega. No se midió de nuevo el guardado aislado ni se
+identificó la causa de la diferencia entre los dos entornos. Estas observaciones
+no garantizan capacidad para una institución; se necesita medir su carga y
+entorno reales antes de dimensionar.
