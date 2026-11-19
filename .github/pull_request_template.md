@@ -20,6 +20,7 @@ Comandos, resultados, entorno y lo no ejecutado con motivo. Capturas con datos f
 - [ ] Sin secretos, datos personales, evidencia real ni artifacts temporales.
 - [ ] Autorización y procedencia de código/assets revisadas; avisos conservados.
 - [ ] Documentación/changelog y accesibilidad considerados cuando corresponda.
+- [ ] Si cambié un texto, botón o comportamiento que cita docs/ayuda, actualicé la ayuda.
 
 - [ ] Mis contribuciones pueden distribuirse bajo AGPL-3.0-only y mis commits incluyen Signed-off-by conforme a DCO 1.1.
 

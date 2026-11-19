@@ -107,6 +107,8 @@ Prepara un proyecto vacío y carga tus temas y preguntas desde una [plantilla CS
 
 ## Self-hosting
 
+Para dudas de uso, consulta el [centro de ayuda](docs/ayuda/README.md): glosario, mensajes de error y preguntas frecuentes, organizados por tarea.
+
 El trabajo cotidiano incluye borradores con autoguardado, seguimiento de [participación y fechas límite informativas](docs/PROJECT-ADMINISTRATION.md), ayuda por perfil y [cuestionarios reutilizables](docs/IMPORTING-QUESTIONNAIRES.md). Los recordatorios se copian para enviarlos por el medio que elijas; Acta no envía correo. La [medición de guardados simultáneos](docs/RESOURCE-REFERENCE.md) registra un límite de capacidad pendiente; no certifica 50 personas guardando a la vez.
 
 Para evaluar el uso con personas no técnicas, prepara un [piloto de 5 a 8 personas](docs/pilot/README.md): guías breves, observación sin dirigir, métricas y una decisión de cierre. El piloto con personas es una validación pendiente; el kit no declara el producto validado.

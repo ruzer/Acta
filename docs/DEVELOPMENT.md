@@ -117,3 +117,9 @@ Las pruebas de Dirección C y del asistente guardan capturas y métricas en
 `test-results/design-evidence` (ignorado por Git). `ACTA_DIRECTION_C_EVIDENCE_DIR`
 permite elegir otro destino de trabajo. Las imágenes de `docs/design/` son
 referencias históricas versionadas y las pruebas no deben regenerarlas por defecto.
+
+## Cómo agregar una respuesta a la ayuda
+
+Sigue el [flujo de contribución de ayuda](../CONTRIBUTING.md#cómo-agregar-una-respuesta-a-la-ayuda): una duda respondida en Discussions, con su enlace estable, se convierte en un PR con la pregunta, la respuesta comprobada y sus fuentes. Los pasos de uso permanecen en las guías del piloto.
+
+La prueba `npx vitest run tests/unit/ayuda.test.ts` contrasta etiquetas y mensajes con el producto, resuelve enlaces y anclas, comprueba el glosario y los índices y detecta vocabulario retirado. No demuestra que las explicaciones sean correctas: revisa también permisos, contexto del mensaje y comportamiento. Comprueba los enlaces de todos los Markdown modificados y registra qué recorriste en la interfaz.

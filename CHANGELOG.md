@@ -28,6 +28,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Medición de guardados con ritmo espaciado.** El laboratorio puede medir dos rondas de 50 personas, con un inicio cada 0,6 segundos; informa éxitos, fallos y latencias sin optimizar ni cambiar la revisión.
 
+- **Centro de ayuda versionado.** Glosario, solución de problemas y preguntas frecuentes por audiencia, con guías enlazadas, prueba anti-deriva y mapa `llms.txt` para consultar las fuentes sin duplicarlas.
+
 ### Fixed
 
 - **Acceso al proyecto sin jerga.** La administración, el alta de cuentas y los mensajes de ayuda hablan de accesos al proyecto; dar acceso sigue siendo distinto de asignar preguntas.

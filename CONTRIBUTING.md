@@ -33,9 +33,19 @@ Identifica la parte reutilizable y extrae una rama limpia desde upstream. Elimin
 
 Explica el problema con un ejemplo ficticio, evita traer todo el historial del fork y prueba el cambio sin servicios privados. Si no se puede separar con seguridad, discute primero una alternativa genérica. [Guía de forks y sincronización](docs/UPSTREAM-FORKS.md).
 
+## Cómo agregar una respuesta a la ayuda
+
+Parte de una duda respondida en [Discussions → Q&A](https://github.com/ruzer/Acta/discussions/categories/q-a). Conserva el enlace estable a la discusión o a la respuesta aceptada en la descripción del PR; no uses un enlace a una búsqueda.
+
+1. Busca si la duda ya está en el centro de ayuda. Propón una pregunta en palabras de la persona y una respuesta breve, autocontenida y en español de México.
+2. Comprueba cada afirmación con el código, una prueba, una guía vigente o la interfaz. En el PR enlaza esas fuentes y distingue lo recorrido de lo no comprobado. No publiques datos reales ni enlaces privados.
+3. Para explicar pasos, enlaza a las guías existentes; no los copies al FAQ. Añade o ajusta el glosario y los mensajes exactos si corresponde. En negritas usa solo nombres literales de botones o pantallas, que comprueba la prueba anti-deriva.
+4. Ejecuta `npx vitest run tests/unit/ayuda.test.ts`, revisa enlaces y anclas de todos los documentos tocados y confirma que `docs/ayuda/` ocupa menos de 60 kB. Actualiza su índice y `llms.txt` si cambian sus archivos. Una etiqueta renombrada debe hacer fallar la prueba, no justificar excluirla.
+5. Presenta el PR con la duda original, la respuesta comprobada y sus enlaces. La revisión decide la incorporación; responder una Discussion no modifica la ayuda automáticamente. No hace falta un Wiki ni generar una copia completa del contenido para IA.
+
 ## Canales
 
-Canales cuya habilitación se verificó el 2026-10-01. Este cierre local no vuelve a comprobar GitHub; su estado actual deberá verificarse en la siguiente fase remota autorizada:
+Registro inicial de canales: 2026-10-01. El 2026-11-19 se volvió a comprobar, solo en lectura, Discussions y su categoría Q&A; no se cambiaron ajustes ni se revalidaron los demás canales.
 
 - [Upstream oficial](https://github.com/ruzer/Acta).
 - [Issues](https://github.com/ruzer/Acta/issues): bugs y trabajo concreto.

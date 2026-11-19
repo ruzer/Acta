@@ -1,7 +1,8 @@
 # Soporte de Acta
 
-La habilitación de Issues y Discussions se registró el 2026-10-01; su estado actual se comprobará en la siguiente revisión remota autorizada. Consulta [Canales](CONTRIBUTING.md#canales). El modelo es **community support, best effort**, sin SLA, atención 24/7, soporte empresarial ni tiempos de respuesta garantizados.
+Discussions y su categoría Q&A (preguntas y respuestas) se comprobaron habilitados el 2026-11-19, mediante una consulta de solo lectura. Consulta [Canales](CONTRIBUTING.md#canales). El modelo es **community support, best effort**, sin SLA, atención 24/7, soporte empresarial ni tiempos de respuesta garantizados.
 
+- Dudas de uso: consulta primero el [centro de ayuda](docs/ayuda/README.md). Si no hay respuesta, pregunta en [Discussions → Q&A](https://github.com/ruzer/Acta/discussions/categories/q-a) con un ejemplo ficticio; para tu cuenta o datos privados, acude a la administración local.
 - Dudas de instalación: consulta primero [Self-hosting](docs/SELF-HOSTING.md) y [Configuración](docs/CONFIGURATION.md); después, [Discussions](https://github.com/ruzer/Acta/discussions).
 - Bugs reproducibles o trabajo concreto: [Issues](https://github.com/ruzer/Acta/issues), según [CONTRIBUTING](CONTRIBUTING.md#canales).
 - Vulnerabilidades: únicamente [el reporte privado](https://github.com/ruzer/Acta/security/advisories/new); [SECURITY](SECURITY.md).
