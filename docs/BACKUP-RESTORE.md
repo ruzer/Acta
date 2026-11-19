@@ -227,7 +227,7 @@ dc stop object-storage
 for suffix in objectdata evidence db-secrets api-secrets object-secrets provision-secrets; do
   docker run --rm --user 0 \
     -v "${project}_$suffix:/source:ro" -v "$backup:/backup" \
-    node:26.13.0-bookworm-slim \
+    node:26.13.1-bookworm-slim \
     sh -c 'tar -C /source -cpf "/backup/$1.tar" .' sh "$suffix"
 done
 ```
@@ -256,7 +256,7 @@ for suffix in objectdata evidence db-secrets api-secrets object-secrets provisio
     "${project}_$suffix" >/dev/null
   docker run --rm --user 0 \
     -v "${project}_$suffix:/target" -v "$backup:/backup:ro" \
-    node:26.13.0-bookworm-slim \
+    node:26.13.1-bookworm-slim \
     sh -c 'tar -C /target -xpf "/backup/$1.tar"' sh "$suffix"
 done
 dc up -d --wait --no-build postgres

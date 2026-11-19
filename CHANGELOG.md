@@ -66,6 +66,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Auditoría completa sin excepciones.** Se retira la excepción temporal de picomatch porque GitHub retiró GHSA-fc5q-39xc-vjpf el 2026-11-18T15:38:56Z; CI vuelve a exigir `npm audit --audit-level=high` sin excepciones. La comprobación del 2026-11-18 devuelve cero vulnerabilidades.
 
+- **Node de seguridad y respaldo coherente.** Las imágenes de construcción, ejecución y secretos usan Node 26.13.1. Compose descarga también la imagen auxiliar que necesita el respaldo; una prueba evita que sus versiones vuelvan a separarse.
+
 ## 0.11.0 — 2026-11-17
 
 Correcciones de Administración y cookie de sesión neutral de los PR

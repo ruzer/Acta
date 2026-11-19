@@ -14,6 +14,17 @@ import { join, resolve } from "node:path";
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 const directories: string[] = [];
+it("Compose descarga la imagen auxiliar que necesita el respaldo", () => {
+  const helper = spawnSync(
+    process.execPath,
+    ["scripts/backup-manifest.mjs", "helper", process.cwd()],
+    { encoding: "utf8" },
+  );
+  expect(helper.status).toBe(0);
+  const compose = readFileSync("docker-compose.yml", "utf8");
+  const secretsImage = compose.match(/^ {2}secrets-init:\n\s+image: (\S+)/m)?.[1];
+  expect(secretsImage).toBe(helper.stdout.trim());
+});
 afterEach(() => {
   for (const dir of directories.splice(0))
     rmSync(dir, { recursive: true, force: true });
