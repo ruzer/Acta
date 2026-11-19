@@ -44,6 +44,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Más espacio para responder en móvil.** Solo Guardar y salir y Enviar respuesta permanecen al pie; la consulta y la ayuda se desplazan con el contenido.
 
+- **Reintentos de autoguardado con pausa creciente.** Tras fallar, los intentos se espacian a 60, 120 y hasta 300 segundos; un guardado correcto o una acción manual recupera el intervalo de 30 segundos, sin perder el texto pendiente.
+
 ### Security
 
 - **Auditoría completa sin excepciones.** Se retira la excepción temporal de picomatch porque GitHub retiró GHSA-fc5q-39xc-vjpf el 2026-11-18T15:38:56Z; CI vuelve a exigir `npm audit --audit-level=high` sin excepciones. La comprobación del 2026-11-18 devuelve cero vulnerabilidades.

@@ -174,7 +174,7 @@ function ResponseEditor({
       setBackupUnavailable(!writeDraftText(backupKey, copy));
     } else removeDraftText(backupKey);
   }, [values, server, backupKey, recovery, authenticated]);
-  useDraftAutosave({
+  const resetAutosave = useDraftAutosave({
     changed: JSON.stringify(values),
     dirty: form.formState.isDirty,
     enabled: editing && !busy && !hasConflict && authenticated && !recovery,
@@ -268,7 +268,10 @@ function ResponseEditor({
       (automatic && (busyRef.current || hasConflict))
     )
       return null;
-    if (!automatic) working(true);
+    if (!automatic) {
+      resetAutosave();
+      working(true);
+    }
     let own: Promise<ResponseView | null> | null = null;
     try {
       // La acción manual espera el guardado automático antes de tomar su versión.
@@ -349,6 +352,7 @@ function ResponseEditor({
     }
   }
   async function submit() {
+    resetAutosave();
     working(true);
     setError("");
     setFields({});
