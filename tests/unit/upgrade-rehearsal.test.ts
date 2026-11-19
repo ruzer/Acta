@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   argumentsForRehearsal,
   compareSnapshots,
+  verifyRehearsalMigrations,
+  responseDeadlineMigration,
 } from "../../scripts/upgrade-rehearsal.mjs";
 
 const args = [
@@ -77,4 +79,21 @@ describe("integridad del contenido persistido", () => {
   ])("detecta pérdida, alteración o adición inesperada", (after) => {
     expect(() => compareSnapshots(before, after)).toThrow();
   });
+});
+
+it("admite solo la migración de fecha límite y conserva las trece previas", () => {
+  const original = Array.from({ length: 13 }, (_, i) => `migration-${i}`);
+  expect(() =>
+    verifyRehearsalMigrations(original, [
+      ...original,
+      responseDeadlineMigration,
+    ]),
+  ).not.toThrow();
+  for (const after of [
+    original,
+    [...original, "unexpected"],
+    [...original.slice(1), responseDeadlineMigration],
+    [...original, responseDeadlineMigration, "extra"],
+  ])
+    expect(() => verifyRehearsalMigrations(original, after)).toThrow();
 });

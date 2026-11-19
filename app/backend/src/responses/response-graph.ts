@@ -59,14 +59,30 @@ export const presentEvidence = (e: Prisma.EvidenceGetPayload<object>) =>
     status: e.status,
     createdAt: e.createdAt.toISOString(),
   });
-export class ResponseGraph {
+export type ApplicabilityQuestion = Pick<
+  FullQuestion,
+  "id" | "QuestionCondition_child"
+> & {
+  QuestionRevision_questionRecord: { id: string }[];
+};
+export type ApplicabilityResponse = Pick<FullResponse, "questionId"> & {
+  ResponseRevision_response: Pick<
+    FullResponse["ResponseRevision_response"][number],
+    "id" | "answer" | "questionRevisionId" | "conditionContext"
+  >[];
+};
+// La participación usa la misma vigencia y condiciones, sin cargar evidencia ni texto de borradores.
+export class ResponseApplicability<
+  Q extends ApplicabilityQuestion,
+  R extends ApplicabilityResponse,
+> {
   private readonly contexts = new Map<
     string,
     { state: Applicability; context: Record<string, string> }
   >();
   constructor(
-    readonly questions: FullQuestion[],
-    readonly responses: FullResponse[],
+    readonly questions: Q[],
+    readonly responses: R[],
   ) {}
   question(id: string) {
     const q = this.questions.find((x) => x.id === id);
@@ -130,6 +146,11 @@ export class ResponseGraph {
       canonical(rev.conditionContext) === canonical(ctx.context)
     );
   }
+}
+export class ResponseGraph extends ResponseApplicability<
+  FullQuestion,
+  FullResponse
+> {
   personal(projectName: string) {
     const items = this.questions.map((q) => {
       const r = this.response(q.id),

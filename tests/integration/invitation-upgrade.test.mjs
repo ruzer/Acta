@@ -303,7 +303,7 @@ test(
           table === "User"
             ? " - 'invitationOnly'"
             : table === "Project"
-              ? " - 'allowNonNominalInvitations'"
+              ? " - 'allowNonNominalInvitations' - 'responseDueAt'"
               : "";
         assert.deepEqual(
           (
@@ -327,6 +327,11 @@ test(
           )
         ).rows[0].allowNonNominalInvitations,
         false,
+      );
+      assert.equal(
+        (await owner.query('SELECT "responseDueAt" FROM "Project"')).rows[0]
+          .responseDueAt,
+        null,
       );
       for (const table of [
         "ResponseInvitation",

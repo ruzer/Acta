@@ -108,3 +108,52 @@ miles de evidencias. La prueba corta no mide saturación, latencias percentiles,
 retención prolongada, fugas, uso de muchos usuarios, otros proveedores S3, HA ni
 recuperación ante caída del host. No extrapolar estos resultados ARM64 a un
 servidor x86_64: la instalación funcional en CI x86_64 acredita otro alcance.
+
+
+## Guardados simultáneos y autoguardado — 2026-11-18
+
+Laboratorio descartable propio sobre `b6093c9`, en el mismo host ARM64 compartido;
+no se cambiaron el servidor, el pool ni los límites de transacción. Se añadieron
+300 preguntas publicadas, 50 cuentas ficticias y 15 000 asignaciones mediante
+importación y operaciones oficiales. Cada cuenta envió un borrador independiente
+al mismo tiempo. No se reutilizó una cuenta como si fueran 50 personas.
+
+| Medida | Resultado real |
+| --- | ---: |
+| Peticiones de guardado simultáneas | 50 |
+| Respuestas HTTP 200 | 12 |
+| Respuestas HTTP 500 | 38 |
+| Duración de la tanda | 29,77 s |
+| Mínimo / mediana / percentil 95 / máximo por petición | 2,04 / 15,06 / 28,34 / 29,76 s |
+
+**Esta carga no pasó como prueba de capacidad.** El backend registró 38 errores
+Prisma `P2028` durante la tanda. Los fallos cuentan en los tiempos;
+no se ocultaron ni reintentaron. No es una recomendación para operar con 50 personas
+concurrentes. Es una medición de una tanda, no una promesa ni un límite universal.
+
+Se conserva `recomputeReview`: sobre el mismo conjunto de preguntas, guardar
+`consultationRequested=true` cambió una pregunta de `NOT_REVIEWED` a `PENDING`.
+Omitir el recálculo de todos los borradores alteraría un resultado funcional.
+La corrección de ese costo requiere una propuesta que conserve esas proyecciones;
+no se cambia la revisión como atajo para acelerar esta entrega.
+
+Para repetir en una instalación **descartable propia**, con la cuenta de prueba
+`admin` ya activada, guarda `APP_ORIGIN` (HTTP local con puerto exclusivo),
+`ACTA_DRAFT_LOAD_ALLOWED=true` y `ACTA_LOAD_ADMIN_PASSWORD` en un archivo privado
+fuera de Git, modo 600. No uses credenciales reales:
+
+```sh
+caffeinate -dimsu node --env-file=/ruta/privada/carga.env scripts/draft-load.mjs
+```
+
+En Linux omite `caffeinate`. El script rechaza orígenes externos, crea datos
+ficticios nuevos, imprime recuentos y tiempos sin credenciales y no elimina nada.
+Retira después **solo el proyecto Compose y los volúmenes de ese laboratorio**,
+verificando sus etiquetas. No ejecutarlo en una instalación de trabajo.
+
+Por separado, una sesión Chromium de diez minutos reales hizo 50 cambios de texto,
+uno cada 12 segundos. El autoguardado produjo **17 eventos `RESPONSE_DRAFTED`**:
+por minuto, `2, 2, 1, 2, 2, 1, 2, 2, 1, 2`; intervalo mínimo **35,97 segundos**.
+Ninguna ventana de 60 segundos tuvo más de dos eventos. Esta prueba usó pausas reales,
+no el reloj simulado de las pruebas unitarias. El límite corresponde a intentos
+automáticos; pulsar acciones de guardado o envío explícitamente sigue disponible.

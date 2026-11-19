@@ -309,7 +309,9 @@ test.describe("Direction C · shell and attention", () => {
             .getByRole("article", { name: "Aclaraciones", exact: true })
             .locator("strong"),
         ).toHaveText("2");
-        await expect(page.getByRole("status")).toHaveText("304 preguntas");
+        await expect(page.locator(".ac-attention-result")).toHaveText(
+          "304 preguntas",
+        );
         const action = page.getByRole("region", {
           name: "Te toca a ti",
           exact: true,
@@ -465,7 +467,7 @@ test.describe("Direction C · shell and attention", () => {
         expect(metrics.questionWeight).toBeGreaterThanOrEqual(500);
         if (width === 1440) expect(metrics.firstRowY).toBeLessThanOrEqual(400);
         expect(metrics.sidebar).toBe(
-          width >= 1100 ? 248 : width >= 760 ? 64 : 0,
+          width >= 1100 ? 248 : width >= 760 ? 128 : 0,
         );
         expect(metrics.mobile).toBe(width < 760);
         for (const control of metrics.controls) {

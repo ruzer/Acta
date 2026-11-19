@@ -283,6 +283,7 @@ async function exported(
   session = analyst,
   scope = "full",
   p = project,
+  csvHeaders,
 ) {
   const r = await fetch(origin + `/api/v1/projects/${p.id}/exports`, {
     method: "POST",
@@ -292,7 +293,12 @@ async function exported(
       "X-CSRF-Token": session.csrf,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ format, scope, requestId: randomUUID() }),
+    body: JSON.stringify({
+      format,
+      scope,
+      requestId: randomUUID(),
+      csvHeaders,
+    }),
   });
   const text = await r.text();
   return {
@@ -595,6 +601,12 @@ test("T08/T11/T18/T20 exported decisions, evidence, escaping, privacy, invalidat
   assert.equal(csv.status, 201);
   assert.ok(csv.text.includes("validationId"));
   assert.ok(csv.text.includes(q.externalId));
+  const readable = await exported("CSV", analyst, "full", project, "es-MX");
+  assert.equal(readable.status, 201);
+  assert.ok(
+    readable.text.startsWith("Proyecto,Tema,Código de pregunta,Título"),
+  );
+  assert.ok(readable.text.includes(q.externalId));
   const limited = await exported("JSON", viewer, "validated-decisions");
   assert.equal(limited.status, 201);
   assert.equal(limited.data.kind, "validated-decisions-export");
@@ -1202,4 +1214,363 @@ test("Markdown tolerates incomplete historical snapshots without changing JSON o
   } finally {
     await replaceSnapshots(revisions);
   }
+});
+
+test("Participación permite solo administración y análisis del proyecto, sin respuestas ni secretos", async () => {
+  for (const session of [admin, analyst]) {
+    const r = await req(`/projects/${project.id}/participation`, { session });
+    assert.equal(r.status, 200);
+    assert.ok(r.data.participants.some((p) => p.memberId === member.id));
+    for (const p of r.data.participants) {
+      assert.deepEqual(
+        Object.keys(p).sort(),
+        [
+          "memberId",
+          "name",
+          "area",
+          "assigned",
+          "required",
+          "drafts",
+          "sent",
+          "pending",
+          "lastActivity",
+          "state",
+        ].sort(),
+      );
+      assert.ok(
+        ["Sin iniciar", "En borrador", "Envió parte", "Completo"].includes(
+          p.state,
+        ),
+      );
+    }
+  }
+  for (const session of [stakeholder, viewer]) {
+    const r = await req(`/projects/${project.id}/participation`, { session });
+    assert.equal(r.status, 403);
+    assert.equal(r.data.participants, undefined);
+  }
+});
+
+test("Participación agrupa 300 preguntas por 50 personas y excluye accesos inactivos", async () => {
+  const p = await emptyProject("PARTICIPATION-VOLUME");
+  const file = template(p.externalId, "PARTICIPATION-AREA");
+  file.conditions = [];
+  file.traceabilityReferences = [];
+  file.questions = Array.from({ length: 300 }, (_, i) => ({
+    ...file.questions[0],
+    externalId: `P-${i}`,
+    order: i,
+    references: [],
+  }));
+  const preview = await importFile(p, file);
+  assert.deepEqual(preview.data.errors, []);
+  assert.equal(
+    (await importFile(p, file, confirmation(preview.data))).status,
+    201,
+  );
+  const all = await db.question.findMany({ where: { projectId: p.id } });
+  const areaId = all[0].responsibleAreaId;
+  const organizationId = (
+    await db.project.findUniqueOrThrow({ where: { id: p.id } })
+  ).organizationId;
+  const users = Array.from({ length: 50 }, (_, i) => ({
+    id: randomUUID(),
+    organizationId,
+    username: `participation-${i}`,
+    displayName: `Persona ficticia ${i}`,
+  }));
+  await db.user.createMany({ data: users });
+  const members = users.map((u) => ({
+    id: randomUUID(),
+    projectId: p.id,
+    userId: u.id,
+    role: "STAKEHOLDER",
+    areaId,
+  }));
+  await db.projectMember.createMany({ data: members });
+  await db.questionAssignment.createMany({
+    data: members.flatMap((m) =>
+      all.map((q) => ({
+        projectId: p.id,
+        projectMemberId: m.id,
+        questionId: q.id,
+        required: true,
+      })),
+    ),
+  });
+  const command = {
+    requestId: randomUUID(),
+    questions: all.map((q) => ({ id: q.id, expectedVersion: q.lockVersion })),
+  };
+  const publication = await ok(
+    `/projects/${p.id}/questions/bulk/publish/preview`,
+    { session: admin, method: "POST", body: command },
+  );
+  await ok(`/projects/${p.id}/questions/bulk/publish/confirm`, {
+    session: admin,
+    method: "POST",
+    body: { ...command, previewHash: publication.previewHash },
+  });
+  const started = performance.now();
+  const result = await req(`/projects/${p.id}/participation`, {
+    session: analyst,
+  });
+  const elapsed = Math.round(performance.now() - started);
+  assert.equal(result.status, 200, JSON.stringify(result.data));
+  assert.equal(result.data.participants.length, 50);
+  assert.ok(
+    result.data.participants.every(
+      (person) =>
+        person.assigned === 300 &&
+        person.pending === 300 &&
+        person.state === "Sin iniciar",
+    ),
+  );
+  console.log(
+    `participation-volume: 300 preguntas, 50 personas, 15000 asignaciones, ${elapsed} ms, 50 filas sin contenido de respuestas`,
+  );
+  await db.projectMember.update({
+    where: { id: members[0].id },
+    data: { active: false },
+  });
+  await db.user.update({ where: { id: users[1].id }, data: { active: false } });
+  const active = await req(`/projects/${p.id}/participation`, {
+    session: analyst,
+  });
+  assert.equal(active.data.participants.length, 48);
+});
+
+test("Fecha límite es opcional, respeta la zona horaria y mantiene los contratos anteriores", async () => {
+  const previous = process.env.DEFAULT_TIMEZONE;
+  try {
+    for (const [timezone, expected] of [
+      ["UTC", "2026-11-25T23:59:59.999Z"],
+      ["America/Mexico_City", "2026-11-26T05:59:59.999Z"],
+    ]) {
+      process.env.DEFAULT_TIMEZONE = timezone;
+      const p = await ok("/projects", {
+        session: admin,
+        method: "POST",
+        body: {
+          externalId: `DUE-${randomUUID()}`,
+          name: "Proyecto ficticio con plazo",
+          responseDueDate: "2026-11-25",
+        },
+      });
+      assert.equal(
+        "responseDueAt" in p,
+        false,
+        "La respuesta existente conserva su contrato estricto",
+      );
+      const deadline = await ok(`/projects/${p.id}/response-deadline`, {
+        session: admin,
+      });
+      assert.equal(deadline.responseDueAt, expected);
+      const changed = await ok(`/projects/${p.id}/response-deadline`, {
+        session: admin,
+        method: "POST",
+        body: {
+          responseDueDate: "2020-01-01",
+          expectedVersion: deadline.lockVersion,
+        },
+      });
+      assert.ok(new Date(changed.responseDueAt).getTime() < Date.now());
+      const stale = await req(`/projects/${p.id}/response-deadline`, {
+        session: admin,
+        method: "POST",
+        body: { responseDueDate: null, expectedVersion: deadline.lockVersion },
+      });
+      assert.equal(stale.status, 409);
+      const cleared = await ok(`/projects/${p.id}/response-deadline`, {
+        session: admin,
+        method: "POST",
+        body: { responseDueDate: null, expectedVersion: changed.lockVersion },
+      });
+      assert.equal(cleared.responseDueAt, null);
+      assert.equal(
+        (await db.project.findUniqueOrThrow({ where: { id: p.id } })).lifecycle,
+        "ACTIVE",
+      );
+    }
+    const blank = await emptyProject(`NO-DUE-${randomUUID()}`);
+    assert.equal(
+      (await ok(`/projects/${blank.id}/response-deadline`, { session: admin }))
+        .responseDueAt,
+      null,
+    );
+    for (const session of [analyst, stakeholder, viewer]) {
+      assert.equal(
+        (await req(`/projects/${project.id}/response-deadline`, { session }))
+          .status,
+        200,
+      );
+      assert.equal(
+        (
+          await req(`/projects/${project.id}/response-deadline`, {
+            session,
+            method: "POST",
+            body: { responseDueDate: null, expectedVersion: 0 },
+          })
+        ).status,
+        403,
+      );
+    }
+    const noCsrf = await fetch(
+      origin + `/api/v1/projects/${project.id}/response-deadline`,
+      {
+        method: "POST",
+        headers: {
+          Origin: origin,
+          Cookie: admin.cookie,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ responseDueDate: null, expectedVersion: 0 }),
+      },
+    );
+    assert.equal(noCsrf.status, 403);
+  } finally {
+    if (previous === undefined) delete process.env.DEFAULT_TIMEZONE;
+    else process.env.DEFAULT_TIMEZONE = previous;
+  }
+});
+
+test("plantilla reutilizable conserva estructura y reglas sin respuestas ni personas; respeta roles y vista previa oficial", async () => {
+  const source = await emptyProject(`REUSE-SOURCE-${randomUUID()}`);
+  const input = JSON.parse(
+    await readFile(
+      new URL(
+        "../../examples/questionnaire-template.full.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  );
+  input.project.externalId = source.externalId;
+  const preview = await importFile(source, input);
+  assert.deepEqual(preview.data.errors, []);
+  assert.equal(
+    (await importFile(source, input, confirmation(preview.data))).status,
+    201,
+  );
+  const downloaded = await req(
+    `/projects/${source.id}/questionnaire-template?format=csv`,
+    { session: analyst },
+  );
+  assert.equal(downloaded.status, 200);
+  assert.match(downloaded.headers.get("content-type"), /application\/json/);
+  const data = downloaded.data;
+  assert.equal(data.kind, "questionnaire-template");
+  for (const key of [
+    "sections",
+    "questions",
+    "conditions",
+    "traceabilityReferences",
+  ])
+    assert.equal(data[key].length, input[key].length);
+  assert.equal(
+    data.questions.reduce((n, q) => n + q.options.length, 0),
+    input.questions.reduce((n, q) => n + q.options.length, 0),
+  );
+  assert.deepEqual(data.conditions, input.conditions);
+  assert.ok(
+    data.questions.every(
+      (q) =>
+        !Object.hasOwn(q, "id") &&
+        !Object.hasOwn(q, "assignments") &&
+        !Object.hasOwn(q, "responses") &&
+        !Object.hasOwn(q, "evidence") &&
+        !Object.hasOwn(q, "publication"),
+    ),
+  );
+  const fromAnswered = await req(
+    `/projects/${project.id}/questionnaire-template?format=json`,
+    { session: admin },
+  );
+  assert.equal(fromAnswered.status, 200);
+  assert.equal(
+    JSON.stringify(fromAnswered.data).includes("Decisión ficticia documentada"),
+    false,
+  );
+  for (const session of [stakeholder, viewer])
+    assert.equal(
+      (
+        await req(
+          `/projects/${project.id}/questionnaire-template?format=json`,
+          { session },
+        )
+      ).status,
+      403,
+    );
+  assert.equal(
+    (
+      await req(`/projects/${source.id}/questionnaire-template`, {
+        session: other,
+      })
+    ).status,
+    404,
+  );
+  assert.equal(
+    (
+      await req(`/projects/${source.id}/questionnaire-template?format=xml`, {
+        session: admin,
+      })
+    ).status,
+    400,
+  );
+  const target = await emptyProject(`REUSE-TARGET-${randomUUID()}`);
+  data.project = {
+    externalId: target.externalId,
+    name: target.name,
+    description: target.description,
+  };
+  const check = await importFile(target, data);
+  assert.deepEqual(check.data.errors, []);
+  assert.equal(check.data.counts.questions, input.questions.length);
+  const confirm = await importFile(target, data, confirmation(check.data));
+  assert.equal(confirm.status, 201);
+  assert.equal(confirm.data.counts.conditions, input.conditions.length);
+  const imported = await ok(`/projects/${target.id}/questionnaire`);
+  assert.ok(
+    imported.questions.every(
+      (q) => q.publication === "DRAFT" && q.assignments.length === 0,
+    ),
+  );
+  const again = await importFile(target, data);
+  assert.ok(
+    again.data.errors.some((e) =>
+      e.message.includes("proyecto ya contiene estructura"),
+    ),
+  );
+});
+
+test("Attention counts each submitted revision since a visit, scoped to its project and opt-in", async () => {
+  const url = `/projects/${project.id}/dashboard`;
+  const before = await ok(url);
+  assert.equal("newContributions" in before, false);
+  assert.equal("contributionsAsOf" in before, false);
+  const since = "2000-01-01T00:00:00.000Z";
+  const result = await ok(`${url}?since=${since}`);
+  const expected = await db.responseRevision.count({
+    where: {
+      projectId: project.id,
+      response: { questionId: { in: before.questions.map((q) => q.id) } },
+      createdAt: {
+        gt: new Date(since),
+        lte: new Date(result.contributionsAsOf),
+      },
+    },
+  });
+  assert.ok(expected > 0);
+  assert.equal(result.newContributions, expected);
+  assert.equal(
+    (await ok(`${url}?since=${result.contributionsAsOf}`)).newContributions,
+    0,
+  );
+  assert.equal((await req(`${url}?since=not-a-date`)).status, 400);
+  for (const session of [stakeholder, viewer])
+    assert.equal((await req(`${url}?since=${since}`, { session })).status, 403);
+  assert.equal(
+    (await req(`${url}?since=${since}`, { session: other })).status,
+    (await req(url, { session: other })).status,
+  );
 });

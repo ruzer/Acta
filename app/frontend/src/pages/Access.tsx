@@ -9,6 +9,7 @@ import {
   EmptyState,
   ErrorState,
   Input,
+  PasswordInput,
   LoadingState,
   StatusBadge,
 } from "../ui";
@@ -21,10 +22,12 @@ export function Login({
   onLogin,
   notice,
   compact = false,
+  username = "",
 }: {
   onLogin: (me: Me) => void;
   notice: string;
   compact?: boolean;
+  username?: string;
 }) {
   const branding = useBranding();
   const context = useQuery({
@@ -91,13 +94,13 @@ export function Login({
           <Input
             label="Usuario"
             name="username"
+            defaultValue={username}
             autoComplete="username"
             required
           />
-          <Input
+          <PasswordInput
             label="Contraseña"
             name="password"
-            type="password"
             autoComplete="current-password"
             required
             maxLength={128}
@@ -153,26 +156,23 @@ export function Password({
       </p>
       {error && <Alert error>{error}</Alert>}
       <form onSubmit={submit}>
-        <Input
+        <PasswordInput
           label="Contraseña actual"
           name="currentPassword"
-          type="password"
           autoComplete="current-password"
           required
         />
-        <Input
+        <PasswordInput
           label="Nueva contraseña"
           name="newPassword"
-          type="password"
           minLength={12}
           maxLength={128}
           autoComplete="new-password"
           required
         />
-        <Input
+        <PasswordInput
           label="Repetir nueva contraseña"
           name="confirm"
-          type="password"
           autoComplete="new-password"
           required
         />
@@ -194,7 +194,7 @@ export function Projects({
     queryKey: ["projects"],
     queryFn: () => api("projects"),
   });
-  if (q.isPending) return <LoadingState />;
+  if (q.isPending) return <LoadingState skeleton />;
   if (q.error)
     return <ErrorState error={q.error} retry={() => void q.refetch()} />;
   if (q.data.length > 0 && q.data.every((p) => p.role === "STAKEHOLDER"))

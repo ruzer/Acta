@@ -1,10 +1,13 @@
+import { FirstSteps } from "./FirstSteps";
+import { ResponseDeadline } from "./ResponseDeadline";
+import { ParticipationCard } from "./Participation";
 import { ProjectAttention } from "./ProjectAttention";
-import { ProjectWorkbench } from "./ProjectWorkbench";
+import { ProjectWorkbench, ProjectDeliverables } from "./ProjectWorkbench";
 import { referenceTypeLabels } from "../reference-labels";
 import { FactGrid, PageHeader } from "../ui/semantic";
 import { auditActions, auditObjects } from "./audit-labels";
 import { AnalystStatus } from "./AnalystVisual";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Link,
   useLocation,
@@ -57,20 +60,45 @@ function MetricRow({ value }: { value: z.infer<typeof C.metricsView> }) {
     </div>
   );
 }
-export function Dashboard() {
+export function Dashboard({ userId }: { userId: string }) {
   const { projectId = "" } = useParams(),
     [params, setParams] = useSearchParams();
+  const visitKey = `acta-attention-visit:${userId}:${projectId}`;
+  const visit = useMemo(() => {
+    let previous: string | null = null;
+    try {
+      previous = localStorage.getItem(visitKey);
+    } catch {
+      /* Optional on shared browsers. */
+    }
+    const valid = C.dashboardQuery.safeParse({ since: previous });
+    return {
+      previous: valid.success ? previous : null,
+      since: valid.success ? previous! : new Date().toISOString(),
+    };
+  }, [visitKey]);
   const q = useQuery({
     queryKey: ["dashboard", projectId],
-    queryFn: () => exchangeRequest(projectId, "dashboard", C.dashboardView),
+    queryFn: () =>
+      exchangeRequest(projectId, "dashboard", C.dashboardView, {
+        query: { since: visit.since },
+      }),
     staleTime: 0,
   });
+  useEffect(() => {
+    if (!q.isFetchedAfterMount || !q.data?.contributionsAsOf) return;
+    try {
+      localStorage.setItem(visitKey, q.data.contributionsAsOf);
+    } catch {
+      /* Browsing still works without history. */
+    }
+  }, [visitKey, q.data, q.isFetchedAfterMount]);
   const projects = useQuery({
     queryKey: ["projects"],
     queryFn: () => api("projects"),
   });
   const [dimension, setDimension] = useState("section");
-  if (q.isPending || projects.isPending) return <LoadingState />;
+  if (q.isPending || projects.isPending) return <LoadingState skeleton />;
   if (q.error || projects.error)
     return (
       <ErrorState
@@ -98,12 +126,34 @@ export function Dashboard() {
         projectName={data.projectName}
         role={data.role}
         active="attention"
+        actions={<ProjectDeliverables projectId={projectId} />}
       />
+      {visit.previous && (data.newContributions ?? 0) > 0 && (
+        <p role="status">
+          {data.newContributions}{" "}
+          {data.newContributions === 1
+            ? "aportación nueva"
+            : "aportaciones nuevas"}{" "}
+          desde tu última visita
+        </p>
+      )}
+      {data.questions.some((question) => question.status === "VALIDATED") && (
+        <p>Ya puedes imprimir el informe</p>
+      )}
+      {project.lifecycle === "ACTIVE" && (
+        <FirstSteps
+          projectId={projectId}
+          role={data.role}
+          started={data.questions.some((q) => q.submittedRespondents > 0)}
+        />
+      )}
+      <ResponseDeadline projectId={projectId} />
       <ProjectAttention
         projectId={projectId}
         data={data}
         lifecycle={project.lifecycle}
       />
+      <ParticipationCard projectId={projectId} />
       <details className="pw-metrics">
         <summary>Resumen y métricas</summary>
         <h2>Resumen</h2>

@@ -52,6 +52,20 @@ export function argumentsForRehearsal(args) {
   };
 }
 
+export const responseDeadlineMigration = "202611180001_response_due_at";
+export function verifyRehearsalMigrations(before, after) {
+  assert.equal(
+    before.length,
+    13,
+    "La base publicada debe tener 13 migraciones.",
+  );
+  assert.deepEqual(
+    [...after].sort(),
+    [...before, responseDeadlineMigration].sort(),
+    "Solo se admite la migración aditiva de fecha límite (13 → 14).",
+  );
+}
+
 // Auth cambia con cada acceso; no forma parte de la huella de contenido de negocio.
 const volatileTables = new Set([
   "Session",
@@ -219,15 +233,37 @@ async function run(options) {
       "-Atc",
       query,
     ).trim();
+  const migrationNames = () =>
+    sql(
+      'SELECT migration_name FROM "_prisma_migrations" WHERE finished_at IS NOT NULL AND rolled_back_at IS NULL ORDER BY migration_name',
+    ).split("\n");
   const snapshot = () => {
+    const hasDeadline =
+      sql(
+        "SELECT count(*) FROM information_schema.columns WHERE table_schema='public' AND table_name='Project' AND column_name='responseDueAt'",
+      ) === "1";
+    if (hasDeadline)
+      assert.equal(
+        sql('SELECT count(*) FROM "Project" WHERE "responseDueAt" IS NOT NULL'),
+        "0",
+        "La nueva columna debe ser nula en todo el fixture previo.",
+      );
     const tables = sql(
       "SELECT tablename FROM pg_tables WHERE schemaname='public' ORDER BY tablename",
     ).split("\n");
     const hashes = {};
     for (const table of tables.filter((t) => !volatileTables.has(t))) {
       assert.match(table, /^[A-Za-z_][A-Za-z0-9_]*$/);
+      const value =
+        table === "Project" && hasDeadline
+          ? "(to_jsonb(t)-'responseDueAt')"
+          : "to_jsonb(t)";
+      const where =
+        table === "_prisma_migrations"
+          ? `WHERE migration_name <> '${responseDeadlineMigration}'`
+          : "";
       const result = sql(
-        `SELECT encode(sha256(convert_to(to_jsonb(t)::text,'UTF8')),'hex') FROM "${table}" t ORDER BY 1`,
+        `SELECT encode(sha256(convert_to(${value}::text,'UTF8')),'hex') FROM "${table}" t ${where} ORDER BY 1`,
       );
       hashes[table] = result ? result.split("\n") : [];
     }
@@ -277,10 +313,14 @@ async function run(options) {
   let state;
   try {
     if (options.phase === "prepare") {
-      assert.equal(
-        JSON.parse(readFileSync(join(options.root, "package.json"))).version,
-        "0.10.0",
+      const baseVersion = JSON.parse(
+        readFileSync(join(options.root, "package.json")),
+      ).version;
+      assert.ok(
+        ["0.10.0", "0.11.0"].includes(baseVersion),
+        "La base debe ser v0.10.0 o v0.11.0 publicada.",
       );
+      assert.equal(migrationNames().length, 13);
       assert.equal(
         sql('SELECT count(*) FROM "User"'),
         "0",
@@ -319,8 +359,8 @@ async function run(options) {
       const session = await login(fixture.adminUsername, fixture.adminPassword);
       assert.match(
         session.cookie,
-        /^fgeo_session=/,
-        "La base debe emitir la cookie anterior real.",
+        baseVersion === "0.10.0" ? /^fgeo_session=/ : /^acta_session=/,
+        "La base debe emitir su cookie real, sin reemplazarla.",
       );
       const project = await api("/projects", session, "POST", {
         externalId: "UPGRADE-CSV",
@@ -409,6 +449,8 @@ async function run(options) {
       }
       state = {
         complete: true,
+        baseVersion,
+        migrations: migrationNames(),
         fixture,
         session,
         accounts,
@@ -422,6 +464,8 @@ async function run(options) {
         true,
         "El estado de origen está incompleto.",
       );
+      if (options.phase === "verify")
+        verifyRehearsalMigrations(state.migrations, migrationNames());
       compareSnapshots(state.snapshot, snapshot());
     }
     if (options.phase === "measure") {
@@ -615,7 +659,7 @@ async function run(options) {
     const context = await browser.newContext();
     await context.addCookies([
       {
-        name: "fgeo_session",
+        name: state.session.cookie.split("=")[0],
         value: state.session.cookie.split("=")[1],
         url: options.origin,
         httpOnly: true,

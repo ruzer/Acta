@@ -9,6 +9,7 @@ import { snapshotName } from "../../app/backend/src/common/snapshot.js";
 import { parseExactJson } from "../../app/backend/src/exchange/strict-json.js";
 import {
   csvCell,
+  csvDocument,
   markdownHeading,
   markdownText,
 } from "../../app/backend/src/exchange/renderers.js";
@@ -221,4 +222,17 @@ describe("historical snapshot display names", () => {
       ),
     ).toBe("ACCOUNT");
   });
+});
+
+it("ofrece encabezados CSV en español sin cambiar la salida técnica ni la protección de fórmulas", () => {
+  const row = { projectExternalId: "P-1", title: "=SUM(1,2)" };
+  const technical = csvDocument([row]);
+  const readable = csvDocument([row], "es-MX");
+  expect(technical).toMatch(/^\uFEFFprojectExternalId,sectionExternalId/);
+  expect(readable).toMatch(/^\uFEFFProyecto,Tema,Código de pregunta,Título/);
+  expect(readable.split("\r\n")[0].split(",")).toHaveLength(16);
+  expect(readable.split("\r\n").slice(1)).toEqual(
+    technical.split("\r\n").slice(1),
+  );
+  expect(readable).toContain('"\'=SUM(1,2)"');
 });

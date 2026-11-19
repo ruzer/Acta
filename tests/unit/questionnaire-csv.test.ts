@@ -285,3 +285,14 @@ describe("CSV sencillo usa el importador autoritativo", () => {
     expect(inspectTemplate(Buffer.from(json)).errors.length).toBeGreaterThan(0);
   });
 });
+
+it("la plantilla descargable lleva BOM y vuelve al importador sin perder sus tres preguntas", () => {
+  const bytes = readFileSync("examples/questionnaire-template.csv");
+  expect([...bytes.subarray(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
+  const result = inspectTemplate(
+    Buffer.from(csvQuestionnaire(bytes, project, []).json),
+  );
+  expect(result.errors).toEqual([]);
+  expect(result.data?.questions).toHaveLength(3);
+  expect(result.data?.sections).toHaveLength(2);
+});

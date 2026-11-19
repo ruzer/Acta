@@ -1338,3 +1338,22 @@ section.narrow {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* La carga es estática: no produce movimiento, tampoco con movimiento reducido. */
+.loading-skeleton {
+  padding: 24px 0;
+}
+.loading-skeleton > div {
+  display: grid;
+  gap: 16px;
+}
+.loading-skeleton > div > span {
+  display: block;
+  height: 64px;
+  border-radius: var(--ac-radius-control);
+  background: var(--ac-sunken);
+}
+.loading-skeleton > div > span:first-child {
+  width: 60%;
+  height: 28px;
+}

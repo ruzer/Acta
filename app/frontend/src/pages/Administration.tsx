@@ -1,8 +1,14 @@
+import { responseDeadlineQuery } from "./ResponseDeadline";
+import { useBranding } from "../branding";
+import {
+  responseCalendarDate,
+  responseDeadlineView,
+} from "@requirements/contracts";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { roles, roleLabels, type Me } from "@requirements/contracts";
-import { api, formValues } from "../api";
+import { api, formValues, exchangeRequest } from "../api";
 import {
   Alert,
   Button,
@@ -87,6 +93,9 @@ export function Administration({ me }: { me: Me }) {
   const [creating, setCreating] = useState<
     "users" | "areas" | "projects" | "bulk-users" | null
   >(null);
+  const [deadline, setDeadline] = useState<{ id: string; name: string } | null>(
+    null,
+  );
   const [saved, setSaved] = useState("");
   const qc = useQueryClient();
   const users = useQuery({
@@ -348,6 +357,17 @@ export function Administration({ me }: { me: Me }) {
                     ),
                     p.myRole ? roleLabels[p.myRole] : "Sin acceso",
                     <div className="table-links" key="a">
+                      {p.lifecycle === "ACTIVE" && (
+                        <Button
+                          tone="tertiary"
+                          onClick={() =>
+                            setDeadline({ id: p.id, name: p.name })
+                          }
+                          aria-label={`Fecha límite de ${p.name}`}
+                        >
+                          Fecha límite
+                        </Button>
+                      )}
                       {p.myRole && (
                         <Link
                           to={`/projects/${p.id}/dashboard`}
@@ -461,9 +481,24 @@ export function Administration({ me }: { me: Me }) {
                 setSaved("Proyecto creado.");
                 refresh();
               }}
-              onSubmit={(d) => api("createProject", {}, d)}
+              onSubmit={({ responseDueDate, ...fields }) =>
+                api(
+                  "createProject",
+                  {},
+                  {
+                    ...fields,
+                    ...(responseDueDate ? { responseDueDate } : {}),
+                  },
+                )
+              }
             >
               <Input label="Nombre del proyecto" name="name" required />
+              <Input
+                label="Fecha límite para responder (opcional)"
+                name="responseDueDate"
+                type="date"
+                hint="Solo es un aviso. No impide responder después del plazo."
+              />
               <Input
                 label="Identificador externo"
                 name="externalId"
@@ -473,6 +508,21 @@ export function Administration({ me }: { me: Me }) {
               <Textarea label="Descripción" name="description" />
             </ActionForm>
           )}
+        </Dialog>
+      )}
+      {deadline && (
+        <Dialog
+          title={`Fecha límite · ${deadline.name}`}
+          onClose={() => setDeadline(null)}
+        >
+          <ResponseDeadlineForm
+            projectId={deadline.id}
+            onDone={() => {
+              setDeadline(null);
+              setSaved("Fecha límite guardada.");
+              void qc.invalidateQueries();
+            }}
+          />
         </Dialog>
       )}
       {reset && (
@@ -738,5 +788,57 @@ export function Members() {
         </ActionForm>
       </section>
     </>
+  );
+}
+
+function ResponseDeadlineForm({
+  projectId,
+  onDone,
+}: {
+  projectId: string;
+  onDone: () => void;
+}) {
+  const query = useQuery(responseDeadlineQuery(projectId));
+  const { timezone } = useBranding();
+  if (query.isPending) return <LoadingState />;
+  if (query.error)
+    return (
+      <ErrorState error={query.error} retry={() => void query.refetch()} />
+    );
+  return (
+    <ActionForm
+      label="Guardar fecha límite"
+      onDone={onDone}
+      onSubmit={async (d) => {
+        try {
+          await exchangeRequest(
+            projectId,
+            "response-deadline",
+            responseDeadlineView,
+            {
+              input: {
+                responseDueDate: d.responseDueDate || null,
+                expectedVersion: query.data.lockVersion,
+              },
+            },
+          );
+        } catch (error) {
+          void query.refetch();
+          throw error;
+        }
+      }}
+    >
+      <Input
+        label="Fecha límite para responder (opcional)"
+        name="responseDueDate"
+        type="date"
+        defaultValue={
+          query.data.responseDueAt
+            ? responseCalendarDate(new Date(query.data.responseDueAt), timezone)
+            : ""
+        }
+        hint={`Hasta el final del día en ${timezone}. Solo es un aviso; no impide responder. Deja vacío para quitar la fecha.`}
+      />
+    </ActionForm>
   );
 }

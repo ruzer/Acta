@@ -12,6 +12,7 @@ const pageNames: Record<string, string> = {
   "/admin": "Administración",
   "/admin/settings": "Configuración",
   "/password": "Mi contraseña",
+  "/help": "Ayuda",
   "/review": "Revisar respuestas",
 };
 
@@ -68,7 +69,9 @@ export function OrganizationShell({
     <>
       <p className="ac-account-name">{displayName}</p>
       <nav aria-label="Cuenta">
+        <Link to="/">Mis proyectos</Link>
         <Link to="/password">Mi contraseña</Link>
+        <Link to="/help">Ayuda</Link>
       </nav>
       <Button tone="tertiary" onClick={onLogout}>
         Cerrar sesión

@@ -1,3 +1,4 @@
+import { ResponseDeadline } from "./ResponseDeadline";
 import { useState } from "react";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
@@ -50,7 +51,7 @@ export function ParticipantHome({
       staleTime: 0,
     })),
   });
-  if (results.some((q) => q.isPending)) return <LoadingState />;
+  if (results.some((q) => q.isPending)) return <LoadingState skeleton />;
   const failed = results.find((q) => q.error);
   if (failed)
     return (
@@ -208,7 +209,7 @@ export function MyWork() {
     queryFn: () => api("personalProject", { projectId }),
     staleTime: 0,
   });
-  if (q.isPending) return <LoadingState />;
+  if (q.isPending) return <LoadingState skeleton />;
   if (q.error)
     return <ErrorState error={q.error} retry={() => void q.refetch()} />;
   const items = q.data.sections.flatMap((s) => s.questions),
@@ -219,6 +220,7 @@ export function MyWork() {
       <div>
         <h1>Mi trabajo</h1>
         <p className="participant-subtitle">{q.data.projectName}</p>
+        <ResponseDeadline projectId={projectId} />
       </div>
       <Welcome
         refreshing={q.isFetching}

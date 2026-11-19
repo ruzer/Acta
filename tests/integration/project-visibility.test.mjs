@@ -235,6 +235,7 @@ test("listing a project opens none of its content: questionnaire, decisions, his
     "decisions",
     "history",
     "dashboard",
+    "participation",
     `evidence/${randomUUID()}/download`,
   ]) {
     const r = await request(`/projects/${secret.id}/${path}`, {
@@ -440,6 +441,9 @@ test("another organization sees nothing of this one, and this one nothing of it"
       `${secret.id}/questionnaire`,
       `${secret.id}/members`,
       `${secret.id}/decisions`,
+      `${secret.id}/participation`,
+      `${secret.id}/response-deadline`,
+      `${secret.id}/questionnaire-template`,
     ])
       assert.equal(
         (await request(`/projects/${path}`, { session: otherAdmin })).status,

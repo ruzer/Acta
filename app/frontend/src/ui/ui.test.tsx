@@ -1,3 +1,4 @@
+import { ApiFailure } from "../api";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeAll, expect, it, vi } from "vitest";
 import { render, screen, cleanup, within } from "@testing-library/react";
@@ -189,4 +190,39 @@ it("CP7: un diálogo que se retira de la página devuelve el foco a quien lo abr
   await user.click(screen.getByRole("button", { name: "Cerrar" }));
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   expect(opener).toHaveFocus();
+});
+
+it("un permiso denegado lleva al inicio sin ofrecer reintento", () => {
+  render(
+    <MemoryRouter>
+      <ErrorState
+        error={new ApiFailure(403, "Tu perfil no permite esta acción.")}
+        retry={() => {}}
+      />
+    </MemoryRouter>,
+  );
+  expect(
+    screen.getByRole("link", { name: "Ir a Mis proyectos" }),
+  ).toHaveAttribute("href", "/");
+  expect(
+    screen.queryByRole("button", { name: "Volver a intentar" }),
+  ).not.toBeInTheDocument();
+});
+
+it("permite mostrar cada contraseña sin cambiar su valor ni enviar el formulario", async () => {
+  const done = vi.fn();
+  render(<Password onDone={done} />);
+  const input = screen.getByLabelText("Contraseña actual");
+  await userEvent.type(input, "ejemploSoloParaPrueba");
+  const toggle = screen.getByRole("button", {
+    name: "Mostrar contraseña: actual",
+  });
+  expect(toggle).toHaveAttribute("aria-pressed", "false");
+  await userEvent.click(toggle);
+  expect(input).toHaveAttribute("type", "text");
+  expect(input).toHaveValue("ejemploSoloParaPrueba");
+  expect(toggle).toHaveAttribute("aria-pressed", "true");
+  await userEvent.click(toggle);
+  expect(input).toHaveAttribute("type", "password");
+  expect(done).not.toHaveBeenCalled();
 });

@@ -1,3 +1,4 @@
+import { QuestionnaireTemplateService } from "./questionnaire-template.js";
 import { importLimits } from "./limits.js";
 import {
   Controller,
@@ -26,14 +27,40 @@ export class ExchangeController {
   private uploads = 0;
   constructor(
     private readonly imports: ImportService,
+    private readonly templates: QuestionnaireTemplateService,
     private readonly exports: ExportService,
     private readonly visibility: VisibilityService,
   ) {}
+  @Get("questionnaire-template") async template(
+    @Req() r: ActorRequest,
+    @Param("projectId", ParseUUIDPipe) p: string,
+    @Query(new SchemaPipe(C.questionnaireTemplateQuery))
+    d: z.infer<typeof C.questionnaireTemplateQuery>,
+    @Res() res: Response,
+  ) {
+    const file = await this.templates.download(r.actor, p, d.format);
+    res.setHeader("Content-Type", file.mime + "; charset=utf-8");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${file.filename}"`,
+    );
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("Cache-Control", "no-store");
+    res.send(file.content);
+  }
   @Get("dashboard") dashboard(
     @Req() r: ActorRequest,
     @Param("projectId", ParseUUIDPipe) p: string,
+    @Query(new SchemaPipe(C.dashboardQuery))
+    d: z.infer<typeof C.dashboardQuery>,
   ) {
-    return this.visibility.dashboard(r.actor, p);
+    return this.visibility.dashboard(r.actor, p, d.since);
+  }
+  @Get("participation") participation(
+    @Req() r: ActorRequest,
+    @Param("projectId", ParseUUIDPipe) p: string,
+  ) {
+    return this.visibility.participation(r.actor, p);
   }
   @Get("decisions") decisions(
     @Req() r: ActorRequest,

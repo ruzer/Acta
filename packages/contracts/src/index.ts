@@ -1,3 +1,8 @@
+export {
+  endOfResponseDay,
+  responseCalendarDate,
+  responseDueLabel,
+} from "./deadline.js";
 import { z } from "zod";
 import {
   assetCommandView,
@@ -200,6 +205,7 @@ export const areaUpdateInput = z
     message: "Indica el nombre o el estado del área.",
   });
 export const projectInput = z.strictObject({
+  responseDueDate: z.iso.date().nullable().optional(),
   externalId,
   name,
   description: short.default(""),
@@ -1697,7 +1703,12 @@ export const visibilityQuestion = z.strictObject({
   conditionalWithoutCase: z.boolean(),
   referenceIds: z.array(z.uuid()),
 });
+export const dashboardQuery = z.strictObject({
+  since: z.iso.datetime().optional(),
+});
 export const dashboardView = z.strictObject({
+  newContributions: z.number().int().nonnegative().optional(),
+  contributionsAsOf: z.iso.datetime().optional(),
   projectName: z.string(),
   role: z.enum(["ADMIN", "ANALYST"]),
   metrics: metricsView,
@@ -1799,6 +1810,7 @@ export const decisionRegisterView = z.strictObject({
 });
 export type DecisionRegisterEntry = z.infer<typeof decisionRegisterEntry>;
 export const exportInput = z.strictObject({
+  csvHeaders: z.literal("es-MX").optional(),
   format: z.enum(["JSON", "CSV", "MARKDOWN"]),
   scope: z.enum(["full", "validated-decisions"]),
   requestId: z.uuid(),
@@ -1939,3 +1951,44 @@ export const validatedDecisionsExportDocument = z.strictObject({
 
 export * from "./participant.js";
 export * from "./installation.js";
+
+// Vista nueva: no amplía el acceso a respuestas ni cambia las vistas existentes.
+export const participationStates = [
+  "Sin iniciar",
+  "En borrador",
+  "Envió parte",
+  "Completo",
+] as const;
+export const participationPerson = z.strictObject({
+  memberId: z.uuid(),
+  name: z.string(),
+  area: z.string().nullable(),
+  assigned: z.number().int().nonnegative(),
+  required: z.number().int().nonnegative(),
+  drafts: z.number().int().nonnegative(),
+  sent: z.number().int().nonnegative(),
+  pending: z.number().int().nonnegative(),
+  lastActivity: z.iso.datetime().nullable(),
+  state: z.enum(participationStates),
+});
+export const participationView = z.strictObject({
+  responseDueAt: z.iso.datetime().nullable().optional(),
+  projectName: z.string(),
+  role: z.enum(["ADMIN", "ANALYST"]),
+  participants: z.array(participationPerson),
+});
+export type ParticipationPerson = z.infer<typeof participationPerson>;
+export type ParticipationView = z.infer<typeof participationView>;
+
+export const responseDeadlineView = z.strictObject({
+  responseDueAt: z.iso.datetime().nullable(),
+  lockVersion: z.number().int().nonnegative(),
+});
+export const responseDeadlineInput = z.strictObject({
+  responseDueDate: z.iso.date().nullable(),
+  expectedVersion: z.number().int().nonnegative(),
+});
+
+export const questionnaireTemplateQuery = z.strictObject({
+  format: z.enum(["csv", "json"]).default("csv"),
+});

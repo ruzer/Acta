@@ -43,6 +43,7 @@ export function ProjectShell({
       import: "Importar cuestionario",
       export: "Exportar",
       report: "Informe",
+      participation: "Participación",
       traceability: "Trazabilidad",
       history: "Bitácora",
     }[segment ?? ""] ??
@@ -54,6 +55,7 @@ export function ProjectShell({
         <Link to="/">Mis proyectos</Link>
         {organizationAdmin && <Link to="/admin">Administración</Link>}
         <Link to="/password">Mi contraseña</Link>
+        <Link to="/help">Ayuda</Link>
       </nav>
       <Button tone="tertiary" onClick={onLogout}>
         Cerrar sesión

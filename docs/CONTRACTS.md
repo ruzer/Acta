@@ -16,3 +16,7 @@ Usa este índice para localizar capacidades sin conocer las fases históricas. S
 | Import/Export — intercambio | [Intercambio](CONTRACTS-2E.md), [Formato de importación](IMPORT-FORMAT.md) | [Contratos compartidos](../packages/contracts/src/index.ts) |
 
 Los esquemas Zod y endpoints implementados son la referencia ejecutable vigente. Este índice no crea endpoints, campos ni permisos. Para entender entidades y relaciones: [Modelo de dominio](DOMAIN-MODEL.md) y [Arquitectura](ARCHITECTURE.md).
+
+### Novedades de Atención
+
+`GET /projects/:id/dashboard?since=<fecha ISO UTC>` conserva los permisos de administración/análisis del proyecto. Solo al enviar `since` agrega `newContributions` (revisiones enviadas, nunca borradores, de las preguntas publicadas actuales) y `contributionsAsOf` (límite superior del conteo). Sin el parámetro, la salida permanece igual. La marca del navegador se separa por cuenta y proyecto; no otorga acceso.

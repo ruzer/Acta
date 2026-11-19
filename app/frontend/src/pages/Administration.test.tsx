@@ -352,3 +352,16 @@ it("nombra el acceso al proyecto sin confundirlo con preguntas asignadas", async
   expect(screen.getByText(/asígnale preguntas en/)).toBeVisible();
   expect(document.body).not.toHaveTextContent(/membres/i);
 });
+
+it("Miembros nombra la columna Área sin confundirla con el rol participante", async () => {
+  mountApp(["/projects/a/members"]);
+  const table = await screen.findByRole("table", {
+    name: "Acceso al proyecto",
+  });
+  expect(
+    within(table).getByRole("columnheader", { name: "Área" }),
+  ).toBeVisible();
+  expect(
+    within(table).queryByRole("columnheader", { name: "Área participante" }),
+  ).toBeNull();
+});

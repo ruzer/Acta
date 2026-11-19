@@ -1,3 +1,4 @@
+import { resolveAppearance } from "../settings/appearance.js";
 import {
   ConflictException,
   Injectable,
@@ -14,6 +15,9 @@ import {
   memberView,
   organizationView,
   projectInput,
+  responseDeadlineInput,
+  responseDeadlineView,
+  endOfResponseDay,
   projectView,
 } from "@requirements/contracts";
 import { Prisma, User } from "@prisma/client";
@@ -373,9 +377,23 @@ export class AdministrationService {
   async createProject(req: CommandContext, d: z.infer<typeof projectInput>) {
     return this.db.$transaction(async (tx) => {
       await this.access.organizationAdmin(tx, req.actor);
+      const { responseDueDate, ...fields } = d;
       const p = await tx.project
         .create({
-          data: { organizationId: req.actor.organizationId, ...d },
+          data: {
+            organizationId: req.actor.organizationId,
+            ...fields,
+            responseDueAt: responseDueDate
+              ? endOfResponseDay(
+                  responseDueDate,
+                  resolveAppearance(
+                    await tx.organizationSettings.findUnique({
+                      where: { organizationId: req.actor.organizationId },
+                    }),
+                  ).timezone.value,
+                )
+              : null,
+          },
         })
         .catch((error: unknown) =>
           creationError(
@@ -399,11 +417,85 @@ export class AdministrationService {
       );
       return serialize(projectView, {
         id: p.id,
-        ...d,
+        ...fields,
         lifecycle: p.lifecycle,
         role: "ADMIN",
         lockVersion: p.lockVersion,
         questionCount: 0,
+      });
+    });
+  }
+  async responseDeadline(actor: User, projectId: string) {
+    return this.db.$transaction(async (tx) => {
+      let project;
+      if (actor.isOrganizationAdmin) {
+        await this.access.organizationAdmin(tx, actor);
+        project = await tx.project.findFirst({
+          where: { id: projectId, organizationId: actor.organizationId },
+        });
+        if (!project)
+          throw new NotFoundException("No se encontró el proyecto.");
+      } else ({ project } = await this.access.project(tx, actor, projectId));
+      return serialize(responseDeadlineView, {
+        responseDueAt: project.responseDueAt?.toISOString() ?? null,
+        lockVersion: project.lockVersion,
+      });
+    });
+  }
+  async setResponseDeadline(
+    req: CommandContext,
+    projectId: string,
+    d: z.infer<typeof responseDeadlineInput>,
+  ) {
+    return this.db.$transaction(async (tx) => {
+      await this.access.organizationAdmin(tx, req.actor);
+      const rows = await tx.$queryRaw<
+        { id: string }[]
+      >`SELECT id FROM "Project" WHERE id=${projectId}::uuid AND "organizationId"=${req.actor.organizationId}::uuid FOR UPDATE`;
+      if (!rows.length)
+        throw new NotFoundException("No se encontró el proyecto.");
+      const old = await tx.project.findUniqueOrThrow({
+        where: { id: projectId },
+      });
+      if (old.lifecycle !== "ACTIVE")
+        throw new ConflictException("El proyecto está archivado.");
+      if (old.lockVersion !== d.expectedVersion)
+        throw new ConflictException(
+          "El proyecto cambió. Recarga la información antes de guardar.",
+        );
+      const responseDueAt = d.responseDueDate
+        ? endOfResponseDay(
+            d.responseDueDate,
+            resolveAppearance(
+              await tx.organizationSettings.findUnique({
+                where: { organizationId: req.actor.organizationId },
+              }),
+            ).timezone.value,
+          )
+        : null;
+      if ((old.responseDueAt?.toISOString() ?? null) === responseDueAt)
+        return serialize(responseDeadlineView, {
+          responseDueAt,
+          lockVersion: old.lockVersion,
+        });
+      const updated = await tx.project.update({
+        where: { id: projectId },
+        data: { responseDueAt, lockVersion: { increment: 1 } },
+      });
+      await audit(
+        tx,
+        req.actor,
+        "PROJECT_DEADLINE_CHANGED",
+        "Project",
+        projectId,
+        projectId,
+        { responseDueAt: old.responseDueAt?.toISOString() ?? null },
+        { responseDueAt },
+        req.requestId,
+      );
+      return serialize(responseDeadlineView, {
+        responseDueAt,
+        lockVersion: updated.lockVersion,
       });
     });
   }

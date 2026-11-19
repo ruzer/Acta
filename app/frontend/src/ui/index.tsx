@@ -2,6 +2,7 @@ import {
   useEffect,
   useId,
   useRef,
+  useState,
   type ReactNode,
   type ComponentProps,
 } from "react";
@@ -49,6 +50,32 @@ export function Input({
         <input id={id} aria-describedby={d} aria-invalid={!!error} {...p} />
       )}
     </Field>
+  );
+}
+export function PasswordInput({
+  label,
+  ...props
+}: Omit<ComponentProps<"input">, "type"> & { label: string }) {
+  const [shown, setShown] = useState(false);
+  const action = shown ? "Ocultar contraseña" : "Mostrar contraseña";
+  const context =
+    {
+      "Contraseña actual": ": actual",
+      "Nueva contraseña": ": nueva",
+      "Repetir nueva contraseña": ": confirmación",
+    }[label] ?? "";
+  return (
+    <>
+      <Input {...props} label={label} type={shown ? "text" : "password"} />
+      <Button
+        tone="tertiary"
+        aria-pressed={shown}
+        aria-label={action + context}
+        onClick={() => setShown(!shown)}
+      >
+        {action}
+      </Button>
+    </>
   );
 }
 export function Select({
@@ -169,7 +196,18 @@ export function EmptyState({
     </div>
   );
 }
-export function LoadingState() {
+export function LoadingState({ skeleton = false }: { skeleton?: boolean }) {
+  if (skeleton)
+    return (
+      <div role="status" aria-busy="true" className="loading-skeleton">
+        <span className="sr-only">Cargando información…</span>
+        <div aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
+      </div>
+    );
   return (
     <p role="status" className="loading">
       Cargando información…
@@ -186,10 +224,16 @@ export function ErrorState({
   return (
     <Alert error>
       <p>{error.message}</p>
-      {retry && (
-        <Button tone="secondary" onClick={retry}>
-          Volver a intentar
-        </Button>
+      {"status" in error && error.status === 403 ? (
+        <a className="button primary" href="/">
+          Ir a Mis proyectos
+        </a>
+      ) : (
+        retry && (
+          <Button tone="secondary" onClick={retry}>
+            Volver a intentar
+          </Button>
+        )
       )}
     </Alert>
   );

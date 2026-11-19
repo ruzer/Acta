@@ -113,21 +113,22 @@ export function ImportStructure() {
     [areas, setAreas] = useState(false),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
+  const [sourceProject, setSourceProject] = useState("");
   const requestId = useRef(crypto.randomUUID()),
     heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     if (preview) heading.current?.focus();
   }, [preview]);
-  async function review() {
-    if (!file || unavailable) return;
+  async function review(selected = file) {
+    if (!selected || unavailable) return;
     setBusy(true);
     setError("");
     setPreview(undefined);
     setAreas(false);
     try {
-      let payload = file;
+      let payload = selected;
       let location: ((path: string) => string) | undefined;
-      if (/\.csv$/i.test(file.name)) {
+      if (/\.csv$/i.test(selected.name)) {
         const project = projects.data?.find((p) => p.id === projectId);
         if (!project)
           throw new Error(
@@ -140,7 +141,7 @@ export function ImportStructure() {
             "El catálogo de áreas es demasiado grande para resolver nombres con seguridad. Utiliza la plantilla JSON con los códigos de área.",
           );
         const converted = csvQuestionnaire(
-          new Uint8Array(await file.arrayBuffer()),
+          new Uint8Array(await selected.arrayBuffer()),
           {
             externalId: project.externalId,
             name: project.name,
@@ -176,6 +177,41 @@ export function ImportStructure() {
           : p,
       );
       requestId.current = crypto.randomUUID();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function reuse() {
+    if (!sourceProject || unavailable) return;
+    setBusy(true);
+    setError("");
+    setPreview(undefined);
+    try {
+      const target = projects.data?.find((p) => p.id === projectId);
+      if (!target)
+        throw new Error(
+          "No se pudo consultar el proyecto. Vuelve a intentarlo.",
+        );
+      const response = await exchangeFetch(
+        sourceProject,
+        "questionnaire-template",
+        { query: { format: "json" } },
+      );
+      const template = C.templateInput.parse(await response.json());
+      template.project = {
+        externalId: target.externalId,
+        name: target.name,
+        description: target.description,
+      };
+      const selected = new File(
+        [JSON.stringify(template)],
+        "cuestionario-plantilla.json",
+        { type: "application/json" },
+      );
+      setFile(selected);
+      await review(selected);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -246,6 +282,47 @@ export function ImportStructure() {
                 Ir al cuestionario
               </Link>
             </Alert>
+          )}
+          {hasStructure && <TemplateDownload projectId={projectId} />}
+          {!hasStructure && (
+            <section aria-labelledby="reuse-questionnaire">
+              <h2 id="reuse-questionnaire">
+                Usar el cuestionario de otro proyecto
+              </h2>
+              <p>
+                Solo se copiará la estructura. Revisa la vista previa antes de
+                confirmar; no se copian personas, respuestas ni archivos.
+              </p>
+              <Select
+                label="Proyecto de origen"
+                value={sourceProject}
+                disabled={busy || unavailable}
+                onChange={(e) => {
+                  setSourceProject(e.target.value);
+                  setPreview(undefined);
+                }}
+              >
+                <option value="">Elige un proyecto</option>
+                {projects.data
+                  ?.filter(
+                    (p) =>
+                      p.id !== projectId &&
+                      (p.role === "ADMIN" || p.role === "ANALYST") &&
+                      p.questionCount > 0,
+                  )
+                  .map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} ({p.externalId})
+                    </option>
+                  ))}
+              </Select>
+              <Button
+                disabled={busy || unavailable || !sourceProject}
+                onClick={() => void reuse()}
+              >
+                Revisar este cuestionario
+              </Button>
+            </section>
           )}
           <section aria-labelledby="import-csv-guide">
             <h2 id="import-csv-guide">Preparar tu cuestionario</h2>
@@ -500,6 +577,7 @@ export function ExportProject() {
       const r = await exchangeFetch(projectId, "exports", {
         input: C.exportInput.parse({
           format: viewer ? "JSON" : format,
+          ...(!viewer && format === "CSV" ? { csvHeaders: "es-MX" } : {}),
           scope: viewer ? "validated-decisions" : "full",
           requestId: crypto.randomUUID(),
         }),
@@ -557,9 +635,59 @@ export function ExportProject() {
         Una exportación funcional no es un backup completo. Los archivos de
         evidencia no se incrustan; sus descargas requieren autorización.
       </p>
+      {!viewer && <TemplateDownload projectId={projectId} />}
       <Button disabled={busy} onClick={() => void download()}>
         {busy ? "Generando archivo…" : "Descargar exportación"}
       </Button>
     </>
+  );
+}
+
+function TemplateDownload({ projectId }: { projectId: string }) {
+  const [busy, setBusy] = useState(false),
+    [error, setError] = useState(""),
+    [notice, setNotice] = useState("");
+  async function download() {
+    setBusy(true);
+    setError("");
+    setNotice("");
+    try {
+      const response = await exchangeFetch(
+        projectId,
+        "questionnaire-template",
+        { query: { format: "csv" } },
+      );
+      const json = response.headers
+        .get("content-type")
+        ?.includes("application/json");
+      saveDownload(
+        await response.blob(),
+        `cuestionario-plantilla.${json ? "json" : "csv"}`,
+      );
+      setNotice(
+        json
+          ? "Plantilla descargada en JSON para conservar toda la estructura. En el proyecto nuevo puedes usar «Usar el cuestionario de otro proyecto» sin editar archivos."
+          : "Plantilla CSV descargada. Puedes importarla en un proyecto vacío.",
+      );
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <section aria-label="Reutilizar cuestionario">
+      <h2>Reutilizar cuestionario</h2>
+      <p>
+        La plantilla contiene preguntas, temas y sus reglas, sin respuestas ni
+        personas. Se elige CSV cuando conserva la estructura; en los demás casos
+        se usa JSON.
+      </p>
+      {error && <Alert error>{error}</Alert>}
+      {notice && <p role="status">{notice}</p>}
+      <Button disabled={busy} onClick={() => void download()}>
+        Descargar este cuestionario como plantilla
+      </Button>
+    </section>
   );
 }

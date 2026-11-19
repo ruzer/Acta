@@ -41,3 +41,25 @@ Todo acceso al contenido de un proyecto exige **acceso activo** a él; la admini
 - **Cuentas desactivadas**: no cuentan como administradoras ni como miembros activos.
 - **Otra institución**: no aparece, y acceder a su proyecto por URL responde 404.
 - **Escalamiento**: ningún rol de proyecto puede agregarse como administrador de otro proyecto ni crear administración de la institución; la lista no cambia ningún permiso existente.
+
+## Seguir la participación
+
+En **Atención → Ver participación**, la administración y el equipo analista del proyecto ven quién empezó, quién guarda borradores y quién envió sus respuestas. **Filtrar participación** y **Ordenar participación** ayudan a encontrar pendientes. «Completo» no significa revisado: solo que ya se enviaron las preguntas obligatorias que aplican a esa persona. Si solo tiene preguntas opcionales, debe enviarlas todas para aparecer como completo.
+
+**Copiar recordatorio** prepara un texto con las personas y sus preguntas obligatorias pendientes. Pégalo tú en el medio acordado con el equipo. Acta no envía mensajes ni incluye respuestas o contraseñas. Si el dispositivo no permite copiar, ofrece el texto seleccionable. Un participante o lector no puede abrir este seguimiento; administrar la institución tampoco otorga acceso automático.
+
+## Fecha límite para responder
+
+Al **Crear proyecto**, **Fecha límite para responder (opcional)** puede dejarse vacía. Para cambiarla después, abre **Administración → Proyectos → Fecha límite** en la fila del proyecto y pulsa **Guardar fecha límite**. Borrar el valor quita el plazo. Se guarda hasta el final del día en la zona horaria de la instalación, también si ese día cambia el horario.
+
+Mi trabajo y Atención muestran si falta tiempo, vence hoy o ya venció. Participación cuenta las personas con plazo vencido y preguntas obligatorias pendientes. La fecha solo orienta: **no cierra el proyecto ni impide guardar o enviar**. Cambiarla requiere administración de la institución; la consulta mantiene los accesos del proyecto. Administración institucional puede consultar este dato general sin obtener respuestas ni evidencia.
+
+## Primeros pasos y ayuda
+
+Atención muestra **Primeros pasos** mientras no hay respuestas enviadas. Usa preguntas, accesos y asignaciones actuales para retirar las tareas completadas. Puede replegarse y desaparece con el primer envío. El analista solicita a la administración los accesos que no puede conceder; la tarjeta no amplía permisos. **Ayuda**, en el menú de cuenta, reúne las guías de los roles actuales. La administración institucional ve todas; el lector recibe orientación para consultar sus proyectos.
+
+## Atención sin repeticiones
+
+Una pregunta aparece una sola vez: primero conflictos o respuestas listas, después aclaraciones, pendientes de otras personas y preguntas sin asignación. «Otras preguntas» reúne lo que no entró en esos grupos. Los filtros mantienen las mismas acciones. Los contadores del resumen pueden coincidir porque una pregunta puede tener conflicto y aclaración a la vez.
+
+Atención anuncia los envíos nuevos desde la visita anterior; cuenta cada envío, no los borradores. La fecha de visita se guarda en este navegador por cuenta y proyecto, sin respuestas. La primera visita no anuncia novedades; otro navegador tiene su propio historial.

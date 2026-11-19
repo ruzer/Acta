@@ -1,3 +1,4 @@
+import { clearDraftTexts } from "./draft-recovery";
 import { ProjectShell } from "./shell/ProjectShell";
 import { OrganizationShell } from "./shell/OrganizationShell";
 import { PageHeader } from "./ui/semantic";
@@ -12,6 +13,7 @@ import {
   Route,
   Routes,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
 import {
   useQuery,
@@ -33,6 +35,14 @@ import {
 import "./participant.css";
 import { Respond } from "./pages/Respond";
 import { Clarifications } from "./pages/Clarifications";
+const Help = lazy(() =>
+  import("./pages/Help").then((module) => ({ default: module.Help })),
+);
+const Participation = lazy(() =>
+  import("./pages/Participation").then((module) => ({
+    default: module.Participation,
+  })),
+);
 const ProjectReport = lazy(() =>
   import("./pages/ProjectReport").then((module) => ({
     default: module.ProjectReport,
@@ -147,9 +157,11 @@ export function RouteFocus() {
  */
 function SignedOut({
   notice,
+  username,
   onLogin,
 }: {
   notice: string;
+  username: string;
   onLogin: (me: Me) => void;
 }) {
   const setup = useQuery({
@@ -163,6 +175,7 @@ function SignedOut({
     return <Setup onFinished={() => setFinished(true)} />;
   return (
     <Login
+      username={username}
       notice={
         finished
           ? "La instalación quedó configurada. Inicia sesión con la cuenta de administración que creaste."
@@ -174,6 +187,8 @@ function SignedOut({
 }
 function Session() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [loginUsername, setLoginUsername] = useState("");
   const [me, setMe] = useState<Me | null>(null);
   const [loading, setLoading] = useState(true);
   const [expired, setExpired] = useState(false);
@@ -184,15 +199,25 @@ function Session() {
     void api("me")
       .then((m) => {
         if (active) {
+          clearDraftTexts(m.user.id);
           setCsrf(m.csrfToken);
           setMe(m);
         }
       })
-      .catch(() => {})
+      .catch((error: unknown) => {
+        if (
+          active &&
+          error instanceof Error &&
+          "status" in error &&
+          error.status === 401
+        )
+          clearDraftTexts();
+      })
       .finally(() => {
         if (active) setLoading(false);
       });
     const expired = () => {
+      clearDraftTexts();
       setExpired(true);
       setCsrf("");
     };
@@ -233,7 +258,10 @@ function Session() {
     )
       proceed();
   }
-  function signedOut(message: string) {
+  function signedOut(message: string, username = "") {
+    clearDraftTexts();
+    setLoginUsername(username);
+    navigate("/", { replace: true });
     setExpired(false);
     setMe(null);
     setCsrf("");
@@ -245,9 +273,13 @@ function Session() {
     return (
       <SignedOut
         notice={notice}
+        username={loginUsername}
         onLogin={(m) => {
+          clearDraftTexts(m.user.id);
           client.clear();
+          navigate("/", { replace: true });
           setMe(m);
+          setLoginUsername("");
           setNotice("");
         }}
       />
@@ -295,6 +327,7 @@ function Session() {
             onDone={() =>
               signedOut(
                 "Contraseña actualizada. Inicia sesión con tu nueva contraseña.",
+                me.user.username,
               )
             }
           />
@@ -311,6 +344,19 @@ function Session() {
             />
             <Route path="/review" element={<ReviewInbox />} />
             <Route
+              path="/help"
+              element={
+                <Help
+                  organizationAdmin={me.user.isOrganizationAdmin}
+                  roles={projects.data?.map((p) => p.role) ?? []}
+                />
+              }
+            />
+            <Route
+              path="/projects/:projectId/participation"
+              element={<Participation />}
+            />
+            <Route
               path="/projects/:projectId/report"
               element={<ProjectReport />}
             />
@@ -324,7 +370,7 @@ function Session() {
             />
             <Route
               path="/projects/:projectId/dashboard"
-              element={<Dashboard />}
+              element={<Dashboard userId={me.user.id} />}
             />
             <Route
               path="/projects/:projectId/traceability"
@@ -354,6 +400,7 @@ function Session() {
                   onDone={() =>
                     signedOut(
                       "Contraseña actualizada. Inicia sesión con tu nueva contraseña.",
+                      me.user.username,
                     )
                   }
                 />
@@ -379,7 +426,7 @@ function Session() {
             <Route path="/projects/:projectId/work" element={<MyWork />} />
             <Route
               path="/projects/:projectId/respond/:id"
-              element={<Respond />}
+              element={<Respond userId={me.user.id} />}
             />
             <Route path="/projects/:projectId" element={<Participant />} />
             <Route path="/projects/:projectId/editor" element={<Editor />} />
@@ -485,9 +532,18 @@ function Session() {
             compact
             notice="Tu sesión terminó. Tus cambios siguen en esta pestaña. Inicia sesión para continuar."
             onLogin={(m) => {
-              if (m.user.id !== me.user.id) client.clear();
+              if (m.user.id !== me.user.id) {
+                client.clear();
+                navigate("/", { replace: true });
+              }
               setMe(m);
+              clearDraftTexts(m.user.id);
               setExpired(false);
+              window.dispatchEvent(
+                new CustomEvent("session-restored", {
+                  detail: { userId: m.user.id },
+                }),
+              );
             }}
           />
         </Dialog>

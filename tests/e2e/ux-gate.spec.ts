@@ -43,7 +43,7 @@ async function checked(page: Page, id: string, width: number) {
 }
 
 for (const count of [12, 54, 304]) {
-  test(`UX-01/03: Atención con ${count} preguntas abre la lista completa y conserva el trabajo agrupado al plegarla`, async ({
+  test(`UX-01/03: Atención con ${count} preguntas separa las preguntas restantes y conserva el trabajo agrupado al plegarlas`, async ({
     page,
     baseURL,
   }) => {
@@ -58,11 +58,21 @@ for (const count of [12, 54, 304]) {
       const all = page.locator("details.ac-attention-all");
       await expect(all).toHaveAttribute("open", "");
       const allRows = all.locator(".ac-queue-row");
-      await expect(allRows).toHaveCount(count <= 60 ? count : 50);
-      const allIds = await allRows.locator("[data-workbench-id]").evaluateAll(
-        (els) => els.map((e) => (e as HTMLElement).dataset.workbenchId),
-      );
+      const remaining =
+        count - fixture.action - fixture.clarificationsOnly - fixture.waiting;
+      await expect(allRows).toHaveCount(remaining <= 60 ? remaining : 50);
+      const allIds = await allRows
+        .locator("[data-workbench-id]")
+        .evaluateAll((els) =>
+          els.map((e) => (e as HTMLElement).dataset.workbenchId),
+        );
       expect(new Set(allIds).size).toBe(allIds.length);
+      const visibleIds = await page
+        .locator(".ac-queue-row [data-workbench-id]")
+        .evaluateAll((els) =>
+          els.map((e) => (e as HTMLElement).dataset.workbenchId),
+        );
+      expect(new Set(visibleIds).size).toBe(visibleIds.length);
       await checked(page, `UX01-expanded-n${count}`, width);
       // Keep the original compact queue budgets after explicitly folding the full list.
       await all.locator("summary").click();
@@ -174,7 +184,9 @@ for (const count of [12, 54, 304]) {
       await expect(page.locator("main h1")).toBeVisible();
       await page.getByRole("link", { name: "← Atención", exact: true }).click();
       await expect(waiting).toHaveAttribute("open", "");
-      await expect(waiting.locator(`[data-workbench-id="${id}"]`)).toBeFocused();
+      await expect(
+        waiting.locator(`[data-workbench-id="${id}"]`),
+      ).toBeFocused();
     }
     // Filters keep working over the whole list and keep the rest of the URL.
     await page

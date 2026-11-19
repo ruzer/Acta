@@ -140,6 +140,12 @@ export function ProjectAttention({
     clarifications.data?.clarificationIds ?? [],
     canReview,
   );
+  const grouped = new Map(
+    groups.flatMap((group) =>
+      group.questions.map((question) => [question.id, group] as const),
+    ),
+  );
+  const remaining = items.filter((question) => !grouped.has(question.id));
   const evidenceIds = new Set(
     clarifications.data?.reviewItems
       .filter((item) => item.hasEvidence)
@@ -236,11 +242,13 @@ export function ProjectAttention({
   // The row the review was opened from lives in the first section that lists
   // it; only that section is forced open / long enough, never the full list too.
   const focusHome = savedFocus
-    ? [
-        ...groups.map((group) => ({ id: group.id, list: group.questions })),
-        { id: `filtered:${task ?? ""}:${status}`, list: items },
-        { id: "all", list: items },
-      ].find((section) => section.list.some((q) => q.id === savedFocus))?.id
+    ? (task || status
+        ? [{ id: `filtered:${task ?? ""}:${status}`, list: items }]
+        : [
+            ...groups.map((group) => ({ id: group.id, list: group.questions })),
+            { id: "all", list: remaining },
+          ]
+      ).find((section) => section.list.some((q) => q.id === savedFocus))?.id
     : undefined;
   function shownRows(id: string, list: typeof items, paging: Paging) {
     const base =
@@ -301,11 +309,13 @@ export function ProjectAttention({
     list.map((q) =>
       row(
         q,
-        q.status === "CONFLICT"
-          ? "Revisar conflicto"
-          : q.status === "VALIDATED"
-            ? "Ver decisión"
-            : "Revisar respuestas",
+        grouped.get(q.id)?.action(q) ??
+          (q.status === "CONFLICT"
+            ? "Revisar conflicto"
+            : q.status === "VALIDATED"
+              ? "Ver decisión"
+              : "Revisar respuestas"),
+        grouped.get(q.id)?.reason(q),
       ),
     );
   return (
@@ -389,6 +399,22 @@ export function ProjectAttention({
                       )}
                     </>
                   )}
+                </EmptyState>
+              ) : !task &&
+                !status &&
+                data.questions.every(
+                  (q) =>
+                    q.status === "NOT_REVIEWED" && q.submittedRespondents === 0,
+                ) ? (
+                <EmptyState title="Aún no hay respuestas enviadas">
+                  Revisa las asignaciones y avisa al equipo que puede comenzar.{" "}
+                  <Link to={`/projects/${projectId}/editor`}>
+                    Abrir Cuestionario
+                  </Link>
+                  {" · "}
+                  <Link to={`/projects/${projectId}/participation`}>
+                    Ver participación
+                  </Link>
                 </EmptyState>
               ) : task || status ? (
                 <section
@@ -487,27 +513,29 @@ export function ProjectAttention({
                       </section>
                     );
                   })}
-                  <details
-                    className="ac-attention-all ac-attention-fold"
-                    open={isOpen("all", true)}
-                    onToggle={(event) =>
-                      setOpen(
-                        "all",
-                        event.currentTarget.open,
-                        isOpen("all", true),
-                      )
-                    }
-                  >
-                    <summary>Todas las preguntas ({items.length})</summary>
-                    {isOpen("all", true) &&
-                      rowList(
-                        "all",
-                        "Casos de atención",
-                        items,
-                        secondaryPaging,
-                        (q) => allRows([q])[0],
-                      )}
-                  </details>
+                  {remaining.length > 0 && (
+                    <details
+                      className="ac-attention-all ac-attention-fold"
+                      open={isOpen("all", true)}
+                      onToggle={(event) =>
+                        setOpen(
+                          "all",
+                          event.currentTarget.open,
+                          isOpen("all", true),
+                        )
+                      }
+                    >
+                      <summary>Otras preguntas ({remaining.length})</summary>
+                      {isOpen("all", true) &&
+                        rowList(
+                          "all",
+                          "Casos de atención",
+                          remaining,
+                          secondaryPaging,
+                          (q) => allRows([q])[0],
+                        )}
+                    </details>
+                  )}
                 </>
               )}
             </>

@@ -179,7 +179,10 @@ test("administración, edición, guardado, publicación y contenido protegido", 
     path: "artifacts/admin-desktop.png",
     fullPage: true,
   });
-  await page.getByRole("link", { name: "Mis proyectos", exact: true }).click();
+  await page
+    .getByRole("navigation", { name: "Cuenta" })
+    .getByRole("link", { name: "Mis proyectos", exact: true })
+    .click();
   await page
     .getByRole("listitem")
     .filter({
@@ -356,7 +359,7 @@ test("cambios sin guardar se conservan al cancelar navegación y miembros funcio
   await composer.getByRole("button", { name: "Cancelar", exact: true }).click();
   await expect(composer).toHaveCount(0);
   await expect(trigger).toBeFocused();
-  await page.getByRole("link", { name: "Mis proyectos", exact: true }).click();
+  await page.locator(".ac-project-switch").click();
   await expect(
     page.getByRole("heading", { name: "Mis proyectos", exact: true }),
   ).toBeVisible();

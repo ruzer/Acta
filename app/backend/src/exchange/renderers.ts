@@ -53,11 +53,34 @@ export const csvFields = [
   "traceabilityIds",
   "exportedAt",
 ] as const;
-export function csvDocument(rows: Record<string, unknown>[]) {
+const csvSpanishHeaders: Record<(typeof csvFields)[number], string> = {
+  projectExternalId: "Proyecto",
+  sectionExternalId: "Tema",
+  questionExternalId: "Código de pregunta",
+  title: "Título",
+  priority: "Prioridad",
+  responsibleArea: "Área responsable",
+  status: "Estado",
+  published: "Publicada",
+  archived: "Archivada",
+  submittedRespondents: "Personas que enviaron",
+  requiredRespondents: "Personas requeridas",
+  validatedBy: "Decidió",
+  validatedAt: "Fecha de decisión",
+  validationId: "Identificador de decisión",
+  traceabilityIds: "Referencias",
+  exportedAt: "Fecha de exportación",
+};
+export function csvDocument(
+  rows: Record<string, unknown>[],
+  headers?: "es-MX",
+) {
   return (
     "\uFEFF" +
     [
-      csvFields.join(","),
+      csvFields
+        .map((key) => (headers === "es-MX" ? csvSpanishHeaders[key] : key))
+        .join(","),
       ...rows.map((r) => csvFields.map((k) => csvCell(r[k])).join(",")),
     ].join("\r\n") +
     "\r\n"

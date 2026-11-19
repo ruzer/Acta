@@ -342,6 +342,7 @@ export class ExportService {
                     exportedAt,
                   };
                 }),
+                d.csvHeaders,
               );
             } else {
               const out = [

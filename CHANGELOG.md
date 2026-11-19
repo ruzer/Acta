@@ -10,6 +10,22 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Kit de piloto con personas.** Plan ajustable, guion de observación, guías breves de Administración, Participante y Revisión, y plantillas para medir resultados y decidir continuar, ajustar o detener; no sustituye una validación con personas ni certifica producción.
 
+- **Borradores con autoguardado y recuperación.** Los cambios se guardan tras una pausa al escribir, con un máximo de un intento automático cada 30 segundos y sin solicitudes simultáneas. El texto pendiente puede recuperarse en la misma pestaña; la copia se limita a la cuenta y pregunta actuales y se retira al guardar, enviar o terminar la sesión.
+
+- **Medición reproducible de guardados simultáneos.** Un ensayo local crea 300 preguntas y 50 participantes ficticios, informa latencias y errores reales y comprueba por qué debe conservarse el recálculo de revisión al guardar borradores. La primera medición registra un límite de capacidad; no acredita operación institucional con esa concurrencia.
+
+- **Entregables a la vista.** Atención y Decisiones ofrecen Informe para imprimir y Exportar; una decisión vigente anuncia que el informe está listo. La plantilla y el CSV descargados usan UTF-8 con BOM y encabezados en español, sin cambiar la salida técnica predeterminada para integraciones.
+
+- **Seguimiento de participación.** Administración y análisis del proyecto consultan conteos por persona, filtran su avance y copian un recordatorio sin respuestas ni claves. Atención enlaza al seguimiento y explica qué hacer cuando aún no hay envíos; los permisos y la vigencia de las respuestas siguen siendo autoridad del servidor.
+
+- **Fecha límite informativa.** Administración puede fijar o quitar una fecha al crear o editar el plazo del proyecto. Se guarda al final del día en la zona horaria de la instalación y se muestra en Atención, Mi trabajo y Participación, sin bloquear envíos. Una sola migración agrega una columna vacía a los proyectos existentes.
+
+- **Primeros pasos y ayuda por perfil:** el proyecto nuevo indica los pasos pendientes con datos reales; el menú de cuenta ofrece las guías de cada rol, verificadas contra las etiquetas de la interfaz.
+
+- **Cuestionarios reutilizables:** descarga la estructura sin respuestas ni personas como CSV sencillo o plantilla JSON completa, o úsala desde otro proyecto autorizado con la vista previa y confirmación habituales.
+
+- **Comprobación de los pendientes menores.** Se conserva el respaldo de nombres ausentes en exportes históricos y se fija una prueba de la columna «Área» en Miembros; ambos comportamientos ya estaban presentes en la base.
+
 ### Fixed
 
 - **Acceso al proyecto sin jerga.** La administración, el alta de cuentas y los mensajes de ayuda hablan de accesos al proyecto; dar acceso sigue siendo distinto de asignar preguntas.
@@ -19,6 +35,12 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 - **Atención según el acceso y el estado del proyecto.** La administración conoce qué puede preparar y consultar; un proyecto archivado indica que solo permite consulta, también al equipo analista.
 
 - **Un solo nombre para importar.** Los enlaces, la ruta de navegación y la guía de Administración dicen «Importar cuestionario», igual que la pantalla a la que llevan.
+
+- **Acceso sin callejones.** Cerrar sesión o cambiar de cuenta lleva al inicio; los permisos denegados y el menú móvil ofrecen volver a Mis proyectos. El acceso y el cambio de contraseña permiten mostrarla; tras cambiarla, solo se conserva el usuario en memoria para volver a entrar.
+
+- **Carga y navegación legibles en móvil.** Mis proyectos, Mi trabajo, Atención y Responder muestran una carga accesible sin animación; los nombres del menú lateral siguen visibles en anchos intermedios. Las acciones de respuesta permanecen al pie en pantallas pequeñas, respetando el área segura.
+
+- **Atención sin filas repetidas.** Cada pregunta ocupa un solo grupo, conserva la misma acción al filtrar y anuncia los envíos nuevos desde la última visita de esa cuenta y proyecto.
 
 ### Security
 

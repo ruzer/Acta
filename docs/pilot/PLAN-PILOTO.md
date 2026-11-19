@@ -38,7 +38,7 @@ personas por sí sola.
 - [ ] Responsable del piloto, personas, fechas y criterios acordados por escrito.
 - [ ] Instalación separada para el piloto; dirección de acceso probada desde los equipos previstos.
 - [ ] Equipo técnico confirma respaldo previo verificado y cómo recuperar la instalación; registra fecha y responsable, nunca claves.
-- [ ] Proyecto vacío creado; nombre y códigos de proyecto y áreas acordados.
+- [ ] Proyecto vacío creado; nombre y códigos de proyecto y áreas acordados. Fecha límite opcional acordada: solo orienta y no bloquea envíos.
 - [ ] Cuentas creadas con **Crear varios usuarios**; roles y acceso al proyecto revisados. Contraseñas entregadas individualmente.
 - [ ] Cuestionario cargado desde la [plantilla CSV](../../examples/questionnaire-template.csv), revisado y confirmado. No importar de nuevo sobre un proyecto con preguntas.
 - [ ] Áreas, participantes asignados y preguntas autorizadas para publicar comprobados. El resto permanece en borrador.
@@ -54,7 +54,7 @@ personas por sí sola.
 | 1 | Administración y equipo técnico preparan; coordinación prueba acceso y agenda. | Lista anterior completa y metas acordadas. |
 | 2 | Sesiones individuales: primera entrada, cambio de contraseña, borrador, evidencia y primer envío. | Una hoja por persona, con tiempos y ayudas. |
 | 3 | Participantes vuelven sin sesión guiada y continúan. Analista solicita una aclaración de prueba. | Dudas, retorno al trabajo y aclaración atendida. |
-| 4 | Analista cierra la aclaración, registra una decisión y abre el informe. Administración revisa Atención. | Recorrido de revisión y diferencias entre lo esperado y lo ocurrido. |
+| 4 | Analista cierra la aclaración, registra una decisión y abre el informe. Administración revisa Atención y Participación; copia un recordatorio ficticio sin enviarlo. | Recorrido de revisión y diferencias entre lo esperado y lo ocurrido. |
 | 5 | Encuesta, revisión de incidentes y reunión de cierre. | Decisión explícita, responsables y siguiente fecha. |
 
 Usa el [guion de coordinación](GUIA-COORDINADOR.md). Las decisiones de prueba no
@@ -92,3 +92,5 @@ La persona responsable elige y firma una decisión:
 Registrar: decisión, fecha, responsables, razones, pendientes, próxima revisión,
 y qué se hará con cuentas, archivos y notas del piloto. No borrar información
 necesaria para investigar un incidente ni conservarla indefinidamente sin motivo.
+
+Durante las sesiones, registra si la persona consultó **Primeros pasos** o **Ayuda**, sin confundir esa consulta con la intervención del observador.

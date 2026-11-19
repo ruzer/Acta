@@ -71,7 +71,9 @@ export function ParticipantHeader({
             <span>{displayName}</span>
           </summary>
           <div>
+            <Link to="/">Mis proyectos</Link>
             <Link to="/password">Mi contraseña</Link>
+            <Link to="/help">Ayuda</Link>
             <Button tone="secondary" onClick={onLogout}>
               Cerrar sesión
             </Button>

@@ -782,6 +782,25 @@
     padding: 24px 16px 80px;
   }
 }
+@media (max-width: 640px) {
+  .acta-participant .response-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px));
+    background: var(--ac-surface);
+  }
+  .acta-participant .response-footer .response-actions {
+    margin: 0 0 8px;
+  }
+  .acta-participant .response-footer > .hint {
+    margin: 0;
+  }
+  .acta-participant .formal-contribution input,
+  .acta-participant .formal-contribution textarea {
+    scroll-margin-bottom: 200px;
+  }
+}
 @media (max-width: 600px) {
   .acta-participant .participant-answer-card h1,
   .acta-participant .participant-wide h1 {

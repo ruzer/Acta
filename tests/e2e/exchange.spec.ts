@@ -217,7 +217,7 @@ test("A/D analyst dashboard filters and opens review; Markdown includes current 
   // Direction C (CP2): the question is a heading and its row opens the review
   // through the "Revisar respuestas" link that names the question.
   const open = page.getByRole("link", {
-    name: "Revisar respuestas: Pregunta ficticia",
+    name: "Revisar y decidir: Pregunta ficticia",
     exact: true,
   });
   await expect(open).toBeVisible();
