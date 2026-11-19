@@ -51,6 +51,58 @@ const data: ParticipationView = {
     },
   ],
 };
+it("ordena por avance y resuelve empates por nombre", async () => {
+  await setup({
+    ...data,
+    participants: [
+      {
+        ...data.participants[0]!,
+        memberId: "complete",
+        name: "A completa",
+        state: "Completo",
+        pending: 0,
+      },
+      {
+        ...data.participants[0]!,
+        memberId: "partial",
+        name: "B parte",
+        state: "Envió parte",
+      },
+      {
+        ...data.participants[0]!,
+        memberId: "draft",
+        name: "C borrador",
+        state: "En borrador",
+      },
+      {
+        ...data.participants[0]!,
+        memberId: "new-z",
+        name: "Z inicio",
+        state: "Sin iniciar",
+      },
+      {
+        ...data.participants[0]!,
+        memberId: "new-a",
+        name: "D inicio",
+        state: "Sin iniciar",
+      },
+    ],
+  });
+  fireEvent.change(screen.getByLabelText("Ordenar participación"), {
+    target: { value: "state" },
+  });
+  const names = screen
+    .getAllByRole("row")
+    .slice(1)
+    .map((row) => within(row).getAllByRole("cell")[0]!.textContent);
+  expect(names).toEqual([
+    "D inicio",
+    "Z inicio",
+    "C borrador",
+    "B parte",
+    "A completa",
+  ]);
+});
 async function setup(value = data) {
   vi.mocked(exchangeRequest).mockResolvedValue(value);
   render(

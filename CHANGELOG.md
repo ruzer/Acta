@@ -50,6 +50,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Recordatorios individuales.** Cada persona con pendientes tiene un botón para copiar solo su recordatorio; si no se puede usar el portapapeles, el texto queda seleccionado para copiarlo.
 
+- **Participación ordenada por avance.** El orden por estado sigue Sin iniciar, En borrador, Envió parte y Completo; los empates se ordenan por nombre.
+
 ### Security
 
 - **Auditoría completa sin excepciones.** Se retira la excepción temporal de picomatch porque GitHub retiró GHSA-fc5q-39xc-vjpf el 2026-11-18T15:38:56Z; CI vuelve a exigir `npm audit --audit-level=high` sin excepciones. La comprobación del 2026-11-18 devuelve cero vulnerabilidades.

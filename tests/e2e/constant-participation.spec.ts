@@ -116,6 +116,10 @@ test("Participación muestra cuatro estados, filtra, ordena y copia un recordato
         await expect(
           table.getByRole("cell", { name: state, exact: true }),
         ).toHaveCount(1);
+      await page.getByLabel("Ordenar participación").selectOption("state");
+      await expect(
+        table.locator("tbody tr").locator('td[data-label="Estado"]'),
+      ).toHaveText(["Sin iniciar", "En borrador", "Envió parte", "Completo"]);
       await page.getByLabel("Ordenar participación").selectOption("pending");
       await page.getByLabel("Filtrar participación").selectOption("Completo");
       await expect(table.getByRole("row")).toHaveCount(2);

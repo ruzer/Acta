@@ -89,7 +89,8 @@ export function Participation() {
           : order === "activity"
             ? (b.lastActivity ?? "").localeCompare(a.lastActivity ?? "")
             : order === "state"
-              ? a.state.localeCompare(b.state, "es-MX")
+              ? participationStates.indexOf(a.state) -
+                participationStates.indexOf(b.state)
               : 0;
       return result || a.name.localeCompare(b.name, "es-MX");
     });
@@ -155,7 +156,7 @@ export function Participation() {
           <option value="name">Nombre (A a Z)</option>
           <option value="pending">Más pendientes primero</option>
           <option value="activity">Actividad más reciente</option>
-          <option value="state">Estado (A a Z)</option>
+          <option value="state">Estado (por avance)</option>
         </Select>
         <Button
           disabled={!data.participants.some((p) => p.pending > 0)}
