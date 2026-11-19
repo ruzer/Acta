@@ -15,9 +15,11 @@ async function holdLoading(
   const held = new Promise<void>((resolve) => {
     release = resolve;
   });
+  const requested = Promise.withResolvers<void>();
   await page.route(
     (url) => url.pathname === `/api/v1${apiPath}`,
     async (route) => {
+      requested.resolve();
       await held;
       await route.continue();
     },
@@ -25,6 +27,7 @@ async function holdLoading(
   );
   try {
     await page.goto(url);
+    await requested.promise;
     await expect(
       page.locator('.loading-skeleton[aria-busy="true"]'),
     ).toBeVisible();
