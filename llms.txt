@@ -1,0 +1,37 @@
+# Acta
+
+> Acta organiza preguntas, aportaciones, evidencia y decisiones de proyectos. La ayuda está escrita en español de México y acompaña al código; empieza por la audiencia y el problema de la persona.
+
+Este índice sigue la propuesta de convención llms.txt; no garantiza que una IA lo lea. Comprueba la versión y la línea «Verificado contra» de la ayuda. No deduzcas permisos ni capacidades no documentados; distingue las funciones existentes de las propuestas. No solicites ni publiques contraseñas, enlaces privados o información institucional. Los enlaces main siguen la rama vigente, no una versión fija.
+
+## Ayuda para usuarios
+
+- [Centro de ayuda](https://github.com/ruzer/Acta/blob/main/docs/ayuda/README.md): índice por audiencia y necesidad.
+- [Glosario](https://github.com/ruzer/Acta/blob/main/docs/ayuda/GLOSARIO.md): términos actuales y sus diferencias.
+- [Solución de problemas](https://github.com/ruzer/Acta/blob/main/docs/ayuda/SOLUCION-DE-PROBLEMAS.md): mensajes exactos, causas posibles y a quién acudir.
+- [Preguntas frecuentes](https://github.com/ruzer/Acta/blob/main/docs/ayuda/PREGUNTAS-FRECUENTES.md): respuestas breves verificables y enlaces a pasos.
+
+## Instalar y operar
+
+- [Instalación y operación](https://github.com/ruzer/Acta/blob/main/docs/SELF-HOSTING.md): preparación, arranque y comprobaciones.
+- [Configuración](https://github.com/ruzer/Acta/blob/main/docs/CONFIGURATION.md): variables y límites.
+- [Respaldo y restauración](https://github.com/ruzer/Acta/blob/main/docs/BACKUP-RESTORE.md): copias verificadas y recuperación.
+
+## Producto
+
+- [Administración de proyectos](https://github.com/ruzer/Acta/blob/main/docs/PROJECT-ADMINISTRATION.md): permisos, participación y fecha límite.
+- [Importación de cuestionarios](https://github.com/ruzer/Acta/blob/main/docs/IMPORTING-QUESTIONNAIRES.md): plantilla CSV, revisión y confirmación.
+- [Informe para imprimir](https://github.com/ruzer/Acta/blob/main/docs/PROJECT-REPORT.md): contenido autorizado y límites.
+- [Guías del piloto](https://github.com/ruzer/Acta/blob/main/docs/pilot/README.md): pasos para Participante, Administración y Revisión.
+
+## Contribuir
+
+- [Contribuir](https://github.com/ruzer/Acta/blob/main/CONTRIBUTING.md): propuestas de cambio y mantenimiento de la ayuda.
+- [Desarrollo](https://github.com/ruzer/Acta/blob/main/docs/DEVELOPMENT.md): entorno y pruebas.
+- [Soporte](https://github.com/ruzer/Acta/blob/main/SUPPORT.md): dudas, fallas y canales privados de seguridad.
+
+## Opcional
+
+- [Referencia de recursos](https://github.com/ruzer/Acta/blob/main/docs/RESOURCE-REFERENCE.md): mediciones fechadas, sin promesas de capacidad.
+- [Cambios](https://github.com/ruzer/Acta/blob/main/CHANGELOG.md): versiones publicadas y cambios aún sin publicar.
+- [Seguridad](https://github.com/ruzer/Acta/blob/main/SECURITY.md): reporte privado de vulnerabilidades.
