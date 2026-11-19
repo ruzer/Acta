@@ -128,11 +128,16 @@ test("V-16 · Responder: la pregunta domina, la nota queda junto a los botones y
     expect(await top(page, "main h1")).toBeLessThan(
       await top(page, "textarea"),
     );
-    // One primary: "Enviar respuesta"; the note about saving is right under the actions.
+    // La ayuda se desplaza con el formulario; el pie móvil solo fija las dos acciones.
     await expect(
       page.getByRole("button", { name: /^Enviar respuesta/ }),
     ).toHaveCount(1);
     expect(await primaryCount(page)).toBe(1);
+    const help = page.locator("p.hint").filter({ hasText: "“Guardar y salir”" });
+    await help.scrollIntoViewIfNeeded();
+    await expect(help).toBeInViewport({ ratio: 1 });
+    await expect(page.locator(".response-footer p.hint")).toHaveCount(0);
+    await expect(page.locator(".response-footer button")).toHaveCount(2);
     const geometry = await page.evaluate(() => {
       const actions = document
         .querySelector(".response-actions")!
@@ -140,14 +145,19 @@ test("V-16 · Responder: la pregunta domina, la nota queda junto a los botones y
       const note = [...document.querySelectorAll<HTMLElement>("p.hint")]
         .find((p) => p.textContent?.includes("Guardar y salir"))!
         .getBoundingClientRect();
-      return { gap: note.top - actions.bottom };
+      return { gap: actions.top - note.bottom };
     });
+    expect(
+      geometry.gap,
+      "la ayuda no queda debajo de los botones",
+    ).toBeGreaterThanOrEqual(0);
     expect(geometry.gap, "la nota junto a las acciones").toBeLessThanOrEqual(
       24,
     );
     // No invented autosave: nothing says "guardado" before anything was saved.
     await expect(page.getByText(/Borrador guardado/)).toHaveCount(0);
     records.push({ id: "V-16", width, h1: h1.size, gap: geometry.gap });
+    await page.evaluate(() => scrollTo(0, 0));
     await checkedPage(page, folder, "V-16-responder", width);
     if (width <= 899)
       expect(
