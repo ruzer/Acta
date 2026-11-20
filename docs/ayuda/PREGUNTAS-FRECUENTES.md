@@ -183,7 +183,7 @@ Aplica a: cualquier persona y operación.
 
 Acta no incorpora envío de correo ni inicio de sesión único con la cuenta institucional. Las cuentas de Acta usan su contraseña; una invitación permite responder mediante un enlace privado. **Copiar recordatorio** prepara texto para compartir por el medio acordado, pero no lo envía.
 
-Más información: [Límites del producto publicado](../releases/v0.11.0.md#límites-conocidos).
+Más información: [Límites de v0.12.0 en preparación](../releases/v0.12.0.md#límites-conocidos).
 
 ### ¿Cuántas personas pueden usar Acta al mismo tiempo?
 Aplica a: coordinación y operación.

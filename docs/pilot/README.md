@@ -1,6 +1,9 @@
 # Kit de piloto con personas
 
-Este kit ayuda a probar Acta con personal administrativo sin formación técnica.
+Este kit acompaña la preparación de [Acta v0.12.0](../releases/v0.12.0.md) y ayuda
+a probar el producto con personal administrativo sin formación técnica.
+Antes de usarlo, registra la versión y el commit de la instalación que se evaluará;
+la candidata no equivale a una versión publicada.
 No supone que las personas ya sepan usarlo. El [estudio anterior](../usability/USABILITY-STUDY.md)
 se hizo con agentes de IA: no demuestra que una persona nueva pueda trabajar sin capacitación.
 El piloto con personas sigue pendiente hasta que una institución lo realice y registre sus resultados.

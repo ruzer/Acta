@@ -1,7 +1,7 @@
 # Ensayo de actualización con datos ficticios
 
-Este procedimiento comprueba v0.11.0 → candidata y conserva la ruta desde v0.10.0 sobre los mismos siete
-volúmenes y una restauración en siete volúmenes nuevos. No opera sobre instalaciones
+Este procedimiento comprueba v0.11.0 → candidata v0.12.0 y conserva la ruta desde
+v0.10.0 sobre los mismos siete volúmenes y una restauración en siete volúmenes nuevos. No opera sobre instalaciones
 de trabajo. Reutiliza Compose, el importador, el alta de usuarios y los scripts de
 [backup/restauración](BACKUP-RESTORE.md); no escribe datos de negocio por SQL.
 
@@ -98,6 +98,11 @@ Además verifica: sesión anterior válida (la cookie real de cada base); nuevo 
 `fgeo_session`; cierre que retira ambas e invalida la sesión nueva; ambos smoke
 oficiales `--verify`. Un error detiene el ensayo: no se reemplaza una cookie antigua
 caducada por otra para presentar una continuidad falsa.
+
+Los resultados de noviembre de 2026 que siguen corresponden a las versiones y
+bases indicadas en cada apartado. No acreditan por sí solos la cabeza final de
+v0.12.0. Cada ensayo debe registrar el commit exacto de la candidata, las huellas
+por fila antes y después y la migración aplicada.
 
 ## Resultado ejecutado el 2026-11-17
 
