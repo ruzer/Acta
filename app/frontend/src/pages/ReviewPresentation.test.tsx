@@ -1355,23 +1355,64 @@ it("la vuelta a la Bitácora solo acepta la bitácora de este proyecto", async (
   }
 });
 
-it.each([
-  ["ADMIN", "ACTIVE", false, true],
-  ["VIEWER", "ACTIVE", false, true],
-  ["ANALYST", "ACTIVE", true, false],
-  ["ADMIN", "ARCHIVED", false, false],
-  ["ANALYST", "ARCHIVED", false, false],
-])(
-  "explica el perfil de solo lectura para %s/%s",
-  async (role, lifecycle, canReview, shown) => {
-    page({ ...conflict, canReview }, "", [
-      { id: conflict.projectId, role, lifecycle },
-    ]);
+it.each(
+  (
+    [
+      ["ADMIN", "ACTIVE", false, true],
+      ["VIEWER", "ACTIVE", false, true],
+      ["ANALYST", "ACTIVE", true, false],
+      ["ADMIN", "ARCHIVED", false, false],
+      ["VIEWER", "ARCHIVED", false, false],
+      ["ANALYST", "ARCHIVED", false, false],
+    ] as const
+  ).flatMap(([role, lifecycle, canReview, shown]) =>
+    [true, false].map((hasConflict) => ({
+      role,
+      lifecycle,
+      canReview,
+      shown,
+      hasConflict,
+    })),
+  ),
+)(
+  "explica el perfil de solo lectura para $role/$lifecycle, conflicto=$hasConflict",
+  async ({ role, lifecycle, canReview, shown, hasConflict }) => {
+    page(
+      {
+        ...conflict,
+        status: hasConflict ? "CONFLICT" : "ANSWERED",
+        conflicts: hasConflict ? conflict.conflicts : [],
+        canReview,
+      },
+      "",
+      [{ id: conflict.projectId, role, lifecycle }],
+    );
     await screen.findByRole("heading", { level: 1 });
     const note = screen.queryByText(
       "Esta pantalla es de solo lectura para tu perfil. Solo el perfil Analista puede pedir aclaraciones y registrar decisiones.",
     );
     if (shown) expect(note).toBeVisible();
     else expect(note).not.toBeInTheDocument();
+    const conflictDetail = screen.queryByText(
+      /^Hay un conflicto abierto entre aportaciones\./,
+    );
+    if (hasConflict && !canReview) expect(conflictDetail).toBeVisible();
+    else expect(conflictDetail).not.toBeInTheDocument();
+    if (shown)
+      expect(
+        screen.queryByText(/La información disponible corresponde/),
+      ).not.toBeInTheDocument();
+    if (role === "ANALYST" && lifecycle === "ARCHIVED")
+      expect(
+        screen.getByText(
+          /El proyecto está archivado: no admite acciones de revisión\./,
+        ),
+      ).toBeVisible();
+    if (!canReview)
+      expect(
+        screen.queryByRole("button", {
+          name: /Resolver conflicto|Registrar decisión|Pedir aclaración/,
+        }),
+      ).not.toBeInTheDocument();
   },
 );
