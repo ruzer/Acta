@@ -82,6 +82,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Conflicto explicado en la consulta.** La nota de solo lectura conserva la explicación del conflicto abierto, sin conceder acciones de revisión a otros perfiles.
 
+- **Permisos descritos con precisión en la ayuda.** La comprobación de las guías reconoce más atribuciones incorrectas de revisión a Administración y distingue las frases que explican sus límites.
+
 ### Security
 
 - **Auditoría completa sin excepciones.** Se retira la excepción temporal de picomatch porque GitHub retiró GHSA-fc5q-39xc-vjpf el 2026-11-18T15:38:56Z; CI vuelve a exigir `npm audit --audit-level=high` sin excepciones. La comprobación del 2026-11-18 devuelve cero vulnerabilidades.
