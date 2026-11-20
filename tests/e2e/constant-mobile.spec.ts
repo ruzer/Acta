@@ -128,7 +128,7 @@ test("Mi trabajo y Responder muestran carga; las acciones móviles permanecen vi
   }
 });
 
-test("el pie a 390×480 deja espacio para responder y fija solo guardar y enviar", async ({
+test("el pie a 390×480 deja espacio para responder y permite llegar a guardar y enviar", async ({
   page,
   browser,
 }) => {
@@ -147,12 +147,6 @@ test("el pie a 390×480 deja espacio para responder y fija solo guardar y enviar
   const footer = page.locator(".response-footer");
   await checkedPage(page, evidence, "polish-response-short-viewport", 390);
   await expect(footer.getByRole("button")).toHaveCount(2);
-  await expect(
-    footer.getByRole("button", { name: "Guardar y salir", exact: true }),
-  ).toBeInViewport();
-  await expect(
-    footer.getByRole("button", { name: "Enviar respuesta", exact: true }),
-  ).toBeInViewport();
   await expect(footer.getByText("Necesito consultar esto")).toHaveCount(0);
   await expect(footer.locator(".hint")).toHaveCount(0);
   const bar = (await footer.boundingBox())!;
@@ -164,4 +158,11 @@ test("el pie a 390×480 deja espacio para responder y fija solo guardar y enviar
   await expect(
     page.getByRole("button", { name: "Necesito consultar esto" }),
   ).toBeAttached();
+  await footer.scrollIntoViewIfNeeded();
+  await expect(
+    footer.getByRole("button", { name: "Guardar y salir", exact: true }),
+  ).toBeInViewport();
+  await expect(
+    footer.getByRole("button", { name: "Enviar respuesta", exact: true }),
+  ).toBeInViewport();
 });

@@ -191,6 +191,38 @@ test.beforeAll(async ({ browser }) => {
   );
   await context.close();
 });
+test("el campo enfocado no queda debajo del pie en móvil bajo", async ({
+  page,
+}) => {
+  await login(page, "stakeholder");
+  for (const [width, height] of [
+    [390, 480],
+    [390, 844],
+    [1280, 900],
+  ]) {
+    await page.setViewportSize({ width, height });
+    await open(page, 3);
+    await page.evaluate(() => document.fonts.ready);
+    await page.getByLabel("Tu respuesta", { exact: true }).focus();
+    const geometry = await page.evaluate(() => ({
+      fieldBottom: document
+        .querySelector(".formal-contribution textarea")!
+        .getBoundingClientRect().bottom,
+      footerTop: document
+        .querySelector(".response-footer")!
+        .getBoundingClientRect().top,
+    }));
+    expect(
+      geometry.fieldBottom,
+      `${width}×${height}: campo completo sobre el pie`,
+    ).toBeLessThanOrEqual(geometry.footerTop);
+    const footer = page.locator(".response-footer");
+    await expect(footer.getByRole("button")).toHaveCount(2);
+    for (const button of await footer.getByRole("button").all())
+      expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    await expect(footer).not.toContainText("Necesito consultar esto");
+  }
+});
 test("guardar intacta, recuperar tras logout, prioridad borrador y consulta recuperable", async ({
   page,
 }) => {
@@ -358,21 +390,23 @@ test("aclaración tiene prioridad; al contestar ya no queda pendiente del partic
   const context = await browser.newContext(),
     analyst = await context.newPage();
   await login(analyst, "analyst");
-  const detail = await call(
-    analyst,
-    `/projects/${projectId}/questions/${ids[1]}/review`,
-  );
-  await call(
-    analyst,
-    `/projects/${projectId}/questions/${ids[1]}/review/clarifications/request`,
-    "POST",
-    {
-      expectedVersion: detail.lockVersion,
-      requestId: randomUUID(),
-      responseRevisionId: detail.submissions[0].id,
-      body: "¿Puedes precisar qué guía utiliza el área?",
-    },
-  );
+  await analyst.goto(`/projects/${projectId}/review/${ids[1]}`);
+  await analyst.getByText("Otras acciones", { exact: true }).click();
+  await analyst
+    .locator(".ac-action-menu")
+    .getByRole("button", { name: "Solicitar aclaración", exact: true })
+    .click();
+  const dialog = analyst.getByRole("dialog");
+  await dialog
+    .getByLabel("Respuesta sobre la que necesitas aclaración")
+    .selectOption({ label: "Participante demo · envío #1" });
+  await dialog
+    .getByLabel("Pregunta de aclaración")
+    .fill("¿Puedes precisar qué guía utiliza el área?");
+  await dialog
+    .getByRole("button", { name: "Enviar solicitud", exact: true })
+    .click();
+  await expect(dialog).toHaveCount(0);
   await login(page, "stakeholder");
   await work(page);
   await page.getByRole("link", { name: "Continuar", exact: true }).click();
@@ -382,6 +416,16 @@ test("aclaración tiene prioridad; al contestar ya no queda pendiente del partic
       exact: true,
     }),
   ).toBeVisible();
+  await work(page);
+  await expect(
+    page.getByText("Una aclaración espera tu respuesta", { exact: true }),
+  ).toBeVisible();
+  await page.getByRole("link", { name: /^Responder aclaración:/ }).click();
+  await expect(page.getByLabel("Tu aclaración")).toBeVisible();
+  await page.goto(`/projects/${projectId}/submitted/${ids[1]}`);
+  await page
+    .getByRole("link", { name: "Consultar aclaraciones", exact: true })
+    .click();
   await axe(page);
   await page
     .getByLabel("Tu aclaración")

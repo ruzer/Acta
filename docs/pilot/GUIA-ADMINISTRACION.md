@@ -2,6 +2,8 @@
 
 Necesitas acceso de administración y permiso en el proyecto.
 
+Una persona tiene un solo perfil por proyecto. Quien coordina el acceso con perfil de Administración no puede pedir aclaraciones ni registrar decisiones con esa cuenta: para la revisión, crea o usa una cuenta con perfil Analista.
+
 1. Pide al equipo técnico confirmar un [respaldo verificado](../BACKUP-RESTORE.md). Anota fecha y responsable; no se hace desde esta pantalla.
 2. En **Administración** → **Proyectos** → **Crear proyecto**, completa **Nombre del proyecto**, **Identificador externo** y **Descripción**. Puedes indicar **Fecha límite para responder (opcional)**; no bloquea respuestas. Pulsa **Crear proyecto**.
 3. En **Áreas** → **Crear área**, completa **Nombre del área** y **Código del área**. Pulsa **Crear área**; conserva el código. Un área no asigna personas.

@@ -446,7 +446,11 @@ export function ReviewDetail() {
           }
           otherActions={otherControls}
         >
-          <p>{turn.detail}</p>
+          <p>
+            {readOnly && currentProject?.lifecycle === "ACTIVE"
+              ? "Esta pantalla es de solo lectura para tu perfil. Solo el perfil Analista puede pedir aclaraciones y registrar decisiones."
+              : turn.detail}
+          </p>
           {d.pendingReviewReason && <p>Pendiente: {d.pendingReviewReason}</p>}
           {d.partialReviewReason && (
             <p>Falta información: {d.partialReviewReason}</p>

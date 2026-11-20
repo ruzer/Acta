@@ -240,7 +240,9 @@ it("la columna Detalle solo aparece si algún evento la usa y la paginación dic
   expect(
     await screen.findByRole("columnheader", { name: "Detalle" }),
   ).toBeVisible();
-  expect(screen.getByText("JSON full")).toBeVisible();
+  expect(
+    screen.getByText("Archivo de datos · Todo el contenido"),
+  ).toBeVisible();
 });
 it("al abrir una pregunta desde la Bitácora se conserva el filtro para volver", async () => {
   serve(history([event(1)]));
@@ -254,3 +256,34 @@ it("al abrir una pregunta desde la Bitácora se conserva el filtro para volver",
     logReturn: "/projects/project-a/history?action=RESPONSE_VALIDATED&page=2",
   });
 });
+
+it.each([
+  ["full", "Todo el contenido"],
+  ["validated-decisions", "Decisiones validadas"],
+])(
+  "explica el alcance %s y conserva su identificador",
+  async (scope, label) => {
+    serve(
+      history([
+        event(3, {
+          action: "EXPORT_CREATED",
+          objectType: "Project",
+          exportType: "JSON",
+          scope,
+          subject: null,
+        }),
+      ]),
+    );
+    const user = setup();
+    expect(
+      await screen.findByText(`Archivo de datos · ${label}`),
+    ).toBeVisible();
+    expect(
+      screen.getByText(`JSON ${scope}`, { exact: true }),
+    ).not.toBeVisible();
+    await user.click(
+      screen.getByText("Identificador de exportación", { exact: true }),
+    );
+    expect(screen.getByText(`JSON ${scope}`, { exact: true })).toBeVisible();
+  },
+);

@@ -1,6 +1,6 @@
 # Centro de ayuda de Acta
 
-Verificado contra Acta v0.11.0 y main e1e2259, 2026-11-19.
+Verificado contra Acta v0.11.0, con base en main 63312d3 y el pulido del piloto, 2026-11-19.
 
 Esta ayuda incluye mejoras posteriores a la publicación de v0.11.0, presentes
 en el commit indicado. Consulta a tu administración si tu pantalla es distinta.

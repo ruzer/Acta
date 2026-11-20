@@ -34,7 +34,7 @@ Más información: [Participante](GLOSARIO.md#participante).
 ### ¿Quién ve mis respuestas y mis archivos?
 Aplica a: Participante y personas invitadas.
 
-Como participante, consultas tus propias respuestas y evidencias dentro de tu acceso vigente. Administración y Analista del proyecto pueden revisar los envíos y la evidencia vinculada a ellos, no tus borradores privados. Consulta ve las fuentes autorizadas de decisiones vigentes, no todos los envíos. Administrar la institución por sí solo no abre ese contenido.
+Como participante, consultas tus propias respuestas y evidencias dentro de tu acceso vigente. Administración y Analista del proyecto pueden consultar los envíos y la evidencia vinculada a ellos, no tus borradores privados. Consulta ve las fuentes autorizadas de decisiones vigentes, no todos los envíos. Administrar la institución por sí solo no abre ese contenido.
 
 Más información: [Permisos de proyecto](../PROJECT-ADMINISTRATION.md#modelo-de-permisos-sin-cambios-de-fondo).
 
@@ -53,11 +53,11 @@ Una respuesta enviada queda registrada como aportación y la pantalla no ofrece 
 Más información: [Aclaración](GLOSARIO.md#aclaración).
 
 ### ¿Dónde respondo una aclaración después de enviar?
-Aplica a: Participante y personas invitadas.
+Aplica a: Participante.
 
-Después de enviar una respuesta, **Consultar aclaraciones** abre el espacio de aclaraciones de esa pregunta. Si hay una solicitud pendiente para ti, puedes escribir en **Tu aclaración** y usar **Enviar aclaración**. La aclaración enviada se agrega al historial sin reemplazar tu respuesta original.
+En **Mi trabajo**, el aviso **Una aclaración espera tu respuesta** tiene el enlace **Responder aclaración**. Después de enviar una respuesta, también puedes abrir **Consultar aclaraciones**. Completa **Tu aclaración** y pulsa **Enviar aclaración**. Busca **Aclaración enviada**; puede abrirse otra pregunta.
 
-Más información: [Guía de Participante](../pilot/GUIA-PARTICIPANTE.md).
+Más información: [Guía de Participante](../pilot/GUIA-PARTICIPANTE.md); si entras por invitación, consulta [Invitaciones privadas](../EXTERNAL-INVITATIONS.md).
 
 ### ¿Acta guarda mientras escribo?
 Aplica a: Participante.
@@ -111,14 +111,14 @@ Más información: [Invitaciones privadas](../EXTERNAL-INVITATIONS.md).
 ### ¿Qué diferencia hay entre dar acceso y asignar preguntas?
 Aplica a: Administración y Analista.
 
-Dar acceso permite entrar al proyecto con un perfil. Asignar determina qué preguntas responderá cada participante. Publicar las preguntas es otro paso; dar acceso o asignar no las publica.
+Solo Administración del proyecto puede dar acceso: permite entrar con un perfil. Administración y Analista pueden asignar preguntas: esto determina qué responderá cada participante. Publicar las preguntas es otro paso; dar acceso o asignar no las publica.
 
 Más información: [Guía de Administración](../pilot/GUIA-ADMINISTRACION.md).
 
 ### ¿Qué puede hacer cada perfil?
 Aplica a: cualquier persona con cuenta.
 
-Participante responde lo asignado; Analista prepara y revisa preguntas; Administración del proyecto gestiona además sus accesos. Consulta permite leer el contenido autorizado sin modificarlo. Administración de la institución gestiona cuentas, áreas y configuración, pero necesita acceso al proyecto para consultar sus respuestas.
+Participante responde lo asignado; Analista prepara preguntas, revisa aportaciones, pide aclaraciones y registra decisiones. Administración del proyecto gestiona sus accesos y prepara preguntas, pero no realiza la revisión. Consulta permite leer el contenido autorizado sin modificarlo. Administración de la institución gestiona cuentas, áreas y configuración, pero necesita acceso al proyecto para consultar sus respuestas.
 
 Más información: [Perfiles y permisos](../PROJECT-ADMINISTRATION.md#modelo-de-permisos-sin-cambios-de-fondo).
 
@@ -151,11 +151,18 @@ Crear o elegir un área no agrega personas al proyecto ni las asigna a las pregu
 Más información: [Área](GLOSARIO.md#área).
 
 ### ¿Cómo pido una aclaración o registro una decisión?
-Aplica a: Analista y Administración del proyecto.
+Aplica a: Analista.
 
 **Solicitar aclaración** permite pedir información adicional sobre una aportación enviada. **Registrar decisión** permite documentar el resultado con las fuentes revisadas. Cerrar una aclaración no registra una decisión automáticamente.
 
 Más información: [Guía de Revisión](../pilot/GUIA-REVISION.md).
+
+### ¿Por qué no veo los botones para pedir una aclaración o registrar una decisión?
+Aplica a: Administración y Consulta.
+
+Acta indica: «Esta pantalla es de solo lectura para tu perfil. Solo el perfil Analista puede pedir aclaraciones y registrar decisiones.» Una persona tiene un solo perfil por proyecto: para la revisión, crea o usa una cuenta con perfil Analista.
+
+Más información: [Administración del proyecto](GLOSARIO.md#administración-del-proyecto) y [Guía de Revisión](../pilot/GUIA-REVISION.md).
 
 ### ¿Qué incluye el Informe para imprimir?
 Aplica a: Administración del proyecto, Analista y Consulta.

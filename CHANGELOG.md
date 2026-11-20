@@ -64,6 +64,18 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Actualizaciones con licencias coherentes.** Se actualizan juntos los tres paquetes de NestJS a 12.5.1, React Query a 5.107.1, el complemento React de Vite a 6.3.0, Prettier a 3.10.1 y user-event a 14.6.12. El inventario se regenera desde el lockfile para conservar la comprobación de licencias.
 
+- **Perfiles de revisión sin ambigüedad.** Las guías y la ayuda distinguen la administración de accesos de la revisión: solo Analista puede pedir aclaraciones y registrar decisiones, con un perfil por persona y proyecto.
+
+- **Revisión de solo lectura explicada.** Los proyectos activos indican por qué Administración y Consulta no tienen botones de revisión; la ayuda conserva el mismo mensaje.
+
+- **Respuesta visible en móviles bajos.** El pie deja de permanecer fijo cuando la pantalla móvil tiene poca altura, sin reducir los botones ni cambiar las vistas altas y de escritorio.
+
+- **Aclaraciones con el mismo recorrido en las guías.** Mi trabajo, la ayuda y las preguntas frecuentes nombran el aviso y los enlaces reales para responder una aclaración, también desde la respuesta enviada.
+
+- **Exportaciones legibles en la Bitácora.** El tipo de archivo y su alcance se muestran en palabras claras; sus valores originales siguen disponibles al abrir el identificador de exportación.
+
+- **Ayuda comprobada para el piloto.** Se actualiza su referencia de verificación y una prueba evita volver a atribuir acciones de revisión a Administración del proyecto.
+
 ### Security
 
 - **Auditoría completa sin excepciones.** Se retira la excepción temporal de picomatch porque GitHub retiró GHSA-fc5q-39xc-vjpf el 2026-11-18T15:38:56Z; CI vuelve a exigir `npm audit --audit-level=high` sin excepciones. La comprobación del 2026-11-18 devuelve cero vulnerabilidades.

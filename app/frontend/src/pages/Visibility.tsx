@@ -5,7 +5,12 @@ import { ProjectAttention } from "./ProjectAttention";
 import { ProjectWorkbench, ProjectDeliverables } from "./ProjectWorkbench";
 import { referenceTypeLabels } from "../reference-labels";
 import { FactGrid, PageHeader } from "../ui/semantic";
-import { auditActions, auditObjects } from "./audit-labels";
+import {
+  auditActions,
+  auditObjects,
+  auditExportTypes,
+  auditExportScopes,
+} from "./audit-labels";
 import { AnalystStatus } from "./AnalystVisual";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -503,7 +508,30 @@ export function History() {
                       )}
                     </span>,
                     ...(hasDetail
-                      ? [`${e.exportType ?? "—"} ${e.scope ?? ""}`.trim()]
+                      ? [
+                          e.exportType || e.scope ? (
+                            <span key="d">
+                              {[
+                                e.exportType &&
+                                  (auditExportTypes[e.exportType] ??
+                                    "Otro formato"),
+                                e.scope &&
+                                  (auditExportScopes[e.scope] ??
+                                    "Otro alcance"),
+                              ]
+                                .filter(Boolean)
+                                .join(" · ")}
+                              <details>
+                                <summary>Identificador de exportación</summary>
+                                <code>
+                                  {`${e.exportType ?? "—"} ${e.scope ?? ""}`.trim()}
+                                </code>
+                              </details>
+                            </span>
+                          ) : (
+                            "—"
+                          ),
+                        ]
                       : []),
                   ],
                 };

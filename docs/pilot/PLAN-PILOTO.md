@@ -24,7 +24,7 @@ antes de empezar, según la disponibilidad; registra el cambio.
 | Rol | Responsabilidad |
 | --- | --- |
 | Coordinación | Obtiene consentimiento, fija metas, agenda, observa, mide y reúne hallazgos; no enseña durante la medición. |
-| Administración | Crea proyecto, áreas y cuentas; entrega accesos en privado y revisa quién participa. |
+| Administración | Crea proyecto, áreas y cuentas; entrega accesos en privado y consulta quién participa. Una persona tiene un solo perfil por proyecto. Quien coordina el acceso con perfil de Administración no puede pedir aclaraciones ni registrar decisiones con esa cuenta: para la revisión, crea o usa una cuenta con perfil Analista. |
 | Analista | Prepara preguntas, asigna, publica solo lo autorizado, revisa aportaciones, solicita aclaraciones y registra decisiones. |
 | Participantes | Responden lo asignado, guardan borradores y atienden aclaraciones. |
 | Equipo técnico | Confirma instalación, accesos, respaldo verificable y procedimiento de recuperación. No observa contraseñas. |
@@ -54,7 +54,7 @@ personas por sí sola.
 | 1 | Administración y equipo técnico preparan; coordinación prueba acceso y agenda. | Lista anterior completa y metas acordadas. |
 | 2 | Sesiones individuales: primera entrada, cambio de contraseña, borrador, evidencia y primer envío. | Una hoja por persona, con tiempos y ayudas. |
 | 3 | Participantes vuelven sin sesión guiada y continúan. Analista solicita una aclaración de prueba. | Dudas, retorno al trabajo y aclaración atendida. |
-| 4 | Analista cierra la aclaración, registra una decisión y abre el informe. Administración revisa Atención y Participación; copia un recordatorio ficticio sin enviarlo. | Recorrido de revisión y diferencias entre lo esperado y lo ocurrido. |
+| 4 | Analista cierra la aclaración, registra una decisión y abre el informe. Administración consulta Atención y Participación; copia un recordatorio ficticio sin enviarlo. | Recorrido de revisión y diferencias entre lo esperado y lo ocurrido. |
 | 5 | Encuesta, revisión de incidentes y reunión de cierre. | Decisión explícita, responsables y siguiente fecha. |
 
 Usa el [guion de coordinación](GUIA-COORDINADOR.md). Las decisiones de prueba no

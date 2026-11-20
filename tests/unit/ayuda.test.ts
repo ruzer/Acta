@@ -143,3 +143,25 @@ it("f: las entradas son autocontenidas, el FAQ declara audiencia y enlaza sin co
     }
   }
 });
+it("g: las guías no atribuyen revisión a Administración del proyecto", () => {
+  const paths = [
+    ...docs().map(({ path }) => path),
+    ...readdirSync("docs/pilot")
+      .filter((name) => name.endsWith(".md"))
+      .map((name) => join("docs/pilot", name)),
+    "app/frontend/src/pages/Help.tsx",
+  ];
+  for (const path of paths) {
+    const text = read(path);
+    const sections = text.split(
+      path.endsWith(".tsx") ? /<\/(?:p|li)>/ : /^#{1,6} /m,
+    );
+    for (const section of sections) {
+      const content = compact(section);
+      if (/revis|aclaraci[oó]n|decisi[oó]n/iu.test(content))
+        expect(content, path).not.toMatch(
+          /Analista o Administración del proyecto|Administración o Analista|Analista y Administración del proyecto/iu,
+        );
+    }
+  }
+});

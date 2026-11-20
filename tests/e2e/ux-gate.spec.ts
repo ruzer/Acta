@@ -393,7 +393,7 @@ test.describe("revisión con 0, 1, 3, 12 y 50 aportaciones", () => {
       ]);
       await expect(
         page.getByText(
-          "Las acciones de revisión corresponden al equipo analista.",
+          "Esta pantalla es de solo lectura para tu perfil. Solo el perfil Analista puede pedir aclaraciones y registrar decisiones.",
           { exact: false },
         ),
       ).toBeVisible();
@@ -430,7 +430,7 @@ test("UX-09: el lector solo ve las pestañas con contenido y entiende por qué n
     );
     await expect(
       page.getByText(
-        "Las acciones de revisión corresponden al equipo analista.",
+        "Esta pantalla es de solo lectura para tu perfil. Solo el perfil Analista puede pedir aclaraciones y registrar decisiones.",
         { exact: false },
       ),
     ).toBeVisible();

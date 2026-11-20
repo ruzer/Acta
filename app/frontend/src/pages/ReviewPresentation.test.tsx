@@ -761,7 +761,7 @@ it("UX-09: la tarjeta de estado dice por qué no hay acciones: equipo analista p
   ]);
   expect(
     await screen.findByText(
-      /Las acciones de revisión corresponden al equipo analista\./,
+      "Esta pantalla es de solo lectura para tu perfil. Solo el perfil Analista puede pedir aclaraciones y registrar decisiones.",
     ),
   ).toBeVisible();
   expect(screen.getByText("Consulta de solo lectura.")).toBeVisible();
@@ -1354,3 +1354,24 @@ it("la vuelta a la Bitácora solo acepta la bitácora de este proyecto", async (
     ).not.toBeInTheDocument();
   }
 });
+
+it.each([
+  ["ADMIN", "ACTIVE", false, true],
+  ["VIEWER", "ACTIVE", false, true],
+  ["ANALYST", "ACTIVE", true, false],
+  ["ADMIN", "ARCHIVED", false, false],
+  ["ANALYST", "ARCHIVED", false, false],
+])(
+  "explica el perfil de solo lectura para %s/%s",
+  async (role, lifecycle, canReview, shown) => {
+    page({ ...conflict, canReview }, "", [
+      { id: conflict.projectId, role, lifecycle },
+    ]);
+    await screen.findByRole("heading", { level: 1 });
+    const note = screen.queryByText(
+      "Esta pantalla es de solo lectura para tu perfil. Solo el perfil Analista puede pedir aclaraciones y registrar decisiones.",
+    );
+    if (shown) expect(note).toBeVisible();
+    else expect(note).not.toBeInTheDocument();
+  },
+);
