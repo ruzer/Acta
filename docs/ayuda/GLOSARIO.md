@@ -23,8 +23,9 @@ tiene ese perfil. Ser Analista no permite administrar toda la institución.
 
 ### Administración del proyecto
 
-Perfil que administra un proyecto y sus accesos, además de preparar y revisar sus
-preguntas. No equivale a administrar las cuentas de toda la institución.
+Perfil que administra un proyecto y sus accesos y también prepara preguntas.
+No pide aclaraciones ni registra decisiones: esas tareas corresponden al perfil
+Analista. No equivale a administrar las cuentas de toda la institución.
 [Permisos](../PROJECT-ADMINISTRATION.md#modelo-de-permisos-sin-cambios-de-fondo).
 
 ### Administración de la institución

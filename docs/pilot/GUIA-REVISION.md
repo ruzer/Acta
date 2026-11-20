@@ -1,6 +1,6 @@
 # Guía de Revisión
 
-Necesitas acceso como Analista o Administración del proyecto. Trabaja con las
+Necesitas acceso como Analista. Trabaja con las
 respuestas del piloto. Una decisión de prueba no aprueba un procedimiento oficial.
 
 1. En **Mis proyectos**, pulsa **Revisar respuestas** en el proyecto del piloto y abre la pregunta. Lee el enunciado y las aportaciones de cada persona; no supongas que todas dicen lo mismo.

@@ -97,6 +97,12 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
       content: (
         <>
           <p>Necesitas acceso de administración y permiso en el proyecto.</p>
+          <p>
+            Una persona tiene un solo perfil por proyecto. Quien coordina el
+            acceso con perfil de Administración no puede pedir aclaraciones ni
+            registrar decisiones con esa cuenta: para la revisión, crea o usa
+            una cuenta con perfil Analista.
+          </p>
           <ol>
             <li>
               Pide al equipo técnico confirmar un{" "}
@@ -203,9 +209,8 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
       content: (
         <>
           <p>
-            Necesitas acceso como Analista o Administración del proyecto.
-            Trabaja con las respuestas del piloto. Una decisión de prueba no
-            aprueba un procedimiento oficial.
+            Necesitas acceso como Analista. Trabaja con las respuestas del
+            piloto. Una decisión de prueba no aprueba un procedimiento oficial.
           </p>
           <ol>
             <li>
