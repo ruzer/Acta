@@ -28,6 +28,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Medición de guardados con ritmo espaciado.** El laboratorio puede medir dos rondas de 50 personas, con un inicio cada 0,6 segundos; informa éxitos, fallos y latencias sin optimizar ni cambiar la revisión.
 
+- **Centro de ayuda versionado.** Glosario, solución de problemas y preguntas frecuentes por audiencia, con guías enlazadas, prueba anti-deriva y mapa `llms.txt` para consultar las fuentes sin duplicarlas.
+
 ### Fixed
 
 - **Acceso al proyecto sin jerga.** La administración, el alta de cuentas y los mensajes de ayuda hablan de accesos al proyecto; dar acceso sigue siendo distinto de asignar preguntas.
@@ -60,9 +62,15 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Prueba de pausa del autoguardado.** La comprobación en navegador mide los 60 segundos desde el primer intento con el reloj detenido y una respuesta de error demorada, conservando las aserciones de tiempo y texto sin cambiar el producto.
 
+- **Actualizaciones con licencias coherentes.** Se actualizan juntos los tres paquetes de NestJS a 12.5.1, React Query a 5.107.1, el complemento React de Vite a 6.3.0, Prettier a 3.10.1 y user-event a 14.6.12. El inventario se regenera desde el lockfile para conservar la comprobación de licencias.
+
 ### Security
 
 - **Auditoría completa sin excepciones.** Se retira la excepción temporal de picomatch porque GitHub retiró GHSA-fc5q-39xc-vjpf el 2026-11-18T15:38:56Z; CI vuelve a exigir `npm audit --audit-level=high` sin excepciones. La comprobación del 2026-11-18 devuelve cero vulnerabilidades.
+
+- **Node de seguridad y respaldo coherente.** Las imágenes de construcción, ejecución y secretos usan Node 26.13.1. Compose descarga también la imagen auxiliar que necesita el respaldo; una prueba evita que sus versiones vuelvan a separarse.
+
+- **Herramientas Prisma sin el aviso de Effect.** Se fija únicamente la dependencia Effect de `@prisma/config` en 3.22.1 para corregir GHSA-7589-6fvf-x4pw, sin actualizar Prisma ni omitir controles. La fijación podrá retirarse cuando Prisma incorpore una versión corregida.
 
 ## 0.11.0 — 2026-11-17
 

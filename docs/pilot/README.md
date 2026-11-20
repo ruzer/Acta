@@ -5,6 +5,8 @@ No supone que las personas ya sepan usarlo. El [estudio anterior](../usability/U
 se hizo con agentes de IA: no demuestra que una persona nueva pueda trabajar sin capacitación.
 El piloto con personas sigue pendiente hasta que una institución lo realice y registre sus resultados.
 
+Para dudas concretas antes o durante el piloto, consulta el [centro de ayuda](../ayuda/README.md). Sus respuestas breves enlazan a estas guías; no sustituyen la observación con personas.
+
 ## Por dónde empezar
 
 1. La coordinación adapta el [plan del piloto](PLAN-PILOTO.md) y acuerda las metas antes de empezar.
