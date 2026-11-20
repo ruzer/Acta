@@ -65,3 +65,13 @@ export const auditObjects: Record<string, string> = {
   User: "Usuario",
   Validation: "Validación",
 };
+
+export const auditExportTypes: Record<string, string> = {
+  JSON: "Archivo de datos",
+  CSV: "Hoja de cálculo",
+  MARKDOWN: "Documento de texto",
+};
+export const auditExportScopes: Record<string, string> = {
+  full: "Todo el contenido",
+  "validated-decisions": "Decisiones validadas",
+};
