@@ -76,6 +76,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Ayuda comprobada para el piloto.** Se actualiza su referencia de verificación y una prueba evita volver a atribuir acciones de revisión a Administración del proyecto.
 
+- **Campo visible al responder en móvil.** El formulario reserva espacio cuando se reduce el área visible y desplaza el campo enfocado por encima de las acciones; el pie deja de permanecer fijo con poca altura, también ante el teclado.
+
 ### Security
 
 - **Auditoría completa sin excepciones.** Se retira la excepción temporal de picomatch porque GitHub retiró GHSA-fc5q-39xc-vjpf el 2026-11-18T15:38:56Z; CI vuelve a exigir `npm audit --audit-level=high` sin excepciones. La comprobación del 2026-11-18 devuelve cero vulnerabilidades.

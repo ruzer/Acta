@@ -783,6 +783,9 @@
   }
 }
 @media (max-width: 640px) {
+  .acta-participant .response-page {
+    padding-bottom: var(--response-viewport-inset, 0px);
+  }
   .acta-participant .response-footer {
     position: sticky;
     bottom: 0;
@@ -797,6 +800,9 @@
   .acta-participant .formal-contribution input,
   .acta-participant .formal-contribution textarea {
     scroll-margin-bottom: 200px;
+  }
+  .acta-participant .response-short-viewport .response-footer {
+    position: static;
   }
 }
 @media (max-width: 640px) and (max-height: 600px) {

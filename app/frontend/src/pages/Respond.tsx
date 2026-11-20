@@ -114,6 +114,61 @@ function ResponseEditor({
   const allowNavigation = useRef(false),
     requests = useRef(new Map<string, string>()),
     errorRef = useRef<HTMLDivElement>(null);
+  const pageRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const page = pageRef.current!;
+    const viewport = window.visualViewport;
+    let frame = 0;
+    const revealField = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const mobile = window.innerWidth <= 640;
+        const height = viewport?.height ?? window.innerHeight;
+        page.style.setProperty(
+          "--response-viewport-inset",
+          `${mobile ? Math.max(0, window.innerHeight - height) : 0}px`,
+        );
+        page.classList.toggle(
+          "response-short-viewport",
+          mobile && height <= 600,
+        );
+        const field = document.activeElement;
+        if (
+          !mobile ||
+          !field ||
+          !page.contains(field) ||
+          !field.matches('input:not([type="file"]), textarea, select')
+        )
+          return;
+        const footer = page.querySelector<HTMLElement>(".response-footer");
+        if (!footer) return;
+        const top = (viewport?.offsetTop ?? 0) + 8;
+        const bottom =
+          Math.min(
+            (viewport?.offsetTop ?? 0) + height,
+            getComputedStyle(footer).position === "sticky"
+              ? footer.getBoundingClientRect().top
+              : Infinity,
+          ) - 8;
+        const box = field.getBoundingClientRect();
+        // El desplazamiento nativo de foco no tiene en cuenta el pie superpuesto.
+        if (box.top < top) window.scrollBy(0, box.top - top);
+        else if (box.bottom > bottom) window.scrollBy(0, box.bottom - bottom);
+      });
+    };
+    page.addEventListener("focusin", revealField);
+    window.addEventListener("resize", revealField);
+    viewport?.addEventListener("resize", revealField);
+    viewport?.addEventListener("scroll", revealField);
+    revealField();
+    return () => {
+      cancelAnimationFrame(frame);
+      page.removeEventListener("focusin", revealField);
+      window.removeEventListener("resize", revealField);
+      viewport?.removeEventListener("resize", revealField);
+      viewport?.removeEventListener("scroll", revealField);
+    };
+  }, []);
   const branding = useBranding();
   const backupKey = draftKey(userId, projectId, id);
   const serverRef = useRef(data),
@@ -543,7 +598,7 @@ function ResponseEditor({
     </p>
   );
   return (
-    <section className="response-page participant-page">
+    <section ref={pageRef} className="response-page participant-page">
       <div className="participant-step-meta">
         <span>
           {server.question.position

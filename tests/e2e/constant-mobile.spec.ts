@@ -166,3 +166,85 @@ test("el pie a 390×480 deja espacio para responder y permite llegar a guardar y
     footer.getByRole("button", { name: "Enviar respuesta", exact: true }),
   ).toBeInViewport();
 });
+
+test("el último campo queda completo sobre el pie al escribir y al reducir el área visible", async ({
+  page,
+  browser,
+}) => {
+  const admin = await browser.newPage();
+  await login(admin, "admin");
+  const fixture = await draftProject(admin);
+  await admin.close();
+  await login(page, "stakeholder");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(
+    `/projects/${fixture.project.id}/respond/${fixture.questions[0].id}`,
+  );
+  await page
+    .getByText("Agregar un ejemplo (opcional)", { exact: true })
+    .click();
+  const example = page.getByLabel("Ejemplo (opcional)", { exact: true });
+  const footer = page.locator(".response-footer");
+  await page.evaluate(() => document.fonts.ready);
+  // Se puede pulsar el centro del campo aunque su borde inferior quede bajo el pie.
+  await example.evaluate((field) => {
+    const box = field.getBoundingClientRect();
+    const bar = document
+      .querySelector(".response-footer")!
+      .getBoundingClientRect();
+    window.scrollBy(0, box.top + box.height / 2 - (bar.top - 10));
+  });
+  const box = (await example.boundingBox())!;
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  await page.keyboard.type("Ejemplo ficticio para el piloto.");
+  await expect(example).toBeFocused();
+  await page.screenshot({ path: `${evidence}/pilot-last-field-390.png` });
+  await expect
+    .poll(async () => {
+      const field = (await example.boundingBox())!;
+      const bar = (await footer.boundingBox())!;
+      return field.y >= 0 && field.y + field.height <= bar.y;
+    })
+    .toBe(true);
+  expect(await footer.evaluate((el) => getComputedStyle(el).position)).toBe(
+    "sticky",
+  );
+
+  // Chromium de escritorio no abre un teclado virtual: simulamos su viewport visual.
+  await page.evaluate(() => {
+    Object.defineProperty(window.visualViewport!, "height", {
+      configurable: true,
+      value: 400,
+    });
+    window.visualViewport!.dispatchEvent(new Event("resize"));
+  });
+  await expect
+    .poll(() => footer.evaluate((el) => getComputedStyle(el).position))
+    .toBe("static");
+  await expect
+    .poll(async () => {
+      const field = (await example.boundingBox())!;
+      return field.y >= 0 && field.y + field.height <= 400;
+    })
+    .toBe(true);
+  await footer.evaluate((el) => el.scrollIntoView({ block: "start" }));
+  for (const button of await footer.getByRole("button").all()) {
+    const bounds = (await button.boundingBox())!;
+    expect(bounds.y).toBeGreaterThanOrEqual(0);
+    expect(bounds.y + bounds.height).toBeLessThanOrEqual(400);
+    expect(bounds.height).toBeGreaterThanOrEqual(44);
+  }
+  await page.evaluate(() => {
+    delete (window.visualViewport as unknown as { height?: number }).height;
+    window.visualViewport!.dispatchEvent(new Event("resize"));
+  });
+  await expect
+    .poll(() => footer.evaluate((el) => getComputedStyle(el).position))
+    .toBe("sticky");
+  await footer.scrollIntoViewIfNeeded();
+  for (const name of ["Guardar y salir", "Enviar respuesta"]) {
+    const button = footer.getByRole("button", { name, exact: true });
+    await expect(button).toBeInViewport();
+    expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  }
+});
