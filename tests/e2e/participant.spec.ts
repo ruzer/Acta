@@ -191,6 +191,38 @@ test.beforeAll(async ({ browser }) => {
   );
   await context.close();
 });
+test("el campo enfocado no queda debajo del pie en móvil bajo", async ({
+  page,
+}) => {
+  await login(page, "stakeholder");
+  for (const [width, height] of [
+    [390, 480],
+    [390, 844],
+    [1280, 900],
+  ]) {
+    await page.setViewportSize({ width, height });
+    await open(page, 3);
+    await page.evaluate(() => document.fonts.ready);
+    await page.getByLabel("Tu respuesta", { exact: true }).focus();
+    const geometry = await page.evaluate(() => ({
+      fieldBottom: document
+        .querySelector(".formal-contribution textarea")!
+        .getBoundingClientRect().bottom,
+      footerTop: document
+        .querySelector(".response-footer")!
+        .getBoundingClientRect().top,
+    }));
+    expect(
+      geometry.fieldBottom,
+      `${width}×${height}: campo completo sobre el pie`,
+    ).toBeLessThanOrEqual(geometry.footerTop);
+    const footer = page.locator(".response-footer");
+    await expect(footer.getByRole("button")).toHaveCount(2);
+    for (const button of await footer.getByRole("button").all())
+      expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    await expect(footer).not.toContainText("Necesito consultar esto");
+  }
+});
 test("guardar intacta, recuperar tras logout, prioridad borrador y consulta recuperable", async ({
   page,
 }) => {
