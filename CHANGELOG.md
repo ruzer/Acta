@@ -78,6 +78,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Campo visible al responder en móvil.** El formulario reserva espacio cuando se reduce el área visible y desplaza el campo enfocado por encima de las acciones; el pie deja de permanecer fijo con poca altura, también ante el teclado.
 
+- **Aclaración con enlace visible.** Mi trabajo muestra «Responder aclaración», igual que las guías y la ayuda; conserva su nombre accesible y el destino de la consulta.
+
 ### Security
 
 - **Auditoría completa sin excepciones.** Se retira la excepción temporal de picomatch porque GitHub retiró GHSA-fc5q-39xc-vjpf el 2026-11-18T15:38:56Z; CI vuelve a exigir `npm audit --audit-level=high` sin excepciones. La comprobación del 2026-11-18 devuelve cero vulnerabilidades.

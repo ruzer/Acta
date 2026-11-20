@@ -214,6 +214,7 @@ it("el avance se dice con palabras y sin inventar envíos; la aclaración pendie
       name: "Responder aclaración: Criterio de urgencia",
     }),
   ).toHaveAttribute("href", "/projects/p/clarifications/q");
+  expect(screen.getByText("Responder aclaración")).toBeVisible();
   expect(screen.getByText(/Guardar y salir/)).toBeVisible();
 });
 

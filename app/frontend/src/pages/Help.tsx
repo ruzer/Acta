@@ -60,10 +60,10 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
               siguiente pregunta. Cada una se envía por separado.
             </li>
             <li>
-              En <strong>Mi trabajo</strong>, el aviso{" "}
-              <strong>Una aclaración espera tu respuesta</strong> tiene el
-              enlace <strong>Responder aclaración</strong>. Después de enviar
-              una respuesta, también puedes abrir{" "}
+              En <strong>Mi trabajo</strong>, pulsa{" "}
+              <strong>Responder aclaración</strong> en el aviso{" "}
+              <strong>Una aclaración espera tu respuesta</strong>. Después de
+              enviar una respuesta, también puedes abrir{" "}
               <strong>Consultar aclaraciones</strong>. Completa{" "}
               <strong>Tu aclaración</strong> y pulsa{" "}
               <strong>Enviar aclaración</strong>. Busca{" "}

@@ -783,6 +783,13 @@
   }
 }
 @media (max-width: 640px) {
+  .acta-participant .ac-callout {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .acta-participant .ac-callout-action {
+    grid-column: 2;
+    justify-self: start;
+  }
   .acta-participant .response-page {
     padding-bottom: var(--response-viewport-inset, 0px);
   }

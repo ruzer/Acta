@@ -84,6 +84,14 @@ test("V-15 · Mi trabajo: avance, aclaración destacada y la pregunta como texto
     // The clarification that waits on the person is above the list.
     const callout = page.locator(".ac-callout");
     await expect(callout).toContainText("Una aclaración espera tu respuesta");
+    await expect(
+      callout.getByText("Responder aclaración", { exact: true }),
+    ).toBeVisible();
+    expect(
+      await callout
+        .locator("h2")
+        .evaluate((el) => el.scrollWidth <= el.clientWidth),
+    ).toBe(true);
     const list = await top(page, ".participant-topic");
     const attention = await top(page, ".ac-callout");
     expect(attention).toBeLessThan(list);
@@ -133,7 +141,9 @@ test("V-16 · Responder: la pregunta domina, la nota queda junto a los botones y
       page.getByRole("button", { name: /^Enviar respuesta/ }),
     ).toHaveCount(1);
     expect(await primaryCount(page)).toBe(1);
-    const help = page.locator("p.hint").filter({ hasText: "“Guardar y salir”" });
+    const help = page
+      .locator("p.hint")
+      .filter({ hasText: "“Guardar y salir”" });
     await help.scrollIntoViewIfNeeded();
     await expect(help).toBeInViewport({ ratio: 1 });
     await expect(page.locator(".response-footer p.hint")).toHaveCount(0);

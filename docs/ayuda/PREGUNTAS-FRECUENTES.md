@@ -55,7 +55,7 @@ Más información: [Aclaración](GLOSARIO.md#aclaración).
 ### ¿Dónde respondo una aclaración después de enviar?
 Aplica a: Participante.
 
-En **Mi trabajo**, el aviso **Una aclaración espera tu respuesta** tiene el enlace **Responder aclaración**. Después de enviar una respuesta, también puedes abrir **Consultar aclaraciones**. Completa **Tu aclaración** y pulsa **Enviar aclaración**. Busca **Aclaración enviada**; puede abrirse otra pregunta.
+En **Mi trabajo**, pulsa **Responder aclaración** en el aviso **Una aclaración espera tu respuesta**. Después de enviar una respuesta, también puedes abrir **Consultar aclaraciones**. Completa **Tu aclaración** y pulsa **Enviar aclaración**. Busca **Aclaración enviada**; puede abrirse otra pregunta.
 
 Más información: [Guía de Participante](../pilot/GUIA-PARTICIPANTE.md); si entras por invitación, consulta [Invitaciones privadas](../EXTERNAL-INVITATIONS.md).
 
