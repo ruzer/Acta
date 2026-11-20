@@ -53,11 +53,11 @@ Una respuesta enviada queda registrada como aportación y la pantalla no ofrece 
 Más información: [Aclaración](GLOSARIO.md#aclaración).
 
 ### ¿Dónde respondo una aclaración después de enviar?
-Aplica a: Participante y personas invitadas.
+Aplica a: Participante.
 
-Después de enviar una respuesta, **Consultar aclaraciones** abre el espacio de aclaraciones de esa pregunta. Si hay una solicitud pendiente para ti, puedes escribir en **Tu aclaración** y usar **Enviar aclaración**. La aclaración enviada se agrega al historial sin reemplazar tu respuesta original.
+En **Mi trabajo**, el aviso **Una aclaración espera tu respuesta** tiene el enlace **Responder aclaración**. Después de enviar una respuesta, también puedes abrir **Consultar aclaraciones**. Completa **Tu aclaración** y pulsa **Enviar aclaración**. Busca **Aclaración enviada**; puede abrirse otra pregunta.
 
-Más información: [Guía de Participante](../pilot/GUIA-PARTICIPANTE.md).
+Más información: [Guía de Participante](../pilot/GUIA-PARTICIPANTE.md); si entras por invitación, consulta [Invitaciones privadas](../EXTERNAL-INVITATIONS.md).
 
 ### ¿Acta guarda mientras escribo?
 Aplica a: Participante.

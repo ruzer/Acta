@@ -390,21 +390,23 @@ test("aclaración tiene prioridad; al contestar ya no queda pendiente del partic
   const context = await browser.newContext(),
     analyst = await context.newPage();
   await login(analyst, "analyst");
-  const detail = await call(
-    analyst,
-    `/projects/${projectId}/questions/${ids[1]}/review`,
-  );
-  await call(
-    analyst,
-    `/projects/${projectId}/questions/${ids[1]}/review/clarifications/request`,
-    "POST",
-    {
-      expectedVersion: detail.lockVersion,
-      requestId: randomUUID(),
-      responseRevisionId: detail.submissions[0].id,
-      body: "¿Puedes precisar qué guía utiliza el área?",
-    },
-  );
+  await analyst.goto(`/projects/${projectId}/review/${ids[1]}`);
+  await analyst.getByText("Otras acciones", { exact: true }).click();
+  await analyst
+    .locator(".ac-action-menu")
+    .getByRole("button", { name: "Solicitar aclaración", exact: true })
+    .click();
+  const dialog = analyst.getByRole("dialog");
+  await dialog
+    .getByLabel("Respuesta sobre la que necesitas aclaración")
+    .selectOption({ label: "Participante demo · envío #1" });
+  await dialog
+    .getByLabel("Pregunta de aclaración")
+    .fill("¿Puedes precisar qué guía utiliza el área?");
+  await dialog
+    .getByRole("button", { name: "Enviar solicitud", exact: true })
+    .click();
+  await expect(dialog).toHaveCount(0);
   await login(page, "stakeholder");
   await work(page);
   await page.getByRole("link", { name: "Continuar", exact: true }).click();
@@ -414,6 +416,16 @@ test("aclaración tiene prioridad; al contestar ya no queda pendiente del partic
       exact: true,
     }),
   ).toBeVisible();
+  await work(page);
+  await expect(
+    page.getByText("Una aclaración espera tu respuesta", { exact: true }),
+  ).toBeVisible();
+  await page.getByRole("link", { name: /^Responder aclaración:/ }).click();
+  await expect(page.getByLabel("Tu aclaración")).toBeVisible();
+  await page.goto(`/projects/${projectId}/submitted/${ids[1]}`);
+  await page
+    .getByRole("link", { name: "Consultar aclaraciones", exact: true })
+    .click();
   await axe(page);
   await page
     .getByLabel("Tu aclaración")
