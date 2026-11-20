@@ -1,9 +1,12 @@
 # Centro de ayuda de Acta
 
-Verificado contra Acta v0.11.0, con base en main 63312d3 y el pulido del piloto, 2026-11-19.
+Verificado contra Acta v0.12.0 en preparación:
+`ba17ae2d2339880722ad071a89f53b43c6be2f54`, 2026-11-20.
 
-Esta ayuda incluye mejoras posteriores a la publicación de v0.11.0, presentes
-en el commit indicado. Consulta a tu administración si tu pantalla es distinta.
+El commit indicado incorpora el pulido de respuesta móvil, aclaraciones y
+revisión de solo lectura, y la comprobación de permisos descritos en las guías.
+Es una referencia funcional; no acredita la publicación ni las comprobaciones
+completas de la candidata. Consulta a tu administración si tu pantalla es distinta.
 
 Acta reúne preguntas, respuestas, comprobantes y decisiones de un proyecto.
 Empieza por tu duda. Estas páginas acompañan al código: la versión instalada

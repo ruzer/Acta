@@ -14,6 +14,31 @@ Se prepara [Semantic Versioning](https://semver.org/lang/es/) en formato **MAJOR
 
 El contrato público incluye API documentada, configuración, formatos de intercambio y requisitos de actualización/persistencia. No basta con que TypeScript compile para afirmar compatibilidad. Antes de 1.0 no se promete estabilidad absoluta; los cambios incompatibles deben anunciarse, agruparse en un incremento MINOR de `0.x` y acompañarse de instrucciones de migración. PATCH seguirá reservado para cambios compatibles. Una corrección de seguridad que rompa compatibilidad debe decirlo y usar la versión apropiada.
 
+### Preparación de 0.12.0 — Seguimiento y pulido del piloto
+
+Base comprobada: `92c589dc96ae65c5d88c2d98dc51de459b070e34`, después del PR #153.
+La candidata reúne participación, plazos informativos, autoguardado, plantillas,
+Primeros pasos, ayuda por perfil, centro de ayuda y pulido de la interfaz.
+Las [notas de 0.12.0](releases/v0.12.0.md) distinguen esta base de la cabeza final,
+recogen las tres mediciones de carga y no certifican capacidad institucional.
+
+Es MINOR por las funciones añadidas. Desde v0.11.0 hay una migración aditiva,
+`202611180001_response_due_at`: 13 → 14 migraciones, columna nueva nula en los
+proyectos existentes. Las imágenes usan Node 26.13.1; las cookies no cambian.
+Actualizar frontend y backend juntos, con respaldo verificado y recarga de
+pestañas. El [ensayo de actualización](UPGRADE-REHEARSAL.md) debe identificar la
+cabeza exacta; los resultados anteriores no prueban esa candidata.
+
+Exigir `verify`, `secrets`, `selfhosting`, `guided-install` y `codeql` en verde
+sobre la cabeza final. El propietario revisa y fusiona. Publicar requiere su
+autorización expresa posterior y comprobar los cinco checks del merge exacto.
+Solo entonces corresponde crear allí el tag anotado `v0.12.0`, publicar
+«Acta v0.12.0» como Latest con estas notas y ejecutar
+`gh workflow run ci.yml --ref v0.12.0`, verificando el mismo SHA: CI no escucha
+push de tags. Los enlaces de las notas ya apuntan de forma absoluta a
+`blob/v0.12.0`; no acreditan que el tag exista antes de publicarlo.
+La preparación no publica imágenes ni actualiza instalaciones derivadas.
+
 ### Preparación de 0.11.0 — Continuidad y piloto institucional
 
 Base verificada `7aaa10c71cdbacc4cb06f8a4b45face93f8c806a`: seis commits y 18

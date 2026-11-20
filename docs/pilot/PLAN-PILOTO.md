@@ -36,7 +36,7 @@ personas por sí sola.
 ## Preparación: no abrir las sesiones sin completar
 
 - [ ] Responsable del piloto, personas, fechas y criterios acordados por escrito.
-- [ ] Instalación separada para el piloto; dirección de acceso probada desde los equipos previstos.
+- [ ] Instalación separada para el piloto; versión y commit registrados, y dirección de acceso probada desde los equipos previstos. Para evaluar [v0.12.0](../releases/v0.12.0.md), distingue la candidata de la versión publicada.
 - [ ] Equipo técnico confirma respaldo previo verificado y cómo recuperar la instalación; registra fecha y responsable, nunca claves.
 - [ ] Proyecto vacío creado; nombre y códigos de proyecto y áreas acordados. Fecha límite opcional acordada: solo orienta y no bloquea envíos.
 - [ ] Cuentas creadas con **Crear varios usuarios**; roles y acceso al proyecto revisados. Contraseñas entregadas individualmente.

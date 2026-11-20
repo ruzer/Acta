@@ -119,7 +119,7 @@ El despliegue incluido usa **frontend + backend + PostgreSQL + VersityGW**, con 
 - **VersityGW** guarda los archivos adjuntos en almacenamiento privado dentro de tu infraestructura, mediante la API S3. Es el proveedor self-hosted por defecto verificado.
 - Los volúmenes Docker conservan datos y secretos entre reinicios. Un backup completo necesita base de datos, archivos y configuración; exportar JSON no sustituye ese backup.
 
-Para actualizar desde v0.9.0 o v0.10.0, consulta las [notas de v0.11.0](docs/releases/v0.11.0.md): backup previo, frontend y backend juntos y recarga de pestañas; sin migraciones nuevas. Comprueba la versión publicada y su commit en las [releases oficiales](https://github.com/ruzer/Acta/releases) antes de actualizar. Si aún utilizas v0.8.0, revisa también la migración y la incompatibilidad de Sistema de las [notas de v0.9.0](docs/releases/v0.9.0.md).
+Para preparar la actualización desde v0.11.0, consulta las [notas de v0.12.0](docs/releases/v0.12.0.md): respaldo previo, frontend y backend juntos, una migración que añade la fecha límite y recarga de pestañas. Si partes de v0.9.0 o v0.10.0, revisa también las notas de los saltos anteriores y ensaya el recorrido completo. Comprueba la versión publicada y su commit en las [releases oficiales](https://github.com/ruzer/Acta/releases) antes de actualizar. Si aún utilizas v0.8.0, revisa también la migración y la incompatibilidad de Sistema de las [notas de v0.9.0](docs/releases/v0.9.0.md).
 
 [Instalar en servidor y actualizar](docs/SELF-HOSTING.md) · [Configuración](docs/CONFIGURATION.md) · [Backup y restauración](docs/BACKUP-RESTORE.md) · [Almacenamiento avanzado](docs/S3-PROVIDERS.md)
 
@@ -142,7 +142,7 @@ También puedes ver [Organizar](docs/assets/02-editor-organize.png), [Responder]
 
 Acta está diseñado para instalarse en infraestructura propia y adaptarse mediante forks. Las organizaciones pueden mantener personalizaciones y sincronizarse con el upstream conforme a AGPL-3.0-only. Las mejoras genéricas son bienvenidas de regreso mediante Pull Requests: contribuir así ayuda a otras instalaciones y reduce divergencia; no es una obligación de enviar PR atribuida a la licencia.
 
-El upstream oficial es [github.com/ruzer/Acta](https://github.com/ruzer/Acta). Las [notas de v0.11.0 — continuidad y piloto institucional](docs/releases/v0.11.0.md) describen sus cambios, actualización y límites. Consulta el [changelog](CHANGELOG.md) y las [releases oficiales](https://github.com/ruzer/Acta/releases) para verificar la versión publicada, su commit y la autorización de tu instalación antes de actualizar; una versión en los archivos del repositorio no acredita su publicación.
+El upstream oficial es [github.com/ruzer/Acta](https://github.com/ruzer/Acta). Las [notas de v0.12.0 — preparación del piloto](docs/releases/v0.12.0.md) describen la candidata, su actualización y sus límites. Consulta el [changelog](CHANGELOG.md) y las [releases oficiales](https://github.com/ruzer/Acta/releases) para verificar la versión publicada, su commit y la autorización de tu instalación antes de actualizar; una versión en los archivos del repositorio no acredita su publicación.
 
 [Gobernanza](GOVERNANCE.md) · [Forks y sincronización](docs/UPSTREAM-FORKS.md) · [Roadmap](ROADMAP.md) · [Soporte comunitario](SUPPORT.md).
 

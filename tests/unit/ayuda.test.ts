@@ -143,6 +143,56 @@ it("f: las entradas son autocontenidas, el FAQ declara audiencia y enlaza sin co
     }
   }
 });
+function attributesReviewToAdministration(text: string) {
+  const content = compact(
+    text
+      .normalize("NFD")
+      .replace(/\p{M}/gu, "")
+      .replace(/<[^<>]*>|\{\s*" "\s*\}|[*_`]/g, " "),
+  );
+  const subject =
+    "\\badministracion(?: del proyecto)?(?: [yo] (?:el perfil )?analista(?: del proyecto)?)? (?:pueden? )?";
+  const review =
+    "revis(?:ar|an?)(?: (?:las? |sus |una )?(?:respuestas?|aportacion(?:es)?)\\b|(?=\\s*(?:[.!?;,:]|$)))";
+  const clarification =
+    "(?:pedir|piden?|solicit(?:ar|an?)) (?:una |las? )?aclaracion(?:es)?\\b";
+  const decision =
+    "(?:registr(?:ar|an?) (?:una |las? )?decision(?:es)?\\b|decid(?:ir|en?)\\b)";
+  // shortcut: reconoce sujeto y acción explícitos; ampliar los casos si cambia esa redacción.
+  return new RegExp(
+    `${subject}(?:${review}|${clarification}|${decision})`,
+    "i",
+  ).test(content);
+}
+it.each([
+  "Administración revisa.",
+  "Administración puede registrar decisiones.",
+  "Administración del proyecto solicita aclaraciones.",
+  "Administración puede revisar respuestas.",
+  "Analista y Administración pueden decidir.",
+  "<p><strong>Administración</strong> puede pedir aclaraciones.</p>",
+  "Administración o Analista pueden pedir aclaraciones.",
+  "Analista o Administración del proyecto pueden revisar respuestas.",
+  "Analista y Administración del proyecto registran decisiones.",
+])("g: detecta la atribución incorrecta: %s", (text) => {
+  expect(attributesReviewToAdministration(text)).toBe(true);
+});
+it.each([
+  "Administración no revisa.",
+  "Administración no puede registrar decisiones.",
+  "Administración o Analista no pueden pedir aclaraciones.",
+  "Administración no pide aclaraciones ni registra decisiones.",
+  "Solo el perfil Analista puede pedir aclaraciones y registrar decisiones.",
+  "Administración consulta las respuestas; solo el perfil Analista puede revisarlas.",
+  "Analista y Administración del proyecto pueden consultar el informe. Solo el perfil Analista registra decisiones.",
+  "Administración revisa el acceso al proyecto.",
+  "Administración puede revisar el archivo antes de importarlo.",
+  "Administración del proyecto debe revisar dónde corresponde cargarlo.",
+  "Administración puede consultar decisiones.",
+  "Administración prepara preguntas; Analista revisa respuestas.",
+])("g: acepta los permisos correctos: %s", (text) => {
+  expect(attributesReviewToAdministration(text)).toBe(false);
+});
 it("g: las guías no atribuyen revisión a Administración del proyecto", () => {
   const paths = [
     ...docs().map(({ path }) => path),
@@ -151,17 +201,6 @@ it("g: las guías no atribuyen revisión a Administración del proyecto", () => 
       .map((name) => join("docs/pilot", name)),
     "app/frontend/src/pages/Help.tsx",
   ];
-  for (const path of paths) {
-    const text = read(path);
-    const sections = text.split(
-      path.endsWith(".tsx") ? /<\/(?:p|li)>/ : /^#{1,6} /m,
-    );
-    for (const section of sections) {
-      const content = compact(section);
-      if (/revis|aclaraci[oó]n|decisi[oó]n/iu.test(content))
-        expect(content, path).not.toMatch(
-          /Analista o Administración del proyecto|Administración o Analista|Analista y Administración del proyecto/iu,
-        );
-    }
-  }
+  for (const path of paths)
+    expect(attributesReviewToAdministration(read(path)), path).toBe(false);
 });

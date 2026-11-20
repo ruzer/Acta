@@ -6,6 +6,21 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
+Sin cambios adicionales por anunciar.
+
+## [0.12.0] - 2026-11-20
+
+Seguimiento de participación, plazos, autoguardado, plantillas y ayuda para el piloto,
+integrados en los PR [#137](https://github.com/ruzer/Acta/pull/137),
+[#140](https://github.com/ruzer/Acta/pull/140),
+[#141](https://github.com/ruzer/Acta/pull/141),
+[#143](https://github.com/ruzer/Acta/pull/143),
+[#152](https://github.com/ruzer/Acta/pull/152) y
+[#153](https://github.com/ruzer/Acta/pull/153), más el pulido final de esta candidata.
+Las [notas de preparación](docs/releases/v0.12.0.md) explican la actualización,
+la migración aditiva y los límites de la evidencia. La publicación requiere la
+aprobación del propietario.
+
 ### Added
 
 - **Kit de piloto con personas.** Plan ajustable, guion de observación, guías breves de Administración, Participante y Revisión, y plantillas para medir resultados y decidir continuar, ajustar o detener; no sustituye una validación con personas ni certifica producción.
@@ -75,6 +90,14 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 - **Exportaciones legibles en la Bitácora.** El tipo de archivo y su alcance se muestran en palabras claras; sus valores originales siguen disponibles al abrir el identificador de exportación.
 
 - **Ayuda comprobada para el piloto.** Se actualiza su referencia de verificación y una prueba evita volver a atribuir acciones de revisión a Administración del proyecto.
+
+- **Campo visible al responder en móvil.** El formulario reserva espacio cuando se reduce el área visible y desplaza el campo enfocado por encima de las acciones; el pie deja de permanecer fijo con poca altura, también ante el teclado.
+
+- **Aclaración con enlace visible.** Mi trabajo muestra «Responder aclaración», igual que las guías y la ayuda; conserva su nombre accesible y el destino de la consulta.
+
+- **Conflicto explicado en la consulta.** La nota de solo lectura conserva la explicación del conflicto abierto, sin conceder acciones de revisión a otros perfiles.
+
+- **Permisos descritos con precisión en la ayuda.** La comprobación de las guías reconoce más atribuciones incorrectas de revisión a Administración y distingue las frases que explican sus límites.
 
 ### Security
 
@@ -936,3 +959,5 @@ Sin entradas por anunciar.
 ### Security
 
 - Reporte de vulnerabilidades exclusivamente privado. La habilitación de GitHub Private Vulnerability Reporting se registró el 2026-10-01; el cierre local no vuelve a comprobar su disponibilidad. El contacto de moderación permanece pendiente. Esta precisión documental no es una corrección nueva de una vulnerabilidad.
+
+[0.12.0]: https://github.com/ruzer/Acta/compare/v0.11.0...v0.12.0

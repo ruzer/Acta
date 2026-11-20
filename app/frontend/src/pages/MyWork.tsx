@@ -178,7 +178,7 @@ export function Welcome({
               to={waiting[0]!.href}
               aria-label={`Responder aclaración: ${waiting[0]!.title}`}
             >
-              <ParticipantIcon name="arrow" />
+              Responder aclaración <ParticipantIcon name="arrow" />
             </Link>
           }
         >
