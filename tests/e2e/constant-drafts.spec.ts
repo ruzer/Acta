@@ -16,12 +16,15 @@ test("autoguarda después de ocho segundos sin salir y conserva la edición en c
   const fixture = await draftProject(admin);
   await admin.close();
   await login(page, "stakeholder");
+  const clockStart = new Date("2026-11-20T12:00:00Z");
+  await page.clock.install({ time: new Date(clockStart.getTime() - 60000) });
   await page.goto(
     `/projects/${fixture.project.id}/respond/${fixture.questions[0].id}`,
   );
   const answer = page.getByLabel("Tu respuesta", { exact: true });
   await expect(answer).toBeVisible();
-  await page.clock.install();
+  // Pausar antes de escribir excluye el tiempo real entre comandos de Playwright.
+  await page.clock.pauseAt(clockStart);
   const requests: { expectedVersion: number; answer: string }[] = [];
   page.on("request", (r) => {
     if (r.url().endsWith("/response/draft") && r.method() === "PUT")
@@ -29,8 +32,14 @@ test("autoguarda después de ocho segundos sin salir y conserva la edición en c
   });
   await answer.fill("Una respuesta ficticia que no debe perderse.");
   await page.clock.runFor(7999);
+  expect(await page.evaluate(() => Date.now())).toBe(
+    clockStart.getTime() + 7999,
+  );
   expect(requests).toHaveLength(0);
   await page.clock.runFor(1);
+  expect(await page.evaluate(() => Date.now())).toBe(
+    clockStart.getTime() + 8000,
+  );
   await expect(
     page.getByRole("status").filter({ hasText: "Borrador guardado a las" }),
   ).toBeVisible();
@@ -46,6 +55,8 @@ test("autoguarda después de ocho segundos sin salir y conserva la edición en c
       ),
     ),
   ).toEqual([]);
+  // Axe necesita que sus temporizadores vuelvan a avanzar.
+  await page.clock.resume();
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 900 });
     await checkedPage(page, evidence, "constant-draft-saved", width);
