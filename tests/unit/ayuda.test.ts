@@ -38,7 +38,6 @@ function anchors(text: string) {
   return [...text.matchAll(/^#{1,6}\s+(.+?)\s*#*$/gm)].map((m) => {
     const base = m[1]
       .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-      .replace(/<[^>]+>/g, "")
       .toLowerCase()
       .replace(/[^\p{L}\p{N}\p{M}_\-\s]/gu, "")
       .replace(/\s/g, "-");
