@@ -66,6 +66,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Perfiles de revisión sin ambigüedad.** Las guías y la ayuda distinguen la administración de accesos de la revisión: solo Analista puede pedir aclaraciones y registrar decisiones, con un perfil por persona y proyecto.
 
+- **Revisión de solo lectura explicada.** Los proyectos activos indican por qué Administración y Consulta no tienen botones de revisión; la ayuda conserva el mismo mensaje.
+
 ### Security
 
 - **Auditoría completa sin excepciones.** Se retira la excepción temporal de picomatch porque GitHub retiró GHSA-fc5q-39xc-vjpf el 2026-11-18T15:38:56Z; CI vuelve a exigir `npm audit --audit-level=high` sin excepciones. La comprobación del 2026-11-18 devuelve cero vulnerabilidades.

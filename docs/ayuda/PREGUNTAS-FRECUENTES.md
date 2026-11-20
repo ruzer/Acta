@@ -160,7 +160,7 @@ Más información: [Guía de Revisión](../pilot/GUIA-REVISION.md).
 ### ¿Por qué no veo los botones para pedir una aclaración o registrar una decisión?
 Aplica a: Administración y Consulta.
 
-Solo el perfil Analista puede pedir aclaraciones y registrar decisiones. Administración del proyecto prepara preguntas y gestiona accesos; Consulta permite leer el contenido autorizado. Una persona tiene un solo perfil por proyecto: para la revisión, crea o usa una cuenta con perfil Analista.
+Acta indica: «Esta pantalla es de solo lectura para tu perfil. Solo el perfil Analista puede pedir aclaraciones y registrar decisiones.» Una persona tiene un solo perfil por proyecto: para la revisión, crea o usa una cuenta con perfil Analista.
 
 Más información: [Administración del proyecto](GLOSARIO.md#administración-del-proyecto) y [Guía de Revisión](../pilot/GUIA-REVISION.md).
 

@@ -148,3 +148,12 @@ Consulta los pasos en las guías de [Participante](../pilot/GUIA-PARTICIPANTE.md
 [Administración](../pilot/GUIA-ADMINISTRACION.md) y [Revisión](../pilot/GUIA-REVISION.md).
 
 ¿No encontraste tu duda? [Pregúntala en Discussions (Preguntas y respuestas)](https://github.com/ruzer/Acta/discussions/categories/q-a).
+
+### La revisión no muestra botones para actuar
+
+«Esta pantalla es de solo lectura para tu perfil. Solo el perfil Analista puede pedir aclaraciones y registrar decisiones.»
+
+El proyecto está activo, pero tu perfil permite consultar esta pantalla, no pedir
+aclaraciones ni registrar decisiones. Usa una cuenta con perfil Analista para
+revisar; no uses la contraseña de otra persona.
+[Perfiles de revisión](PREGUNTAS-FRECUENTES.md#por-qué-no-veo-los-botones-para-pedir-una-aclaración-o-registrar-una-decisión).
