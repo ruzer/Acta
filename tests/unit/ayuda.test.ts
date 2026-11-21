@@ -151,13 +151,12 @@ function attributesReviewToAdministration(text: string) {
       .replace(/<[^<>]*>|\{\s*" "\s*\}|[*_`]/g, " "),
   );
   const subject =
-    "\\badministracion(?: del proyecto)?(?: [yo] (?:el perfil )?analista(?: del proyecto)?)? (?:pueden? )?";
-  const review =
-    "revis(?:ar|an?)(?: (?:las? |sus |una )?(?:respuestas?|aportacion(?:es)?)\\b|(?=\\s*(?:[.!?;,:]|$)))";
+    "\\badministracion(?: del proyecto)?(?: [yo] (?:el (?:perfil|equipo) )?analista(?: del proyecto)?)? (?:pueden? )?";
   const clarification =
-    "(?:pedir|piden?|solicit(?:ar|an?)) (?:una |las? )?aclaracion(?:es)?\\b";
+    "(?:pedir|piden?|solicit(?:ar|an?)) (?:una |las? )?aclaracion(?:es)?(?: al participante\\b|(?=\\s*(?:[.!?;,:]|$)))";
   const decision =
-    "(?:registr(?:ar|an?) (?:una |las? )?decision(?:es)?\\b|decid(?:ir|en?)\\b)";
+    "(?:registr(?:ar|an?) (?:una |las? )?decision(?:es)?\\b|decid(?:ir|en?)(?: (?:sobre )?(?:las? |sus |una )?(?:respuestas?|aportacion(?:es)?|decision(?:es)?)\\b|(?=\\s*(?:[.!?;,:]|$))))";
+  const review = `revis(?:ar|an?)(?: (?:las? |sus |una )?(?:respuestas?|aportacion(?:es)?)\\b| y ${decision}|(?=\\s*(?:[.!?;,:]|$)))`;
   // shortcut: reconoce sujeto y acción explícitos; ampliar los casos si cambia esa redacción.
   return new RegExp(
     `${subject}(?:${review}|${clarification}|${decision})`,
@@ -174,6 +173,10 @@ it.each([
   "Administración o Analista pueden pedir aclaraciones.",
   "Analista o Administración del proyecto pueden revisar respuestas.",
   "Analista y Administración del proyecto registran decisiones.",
+  "Administración puede revisar y decidir.",
+  "Administración y el equipo analista pueden registrar decisiones.",
+  "Administración decide sobre la respuesta.",
+  "Administración solicita una aclaración al participante.",
 ])("g: detecta la atribución incorrecta: %s", (text) => {
   expect(attributesReviewToAdministration(text)).toBe(true);
 });
@@ -190,6 +193,11 @@ it.each([
   "Administración del proyecto debe revisar dónde corresponde cargarlo.",
   "Administración puede consultar decisiones.",
   "Administración prepara preguntas; Analista revisa respuestas.",
+  "Administración decide la fecha límite del proyecto.",
+  "Administración decide quién participa.",
+  "Administración puede decidir si publica las preguntas.",
+  "Administración solicita una aclaración a Sistemas sobre el servidor.",
+  "Administración puede revisar y decidir la fecha límite del proyecto.",
 ])("g: acepta los permisos correctos: %s", (text) => {
   expect(attributesReviewToAdministration(text)).toBe(false);
 });

@@ -210,11 +210,30 @@ test("el Ãºltimo campo queda completo sobre el pie al escribir y al reducir el Ã
     "sticky",
   );
 
+  // El zoom de pellizco reduce el viewport visual sin abrir un teclado.
+  await page.evaluate(async () => {
+    Object.defineProperties(window.visualViewport!, {
+      height: { configurable: true, value: 563 },
+      scale: { configurable: true, value: 1.5 },
+    });
+    window.visualViewport!.dispatchEvent(new Event("resize"));
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+  });
+  await expect
+    .poll(() =>
+      footer.evaluate((el) => ({
+        position: getComputedStyle(el).position,
+        paddingBottom: getComputedStyle(el.closest(".response-page")!)
+          .paddingBottom,
+      })),
+    )
+    .toEqual({ position: "sticky", paddingBottom: "0px" });
+
   // Chromium de escritorio no abre un teclado virtual: simulamos su viewport visual.
   await page.evaluate(() => {
-    Object.defineProperty(window.visualViewport!, "height", {
-      configurable: true,
-      value: 400,
+    Object.defineProperties(window.visualViewport!, {
+      height: { configurable: true, value: 400 },
+      scale: { configurable: true, value: 1 },
     });
     window.visualViewport!.dispatchEvent(new Event("resize"));
   });
@@ -236,6 +255,7 @@ test("el Ãºltimo campo queda completo sobre el pie al escribir y al reducir el Ã
   }
   await page.evaluate(() => {
     delete (window.visualViewport as unknown as { height?: number }).height;
+    delete (window.visualViewport as unknown as { scale?: number }).scale;
     window.visualViewport!.dispatchEvent(new Event("resize"));
   });
   await expect

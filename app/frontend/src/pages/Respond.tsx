@@ -124,13 +124,14 @@ function ResponseEditor({
       frame = requestAnimationFrame(() => {
         const mobile = window.innerWidth <= 640;
         const height = viewport?.height ?? window.innerHeight;
+        const unzoomed = (viewport?.scale ?? 1) <= 1.01;
         page.style.setProperty(
           "--response-viewport-inset",
-          `${mobile ? Math.max(0, window.innerHeight - height) : 0}px`,
+          `${mobile && unzoomed ? Math.max(0, window.innerHeight - height) : 0}px`,
         );
         page.classList.toggle(
           "response-short-viewport",
-          mobile && height <= 600,
+          mobile && unzoomed && height <= 600,
         );
         const field = document.activeElement;
         if (

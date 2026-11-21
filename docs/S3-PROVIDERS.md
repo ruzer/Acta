@@ -44,6 +44,32 @@ La misma etapa de compilación se usa en `docker/versity/Dockerfile` y `app/back
 
 Correcciones: Go 1.27.3 resuelve **GO-2026-6809 / CVE-2026-111943** (`crypto/x509`) y Go 1.27.4 resuelve **GO-2026-6859** (`net/http`, caída del servidor HTTP/1 por una condición de carrera con `MaxBytesReader`; `govulncheck` la marcaba en el binario). VersityGW 1.9.0 corrige **GHSA-7qcr-88c3-f9p7** (path traversal mediante uploadId y borrado múltiple) y **GHSA-5gjv-3vhq-4chv** (cuerpos chunked sin consumir y reutilización de conexiones). El despliegue estándar no activa keepalive ni usa multipart; eso limita el alcance probado, pero no justifica conservar una versión afectada. El gate `govulncheck` sigue siendo obligatorio y no certifica ausencia de todas las vulnerabilidades de aplicación o del sistema operativo.
 
+### Aviso de módulo no invocado — 2026-11-21
+
+Se volvió a examinar el binario del laboratorio propio sobre Acta `4e7390c`,
+compilado desde VersityGW 1.11.0 sin modificaciones, con Go 1.27.4 fijado por
+el mismo digest del CI. `govulncheck` v1.8.0, con
+`-mode=binary -show=verbose`, terminó con código 0: **0 avisos en símbolos,
+0 en paquetes importados y 1 en módulos requeridos** (78 módulos examinados).
+No equivale a certificar ausencia de vulnerabilidades.
+
+El aviso es [GO-2026-5932](https://pkg.go.dev/vuln/GO-2026-5932):
+`golang.org/x/crypto` v0.58.0 contiene OpenPGP, que no tiene mantenimiento y
+presenta problemas conocidos. El binario examinado no importa los paquetes
+OpenPGP afectados; por eso el escáner lo informa solo a nivel de módulo.
+La [base oficial](https://vuln.go.dev/ID/GO-2026-5932.json) fija el fin del rango
+afectado de `x/crypto` en `v0.58.1-0.20261009181718-2f1f834330b2`.
+Esa versión [separa OpenPGP en otro módulo](https://go.dev/issue/81227);
+no repara OpenPGP: el módulo independiente continúa sin versión corregida.
+
+**Decisión propuesta para el propietario:** conservar el proveedor sin parches
+locales ni exclusiones del escáner y revisar este aviso a más tardar el
+**2026-12-05**, o antes si cambia su alcance. Evaluar una release oficial de
+VersityGW que incorpore el módulo corregido, con el contrato S3 y la persistencia
+verificados. Esta propuesta no constituye una aceptación automática del riesgo.
+Un aviso nuevo en código importado o invocado requiere una revisión nueva;
+los resultados anteriores no lo cubren.
+
 ### Actualización 1.10.0 → 1.11.0
 
 Release oficial del 2026-11-06; tag verificado en el commit

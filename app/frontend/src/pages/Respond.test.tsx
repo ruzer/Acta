@@ -61,8 +61,13 @@ const response: ResponseView = {
   },
 };
 for (const action of ["Guardar y salir", "Enviar respuesta"] as const) {
-  for (const inFlight of [true, false]) {
-    it(`${action} reintenta una vez tras un autoguardado fallido ${inFlight ? "en vuelo" : "ya terminado"}`, async () => {
+  for (const [inFlight, manualFails] of [
+    [true, false],
+    [true, true],
+    [false, false],
+    [false, true],
+  ] as const) {
+    it(`${action} reintenta una vez tras un autoguardado fallido ${inFlight ? "en vuelo" : "ya terminado"}; falla manual: ${manualFails}`, async () => {
       let fail!: (error: Error) => void;
       const pending = new Promise<ResponseView>((_, reject) => {
         fail = reject;
@@ -77,7 +82,7 @@ for (const action of ["Guardar y salir", "Enviar respuesta"] as const) {
           basedOnRevisionId: null,
           lockVersion: 1,
           updatedAt: new Date().toISOString(),
-          answer: "Texto que debe conservarse",
+          answer: "Texto actualizado que debe conservarse",
           comment: "",
           example: "",
           consultationRequested: false,
@@ -86,8 +91,11 @@ for (const action of ["Guardar y salir", "Enviar respuesta"] as const) {
       };
       vi.mocked(api).mockImplementation(async (key) => {
         if (key === "getResponse") return response as never;
-        if (key === "saveDraft")
-          return (++saves === 1 ? pending : Promise.resolve(saved)) as never;
+        if (key === "saveDraft") {
+          if (++saves === 1) return pending as never;
+          if (manualFails) throw new ApiFailure(503, "Servicio no disponible.");
+          return saved as never;
+        }
         if (key === "submitResponse")
           return { ...saved, lockVersion: 2 } as never;
         throw new Error(`Llamada inesperada: ${key}`);
@@ -122,29 +130,43 @@ for (const action of ["Guardar y salir", "Enviar respuesta"] as const) {
         void autosave.save();
       });
       expect(saves).toBe(1);
+      fireEvent.change(screen.getByLabelText("Tu respuesta", { exact: true }), {
+        target: { value: "Texto actualizado que debe conservarse" },
+      });
       if (!inFlight)
         await act(async () => {
           fail(new ApiFailure(503, "No se pudo guardar."));
         });
-      fireEvent.click(
-        screen.getByRole("button", { name: action }),
-      );
+      fireEvent.click(screen.getByRole("button", { name: action }));
       if (inFlight)
         await act(async () => {
           fail(new ApiFailure(503, "No se pudo guardar."));
         });
       await waitFor(() => expect(saves).toBe(2));
-      await screen.findByRole("heading", { name: "Mi trabajo ficticio" });
       const writes = vi
         .mocked(api)
         .mock.calls.filter(([key]) => key === "saveDraft");
       expect(writes[1]![2]).toMatchObject({
-        answer: "Texto que debe conservarse",
+        answer: "Texto actualizado que debe conservarse",
         expectedVersion: 0,
       });
+      if (manualFails) {
+        await waitFor(() =>
+          expect(screen.getByRole("status")).toHaveTextContent(
+            "No se pudo guardar. Tu texto sigue aquí",
+          ),
+        );
+        expect(
+          screen.getByLabelText("Tu respuesta", { exact: true }),
+        ).toHaveValue("Texto actualizado que debe conservarse");
+        expect(router.state.location.pathname).toBe("/projects/p/respond/q");
+        expect(screen.getByRole("button", { name: action })).toBeEnabled();
+      } else {
+        await screen.findByRole("heading", { name: "Mi trabajo ficticio" });
+      }
       expect(
         vi.mocked(api).mock.calls.filter(([key]) => key === "submitResponse"),
-      ).toHaveLength(action === "Enviar respuesta" ? 1 : 0);
+      ).toHaveLength(action === "Enviar respuesta" && !manualFails ? 1 : 0);
     });
   }
 }
