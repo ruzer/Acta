@@ -10,6 +10,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Prueba exacta del primer autoguardado.** La comprobación en navegador detiene el reloj antes de escribir y verifica que no se guarde a los 7.999 ms y sí a los 8.000 ms. Se conserva la revisión de accesibilidad; no cambia el funcionamiento del guardado.
 
+- **Zoom sin espacio de teclado.** Al ampliar la respuesta con un gesto de pellizco, el pie conserva su posición y no agrega el espacio reservado para el teclado; el teclado sigue dejando visible el campo.
+
 ## [0.12.0] - 2026-11-20
 
 Seguimiento de participación, plazos, autoguardado, plantillas y ayuda para el piloto,
