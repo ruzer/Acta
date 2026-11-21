@@ -1,12 +1,9 @@
 import { User, ReviewStatus } from "@prisma/client";
 import { AccessService } from "../administration/access.service.js";
 import { Tx, audit } from "../common/http.js";
-import {
-  loadGraph,
-  loadAssignedResponseGraph,
-} from "../responses/response-graph.js";
+import { ResponseApplicability } from "../responses/response-graph.js";
 
-export async function coverage(tx: Tx, access: AccessService, p: string) {
+export async function coverage(tx: Tx, _access: AccessService, p: string) {
   const assignments = await tx.questionAssignment.findMany({
     where: {
       projectId: p,
@@ -19,16 +16,97 @@ export async function coverage(tx: Tx, access: AccessService, p: string) {
     },
     include: { member: { include: { user: true, area: true } } },
   });
+  const members = new Map(assignments.map((a) => [a.member.userId, a.member]));
+  const [questions, responses, invitations] = await Promise.all([
+    tx.question.findMany({
+      where: { projectId: p, publication: "PUBLISHED" },
+      select: {
+        id: true,
+        QuestionCondition_child: true,
+        QuestionRevision_questionRecord: {
+          orderBy: { number: "desc" },
+          take: 1,
+          select: { id: true },
+        },
+      },
+    }),
+    tx.response.findMany({
+      where: {
+        projectId: p,
+        respondentId: { in: [...members.keys()] },
+        question: { publication: "PUBLISHED" },
+      },
+      select: {
+        questionId: true,
+        respondentId: true,
+        ResponseDraft_response: { select: { consultationRequested: true } },
+        ResponseRevision_response: {
+          orderBy: { number: "desc" },
+          take: 1,
+          select: {
+            id: true,
+            answer: true,
+            questionRevisionId: true,
+            conditionContext: true,
+          },
+        },
+      },
+    }),
+    tx.responseInvitation.findMany({
+      where: {
+        projectId: p,
+        scopeSealed: true,
+        respondentId: {
+          in: [...members.values()]
+            .filter((m) => m.user.invitationOnly)
+            .map((m) => m.userId),
+        },
+      },
+      select: {
+        respondentId: true,
+        organizationId: true,
+        questions: { select: { questionId: true } },
+      },
+    }),
+  ]);
   const graphs = new Map<
     string,
-    Awaited<ReturnType<typeof loadGraph>>["graph"]
+    ResponseApplicability<
+      (typeof questions)[number],
+      (typeof responses)[number]
+    >
   >();
-  for (const a of assignments)
-    if (!graphs.has(a.member.userId))
-      graphs.set(
-        a.member.userId,
-        await loadAssignedResponseGraph(tx, a.member.user, p, a.member.id),
-      );
+  for (const member of members.values()) {
+    // La revisión conserva envíos de invitaciones vencidas o revocadas.
+    const invitation = invitations.find(
+      (i) =>
+        i.respondentId === member.userId &&
+        i.organizationId === member.user.organizationId,
+    );
+    if (member.user.invitationOnly && !invitation)
+      throw new Error("Missing invitation scope");
+    const assigned = new Set(
+      assignments
+        .filter((a) => a.projectMemberId === member.id)
+        .map((a) => a.questionId),
+    );
+    const visible = questions.filter(
+      (q) =>
+        assigned.has(q.id) &&
+        (!invitation ||
+          invitation.questions.some((i) => i.questionId === q.id)),
+    );
+    const ids = new Set(visible.map((q) => q.id));
+    graphs.set(
+      member.userId,
+      new ResponseApplicability(
+        visible,
+        responses.filter(
+          (r) => r.respondentId === member.userId && ids.has(r.questionId),
+        ),
+      ),
+    );
+  }
   return { assignments, graphs };
 }
 export function questionCoverage(
