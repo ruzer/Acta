@@ -6,11 +6,13 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
+### Changed
+
+- **Menos lecturas al guardar borradores.** Se reutiliza la carga inicial de la respuesta y se consulta la cobertura de participantes en conjunto, sin volver a cargar un grafo completo por persona. Se conserva el recálculo completo de estados, las consultas solicitadas, los permisos y los límites de conexión.
+
 ### Fixed
 
 - **Prueba exacta del primer autoguardado.** La comprobación en navegador detiene el reloj antes de escribir y verifica que no se guarde a los 7.999 ms y sí a los 8.000 ms. Se conserva la revisión de accesibilidad; no cambia el funcionamiento del guardado.
-
-- **Menos lecturas al guardar borradores.** Se reutiliza la carga inicial de la respuesta y se consulta la cobertura de participantes en conjunto, sin volver a cargar un grafo completo por persona. Se conserva el recálculo completo de estados, las consultas solicitadas, los permisos y los límites de conexión.
 
 ## [0.12.0] - 2026-11-20
 
