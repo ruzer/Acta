@@ -14,6 +14,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Prueba de ayuda sin confundir administración con revisión.** La comprobación acepta decisiones sobre fechas, participantes y publicación, y aclaraciones a Sistemas; sigue detectando atribuciones de revisión a Administración.
 
+- **Guardado manual comprobado tras un fallo automático.** Se amplían las pruebas del comportamiento existente para verificar que se reintente con la edición más reciente y que un segundo fallo conserve el texto con un aviso claro; no cambia el funcionamiento del guardado.
+
 ### Added
 
 - **Aviso de almacenamiento identificado.** Se documenta GO-2026-5932 en OpenPGP, incluido en una dependencia de VersityGW pero no importado por su binario, y una revisión propuesta para el propietario. No se cambia el proveedor ni se excluye el aviso del escáner.
