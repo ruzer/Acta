@@ -14,6 +14,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Prueba de ayuda sin confundir administración con revisión.** La comprobación acepta decisiones sobre fechas, participantes y publicación, y aclaraciones a Sistemas; sigue detectando atribuciones de revisión a Administración.
 
+### Added
+
+- **Aviso de almacenamiento identificado.** Se documenta GO-2026-5932 en OpenPGP, incluido en una dependencia de VersityGW pero no importado por su binario, y una revisión propuesta para el propietario. No se cambia el proveedor ni se excluye el aviso del escáner.
+
 ## [0.12.0] - 2026-11-20
 
 Seguimiento de participación, plazos, autoguardado, plantillas y ayuda para el piloto,
