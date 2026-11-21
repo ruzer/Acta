@@ -12,6 +12,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Zoom sin espacio de teclado.** Al ampliar la respuesta con un gesto de pellizco, el pie conserva su posición y no agrega el espacio reservado para el teclado; el teclado sigue dejando visible el campo.
 
+- **Prueba de ayuda sin confundir administración con revisión.** La comprobación acepta decisiones sobre fechas, participantes y publicación, y aclaraciones a Sistemas; sigue detectando atribuciones de revisión a Administración.
+
 ## [0.12.0] - 2026-11-20
 
 Seguimiento de participación, plazos, autoguardado, plantillas y ayuda para el piloto,
