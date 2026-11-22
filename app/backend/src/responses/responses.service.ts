@@ -107,7 +107,7 @@ export class ResponsesService {
     operation: string,
     payload: unknown,
     schema: z.ZodType<T>,
-    work: (tx: Tx) => Promise<T>,
+    work: (tx: Tx, loaded: Awaited<ReturnType<typeof loadGraph>>) => Promise<T>,
   ) {
     return this.access.mutate(r.actor, p, ["STAKEHOLDER"], async (tx) => {
       if (
@@ -117,7 +117,8 @@ export class ResponsesService {
         !(await invitationAccess(tx, r.actor, p)).allowEvidence
       )
         throw new NotFoundException("No se encontró la evidencia.");
-      const { graph } = await loadGraph(tx, this.access, r.actor, p);
+      const loaded = await loadGraph(tx, this.access, r.actor, p);
+      const { graph } = loaded;
       graph.question(q);
       const payloadHash = sha256(canonical({ p, q, operation, payload }));
       const previous = await tx.auditEvent.findFirst({
@@ -143,7 +144,7 @@ export class ResponsesService {
         throw new ConflictException(
           "La pregunta está marcada como no aplica. El analista debe reabrirla antes de aportar.",
         );
-      const result = await work(tx);
+      const result = await work(tx, loaded);
       await tx.auditEvent.create({
         data: {
           organizationId: r.actor.organizationId,
@@ -181,8 +182,7 @@ export class ResponsesService {
       "RESPONSE_DRAFTED",
       d,
       responseView,
-      async (tx) => {
-        const { graph, member } = await loadGraph(tx, this.access, r.actor, p);
+      async (tx, { graph, member }) => {
         const v = graph.view(q);
         if (v.lockVersion !== d.expectedVersion) throw conflict();
         validateAnswer(v.question, d, false);
