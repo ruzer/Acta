@@ -14,6 +14,16 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Prueba exacta del primer autoguardado.** La comprobación en navegador detiene el reloj antes de escribir y verifica que no se guarde a los 7.999 ms y sí a los 8.000 ms. Se conserva la revisión de accesibilidad; no cambia el funcionamiento del guardado.
 
+- **Zoom sin espacio de teclado.** Al ampliar la respuesta con un gesto de pellizco, el pie conserva su posición y no agrega el espacio reservado para el teclado; el teclado sigue dejando visible el campo.
+
+- **Prueba de ayuda sin confundir administración con revisión.** La comprobación acepta decisiones sobre fechas, participantes y publicación, y aclaraciones a Sistemas; sigue detectando atribuciones de revisión a Administración.
+
+- **Guardado manual comprobado tras un fallo automático.** Se amplían las pruebas del comportamiento existente para verificar que se reintente con la edición más reciente y que un segundo fallo conserve el texto con un aviso claro; no cambia el funcionamiento del guardado.
+
+### Added
+
+- **Aviso de almacenamiento identificado.** Se documenta GO-2026-5932 en OpenPGP, incluido en una dependencia de VersityGW pero no importado por su binario, y una revisión propuesta para el propietario. No se cambia el proveedor ni se excluye el aviso del escáner.
+
 ## [0.12.0] - 2026-11-20
 
 Seguimiento de participación, plazos, autoguardado, plantillas y ayuda para el piloto,
