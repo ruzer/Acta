@@ -233,7 +233,11 @@ it("Mi trabajo y Participación coinciden con el mismo conjunto: No aplica con e
   ]);
 });
 
-it("Hola usa las mismas cifras sin pedir fechas ni nuevas lecturas", async () => {
+it("Hola usa las mismas cifras y consulta el plazo una vez por proyecto", async () => {
+  vi.mocked(exchangeRequest).mockResolvedValue({
+    responseDueAt: null,
+    lockVersion: 0,
+  } as never);
   const { personal } = fixture();
   const project: ProjectView = {
     id: "p",
@@ -261,7 +265,11 @@ it("Hola usa las mismas cifras sin pedir fechas ni nuevas lecturas", async () =>
   expect(vi.mocked(api).mock.calls.map(([key]) => key)).toEqual([
     "personalProject",
   ]);
-  expect(exchangeRequest).not.toHaveBeenCalled();
+  expect(exchangeRequest).toHaveBeenCalledTimes(1);
+  expect(vi.mocked(exchangeRequest).mock.calls[0]?.slice(0, 2)).toEqual([
+    "p",
+    "response-deadline",
+  ]);
 });
 
 it("el resumen compacto también excluye No aplica", async () => {

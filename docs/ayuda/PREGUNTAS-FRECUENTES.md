@@ -90,7 +90,7 @@ Más información: [Problemas al guardar](SOLUCION-DE-PROBLEMAS.md#respuestas-y-
 ### ¿La fecha límite impide responder después?
 Aplica a: Participante, Administración y Analista.
 
-La fecha límite informa del plazo previsto; Acta permite guardar y enviar después. La institución puede tener acuerdos propios sobre entregas tardías. Consulta esos acuerdos al coordinador.
+En **Hola**, cada proyecto muestra su fecha límite si está disponible. Puedes seguir respondiendo después del plazo. La institución puede tener acuerdos propios sobre entregas tardías. Consulta esos acuerdos al coordinador.
 
 Más información: [Fecha límite](GLOSARIO.md#fecha-límite).
 

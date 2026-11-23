@@ -393,6 +393,18 @@
   justify-content: space-between;
   gap: 12px;
 }
+.participant-home-deadline {
+  min-block-size: 3em;
+  margin: 0;
+  color: var(--ac-muted);
+  font-size: var(--ac-text-ui);
+  line-height: 1.5;
+}
+@media (max-width: 600px) {
+  .participant-home-deadline {
+    min-block-size: 7.5em;
+  }
+}
 .participant-topic {
   overflow: hidden;
   margin-bottom: 8px;

@@ -1,6 +1,10 @@
 import { participantProgress } from "./participant-progress";
-import { ResponseDeadline } from "./ResponseDeadline";
-import { useState } from "react";
+import {
+  ResponseDeadline,
+  responseDeadlineQuery,
+  responseDueLabel,
+} from "./ResponseDeadline";
+import { useState, type ReactNode } from "react";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import {
@@ -12,6 +16,7 @@ import {
   type ProjectView,
 } from "@requirements/contracts";
 import { api } from "../api";
+import { useBranding } from "../branding";
 import { Button, EmptyState, ErrorState, Input, LoadingState } from "../ui";
 import {
   ParticipantBadge,
@@ -105,7 +110,9 @@ export function ParticipantHome({
       />
       {entries.length ? (
         entries.map((p) => (
-          <ProjectWork key={p.id} projectId={p.id} data={p.data} />
+          <ProjectWork key={p.id} projectId={p.id} data={p.data}>
+            <HomeResponseDeadline projectId={p.id} />
+          </ProjectWork>
         ))
       ) : (
         <EmptyState title="Todavía no tienes preguntas asignadas">
@@ -113,6 +120,29 @@ export function ParticipantHome({
         </EmptyState>
       )}
     </div>
+  );
+}
+function HomeResponseDeadline({ projectId }: { projectId: string }) {
+  const query = useQuery({
+    ...responseDeadlineQuery(projectId),
+    staleTime: 60_000,
+    retry: false,
+    retryOnMount: false,
+    refetchOnMount: (query) => query.state.status !== "error",
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  const { timezone } = useBranding();
+  const due = query.error ? null : query.data?.responseDueAt;
+  return (
+    <p className="participant-home-deadline" aria-hidden={!due || undefined}>
+      {due && (
+        <>
+          {responseDueLabel(due, timezone)}. Puedes seguir respondiendo después
+          del plazo.
+        </>
+      )}
+    </p>
   );
 }
 export function Welcome({
@@ -263,11 +293,13 @@ export function ProjectWork({
   projectId,
   data,
   showHeading = true,
+  children,
 }: {
   projectId: string;
   data: PersonalProjectView;
   /** The page of a single project already names it; the list keeps an unseen heading. */
   showHeading?: boolean;
+  children?: ReactNode;
 }) {
   const [search, setSearch] = useState(""),
     [filter, setFilter] = useState("all"),
@@ -311,6 +343,7 @@ export function ProjectWork({
           </Button>
         )}
       </div>
+      {children}
       {(large || showTools) && (
         <div className="participant-toolbar">
           <Input

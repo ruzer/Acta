@@ -32,11 +32,11 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
               <strong>Iniciar sesión</strong> con la nueva contraseña.
             </li>
             <li>
-              En <strong>Mi trabajo</strong>, revisa cuántas preguntas enviaste;
-              <strong> No aplica</strong> no cuenta. La fecha límite permite
-              responder después. Abre el proyecto y pulsa{" "}
-              <strong>Responder</strong>. Revisa los límites y el contador; no
-              inventes información.
+              En <strong>Hola</strong>, cada proyecto muestra su fecha límite si
+              está disponible. Puedes seguir respondiendo después del plazo.
+              Revisa tu avance; <strong>No aplica</strong> no cuenta. Abre el
+              proyecto y pulsa <strong>Responder</strong>. Revisa los límites y
+              el contador; no inventes información.
             </li>
             <li>
               Acta guarda el borrador tras una pausa. Espera el aviso; aún no lo

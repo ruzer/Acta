@@ -275,3 +275,19 @@ it("el cierre de la guía explica límites y contadores en una página con ocho 
   expect(faq).toContain("Guardando…");
   expect(faq).toContain("Tienes cambios sin guardar");
 });
+
+it("la ayuda y la guía ubican el plazo disponible por proyecto en Hola y permiten responder después", () => {
+  for (const path of [
+    "app/frontend/src/pages/Help.tsx",
+    "docs/pilot/GUIA-PARTICIPANTE.md",
+    `${folder}/PREGUNTAS-FRECUENTES.md`,
+  ]) {
+    const text = compact(read(path));
+    expect(text, path).toContain("Hola");
+    expect(text, path).toContain("cada proyecto");
+    expect(text, path).toContain("si está disponible");
+    expect(text, path).toContain(
+      "Puedes seguir respondiendo después del plazo",
+    );
+  }
+});
