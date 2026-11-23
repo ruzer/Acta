@@ -1,6 +1,15 @@
+import {
+  readEditorLocation,
+  writeEditorLocation,
+} from "./editor/editor-location";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import {
   dashboardView,
   priorities,
@@ -32,13 +41,23 @@ export function Editor() {
   const { projectId = "" } = useParams();
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
   const contextKey = ["questionnaire-context", projectId];
   const savedContext = qc.getQueryData<{
     mode?: number;
     organize?: OrganizeContext;
   }>(contextKey);
+  const locationContext = readEditorLocation(params, savedContext);
   const rememberOrganize = useCallback(
     (organize: OrganizeContext) => {
+      const next = writeEditorLocation(params, locationContext.mode, organize);
+      const current = writeEditorLocation(
+        params,
+        locationContext.mode,
+        locationContext.organize,
+      );
+      if (next.toString() !== current.toString())
+        setParams(next, { replace: true, preventScrollReset: true });
       qc.setQueryData(
         ["questionnaire-context", projectId],
         (previous: { mode?: number } | undefined) => ({
@@ -47,7 +66,14 @@ export function Editor() {
         }),
       );
     },
-    [qc, projectId],
+    [
+      qc,
+      projectId,
+      params,
+      setParams,
+      locationContext.mode,
+      locationContext.organize,
+    ],
   );
   const contributions = useQuery({
     queryKey: ["dashboard", projectId],
@@ -307,17 +333,22 @@ export function Editor() {
         </p>
       )}
       <EditorWorkspace
-        initialMode={savedContext?.mode ?? 1}
-        onModeChange={(mode) =>
+        mode={locationContext.mode}
+        onModeChange={(mode) => {
           qc.setQueryData(
             contextKey,
             (previous: { organize?: OrganizeContext } | undefined) => ({
               ...previous,
               mode,
             }),
-          )
-        }
-        organizeContext={savedContext?.organize}
+          );
+          setParams(
+            writeEditorLocation(params, mode, locationContext.organize),
+            { replace: true, preventScrollReset: true },
+          );
+        }}
+        organizeContext={locationContext.organize}
+        organizeLocation={params.toString()}
         onOrganizeContextChange={rememberOrganize}
         contributionQuestions={contributions.data?.questions}
         contributionsLoading={contributions.isPending}

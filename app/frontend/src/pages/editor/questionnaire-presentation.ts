@@ -1,6 +1,6 @@
 import type { QuestionView } from "@requirements/contracts";
 
-/** View state only. Kept in the authenticated query cache, never persisted. */
+/** View state only. Filters may use the URL; selection and collapse stay in the authenticated query cache. */
 export type OrganizeContext = {
   topic: string;
   search: string;
