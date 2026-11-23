@@ -740,3 +740,106 @@ test("No autocertificación después de cambiar rol; fuente indirecta tampoco el
     403,
   );
 });
+
+test("F4: los filtros de revisión pertenecen al proyecto elegido sin ocultar temas homónimos", async () => {
+  const fixtures = [];
+  for (const [index, person] of [stakeholder, other].entries()) {
+    const p = await ok("/projects", {
+      session: admin,
+      method: "POST",
+      body: {
+        externalId: `FILTER-${index}`,
+        name: `Proyecto filtros ${index}`,
+        description: "Datos ficticios",
+      },
+    });
+    await ok(`/projects/${p.id}/members`, {
+      session: admin,
+      method: "POST",
+      body: {
+        userId: analyst.user.id,
+        role: "ANALYST",
+        areaId: null,
+        active: true,
+      },
+    });
+    const a = await ok("/areas", {
+      session: admin,
+      method: "POST",
+      body: { code: `FILTER-${index}`, name: `Área filtros ${index}` },
+    });
+    await ok(`/projects/${p.id}/members`, {
+      session: admin,
+      method: "POST",
+      body: {
+        userId: person.user.id,
+        role: "STAKEHOLDER",
+        areaId: a.id,
+        active: true,
+      },
+    });
+    const sections = [];
+    for (let n = 0; n < (index === 0 ? 2 : 1); n++) {
+      sections.push(
+        await ok(`/projects/${p.id}/sections`, {
+          method: "POST",
+          body: {
+            externalId: `TEMA-${n}`,
+            title: "Servicios y atención",
+            order: n,
+          },
+        }),
+      );
+    }
+    await ok(`/projects/${p.id}/questions`, {
+      method: "POST",
+      body: {
+        externalId: "Q-1",
+        sectionId: sections[0].id,
+        title: "Pregunta ficticia",
+        question: "¿Cómo se registra una solicitud?",
+        type: "SHORT_TEXT",
+        required: true,
+        priority: "P1",
+        responsibleAreaId: a.id,
+        order: 0,
+      },
+    });
+    fixtures.push({ p, a, sections, person });
+  }
+  for (const { p, a, sections, person } of fixtures) {
+    const { filters } = await ok(`/review?projectId=${p.id}`);
+    assert.deepEqual(
+      filters.sections.map((s) => s.id).sort(),
+      sections.map((s) => s.id).sort(),
+    );
+    assert.equal(
+      new Set(filters.sections.map((s) => s.name)).size,
+      sections.length,
+      "Los temas distintos conservan sus IDs y nombres distinguibles",
+    );
+    assert.deepEqual(
+      filters.areas.map((x) => x.id),
+      [a.id],
+    );
+    assert.deepEqual(
+      filters.participants.map((x) => x.id),
+      [person.user.id],
+    );
+    assert.ok(
+      fixtures.every((x) => filters.projects.some((y) => y.id === x.p.id)),
+      "El selector de proyectos conserva los autorizados",
+    );
+  }
+  const all = await ok("/review");
+  assert.ok(
+    fixtures.every((f) =>
+      f.sections.every((s) => all.filters.sections.some((x) => x.id === s.id)),
+    ),
+  );
+  const denied = await ok(`/review?projectId=${randomUUID()}`);
+  assert.deepEqual(denied.filters.sections, []);
+  assert.deepEqual(denied.filters.areas, []);
+  assert.deepEqual(denied.filters.participants, []);
+  assert.deepEqual(denied.items, []);
+});

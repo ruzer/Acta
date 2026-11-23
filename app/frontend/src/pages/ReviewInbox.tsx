@@ -21,7 +21,9 @@ export function ReviewInbox() {
     if (value) next.set(key, value);
     else next.delete(key);
     next.delete("page");
-    if (key === "projectId") next.delete("sectionId");
+    if (key === "projectId")
+      for (const dependent of ["sectionId", "areaId", "participantId"])
+        next.delete(dependent);
     setParams(next);
   }
   return (

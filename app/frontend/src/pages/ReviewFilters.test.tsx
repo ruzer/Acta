@@ -85,3 +85,25 @@ it("conserva los filtros y el foco mientras llega la nueva lista", async () => {
   expect(api).toHaveBeenCalledTimes(2);
   expect(project).toHaveFocus();
 });
+
+it("al cambiar proyecto limpia opciones dependientes y página, conservando estado y prioridad", async () => {
+  vi.mocked(api).mockResolvedValue(result);
+  setup(
+    `?projectId=${p1}&sectionId=${section}&areaId=${area}&participantId=${person}&status=PARTIAL&priority=P1&page=3`,
+  );
+  fireEvent.change(await screen.findByLabelText("Proyecto"), {
+    target: { value: p2 },
+  });
+  await waitFor(() => expect(api).toHaveBeenCalledTimes(2));
+  const input = vi.mocked(api).mock.calls[1]![2] as Record<string, string>;
+  expect(input).toMatchObject({
+    projectId: p2,
+    status: "PARTIAL",
+    priority: "P1",
+  });
+  for (const key of ["sectionId", "areaId", "participantId", "page"])
+    expect(input).not.toHaveProperty(key);
+  expect(screen.getByLabelText("Ruta de prueba")).toHaveTextContent(
+    `projectId=${p2}`,
+  );
+});

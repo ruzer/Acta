@@ -388,6 +388,11 @@ export class ReviewReadService {
           },
         });
         const projectIds = projects.map((p) => p.id);
+        // Narrow options to the selected authorized project, never to an
+        // arbitrary project ID supplied by the client.
+        const optionProjectIds = d.projectId
+          ? projectIds.filter((id) => id === d.projectId)
+          : projectIds;
         const where: Prisma.QuestionWhereInput = {
           projectId: { in: projectIds },
           publication: "PUBLISHED",
@@ -451,20 +456,20 @@ export class ReviewReadService {
               },
             }),
             tx.section.findMany({
-              where: { projectId: { in: projectIds } },
+              where: { projectId: { in: optionProjectIds } },
               orderBy: { order: "asc" },
             }),
             tx.area.findMany({
               where: {
                 organizationId: actor.organizationId,
                 Question_responsibleArea: {
-                  some: { projectId: { in: projectIds } },
+                  some: { projectId: { in: optionProjectIds } },
                 },
               },
             }),
             tx.projectMember.findMany({
               where: {
-                projectId: { in: projectIds },
+                projectId: { in: optionProjectIds },
                 active: true,
                 role: "STAKEHOLDER",
               },
@@ -520,6 +525,15 @@ export class ReviewReadService {
             };
           }),
         );
+        const sectionNameCounts = new Map<string, number>();
+        for (const section of sections)
+          sectionNameCounts.set(
+            section.title,
+            (sectionNameCounts.get(section.title) ?? 0) + 1,
+          );
+        const projectNames = new Map(
+          projects.map((project) => [project.id, project.name]),
+        );
         return serialize(C.reviewInboxView, {
           items,
           total,
@@ -527,7 +541,15 @@ export class ReviewReadService {
           pageSize: d.pageSize,
           filters: {
             projects: projects.map((p) => ({ id: p.id, name: p.name })),
-            sections: sections.map((s) => ({ id: s.id, name: s.title })),
+            sections: sections.map((s) => ({
+              id: s.id,
+              // Titles are not unique. Distinguish real topics instead of
+              // dropping IDs and making their questions impossible to filter.
+              name:
+                (sectionNameCounts.get(s.title) ?? 0) > 1
+                  ? `${s.title} — ${s.externalId}${d.projectId ? "" : ` · ${projectNames.get(s.projectId)}`}`
+                  : s.title,
+            })),
             areas: areas.map((a) => ({ id: a.id, name: a.name })),
             participants: [
               ...new Map(
