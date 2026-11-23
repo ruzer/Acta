@@ -1,5 +1,5 @@
 import { AnalystStatus } from "./AnalystVisual";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
 import { priorities, reviewStates } from "@requirements/contracts";
 import { api } from "../api";
@@ -14,6 +14,7 @@ export function ReviewInbox() {
     queryKey: ["review-inbox", input],
     queryFn: () => api("listReviewInbox", {}, input),
     staleTime: 0,
+    placeholderData: keepPreviousData,
   });
   function filter(key: string, value: string) {
     const next = new URLSearchParams(params);
@@ -88,95 +89,104 @@ export function ReviewInbox() {
           Limpiar filtros
         </Button>
       )}
-      {q.isPending ? (
-        <LoadingState />
-      ) : q.error ? (
-        <ErrorState error={q.error} retry={() => void q.refetch()} />
-      ) : (
-        <>
-          <p role="status">
-            {plural(
-              q.data.total,
-              "pregunta encontrada",
-              "preguntas encontradas",
+      <section
+        className="review-results"
+        aria-label="Resultados de revisión"
+        aria-busy={q.isFetching}
+      >
+        {q.isPending ? (
+          <LoadingState />
+        ) : q.error ? (
+          <ErrorState error={q.error} retry={() => void q.refetch()} />
+        ) : (
+          <>
+            <p role="status">
+              {plural(
+                q.data.total,
+                "pregunta encontrada",
+                "preguntas encontradas",
+              )}
+            </p>
+            {q.data.items.length === 0 ? (
+              <EmptyState title="No hay preguntas para estos filtros">
+                Las preguntas publicadas de los proyectos donde eres analista
+                aparecerán aquí.
+              </EmptyState>
+            ) : (
+              <ul className="review-inbox">
+                {q.data.items.map((item) => (
+                  <li key={item.questionId}>
+                    <p className="eyebrow">
+                      {item.projectName} · {item.sectionTitle}
+                    </p>
+                    <h2>
+                      <Link
+                        to={`/projects/${item.projectId}/review/${item.questionId}`}
+                        state={{ reviewSearch: params.toString() }}
+                      >
+                        {item.question}
+                      </Link>
+                    </h2>
+                    <div className="actions">
+                      <AnalystStatus status={item.status} />
+                      <span className="av-metadata">
+                        Prioridad {item.priority}
+                      </span>
+                      <span className="av-metadata">{item.areaName}</span>
+                    </div>
+                    <p>
+                      {item.respondents.length
+                        ? "Respondieron: " +
+                          item.respondents
+                            .map((r) => `${r.displayName} (${r.areaName})`)
+                            .join(", ")
+                        : "Aún no hay respuestas enviadas."}
+                    </p>
+                    <p className="hint">
+                      Última aportación: {dateText(item.lastContributionAt)} ·{" "}
+                      {item.hasEvidence ? "Con evidencia" : "Sin evidencia"}
+                      {item.openClarifications > 0
+                        ? ` · ${item.openClarifications} aclaraciones abiertas`
+                        : ""}
+                    </p>
+                  </li>
+                ))}
+              </ul>
             )}
-          </p>
-          {q.data.items.length === 0 ? (
-            <EmptyState title="No hay preguntas para estos filtros">
-              Las preguntas publicadas de los proyectos donde eres analista
-              aparecerán aquí.
-            </EmptyState>
-          ) : (
-            <ul className="review-inbox">
-              {q.data.items.map((item) => (
-                <li key={item.questionId}>
-                  <p className="eyebrow">
-                    {item.projectName} · {item.sectionTitle}
-                  </p>
-                  <h2>
-                    <Link
-                      to={`/projects/${item.projectId}/review/${item.questionId}`}
-                      state={{ reviewSearch: params.toString() }}
-                    >
-                      {item.question}
-                    </Link>
-                  </h2>
-                  <div className="actions">
-                    <AnalystStatus status={item.status} />
-                    <span className="av-metadata">
-                      Prioridad {item.priority}
-                    </span>
-                    <span className="av-metadata">{item.areaName}</span>
-                  </div>
-                  <p>
-                    {item.respondents.length
-                      ? "Respondieron: " +
-                        item.respondents
-                          .map((r) => `${r.displayName} (${r.areaName})`)
-                          .join(", ")
-                      : "Aún no hay respuestas enviadas."}
-                  </p>
-                  <p className="hint">
-                    Última aportación: {dateText(item.lastContributionAt)} ·{" "}
-                    {item.hasEvidence ? "Con evidencia" : "Sin evidencia"}
-                    {item.openClarifications > 0
-                      ? ` · ${item.openClarifications} aclaraciones abiertas`
-                      : ""}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-          <div className="actions">
-            <Button
-              tone="secondary"
-              disabled={q.data.page <= 1}
-              onClick={() => {
-                const next = new URLSearchParams(params);
-                next.set("page", String(q.data.page - 1));
-                setParams(next);
-              }}
-            >
-              Anterior
-            </Button>
-            <span>
-              Página {q.data.page} de{" "}
-              {Math.max(1, Math.ceil(q.data.total / q.data.pageSize))}
-            </span>
-            <Button
-              tone="secondary"
-              disabled={q.data.page * q.data.pageSize >= q.data.total}
-              onClick={() => {
-                const next = new URLSearchParams(params);
-                next.set("page", String(q.data.page + 1));
-                setParams(next);
-              }}
-            >
-              Siguiente
-            </Button>
-          </div>
-        </>
-      )}
+            <div className="actions">
+              <Button
+                tone="secondary"
+                disabled={q.isPlaceholderData || q.data.page <= 1}
+                onClick={() => {
+                  const next = new URLSearchParams(params);
+                  next.set("page", String(q.data.page - 1));
+                  setParams(next);
+                }}
+              >
+                Anterior
+              </Button>
+              <span>
+                Página {q.data.page} de{" "}
+                {Math.max(1, Math.ceil(q.data.total / q.data.pageSize))}
+              </span>
+              <Button
+                tone="secondary"
+                disabled={
+                  q.isPlaceholderData ||
+                  q.data.page * q.data.pageSize >= q.data.total
+                }
+                onClick={() => {
+                  const next = new URLSearchParams(params);
+                  next.set("page", String(q.data.page + 1));
+                  setParams(next);
+                }}
+              >
+                Siguiente
+              </Button>
+            </div>
+          </>
+        )}
+      </section>
     </div>
   );
 }
