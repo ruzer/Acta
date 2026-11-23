@@ -847,6 +847,11 @@
   }
 }
 @media (max-width: 600px) {
+  .acta-participant input:not([type="checkbox"]):not([type="radio"]),
+  .acta-participant textarea,
+  .acta-participant select {
+    font-size: 16px;
+  }
   .acta-participant .participant-answer-card h1,
   .acta-participant .participant-wide h1 {
     font-size: 23px;
