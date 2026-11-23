@@ -6,34 +6,20 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
-### Changed
-
-- **Menos lecturas al guardar borradores.** Se reutiliza la carga inicial de la respuesta y se consulta la cobertura de participantes en conjunto, sin volver a cargar un grafo completo por persona. Se conserva el recálculo completo de estados, las consultas solicitadas, los permisos y los límites de conexión.
-
-### Fixed
-
-- **Prueba exacta del primer autoguardado.** La comprobación en navegador detiene el reloj antes de escribir y verifica que no se guarde a los 7.999 ms y sí a los 8.000 ms. Se conserva la revisión de accesibilidad; no cambia el funcionamiento del guardado.
-
-- **Zoom sin espacio de teclado.** Al ampliar la respuesta con un gesto de pellizco, el pie conserva su posición y no agrega el espacio reservado para el teclado; el teclado sigue dejando visible el campo.
-
-- **Prueba de ayuda sin confundir administración con revisión.** La comprobación acepta decisiones sobre fechas, participantes y publicación, y aclaraciones a Sistemas; sigue detectando atribuciones de revisión a Administración.
-
-- **Guardado manual comprobado tras un fallo automático.** Se amplían las pruebas del comportamiento existente para verificar que se reintente con la edición más reciente y que un segundo fallo conserve el texto con un aviso claro; no cambia el funcionamiento del guardado.
-
-### Added
-
-- **Aviso de almacenamiento identificado.** Se documenta GO-2026-5932 en OpenPGP, incluido en una dependencia de VersityGW pero no importado por su binario, y una revisión propuesta para el propietario. No se cambia el proveedor ni se excluye el aviso del escáner.
-
-## [0.12.0] - 2026-11-20
+## [0.12.0] - 2026-11-22
 
 Seguimiento de participación, plazos, autoguardado, plantillas y ayuda para el piloto,
 integrados en los PR [#137](https://github.com/ruzer/Acta/pull/137),
 [#140](https://github.com/ruzer/Acta/pull/140),
 [#141](https://github.com/ruzer/Acta/pull/141),
 [#143](https://github.com/ruzer/Acta/pull/143),
-[#152](https://github.com/ruzer/Acta/pull/152) y
-[#153](https://github.com/ruzer/Acta/pull/153), más el pulido final de esta candidata.
-Las [notas de preparación](docs/releases/v0.12.0.md) explican la actualización,
+[#152](https://github.com/ruzer/Acta/pull/152),
+[#153](https://github.com/ruzer/Acta/pull/153),
+[#154](https://github.com/ruzer/Acta/pull/154),
+[#155](https://github.com/ruzer/Acta/pull/155),
+[#156](https://github.com/ruzer/Acta/pull/156) y
+[#157](https://github.com/ruzer/Acta/pull/157).
+Las [notas de la versión](docs/releases/v0.12.0.md) explican la actualización,
 la migración aditiva y los límites de la evidencia. La publicación requiere la
 aprobación del propietario.
 
@@ -43,7 +29,7 @@ aprobación del propietario.
 
 - **Borradores con autoguardado y recuperación.** Los cambios se guardan tras una pausa al escribir, con un máximo de un intento automático cada 30 segundos y sin solicitudes simultáneas. El texto pendiente puede recuperarse en la misma pestaña; la copia se limita a la cuenta y pregunta actuales y se retira al guardar, enviar o terminar la sesión.
 
-- **Medición reproducible de guardados simultáneos.** Un ensayo local crea 300 preguntas y 50 participantes ficticios, informa latencias y errores reales y comprueba por qué debe conservarse el recálculo de revisión al guardar borradores. La primera medición registra un límite de capacidad; no acredita operación institucional con esa concurrencia.
+- **Medición reproducible de guardados simultáneos.** Un ensayo local crea 300 preguntas y 50 participantes ficticios, informa latencias y errores reales y comprueba por qué debe conservarse el recálculo de revisión al guardar borradores. La primera medición registró fallos bajo esa carga; no acredita operación institucional con esa concurrencia.
 
 - **Entregables a la vista.** Atención y Decisiones ofrecen Informe para imprimir y Exportar; una decisión vigente anuncia que el informe está listo. La plantilla y el CSV descargados usan UTF-8 con BOM y encabezados en español, sin cambiar la salida técnica predeterminada para integraciones.
 
@@ -57,9 +43,15 @@ aprobación del propietario.
 
 - **Comprobación de los pendientes menores.** Se conserva el respaldo de nombres ausentes en exportes históricos y se fija una prueba de la columna «Área» en Miembros; ambos comportamientos ya estaban presentes en la base.
 
-- **Medición de guardados con ritmo espaciado.** El laboratorio puede medir dos rondas de 50 personas, con un inicio cada 0,6 segundos; informa éxitos, fallos y latencias sin optimizar ni cambiar la revisión.
+- **Medición de guardados con ritmo espaciado.** El laboratorio puede medir dos rondas de 50 personas, con un inicio cada 0,6 segundos; informa éxitos, fallos y latencias. En ese ensayo inicial no se optimizó ni cambió la revisión.
 
 - **Centro de ayuda versionado.** Glosario, solución de problemas y preguntas frecuentes por audiencia, con guías enlazadas, prueba anti-deriva y mapa `llms.txt` para consultar las fuentes sin duplicarlas.
+
+- **Aviso de almacenamiento identificado.** Se documenta GO-2026-5932 en OpenPGP, incluido en una dependencia de VersityGW pero no importado por su binario, y una revisión propuesta para el propietario. No se cambia el proveedor ni se excluye el aviso del escáner.
+
+### Changed
+
+- **Menos lecturas al guardar borradores.** Se reutiliza la carga inicial de la respuesta y se consulta la cobertura de participantes en conjunto, sin volver a cargar un grafo completo por persona. Se conserva el recálculo completo de estados, las consultas solicitadas, los permisos y los límites de conexión. En las mediciones espaciadas mejoró el guardado, pero las ráfagas de 50 simultáneos todavía tuvieron 56 fallos de 150 intentos; no se acredita capacidad institucional.
 
 ### Fixed
 
@@ -81,7 +73,7 @@ aprobación del propietario.
 
 - **Reintentos de autoguardado con pausa creciente.** Tras fallar, los intentos se espacian a 60, 120 y hasta 300 segundos; un guardado correcto o una acción manual recupera el intervalo de 30 segundos, sin perder el texto pendiente.
 
-- **Guardar o enviar con un solo clic tras un fallo automático.** La acción manual espera el intento pendiente y realiza su propio guardado si falló, conservando la versión y el contenido actuales.
+- **Guardar o enviar con un solo clic tras un fallo automático.** La acción manual espera el intento pendiente y realiza su propio guardado si falló, conservando la versión y el contenido actuales. Las pruebas ampliadas verifican que se reintente con la edición más reciente y que un segundo fallo conserve el texto con un aviso claro; esta ampliación no cambia el comportamiento.
 
 - **Recordatorios individuales.** Cada persona con pendientes tiene un botón para copiar solo su recordatorio; si no se puede usar el portapapeles, el texto queda seleccionado para copiarlo.
 
@@ -105,7 +97,7 @@ aprobación del propietario.
 
 - **Exportaciones legibles en la Bitácora.** El tipo de archivo y su alcance se muestran en palabras claras; sus valores originales siguen disponibles al abrir el identificador de exportación.
 
-- **Ayuda comprobada para el piloto.** Se actualiza su referencia de verificación y una prueba evita volver a atribuir acciones de revisión a Administración del proyecto.
+- **Ayuda comprobada para el piloto.** Se actualiza su referencia de verificación. La prueba detecta atribuciones incorrectas de revisión a Administración, distingue las frases negativas y acepta decisiones sobre fechas, participantes y publicación, y aclaraciones a Sistemas. No cambia permisos del producto.
 
 - **Campo visible al responder en móvil.** El formulario reserva espacio cuando se reduce el área visible y desplaza el campo enfocado por encima de las acciones; el pie deja de permanecer fijo con poca altura, también ante el teclado.
 
@@ -113,7 +105,9 @@ aprobación del propietario.
 
 - **Conflicto explicado en la consulta.** La nota de solo lectura conserva la explicación del conflicto abierto, sin conceder acciones de revisión a otros perfiles.
 
-- **Permisos descritos con precisión en la ayuda.** La comprobación de las guías reconoce más atribuciones incorrectas de revisión a Administración y distingue las frases que explican sus límites.
+- **Prueba exacta del primer autoguardado.** La comprobación en navegador detiene el reloj antes de escribir y verifica que no se guarde a los 7.999 ms y sí a los 8.000 ms. Se conserva la revisión de accesibilidad; no cambia el funcionamiento del guardado.
+
+- **Zoom sin espacio de teclado.** Al ampliar la respuesta con un gesto de pellizco, el pie conserva su posición y no agrega el espacio reservado para el teclado; el teclado sigue dejando visible el campo.
 
 ### Security
 
