@@ -1,10 +1,10 @@
 # Guía de Participante
 
-Ten listo tu acceso y un archivo ficticio autorizado. Por invitación, usa [esta guía](../EXTERNAL-INVITATIONS.md).
+Ten tu acceso y un archivo ficticio autorizado. Por invitación, usa [esta guía](../EXTERNAL-INVITATIONS.md).
 
 1. Abre la dirección recibida. Escribe **Usuario** y **Contraseña**; pulsa **Iniciar sesión**. No compartas tu acceso.
 2. En **Cambia tu contraseña temporal**, llena **Contraseña actual**, **Nueva contraseña** y **Repetir nueva contraseña**. Pulsa **Actualizar contraseña**. Vuelve a **Iniciar sesión** con la nueva contraseña.
-3. En **Mi trabajo**, revisa cuántas preguntas enviaste; **No aplica** no cuenta. La fecha límite permite responder después. Abre el proyecto y pulsa **Responder**. Lee su ayuda; no inventes información.
+3. En **Mi trabajo**, revisa cuántas preguntas enviaste; **No aplica** no cuenta. La fecha límite permite responder después. Abre el proyecto y pulsa **Responder**. Revisa los límites y el contador; no inventes información.
 4. Acta guarda el borrador tras una pausa. Espera el aviso; aún no lo envías. **Guardar y salir** permite continuar después. Si recargas con texto pendiente, elige **Restaurar texto de esta pestaña**; **Continuar** permite retomar. Si te falta información, pulsa **Necesito consultar esto**. La pregunta anterior queda **Por consultar**. Puedes pulsar **Deshacer** durante ocho segundos; tu borrador se conserva.
 5. Si necesitas un comprobante, abre **Adjuntar evidencia**, usa **Seleccionar evidencia** y pulsa **Adjuntar al borrador**. Espera **Evidencia adjunta al borrador. Todavía no se ha enviado.** Revisa el nombre del archivo.
 6. Cuando termines, pulsa **Enviar respuesta**. Busca el aviso **Respuesta enviada**; Acta puede abrir la siguiente pregunta. Cada una se envía por separado.

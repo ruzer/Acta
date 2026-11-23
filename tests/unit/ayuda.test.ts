@@ -258,3 +258,20 @@ it("la ayuda y la guía aclaran que No aplica queda fuera del avance", () => {
   expect(faq).toContain("Pendientes sin borrador");
   expect(faq).toContain("no se cuenta dos veces");
 });
+
+it("el cierre de la guía explica límites y contadores en una página con ocho pasos", () => {
+  for (const path of [
+    "app/frontend/src/pages/Help.tsx",
+    "docs/pilot/GUIA-PARTICIPANTE.md",
+  ]) {
+    const text = compact(read(path));
+    expect(text, path).toContain("límites y el contador");
+  }
+  const guide = read("docs/pilot/GUIA-PARTICIPANTE.md");
+  expect(guide.trim().split(/\s+/).length).toBeLessThanOrEqual(350);
+  expect([...guide.matchAll(/^\d+\. /gm)]).toHaveLength(8);
+  const faq = read(`${folder}/PREGUNTAS-FRECUENTES.md`);
+  expect(faq).toContain("Cambios sin guardar");
+  expect(faq).toContain("Guardando…");
+  expect(faq).toContain("Tienes cambios sin guardar");
+});

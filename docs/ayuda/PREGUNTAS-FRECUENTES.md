@@ -55,7 +55,7 @@ Más información: [Guía de Participante](../pilot/GUIA-PARTICIPANTE.md).
 ### ¿Por qué el avance no cuenta todas las preguntas que veo?
 Aplica a: Participante.
 
-Solo cuenta preguntas asignadas y aplicables. **No aplica** queda fuera del avance, igual que una pregunta cuya condición todavía no se cumple. La barra distingue **Enviadas**, **Borradores sin enviar** y **Pendientes sin borrador**. Un borrador sobre una pregunta ya enviada se explica aparte: no se cuenta dos veces. La posición de la pregunta indica dónde estás; el número de enviadas indica tu avance.
+Solo cuenta preguntas asignadas y aplicables. **No aplica** queda fuera del avance, igual que una pregunta cuya condición todavía no se cumple. La barra distingue **Enviadas**, **Borradores sin enviar** y **Pendientes sin borrador**. Un borrador sobre una pregunta ya enviada se explica aparte: no se cuenta dos veces. La posición de la pregunta indica dónde estás; el número de enviadas indica tu avance. El total puede cambiar cuando se habilita un seguimiento.
 
 Más información: [Guía de Participante](../pilot/GUIA-PARTICIPANTE.md).
 
@@ -76,7 +76,7 @@ Más información: [Guía de Participante](../pilot/GUIA-PARTICIPANTE.md); si en
 ### ¿Acta guarda mientras escribo?
 Aplica a: Participante.
 
-Acta intenta guardar el borrador después de una pausa al escribir y muestra su estado. Si el intento falla, conserva el texto visible y espacia los reintentos; no debes asumir que el borrador ya está en el servicio. **Guardar y salir** permite intentar el guardado de forma explícita.
+Acta intenta guardar el borrador después de una pausa al escribir. **Cambios sin guardar** indica texto pendiente y **Guardando…**, un intento en curso. Si falla, conserva el texto visible; revisa la causa antes de asumir que llegó al servicio. **Guardar y salir** también está en el diálogo **Tienes cambios sin guardar**: guarda antes de salir y conserva la página si falla. **Volver al borrador** cancela la salida; **Salir sin guardar** sale sin confirmar los cambios pendientes.
 
 Más información: [Guía de Participante](../pilot/GUIA-PARTICIPANTE.md).
 
@@ -86,13 +86,6 @@ Aplica a: Participante.
 Si Acta encuentra una copia pendiente de esa pestaña, ofrece **Restaurar texto de esta pestaña**. La copia es local y no equivale a una respuesta enviada ni a un respaldo garantizado. Recupera el texto, revísalo y confirma que se guarde; no cierres una página con error creyendo que el servicio lo recibió.
 
 Más información: [Problemas al guardar](SOLUCION-DE-PROBLEMAS.md#respuestas-y-archivos).
-
-### ¿Por qué veo menos preguntas en el contador que en los temas?
-Aplica a: Participante.
-
-El avance cuenta las preguntas que aplican a tus respuestas actuales. Algunos seguimientos pueden aparecer en los temas como dependientes de una respuesta anterior y no contar todavía. El contador puede cambiar cuando un seguimiento se habilita.
-
-Más información: [Mi trabajo](GLOSARIO.md#mi-trabajo).
 
 ### ¿La fecha límite impide responder después?
 Aplica a: Participante, Administración y Analista.
