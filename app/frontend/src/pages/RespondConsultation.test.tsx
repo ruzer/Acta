@@ -9,9 +9,17 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
 import "@testing-library/jest-dom/vitest";
-import type { ResponseView } from "@requirements/contracts";
+import {
+  personalProjectView,
+  type PersonalProjectView,
+  type ResponseView,
+} from "@requirements/contracts";
 import { api, ApiFailure } from "../api";
 import { Respond } from "./Respond";
 import { ParticipantNotice } from "./ParticipantFlow";
@@ -180,7 +188,11 @@ it("identifica la pregunta anterior y deshace con una sola escritura explícita,
   expect(
     vi.mocked(api).mock.calls.filter(([key]) => key !== "saveDraft"),
   ).toHaveLength(readsBefore);
-  expect(invalidation).toHaveBeenLastCalledWith({ queryKey: ["my-work", "p"] });
+  expect(invalidation).toHaveBeenLastCalledWith({
+    queryKey: ["my-work", "p"],
+    exact: true,
+    refetchType: "none",
+  });
 });
 
 it("retira el aviso y Deshacer a los ocho segundos sin hacer otra escritura", async () => {
@@ -430,3 +442,198 @@ it.each(["pagehide", "session-expired", "session-restored", "expiry"])(
     expect(writes()).toHaveLength(0);
   },
 );
+
+const observedQuestionId = "11111111-1111-4111-8111-111111111111";
+const anotherQuestionId = "22222222-2222-4222-8222-222222222222";
+const observedWork = personalProjectView.parse({
+  projectName: "Proyecto ficticio con observador activo",
+  continueQuestionId: anotherQuestionId,
+  progress: {
+    total: 2,
+    enabled: 2,
+    sent: 1,
+    drafts: 2,
+    pending: 1,
+    excluded: 0,
+    undetermined: 0,
+  },
+  sections: [
+    {
+      id: "33333333-3333-4333-8333-333333333333",
+      title: "Tema ficticio",
+      questions: [
+        {
+          id: observedQuestionId,
+          title: "Pregunta por consultar",
+          question: "¿Cuántas solicitudes hay?",
+          currentSubmission: false,
+          hasSubmission: false,
+          applicability: "ENABLED",
+          state: "CONSULTATION",
+          updatedAt: consulting.draft!.updatedAt,
+        },
+        {
+          id: anotherQuestionId,
+          title: "Otro borrador con envío vigente",
+          currentSubmission: true,
+          hasSubmission: true,
+          applicability: "ENABLED",
+          state: "DRAFT",
+          updatedAt: "2026-11-23T12:00:01Z",
+        },
+      ],
+    },
+  ],
+});
+const observedResult: ResponseView = {
+  ...reverted,
+  question: { ...reverted.question, id: observedQuestionId },
+  draft: { ...reverted.draft!, updatedAt: "2026-11-23T12:00:02Z" },
+};
+const expectedWork = {
+  ...observedWork,
+  sections: observedWork.sections.map((section) => ({
+    ...section,
+    questions: section.questions.map((question) =>
+      question.id === observedQuestionId
+        ? {
+            ...question,
+            state: "DRAFT",
+            updatedAt: observedResult.draft!.updatedAt,
+          }
+        : question,
+    ),
+  })),
+};
+async function observeUndo() {
+  vi.useFakeTimers();
+  let finish!: () => void;
+  const read = vi.fn(async (): Promise<PersonalProjectView> => observedWork);
+  vi.mocked(api).mockImplementation(async (key) => {
+    if (key === "personalProject") return (await read()) as never;
+    if (key === "saveDraft")
+      return await new Promise<never>((resolve) => {
+        finish = () => resolve(observedResult as never);
+      });
+    throw new Error(`Llamada inesperada: ${key}`);
+  });
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  client.setQueryData(["my-work", "p"], observedWork);
+  function WorkObserver() {
+    const { data } = useQuery({
+      queryKey: ["my-work", "p"],
+      queryFn: () => api("personalProject", { projectId: "p" }),
+    });
+    return (
+      <p>Estado en Mi trabajo: {data?.sections[0]?.questions[0]?.state}</p>
+    );
+  }
+  const token = registerConsultationUndo("p", observedQuestionId, consulting);
+  const router = createMemoryRouter(
+    [
+      {
+        path: "*",
+        element: (
+          <>
+            <ParticipantNotice />
+            <WorkObserver />
+          </>
+        ),
+      },
+    ],
+    {
+      initialEntries: [
+        { pathname: "/projects/p/work", state: { consultationUndo: token } },
+      ],
+    },
+  );
+  const view = render(
+    <QueryClientProvider client={client}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>,
+  );
+  await act(async () => vi.advanceTimersByTimeAsync(0));
+  expect(read).toHaveBeenCalledTimes(1);
+  return { client, read, finish: () => finish(), ...view };
+}
+
+it.each([50, 150])(
+  "Deshacer termina %d ms después de pulsarlo a los 7.9 s y actualiza el observador activo sin nuevas lecturas",
+  async (delay) => {
+    const { client, read, finish } = await observeUndo();
+    await act(async () => vi.advanceTimersByTimeAsync(7900));
+    fireEvent.click(screen.getByRole("button", { name: "Deshacer" }));
+    expect(writes()).toHaveLength(1);
+    await act(async () => vi.advanceTimersByTimeAsync(delay));
+    if (delay > 100)
+      expect(
+        screen.queryByRole("button", { name: "Deshaciendo…" }),
+      ).not.toBeInTheDocument();
+    await act(async () => {
+      finish();
+      await vi.advanceTimersByTimeAsync(1);
+    });
+    expect(read).toHaveBeenCalledTimes(1);
+    expect(client.getQueryData(["my-work", "p"])).toEqual(expectedWork);
+    expect(screen.getByText("Estado en Mi trabajo: DRAFT")).toBeVisible();
+    expect(writes()).toHaveLength(1);
+    expect(client.getQueryState(["my-work", "p"])?.isInvalidated).toBe(true);
+    if (delay > 100)
+      expect(screen.queryByText(/Deshiciste/)).not.toBeInTheDocument();
+  },
+);
+
+it.each(["session-expired", "session-restored", "pagehide", "unmount"])(
+  "una operación en vuelo no actualiza Mi trabajo después de caducar el aviso y recibir %s",
+  async (event) => {
+    const { client, read, finish, unmount } = await observeUndo();
+    await act(async () => vi.advanceTimersByTimeAsync(7900));
+    fireEvent.click(screen.getByRole("button", { name: "Deshacer" }));
+    await act(async () => vi.advanceTimersByTimeAsync(150));
+    if (event === "unmount") unmount();
+    else act(() => window.dispatchEvent(new Event(event)));
+    await act(async () => {
+      finish();
+      await vi.advanceTimersByTimeAsync(1);
+    });
+    expect(client.getQueryData(["my-work", "p"])).toEqual(observedWork);
+    expect(client.getQueryState(["my-work", "p"])?.isInvalidated).toBe(false);
+    expect(read).toHaveBeenCalledTimes(1);
+    expect(writes()).toHaveLength(1);
+    expect(screen.queryByText(/Deshiciste/)).not.toBeInTheDocument();
+  },
+);
+
+it("una lectura anterior en vuelo no sobrescribe la marca deshecha ni provoca otra lectura", async () => {
+  const { client, read, finish } = await observeUndo();
+  fireEvent.click(screen.getByRole("button", { name: "Deshacer" }));
+  let completeOldRead!: () => void;
+  read.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        completeOldRead = () => resolve(observedWork);
+      }),
+  );
+  let refreshing!: Promise<void>;
+  await act(async () => {
+    refreshing = client.refetchQueries({ queryKey: ["my-work", "p"] });
+    await vi.advanceTimersByTimeAsync(0);
+  });
+  expect(read).toHaveBeenCalledTimes(2);
+  await act(async () => {
+    finish();
+    await vi.advanceTimersByTimeAsync(1);
+  });
+  expect(client.getQueryData(["my-work", "p"])).toEqual(expectedWork);
+  await act(async () => {
+    completeOldRead();
+    await refreshing;
+    await vi.advanceTimersByTimeAsync(1);
+  });
+  expect(client.getQueryData(["my-work", "p"])).toEqual(expectedWork);
+  expect(screen.getByText("Estado en Mi trabajo: DRAFT")).toBeVisible();
+  expect(read).toHaveBeenCalledTimes(2);
+  expect(writes()).toHaveLength(1);
+});

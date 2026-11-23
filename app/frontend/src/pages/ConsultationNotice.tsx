@@ -1,7 +1,11 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import type { ResponseContent, ResponseView } from "@requirements/contracts";
+import type {
+  PersonalProjectView,
+  ResponseContent,
+  ResponseView,
+} from "@requirements/contracts";
 import { api, ApiFailure } from "../api";
 import { Alert, Button } from "../ui";
 import { ParticipantIcon } from "./ParticipantIcon";
@@ -10,7 +14,7 @@ type Undo = {
   active: boolean;
   projectId: string;
   id: string;
-  content: ResponseContent;
+  content: ResponseContent | null;
   expectedVersion: number;
   requestId: string;
   expiresAt: number;
@@ -48,7 +52,10 @@ export function registerConsultationUndo(
   pending.set(token, undo);
   const clear = () => release(token);
   const dispose = (discard: boolean) => {
-    if (discard) undo.active = false;
+    if (discard) {
+      undo.active = false;
+      undo.content = null;
+    }
     window.clearTimeout(timer);
     pending.delete(token);
     cleanupPending.delete(token);
@@ -62,7 +69,8 @@ export function registerConsultationUndo(
 
 export function ConsultationNotice({ token }: { token: string }) {
   const client = useQueryClient();
-  const [undo, setUndo] = useState(() => pending.get(token) ?? null);
+  const [undo] = useState(() => pending.get(token) ?? null);
+  const [visible, setVisible] = useState(!!undo);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
@@ -74,20 +82,24 @@ export function ConsultationNotice({ token }: { token: string }) {
     if (!undo?.active || Date.now() >= undo.expiresAt) {
       alive.current = false;
       release(token);
-      setUndo(null);
+      setVisible(false);
       return;
     }
     alive.current = true;
-    const clear = () => {
+    const expire = () => {
       undo.active = false;
+      undo.content = null;
+      setVisible(false);
+    };
+    const clear = () => {
       alive.current = false;
-      setUndo(null);
+      expire();
     };
     for (const event of clearEvents) window.addEventListener(event, clear);
     // Suscribir antes de entregar el registro; no queda una ventana sin escucha.
     release(token, false);
     const timer = window.setTimeout(
-      clear,
+      expire,
       Math.max(0, undo.expiresAt - Date.now()),
     );
     return () => {
@@ -99,6 +111,7 @@ export function ConsultationNotice({ token }: { token: string }) {
   async function revert() {
     if (
       !undo?.active ||
+      !undo.content ||
       !alive.current ||
       inFlight.current ||
       conflict ||
@@ -110,7 +123,7 @@ export function ConsultationNotice({ token }: { token: string }) {
     setBusy(true);
     setError("");
     try {
-      await api(
+      const result = await api(
         "saveDraft",
         { projectId: undo.projectId, id: undo.id },
         {
@@ -120,7 +133,37 @@ export function ConsultationNotice({ token }: { token: string }) {
         },
       );
       if (!alive.current) return;
-      void client.invalidateQueries({ queryKey: ["my-work", undo.projectId] });
+      const queryKey = ["my-work", undo.projectId];
+      // Una lectura iniciada antes de deshacer no debe restaurar la marca vieja.
+      await client.cancelQueries({ queryKey, exact: true });
+      if (!alive.current) return;
+      const draft = result.draft;
+      if (draft && !draft.consultationRequested)
+        client.setQueryData<PersonalProjectView>(queryKey, (current) =>
+          current
+            ? {
+                ...current,
+                sections: current.sections.map((section) => ({
+                  ...section,
+                  questions: section.questions.map((question) =>
+                    question.id === undo.id && question.state === "CONSULTATION"
+                      ? {
+                          ...question,
+                          state: "DRAFT",
+                          updatedAt: draft.updatedAt,
+                        }
+                      : question,
+                  ),
+                })),
+              }
+            : current,
+        );
+      // Deshacer solo cambia la marca. El resto se reconcilia en la próxima lectura.
+      void client.invalidateQueries({
+        queryKey,
+        exact: true,
+        refetchType: "none",
+      });
       setDone(true);
     } catch (error) {
       if (!alive.current) return;
@@ -135,7 +178,7 @@ export function ConsultationNotice({ token }: { token: string }) {
       if (alive.current) setBusy(false);
     }
   }
-  if (!undo) return null;
+  if (!undo || !visible) return null;
   return (
     <div>
       <div role="status" className="participant-feedback">
