@@ -1,6 +1,10 @@
 import { useSearchParams } from "react-router-dom";
 import type { z } from "zod";
-import type { dashboardView } from "@requirements/contracts";
+import {
+  reviewStates,
+  statusLabels,
+  type dashboardView,
+} from "@requirements/contracts";
 import "../progress-board.css";
 
 const metrics = [
@@ -10,12 +14,41 @@ const metrics = [
   { status: "CONFLICT", label: "Conflictos" },
 ] as const;
 
+// Presentation order only; the backend remains authoritative for each status.
+const stateOrder: Record<(typeof reviewStates)[number], number> = {
+  NOT_REVIEWED: 0,
+  PENDING: 1,
+  PARTIAL: 2,
+  CLARIFICATION_REQUIRED: 3,
+  CONFLICT: 4,
+  ANSWERED: 5,
+  NOT_APPLICABLE: 6,
+  VALIDATED: 7,
+};
+
 export function ProgressBoard({
   data,
 }: {
   data: z.infer<typeof dashboardView>;
 }) {
   const [params, setParams] = useSearchParams();
+  const states = reviewStates
+    .toSorted((a, b) => stateOrder[a] - stateOrder[b])
+    .map((status) => ({
+      status,
+      count: data.states.find((item) => item.status === status)?.count ?? 0,
+    }));
+  const totalQuestions = data.metrics.validation.denominator;
+  let offset = 0;
+  const segments = states.map((state) => {
+    const start = offset;
+    offset += state.count;
+    return {
+      ...state,
+      start: totalQuestions ? start / totalQuestions : 0,
+      ratio: totalQuestions ? state.count / totalQuestions : 0,
+    };
+  });
   function show(status: (typeof metrics)[number]["status"]) {
     const next = new URLSearchParams(params);
     next.set("status", status);
@@ -60,6 +93,39 @@ export function ProgressBoard({
             </button>
           );
         })}
+      </div>
+      <div className="pb-state-summary">
+        {totalQuestions === 0 && <p>Aún no hay preguntas publicadas.</p>}
+        <div
+          className="pb-stack"
+          role="img"
+          aria-label={`${totalQuestions ? `Estados de ${totalQuestions} preguntas` : "No hay preguntas publicadas"}. ${states.map((state) => `${statusLabels[state.status]}: ${state.count}`).join("; ")}.`}
+        >
+          {segments
+            .filter((state) => state.count > 0)
+            .map((state) => (
+              <span
+                key={state.status}
+                className={`pb-stack-segment pb-state pb-state-${state.status}`}
+                style={{
+                  transform: `translateX(${state.start * 100}%) scaleX(${state.ratio})`,
+                }}
+                aria-hidden="true"
+              />
+            ))}
+        </div>
+        <ul className="pb-legend" aria-label="Estados de las preguntas">
+          {states.map((state) => (
+            <li key={state.status}>
+              <span
+                className={`pb-state pb-state-${state.status}`}
+                aria-hidden="true"
+              />
+              <span>{statusLabels[state.status]}</span>
+              <strong>{state.count}</strong>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

@@ -7,6 +7,7 @@ import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import {
   dashboardView,
   reviewStates,
+  statusLabels,
   type ParticipationView,
 } from "@requirements/contracts";
 import fixture from "../../../../tests/fixtures/analyst-visual.json";
@@ -236,3 +237,46 @@ it.each([
     ).toHaveAttribute("aria-pressed", "true");
   },
 );
+
+it("F3.2: todos los estados tienen etiqueta y cifra, desde Sin revisar hasta Validada", async () => {
+  await setup();
+  const legend = screen.getByRole("list", { name: "Estados de las preguntas" });
+  const items = within(legend).getAllByRole("listitem");
+  expect(items).toHaveLength(8);
+  expect(items[0]).toHaveTextContent(statusLabels.NOT_REVIEWED);
+  expect(items[7]).toHaveTextContent(statusLabels.VALIDATED);
+  for (const status of reviewStates) {
+    const item = items.find((li) =>
+      li.textContent?.includes(statusLabels[status]),
+    );
+    expect(item).toHaveTextContent(String(counts[status]));
+  }
+  expect(
+    screen.getByRole("img", { name: /Sin revisar: 4/ }),
+  ).toHaveAccessibleName(/Validada: 12/);
+});
+
+it("F3.2: conserva los ocho estados en cero sin mostrar porcentajes indefinidos", async () => {
+  await setup({
+    data: {
+      ...data,
+      questions: [],
+      metrics: {
+        validation: metric(0, 0),
+        closure: metric(0, 0),
+        submission: metric(0, 0),
+      },
+      states: reviewStates.map((status) => ({ status, count: 0 })),
+    },
+  });
+  expect(screen.getByText("Aún no hay preguntas publicadas.")).toBeVisible();
+  const image = screen.getByRole("img", {
+    name: /^No hay preguntas publicadas/,
+  });
+  expect(image).not.toHaveTextContent(/NaN|Infinity/);
+  const items = within(
+    screen.getByRole("list", { name: "Estados de las preguntas" }),
+  ).getAllByRole("listitem");
+  expect(items).toHaveLength(8);
+  for (const item of items) expect(item).toHaveTextContent("0");
+});
