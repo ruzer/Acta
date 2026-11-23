@@ -1,12 +1,14 @@
 # Centro de ayuda de Acta
 
-Verificado contra Acta v0.12.0 en preparación:
-`ba17ae2d2339880722ad071a89f53b43c6be2f54`, 2026-11-20.
+Referencia de código: Acta v0.12.0,
+`b9cbe64f2ddfcba795bd2f039edb2bfa82f8028c`, revisión documental del 2026-11-22.
 
-El commit indicado incorpora el pulido de respuesta móvil, aclaraciones y
-revisión de solo lectura, y la comprobación de permisos descritos en las guías.
-Es una referencia funcional; no acredita la publicación ni las comprobaciones
-completas de la candidata. Consulta a tu administración si tu pantalla es distinta.
+Incluye el pulido de respuesta móvil, aclaraciones y revisión de solo lectura,
+las pruebas de permisos descritos en las guías y la mejora de guardado.
+La revisión de textos y las pruebas automáticas no sustituyen un recorrido nuevo
+con personas ni acreditan publicación o producción. Consulta las
+[notas y su evidencia](../releases/v0.12.0.md#evidencia) y a tu administración
+si tu pantalla es distinta.
 
 Acta reúne preguntas, respuestas, comprobantes y decisiones de un proyecto.
 Empieza por tu duda. Estas páginas acompañan al código: la versión instalada

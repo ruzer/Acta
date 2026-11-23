@@ -125,7 +125,7 @@ Para preparar la actualización desde v0.11.0, consulta las [notas de v0.12.0](d
 
 La interfaz usa fuentes y recursos locales, sin analytics ni CDN obligatorios. El build descarga dependencias públicas. Un almacenamiento externo recibe objetos únicamente si el operador lo configura. No se promete alta disponibilidad ni compatibilidad con cualquier endpoint S3.
 
-Resultados vigentes: [verificación](docs/VERIFICATION.md); registro histórico: [manifiesto](PUBLIC-SNAPSHOT-MANIFEST.md). No verificados: hardware o virtualización institucional concreta, AWS S3, Ceph, SeaweedFS, multi-node/HA y migración entre proveedores. Recursos mínimos: **No published minimum yet.**
+Verificación y alcance: [verificación](docs/VERIFICATION.md); registro histórico: [manifiesto](PUBLIC-SNAPSHOT-MANIFEST.md). No verificados: hardware o virtualización institucional concreta, AWS S3, Ceph, SeaweedFS, multi-node/HA y migración entre proveedores. Recursos mínimos: **No published minimum yet.**
 
 ## Screenshots
 
@@ -142,7 +142,7 @@ También puedes ver [Organizar](docs/assets/02-editor-organize.png), [Responder]
 
 Acta está diseñado para instalarse en infraestructura propia y adaptarse mediante forks. Las organizaciones pueden mantener personalizaciones y sincronizarse con el upstream conforme a AGPL-3.0-only. Las mejoras genéricas son bienvenidas de regreso mediante Pull Requests: contribuir así ayuda a otras instalaciones y reduce divergencia; no es una obligación de enviar PR atribuida a la licencia.
 
-El upstream oficial es [github.com/ruzer/Acta](https://github.com/ruzer/Acta). Las [notas de v0.12.0 — preparación del piloto](docs/releases/v0.12.0.md) describen la candidata, su actualización y sus límites. Consulta el [changelog](CHANGELOG.md) y las [releases oficiales](https://github.com/ruzer/Acta/releases) para verificar la versión publicada, su commit y la autorización de tu instalación antes de actualizar; una versión en los archivos del repositorio no acredita su publicación.
+El upstream oficial es [github.com/ruzer/Acta](https://github.com/ruzer/Acta). Las [notas de v0.12.0](docs/releases/v0.12.0.md) describen sus cambios, actualización y límites. Consulta el [changelog](CHANGELOG.md) y las [releases oficiales](https://github.com/ruzer/Acta/releases) para verificar la versión publicada, su commit y la autorización de tu instalación antes de actualizar; una versión en los archivos del repositorio no acredita su publicación.
 
 [Gobernanza](GOVERNANCE.md) · [Forks y sincronización](docs/UPSTREAM-FORKS.md) · [Roadmap](ROADMAP.md) · [Soporte comunitario](SUPPORT.md).
 

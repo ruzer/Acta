@@ -90,7 +90,7 @@ VersityGW es un servicio S3 para guardar adjuntos privados. Las descargas pasan 
 5. Verifica salud, login y una descarga conocida. Cambiar código hacia atrás no revierte automáticamente las migraciones; usa una restauración coordinada si hace falta volver.
 
 Para preparar **v0.11.0 → v0.12.0**, consulta las
-[notas de la candidata](releases/v0.12.0.md#actualización-desde-v0110) y el
+[notas de v0.12.0](releases/v0.12.0.md#actualización-desde-v0110) y el
 [ensayo con datos ficticios](UPGRADE-REHEARSAL.md). Hay una migración nueva,
 `202611180001_response_due_at`, que añade una fecha límite vacía a los proyectos
 existentes; son 14 migraciones en total. Las imágenes pasan a Node 26.13.1 y
