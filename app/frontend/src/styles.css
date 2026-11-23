@@ -735,7 +735,7 @@ progress {
   overflow-wrap: anywhere;
 }
 .review-results[aria-busy="true"] .review-inbox {
-  opacity: 0.65;
+  filter: grayscale(1);
 }
 .review-inbox {
   margin: 16px 0;

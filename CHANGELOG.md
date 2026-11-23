@@ -8,7 +8,7 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ### Changed
 
-- **Filtros y seguimiento con contexto.** La bandeja mantiene sus filtros visibles mientras actualiza los resultados.
+- **Filtros y seguimiento con contexto.** La bandeja conserva sus filtros mientras carga y al volver de una pregunta; las opciones se limitan al proyecto elegido. Organizar y Participación recuerdan los filtros en la dirección de la página. Participación muestra los envíos por persona, las obligatorias pendientes y los cambios sin enviar por separado, con búsqueda y filas más compactas en móvil.
 
 ## [0.12.0] - 2026-11-22
 
