@@ -6,6 +6,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
+### Changed
+
+- **Atención con cifras a la vista.** Las preguntas validadas, pendientes de otras personas, con aclaraciones y con conflictos se consultan desde un tablero que reutiliza los filtros existentes.
+
 ## [0.12.0] - 2026-11-22
 
 Seguimiento de participación, plazos, autoguardado, plantillas y ayuda para el piloto,

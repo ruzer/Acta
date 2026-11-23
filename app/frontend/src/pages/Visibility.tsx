@@ -2,6 +2,7 @@ import { FirstSteps } from "./FirstSteps";
 import { ResponseDeadline } from "./ResponseDeadline";
 import { ParticipationCard } from "./Participation";
 import { ProjectAttention } from "./ProjectAttention";
+import { ProgressBoard } from "./ProgressBoard";
 import { ProjectWorkbench, ProjectDeliverables } from "./ProjectWorkbench";
 import { referenceTypeLabels } from "../reference-labels";
 import { FactGrid, PageHeader } from "../ui/semantic";
@@ -153,6 +154,7 @@ export function Dashboard({ userId }: { userId: string }) {
         />
       )}
       <ResponseDeadline projectId={projectId} />
+      <ProgressBoard data={data} />
       <ProjectAttention
         projectId={projectId}
         data={data}

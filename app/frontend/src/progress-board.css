@@ -1,0 +1,77 @@
+.pb-board {
+  color: var(--ac-ink);
+  background: var(--ac-surface);
+  border: 1px solid var(--ac-line);
+  border-radius: var(--ac-radius-surface);
+  padding: 20px;
+  margin-block: 16px 24px;
+  min-width: 0;
+}
+.pb-board h2 {
+  margin: 0 0 12px;
+  font: 600 20px/1.3 var(--ac-font-ui);
+}
+.pb-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.pb-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 88px;
+  min-width: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--ac-line-2);
+  border-radius: var(--ac-radius-control);
+  background: var(--ac-surface-2);
+  color: var(--ac-ink);
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+.pb-metric:hover {
+  border-color: var(--ac-info);
+}
+.pb-metric[aria-pressed="true"] {
+  border-color: var(--ac-info);
+  box-shadow: inset 0 0 0 1px var(--ac-info);
+}
+.pb-metric:focus-visible {
+  box-shadow: var(--ac-focus);
+}
+.pb-metric-label {
+  font: 600 14px/1.25 var(--ac-font-ui);
+}
+.pb-metric-number {
+  display: inline-block;
+  font: 600 28px/1.1 var(--ac-font-ui);
+  font-variant-numeric: tabular-nums;
+}
+.pb-metric-number small {
+  font-size: 16px;
+  font-weight: 400;
+}
+@media (max-width: 759px) {
+  .pb-board {
+    padding: 12px;
+    margin-block: 12px 20px;
+  }
+  .pb-board h2 {
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+  .pb-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pb-metric {
+    padding: 9px 10px;
+    min-height: 84px;
+    gap: 4px;
+  }
+  .pb-metric-number {
+    font-size: 26px;
+  }
+}
