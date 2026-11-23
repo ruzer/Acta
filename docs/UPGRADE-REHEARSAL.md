@@ -74,6 +74,7 @@ incompleto; diagnostica el error y empieza otro laboratorio, no continúes con �
 ACTA_UPGRADE_REHEARSAL_ALLOWED=true node "$candidate/scripts/upgrade-rehearsal.mjs" \
   --phase verify --root "$candidate" --project acta-upgrade-source \
   --origin http://127.0.0.1:4491 --state "$lab/state.json"
+(cd "$candidate" && docker compose -p acta-upgrade-source stop)
 (cd "$lab/restore-base" && docker compose -p acta-upgrade-restore build && \
   docker compose -p acta-upgrade-restore pull --ignore-buildable && \
   scripts/restore.sh --project acta-upgrade-restore --backup "$lab/backup-base")
@@ -83,6 +84,7 @@ ACTA_UPGRADE_REHEARSAL_ALLOWED=true node "$candidate/scripts/upgrade-rehearsal.m
   --origin http://127.0.0.1:4492 --state "$lab/state.json"
 ```
 
+Detén el origen antes de arrancar el destino: mantén un solo laboratorio activo.
 La restauración advierte diferencias de código o de configuración, por ejemplo
 el puerto distinto. No sobrescribe volúmenes existentes. La verificación compara
 huellas por fila de las tablas de negocio, incluidas migraciones, cuentas, accesos a proyectos, preguntas,
@@ -99,10 +101,10 @@ Además verifica: sesión anterior válida (la cookie real de cada base); nuevo 
 oficiales `--verify`. Un error detiene el ensayo: no se reemplaza una cookie antigua
 caducada por otra para presentar una continuidad falsa.
 
-Los resultados de noviembre de 2026 que siguen corresponden a las versiones y
-bases indicadas en cada apartado. No acreditan por sí solos la cabeza final de
-v0.12.0. Cada ensayo debe registrar el commit exacto de la candidata, las huellas
-por fila antes y después y la migración aplicada.
+Los resultados del 17 y 18 de noviembre conservan sus versiones y alcance
+históricos. El apartado del 22 de noviembre identifica el código final ensayado.
+Cada ejecución debe registrar su commit exacto, las huellas por fila antes y
+después y la migración aplicada; no se trasladan resultados a otro código.
 
 ## Resultado ejecutado el 2026-11-17
 
@@ -150,6 +152,51 @@ fila de migración y la columna nueva, que se comprobó nula. No se borraron ni
 alteraron filas previas. La ruta v0.10.0 se conserva en el script y sus pruebas;
 no se repitió su ensayo completo en esta ejecución. No se verificó una base
 institucional ni otra arquitectura.
+
+## Resultado sobre el código final ejecutado el 2026-11-22
+
+Host macOS ARM64, Docker Linux arm64. Base publicada v0.11.0
+`d3fabd45daed0fd93784c2c2ae6a1f929f27bd6e`; candidata
+`b9cbe64f2ddfcba795bd2f039edb2bfa82f8028c`, que incorpora los cambios
+de los PR #154–#157. Datos ficticios, demo desactivada y scripts oficiales sin
+cambios. Las imágenes se construyeron desde ambos commits antes de preparar el
+fixture; el recorrido completo se ejecutó bajo `caffeinate`, con un solo
+laboratorio activo y el origen detenido antes de restaurar el destino.
+
+| Comprobación | Resultado real |
+| --- | --- |
+| Preparación oficial | PASS: cinco cuentas nuevas, CSV de 300 preguntas / 12 temas, 5 publicadas / 295 borradores |
+| Conjunto con fixtures | 3 proyectos, 13 temas, 302 preguntas, 7 revisiones, 1 validación y 2 evidencias |
+| Backup + verificación | PASS: 368 665 bytes incluyendo manifiesto, 9 archivos verificados; 20,096 s + 0,163 s |
+| Actualización en los mismos siete volúmenes | PASS: 26,011 s, imágenes precargadas; 13 → 14 migraciones |
+| Restauración con la base en siete volúmenes nuevos | PASS: 34,226 s; ocho recuentos iguales, incluidas 13 migraciones |
+| Actualización del destino restaurado | PASS: 26,012 s; 13 → 14 migraciones |
+| Huellas por fila | PASS: 787 filas previas en 38 tablas conservadas al actualizar, al restaurar la base y al actualizar el destino; eventos previos intactos y columna nueva nula |
+| Sesión previa y nueva, evidencia, informe e invitación | PASS en actualización y restauración: cookie original válida, cierre comprobado, informe HTML/PDF y ambos smoke oficiales `--verify` |
+| Retirada | Inventario ajeno idéntico por identificador: 74 contenedores, 380 volúmenes y 10 activos |
+
+La comparación excluye `Session`, `InvitationSession`, `LoginAttempt` e
+`InvitationRateBucket`, que cambian por uso; la autenticación se verificó
+funcionalmente. Los 98 eventos de auditoría previos permanecieron y se añadieron
+nueve en cada verificación. Solo se excluyen la nueva migración y la nueva
+columna `responseDueAt`, comprobada nula; las 13 migraciones anteriores conservan
+sus huellas.
+
+SHA-256 de evidencia comprobado en ambas rutas:
+`37af9893dcc9c8f632b5c47af6bdc4c803c67a6224aaf61ed4d44eea85ca0ade`.
+
+Un primer intento quedó incompleto por caducidad normal de la sesión tras
+saltos del reloj del host: superó los 30 minutos de inactividad. Sus 787
+filas previas estaban intactas, pero no acredita continuidad de sesión ni
+restauración. No se sustituyó la cookie ni se cambió su duración. La tabla
+anterior corresponde exclusivamente al segundo intento, con un fixture nuevo
+y ejecución continua de 174,485 s desde la preparación
+hasta la última comprobación. Con precarga, arranque y limpieza fueron 223,857 s. Los tiempos se midieron
+con reloj monotónico.
+
+Son tiempos de un fixture pequeño con imágenes precargadas; no acreditan
+capacidad ni un RTO. No se probó una base institucional, S3 externo, HA, cambios
+mayores de PostgreSQL, assets externos, otra arquitectura ni la ruta v0.10.0.
 
 ## Retirada
 

@@ -16,18 +16,26 @@ El contrato público incluye API documentada, configuración, formatos de interc
 
 ### Preparación de 0.12.0 — Seguimiento y pulido del piloto
 
-Base comprobada: `92c589dc96ae65c5d88c2d98dc51de459b070e34`, después del PR #153.
-La candidata reúne participación, plazos informativos, autoguardado, plantillas,
-Primeros pasos, ayuda por perfil, centro de ayuda y pulido de la interfaz.
-Las [notas de 0.12.0](releases/v0.12.0.md) distinguen esta base de la cabeza final,
-recogen las tres mediciones de carga y no certifican capacidad institucional.
+Base comprobada: `b9cbe64f2ddfcba795bd2f039edb2bfa82f8028c`, merge del PR #157.
+Incluye #154 (preparación), #155 (reloj de la prueba de autoguardado),
+#156 (menos lecturas al guardar borradores) y #157 (zoom, ayuda y aviso de
+almacenamiento), además del seguimiento, plazos, plantillas y ayuda anteriores.
+Las [notas de 0.12.0](releases/v0.12.0.md) conservan las tres mediciones históricas
+y todas las tandas de la comparación del 21 de noviembre: 300/300 guardados
+espaciados correctos y 94/150 en ráfagas. Persisten 56 fallos y no se acredita
+capacidad institucional.
 
 Es MINOR por las funciones añadidas. Desde v0.11.0 hay una migración aditiva,
 `202611180001_response_due_at`: 13 → 14 migraciones, columna nueva nula en los
 proyectos existentes. Las imágenes usan Node 26.13.1; las cookies no cambian.
 Actualizar frontend y backend juntos, con respaldo verificado y recarga de
-pestañas. El [ensayo de actualización](UPGRADE-REHEARSAL.md) debe identificar la
-cabeza exacta; los resultados anteriores no prueban esa candidata.
+pestañas. El [ensayo del 22 de noviembre](UPGRADE-REHEARSAL.md#resultado-sobre-el-código-final-ejecutado-el-2026-11-22)
+comprobó v0.11.0 → `b9cbe64` y su restauración: 787 filas previas de 38 tablas
+conservadas, 13 → 14 migraciones, sesión y evidencia intactas, con las exclusiones
+operativas indicadas en la guía. Distingue los resultados históricos. El cierre documental no cambia
+ese código: comprobar que `git diff --stat b9cbe64 HEAD` solo enumera `.md`.
+Si cambia el producto después, esta evidencia no sustituye un ensayo de la nueva
+candidata.
 
 Exigir `verify`, `secrets`, `selfhosting`, `guided-install` y `codeql` en verde
 sobre la cabeza final. El propietario revisa y fusiona. Publicar requiere su
@@ -235,7 +243,7 @@ Los forks permanecen en su base estable actual durante esta preparación. Despu�
 
 ## Preparar, verificar y autorizar
 
-- [ ] Revisar [docs/ayuda](ayuda/README.md) contra la versión candidata y actualizar su línea «Verificado contra» con versión, commit y fecha. La prueba anti-deriva no sustituye comprobar las respuestas y los permisos descritos.
+- [ ] Revisar [docs/ayuda](ayuda/README.md) contra la versión candidata y actualizar su «Referencia de código» con versión, commit y fecha. La prueba anti-deriva no sustituye comprobar las respuestas y los permisos descritos.
 
 1. Conservar LICENSE, DCO y avisos; cerrar el [checklist GitHub](GITHUB-SETUP.md). Responsable inicial de release: Cristóbal Ruz Escobar, como maintainer designado.
 2. Cerrar el alcance desde `main`, revisar PR y cambios de seguridad, datos, permisos, compatibilidad y dependencias. No trasladar historia privada al changelog.
