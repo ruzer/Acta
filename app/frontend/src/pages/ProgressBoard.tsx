@@ -1,4 +1,6 @@
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { participationQuery } from "./Participation";
 import type { z } from "zod";
 import {
   reviewStates,
@@ -28,10 +30,27 @@ const stateOrder: Record<(typeof reviewStates)[number], number> = {
 
 export function ProgressBoard({
   data,
+  projectId,
 }: {
   data: z.infer<typeof dashboardView>;
+  projectId: string;
 }) {
   const [params, setParams] = useSearchParams();
+  // ParticipationCard owns the existing request. Observe its cache without
+  // fetching a second time or adding another retry control to the dashboard.
+  const participation = useQuery({
+    ...participationQuery(projectId),
+    enabled: false,
+  });
+  const blockers = (participation.data?.participants ?? [])
+    .filter((person) => person.pending > 0)
+    .sort(
+      (a, b) =>
+        b.pending - a.pending ||
+        a.name.localeCompare(b.name, "es-MX") ||
+        a.memberId.localeCompare(b.memberId),
+    )
+    .slice(0, 5);
   const states = reviewStates
     .toSorted((a, b) => stateOrder[a] - stateOrder[b])
     .map((status) => ({
@@ -199,6 +218,43 @@ export function ProgressBoard({
           );
         })}
       </div>
+      <section
+        className="pb-blockers"
+        aria-labelledby="progress-blockers-title"
+      >
+        <h3 id="progress-blockers-title">Qué me bloquea</h3>
+        {participation.error ? (
+          <p>
+            No se pudieron consultar los pendientes. Abre Participación para
+            volver a intentarlo.
+          </p>
+        ) : participation.isPending ? (
+          <p role="status">Consultando participación…</p>
+        ) : blockers.length ? (
+          <>
+            <p>Preguntas obligatorias pendientes por persona.</p>
+            <ol>
+              {blockers.map((person) => (
+                <li key={person.memberId}>
+                  <span>{person.name}</span>
+                  <strong>
+                    {person.pending}
+                    <span className="sr-only">
+                      {" "}
+                      preguntas obligatorias pendientes
+                    </span>
+                  </strong>
+                </li>
+              ))}
+            </ol>
+          </>
+        ) : (
+          <p>Nadie tiene preguntas obligatorias pendientes.</p>
+        )}
+        <Link to={`/projects/${projectId}/participation`}>
+          Ver participación
+        </Link>
+      </section>
     </section>
   );
 }

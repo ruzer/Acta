@@ -366,3 +366,46 @@ it("F3.4: aclara la métrica de envío, conserva la tabla y no inventa una cifra
     screen.queryByText("Con respuestas", { exact: true }),
   ).not.toBeInTheDocument();
 });
+
+it("F3.5: reutiliza una sola consulta de Participación y ordena las cinco personas con más pendientes", async () => {
+  await setup();
+  const blockers = screen.getByRole("region", { name: "Qué me bloquea" });
+  const rows = within(blockers).getAllByRole("listitem");
+  expect(rows).toHaveLength(5);
+  expect(rows.map((row) => row.textContent)).toEqual([
+    expect.stringContaining("Persona ficticia 2"),
+    expect.stringContaining("Persona ficticia 7"),
+    expect.stringContaining("Persona ficticia 4"),
+    expect.stringContaining("Persona ficticia 6"),
+    expect.stringContaining("Persona ficticia 3"),
+  ]);
+  expect(
+    within(blockers).queryByText("Persona ficticia 5"),
+  ).not.toBeInTheDocument();
+  expect(
+    within(blockers).getByRole("link", { name: "Ver participación" }),
+  ).toHaveAttribute("href", `/projects/${fixture.projectId}/participation`);
+  expect(
+    vi
+      .mocked(exchangeRequest)
+      .mock.calls.filter(([, resource]) => resource === "participation"),
+  ).toHaveLength(1);
+});
+
+it("F3.5: no inventa bloqueos cuando todas las personas completaron sus preguntas", async () => {
+  await setup({
+    participation: {
+      ...participation,
+      participants: participation.participants.map((person) => ({
+        ...person,
+        pending: 0,
+        state: "Completo",
+      })),
+    },
+  });
+  const blockers = screen.getByRole("region", { name: "Qué me bloquea" });
+  expect(within(blockers).queryAllByRole("listitem")).toHaveLength(0);
+  expect(blockers).toHaveTextContent(
+    "Nadie tiene preguntas obligatorias pendientes.",
+  );
+});

@@ -154,7 +154,7 @@ export function Dashboard({ userId }: { userId: string }) {
         />
       )}
       <ResponseDeadline projectId={projectId} />
-      <ProgressBoard data={data} />
+      <ProgressBoard data={data} projectId={projectId} />
       <ProjectAttention
         projectId={projectId}
         data={data}
