@@ -6,6 +6,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
+### Fixed
+
+- **Formulario del participante más claro.** Los límites de texto, opciones, números y fechas se explican junto a la respuesta; los contadores usan la configuración de cada pregunta.
+
 ## [0.12.0] - 2026-11-22
 
 Seguimiento de participación, plazos, autoguardado, plantillas y ayuda para el piloto,
