@@ -227,3 +227,18 @@ it("el error de guardado en ayuda y guía explica la causa y conserva el texto s
     );
   }
 });
+
+it("la ayuda explica que Deshacer retira Por consultar, conserva el borrador y dura ocho segundos", () => {
+  for (const path of [
+    "app/frontend/src/pages/Help.tsx",
+    "docs/pilot/GUIA-PARTICIPANTE.md",
+    `${folder}/PREGUNTAS-FRECUENTES.md`,
+  ]) {
+    const content = compact(read(path));
+    expect(content, path).toContain("Necesito consultar esto");
+    expect(content, path).toContain("Por consultar");
+    expect(content, path).toContain("Deshacer");
+    expect(content, path).toContain("ocho segundos");
+    expect(content, path).toContain("borrador se conserva");
+  }
+});

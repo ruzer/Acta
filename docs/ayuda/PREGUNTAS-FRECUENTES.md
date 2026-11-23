@@ -45,6 +45,13 @@ Guardar un borrador conserva el trabajo sin entregarlo al equipo revisor. **Envi
 
 Más información: [Borrador](GLOSARIO.md#borrador).
 
+### ¿Qué pasa si necesito consultar información antes de responder?
+Aplica a: Participante.
+
+**Necesito consultar esto** guarda tu borrador, marca la pregunta como **Por consultar** y abre la siguiente. El aviso se refiere a la pregunta anterior. Puedes pulsar **Deshacer** durante ocho segundos para quitar la marca; tu borrador se conserva. Después, retoma la pregunta desde **Mi trabajo**. Esto no envía una respuesta.
+
+Más información: [Guía de Participante](../pilot/GUIA-PARTICIPANTE.md).
+
 ### ¿Por qué no puedo deshacer Enviar respuesta?
 Aplica a: Participante y personas invitadas.
 

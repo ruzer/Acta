@@ -10,6 +10,7 @@ import {
   type ResponseView,
 } from "@requirements/contracts";
 import { ParticipantIcon } from "./ParticipantIcon";
+import { ConsultationNotice } from "./ConsultationNotice";
 import { api, downloadEvidence } from "../api";
 import { Alert, EmptyState, ErrorState, LoadingState } from "../ui";
 import { dateText } from "./ReviewShared";
@@ -479,9 +480,17 @@ function Sent({
 }
 export function ParticipantNotice() {
   const location = useLocation();
-  const notice = (location.state as { participantNotice?: string } | null)
-    ?.participantNotice;
-  return notice ? <Notice key={location.key} text={notice} /> : null;
+  const state = location.state as {
+    participantNotice?: string;
+    consultationUndo?: string;
+  } | null;
+  if (state?.consultationUndo)
+    return (
+      <ConsultationNotice key={location.key} token={state.consultationUndo} />
+    );
+  return state?.participantNotice ? (
+    <Notice key={location.key} text={state.participantNotice} />
+  ) : null;
 }
 function Notice({ text }: { text: string }) {
   return (

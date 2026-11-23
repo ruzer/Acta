@@ -34,15 +34,19 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
             <li>
               Al entrar verás <strong>Mi trabajo</strong>. La fecha límite es un
               aviso; permite responder después. Pulsa el nombre del proyecto y{" "}
-              <strong>Responder</strong> junto a una pregunta. Lee la pregunta y
-              su ayuda. Responde con lo que sabes; no inventes información.
+              <strong>Responder</strong> junto a una pregunta. Lee su ayuda.
+              Responde sin inventar información.
             </li>
             <li>
-              Acta guarda el borrador al hacer una pausa. Espera el aviso de
-              guardado; todavía no lo envías. Para continuar después, pulsa{" "}
-              <strong>Guardar y salir</strong>. Si recargas con texto pendiente,
-              elige <strong>Restaurar texto de esta pestaña</strong>. Usa{" "}
-              <strong>Continuar</strong> para retomar.
+              Acta guarda el borrador tras una pausa. Espera el aviso; aún no lo
+              envías. <strong>Guardar y salir</strong> permite continuar
+              después. Si recargas con texto pendiente, elige{" "}
+              <strong>Restaurar texto de esta pestaña</strong>;{" "}
+              <strong>Continuar</strong> permite retomar. Si te falta
+              información, pulsa <strong>Necesito consultar esto</strong>. La
+              pregunta anterior queda <strong>Por consultar</strong>. Puedes
+              pulsar <strong>Deshacer</strong> durante ocho segundos; tu
+              borrador se conserva.
             </li>
             <li>
               Si necesitas un comprobante, abre{" "}

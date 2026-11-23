@@ -40,6 +40,7 @@ import { StatusChip } from "../ui/semantic";
 import { ParticipantIcon } from "./ParticipantIcon";
 import { AnswerControl, answerText } from "./AnswerControl";
 import { SaveStatus } from "./SaveStatus";
+import { registerConsultationUndo } from "./ConsultationNotice";
 const empty: ResponseContent = {
   answer: null,
   comment: "",
@@ -404,14 +405,22 @@ function ResponseEditor({
                 () => `/projects/${projectId}/work`,
               )
             : `/projects/${projectId}/work`;
+        if (!mounted.current || !sessionActive.current) return result;
         allowNavigation.current = true;
         navigate(target, {
-          state: {
-            participantNotice:
-              destination === "consult"
-                ? "Pregunta marcada como Por consultar. Tu borrador se conserva."
-                : "Borrador guardado. Puedes retomarlo después.",
-          },
+          state:
+            destination === "consult"
+              ? {
+                  consultationUndo: registerConsultationUndo(
+                    projectId,
+                    id,
+                    result,
+                  ),
+                }
+              : {
+                  participantNotice:
+                    "Borrador guardado. Puedes retomarlo después.",
+                },
         });
       }
       return result;
