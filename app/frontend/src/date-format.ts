@@ -2,6 +2,12 @@ import type { PublicBranding } from "@requirements/contracts";
 
 type DateSettings = Pick<PublicBranding, "locale" | "timezone">;
 
+/** Un día de calendario no es un instante: conserva sus partes sin aplicar zona. */
+export function formatCalendarDate(date: string) {
+  const parts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+  return parts ? `${parts[3]}/${parts[2]}/${parts[1]}` : date;
+}
+
 /** Los instantes se muestran en la zona de la organización, no del navegador. */
 export function formatDateTime(
   date: string,

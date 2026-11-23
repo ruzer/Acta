@@ -5,6 +5,7 @@ import "@testing-library/jest-dom/vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import {
+  answerText as contractAnswerText,
   historyView,
   type ResponseQuestionView,
   type ResponseView,
@@ -13,6 +14,8 @@ import * as apiModule from "../api";
 import { BrandingProvider, formatDate } from "../branding";
 import { History } from "./Visibility";
 import { Respond } from "./Respond";
+import { answerText } from "./AnswerControl";
+import { SubmittedAnswer } from "./ReviewShared";
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
@@ -142,3 +145,49 @@ for (const organizationZone of ["UTC", "America/Mexico_City"]) {
     ).toBeVisible();
   });
 }
+
+// La zona del proceso está fijada por TZ al ejecutar esta prueba.
+it.each([
+  ["2031-03-15", "15/03/2031"],
+  ["2032-02-29", "29/02/2032"],
+  ["2031-01-01", "01/01/2031"],
+])("muestra el calendario %s sin desplazarlo por zona", (date, expected) => {
+  expect(answerText(question, date)).toBe(expected);
+  expect(contractAnswerText(question, date)).toBe(date);
+  expect(answerText({ ...question, type: "SHORT_TEXT" }, date)).toBe(date);
+});
+it.each([null, "", "Sin fecha", "2031-03-15T00:00:00Z"])(
+  "conserva el respaldo del contrato cuando no hay un día ISO: %s",
+  (value) => {
+    expect(answerText(question, value)).toBe(
+      contractAnswerText(question, value),
+    );
+  },
+);
+it.each([false, true])(
+  "la fecha enviada se lee como calendario en revisión (participante: %s)",
+  (participant) => {
+    const revision: ResponseView["revisions"][number] = {
+      id: "rev",
+      number: 1,
+      status: "SUBMITTED",
+      current: true,
+      createdAt: stamp,
+      answer: "2031-03-15",
+      comment: "",
+      example: "",
+      evidence: [],
+    };
+    const original = structuredClone(revision);
+    render(
+      <SubmittedAnswer
+        question={question}
+        revision={revision}
+        projectId="p"
+        participant={participant}
+      />,
+    );
+    expect(screen.getByText("15/03/2031")).toBeVisible();
+    expect(revision).toEqual(original);
+  },
+);
