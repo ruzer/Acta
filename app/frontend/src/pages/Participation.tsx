@@ -1,3 +1,4 @@
+import { FilterBar } from "../ui/FilterBar";
 import { ParticipationPeople } from "./ParticipationPeople";
 import { plural } from "../ui/plural";
 import { useEffect, useRef, useState } from "react";
@@ -16,7 +17,6 @@ import {
   EmptyState,
   ErrorState,
   LoadingState,
-  Input,
   Select,
   Textarea,
 } from "../ui";
@@ -162,13 +162,16 @@ export function Participation() {
         estén revisadas. Las preguntas que dependan de otra respuesta pueden
         aparecer después.
       </p>
-      <div className="actions">
-        <Input
-          type="search"
-          label="Buscar participantes"
-          value={search}
-          onChange={(e) => filter("q", e.target.value)}
-        />
+      <FilterBar
+        search={{
+          label: "Buscar participantes",
+          value: search,
+          onChange: (value) => filter("q", value),
+        }}
+        summary={`${people.length} de ${data.participants.length} personas`}
+        hasFilters={!!(state || order !== "name" || search)}
+        onClear={clearFilters}
+      >
         <Select
           label="Filtrar participación"
           value={state}
@@ -189,19 +192,10 @@ export function Participation() {
           <option value="activity">Actividad más reciente</option>
           <option value="state">Estado (por avance)</option>
         </Select>
-        <Button disabled={pendingPeople === 0} onClick={() => void remind()}>
-          Copiar recordatorio ({plural(pendingPeople, "persona")} con
-          pendientes)
-        </Button>
-      </div>
-      <p aria-live="polite" aria-atomic="true">
-        {people.length} de {data.participants.length} personas
-      </p>
-      {(state || order !== "name" || search) && (
-        <Button tone="secondary" onClick={clearFilters}>
-          Limpiar filtros
-        </Button>
-      )}
+      </FilterBar>
+      <Button disabled={pendingPeople === 0} onClick={() => void remind()}>
+        Copiar recordatorio ({plural(pendingPeople, "persona")} con pendientes)
+      </Button>
       {notice && <p role="status">{notice}</p>}
       {fallback && (
         <Textarea

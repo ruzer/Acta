@@ -1,3 +1,4 @@
+import { FilterBar } from "../ui/FilterBar";
 import { useEffect } from "react";
 import { cleanReviewSearch, rememberReviewSearch } from "../review-context";
 import { AnalystStatus } from "./AnalystVisual";
@@ -8,7 +9,6 @@ import { api } from "../api";
 import { Button, EmptyState, ErrorState, LoadingState, Select } from "../ui";
 import { PageHeader } from "../ui/semantic";
 import { dateText, reviewLabels } from "./ReviewShared";
-import { plural } from "../ui/plural";
 export function ReviewInbox({ userId = "" }: { userId?: string }) {
   const [params, setParams] = useSearchParams();
   const input = Object.fromEntries(params);
@@ -41,7 +41,15 @@ export function ReviewInbox({ userId = "" }: { userId?: string }) {
         title="Revisar respuestas"
         lead="Consulta las aportaciones y decide qué necesita seguimiento."
       />
-      <div className="review-filters">
+      <FilterBar
+        summary={
+          q.data
+            ? `${q.data.items.length} de ${q.data.total} preguntas en esta página`
+            : ""
+        }
+        hasFilters={params.size > 0}
+        onClear={() => setParams({})}
+      >
         <Select
           label="Estado"
           value={input.status ?? ""}
@@ -91,12 +99,7 @@ export function ReviewInbox({ userId = "" }: { userId?: string }) {
               ))}
             </Select>
           ))}
-      </div>
-      {params.size > 0 && (
-        <Button tone="secondary" onClick={() => setParams({})}>
-          Limpiar filtros
-        </Button>
-      )}
+      </FilterBar>
       <section
         className="review-results"
         aria-label="Resultados de revisión"
@@ -108,13 +111,6 @@ export function ReviewInbox({ userId = "" }: { userId?: string }) {
           <ErrorState error={q.error} retry={() => void q.refetch()} />
         ) : (
           <>
-            <p role="status">
-              {plural(
-                q.data.total,
-                "pregunta encontrada",
-                "preguntas encontradas",
-              )}
-            </p>
             {q.data.items.length === 0 ? (
               <EmptyState title="No hay preguntas para estos filtros">
                 Las preguntas publicadas de los proyectos donde eres analista
