@@ -127,6 +127,67 @@ export function ProgressBoard({
           ))}
         </ul>
       </div>
+      <div className="pb-breakdowns">
+        {(
+          [
+            {
+              dimension: "section",
+              label: "Por tema",
+              empty: "No hay temas con preguntas publicadas.",
+            },
+            {
+              dimension: "area",
+              label: "Por área",
+              empty: "No hay áreas con preguntas publicadas.",
+            },
+          ] as const
+        ).map((group) => {
+          const rows = data.breakdowns.filter(
+            (row) => row.dimension === group.dimension,
+          );
+          return (
+            <details key={group.dimension} className="pb-breakdown">
+              <summary>
+                {group.label}
+                <span>({rows.length})</span>
+              </summary>
+              <section aria-label={group.label}>
+                {!rows.length ? (
+                  <p>{group.empty}</p>
+                ) : (
+                  <ul>
+                    {rows.map((row) => {
+                      const value = row.metrics.validation;
+                      const ratio = value.denominator
+                        ? value.numerator / value.denominator
+                        : 0;
+                      return (
+                        <li key={row.key} data-pb-breakdown={row.key}>
+                          <div className="pb-breakdown-label">
+                            <span>{row.label}</span>
+                            <span className="pb-breakdown-value">
+                              {value.numerator} de {value.denominator} ·{" "}
+                              {value.percentage === null
+                                ? "Sin preguntas"
+                                : `${value.percentage.toLocaleString("es-MX")} %`}
+                            </span>
+                          </div>
+                          <div className="pb-track" aria-hidden="true">
+                            <span
+                              className="pb-fill"
+                              style={{ transform: `scaleX(${ratio})` }}
+                            />
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </section>
+            </details>
+          );
+        })}
+      </div>
     </section>
   );
 }

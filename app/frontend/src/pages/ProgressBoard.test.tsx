@@ -280,3 +280,62 @@ it("F3.2: conserva los ocho estados en cero sin mostrar porcentajes indefinidos"
   expect(items).toHaveLength(8);
   for (const item of items) expect(item).toHaveTextContent("0");
 });
+
+it("F3.3: el desglose conserva numerador, denominador y porcentaje, sin inventar filtros", async () => {
+  const { user } = await setup();
+  await user.click(screen.getByText("Por tema", { selector: "summary" }));
+  await user.click(screen.getByText("Por área", { selector: "summary" }));
+  const topics = screen.getByRole("region", { name: "Por tema" });
+  expect(topics).toHaveTextContent("Recepción");
+  expect(topics).toHaveTextContent("8 de 20");
+  expect(topics).toHaveTextContent("40 %");
+  expect(topics).toHaveTextContent("Seguimiento");
+  expect(topics).toHaveTextContent("4 de 16");
+  expect(topics).toHaveTextContent("25 %");
+  const areas = screen.getByRole("region", { name: "Por área" });
+  expect(areas).toHaveTextContent("Atención al público");
+  expect(areas).toHaveTextContent("12 de 36");
+  for (const region of [topics, areas]) {
+    expect(within(region).queryAllByRole("button")).toHaveLength(0);
+    expect(within(region).queryAllByRole("link")).toHaveLength(0);
+  }
+});
+
+it("F3.3: los desgloses nativos empiezan plegados y conservan un control enfocable", async () => {
+  const { user } = await setup();
+  const summary = screen.getByText("Por tema", { selector: "summary" });
+  expect(summary.closest("details")).not.toHaveAttribute("open");
+  expect(screen.getByRole("region", { name: "Por tema" })).not.toBeVisible();
+  summary.focus();
+  expect(summary).toHaveFocus();
+  // Native summary keyboard activation is checked in Chromium, not simulated by jsdom.
+  await user.click(summary);
+  expect(summary.closest("details")).toHaveAttribute("open");
+  expect(screen.getByRole("region", { name: "Por tema" })).toBeVisible();
+});
+
+it("F3.3: distingue un desglose vacío y un grupo sin preguntas, sin inventar porcentajes", async () => {
+  const { user } = await setup({
+    data: {
+      ...data,
+      breakdowns: [
+        {
+          ...data.breakdowns[0]!,
+          metrics: {
+            validation: metric(0, 0),
+            closure: metric(0, 0),
+            submission: metric(0, 0),
+          },
+        },
+      ],
+    },
+  });
+  await user.click(screen.getByText("Por tema", { selector: "summary" }));
+  await user.click(screen.getByText("Por área", { selector: "summary" }));
+  const topics = screen.getByRole("region", { name: "Por tema" });
+  expect(topics).toHaveTextContent("0 de 0 · Sin preguntas");
+  expect(topics).not.toHaveTextContent(/NaN|Infinity|100 %/);
+  expect(screen.getByRole("region", { name: "Por área" })).toHaveTextContent(
+    "No hay áreas con preguntas publicadas.",
+  );
+});
