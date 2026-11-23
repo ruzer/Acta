@@ -1,5 +1,6 @@
 import { responseDeadlineQuery } from "./ResponseDeadline";
 import { useBranding } from "../branding";
+import { timezoneLabel } from "../response-deadline-display";
 import {
   responseCalendarDate,
   responseDeadlineView,
@@ -837,7 +838,7 @@ function ResponseDeadlineForm({
             ? responseCalendarDate(new Date(query.data.responseDueAt), timezone)
             : ""
         }
-        hint={`Hasta el final del día en ${timezone}. Solo es un aviso; no impide responder. Deja vacío para quitar la fecha.`}
+        hint={`Hasta el final del día, ${timezoneLabel(timezone)}. Solo es un aviso; no impide responder. Deja vacío para quitar la fecha.`}
       />
     </ActionForm>
   );
