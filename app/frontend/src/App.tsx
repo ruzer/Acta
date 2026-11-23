@@ -1,4 +1,4 @@
-import { clearSessionPresentation } from "./session-presentation";
+import { usePresentationSession } from "./session-presentation";
 import { clearDraftTexts } from "./draft-recovery";
 import { ProjectShell } from "./shell/ProjectShell";
 import { OrganizationShell } from "./shell/OrganizationShell";
@@ -195,6 +195,7 @@ function Session() {
   const [expired, setExpired] = useState(false);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
+  usePresentationSession(me?.user.id, loading, expired);
   useEffect(() => {
     let active = true;
     void api("me")
@@ -218,7 +219,6 @@ function Session() {
         if (active) setLoading(false);
       });
     const expired = () => {
-      clearSessionPresentation();
       clearDraftTexts();
       setExpired(true);
       setCsrf("");
@@ -261,7 +261,6 @@ function Session() {
       proceed();
   }
   function signedOut(message: string, username = "") {
-    clearSessionPresentation();
     clearDraftTexts();
     setLoginUsername(username);
     navigate("/", { replace: true });
@@ -278,7 +277,6 @@ function Session() {
         notice={notice}
         username={loginUsername}
         onLogin={(m) => {
-          clearSessionPresentation();
           clearDraftTexts(m.user.id);
           client.clear();
           navigate("/", { replace: true });
