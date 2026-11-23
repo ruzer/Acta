@@ -243,7 +243,7 @@ Los forks permanecen en su base estable actual durante esta preparación. Despu�
 
 ## Preparar, verificar y autorizar
 
-- [ ] Revisar [docs/ayuda](ayuda/README.md) contra la versión candidata y actualizar su línea «Verificado contra» con versión, commit y fecha. La prueba anti-deriva no sustituye comprobar las respuestas y los permisos descritos.
+- [ ] Revisar [docs/ayuda](ayuda/README.md) contra la versión candidata y actualizar su «Referencia de código» con versión, commit y fecha. La prueba anti-deriva no sustituye comprobar las respuestas y los permisos descritos.
 
 1. Conservar LICENSE, DCO y avisos; cerrar el [checklist GitHub](GITHUB-SETUP.md). Responsable inicial de release: Cristóbal Ruz Escobar, como maintainer designado.
 2. Cerrar el alcance desde `main`, revisar PR y cambios de seguridad, datos, permisos, compatibilidad y dependencias. No trasladar historia privada al changelog.
