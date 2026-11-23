@@ -4,7 +4,10 @@ import { participationQuery } from "./Participation";
 import { z } from "zod";
 import { useEffect, useMemo, useRef, type RefObject } from "react";
 import { useMediaQuery } from "../ui/useMediaQuery";
-import { presentationKey } from "../session-presentation";
+import {
+  presentationKey,
+  presentationUsesKeyboard,
+} from "../session-presentation";
 import {
   reviewStates,
   statusLabels,
@@ -224,6 +227,7 @@ function useProgressMotion(
       }
       if (!previous || !root.current) return;
       const byKeyboard =
+        presentationUsesKeyboard() ||
         keyboard.current ||
         document.activeElement?.matches(
           ":focus-visible:not(h1):not(main):not(body)",
@@ -323,14 +327,12 @@ function useProgressMotion(
   }, [key, snapshot, visit, reduced, root]);
   return (fromKeyboard: boolean) => {
     scrollCleanup.current();
-    if (fromKeyboard || reduced) {
+    // setParams replaces the question groups. Wait for that commit before
+    // selecting its heading, including the instant/reduced-motion path.
+    const frame = window.requestAnimationFrame(() => {
       scrollCleanup.current = revealQuestions(reduced, fromKeyboard);
-    } else {
-      const frame = window.requestAnimationFrame(() => {
-        scrollCleanup.current = revealQuestions(false, false);
-      });
-      scrollCleanup.current = () => window.cancelAnimationFrame(frame);
-    }
+    });
+    scrollCleanup.current = () => window.cancelAnimationFrame(frame);
   };
 }
 

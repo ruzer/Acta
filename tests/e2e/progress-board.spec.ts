@@ -542,3 +542,130 @@ test("F3.7: clic desplaza250ms y contorno800ms; teclado no anima", async ({
   await expect(page.locator(".pb-list-outline")).toHaveCount(0);
   expect(data.unexpected).toEqual([]);
 });
+
+test("F3.7 regresión: entrar desde Participación con Enter no anima los valores nuevos", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await observeMotion(page);
+  const data = await dashboardFixture(page);
+  await page.goto(`/projects/${data.projectId}/dashboard`);
+  await snapshotSaved(page, data.projectId, 17);
+  await page.locator(".pb-blockers a").focus();
+  await page.keyboard.press("Enter");
+  await expect(
+    page.getByRole("heading", { name: "Participación", exact: true }),
+  ).toBeVisible();
+  data.setValidated(18);
+  await page
+    .getByRole("link", { name: "Volver a Atención", exact: true })
+    .focus();
+  await page.keyboard.press("Enter");
+  await snapshotSaved(page, data.projectId, 18);
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+      ),
+  );
+  expect((await motionEvidence(page)).animations).toEqual([]);
+  expect(data.unexpected).toEqual([]);
+});
+
+test("F3.7 regresión: primer filtro reducido resalta600ms el encabezado conectado de la nueva lista", async ({
+  page,
+}, testInfo) => {
+  await observeMotion(page);
+  const data = await dashboardFixture(page);
+  await page.goto(`/projects/${data.projectId}/dashboard`);
+  await snapshotSaved(page, data.projectId, 17);
+  await page.evaluate(() => {
+    const w = window as Window & {
+      f3FilterHighlight?: { start: number; end: number; heading: string };
+    };
+    let start: number | null = null;
+    let heading = "";
+    const record = (now: number) => {
+      const node = document.querySelector(".ac-attention-group h2.pb-changed");
+      if (node?.isConnected) {
+        start ??= now;
+        heading = node.textContent ?? "";
+      } else if (start !== null) {
+        w.f3FilterHighlight = { start, end: now, heading };
+        return;
+      }
+      requestAnimationFrame(record);
+    };
+    requestAnimationFrame(record);
+  });
+  await page.getByRole("button", { name: /^Validadas 17 de 88/ }).click();
+  await expect(page).toHaveURL(/status=VALIDATED/);
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          (window as Window & { f3FilterHighlight?: unknown })
+            .f3FilterHighlight,
+      ),
+    )
+    .toBeTruthy();
+  const timing = await page.evaluate(
+    () =>
+      (
+        window as Window & {
+          f3FilterHighlight: { start: number; end: number; heading: string };
+        }
+      ).f3FilterHighlight,
+  );
+  expect(timing.heading).not.toBe("");
+  expect(timing.end - timing.start).toBeGreaterThanOrEqual(570);
+  expect(timing.end - timing.start).toBeLessThanOrEqual(650);
+  expect((await motionEvidence(page)).animations).toEqual([]);
+  await testInfo.attach("resalte-de-lista-filtrada", {
+    body: JSON.stringify(timing),
+    contentType: "application/json",
+  });
+  expect(data.unexpected).toEqual([]);
+});
+
+test("F3.7 regresión: sesión401 al recargar retira las cifras guardadas de esa sesión", async ({
+  page,
+}) => {
+  const data = await dashboardFixture(page);
+  await page.goto(`/projects/${data.projectId}/dashboard`);
+  await snapshotSaved(page, data.projectId, 17);
+  await page.route("**/api/v1/auth/me", (route) =>
+    route.fulfill({
+      status: 401,
+      contentType: "application/json",
+      body: JSON.stringify({ message: "Sesión expirada de prueba" }),
+    }),
+  );
+  await page.route("**/api/v1/setup/status", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ state: "COMPLETED" }),
+    }),
+  );
+  await page.route("**/api/v1/auth/context", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        mode: "single-organization",
+        institutionName: "Institución ficticia",
+      }),
+    }),
+  );
+  await page.reload();
+  await expect(
+    page.getByRole("button", { name: "Iniciar sesión", exact: true }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(() =>
+      Object.keys(sessionStorage).filter((key) => key.startsWith("acta-ux:")),
+    ),
+  ).toEqual([]);
+  expect(data.unexpected).toEqual([]);
+});

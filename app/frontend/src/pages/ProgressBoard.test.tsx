@@ -6,6 +6,7 @@ import {
   render,
   screen,
   within,
+  waitFor,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
@@ -234,10 +235,12 @@ it.each([
     expect(params.get("status")).toBe(status);
     expect(params.get("keep")).toBe("si");
     expect(params.has("task")).toBe(false);
-    expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({
-      behavior: "instant",
-      block: "start",
-    });
+    await waitFor(() =>
+      expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({
+        behavior: "instant",
+        block: "start",
+      }),
+    );
     expect(
       screen.getByRole("button", { name: new RegExp(`^${label} `) }),
     ).toHaveAttribute("aria-pressed", "true");
