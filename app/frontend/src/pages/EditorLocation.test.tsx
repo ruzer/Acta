@@ -126,3 +126,62 @@ it("Atrás y Adelante restauran filtros en el editor que sigue montado", async (
     "true",
   );
 });
+
+it("los controles normales limpian la selección al cambiar q", async () => {
+  page("?mode=organize&approach=prepare&q=Recepción");
+  const checkbox = await screen.findByRole("checkbox", {
+    name: /Seleccionar pregunta:/,
+  });
+  fireEvent.click(checkbox);
+  expect(screen.getByText("1 pregunta seleccionada")).toBeVisible();
+  fireEvent.change(screen.getByLabelText("Buscar preguntas"), {
+    target: { value: "Comunicación" },
+  });
+  await waitFor(() =>
+    expect(
+      screen.queryByText("1 pregunta seleccionada"),
+    ).not.toBeInTheDocument(),
+  );
+});
+it("Atrás no mantiene selección oculta cuando restaura otro filtro", async () => {
+  const router = page("?mode=organize&approach=prepare&q=Recepción");
+  await screen.findByLabelText("Buscar preguntas");
+  await act(async () => {
+    await router.navigate("?mode=organize&approach=prepare&q=Comunicación");
+  });
+  await waitFor(() =>
+    expect(screen.getByLabelText("Buscar preguntas")).toHaveValue(
+      "Comunicación",
+    ),
+  );
+  fireEvent.click(
+    screen.getByRole("checkbox", { name: /Seleccionar pregunta:/ }),
+  );
+  expect(screen.getByText("1 pregunta seleccionada")).toBeVisible();
+  await act(async () => {
+    await router.navigate(-1);
+  });
+  await waitFor(() =>
+    expect(screen.getByLabelText("Buscar preguntas")).toHaveValue("Recepción"),
+  );
+  expect(
+    screen.getByRole("checkbox", { name: /Seleccionar pregunta:/ }),
+  ).not.toBeChecked();
+  expect(screen.queryByText("1 pregunta seleccionada")).not.toBeInTheDocument();
+});
+
+it("Atrás restaura el editor sin filtros cuando la entrada original no tenía query", async () => {
+  const router = page();
+  expect(await screen.findByLabelText("Buscar preguntas")).toHaveValue("");
+  await act(async () => {
+    await router.navigate("?mode=organize&approach=prepare&q=Recepción");
+  });
+  await waitFor(() =>
+    expect(screen.getByLabelText("Buscar preguntas")).toHaveValue("Recepción"),
+  );
+  await act(async () => {
+    await router.navigate(-1);
+  });
+  expect(router.state.location.search).toBe("");
+  expect(screen.getByLabelText("Buscar preguntas")).toHaveValue("");
+});

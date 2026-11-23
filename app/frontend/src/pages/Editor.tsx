@@ -7,6 +7,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Link,
   useNavigate,
+  useNavigationType,
   useParams,
   useSearchParams,
 } from "react-router-dom";
@@ -47,7 +48,12 @@ export function Editor() {
     mode?: number;
     organize?: OrganizeContext;
   }>(contextKey);
-  const locationContext = readEditorLocation(params, savedContext);
+  const navigationType = useNavigationType();
+  const locationContext = readEditorLocation(
+    params,
+    savedContext,
+    navigationType === "PUSH",
+  );
   const rememberOrganize = useCallback(
     (organize: OrganizeContext) => {
       const next = writeEditorLocation(params, locationContext.mode, organize);

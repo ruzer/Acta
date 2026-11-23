@@ -14,10 +14,14 @@ const empty: OrganizeContext = {
 export function readEditorLocation(
   params: URLSearchParams,
   saved?: { mode?: number; organize?: OrganizeContext },
+  returningFromView = false,
 ) {
   const present = keys.some((key) => params.has(key));
   const base = { ...empty, ...saved?.organize };
-  if (!present) return { mode: saved?.mode ?? 1, organize: base };
+  // A link back from review may reuse the editor context. Browser history and
+  // reload restore the URL itself, including an entry with no filters.
+  if (!present && returningFromView)
+    return { mode: saved?.mode ?? 1, organize: base };
   const index = modes.indexOf(params.get("mode") ?? "organize");
   const page = params.get("page") ?? "1";
   return {

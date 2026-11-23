@@ -319,6 +319,18 @@ export function Organize(
     if (props.organizeLocation !== synchronizedLocation.current) {
       synchronizedLocation.current = props.organizeLocation;
       const incoming = props.organizeContext;
+      if (
+        bulkIds.size &&
+        (topic !== (incoming?.topic ?? "") ||
+          search !== (incoming?.search ?? "") ||
+          publication !== (incoming?.publication ?? "") ||
+          area !== (incoming?.area ?? ""))
+      ) {
+        setBulkIds(new Set());
+        setSelectionNotice(
+          "Se limpió la selección al cambiar los filtros. Selecciona las preguntas que deseas modificar.",
+        );
+      }
       setTopic(incoming?.topic ?? "");
       setSearch(incoming?.search ?? "");
       setPublication(incoming?.publication ?? "");
