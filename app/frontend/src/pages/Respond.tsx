@@ -109,10 +109,12 @@ function ResponseEditor({
   const [conflict, setConflict] = useState<ResponseView | null>(null),
     [hasConflict, setHasConflict] = useState(false);
   const [localBackup, setLocalBackup] = useState<ResponseContent | null>(null),
-    [leave, setLeave] = useState<(() => void) | null>(null);
+    [leave, setLeave] = useState<(() => void) | null>(null),
+    [leaveError, setLeaveError] = useState("");
   const [file, setFile] = useState<File | null>(null),
     [staged, setStaged] = useState<EvidenceView | null>(null);
   const allowNavigation = useRef(false),
+    leaveAttempt = useRef(0),
     requests = useRef(new Map<string, string>()),
     errorRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef<HTMLElement>(null);
@@ -423,6 +425,37 @@ function ResponseEditor({
         if (!automatic) working(false);
       }
     }
+  }
+  function cancelLeave() {
+    leaveAttempt.current++;
+    if (blocker.state === "blocked") blocker.reset();
+    setLeave(null);
+    setLeaveError("");
+  }
+  async function saveAndLeave() {
+    const attempt = ++leaveAttempt.current;
+    setLeaveError("");
+    const result = await save();
+    if (
+      !result ||
+      !mounted.current ||
+      !sessionActive.current ||
+      attempt !== leaveAttempt.current
+    )
+      return;
+    try {
+      if (JSON.stringify(content()) !== JSON.stringify(initial(result))) {
+        setLeaveError("Hay cambios más recientes. Guárdalos antes de salir.");
+        return;
+      }
+    } catch {
+      setLeaveError("Hay cambios más recientes. Guárdalos antes de salir.");
+      return;
+    }
+    allowNavigation.current = true;
+    if (blocker.state === "blocked") blocker.proceed();
+    leave?.();
+    setLeave(null);
   }
   async function submit() {
     resetAutosave();
@@ -953,30 +986,34 @@ function ResponseEditor({
         </aside>
       )}
       {(blocker.state === "blocked" || leave) && (
-        <Dialog
-          title="Tienes cambios sin guardar"
-          onClose={() => {
-            if (blocker.state === "blocked") blocker.reset();
-            setLeave(null);
-          }}
-        >
+        <Dialog title="Tienes cambios sin guardar" onClose={cancelLeave}>
           <p>
             Guarda antes de salir para recuperar tus cambios después. Los
             cambios sin confirmar solo están en esta pestaña.
           </p>
+          {(error || leaveError) && <Alert error>{leaveError || error}</Alert>}
+          {(file || staged) && (
+            <p>
+              Vuelve al borrador para adjuntar el archivo o cancelar su
+              selección antes de guardar y salir.
+            </p>
+          )}
           <div className="actions">
             <Button
-              onClick={() => {
-                if (blocker.state === "blocked") blocker.reset();
-                setLeave(null);
-              }}
+              data-autofocus
+              disabled={busy || !!file || !!staged}
+              onClick={() => void saveAndLeave()}
             >
+              Guardar y salir
+            </Button>
+            <Button tone="secondary" onClick={cancelLeave}>
               Volver al borrador
             </Button>
             <Button
               tone="danger"
               disabled={busy}
               onClick={() => {
+                leaveAttempt.current++;
                 allowNavigation.current = true;
                 if (blocker.state === "blocked") blocker.proceed();
                 leave?.();
