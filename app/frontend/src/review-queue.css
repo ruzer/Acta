@@ -1,0 +1,16 @@
+.review-queue {
+  padding: 12px 16px;
+  margin: 12px 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.review-queue p {
+  margin: 4px 0 8px;
+}
+.review-queue .actions {
+  align-items: center;
+  flex-wrap: wrap;
+}
+.review-queue .button {
+  min-height: 44px;
+}

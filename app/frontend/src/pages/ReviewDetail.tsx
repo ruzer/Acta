@@ -1,3 +1,6 @@
+import { useReviewQueue } from "../use-review-queue";
+import { ReviewQueueNav } from "./ReviewQueueNav";
+import { queuePath } from "../review-queue";
 import {
   AnalystStatus,
   DecisionRecord,
@@ -10,6 +13,7 @@ import {
   useParams,
   useLocation,
   useSearchParams,
+  useNavigate,
 } from "react-router-dom";
 import { api } from "../api";
 import { typeLabels, type dashboardView } from "@requirements/contracts";
@@ -40,7 +44,8 @@ import {
 } from "./ReviewActions";
 import { dateText } from "./ReviewShared";
 import { nextToReview } from "./attention-data";
-export function ReviewDetail() {
+export function ReviewDetail({ userId = "" }: { userId?: string }) {
+  const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const contrastHeading = useRef<HTMLHeadingElement>(null);
@@ -63,10 +68,13 @@ export function ReviewDetail() {
     (location.state as { questionnaireReturn?: unknown } | null)
       ?.questionnaireReturn === true;
   const { projectId = "", id = "" } = useParams();
+  const queue = useReviewQueue(userId, projectId, id);
   const reviewSearch =
     typeof savedSearch === "string"
       ? new URLSearchParams(savedSearch).toString()
-      : new URLSearchParams({ projectId }).toString();
+      : queue.enabled
+        ? queue.search
+        : new URLSearchParams({ projectId }).toString();
   const source = (
     location.state as {
       workbenchReturn?: { view?: unknown; search?: unknown };
@@ -119,6 +127,25 @@ export function ReviewDetail() {
   const focusOnTab = useRef<"contrast" | "contributions" | "pane" | null>(null);
   const requestedTab = searchParams.get("tab");
   useEffect(() => {
+    setActionState(null);
+    setMessage("");
+    setFreeComparisonOpen(false);
+    setCompareFrom(undefined);
+    focusOnTab.current = null;
+  }, [projectId, id]);
+  const enteredQuestion = useRef("");
+  useEffect(() => {
+    const identity = `${projectId}/${id}`;
+    if (
+      queue.enabled &&
+      q.data?.question.id === id &&
+      enteredQuestion.current !== identity
+    ) {
+      enteredQuestion.current = identity;
+      questionHeading.current?.focus();
+    }
+  }, [queue.enabled, projectId, id, q.data]);
+  useEffect(() => {
     const wanted = focusOnTab.current;
     focusOnTab.current = null;
     // "pane" is the open contribution, which lives in the Aportaciones tab.
@@ -166,10 +193,13 @@ export function ReviewDetail() {
   if (q.isPending) return <LoadingState />;
   if (!q.data)
     return (
-      <ErrorState
-        error={q.error ?? new Error("No se pudo cargar la información.")}
-        retry={() => void q.refetch()}
-      />
+      <>
+        <ReviewQueueNav queue={queue} />
+        <ErrorState
+          error={q.error ?? new Error("No se pudo cargar la información.")}
+          retry={() => void q.refetch()}
+        />
+      </>
     );
   const d = q.data,
     current = d.submissions.filter((s) => s.current),
@@ -185,11 +215,16 @@ export function ReviewDetail() {
           : current.length
             ? "validateQuestion"
             : "markPending";
-  async function done() {
+  async function done(goNext = false) {
     anchorSince.current =
       client.getQueryState(["review", projectId, id])?.dataUpdatedAt ?? 0;
     setAction(null);
     setMessage("Revisión registrada. El historial se conserva.");
+    // La decisión ya está registrada: avanzar no espera consultas en segundo plano.
+    if (goNext && queue.position?.next)
+      navigate(queuePath(queue.position.next, queue.token, queue.search), {
+        state: { reviewSearch: queue.search },
+      });
     await client.invalidateQueries({ queryKey: ["review"] });
     await client.invalidateQueries({ queryKey: ["review-inbox"] });
     await client.invalidateQueries({ queryKey: ["my-work"] });
@@ -389,6 +424,7 @@ export function ReviewDetail() {
           </Link>
         )}
       </div>
+      {d.canReview && <ReviewQueueNav queue={queue} />}
       <div className="ac-review-heading">
         <div>
           <QuestionBand
@@ -684,6 +720,9 @@ export function ReviewDetail() {
           data={d}
           onClose={() => setAction(null)}
           onDone={() => void done()}
+          onDoneAndNext={
+            queue.position?.next ? () => void done(true) : undefined
+          }
           refresh={() => q.refetch()}
         />
       )}

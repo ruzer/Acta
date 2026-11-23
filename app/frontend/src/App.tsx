@@ -1,3 +1,4 @@
+import { usePresentationSession } from "./session-presentation";
 import { clearDraftTexts } from "./draft-recovery";
 import { ProjectShell } from "./shell/ProjectShell";
 import { OrganizationShell } from "./shell/OrganizationShell";
@@ -194,6 +195,7 @@ function Session() {
   const [expired, setExpired] = useState(false);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
+  usePresentationSession(me?.user.id, loading, expired);
   useEffect(() => {
     let active = true;
     void api("me")
@@ -387,7 +389,7 @@ function Session() {
             />
             <Route
               path="/projects/:projectId/review/:id"
-              element={<ReviewDetail />}
+              element={<ReviewDetail userId={me.user.id} />}
             />
             <Route
               path="/projects/:projectId/clarifications/:id"

@@ -6,6 +6,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
+### Added
+
+- **Revisión seguida dentro de la lista.** Al abrir una pregunta desde la bandeja, Anterior y Siguiente recorren las mismas preguntas y conservan su orden aunque cambien de estado. Registrar una decisión permite guardar y pasar a la siguiente, con las mismas validaciones y permisos.
+
 ## [0.12.0] - 2026-11-22
 
 Seguimiento de participación, plazos, autoguardado, plantillas y ayuda para el piloto,

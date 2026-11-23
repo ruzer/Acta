@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+import { queuePath } from "../review-queue";
 import { AnalystStatus } from "./AnalystVisual";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
@@ -10,6 +12,11 @@ import { plural } from "../ui/plural";
 export function ReviewInbox() {
   const [params, setParams] = useSearchParams();
   const input = Object.fromEntries(params);
+  const search = params.toString();
+  const queueToken = useMemo(
+    () => ({ search, token: crypto.randomUUID() }),
+    [search],
+  );
   const q = useQuery({
     queryKey: ["review-inbox", input],
     queryFn: () => api("listReviewInbox", {}, input),
@@ -115,7 +122,11 @@ export function ReviewInbox() {
                   </p>
                   <h2>
                     <Link
-                      to={`/projects/${item.projectId}/review/${item.questionId}`}
+                      to={queuePath(
+                        { projectId: item.projectId, id: item.questionId },
+                        queueToken.token,
+                        search,
+                      )}
                       state={{ reviewSearch: params.toString() }}
                     >
                       {item.question}
