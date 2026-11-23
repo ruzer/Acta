@@ -104,7 +104,7 @@ export function ProgressBoard({
               aria-label={`${label} ${count}${total}. Ver estas preguntas.`}
               onClick={() => show(status)}
             >
-              <span className="pb-metric-label">{label}</span>
+              <span className="pb-metric-label">{label}</span>{" "}
               <strong className="pb-metric-number">
                 {count}
                 {total && <small>{total}</small>}

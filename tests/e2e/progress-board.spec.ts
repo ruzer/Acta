@@ -1,0 +1,293 @@
+import { test, expect, type Page } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
+import { randomUUID } from "node:crypto";
+import { dashboardView, reviewStates } from "@requirements/contracts";
+import fixture from "../fixtures/analyst-visual.json";
+
+// The real application and Chromium, with a read-only fictional API fixture.
+// Every API call is intercepted: this spec cannot mutate the disposable DB.
+async function dashboardFixture(page: Page) {
+  const projectId = fixture.projectId;
+  const base = dashboardView.parse(fixture.dashboard);
+  const counts = {
+    NOT_REVIEWED: 1,
+    PENDING: 1,
+    PARTIAL: 46,
+    ANSWERED: 6,
+    CLARIFICATION_REQUIRED: 14,
+    VALIDATED: 17,
+    NOT_APPLICABLE: 1,
+    CONFLICT: 2,
+  };
+  const questions = reviewStates.flatMap((status) =>
+    Array.from({ length: counts[status] }, (_, index) => ({
+      ...base.questions[0]!,
+      id: randomUUID(),
+      externalId: `P-${reviewStates.indexOf(status) + 1}-${index + 1}`,
+      title: `Pregunta ficticia ${reviewStates.indexOf(status) + 1}.${index + 1}`,
+      status,
+      submittedRespondents: ["NOT_REVIEWED", "PENDING"].includes(status)
+        ? 0
+        : 1,
+      requiredRespondents: status === "PARTIAL" ? 2 : 1,
+    })),
+  );
+  const metric = (numerator: number) => ({
+    numerator,
+    denominator: 88,
+    percentage: Math.round((numerator / 88) * 10000) / 100,
+  });
+  const metrics = {
+    validation: metric(17),
+    closure: metric(18),
+    submission: metric(86),
+  };
+  const dashboard = {
+    ...base,
+    role: "ANALYST",
+    projectName: "Revisión de procesos ficticios",
+    metrics,
+    states: reviewStates.map((status) => ({ status, count: counts[status] })),
+    questions,
+    breakdowns: [
+      {
+        dimension: "section",
+        key: "section",
+        label: "Recepción de solicitudes",
+        metrics,
+      },
+      { dimension: "area", key: "area", label: "Atención al público", metrics },
+    ],
+  };
+  const unexpected: string[] = [];
+  let participationRequests = 0;
+  await page.route("**/api/v1/**", async (route) => {
+    const request = route.request();
+    const path = new URL(request.url()).pathname.replace("/api/v1", "");
+    const json = (body: unknown) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(body),
+      });
+    if (request.method() !== "GET") {
+      unexpected.push(`${request.method()} ${path}`);
+      return route.abort();
+    }
+    if (path === "/configuration/public")
+      return json({
+        appName: "Acta",
+        shortName: "Acta",
+        organizationName: "Institución ficticia",
+        logo: "",
+        logoSecondary: "",
+        secondaryName: "",
+        favicon: "",
+        accent: "#2b4d7c",
+        locale: "es-MX",
+        timezone: "UTC",
+      });
+    if (path === "/auth/me")
+      return json({
+        user: {
+          id: "6771ed99-97aa-469f-9502-84bb48b86015",
+          username: "analista.ficticio",
+          displayName: "Analista de prueba",
+          active: true,
+          isOrganizationAdmin: false,
+          mustChangePassword: false,
+        },
+        organization: {
+          id: "ce978577-3ab2-40e6-9afb-c1773823dfb2",
+          code: "DEMO",
+          name: "Institución ficticia",
+        },
+        csrfToken: "",
+      });
+    if (path === "/projects")
+      return json([
+        {
+          id: projectId,
+          externalId: "DEMO",
+          name: dashboard.projectName,
+          description: "",
+          lifecycle: "ACTIVE",
+          role: "ANALYST",
+          lockVersion: 0,
+          questionCount: 88,
+        },
+      ]);
+    if (path === `/projects/${projectId}/dashboard`) return json(dashboard);
+    if (path === `/projects/${projectId}/response-deadline`)
+      return json({ responseDueAt: null, lockVersion: 0 });
+    if (path === `/projects/${projectId}/invitations`)
+      return json({ items: [], total: 0, page: 1 });
+    if (path === `/projects/${projectId}/participation`) {
+      participationRequests++;
+      return json({
+        projectName: dashboard.projectName,
+        role: "ANALYST",
+        participants: [11, 8, 5, 2, 0].map((pending, index) => ({
+          memberId: randomUUID(),
+          name: `Persona ficticia ${index + 1}`,
+          area: null,
+          assigned: 12,
+          required: 12,
+          drafts: 0,
+          sent: 12 - pending,
+          pending,
+          lastActivity: null,
+          state: pending ? "Envió parte" : "Completo",
+        })),
+      });
+    }
+    if (path === "/review")
+      return json({
+        items: questions.map((question) => ({
+          questionId: question.id,
+          projectId,
+          projectName: dashboard.projectName,
+          sectionId: question.sectionId,
+          sectionTitle: question.sectionTitle,
+          question: question.title,
+          status: question.status,
+          priority: question.priority,
+          areaId: question.areaId,
+          areaName: question.areaName,
+          respondents: [],
+          lastContributionAt: null,
+          hasEvidence: false,
+          openClarifications:
+            question.status === "CLARIFICATION_REQUIRED" ? 1 : 0,
+        })),
+        total: 88,
+        page: 1,
+        pageSize: 100,
+        filters: { projects: [], sections: [], areas: [], participants: [] },
+      });
+    unexpected.push(`${request.method()} ${path}`);
+    return route.abort();
+  });
+  return {
+    projectId,
+    unexpected,
+    participationRequests: () => participationRequests,
+  };
+}
+
+test.use({ locale: "es-MX", reducedMotion: "reduce", actionTimeout: 15000 });
+for (const colorScheme of ["light", "dark"] as const) {
+  for (const [width, height] of [
+    [1440, 900],
+    [390, 844],
+    [320, 640],
+  ] as const) {
+    test(`F3.6 Atención: cifras, barra y accesibilidad a ${width}px (${colorScheme})`, async ({
+      page,
+    }, testInfo) => {
+      const data = await dashboardFixture(page);
+      await page.setViewportSize({ width, height });
+      await page.emulateMedia({ colorScheme });
+      await page.goto(`/projects/${data.projectId}/dashboard`);
+      const board = page.getByRole("region", { name: "Avance del proyecto" });
+      await expect(board).toBeVisible();
+      await expect(
+        board.getByRole("button", { name: /^Validadas 17 de 88/ }),
+      ).toBeVisible();
+      await expect(
+        board.getByRole("button", { name: /^Esperando a otras personas 46/ }),
+      ).toBeVisible();
+      await expect(
+        board.getByRole("button", { name: /^Requieren aclaración 14/ }),
+      ).toBeVisible();
+      await expect(
+        board.getByRole("button", { name: /^Conflictos 2/ }),
+      ).toBeVisible();
+      await expect(board.getByText("Persona ficticia 1")).toBeVisible();
+      await expect(page.locator(".ac-attention-group").first()).toBeVisible();
+      await page.evaluate(() => document.fonts.ready);
+      await page.evaluate(() => window.scrollTo(0, 0));
+      const geometry = await page.evaluate(() => {
+        const rect = (selector: string) => {
+          const node = document.querySelector(selector)!;
+          const box = node.getBoundingClientRect();
+          return {
+            top: box.top,
+            bottom: box.bottom,
+            width: box.width,
+            height: box.height,
+          };
+        };
+        const nav = document.querySelector(".ac-shell-mobile")!;
+        return {
+          pageWidth: document.documentElement.scrollWidth,
+          pageHeight: document.documentElement.scrollHeight,
+          usableBottom:
+            getComputedStyle(nav).display === "none"
+              ? innerHeight
+              : nav.getBoundingClientRect().top,
+          metrics: rect(".pb-metrics"),
+          bar: rect(".pb-stack"),
+          legend: rect(".pb-legend"),
+          firstGroup: rect(".ac-attention-group"),
+          buttons: [...document.querySelectorAll(".pb-metric")].map((node) => {
+            const box = node.getBoundingClientRect();
+            return { width: box.width, height: box.height };
+          }),
+        };
+      });
+      expect(geometry.pageWidth).toBeLessThanOrEqual(width);
+      for (const button of geometry.buttons) {
+        expect(button.width).toBeGreaterThanOrEqual(44);
+        expect(button.height).toBeGreaterThanOrEqual(44);
+      }
+      if (width >= 390) {
+        expect(geometry.metrics.top).toBeGreaterThanOrEqual(0);
+        expect(geometry.metrics.bottom).toBeLessThanOrEqual(
+          geometry.usableBottom,
+        );
+        expect(geometry.bar.bottom).toBeLessThanOrEqual(geometry.usableBottom);
+        expect(geometry.legend.bottom).toBeLessThanOrEqual(
+          geometry.usableBottom,
+        );
+      }
+      const axe = await new AxeBuilder({ page })
+        .include(".pb-board")
+        .withTags([
+          "wcag2a",
+          "wcag2aa",
+          "wcag21a",
+          "wcag21aa",
+          "wcag22aa",
+          "best-practice",
+        ])
+        .analyze();
+      expect(axe.violations).toEqual([]);
+      await testInfo.attach("medidas-tablero", {
+        body: JSON.stringify(geometry, null, 2),
+        contentType: "application/json",
+      });
+      await testInfo.attach(`tablero-${width}-${colorScheme}`, {
+        body: await page.screenshot(),
+        contentType: "image/png",
+      });
+      const topic = board
+        .locator(".pb-breakdown")
+        .filter({ has: page.locator("summary", { hasText: "Por tema" }) });
+      await topic.locator("summary").focus();
+      await page.keyboard.press("Enter");
+      await expect(topic).toHaveAttribute("open", "");
+      await page.keyboard.press("Space");
+      await expect(topic).not.toHaveAttribute("open", "");
+      await board
+        .getByRole("button", { name: /^Requieren aclaración 14/ })
+        .click();
+      await expect(page).toHaveURL(/status=CLARIFICATION_REQUIRED/);
+      await expect(page.getByLabel("Filtrar estado")).toHaveValue(
+        "CLARIFICATION_REQUIRED",
+      );
+      expect(data.participationRequests()).toBe(1);
+      expect(data.unexpected).toEqual([]);
+    });
+  }
+}

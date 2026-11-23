@@ -25,7 +25,7 @@
   min-height: 88px;
   min-width: 44px;
   padding: 10px 12px;
-  border: 1px solid var(--ac-line-2);
+  border: 1px solid var(--ac-muted);
   border-radius: var(--ac-radius-control);
   background: var(--ac-surface-2);
   color: var(--ac-ink);

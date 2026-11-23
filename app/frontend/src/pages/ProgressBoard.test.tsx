@@ -409,3 +409,13 @@ it("F3.5: no inventa bloqueos cuando todas las personas completaron sus pregunta
     "Nadie tiene preguntas obligatorias pendientes.",
   );
 });
+
+it("F3.6: el nombre accesible contiene el rótulo visible completo de cada cifra", async () => {
+  await setup();
+  const group = screen.getByRole("group", { name: "Preguntas por estado" });
+  for (const button of within(group).getAllByRole("button")) {
+    const visible = button.textContent?.replace(/\s+/g, " ").trim();
+    expect(visible).toBeTruthy();
+    expect(button.getAttribute("aria-label")).toContain(visible);
+  }
+});
