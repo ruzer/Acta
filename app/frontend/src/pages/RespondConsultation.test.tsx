@@ -1,4 +1,4 @@
-import { StrictMode } from "react";
+import { StrictMode, useLayoutEffect } from "react";
 import { afterEach, expect, it, vi } from "vitest";
 import {
   act,
@@ -362,3 +362,71 @@ it("un fallo de conexión conserva el borrador y un reintento explícito reutili
   expect(writes()).toHaveLength(3);
   expect(writes()[2]![2]).toEqual(writes()[1]![2]);
 });
+
+it.each([true, false])(
+  "retira el aviso si la página se oculta entre el render y los efectos (evento anterior al aviso: %s)",
+  (before) => {
+    function PageHideBeforePassiveEffects() {
+      useLayoutEffect(() => {
+        window.dispatchEvent(new Event("pagehide"));
+      }, []);
+      return null;
+    }
+    const token = registerConsultationUndo("p", "q", consulting);
+    const router = createMemoryRouter(
+      [
+        {
+          path: "*",
+          element: (
+            <>
+              {before && <PageHideBeforePassiveEffects />}
+              <ParticipantNotice />
+              {!before && <PageHideBeforePassiveEffects />}
+            </>
+          ),
+        },
+      ],
+      {
+        initialEntries: [
+          { pathname: "/projects/p/work", state: { consultationUndo: token } },
+        ],
+      },
+    );
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>,
+    );
+    expect(
+      screen.queryByRole("button", { name: "Deshacer" }),
+    ).not.toBeInTheDocument();
+    expect(writes()).toHaveLength(0);
+  },
+);
+
+it.each(["pagehide", "session-expired", "session-restored", "expiry"])(
+  "cancela un registro que todavía no se mostró al ocurrir %s",
+  (event) => {
+    vi.useFakeTimers();
+    const token = registerConsultationUndo("p", "q", consulting);
+    if (event === "expiry") act(() => vi.advanceTimersByTime(8000));
+    else act(() => window.dispatchEvent(new Event(event)));
+    const router = createMemoryRouter(
+      [{ path: "*", element: <ParticipantNotice /> }],
+      {
+        initialEntries: [
+          { pathname: "/projects/p/work", state: { consultationUndo: token } },
+        ],
+      },
+    );
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>,
+    );
+    expect(
+      screen.queryByRole("button", { name: "Deshacer" }),
+    ).not.toBeInTheDocument();
+    expect(writes()).toHaveLength(0);
+  },
+);
