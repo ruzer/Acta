@@ -6,6 +6,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
+### Fixed
+
+- **Fechas y horas de la organización.** La Bitácora usa la zona y el formato configurados para la instalación; la hora de guardado comparte el mismo criterio, sin cambiar los instantes guardados ni el autoguardado.
+
 ## [0.12.0] - 2026-11-22
 
 Seguimiento de participación, plazos, autoguardado, plantillas y ayuda para el piloto,

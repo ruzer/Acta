@@ -4,6 +4,7 @@ import type { PublicBranding } from "@requirements/contracts";
 import type { ReactNode } from "react";
 import { api } from "./api";
 import { ErrorState, LoadingState } from "./ui";
+import { formatDateTime, formatClockTime } from "./date-format";
 const defaults: PublicBranding = {
   appName: "Acta",
   shortName: "Acta",
@@ -19,12 +20,10 @@ const defaults: PublicBranding = {
 const BrandingContext = createContext(defaults);
 let formatting = { locale: defaults.locale, timezone: defaults.timezone };
 export function formatDate(date: string, endSentence = false) {
-  const formatted = new Intl.DateTimeFormat(formatting.locale, {
-    dateStyle: "medium",
-    timeStyle: "short",
-    timeZone: formatting.timezone,
-  }).format(new Date(date));
-  return endSentence ? `${formatted.replace(/\.$/, "")}.` : formatted;
+  return formatDateTime(date, formatting, endSentence);
+}
+export function formatTime(date: string, settings = formatting) {
+  return formatClockTime(date, settings);
 }
 export function useBranding() {
   return useContext(BrandingContext);
