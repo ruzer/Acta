@@ -83,9 +83,9 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
               quien te dio acceso. No mandes tu contraseña por chat.
             </li>
             <li>
-              <strong>No se pudo guardar. Tu texto sigue aquí</strong>: conserva
-              tu texto de forma privada, anota la hora y avisa al coordinador.
-              No cierres la página creyendo que quedó guardado.
+              <strong>No se pudo guardar:</strong> revisa la causa indicada.
+              <strong> Tu texto sigue aquí</strong> no confirma el guardado.
+              Conserva la página y avisa al coordinador.
             </li>
             <li>
               Si no ves el proyecto o la pregunta, pide que revisen tu acceso y

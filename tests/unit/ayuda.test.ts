@@ -212,3 +212,18 @@ it("g: las guías no atribuyen revisión a Administración del proyecto", () => 
   for (const path of paths)
     expect(attributesReviewToAdministration(read(path)), path).toBe(false);
 });
+
+it("el error de guardado en ayuda y guía explica la causa y conserva el texto sin afirmar que se guardó", () => {
+  for (const path of [
+    "app/frontend/src/pages/Help.tsx",
+    "docs/pilot/GUIA-PARTICIPANTE.md",
+    `${folder}/SOLUCION-DE-PROBLEMAS.md`,
+  ]) {
+    const content = compact(read(path));
+    expect(content, path).toContain("No se pudo guardar:");
+    expect(content, path).toContain("Tu texto sigue aquí");
+    expect(content, path).not.toContain(
+      "No se pudo guardar. Tu texto sigue aquí",
+    );
+  }
+});

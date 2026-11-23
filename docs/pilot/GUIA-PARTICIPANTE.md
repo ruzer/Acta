@@ -16,5 +16,5 @@ prueba autorizado. No uses información sensible. Si entras por invitación, usa
 ## Si algo no funciona
 
 - **No fue posible iniciar sesión con esos datos.** Revisa usuario y contraseña; si sigue ocurriendo, pide ayuda a quien te dio acceso. No mandes tu contraseña por chat.
-- **No se pudo guardar. Tu texto sigue aquí**: conserva tu texto de forma privada, anota la hora y avisa al coordinador. No cierres la página creyendo que quedó guardado.
+- **No se pudo guardar:** revisa la causa indicada. **Tu texto sigue aquí** no confirma el guardado. Conserva la página y avisa al coordinador.
 - Si no ves el proyecto o la pregunta, pide que revisen tu acceso y asignación. No uses la cuenta de otra persona.

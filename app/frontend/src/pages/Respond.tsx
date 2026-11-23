@@ -39,6 +39,7 @@ import {
 import { StatusChip } from "../ui/semantic";
 import { ParticipantIcon } from "./ParticipantIcon";
 import { AnswerControl, answerText } from "./AnswerControl";
+import { SaveStatus } from "./SaveStatus";
 const empty: ResponseContent = {
   answer: null,
   comment: "",
@@ -178,6 +179,7 @@ function ResponseEditor({
     mounted = useRef(true),
     sessionActive = useRef(true);
   const [saving, setSaving] = useState(false),
+    [savingStartedAt, setSavingStartedAt] = useState<number | null>(null),
     [authenticated, setAuthenticated] = useState(true);
   const [recovery, setRecovery] = useState(() => {
     const copy = readDraftText(backupKey);
@@ -309,11 +311,20 @@ function ResponseEditor({
     const failure =
       e instanceof Error ? e : new Error("No se pudo completar la operación.");
     setError(failure.message);
-    setMessage("No se pudo guardar. Tu texto sigue aquí");
+    setMessage("");
     if (e instanceof ApiFailure) {
       setFields(e.fields);
       if (e.status === 409) setHasConflict(true);
     }
+  }
+  function edited(field: keyof ResponseContent) {
+    setFields((current) => {
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
+    setError("");
+    setMessage("");
   }
   async function save(
     destination: "stay" | "exit" | "consult" = "stay",
@@ -336,6 +347,8 @@ function ResponseEditor({
         if (!previous && automatic) return null;
       }
       if (!mounted.current || !sessionActive.current) return null;
+      // Comparar la edición cruda: el campo numérico usa texto y la API, números.
+      const submittedForm = form.getValues();
       const sent = {
         ...content(),
         ...(destination === "consult" ? { consultationRequested: true } : {}),
@@ -348,6 +361,7 @@ function ResponseEditor({
       setError("");
       setFields({});
       setSaving(true);
+      setSavingStartedAt(Date.now());
       setMessage("Guardando…");
       own = (async () => {
         let result = serverRef.current;
@@ -363,7 +377,7 @@ function ResponseEditor({
           );
         }
         if (mounted.current && sessionActive.current) {
-          accept(result, sent);
+          accept(result, submittedForm);
           setMessage(
             "Borrador guardado a las " + savedTime(result.draft!.updatedAt),
           );
@@ -585,18 +599,25 @@ function ResponseEditor({
     );
   }
   const saveStatus = (
-    <p className="save-status" role="status" aria-live="polite">
-      {busy || saving
-        ? message || "Procesando…"
-        : error
-          ? "No se pudo guardar. Tu texto sigue aquí"
-          : dirty
-            ? "Cambios sin guardar"
-            : message ||
-              (server.draft
-                ? `Borrador guardado a las ${savedTime(server.draft.updatedAt)}`
-                : "")}
-    </p>
+    <SaveStatus
+      saving={saving}
+      startedAt={savingStartedAt}
+      busy={busy}
+      error={
+        error
+          ? Object.keys(fields).length === 1
+            ? Object.values(fields)[0]!
+            : error
+          : ""
+      }
+      dirty={dirty}
+      message={message}
+      savedMessage={
+        server.draft
+          ? `Borrador guardado a las ${savedTime(server.draft.updatedAt)}`
+          : ""
+      }
+    />
   );
   return (
     <section ref={pageRef} className="response-page participant-page">
@@ -688,26 +709,26 @@ function ResponseEditor({
             hasta que se confirme el guardado.
           </Alert>
         )}
-        {error && (
+        {((error && Object.keys(fields).length >= 2) || hasConflict) && (
           <div ref={errorRef} tabIndex={-1}>
-            <Alert error>
-              {error}
-              {hasConflict && (
-                <p>
-                  <Button
-                    tone="secondary"
-                    disabled={busy}
-                    onClick={() => {
-                      void api("getDraft", { projectId, id })
-                        .then(setConflict)
-                        .catch(failed);
-                    }}
-                  >
-                    Consultar versión del servidor
-                  </Button>
-                </p>
-              )}
-            </Alert>
+            {error && Object.keys(fields).length >= 2 && (
+              <Alert error>{error}</Alert>
+            )}
+            {hasConflict && (
+              <p>
+                <Button
+                  tone="secondary"
+                  disabled={busy}
+                  onClick={() => {
+                    void api("getDraft", { projectId, id })
+                      .then(setConflict)
+                      .catch(failed);
+                  }}
+                >
+                  Consultar versión del servidor
+                </Button>
+              </p>
+            )}
           </div>
         )}
         {!editing && saveStatus}
@@ -728,16 +749,19 @@ function ResponseEditor({
                   compact
                   question={server.question}
                   value={values.answer}
-                  onChange={(a) =>
-                    form.setValue("answer", a, { shouldDirty: true })
-                  }
+                  onChange={(a) => {
+                    form.setValue("answer", a, { shouldDirty: true });
+                    edited("answer");
+                  }}
                   error={fields.answer}
                   disabled={busy}
                 />
                 <Textarea
                   label="Comentario adicional (opcional)"
                   rows={2}
-                  {...form.register("comment")}
+                  {...form.register("comment", {
+                    onChange: () => edited("comment"),
+                  })}
                   maxLength={10000}
                   error={fields.comment}
                   disabled={busy}
@@ -746,7 +770,10 @@ function ResponseEditor({
                   <summary>Agregar un ejemplo (opcional)</summary>
                   <Textarea
                     label="Ejemplo (opcional)"
-                    {...form.register("example")}
+                    {...form.register("example", {
+                      onChange: () => edited("example"),
+                    })}
+                    error={fields.example}
                     maxLength={10000}
                     disabled={busy}
                   />

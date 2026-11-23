@@ -550,12 +550,29 @@
   color: var(--ac-ink-2);
 }
 .acta-participant .save-status {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+  block-size: 3em;
   margin: 0 0 12px;
-  color: var(--ac-success);
+  color: var(--ac-muted);
   font-size: var(--ac-text-meta);
+  line-height: 1.5;
 }
-.acta-participant .save-status:empty {
-  display: none;
+.acta-participant .save-status-saving {
+  color: var(--ac-info);
+}
+.acta-participant .save-status-saved {
+  color: var(--ac-success);
+}
+.acta-participant .save-status-error {
+  color: var(--ac-danger);
+}
+@media (max-width: 600px) {
+  .acta-participant .save-status {
+    block-size: 6em;
+  }
 }
 .acta-participant .participant-yesno {
   display: grid;

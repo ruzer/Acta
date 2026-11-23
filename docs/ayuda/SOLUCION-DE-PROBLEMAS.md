@@ -63,10 +63,11 @@ avisa a administración si continúa. Puedes intentar resolverlo tú.
 
 ## Respuestas y archivos
 
-### 10. «No se pudo guardar. Tu texto sigue aquí»
+### 10. «No se pudo guardar:»
 
-El intento de guardado falló; el texto sigue visible, pero no debes asumir que
-llegó al servicio. Conserva una copia privada, revisa tu conexión y vuelve a usar
+El aviso incluye la causa del error y «Tu texto sigue aquí». El texto sigue
+visible, pero no debes asumir que llegó al servicio. Si indica un campo,
+corrígelo; su error se quita al editar y se revisa de nuevo al guardar. Conserva una copia privada, revisa tu conexión y vuelve a usar
 **Guardar y salir**. Si persiste, avisa a administración con la hora, sin compartir
 el contenido de la respuesta.
 
