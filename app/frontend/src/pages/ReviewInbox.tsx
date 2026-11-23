@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { cleanReviewSearch, rememberReviewSearch } from "../review-context";
 import { AnalystStatus } from "./AnalystVisual";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
@@ -7,9 +9,13 @@ import { Button, EmptyState, ErrorState, LoadingState, Select } from "../ui";
 import { PageHeader } from "../ui/semantic";
 import { dateText, reviewLabels } from "./ReviewShared";
 import { plural } from "../ui/plural";
-export function ReviewInbox() {
+export function ReviewInbox({ userId = "" }: { userId?: string }) {
   const [params, setParams] = useSearchParams();
   const input = Object.fromEntries(params);
+  const search = cleanReviewSearch(params.toString()) ?? "";
+  useEffect(() => {
+    rememberReviewSearch(userId, search);
+  }, [userId, search]);
   const q = useQuery({
     queryKey: ["review-inbox", input],
     queryFn: () => api("listReviewInbox", {}, input),
@@ -123,7 +129,7 @@ export function ReviewInbox() {
                     </p>
                     <h2>
                       <Link
-                        to={`/projects/${item.projectId}/review/${item.questionId}`}
+                        to={`/projects/${item.projectId}/review/${item.questionId}?reviewSearch=${encodeURIComponent(search)}`}
                         state={{ reviewSearch: params.toString() }}
                       >
                         {item.question}

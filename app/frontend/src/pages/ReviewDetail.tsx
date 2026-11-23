@@ -1,3 +1,4 @@
+import { reviewReturnSearch } from "../review-context";
 import {
   AnalystStatus,
   DecisionRecord,
@@ -40,7 +41,7 @@ import {
 } from "./ReviewActions";
 import { dateText } from "./ReviewShared";
 import { nextToReview } from "./attention-data";
-export function ReviewDetail() {
+export function ReviewDetail({ userId = "" }: { userId?: string }) {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const contrastHeading = useRef<HTMLHeadingElement>(null);
@@ -63,10 +64,12 @@ export function ReviewDetail() {
     (location.state as { questionnaireReturn?: unknown } | null)
       ?.questionnaireReturn === true;
   const { projectId = "", id = "" } = useParams();
-  const reviewSearch =
-    typeof savedSearch === "string"
-      ? new URLSearchParams(savedSearch).toString()
-      : new URLSearchParams({ projectId }).toString();
+  const reviewSearch = reviewReturnSearch(
+    userId,
+    projectId,
+    searchParams.get("reviewSearch"),
+    savedSearch,
+  );
   const source = (
     location.state as {
       workbenchReturn?: { view?: unknown; search?: unknown };
