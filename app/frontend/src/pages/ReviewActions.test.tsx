@@ -431,6 +431,9 @@ it("Guardar y pasar valida los mismos campos y solo avanza tras registrar la dec
   await user.click(advance);
   expect(api).not.toHaveBeenCalled();
   expect(next).not.toHaveBeenCalled();
+  await waitFor(() =>
+    expect(screen.getByRole("alert").parentElement).toHaveFocus(),
+  );
   await user.type(
     screen.getByLabelText("Decisión acordada"),
     "Decisión ficticia",

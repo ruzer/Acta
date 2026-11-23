@@ -218,7 +218,11 @@ export function ReviewDetail({ userId = "" }: { userId?: string }) {
   async function done(goNext = false) {
     anchorSince.current =
       client.getQueryState(["review", projectId, id])?.dataUpdatedAt ?? 0;
-    setAction(null);
+    if (goNext && queue.position?.next) {
+      // La ruta nueva enfoca su encabezado; no devolver el foco al disparador anterior.
+      returnFocus.current = null;
+      setActionState(null);
+    } else setAction(null);
     setMessage("Revisión registrada. El historial se conserva.");
     // La decisión ya está registrada: avanzar no espera consultas en segundo plano.
     if (goNext && queue.position?.next)

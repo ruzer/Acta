@@ -47,6 +47,8 @@ export function useReviewQueue(userId: string, projectId: string, id: string) {
       return snapshot;
     },
     staleTime: Infinity,
+    // Si sessionStorage no está disponible, la cola dura hasta cerrar la sesión.
+    gcTime: Infinity,
     retry: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
