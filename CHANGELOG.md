@@ -8,7 +8,7 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ### Changed
 
-- **Atención con cifras a la vista.** Las preguntas validadas, pendientes de otras personas, con aclaraciones y con conflictos se consultan desde un tablero que reutiliza los filtros existentes.
+- **Atención con cifras a la vista.** El tablero muestra estados, validación por tema y área, y personas con preguntas pendientes; sus cifras reutilizan los filtros existentes. Distingue las preguntas con al menos una respuesta y conserva la tabla de métricas. Los cambios de avance se señalan entre visitas sin movimiento al usar el teclado o la preferencia de movimiento reducido.
 
 ## [0.12.0] - 2026-11-22
 
