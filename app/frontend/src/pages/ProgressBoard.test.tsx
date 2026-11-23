@@ -339,3 +339,30 @@ it("F3.3: distingue un desglose vacío y un grupo sin preguntas, sin inventar po
     "No hay áreas con preguntas publicadas.",
   );
 });
+
+it("F3.4: aclara la métrica de envío, conserva la tabla y no inventa una cifra de respuestas completas", async () => {
+  const { user } = await setup();
+  const board = screen.getByRole("region", { name: "Avance del proyecto" });
+  const label = within(board).getByText("Con al menos una respuesta");
+  expect(label.closest("p")).toHaveTextContent("30 de 36");
+  expect(label.closest("p")).toHaveTextContent("83.33 %");
+  expect(
+    screen.queryByText(/Completas \(todas las personas del área\)/),
+  ).not.toBeInTheDocument();
+  await user.click(
+    screen.getByText("Tabla de métricas", { selector: "summary" }),
+  );
+  const table = screen.getByRole("table");
+  expect(table).toBeVisible();
+  expect(
+    within(table).getByRole("columnheader", {
+      name: "Con al menos una respuesta",
+    }),
+  ).toBeVisible();
+  expect(
+    within(table).getByRole("cell", { name: "18 / 20 · 90 %" }),
+  ).toBeVisible();
+  expect(
+    screen.queryByText("Con respuestas", { exact: true }),
+  ).not.toBeInTheDocument();
+});

@@ -62,7 +62,7 @@ function MetricRow({ value }: { value: z.infer<typeof C.metricsView> }) {
     <div className="metric-row">
       <Metric label="Validación" value={value.validation} />
       <Metric label="Cierre" value={value.closure} />
-      <Metric label="Con respuestas" value={value.submission} />
+      <Metric label="Con al menos una respuesta" value={value.submission} />
     </div>
   );
 }
@@ -162,7 +162,7 @@ export function Dashboard({ userId }: { userId: string }) {
       />
       <ParticipationCard projectId={projectId} />
       <details className="pw-metrics">
-        <summary>Resumen y métricas</summary>
+        <summary>Tabla de métricas</summary>
         <h2>Resumen</h2>
         <p>
           Preguntas publicadas y no archivadas. Una respuesta enviada aún
@@ -219,7 +219,7 @@ export function Dashboard({ userId }: { userId: string }) {
                 <th scope="col">Grupo</th>
                 <th scope="col">Validación</th>
                 <th scope="col">Cierre</th>
-                <th scope="col">Con respuestas</th>
+                <th scope="col">Con al menos una respuesta</th>
               </tr>
             </thead>
             <tbody>

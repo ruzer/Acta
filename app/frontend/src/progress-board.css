@@ -261,3 +261,13 @@
     gap: 2px 12px;
   }
 }
+
+.pb-submission {
+  margin: 12px 0 0;
+  color: var(--ac-muted);
+  font: 400 14px/1.4 var(--ac-font-ui);
+}
+.pb-submission strong {
+  color: var(--ac-ink);
+  font-weight: 600;
+}

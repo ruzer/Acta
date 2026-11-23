@@ -94,6 +94,17 @@ export function ProgressBoard({
           );
         })}
       </div>
+      <p className="pb-submission">
+        <span>Con al menos una respuesta</span>{" "}
+        <strong>
+          {data.metrics.submission.numerator} de{" "}
+          {data.metrics.submission.denominator}
+        </strong>{" "}
+        ·{" "}
+        {data.metrics.submission.percentage === null
+          ? "Sin preguntas"
+          : `${data.metrics.submission.percentage.toLocaleString("es-MX")} %`}
+      </p>
       <div className="pb-state-summary">
         {totalQuestions === 0 && <p>Aún no hay preguntas publicadas.</p>}
         <div
