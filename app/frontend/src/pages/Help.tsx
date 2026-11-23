@@ -32,10 +32,10 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
               <strong>Iniciar sesión</strong> con la nueva contraseña.
             </li>
             <li>
-              Al entrar verás <strong>Mi trabajo</strong>. La fecha límite es un
-              aviso; permite responder después. Pulsa el nombre del proyecto y{" "}
-              <strong>Responder</strong> junto a una pregunta. Lee su ayuda.
-              Responde sin inventar información.
+              En <strong>Mi trabajo</strong>, revisa cuántas preguntas enviaste;
+              <strong> No aplica</strong> no cuenta. La fecha límite permite
+              responder después. Abre el proyecto y pulsa{" "}
+              <strong>Responder</strong>. Lee su ayuda; no inventes información.
             </li>
             <li>
               Acta guarda el borrador tras una pausa. Espera el aviso; aún no lo

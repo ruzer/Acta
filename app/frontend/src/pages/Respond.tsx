@@ -39,6 +39,7 @@ import {
 import { StatusChip } from "../ui/semantic";
 import { ParticipantIcon } from "./ParticipantIcon";
 import { AnswerControl, answerText } from "./AnswerControl";
+import { ResponseProgress } from "./ResponseProgress";
 import { SaveStatus } from "./SaveStatus";
 import { registerConsultationUndo } from "./ConsultationNotice";
 const empty: ResponseContent = {
@@ -663,28 +664,12 @@ function ResponseEditor({
   );
   return (
     <section ref={pageRef} className="response-page participant-page">
-      <div className="participant-step-meta">
-        <span>
-          {server.question.position
-            ? `Pregunta ${server.question.position} de ${server.question.total}`
-            : "Fuera del recorrido actual"}
-        </span>
-      </div>
-      <div
-        className="participant-progress"
-        role="progressbar"
-        aria-label="Posición en el cuestionario"
-        aria-valuetext={`Pregunta ${server.question.position} de ${server.question.total}. La posición no indica cuántas respuestas has enviado.`}
-        aria-valuemin={0}
-        aria-valuemax={Math.max(1, server.question.total)}
-        aria-valuenow={Math.max(0, server.question.position - 1)}
-      >
-        <span
-          style={{
-            width: `${server.question.total ? (Math.max(0, server.question.position - 1) / server.question.total) * 100 : 0}%`,
-          }}
-        />
-      </div>
+      <ResponseProgress
+        projectId={projectId}
+        id={id}
+        position={server.question.position}
+        total={server.question.total}
+      />
       <div className="participant-answer-card">
         <p className="participant-overline">{server.question.sectionTitle}</p>
         <h1>{server.question.question}</h1>

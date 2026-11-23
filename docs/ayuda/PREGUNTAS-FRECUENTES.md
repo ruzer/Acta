@@ -52,6 +52,13 @@ Aplica a: Participante.
 
 Más información: [Guía de Participante](../pilot/GUIA-PARTICIPANTE.md).
 
+### ¿Por qué el avance no cuenta todas las preguntas que veo?
+Aplica a: Participante.
+
+Solo cuenta preguntas asignadas y aplicables. **No aplica** queda fuera del avance, igual que una pregunta cuya condición todavía no se cumple. La barra distingue **Enviadas**, **Borradores sin enviar** y **Pendientes sin borrador**. Un borrador sobre una pregunta ya enviada se explica aparte: no se cuenta dos veces. La posición de la pregunta indica dónde estás; el número de enviadas indica tu avance.
+
+Más información: [Guía de Participante](../pilot/GUIA-PARTICIPANTE.md).
+
 ### ¿Por qué no puedo deshacer Enviar respuesta?
 Aplica a: Participante y personas invitadas.
 

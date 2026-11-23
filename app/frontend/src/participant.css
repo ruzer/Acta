@@ -506,6 +506,18 @@
 }
 
 /* ---- Answering ---- */
+.participant-response-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  color: var(--ac-muted);
+  font-size: var(--ac-text-ui);
+}
+@media (max-width: 899px) {
+  .participant-response-summary .participant-step-meta {
+    display: inline;
+  }
+}
 .participant-step-meta {
   display: none;
 }

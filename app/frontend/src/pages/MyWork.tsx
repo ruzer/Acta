@@ -1,3 +1,4 @@
+import { participantProgress } from "./participant-progress";
 import { ResponseDeadline } from "./ResponseDeadline";
 import { useState } from "react";
 import { useQueries, useQuery } from "@tanstack/react-query";
@@ -31,9 +32,12 @@ export function PersonalProgress({ projectId }: { projectId: string }) {
   if (q.isPending) return <p role="status">Consultando tu avance…</p>;
   if (q.error)
     return <ErrorState error={q.error} retry={() => void q.refetch()} />;
+  const progress = participantProgress(
+    q.data.sections.flatMap((s) => s.questions),
+  );
   return (
     <p>
-      {q.data.progress.sent} de {q.data.progress.enabled} respuestas enviadas
+      {progress.sent} de {progress.total} respuestas enviadas
     </p>
   );
 }
@@ -91,11 +95,7 @@ export function ParticipantHome({
       <Welcome
         refreshing={results.some((q) => q.isFetching)}
         items={candidates.map((c) => c.q)}
-        progress={{
-          sent: entries.reduce((n, p) => n + p.data.progress.sent, 0),
-          total: entries.reduce((n, p) => n + p.data.progress.enabled, 0),
-          drafts: entries.reduce((n, p) => n + p.data.progress.drafts, 0),
-        }}
+        progress={participantProgress(candidates.map((c) => c.q))}
         href={next ? participantPath(next.projectId, next.q) : undefined}
         waiting={waiting.map((c) => ({
           href: participantPath(c.projectId, c.q),
@@ -125,7 +125,13 @@ export function Welcome({
   refreshing?: boolean;
   items: PersonalQuestion[];
   href?: string;
-  progress: { sent: number; total: number; drafts: number };
+  progress: {
+    sent: number;
+    total: number;
+    drafts: number;
+    overlappingDrafts?: number;
+    notApplicable?: number;
+  };
   waiting: { href: string; question: string; title: string }[];
 }) {
   const counts = participantCounts(items);
@@ -145,6 +151,20 @@ export function Welcome({
           <ParticipantIcon name="info" /> Usa “Guardar y salir” para conservar
           tu borrador y retomarlo después.
         </p>
+        {!!progress.notApplicable && (
+          <p>
+            {progress.notApplicable === 1
+              ? "1 pregunta marcada como No aplica no se cuenta en el avance."
+              : `${progress.notApplicable} preguntas marcadas como No aplica no se cuentan en el avance.`}
+          </p>
+        )}
+        {!!progress.overlappingDrafts && (
+          <p>
+            {progress.overlappingDrafts === 1
+              ? "1 borrador corresponde a una pregunta que ya enviaste; no se suma de nuevo en la barra."
+              : `${progress.overlappingDrafts} borradores corresponden a preguntas que ya enviaste; no se suman de nuevo en la barra.`}
+          </p>
+        )}
         {undetermined > 0 && (
           <p>
             {undetermined === 1
@@ -225,11 +245,7 @@ export function MyWork() {
       <Welcome
         refreshing={q.isFetching}
         items={items}
-        progress={{
-          sent: q.data.progress.sent,
-          total: q.data.progress.enabled,
-          drafts: q.data.progress.drafts,
-        }}
+        progress={participantProgress(items)}
         href={next ? participantPath(projectId, next) : undefined}
         waiting={items
           .filter((item) => participantState(item) === "clarification")

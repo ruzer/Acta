@@ -242,3 +242,19 @@ it("la ayuda explica que Deshacer retira Por consultar, conserva el borrador y d
     expect(content, path).toContain("borrador se conserva");
   }
 });
+
+it("la ayuda y la guía aclaran que No aplica queda fuera del avance", () => {
+  for (const path of [
+    "app/frontend/src/pages/Help.tsx",
+    "docs/pilot/GUIA-PARTICIPANTE.md",
+    `${folder}/PREGUNTAS-FRECUENTES.md`,
+  ]) {
+    const content = compact(read(path));
+    expect(content, path).toContain("No aplica");
+    expect(content, path).toMatch(/no cuenta|fuera del avance/);
+  }
+  const faq = read(`${folder}/PREGUNTAS-FRECUENTES.md`);
+  expect(faq).toContain("Borradores sin enviar");
+  expect(faq).toContain("Pendientes sin borrador");
+  expect(faq).toContain("no se cuenta dos veces");
+});
