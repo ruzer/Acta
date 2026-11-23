@@ -48,6 +48,19 @@ Hay una regla de precedencia: **si defines la variable (no vacía), la infraestr
 | DEFAULT_TIMEZONE       | UTC                   | Zona IANA válida para fechas de revisión/participante                                        |
 | SETUP_WIZARD           | auto                  | `auto`: ofrece el asistente de primera instalación mientras no haya administrador. `disabled`: lo apaga (crea al administrador con `bootstrap-admin`) |
 
+La zona predeterminada de Acta sigue siendo **UTC**. Si nadie elige otra zona y
+`DEFAULT_TIMEZONE` no está definido, las horas de guardado, revisión y Bitácora se
+muestran en UTC; los plazos también se calculan con esa zona. No se cambia el valor
+original de las fechas guardadas. Las respuestas que contienen solo un día se leen
+como **día/mes/año**, sin desplazarlas por zona.
+
+En la primera instalación, el asistente propone la zona válida del navegador solo
+si todavía se usa el valor predeterminado. Revísala en **Personalización → Zona
+horaria**: puedes elegir otra antes de terminar. Una zona guardada por administración
+o definida con `DEFAULT_TIMEZONE` conserva su prioridad. Si el navegador no informa
+una zona válida, se conserva el valor predeterminado. Después se puede revisar en
+**Administración → Configuración**, salvo que la infraestructura controle el valor.
+
 `.env.example` deja comentadas las variables de apariencia para que copiarlo no las fije. Añadir assets propios en `app/frontend/public/branding/` y reconstruir frontend, o montar un directorio de assets revisados en `/usr/share/nginx/html/branding` de solo lectura, sigue funcionando para `APP_LOGO`/`APP_FAVICON`. No incorporar logos con restricciones sin permiso. Solo estos datos públicos salen por `/api/v1/configuration/public`; nunca se expone el entorno completo.
 
 ## Secretos y persistencia

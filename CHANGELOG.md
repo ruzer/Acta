@@ -8,7 +8,7 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ### Fixed
 
-- **Fechas y horas de la organización.** La Bitácora usa la zona y el formato configurados para la instalación; la hora de guardado comparte el mismo criterio, sin cambiar los instantes guardados ni el autoguardado.
+- **Fechas y horas de la organización.** La Bitácora y la hora de guardado usan la zona configurada; las fechas de respuesta se leen como día/mes/año y los plazos explican su zona con un nombre legible. El asistente propone la zona del navegador solo cuando aún no existe una elección explícita. Se conservan los instantes guardados, los exportes y la frecuencia del autoguardado.
 
 ## [0.12.0] - 2026-11-22
 

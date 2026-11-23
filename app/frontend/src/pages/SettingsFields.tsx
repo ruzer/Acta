@@ -6,6 +6,7 @@ import {
   type SettingField,
 } from "@requirements/contracts";
 import { Marks } from "../branding";
+import { isValidTimezone } from "../initial-timezone";
 import { Input, Select } from "../ui";
 import { StatusChip } from "../ui/semantic";
 
@@ -68,14 +69,18 @@ export function TimezoneSelect({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const options =
+    zones.includes(value) || !isValidTimezone(value)
+      ? zones
+      : [...zones, value].sort();
   return (
     <Select
       label="Zona horaria"
-      hint="Se usa para mostrar las fechas de revisión y de los participantes."
+      hint="Se usa en la hora de guardado, los plazos, las revisiones y la Bitácora."
       value={value}
       onChange={(event) => onChange(event.target.value)}
     >
-      {zones.map((zone) => (
+      {options.map((zone) => (
         <option key={zone} value={zone}>
           {zone}
         </option>
