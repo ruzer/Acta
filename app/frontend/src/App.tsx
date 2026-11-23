@@ -1,4 +1,5 @@
 import { clearDraftTexts } from "./draft-recovery";
+import { clearSessionPresentation } from "./session-presentation";
 import { ProjectShell } from "./shell/ProjectShell";
 import { OrganizationShell } from "./shell/OrganizationShell";
 import { PageHeader } from "./ui/semantic";
@@ -217,6 +218,7 @@ function Session() {
         if (active) setLoading(false);
       });
     const expired = () => {
+      clearSessionPresentation();
       clearDraftTexts();
       setExpired(true);
       setCsrf("");
@@ -259,6 +261,7 @@ function Session() {
       proceed();
   }
   function signedOut(message: string, username = "") {
+    clearSessionPresentation();
     clearDraftTexts();
     setLoginUsername(username);
     navigate("/", { replace: true });
@@ -275,6 +278,7 @@ function Session() {
         notice={notice}
         username={loginUsername}
         onLogin={(m) => {
+          clearSessionPresentation();
           clearDraftTexts(m.user.id);
           client.clear();
           navigate("/", { replace: true });

@@ -310,3 +310,30 @@
   min-height: 44px;
   margin-top: 4px;
 }
+
+.pb-metric-number {
+  position: relative;
+}
+.pb-number-current {
+  display: inline-block;
+}
+.pb-previous-number {
+  position: absolute;
+  inset: 0 auto auto 0;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.pb-changed {
+  background-color: var(--ac-warning-weak);
+}
+.pb-list-emphasis {
+  position: relative;
+}
+.pb-list-outline {
+  position: absolute;
+  inset: -4px;
+  pointer-events: none;
+  outline: 2px solid var(--ac-ink);
+  outline-offset: 2px;
+  border-radius: 4px;
+}

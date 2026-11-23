@@ -171,6 +171,24 @@ async function dashboardFixture(page: Page) {
   return {
     projectId,
     unexpected,
+    setValidated: (value: number) => {
+      const difference = value - dashboard.metrics.validation.numerator;
+      dashboard.metrics = { ...dashboard.metrics, validation: metric(value) };
+      dashboard.states = dashboard.states.map((state) => ({
+        ...state,
+        count:
+          state.count +
+          (state.status === "VALIDATED"
+            ? difference
+            : state.status === "PARTIAL"
+              ? -difference
+              : 0),
+      }));
+      dashboard.breakdowns = dashboard.breakdowns.map((row) => ({
+        ...row,
+        metrics: dashboard.metrics,
+      }));
+    },
     participationRequests: () => participationRequests,
   };
 }
@@ -291,3 +309,236 @@ for (const colorScheme of ["light", "dark"] as const) {
     });
   }
 }
+
+type MotionRecord = {
+  target: string;
+  duration: number;
+  easing: string;
+  frames: Record<string, unknown>[];
+};
+type MotionEvidence = {
+  animations: MotionRecord[];
+  scrolls: { time: number; top: number }[];
+};
+type MotionWindow = Window & { f3Motion: MotionEvidence };
+async function observeMotion(page: Page) {
+  await page.addInitScript(() => {
+    const evidence: MotionEvidence = { animations: [], scrolls: [] };
+    (window as MotionWindow).f3Motion = evidence;
+    const seen = new WeakSet<Animation>();
+    let scrollStart: number | null = null;
+    window.addEventListener(
+      "click",
+      (event) => {
+        if (
+          event.target instanceof Element &&
+          event.target.closest(".pb-metric")
+        ) {
+          scrollStart = performance.now();
+          evidence.scrolls = [];
+        }
+      },
+      true,
+    );
+    const record = (now: number) => {
+      for (const animation of document.getAnimations()) {
+        const effect = animation.effect;
+        if (
+          !(effect instanceof KeyframeEffect) ||
+          !(effect.target instanceof Element) ||
+          !effect.target.closest(".pb-board,.pb-list-emphasis")
+        )
+          continue;
+        if (seen.has(animation)) continue;
+        seen.add(animation);
+        const timing = effect.getTiming();
+        evidence.animations.push({
+          target:
+            effect.target.getAttribute("data-pb-motion") ??
+            effect.target.className,
+          duration: Number(timing.duration),
+          easing: timing.easing,
+          frames: effect
+            .getKeyframes()
+            .map((frame) =>
+              Object.fromEntries(
+                Object.entries(frame).filter(
+                  ([key]) =>
+                    ![
+                      "offset",
+                      "computedOffset",
+                      "easing",
+                      "composite",
+                    ].includes(key),
+                ),
+              ),
+            ),
+        });
+      }
+      if (scrollStart !== null && now - scrollStart <= 1100)
+        evidence.scrolls.push({ time: now - scrollStart, top: scrollY });
+      requestAnimationFrame(record);
+    };
+    requestAnimationFrame(record);
+  });
+}
+async function motionEvidence(page: Page) {
+  return page.evaluate(() => (window as MotionWindow).f3Motion);
+}
+async function snapshotSaved(page: Page, projectId: string, value: number) {
+  await expect
+    .poll(() =>
+      page.evaluate(
+        ({ projectId }) => {
+          const raw = sessionStorage.getItem(
+            `acta-ux:6771ed99-97aa-469f-9502-84bb48b86015:${projectId}:progress`,
+          );
+          return raw ? JSON.parse(raw).values["value:VALIDATED"].value : null;
+        },
+        { projectId },
+      ),
+    )
+    .toBe(value);
+}
+
+test("F3.7: solo los cambios entre visitas animan transform y opacity con duración medida", async ({
+  page,
+}, testInfo) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await observeMotion(page);
+  const data = await dashboardFixture(page);
+  await page.goto(`/projects/${data.projectId}/dashboard`);
+  await snapshotSaved(page, data.projectId, 17);
+  expect((await motionEvidence(page)).animations).toEqual([]);
+  await page.mouse.click(10, 10);
+  await page.reload();
+  await snapshotSaved(page, data.projectId, 17);
+  expect((await motionEvidence(page)).animations).toEqual([]);
+  data.setValidated(18);
+  await page.mouse.click(10, 10);
+  await page.reload();
+  await snapshotSaved(page, data.projectId, 18);
+  await expect
+    .poll(async () => (await motionEvidence(page)).animations.length)
+    .toBeGreaterThan(0);
+  const evidence = await motionEvidence(page);
+  expect(evidence.animations.some((item) => item.duration === 250)).toBe(true);
+  expect(evidence.animations.some((item) => item.duration === 380)).toBe(true);
+  for (const item of evidence.animations) {
+    expect([250, 380]).toContain(item.duration);
+    expect(item.easing.replaceAll(" ", "")).toBe("cubic-bezier(0.22,1,0.36,1)");
+    for (const frame of item.frames)
+      expect(
+        Object.keys(frame).every((key) =>
+          ["transform", "opacity"].includes(key),
+        ),
+      ).toBe(true);
+  }
+  expect(
+    evidence.animations.filter((item) => item.target === "value:CONFLICT"),
+  ).toEqual([]);
+  await testInfo.attach("movimiento-entre-visitas", {
+    body: JSON.stringify(evidence, null, 2),
+    contentType: "application/json",
+  });
+  expect(data.unexpected).toEqual([]);
+});
+
+test("F3.7: reduced-motion cambia al instante y usa resalte estático600ms", async ({
+  page,
+}, testInfo) => {
+  await observeMotion(page);
+  const data = await dashboardFixture(page);
+  await page.goto(`/projects/${data.projectId}/dashboard`);
+  await snapshotSaved(page, data.projectId, 17);
+  data.setValidated(18);
+  await page.addInitScript(() => {
+    const w = window as Window & {
+      f3Highlight?: { start: number; end: number };
+    };
+    let start: number | null = null;
+    const record = (now: number) => {
+      if (document.querySelector(".pb-changed")) start ??= now;
+      else if (start !== null) {
+        w.f3Highlight = { start, end: now };
+        return;
+      }
+      requestAnimationFrame(record);
+    };
+    requestAnimationFrame(record);
+  });
+  await page.reload();
+  await snapshotSaved(page, data.projectId, 18);
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => (window as Window & { f3Highlight?: unknown }).f3Highlight,
+      ),
+    )
+    .toBeTruthy();
+  const highlight = await page.evaluate(
+    () =>
+      (window as Window & { f3Highlight?: { start: number; end: number } })
+        .f3Highlight!,
+  );
+  expect(highlight.end - highlight.start).toBeGreaterThanOrEqual(570);
+  expect(highlight.end - highlight.start).toBeLessThanOrEqual(650);
+  expect((await motionEvidence(page)).animations).toEqual([]);
+  await testInfo.attach("resalte-reduced-motion", {
+    body: JSON.stringify(highlight),
+    contentType: "application/json",
+  });
+  expect(data.unexpected).toEqual([]);
+});
+
+test("F3.7: clic desplaza250ms y contorno800ms; teclado no anima", async ({
+  page,
+}, testInfo) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await observeMotion(page);
+  const data = await dashboardFixture(page);
+  await page.goto(`/projects/${data.projectId}/dashboard`);
+  await snapshotSaved(page, data.projectId, 17);
+  await page.getByRole("button", { name: /^Requieren aclaración 14/ }).click();
+  await expect(page).toHaveURL(/status=CLARIFICATION_REQUIRED/);
+  await expect
+    .poll(
+      async () =>
+        (await motionEvidence(page)).animations.find(
+          (item) => item.target === "pb-list-outline",
+        )?.duration,
+    )
+    .toBe(800);
+  await expect(page.locator(".pb-list-outline")).toHaveCount(0);
+  const evidence = await motionEvidence(page);
+  const outline = evidence.animations.find(
+    (item) => item.target === "pb-list-outline",
+  )!;
+  expect(outline.frames.map((frame) => Object.keys(frame))).toEqual([
+    ["opacity"],
+    ["opacity"],
+  ]);
+  const moving = evidence.scrolls.filter(
+    (sample, index) =>
+      index > 0 &&
+      Math.abs(sample.top - evidence.scrolls[index - 1]!.top) >= 0.1,
+  );
+  expect(moving.length).toBeGreaterThan(2);
+  // Animation frames quantize the exact250ms program duration by up to two frames.
+  expect(moving.at(-1)!.time).toBeGreaterThanOrEqual(230);
+  expect(moving.at(-1)!.time).toBeLessThanOrEqual(320);
+  await testInfo.attach("desplazamiento-y-contorno", {
+    body: JSON.stringify(evidence, null, 2),
+    contentType: "application/json",
+  });
+  await page.evaluate(() => {
+    (window as MotionWindow).f3Motion.animations = [];
+  });
+  await page.getByRole("button", { name: /^Conflictos 2/ }).focus();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/status=CONFLICT/);
+  await expect(page.locator("#dashboard-questions")).toBeInViewport();
+  expect((await motionEvidence(page)).animations).toEqual([]);
+  await expect(page.locator(".pb-list-outline")).toHaveCount(0);
+  expect(data.unexpected).toEqual([]);
+});

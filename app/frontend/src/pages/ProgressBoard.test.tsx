@@ -1,5 +1,12 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -219,9 +226,8 @@ it.each([
   "F3.1: %s conserva parámetros ajenos y reutiliza status=%s",
   async (label, status) => {
     const { user } = await setup({ search: "?task=ready&keep=si" });
-    await user.click(
-      screen.getByRole("button", { name: new RegExp(`^${label} `) }),
-    );
+    screen.getByRole("button", { name: new RegExp(`^${label} `) }).focus();
+    await user.keyboard("{Enter}");
     const params = new URLSearchParams(
       screen.getByLabelText("Filtros actuales").textContent ?? "",
     );
@@ -417,5 +423,348 @@ it("F3.6: el nombre accesible contiene el rótulo visible completo de cada cifra
     const visible = button.textContent?.replace(/\s+/g, " ").trim();
     expect(visible).toBeTruthy();
     expect(button.getAttribute("aria-label")).toContain(visible);
+  }
+});
+
+function motionObserver() {
+  const descriptor = Object.getOwnPropertyDescriptor(
+    Element.prototype,
+    "animate",
+  );
+  const calls: {
+    element: Element;
+    frames: Keyframe[];
+    options: KeyframeAnimationOptions;
+  }[] = [];
+  Object.defineProperty(Element.prototype, "animate", {
+    configurable: true,
+    value: function (
+      this: Element,
+      frames: Keyframe[],
+      options: KeyframeAnimationOptions,
+    ) {
+      calls.push({ element: this, frames, options });
+      return {
+        cancel: vi.fn(),
+        finished: Promise.resolve(),
+        onfinish: null,
+      } as unknown as Animation;
+    },
+  });
+  let nextId = 0;
+  const pending = new Map<number, FrameRequestCallback>();
+  const raf = vi
+    .spyOn(window, "requestAnimationFrame")
+    .mockImplementation((callback) => {
+      const id = ++nextId;
+      pending.set(id, callback);
+      return id;
+    });
+  const cancel = vi
+    .spyOn(window, "cancelAnimationFrame")
+    .mockImplementation((id) => {
+      pending.delete(id);
+    });
+  return {
+    calls,
+    flush: (time = 0) => {
+      const callbacks = [...pending.values()];
+      pending.clear();
+      act(() => {
+        for (const callback of callbacks) callback(time);
+      });
+    },
+    restore: () => {
+      raf.mockRestore();
+      cancel.mockRestore();
+      if (descriptor)
+        Object.defineProperty(Element.prototype, "animate", descriptor);
+      else Reflect.deleteProperty(Element.prototype, "animate");
+    },
+  };
+}
+const changedData = {
+  ...data,
+  metrics: { ...data.metrics, validation: metric(13) },
+  states: data.states.map((state) => ({
+    ...state,
+    count:
+      state.status === "VALIDATED"
+        ? 13
+        : state.status === "NOT_REVIEWED"
+          ? 3
+          : state.count,
+  })),
+  breakdowns: data.breakdowns.map((row) =>
+    row.key === "s1"
+      ? { ...row, metrics: { ...row.metrics, validation: metric(9, 20) } }
+      : row,
+  ),
+};
+
+it("F3.7: primera visita y segunda sin cambios guardan solo cifras y no animan", async () => {
+  const motion = motionObserver();
+  try {
+    const first = await setup();
+    motion.flush();
+    expect(motion.calls).toHaveLength(0);
+    const key = `acta-ux:analyst-a:${fixture.projectId}:progress`;
+    const saved = sessionStorage.getItem(key);
+    expect(saved).not.toBeNull();
+    expect(saved).not.toMatch(/Persona ficticia|Recepción|password|"answer"/i);
+    first.unmount();
+    await setup();
+    motion.flush();
+    expect(motion.calls).toHaveLength(0);
+  } finally {
+    motion.restore();
+  }
+});
+
+it("F3.7: un cambio real anima cifras250ms y barras380ms usando solo transform y opacity", async () => {
+  const motion = motionObserver();
+  try {
+    const first = await setup();
+    motion.flush();
+    first.unmount();
+    await setup({ data: changedData });
+    motion.flush();
+    expect(motion.calls.length).toBeGreaterThan(0);
+    expect(motion.calls.some((call) => call.options.duration === 250)).toBe(
+      true,
+    );
+    expect(motion.calls.some((call) => call.options.duration === 380)).toBe(
+      true,
+    );
+    for (const call of motion.calls) {
+      expect([250, 380]).toContain(call.options.duration);
+      expect(call.options.easing).toBe("cubic-bezier(0.22,1,0.36,1)");
+      for (const frame of call.frames)
+        expect(
+          Object.keys(frame).every((key) =>
+            ["transform", "opacity"].includes(key),
+          ),
+        ).toBe(true);
+    }
+    expect(
+      motion.calls.filter((call) =>
+        call.element.closest('[data-pb-breakdown="s2"]'),
+      ),
+    ).toHaveLength(0);
+  } finally {
+    motion.restore();
+  }
+});
+
+it.each([{ userId: "analyst-b" }, { projectId: "project-b" }])(
+  "F3.7: otro usuario o proyecto no hereda animaciones (%j)",
+  async (options) => {
+    const motion = motionObserver();
+    try {
+      const first = await setup();
+      motion.flush();
+      first.unmount();
+      await setup({ ...options, data: changedData });
+      motion.flush();
+      expect(motion.calls).toHaveLength(0);
+    } finally {
+      motion.restore();
+    }
+  },
+);
+
+it("F3.7: reduced-motion actualiza sin animar y resalta durante600ms", async () => {
+  const motion = motionObserver();
+  try {
+    const first = await setup();
+    motion.flush();
+    first.unmount();
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: query === "(prefers-reduced-motion: reduce)",
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    await setup({ data: changedData });
+    vi.useFakeTimers();
+    motion.flush();
+    expect(motion.calls).toHaveLength(0);
+    expect(document.querySelectorAll(".pb-changed").length).toBeGreaterThan(0);
+    act(() => {
+      vi.advanceTimersByTime(599);
+    });
+    expect(document.querySelectorAll(".pb-changed").length).toBeGreaterThan(0);
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(document.querySelectorAll(".pb-changed")).toHaveLength(0);
+  } finally {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+    motion.restore();
+  }
+});
+
+it("F3.7: una actualización recibida mientras se usa teclado no anima", async () => {
+  const motion = motionObserver();
+  try {
+    const { client } = await setup();
+    motion.flush();
+    fireEvent.keyDown(window, { key: "Tab" });
+    await act(async () => {
+      client.setQueryData(["dashboard", fixture.projectId], changedData);
+    });
+    await screen.findByRole("button", { name: /^Validadas 13 de 36/ });
+    motion.flush();
+    expect(motion.calls).toHaveLength(0);
+  } finally {
+    motion.restore();
+  }
+});
+
+it("F3.7: el ratón desplaza en250ms y el contorno solo anima opacidad800ms", async () => {
+  const motion = motionObserver();
+  const scroll = vi
+    .spyOn(window, "scrollTo")
+    .mockImplementation(() => undefined);
+  const oldHeight = Object.getOwnPropertyDescriptor(
+    document.documentElement,
+    "scrollHeight",
+  );
+  Object.defineProperty(document.documentElement, "scrollHeight", {
+    configurable: true,
+    value: 3000,
+  });
+  try {
+    await setup();
+    motion.flush();
+    vi.spyOn(
+      document.getElementById("dashboard-questions")!,
+      "getBoundingClientRect",
+    ).mockReturnValue({ top: 900 } as DOMRect);
+    fireEvent.click(screen.getByRole("button", { name: /^Validadas 12/ }), {
+      detail: 1,
+    });
+    motion.flush(0); // React has applied the filtered list.
+    motion.flush(0); // First scroll frame.
+    expect(scroll).toHaveBeenLastCalledWith({
+      top: expect.closeTo(0, 5),
+      behavior: "instant",
+    });
+    motion.flush(125);
+    const middle = scroll.mock.lastCall![0] as ScrollToOptions;
+    expect(middle.top).toBeGreaterThan(450); // ease-out, not linear.
+    expect(middle.top).toBeLessThan(900);
+    motion.flush(250);
+    expect(scroll).toHaveBeenLastCalledWith({ top: 900, behavior: "instant" });
+    const count = scroll.mock.calls.length;
+    motion.flush(500);
+    expect(scroll).toHaveBeenCalledTimes(count);
+    const outline = motion.calls.find((call) =>
+      call.element.classList.contains("pb-list-outline"),
+    )!;
+    expect(outline.options.duration).toBe(800);
+    expect(outline.frames).toEqual([{ opacity: 1 }, { opacity: 0 }]);
+    expect(outline.element).toHaveAttribute("aria-hidden", "true");
+  } finally {
+    if (oldHeight)
+      Object.defineProperty(
+        document.documentElement,
+        "scrollHeight",
+        oldHeight,
+      );
+    else Reflect.deleteProperty(document.documentElement, "scrollHeight");
+    motion.restore();
+  }
+});
+
+it("F3.7: teclado desplaza de inmediato sin contorno animado", async () => {
+  const motion = motionObserver();
+  try {
+    await setup();
+    motion.flush();
+    fireEvent.keyDown(window, { key: "Enter" });
+    fireEvent.click(screen.getByRole("button", { name: /^Conflictos 1/ }), {
+      detail: 0,
+    });
+    motion.flush();
+    expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({
+      behavior: "instant",
+      block: "start",
+    });
+    expect(motion.calls).toHaveLength(0);
+    expect(document.querySelector(".pb-list-outline")).toBeNull();
+  } finally {
+    motion.restore();
+  }
+});
+
+it("F3.7: memoria ilegible o bloqueada conserva el tablero sin animaciones", async () => {
+  const motion = motionObserver();
+  try {
+    sessionStorage.setItem(
+      `acta-ux:analyst-a:${fixture.projectId}:progress`,
+      "contenido incompleto",
+    );
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("No disponible", "SecurityError");
+    });
+    await setup();
+    motion.flush();
+    expect(
+      screen.getByRole("button", { name: /^Validadas 12 de 36/ }),
+    ).toBeVisible();
+    expect(motion.calls).toHaveLength(0);
+  } finally {
+    motion.restore();
+  }
+});
+
+it("F3.7: el foco programático del título de ruta no se confunde con una acción de teclado", async () => {
+  const motion = motionObserver();
+  try {
+    const first = await setup();
+    motion.flush();
+    first.unmount();
+    await setup({ data: changedData });
+    const heading = screen.getByRole("heading", { name: "Atención" });
+    heading.tabIndex = -1;
+    heading.focus();
+    expect(heading).toHaveFocus();
+    expect(heading.matches(":focus-visible")).toBe(true);
+    motion.flush();
+    expect(motion.calls.some((call) => call.options.duration === 250)).toBe(
+      true,
+    );
+  } finally {
+    motion.restore();
+  }
+});
+
+it("F3.7: un estado que llega a cero conserva el segmento para completar scaleX(0)", async () => {
+  const motion = motionObserver();
+  try {
+    const first = await setup();
+    motion.flush();
+    first.unmount();
+    await setup({
+      data: {
+        ...data,
+        states: data.states.map((state) =>
+          state.status === "CONFLICT"
+            ? { ...state, count: 0 }
+            : state.status === "VALIDATED"
+              ? { ...state, count: 13 }
+              : state,
+        ),
+      },
+    });
+    motion.flush();
+    const segment = motion.calls.find(
+      (call) =>
+        call.element.getAttribute("data-pb-motion") === "bar:state:CONFLICT",
+    );
+    expect(segment?.frames.at(-1)?.transform).toMatch(/scaleX\(0\)$/);
+  } finally {
+    motion.restore();
   }
 });
