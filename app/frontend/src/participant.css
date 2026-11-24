@@ -754,6 +754,20 @@
   width: 32px;
   height: 32px;
 }
+@keyframes participant-celebrate {
+  from { opacity: 0; transform: scale(0.88); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes participant-check-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+.participant-celebrate { animation: participant-celebrate 240ms var(--ac-ease-out); }
+.participant-celebrate .participant-success-check {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: participant-check-draw 320ms var(--ac-ease-out) 120ms backwards;
+}
 .participant-receipt .participant-subtitle {
   margin-top: 8px;
 }

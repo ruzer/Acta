@@ -124,10 +124,7 @@ export async function observeMotion(page: Page) {
         const target = effect?.target;
         if (target instanceof Element)
           measurements.push({
-            target:
-              target.className instanceof Object
-                ? target.tagName
-                : target.className,
+            target: target.getAttribute("class") || target.tagName,
             duration: Number(effect.getTiming().duration),
             delay: effect.getTiming().delay,
             frames: effect.getKeyframes(),

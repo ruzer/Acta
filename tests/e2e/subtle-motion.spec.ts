@@ -84,6 +84,76 @@ test("G1-a: volver a una posición anterior retrocede sin cambiar el tamaño de 
 
 test.use({ actionTimeout: 15000 });
 for (const preference of ["normal", "reduce", "keyboard"] as const) {
+  test(`G1-c: cierre ${preference}, solo celebra al terminar`, async ({
+    page,
+    browser,
+  }) => {
+    const { project, questions } = await motionProject(browser);
+    await observeMotion(page);
+    if (preference === "reduce")
+      await page.emulateMedia({ reducedMotion: "reduce" });
+    await login(page, "stakeholder");
+    await page.goto(`/projects/${project.id}/receipt`);
+    await expect(
+      page.getByRole("heading", { name: "Listo por ahora", exact: true }),
+    ).toBeVisible();
+    await settleMotion(page);
+    expect(await motion(page, "participant-success")).toEqual([]);
+    await page.goto(`/projects/${project.id}/respond/${questions[1]!.id}`);
+    for (const index of [1, 2, 3]) {
+      await expect(
+        page.getByRole("heading", {
+          name: questions[index]!.question,
+          exact: true,
+        }),
+      ).toBeVisible();
+      await page
+        .getByLabel("Tu respuesta", { exact: true })
+        .fill("Respuesta ficticia para terminar");
+      const send = page.getByRole("button", {
+        name: "Enviar respuesta",
+        exact: true,
+      });
+      if (preference === "keyboard") {
+        await send.focus();
+        await page.keyboard.press("Enter");
+      } else await send.click();
+    }
+    await expect(
+      page.getByRole("heading", {
+        name: "Terminaste tus preguntas",
+        exact: true,
+      }),
+    ).toBeVisible();
+    await settleMotion(page);
+    const circles = await motion(page, "participant-success-icon");
+    const checks = await motion(page, "participant-success-check");
+    expect(circles).toHaveLength(preference === "normal" ? 1 : 0);
+    expect(checks).toHaveLength(preference === "normal" ? 1 : 0);
+    if (preference === "normal") {
+      expect(circles[0]!.duration).toBe(240);
+      expect(checks[0]!.duration).toBe(320);
+      expect(checks[0]!.delay).toBe(120);
+      expect(
+        await page
+          .locator(".participant-success-check")
+          .getAttribute("pathLength"),
+      ).toBe("1");
+    }
+    expect(
+      await page
+        .locator(".receipt-card")
+        .evaluate((el) => el.getAnimations({ subtree: true }).length),
+    ).toBe(0);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await settleMotion(page);
+    await noOverflow(page);
+    expect(await motion(page, "participant-success-icon")).toHaveLength(
+      circles.length,
+    );
+  });
+}
+for (const preference of ["normal", "reduce", "keyboard"] as const) {
   test(`G1-b: aviso de envío ${preference}, conserva su anuncio y solo entra una vez`, async ({
     page,
     browser,

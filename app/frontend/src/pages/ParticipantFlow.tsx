@@ -137,12 +137,15 @@ function Receipt({
     next = participantStart(items);
   const complete =
     !next && data.progress.undetermined === 0 && items.length > 0;
+  const [celebrate] = useState(() => complete && !presentationUsesKeyboard());
   return (
     <section className="participant-page participant-receipt">
       <ParticipantFocus />
       <div className="participant-success">
-        <span className="participant-success-icon">
-          <ParticipantIcon />
+        <span
+          className={`participant-success-icon${complete && celebrate ? " participant-celebrate" : ""}`}
+        >
+          <ParticipantIcon drawCheck={complete} />
         </span>
         <h1>{complete ? "Terminaste tus preguntas" : "Listo por ahora"}</h1>
         <p className="participant-subtitle">
