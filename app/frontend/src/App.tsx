@@ -1,4 +1,8 @@
 import { clearDraftTexts } from "./draft-recovery";
+import {
+  usePresentationSession,
+  usePresentationModality,
+} from "./session-presentation";
 import { ProjectShell } from "./shell/ProjectShell";
 import { OrganizationShell } from "./shell/OrganizationShell";
 import { PageHeader } from "./ui/semantic";
@@ -194,6 +198,8 @@ function Session() {
   const [expired, setExpired] = useState(false);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
+  usePresentationModality();
+  usePresentationSession(me?.user.id, loading, expired);
   useEffect(() => {
     let active = true;
     void api("me")

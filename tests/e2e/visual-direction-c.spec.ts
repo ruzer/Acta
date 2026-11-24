@@ -1,5 +1,9 @@
 import { login } from "./login-helper";
 import { prepare } from "./fixtures/workbench";
+import {
+  attentionBoardFootprint,
+  expectAttentionBoardFootprint,
+} from "./fixtures/attention-density";
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { mkdir, writeFile, readFile } from "node:fs/promises";
@@ -341,7 +345,7 @@ test.describe("Direction C · shell and attention", () => {
           nav.getByRole("link", { name: "Atención", exact: true }),
         ).toHaveAttribute("aria-current", "page");
         await expect(page.locator(".pw-navigation")).toHaveCount(0);
-        await page.evaluate(() => document.fonts.ready);
+        const board = await attentionBoardFootprint(page);
         const metrics = await page.evaluate(() => {
           const visible = (element: Element) =>
             element.getBoundingClientRect().width > 0 &&
@@ -453,6 +457,20 @@ test.describe("Direction C · shell and attention", () => {
             })),
           };
         });
+        const id = role === "analyst" ? "V-01" : "V-01b-admin";
+        const firstRowWithoutBoardY = metrics.firstRowY - board.footprint;
+        const measurement = {
+          id,
+          role,
+          path,
+          ...metrics,
+          board,
+          firstRowWithoutBoardY,
+          axeViolations: null as number | null,
+        };
+        // Keep raw geometry and the deduction in JSON even when an assertion fails.
+        measurements.push(measurement);
+        expectAttentionBoardFootprint(board);
         expect(metrics.pageWidth).toBeLessThanOrEqual(width + 1);
         expect(metrics.smallText).toEqual([]);
         expect(metrics.overflow).toEqual([]);
@@ -465,7 +483,9 @@ test.describe("Direction C · shell and attention", () => {
         for (const count of metrics.rowActionCounts) expect(count).toBe(1);
         expect(metrics.questionSize).toBeGreaterThanOrEqual(15);
         expect(metrics.questionWeight).toBeGreaterThanOrEqual(500);
-        if (width === 1440) expect(metrics.firstRowY).toBeLessThanOrEqual(400);
+        // Only the new board's measured footprint is outside the historical budget.
+        if (width === 1440)
+          expect(firstRowWithoutBoardY).toBeLessThanOrEqual(400);
         expect(metrics.sidebar).toBe(
           width >= 1100 ? 248 : width >= 760 ? 128 : 0,
         );
@@ -490,19 +510,12 @@ test.describe("Direction C · shell and attention", () => {
             "best-practice",
           ])
           .analyze();
+        measurement.axeViolations = axe.violations.length;
         expect(axe.violations).toEqual([]);
-        const id = role === "analyst" ? "V-01" : "V-01b-admin";
         await mkdir(`${output}/cp2`, { recursive: true });
         await page.screenshot({
           path: `${output}/cp2/${id}-${width}.png`,
           fullPage: false,
-        });
-        measurements.push({
-          id,
-          role,
-          path,
-          ...metrics,
-          axeViolations: axe.violations.length,
         });
         // The same actions remain available via keyboard in the rail/mobile menu.
         if (width < 1100)

@@ -6,6 +6,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
+### Changed
+
+- **Atención con cifras a la vista.** El tablero muestra estados, validación por tema y área, y personas con preguntas pendientes; sus cifras reutilizan los filtros existentes. Distingue las preguntas con al menos una respuesta y conserva la tabla de métricas. Los cambios de avance se señalan entre visitas sin movimiento al usar el teclado o la preferencia de movimiento reducido.
+
 ### Fixed
 
 - **Formulario del participante más claro y fiable.** Límites y contadores junto a la respuesta, estados de guardado diferenciados y opción de guardar desde el diálogo de salida. «Por consultar» se puede deshacer durante ocho segundos. El avance excluye «No aplica», distingue envíos de posición y explica los borradores sin contarlos dos veces; los campos móviles usan al menos 16 px. Hola muestra el plazo de cada proyecto cuando está disponible, sin bloquear la pantalla. Ayuda y guía actualizadas, sin cambiar los tiempos ni la frecuencia del autoguardado.

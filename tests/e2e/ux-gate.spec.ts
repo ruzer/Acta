@@ -1,6 +1,10 @@
 import { test, expect, type Page } from "@playwright/test";
 import { mkdir, writeFile } from "node:fs/promises";
 import { checkedPage, smallTargets } from "./fixtures/page-checks";
+import {
+  attentionBoardFootprint,
+  expectAttentionBoardFootprint,
+} from "./fixtures/attention-density";
 import { login } from "./login-helper";
 import {
   seedReviewCases,
@@ -114,6 +118,7 @@ for (const count of [12, 54, 304]) {
         );
         await expect(fold.locator(".ac-queue-row")).toHaveCount(0);
       }
+      const board = await attentionBoardFootprint(page);
       const metrics = await page.evaluate(() => ({
         nodes: document.querySelectorAll("*").length,
         scrollHeight: document.documentElement.scrollHeight,
@@ -122,16 +127,14 @@ for (const count of [12, 54, 304]) {
             scrollY,
         ),
       }));
-      // The old queue rendered every question: thousands of nodes and tens of thousands of pixels.
-      expect(metrics.nodes).toBeLessThan(1800);
-      if (width === 1440) {
-        expect(metrics.firstRowY).toBeLessThanOrEqual(400);
-        expect(metrics.scrollHeight).toBeLessThan(3200);
-      }
+      const firstRowWithoutBoardY = metrics.firstRowY - board.footprint;
+      // Preserve raw geometry and the complete deduction even if a budget fails.
       records.push({
         id: `UX01-n${count}`,
         width,
         ...metrics,
+        board,
+        firstRowWithoutBoardY,
         dataset: {
           total: fixture.total,
           action: fixture.action,
@@ -140,6 +143,14 @@ for (const count of [12, 54, 304]) {
           unassigned: fixture.unassigned,
         },
       });
+      expectAttentionBoardFootprint(board);
+      // F3 places the board before the queue; its historical 400px budget stays.
+      // Total nodes and page height still include the visible board.
+      expect(metrics.nodes).toBeLessThan(1800);
+      if (width === 1440) {
+        expect(firstRowWithoutBoardY).toBeLessThanOrEqual(400);
+        expect(metrics.scrollHeight).toBeLessThan(3200);
+      }
       await checked(page, `UX01-n${count}`, width);
       if (width <= 899) {
         const small = (await smallTargets(page)).filter(
