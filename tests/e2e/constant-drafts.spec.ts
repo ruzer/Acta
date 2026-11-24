@@ -36,10 +36,25 @@ test("autoguarda después de ocho segundos sin salir y conserva la edición en c
     clockStart.getTime() + 7999,
   );
   expect(requests).toHaveLength(0);
+  const saved = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/response/draft") &&
+      response.request().method() === "PUT" &&
+      response.ok(),
+  );
   await page.clock.runFor(1);
   expect(await page.evaluate(() => Date.now())).toBe(
     clockStart.getTime() + 8000,
   );
+  await saved;
+  expect(requests).toHaveLength(1);
+  // El guardado ya terminó; solo el anuncio permanece al menos 500 ms.
+  const status = page.locator(".save-status");
+  await expect(status).toHaveText("Guardando…");
+  await page.clock.runFor(499);
+  await expect(status).toHaveText("Guardando…");
+  expect(requests).toHaveLength(1);
+  await page.clock.runFor(1);
   await expect(
     page.getByRole("status").filter({ hasText: "Borrador guardado a las" }),
   ).toBeVisible();
@@ -192,8 +207,12 @@ test("el conflicto automático conserva el texto y al caducar la sesión borra e
   );
   await answer.fill("Texto local que permanece tras el conflicto.");
   await page.clock.runFor(8000);
-  await expect(page.getByRole("alert")).toContainText(
+  await expect(page.locator(".save-status")).toContainText(
     "El borrador fue actualizado",
+  );
+  await expect(page.locator(".save-status > span")).toHaveAttribute(
+    "title",
+    "El borrador fue actualizado desde otra sesión o pestaña.",
   );
   await expect(answer).toHaveValue(
     "Texto local que permanece tras el conflicto.",
@@ -269,7 +288,7 @@ test("tras fallar, el autoguardado espera sesenta segundos y conserva el texto",
   await page.clock.runFor(responseDelay);
   releaseFailure();
   await expect(page.getByRole("status")).toContainText(
-    "No se pudo guardar. Tu texto sigue aquí",
+    "No se pudo guardar: No fue posible completar la operación. Tu texto sigue aquí",
   );
   // El plazo nace en el intento, no cuando el navegador recibe el error.
   await page.clock.runFor(60000 - responseDelay - 1);
@@ -278,12 +297,26 @@ test("tras fallar, el autoguardado espera sesenta segundos y conserva el texto",
   await expect(answer).toHaveValue(
     "Borrador ficticio conservado tras un fallo.",
   );
+  const retried = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/response/draft") &&
+      response.request().method() === "PUT" &&
+      response.ok(),
+  );
+  await page.clock.runFor(1);
+  await retried;
+  expect(attempts).toBe(2);
+  expect(await page.evaluate(() => Date.now())).toBe(firstAttemptTime + 60000);
+  await expect(page.locator(".save-status")).toHaveText("Guardando…");
+  await page.clock.runFor(499);
+  await expect(page.locator(".save-status")).toHaveText("Guardando…");
+  expect(attempts).toBe(2);
   await page.clock.runFor(1);
   await expect(page.getByRole("status")).toContainText(
     "Borrador guardado a las",
   );
   expect(attempts).toBe(2);
-  expect(await page.evaluate(() => Date.now())).toBe(firstAttemptTime + 60000);
+  expect(await page.evaluate(() => Date.now())).toBe(firstAttemptTime + 60500);
 });
 
 for (const action of ["Guardar y salir", "Enviar respuesta"] as const) {

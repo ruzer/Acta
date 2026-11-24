@@ -32,17 +32,22 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
               <strong>Iniciar sesión</strong> con la nueva contraseña.
             </li>
             <li>
-              Al entrar verás <strong>Mi trabajo</strong>. La fecha límite es un
-              aviso; permite responder después. Pulsa el nombre del proyecto y{" "}
-              <strong>Responder</strong> junto a una pregunta. Lee la pregunta y
-              su ayuda. Responde con lo que sabes; no inventes información.
+              En <strong>Hola</strong>, cada proyecto muestra su fecha límite si
+              está disponible. Puedes seguir respondiendo después del plazo.
+              Revisa tu avance; <strong>No aplica</strong> no cuenta. Abre el
+              proyecto y pulsa <strong>Responder</strong>. Revisa los límites y
+              el contador; no inventes información.
             </li>
             <li>
-              Acta guarda el borrador al hacer una pausa. Espera el aviso de
-              guardado; todavía no lo envías. Para continuar después, pulsa{" "}
-              <strong>Guardar y salir</strong>. Si recargas con texto pendiente,
-              elige <strong>Restaurar texto de esta pestaña</strong>. Usa{" "}
-              <strong>Continuar</strong> para retomar.
+              Acta guarda el borrador tras una pausa. Espera el aviso; aún no lo
+              envías. <strong>Guardar y salir</strong> permite continuar
+              después. Si recargas con texto pendiente, elige{" "}
+              <strong>Restaurar texto de esta pestaña</strong>;{" "}
+              <strong>Continuar</strong> permite retomar. Si te falta
+              información, pulsa <strong>Necesito consultar esto</strong>. La
+              pregunta anterior queda <strong>Por consultar</strong>. Puedes
+              pulsar <strong>Deshacer</strong> durante ocho segundos; tu
+              borrador se conserva.
             </li>
             <li>
               Si necesitas un comprobante, abre{" "}
@@ -83,9 +88,9 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
               quien te dio acceso. No mandes tu contraseña por chat.
             </li>
             <li>
-              <strong>No se pudo guardar. Tu texto sigue aquí</strong>: conserva
-              tu texto de forma privada, anota la hora y avisa al coordinador.
-              No cierres la página creyendo que quedó guardado.
+              <strong>No se pudo guardar:</strong> revisa la causa indicada.
+              <strong> Tu texto sigue aquí</strong> no confirma el guardado.
+              Conserva la página y avisa al coordinador.
             </li>
             <li>
               Si no ves el proyecto o la pregunta, pide que revisen tu acceso y

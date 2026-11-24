@@ -26,50 +26,99 @@ export function AnswerControl({
       : q.required
         ? "Necesaria para enviar. Puedes guardar un borrador incompleto."
         : "Opcional. Si la envías sin valor, explica el motivo en el comentario.";
-  if (q.type === "SHORT_TEXT" || q.type === "LONG_TEXT")
+  if (q.type === "SHORT_TEXT" || q.type === "LONG_TEXT") {
+    const text = typeof value === "string" ? value : "";
+    const maximum = Number(
+      cfg.maxLength ?? (q.type === "SHORT_TEXT" ? 500 : 10000),
+    );
+    const showCount = q.type === "SHORT_TEXT" || text.length >= maximum * 0.8;
     return (
-      <Textarea
-        label="Tu respuesta"
-        value={typeof value === "string" ? value : ""}
-        onChange={(e) => onChange(e.target.value)}
-        maxLength={Number(
-          cfg.maxLength ?? (q.type === "SHORT_TEXT" ? 500 : 10000),
+      <>
+        <Textarea
+          label="Tu respuesta"
+          value={text}
+          onChange={(e) => onChange(e.target.value)}
+          maxLength={maximum}
+          rows={q.type === "SHORT_TEXT" ? (compact ? 2 : 3) : 7}
+          error={error}
+          hint={hint}
+          disabled={disabled}
+        />
+        {showCount && (
+          <p className="hint">
+            {text.length}/{maximum} caracteres
+          </p>
         )}
-        rows={q.type === "SHORT_TEXT" ? (compact ? 2 : 3) : 7}
-        error={error}
-        hint={hint}
-        disabled={disabled}
-      />
+        <p
+          className={text.length >= maximum ? "hint" : "sr-only"}
+          aria-live="polite"
+        >
+          {text.length >= maximum
+            ? `Llegaste al máximo de ${maximum} caracteres.`
+            : ""}
+        </p>
+      </>
     );
-  if (q.type === "DATE")
+  }
+  if (q.type === "DATE") {
+    const calendar = (date: string) => date.split("-").reverse().join("/");
+    const bounds = [
+      typeof cfg.min === "string" ? `Desde el ${calendar(cfg.min)}.` : "",
+      typeof cfg.max === "string" ? `Hasta el ${calendar(cfg.max)}.` : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
     return (
-      <Input
-        label="Tu respuesta: fecha"
-        type="date"
-        value={typeof value === "string" ? value : ""}
-        min={typeof cfg.min === "string" ? cfg.min : undefined}
-        max={typeof cfg.max === "string" ? cfg.max : undefined}
-        onChange={(e) => onChange(e.target.value || null)}
-        error={error}
-        hint={hint}
-        disabled={disabled}
-      />
+      <>
+        <Input
+          label="Tu respuesta: fecha"
+          type="date"
+          value={typeof value === "string" ? value : ""}
+          min={typeof cfg.min === "string" ? cfg.min : undefined}
+          max={typeof cfg.max === "string" ? cfg.max : undefined}
+          onChange={(e) => onChange(e.target.value || null)}
+          error={error}
+          hint={[hint, bounds].filter(Boolean).join(" ")}
+          disabled={disabled}
+        />
+        {error && bounds && <p className="hint">{bounds}</p>}
+      </>
     );
-  if (q.type === "NUMBER")
+  }
+  if (q.type === "NUMBER") {
+    const bounds = [
+      typeof cfg.min === "number" ? `Mínimo: ${cfg.min}.` : "",
+      typeof cfg.max === "number" ? `Máximo: ${cfg.max}.` : "",
+      cfg.integer === true ? "Solo números enteros." : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
     return (
-      <Input
-        label="Tu respuesta: número"
-        type="text"
-        inputMode="decimal"
-        value={
-          typeof value === "number" || typeof value === "string" ? value : ""
-        }
-        onChange={(e) => onChange(e.target.value || null)}
-        error={error}
-        hint={hint + " Usa punto decimal; hasta seis decimales."}
-        disabled={disabled}
-      />
+      <>
+        <Input
+          label="Tu respuesta: número"
+          type="text"
+          inputMode="decimal"
+          value={
+            typeof value === "number" || typeof value === "string" ? value : ""
+          }
+          onChange={(e) => onChange(e.target.value || null)}
+          error={error}
+          hint={[
+            hint,
+            bounds,
+            cfg.integer === true
+              ? ""
+              : "Usa punto decimal; hasta seis decimales.",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          disabled={disabled}
+        />
+        {error && bounds && <p className="hint">{bounds}</p>}
+      </>
     );
+  }
   if (q.type === "MATRIX") {
     const matrix = cfg as {
       rows: { key: string; label: string }[];
@@ -116,19 +165,46 @@ export function AnswerControl({
       </fieldset>
     );
   }
+  const selected = Array.isArray(value) ? value : [];
+  const maximum = Number(cfg.maxSelections ?? q.options.length);
+  const minimum = Number(cfg.minSelections ?? 0);
+  const atMaximum = q.type === "MULTIPLE_CHOICE" && selected.length >= maximum;
+  const selectionRule =
+    minimum > 0
+      ? `Elige de ${minimum} a ${maximum} opciones.`
+      : `Elige hasta ${maximum} ${maximum === 1 ? "opción" : "opciones"}.`;
   return (
     <fieldset
       className={
         compact && q.type === "YES_NO" ? "participant-yesno" : undefined
       }
       disabled={disabled}
-      aria-describedby={id}
+      aria-describedby={
+        q.type === "MULTIPLE_CHOICE"
+          ? `${id} ${id}-rules ${id}-count${atMaximum ? ` ${id}-maximum` : ""}`
+          : id
+      }
       aria-invalid={!!error}
     >
       <legend>Tu respuesta</legend>
       <p id={id} className={error ? "field-error" : "hint"}>
         {error || hint}
       </p>
+      {q.type === "MULTIPLE_CHOICE" && (
+        <>
+          <p id={id + "-rules"} className="hint">
+            {selectionRule}
+          </p>
+          <p id={id + "-count"} className="hint" aria-live="polite">
+            Marcadas {selected.length} de {maximum}
+          </p>
+          {atMaximum && (
+            <p id={id + "-maximum"} className="hint">
+              Quita una opción para elegir otra.
+            </p>
+          )}
+        </>
+      )}
       {q.type === "YES_NO" ? (
         <>
           <Radio
@@ -196,6 +272,8 @@ export function AnswerControl({
             key={o.value}
             label={o.label}
             checked={Array.isArray(value) && value.includes(o.value)}
+            disabled={atMaximum && !selected.includes(o.value)}
+            aria-describedby={atMaximum ? id + "-maximum" : undefined}
             onChange={(e) =>
               onChange(
                 e.target.checked

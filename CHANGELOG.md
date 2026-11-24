@@ -10,6 +10,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Filtros y seguimiento con contexto.** La bandeja conserva sus filtros mientras carga y al volver de una pregunta; las opciones se limitan al proyecto elegido. Organizar y Participación recuerdan los filtros en la dirección de la página. Participación muestra los envíos por persona, las obligatorias pendientes y los cambios sin enviar por separado, con búsqueda y filas más compactas en móvil.
 
+### Fixed
+
+- **Formulario del participante más claro y fiable.** Límites y contadores junto a la respuesta, estados de guardado diferenciados y opción de guardar desde el diálogo de salida. «Por consultar» se puede deshacer durante ocho segundos. El avance excluye «No aplica», distingue envíos de posición y explica los borradores sin contarlos dos veces; los campos móviles usan al menos 16 px. Hola muestra el plazo de cada proyecto cuando está disponible, sin bloquear la pantalla. Ayuda y guía actualizadas, sin cambiar los tiempos ni la frecuencia del autoguardado.
+
 ## [0.12.0] - 2026-11-22
 
 Seguimiento de participación, plazos, autoguardado, plantillas y ayuda para el piloto,
