@@ -20,6 +20,21 @@ export const axeTags = [
   "best-practice",
 ];
 
+/** Measure the resting UI, after finite entrance motion and fonts settle. */
+export async function settleVisualState(page: Page) {
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    await Promise.all(
+      document.getAnimations()
+        .filter((animation) =>
+          Number.isFinite(animation.effect?.getComputedTiming().endTime),
+        )
+        .map((animation) => animation.finished.catch(() => {})),
+    );
+  });
+}
+
 /**
  * What every screen must satisfy at every width: no axe violations (automatic
  * scope only; it is not WCAG conformance), no horizontal page scroll, one h1,
@@ -33,6 +48,7 @@ export async function checkedPage(
   width: number,
   options: { capture?: boolean } = {},
 ) {
+  await settleVisualState(page);
   const axe = await new AxeBuilder({ page }).withTags(axeTags).analyze();
   expect(
     axe.violations.map((v) => `${v.id}: ${v.nodes.length}`),
