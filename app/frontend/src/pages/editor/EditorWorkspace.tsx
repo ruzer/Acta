@@ -27,6 +27,8 @@ export type EditorProps = {
   organizeContext?: OrganizeContext;
   onOrganizeContextChange?: (context: OrganizeContext) => void;
   initialMode?: number;
+  mode?: number;
+  organizeLocation?: string;
   onModeChange?: (mode: number) => void;
   onCreateTopic: () => void;
   onBulkComplete?: (message: string) => void;
@@ -269,7 +271,8 @@ export function EditorWorkspace(props: EditorProps) {
     },
     [onRemember],
   );
-  const [mode, updateMode] = useState(props.initialMode ?? 0);
+  const [localMode, updateMode] = useState(props.initialMode ?? 0);
+  const mode = props.mode ?? localMode;
   const setMode = (value: number) => {
     updateMode(value);
     props.onModeChange?.(value);
@@ -322,7 +325,11 @@ export function EditorWorkspace(props: EditorProps) {
               {...props}
               initialSelected={inspectId}
               initialSelectionExpanded={selectionExpanded}
-              organizeContext={organizeContext.current}
+              organizeContext={
+                props.organizeLocation === undefined
+                  ? organizeContext.current
+                  : props.organizeContext
+              }
               onOrganizeContextChange={rememberOrganize}
             />
           )}

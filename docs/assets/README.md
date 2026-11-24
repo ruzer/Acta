@@ -43,7 +43,7 @@ Qué se decidió, su alcance, excepciones, fuente, analista y fecha quedan ident
 ## Dashboard
 
 ![Métricas y estados del proyecto](07-dashboard.png)
-El resumen muestra numeradores y denominadores reales de las preguntas publicadas de esta demo.
+Captura histórica anterior al tablero de avance. Se conserva como referencia y no representa la distribución actual de Atención. Los numeradores y denominadores corresponden a las preguntas publicadas de esa demo.
 
 ## Participante en móvil
 

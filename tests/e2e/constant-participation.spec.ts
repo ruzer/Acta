@@ -164,7 +164,9 @@ test("Participación muestra cuatro estados, filtra, ordena y copia un recordato
   }
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page
-    .getByRole("button", { name: "Copiar recordatorio", exact: true })
+    .getByRole("button", {
+      name: /^Copiar recordatorio \(\d+ personas? con pendientes\)$/,
+    })
     .focus();
   await page.keyboard.press("Enter");
   await expect(page.getByRole("status")).toContainText("Recordatorio copiado");
@@ -179,7 +181,9 @@ test("Participación muestra cuatro estados, filtra, ordena y copia un recordato
     };
   });
   await page
-    .getByRole("button", { name: "Copiar recordatorio", exact: true })
+    .getByRole("button", {
+      name: /^Copiar recordatorio \(\d+ personas? con pendientes\)$/,
+    })
     .click();
   const fallback = page.getByLabel("Texto del recordatorio para copiar");
   await expect(fallback).toBeFocused();

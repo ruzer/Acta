@@ -1,5 +1,6 @@
 import { afterEach, beforeAll, expect, it, vi } from "vitest";
 import {
+  act,
   render,
   screen,
   cleanup,
@@ -409,3 +410,87 @@ it.each(["individual", "todas"])(
     expect(api).not.toHaveBeenCalled();
   },
 );
+
+it("Guardar y pasar valida los mismos campos y solo avanza tras registrar la decisión", async () => {
+  const user = userEvent.setup();
+  const next = vi.fn(),
+    done = vi.fn();
+  render(
+    <ReviewActionDialog
+      data={data}
+      action="validateQuestion"
+      onClose={vi.fn()}
+      onDone={done}
+      onDoneAndNext={next}
+      refresh={vi.fn()}
+    />,
+  );
+  const advance = screen.getByRole("button", {
+    name: "Guardar y pasar a la siguiente",
+  });
+  await user.click(advance);
+  expect(api).not.toHaveBeenCalled();
+  expect(next).not.toHaveBeenCalled();
+  await waitFor(() =>
+    expect(screen.getByRole("alert").parentElement).toHaveFocus(),
+  );
+  await user.type(
+    screen.getByLabelText("Decisión acordada"),
+    "Decisión ficticia",
+  );
+  await user.type(screen.getByLabelText("Alcance"), "Prueba");
+  await user.type(screen.getByLabelText("Comentario interno"), "Verificado");
+  await user.click(
+    screen.getByRole("checkbox", { name: /Participante · envío/ }),
+  );
+  vi.mocked(api).mockRejectedValueOnce(new Error("No hay conexión"));
+  await user.click(advance);
+  expect(await screen.findByText("No hay conexión")).toBeVisible();
+  expect(next).not.toHaveBeenCalled();
+  vi.mocked(api).mockResolvedValueOnce({} as never);
+  await user.click(advance);
+  await waitFor(() => expect(next).toHaveBeenCalledOnce());
+  expect(done).not.toHaveBeenCalled();
+  expect(api).toHaveBeenCalledTimes(2);
+  expect(vi.mocked(api).mock.calls[0]).toEqual(vi.mocked(api).mock.calls[1]);
+});
+
+it("no navega a otra pregunta si Guardar y pasar termina después de salir", async () => {
+  const user = userEvent.setup();
+  const next = vi.fn(),
+    done = vi.fn();
+  let finish!: () => void;
+  vi.mocked(api).mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        finish = () => resolve({} as never);
+      }),
+  );
+  const view = render(
+    <ReviewActionDialog
+      data={data}
+      action="validateQuestion"
+      onClose={vi.fn()}
+      onDone={done}
+      onDoneAndNext={next}
+      refresh={vi.fn()}
+    />,
+  );
+  await user.type(
+    screen.getByLabelText("Decisión acordada"),
+    "Decisión ficticia",
+  );
+  await user.type(screen.getByLabelText("Alcance"), "Prueba");
+  await user.type(screen.getByLabelText("Comentario interno"), "Verificado");
+  await user.click(
+    screen.getByRole("checkbox", { name: /Participante · envío/ }),
+  );
+  await user.click(
+    screen.getByRole("button", { name: "Guardar y pasar a la siguiente" }),
+  );
+  expect(api).toHaveBeenCalledOnce();
+  view.unmount();
+  await act(async () => finish());
+  expect(next).not.toHaveBeenCalled();
+  expect(done).not.toHaveBeenCalled();
+});

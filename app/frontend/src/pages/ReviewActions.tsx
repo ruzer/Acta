@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { contracts, type ReviewDetail } from "@requirements/contracts";
 import { api, ApiFailure, formValues } from "../api";
 import { Alert, Button, Checkbox, Dialog, Select, Textarea } from "../ui";
@@ -32,6 +32,7 @@ export function ReviewActionDialog({
   responseRevisionId,
   onClose,
   onDone,
+  onDoneAndNext,
   refresh,
 }: {
   data: ReviewDetail;
@@ -42,6 +43,7 @@ export function ReviewActionDialog({
   responseRevisionId?: string;
   onClose: () => void;
   onDone: () => void;
+  onDoneAndNext?: () => void;
   refresh: () => Promise<unknown>;
 }) {
   const [error, setError] = useState(""),
@@ -51,6 +53,13 @@ export function ReviewActionDialog({
     [conflict, setConflict] = useState(false);
   const errorSummary = useRef<HTMLDivElement>(null);
   const request = useRef({ key: "", id: "" });
+  const mounted = useRef(false);
+  useLayoutEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
   const aboutSubmission = responseRevisionId
     ? d.submissions.find((s) => s.id === responseRevisionId && s.current)
     : undefined;
@@ -94,7 +103,7 @@ export function ReviewActionDialog({
     setFieldErrors(remaining);
     if (!Object.keys(remaining).length) setError("");
   }
-  async function submit(form: HTMLFormElement) {
+  async function submit(form: HTMLFormElement, goNext = false) {
     const v = formValues(form),
       fd = new FormData(form);
     setError("");
@@ -205,8 +214,11 @@ export function ReviewActionDialog({
         { projectId: d.projectId, id: d.question.id },
         parsed.data,
       );
+      if (goNext && !mounted.current) return;
       setDirty(false);
-      onDone();
+      if (goNext && action === "validateQuestion" && onDoneAndNext)
+        onDoneAndNext();
+      else onDone();
     } catch (e) {
       setError((e as Error).message);
       setConflict(e instanceof ApiFailure && e.status === 409);
@@ -226,7 +238,11 @@ export function ReviewActionDialog({
         onChange={(event) => edited(event.target.getAttribute("name") ?? "")}
         onSubmit={(e) => {
           e.preventDefault();
-          void submit(e.currentTarget);
+          void submit(
+            e.currentTarget,
+            (e.nativeEvent as SubmitEvent).submitter?.getAttribute("value") ===
+              "next",
+          );
         }}
       >
         <p>{d.question.title}</p>
@@ -434,7 +450,20 @@ export function ReviewActionDialog({
           )}
         </fieldset>
         <div className="actions">
-          <Button type="submit" disabled={busy}>
+          {action === "validateQuestion" && onDoneAndNext && (
+            <Button type="submit" name="intent" value="next" disabled={busy}>
+              {busy ? "Registrando…" : "Guardar y pasar a la siguiente"}
+            </Button>
+          )}
+          <Button
+            type="submit"
+            tone={
+              action === "validateQuestion" && onDoneAndNext
+                ? "secondary"
+                : "primary"
+            }
+            disabled={busy}
+          >
             {busy
               ? "Registrando…"
               : action === "validateQuestion"

@@ -388,15 +388,19 @@ it("VIS005: enfoca el error después de habilitar el formulario aunque el cuadro
   const question = screen.getByLabelText("Pregunta", { exact: true });
   expect(question).toBeDisabled();
   const frames: FrameRequestCallback[] = [];
-  vi.spyOn(globalThis, "requestAnimationFrame").mockImplementation((callback) => {
-    frames.push(callback);
-    return frames.length;
-  });
+  vi.spyOn(globalThis, "requestAnimationFrame").mockImplementation(
+    (callback) => {
+      frames.push(callback);
+      return frames.length;
+    },
+  );
   await act(async () => {
-    rejectSave(new ApiFailure(400, "Revisar campos", {
-      question: "Revisa la redacción.",
-      priority: "Revisa la prioridad.",
-    }));
+    rejectSave(
+      new ApiFailure(400, "Revisar campos", {
+        question: "Revisa la redacción.",
+        priority: "Revisa la prioridad.",
+      }),
+    );
     await Promise.resolve();
     // Un cuadro no garantiza que React ya haya habilitado los campos.
     expect(question).toBeDisabled();
@@ -499,27 +503,35 @@ it("volver a Revisión conserva los filtros de procedencia sin cambiar el destin
   vi.spyOn(apiModule, "api").mockImplementation(
     async (key) => (key === "projects" ? [] : conflict) as never,
   );
+  const search = `projectId=${conflict.projectId}&status=CONFLICT`;
+  const router = createMemoryRouter(
+    [
+      {
+        path: "/projects/:projectId/review/:id",
+        element: <ReviewDetailPage />,
+      },
+    ],
+    {
+      initialEntries: [
+        {
+          pathname: `/projects/${conflict.projectId}/review/${conflict.question.id}`,
+          state: { reviewSearch: search },
+        },
+      ],
+    },
+  );
   render(
     <QueryClientProvider
       client={
         new QueryClient({ defaultOptions: { queries: { retry: false } } })
       }
     >
-      <MemoryRouter
-        initialEntries={[
-          {
-            pathname: "/",
-            state: { reviewSearch: "projectId=demo&status=CONFLICT" },
-          },
-        ]}
-      >
-        <ReviewDetailPage />
-      </MemoryRouter>
+      <RouterProvider router={router} />
     </QueryClientProvider>,
   );
   expect(
     await screen.findByRole("link", { name: "← Revisar respuestas" }),
-  ).toHaveAttribute("href", "/review?projectId=demo&status=CONFLICT");
+  ).toHaveAttribute("href", `/review?${search}`);
 });
 
 it("la decisión usa la referencia real, sitúa autor antes del resultado y permite consultar la fuente", async () => {
