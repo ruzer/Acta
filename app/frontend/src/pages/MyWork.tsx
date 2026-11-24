@@ -1,5 +1,10 @@
-import { ResponseDeadline } from "./ResponseDeadline";
-import { useState } from "react";
+import { participantProgress } from "./participant-progress";
+import {
+  ResponseDeadline,
+  responseDeadlineQuery,
+  responseDueLabel,
+} from "./ResponseDeadline";
+import { useState, type ReactNode } from "react";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import {
@@ -11,6 +16,7 @@ import {
   type ProjectView,
 } from "@requirements/contracts";
 import { api } from "../api";
+import { useBranding } from "../branding";
 import { Button, EmptyState, ErrorState, Input, LoadingState } from "../ui";
 import {
   ParticipantBadge,
@@ -31,9 +37,12 @@ export function PersonalProgress({ projectId }: { projectId: string }) {
   if (q.isPending) return <p role="status">Consultando tu avance…</p>;
   if (q.error)
     return <ErrorState error={q.error} retry={() => void q.refetch()} />;
+  const progress = participantProgress(
+    q.data.sections.flatMap((s) => s.questions),
+  );
   return (
     <p>
-      {q.data.progress.sent} de {q.data.progress.enabled} respuestas enviadas
+      {progress.sent} de {progress.total} respuestas enviadas
     </p>
   );
 }
@@ -91,11 +100,7 @@ export function ParticipantHome({
       <Welcome
         refreshing={results.some((q) => q.isFetching)}
         items={candidates.map((c) => c.q)}
-        progress={{
-          sent: entries.reduce((n, p) => n + p.data.progress.sent, 0),
-          total: entries.reduce((n, p) => n + p.data.progress.enabled, 0),
-          drafts: entries.reduce((n, p) => n + p.data.progress.drafts, 0),
-        }}
+        progress={participantProgress(candidates.map((c) => c.q))}
         href={next ? participantPath(next.projectId, next.q) : undefined}
         waiting={waiting.map((c) => ({
           href: participantPath(c.projectId, c.q),
@@ -105,7 +110,9 @@ export function ParticipantHome({
       />
       {entries.length ? (
         entries.map((p) => (
-          <ProjectWork key={p.id} projectId={p.id} data={p.data} />
+          <ProjectWork key={p.id} projectId={p.id} data={p.data}>
+            <HomeResponseDeadline projectId={p.id} />
+          </ProjectWork>
         ))
       ) : (
         <EmptyState title="Todavía no tienes preguntas asignadas">
@@ -113,6 +120,29 @@ export function ParticipantHome({
         </EmptyState>
       )}
     </div>
+  );
+}
+function HomeResponseDeadline({ projectId }: { projectId: string }) {
+  const query = useQuery({
+    ...responseDeadlineQuery(projectId),
+    staleTime: 60_000,
+    retry: false,
+    retryOnMount: false,
+    refetchOnMount: (query) => query.state.status !== "error",
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  const { timezone } = useBranding();
+  const due = query.error ? null : query.data?.responseDueAt;
+  return (
+    <p className="participant-home-deadline" aria-hidden={!due || undefined}>
+      {due && (
+        <>
+          {responseDueLabel(due, timezone)}. Puedes seguir respondiendo después
+          del plazo.
+        </>
+      )}
+    </p>
   );
 }
 export function Welcome({
@@ -125,7 +155,13 @@ export function Welcome({
   refreshing?: boolean;
   items: PersonalQuestion[];
   href?: string;
-  progress: { sent: number; total: number; drafts: number };
+  progress: {
+    sent: number;
+    total: number;
+    drafts: number;
+    overlappingDrafts?: number;
+    notApplicable?: number;
+  };
   waiting: { href: string; question: string; title: string }[];
 }) {
   const counts = participantCounts(items);
@@ -145,6 +181,20 @@ export function Welcome({
           <ParticipantIcon name="info" /> Usa “Guardar y salir” para conservar
           tu borrador y retomarlo después.
         </p>
+        {!!progress.notApplicable && (
+          <p>
+            {progress.notApplicable === 1
+              ? "1 pregunta marcada como No aplica no se cuenta en el avance."
+              : `${progress.notApplicable} preguntas marcadas como No aplica no se cuentan en el avance.`}
+          </p>
+        )}
+        {!!progress.overlappingDrafts && (
+          <p>
+            {progress.overlappingDrafts === 1
+              ? "1 borrador corresponde a una pregunta que ya enviaste; no se suma de nuevo en la barra."
+              : `${progress.overlappingDrafts} borradores corresponden a preguntas que ya enviaste; no se suman de nuevo en la barra.`}
+          </p>
+        )}
         {undetermined > 0 && (
           <p>
             {undetermined === 1
@@ -225,11 +275,7 @@ export function MyWork() {
       <Welcome
         refreshing={q.isFetching}
         items={items}
-        progress={{
-          sent: q.data.progress.sent,
-          total: q.data.progress.enabled,
-          drafts: q.data.progress.drafts,
-        }}
+        progress={participantProgress(items)}
         href={next ? participantPath(projectId, next) : undefined}
         waiting={items
           .filter((item) => participantState(item) === "clarification")
@@ -247,11 +293,13 @@ export function ProjectWork({
   projectId,
   data,
   showHeading = true,
+  children,
 }: {
   projectId: string;
   data: PersonalProjectView;
   /** The page of a single project already names it; the list keeps an unseen heading. */
   showHeading?: boolean;
+  children?: ReactNode;
 }) {
   const [search, setSearch] = useState(""),
     [filter, setFilter] = useState("all"),
@@ -295,6 +343,7 @@ export function ProjectWork({
           </Button>
         )}
       </div>
+      {children}
       {(large || showTools) && (
         <div className="participant-toolbar">
           <Input

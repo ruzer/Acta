@@ -153,7 +153,7 @@ for (const action of ["Guardar y salir", "Enviar respuesta"] as const) {
       if (manualFails) {
         await waitFor(() =>
           expect(screen.getByRole("status")).toHaveTextContent(
-            "No se pudo guardar. Tu texto sigue aquí",
+            "No se pudo guardar: Servicio no disponible. Tu texto sigue aquí",
           ),
         );
         expect(

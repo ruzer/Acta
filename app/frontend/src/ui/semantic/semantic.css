@@ -1043,6 +1043,34 @@
 .ac-progress-bar > .ac-progress-drafts {
   background: color-mix(in srgb, var(--ac-accent) 40%, #fff);
 }
+.ac-progress-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 0;
+  margin: 12px 0 0;
+  list-style: none;
+  color: var(--ac-muted);
+  font-size: var(--ac-text-meta);
+}
+.ac-progress-legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ac-progress-legend li > span {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  border-radius: 2px;
+  background: var(--ac-accent);
+}
+.ac-progress-legend li > .ac-progress-drafts {
+  background: color-mix(in srgb, var(--ac-accent) 40%, #fff);
+}
+.ac-progress-legend li > .ac-progress-pending {
+  background: var(--ac-line);
+}
 .ac-progress-note {
   margin-top: 12px;
   color: var(--ac-muted);

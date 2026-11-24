@@ -8,6 +8,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ### Fixed
 
+- **Formulario del participante más claro y fiable.** Límites y contadores junto a la respuesta, estados de guardado diferenciados y opción de guardar desde el diálogo de salida. «Por consultar» se puede deshacer durante ocho segundos. El avance excluye «No aplica», distingue envíos de posición y explica los borradores sin contarlos dos veces; los campos móviles usan al menos 16 px. Hola muestra el plazo de cada proyecto cuando está disponible, sin bloquear la pantalla. Ayuda y guía actualizadas, sin cambiar los tiempos ni la frecuencia del autoguardado.
+
 - **Fechas y horas de la organización.** La Bitácora y la hora de guardado usan la zona configurada; las fechas de respuesta se leen como día/mes/año y los plazos explican su zona con un nombre legible. El asistente propone la zona del navegador solo cuando aún no existe una elección explícita. Se conservan los instantes guardados, los exportes y la frecuencia del autoguardado.
 
 ## [0.12.0] - 2026-11-22

@@ -393,6 +393,18 @@
   justify-content: space-between;
   gap: 12px;
 }
+.participant-home-deadline {
+  min-block-size: 3em;
+  margin: 0;
+  color: var(--ac-muted);
+  font-size: var(--ac-text-ui);
+  line-height: 1.5;
+}
+@media (max-width: 600px) {
+  .participant-home-deadline {
+    min-block-size: 7.5em;
+  }
+}
 .participant-topic {
   overflow: hidden;
   margin-bottom: 8px;
@@ -506,6 +518,18 @@
 }
 
 /* ---- Answering ---- */
+.participant-response-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  color: var(--ac-muted);
+  font-size: var(--ac-text-ui);
+}
+@media (max-width: 899px) {
+  .participant-response-summary .participant-step-meta {
+    display: inline;
+  }
+}
 .participant-step-meta {
   display: none;
 }
@@ -550,12 +574,29 @@
   color: var(--ac-ink-2);
 }
 .acta-participant .save-status {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+  block-size: 3em;
   margin: 0 0 12px;
-  color: var(--ac-success);
+  color: var(--ac-muted);
   font-size: var(--ac-text-meta);
+  line-height: 1.5;
 }
-.acta-participant .save-status:empty {
-  display: none;
+.acta-participant .save-status-saving {
+  color: var(--ac-info);
+}
+.acta-participant .save-status-saved {
+  color: var(--ac-success);
+}
+.acta-participant .save-status-error {
+  color: var(--ac-danger);
+}
+@media (max-width: 600px) {
+  .acta-participant .save-status {
+    block-size: 6em;
+  }
 }
 .acta-participant .participant-yesno {
   display: grid;
@@ -818,6 +859,11 @@
   }
 }
 @media (max-width: 600px) {
+  .acta-participant input:not([type="checkbox"]):not([type="radio"]),
+  .acta-participant textarea,
+  .acta-participant select {
+    font-size: 16px;
+  }
   .acta-participant .participant-answer-card h1,
   .acta-participant .participant-wide h1 {
     font-size: 23px;
