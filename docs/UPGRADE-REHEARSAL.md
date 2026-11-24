@@ -102,7 +102,8 @@ oficiales `--verify`. Un error detiene el ensayo: no se reemplaza una cookie ant
 caducada por otra para presentar una continuidad falsa.
 
 Los resultados del 17 y 18 de noviembre conservan sus versiones y alcance
-históricos. El apartado del 22 de noviembre identifica el código final ensayado.
+históricos. El apartado del 24 de noviembre identifica el código final ensayado; el del
+22 de noviembre se conserva como histórico, anterior a los lotes F/G.
 Cada ejecución debe registrar su commit exacto, las huellas por fila antes y
 después y la migración aplicada; no se trasladan resultados a otro código.
 
@@ -155,6 +156,9 @@ institucional ni otra arquitectura.
 
 ## Resultado sobre el código final ejecutado el 2026-11-22
 
+**Histórico:** este resultado corresponde a `b9cbe64`, antes de los lotes F/G.
+No acredita el código final `e2e3a41`; consulta el ensayo del 24 de noviembre.
+
 Host macOS ARM64, Docker Linux arm64. Base publicada v0.11.0
 `d3fabd45daed0fd93784c2c2ae6a1f929f27bd6e`; candidata
 `b9cbe64f2ddfcba795bd2f039edb2bfa82f8028c`, que incorpora los cambios
@@ -197,6 +201,76 @@ con reloj monotónico.
 Son tiempos de un fixture pequeño con imágenes precargadas; no acreditan
 capacidad ni un RTO. No se probó una base institucional, S3 externo, HA, cambios
 mayores de PostgreSQL, assets externos, otra arquitectura ni la ruta v0.10.0.
+
+## Resultado sobre el código final ejecutado el 2026-11-24
+
+Host macOS ARM64, Docker Linux aarch64. Base publicada v0.11.0
+`d3fabd45daed0fd93784c2c2ae6a1f929f27bd6e`; candidata final
+`e2e3a41d7306cfc006eab82b0e2e3e72855f1670`, merge del PR #165, con los
+lotes F/G incorporados. El cierre documental conserva ese producto:
+`git diff --stat e2e3a41 HEAD` solo enumera `.md`. Este ensayo nuevo no sustituye
+ni traslada las mediciones de carga de otros commits.
+
+Se ejecutaron los scripts oficiales sin modificaciones y con datos ficticios.
+`npm ci --ignore-scripts` se ejecutó una vez en la candidata. Se construyeron y
+precargaron las imágenes antes del fixture para evitar consumir el tiempo de
+sesión durante la construcción. Hubo un solo laboratorio activo: el origen se
+detuvo antes de arrancar el destino de restauración. Se usaron puertos y subredes
+propios porque el grupo de subredes automáticas de Docker estaba ocupado.
+Los comandos largos se ejecutaron con `caffeinate -dimsu`; tiempos medidos con
+reloj monotónico e imágenes precargadas.
+
+| Comprobación | Resultado real |
+| --- | --- |
+| Preparación oficial | PASS; 12,334 s; cinco cuentas nuevas, CSV de 300 preguntas / 12 temas, 5 publicadas / 295 borradores |
+| Conjunto con fixtures | 3 proyectos, 13 temas, 302 preguntas, 7 revisiones, 1 validación, 2 evidencias y 0 archivos de marca |
+| Backup + verificación | PASS; 21,236 s + 0,962 s; 368 757 bytes incluido manifiesto; 9 archivos verificados |
+| Actualización en los mismos siete volúmenes | PASS; 29,845 s; 13 → 14 migraciones; verificación posterior 11,159 s |
+| Restauración de la base en siete volúmenes nuevos | PASS; 33,910 s; ocho recuentos iguales, incluidas las 13 migraciones; huellas 787/787 y auditoría 98/98 |
+| Actualización del destino restaurado | PASS; 38,410 s; 13 → 14 migraciones; verificación posterior 11,545 s |
+| Huellas por fila | PASS; 787 filas previas de 38 tablas conservadas en ambas rutas; 98 eventos anteriores intactos |
+| Sesión, evidencia, informe e invitación | PASS; sesión original, cookie nueva y cierre, SHA-256, informe HTML/PDF Chromium y ambos smoke oficiales `--verify` |
+| Retirada | 81 contenedores y 387 volúmenes ajenos al ensayo, mismos identificadores/nombres al empezar y terminar; limpieza 2,583 s |
+
+Se restauró primero con v0.11.0 para comprobar los ocho recuentos originales y
+solo después se actualizó el destino al mismo código final. No se omitió ni
+relajó una comprobación para permitir la migración. Se aplicó únicamente
+`202611180001_response_due_at`: las 13 migraciones anteriores mantuvieron sus
+huellas y `responseDueAt` quedó nulo en los proyectos previos.
+
+La comparación excluye `Session`, `InvitationSession`, `LoginAttempt` e
+`InvitationRateBucket`, que cambian por uso; las sesiones se verificaron
+funcionalmente sin sustituir la cookie original. En las tablas comparadas, el
+origen actualizado conservó las 787 filas anteriores y agregó diez eventos de
+auditoría tras la verificación y un acceso visual (797 filas / 108 eventos).
+El destino actualizado agregó nueve (796 filas / 107 eventos). Ninguna otra
+alteración se aceptó. SHA-256 de la evidencia comprobada en ambas rutas:
+`76396e2cf90386978c0f8537a284a58cd5fd437b97c3a3cdd91deeefd72f2b32`.
+
+Además del script, se recorrió la interfaz real con Chromium a 1440 × 900 y
+se inspeccionaron visualmente cuatro capturas con los datos migrados:
+
+- Participante: **Mi trabajo** mostró 1 de 1 enviada y su tarjeta; **Responder**
+  conservó el texto ficticio previo, en revisión y solo lectura.
+- Analista: **Atención** mostró una pregunta validada y una parcial; **Revisar
+  respuestas** cargó ambas aportaciones, filtros y estados.
+
+No se observaron errores de página ni solicitudes fallidas en ese recorrido.
+No se editaron respuestas ni decisiones para observarlas. Una primera espera
+del arnés privado buscaba **Cerrar sesión** visible, pero en participante está
+dentro del menú: se corrigió la espera al encabezado real, sin tocar el producto.
+No se repitieron las suites completas de navegador ni integración locales.
+
+Se comprobaron las etiquetas exactas de los 14 volúmenes propios antes de retirar
+los dos proyectos con `down -v`. Los contenedores y volúmenes ajenos quedaron
+intactos. Configuración privada, credenciales y respaldos permanecieron fuera de Git.
+
+El resultado corresponde a este fixture y host. No acredita teléfonos físicos,
+iOS, lectores de pantalla, Safari/Firefox, otras máquinas ni x86_64 local,
+personas reales, infraestructura institucional, S3 externo, alta disponibilidad,
+cambios mayores de PostgreSQL, recuperación de archivos de marca externos ni la
+ruta desde v0.10.0. Los tiempos no son una prueba de carga ni un plazo de
+recuperación garantizado.
 
 ## Retirada
 

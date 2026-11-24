@@ -16,26 +16,38 @@ El contrato público incluye API documentada, configuración, formatos de interc
 
 ### Preparación de 0.12.0 — Seguimiento y pulido del piloto
 
-Base comprobada: `b9cbe64f2ddfcba795bd2f039edb2bfa82f8028c`, merge del PR #157.
+Base comprobada: `e2e3a41d7306cfc006eab82b0e2e3e72855f1670`, merge del PR #165.
 Incluye #154 (preparación), #155 (reloj de la prueba de autoguardado),
-#156 (menos lecturas al guardar borradores) y #157 (zoom, ayuda y aviso de
-almacenamiento), además del seguimiento, plazos, plantillas y ayuda anteriores.
-Las [notas de 0.12.0](releases/v0.12.0.md) conservan las tres mediciones históricas
-y todas las tandas de la comparación del 21 de noviembre: 300/300 guardados
-espaciados correctos y 94/150 en ráfagas. Persisten 56 fallos y no se acredita
-capacidad institucional.
+#156 (menos lecturas al guardar borradores), #157 (zoom, ayuda y aviso de
+almacenamiento), #158 (cierre documental anterior), #159 (formulario), #160
+(fechas y horas), #164 (consolida #161–#163: Atención, filtros, Participación y
+revisión seguida) y #165 (movimiento sutil).
+Las [notas de 0.12.0](releases/v0.12.0.md) conservan las mediciones históricas
+y todas las tandas del 21 de noviembre: 300/300 guardados espaciados correctos y
+94/150 en ráfagas. Persisten 56 fallos y no se acredita capacidad institucional.
+F/G no cambiaron los archivos de autoguardado ni el servicio de respuestas;
+no se presenta una nueva medición de carga.
 
 Es MINOR por las funciones añadidas. Desde v0.11.0 hay una migración aditiva,
 `202611180001_response_due_at`: 13 → 14 migraciones, columna nueva nula en los
 proyectos existentes. Las imágenes usan Node 26.13.1; las cookies no cambian.
 Actualizar frontend y backend juntos, con respaldo verificado y recarga de
-pestañas. El [ensayo del 22 de noviembre](UPGRADE-REHEARSAL.md#resultado-sobre-el-código-final-ejecutado-el-2026-11-22)
-comprobó v0.11.0 → `b9cbe64` y su restauración: 787 filas previas de 38 tablas
-conservadas, 13 → 14 migraciones, sesión y evidencia intactas, con las exclusiones
-operativas indicadas en la guía. Distingue los resultados históricos. El cierre documental no cambia
-ese código: comprobar que `git diff --stat b9cbe64 HEAD` solo enumera `.md`.
-Si cambia el producto después, esta evidencia no sustituye un ensayo de la nueva
-candidata.
+pestañas. Revisar la zona de la organización: `DEFAULT_TIMEZONE` conserva UTC
+por omisión y ahora también gobierna la Bitácora y la hora de guardado.
+
+El [ensayo final del 24 de noviembre](UPGRADE-REHEARSAL.md#resultado-sobre-el-código-final-ejecutado-el-2026-11-24)
+registra v0.11.0 → `e2e3a41` y su restauración, con huellas por fila, migración,
+sesión y evidencia. El del 22 de noviembre sobre `b9cbe64` permanece como
+histórico; no acredita por sí solo los lotes F/G. El cierre documental conserva
+el código final: `git diff --stat e2e3a41 HEAD` debe enumerar solo `.md`.
+Si cambia el producto, hace falta revisar la evidencia de la nueva candidata.
+
+**Decisión antes de publicar:** el formulario usa la obligatoriedad de la pregunta;
+Participación y Atención cuentan la de la asignación a la persona. Una pregunta
+etiquetada Opcional puede contar como obligatoria pendiente. El propietario debe
+elegir entre corregirlo en otro cambio antes de publicar o publicar con el
+[límite documentado](releases/v0.12.0.md#límites-conocidos). Este cierre no modifica
+ese comportamiento.
 
 Exigir `verify`, `secrets`, `selfhosting`, `guided-install` y `codeql` en verde
 sobre la cabeza final. El propietario revisa y fusiona. Publicar requiere su
@@ -45,6 +57,8 @@ Solo entonces corresponde crear allí el tag anotado `v0.12.0`, publicar
 `gh workflow run ci.yml --ref v0.12.0`, verificando el mismo SHA: CI no escucha
 push de tags. Los enlaces de las notas ya apuntan de forma absoluta a
 `blob/v0.12.0`; no acreditan que el tag exista antes de publicarlo.
+Si se publica otro día, el propietario ajusta la fecha del encabezado de 0.12.0
+en CHANGELOG antes de elegir el commit definitivo; vuelve a comprobar sus controles.
 La preparación no publica imágenes ni actualiza instalaciones derivadas.
 
 ### Preparación de 0.11.0 — Continuidad y piloto institucional

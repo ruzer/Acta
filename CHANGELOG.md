@@ -6,33 +6,9 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
-### Added
+Sin cambios adicionales por anunciar.
 
-- **Revisión seguida dentro de la lista.** Al abrir una pregunta desde la bandeja, Anterior y Siguiente recorren las mismas preguntas y conservan su orden aunque cambien de estado. Registrar una decisión permite guardar y pasar a la siguiente, con las mismas validaciones y permisos. La carga no se duplica al montar la pantalla y se interrumpe al abandonar la lista o vencer la sesión.
-
-### Changed
-
-- **Atención con cifras a la vista.** El tablero muestra estados, validación por tema y área, y personas con preguntas pendientes; sus cifras reutilizan los filtros existentes. Distingue las preguntas con al menos una respuesta y conserva la tabla de métricas. Los cambios de avance se señalan entre visitas sin movimiento al usar el teclado o la preferencia de movimiento reducido.
-
-- **Filtros y seguimiento con contexto.** La bandeja conserva sus filtros mientras carga y al volver de una pregunta; las opciones se limitan al proyecto elegido. Organizar y Participación recuerdan los filtros en la dirección de la página. Participación muestra los envíos por persona, las obligatorias pendientes y los cambios sin enviar por separado, con búsqueda y filas más compactas en móvil.
-
-- **Barras que muestran el cambio.** Mi trabajo y la posición en el cuestionario conservan el último valor visto por cuenta y proyecto; solo animan los cambios, sin movimiento en la primera visita, con teclado o con movimiento reducido. Mantienen sus cifras, etiquetas y dimensiones.
-
-- **Confirmación de envío suave.** El aviso de respuesta enviada aparece con un fundido breve, conserva su anuncio y permanece disponible para leerlo; no se anima con teclado ni con movimiento reducido.
-
-- **Cierre con una señal breve.** Al terminar las preguntas, el círculo y la palomita confirman el cierre una sola vez, sin animar las cifras. «Listo por ahora», el teclado y el movimiento reducido permanecen quietos.
-
-- **Respuesta breve al presionar.** Los botones confirman la pulsación con un cambio mínimo de escala, conservando el espacio, el foco y el objetivo táctil. Los controles deshabilitados y el movimiento reducido no cambian.
-
-- **Diálogos con entrada suave.** El diálogo y su fondo aparecen en 160 ms cuando el navegador lo admite. El foco, Escape y Cerrar siguen funcionando de inmediato; el teclado y el movimiento reducido no animan la entrada y el cierre permanece instantáneo.
-
-### Fixed
-
-- **Formulario del participante más claro y fiable.** Límites y contadores junto a la respuesta, estados de guardado diferenciados y opción de guardar desde el diálogo de salida. «Por consultar» se puede deshacer durante ocho segundos. El avance excluye «No aplica», distingue envíos de posición y explica los borradores sin contarlos dos veces; los campos móviles usan al menos 16 px. Hola muestra el plazo de cada proyecto cuando está disponible, sin bloquear la pantalla. Ayuda y guía actualizadas, sin cambiar los tiempos ni la frecuencia del autoguardado.
-
-- **Fechas y horas de la organización.** La Bitácora y la hora de guardado usan la zona configurada; las fechas de respuesta se leen como día/mes/año y los plazos explican su zona con un nombre legible. El asistente propone la zona del navegador solo cuando aún no existe una elección explícita. Se conservan los instantes guardados, los exportes y la frecuencia del autoguardado.
-
-## [0.12.0] - 2026-11-22
+## [0.12.0] - 2026-11-24
 
 Seguimiento de participación, plazos, autoguardado, plantillas y ayuda para el piloto,
 integrados en los PR [#137](https://github.com/ruzer/Acta/pull/137),
@@ -43,8 +19,15 @@ integrados en los PR [#137](https://github.com/ruzer/Acta/pull/137),
 [#153](https://github.com/ruzer/Acta/pull/153),
 [#154](https://github.com/ruzer/Acta/pull/154),
 [#155](https://github.com/ruzer/Acta/pull/155),
-[#156](https://github.com/ruzer/Acta/pull/156) y
-[#157](https://github.com/ruzer/Acta/pull/157).
+[#156](https://github.com/ruzer/Acta/pull/156),
+[#157](https://github.com/ruzer/Acta/pull/157),
+[#158](https://github.com/ruzer/Acta/pull/158),
+[#159](https://github.com/ruzer/Acta/pull/159),
+[#160](https://github.com/ruzer/Acta/pull/160),
+[#164](https://github.com/ruzer/Acta/pull/164) (consolida #161–#163) y
+[#165](https://github.com/ruzer/Acta/pull/165). Incluye el formulario del participante,
+fechas y horas de la organización, tablero de Atención, filtros con memoria,
+revisión seguida y movimiento sutil.
 Las [notas de la versión](docs/releases/v0.12.0.md) explican la actualización,
 la migración aditiva y los límites de la evidencia. La publicación requiere la
 aprobación del propietario.
@@ -75,9 +58,25 @@ aprobación del propietario.
 
 - **Aviso de almacenamiento identificado.** Se documenta GO-2026-5932 en OpenPGP, incluido en una dependencia de VersityGW pero no importado por su binario, y una revisión propuesta para el propietario. No se cambia el proveedor ni se excluye el aviso del escáner.
 
+- **Revisión seguida dentro de la lista.** Al abrir una pregunta desde la bandeja, Anterior y Siguiente recorren las mismas preguntas y conservan su orden aunque cambien de estado. Registrar una decisión permite guardar y pasar a la siguiente, con las mismas validaciones y permisos. La carga no se duplica al montar la pantalla y se interrumpe al abandonar la lista o vencer la sesión.
+
 ### Changed
 
 - **Menos lecturas al guardar borradores.** Se reutiliza la carga inicial de la respuesta y se consulta la cobertura de participantes en conjunto, sin volver a cargar un grafo completo por persona. Se conserva el recálculo completo de estados, las consultas solicitadas, los permisos y los límites de conexión. En las mediciones espaciadas mejoró el guardado, pero las ráfagas de 50 simultáneos todavía tuvieron 56 fallos de 150 intentos; no se acredita capacidad institucional.
+
+- **Atención con cifras a la vista.** El tablero muestra estados, validación por tema y área, y personas con preguntas pendientes; sus cifras reutilizan los filtros existentes. Distingue las preguntas con al menos una respuesta y conserva la tabla de métricas. Los cambios de avance se señalan entre visitas sin movimiento al usar el teclado o la preferencia de movimiento reducido.
+
+- **Filtros y seguimiento con contexto.** La bandeja conserva sus filtros mientras carga y al volver de una pregunta; las opciones se limitan al proyecto elegido. Organizar y Participación recuerdan los filtros en la dirección de la página. Participación muestra los envíos por persona, las obligatorias pendientes y los cambios sin enviar por separado, con búsqueda y filas más compactas en móvil.
+
+- **Barras que muestran el cambio.** Mi trabajo y la posición en el cuestionario conservan el último valor visto por cuenta y proyecto; solo animan los cambios, sin movimiento en la primera visita, con teclado o con movimiento reducido. Mantienen sus cifras, etiquetas y dimensiones.
+
+- **Confirmación de envío suave.** El aviso de respuesta enviada aparece con un fundido breve, conserva su anuncio y permanece disponible para leerlo; no se anima con teclado ni con movimiento reducido.
+
+- **Cierre con una señal breve.** Al terminar las preguntas, el círculo y la palomita confirman el cierre una sola vez, sin animar las cifras. «Listo por ahora», el teclado y el movimiento reducido permanecen quietos.
+
+- **Respuesta breve al presionar.** Los botones confirman la pulsación con un cambio mínimo de escala, conservando el espacio, el foco y el objetivo táctil. Los controles deshabilitados y el movimiento reducido no cambian.
+
+- **Diálogos con entrada suave.** El diálogo y su fondo aparecen en 160 ms cuando el navegador lo admite. El foco, Escape y Cerrar siguen funcionando de inmediato; el teclado y el movimiento reducido no animan la entrada y el cierre permanece instantáneo.
 
 ### Fixed
 
@@ -134,6 +133,10 @@ aprobación del propietario.
 - **Prueba exacta del primer autoguardado.** La comprobación en navegador detiene el reloj antes de escribir y verifica que no se guarde a los 7.999 ms y sí a los 8.000 ms. Se conserva la revisión de accesibilidad; no cambia el funcionamiento del guardado.
 
 - **Zoom sin espacio de teclado.** Al ampliar la respuesta con un gesto de pellizco, el pie conserva su posición y no agrega el espacio reservado para el teclado; el teclado sigue dejando visible el campo.
+
+- **Formulario del participante más claro y fiable.** Límites y contadores junto a la respuesta, estados de guardado diferenciados y opción de guardar desde el diálogo de salida. «Por consultar» se puede deshacer durante ocho segundos. El avance excluye «No aplica», distingue envíos de posición y explica los borradores sin contarlos dos veces; los campos móviles usan al menos 16 px. Hola muestra el plazo de cada proyecto cuando está disponible, sin bloquear la pantalla. Ayuda y guía actualizadas, sin cambiar los tiempos ni la frecuencia del autoguardado.
+
+- **Fechas y horas de la organización.** La Bitácora y la hora de guardado usan la zona configurada; las fechas de respuesta se leen como día/mes/año y los plazos explican su zona con un nombre legible. El asistente propone la zona del navegador solo cuando aún no existe una elección explícita. Se conservan los instantes guardados, los exportes y la frecuencia del autoguardado.
 
 ### Security
 

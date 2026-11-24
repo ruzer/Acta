@@ -1,10 +1,11 @@
 # Centro de ayuda de Acta
 
 Referencia de código: Acta v0.12.0,
-`b9cbe64f2ddfcba795bd2f039edb2bfa82f8028c`, revisión documental del 2026-11-22.
+`e2e3a41d7306cfc006eab82b0e2e3e72855f1670`, revisión documental del 2026-11-24.
 
-Incluye el pulido de respuesta móvil, aclaraciones y revisión de solo lectura,
-las pruebas de permisos descritos en las guías y la mejora de guardado.
+Incluye el formulario del participante, fechas y horas de la organización,
+Atención, filtros con memoria, revisión seguida y movimiento sutil, además
+de las aclaraciones, los permisos descritos en las guías y la mejora de guardado.
 La revisión de textos y las pruebas automáticas no sustituyen un recorrido nuevo
 con personas ni acreditan publicación o producción. Consulta las
 [notas y su evidencia](../releases/v0.12.0.md#evidencia) y a tu administración
