@@ -1,3 +1,4 @@
+import { settleVisualState } from "./fixtures/page-checks";
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { PDFDocument } from "pdf-lib";
@@ -36,12 +37,7 @@ async function save(page: Page) {
   ).toBeVisible();
 }
 async function accessible(page: Page) {
-  await page.evaluate(async () => {
-    await document.fonts.ready;
-    await Promise.all(
-      document.getAnimations().map((a) => a.finished.catch(() => {})),
-    );
-  });
+  await settleVisualState(page);
   expect(
     (
       await new AxeBuilder({ page })

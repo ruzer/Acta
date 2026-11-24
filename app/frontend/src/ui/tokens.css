@@ -1,4 +1,5 @@
 :root {
+  --ac-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ac-font-ui:
     "Acta Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
     sans-serif;

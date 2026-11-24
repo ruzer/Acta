@@ -1,6 +1,51 @@
+import { z } from "zod";
 import { useEffect, useLayoutEffect, useRef } from "react";
 
 const prefix = "acta-ux:";
+let presentationUser: string | null = null;
+
+const snapshotSchema = z.strictObject({
+  version: z.literal(1),
+  values: z.record(
+    z.string(),
+    z.strictObject({
+      value: z.number().finite().nonnegative(),
+      total: z.number().finite().nonnegative(),
+      start: z.number().finite().nonnegative().optional(),
+    }),
+  ),
+});
+export type PresentationSnapshot = z.infer<typeof snapshotSchema>["values"];
+export function readPresentationSnapshot(
+  key: string,
+): PresentationSnapshot | null {
+  try {
+    const parsed = snapshotSchema.safeParse(
+      JSON.parse(sessionStorage.getItem(key) ?? "null"),
+    );
+    return parsed.success ? parsed.data.values : null;
+  } catch {
+    return null;
+  }
+}
+export function writePresentationSnapshot(
+  key: string,
+  values: PresentationSnapshot,
+) {
+  try {
+    sessionStorage.setItem(key, JSON.stringify({ version: 1, values }));
+  } catch {
+    /* Optional presentation memory. */
+  }
+}
+
+// Session already knows the account. Bar effects read it after the session's
+// layout effect, without fetching /me or changing route props.
+export function sessionPresentationKey(projectId: string, feature: string) {
+  return presentationUser
+    ? presentationKey(presentationUser, projectId, feature)
+    : null;
+}
 
 export function presentationKey(
   userId: string,
@@ -32,9 +77,11 @@ export function usePresentationModality() {
   useEffect(() => {
     const keyboard = () => {
       keyboardPresentation = true;
+      document.documentElement.dataset.presentationKeyboard = "true";
     };
     const pointer = () => {
       keyboardPresentation = false;
+      delete document.documentElement.dataset.presentationKeyboard;
     };
     window.addEventListener("keydown", keyboard, true);
     window.addEventListener("pointerdown", pointer, true);
@@ -42,6 +89,7 @@ export function usePresentationModality() {
       window.removeEventListener("keydown", keyboard, true);
       window.removeEventListener("pointerdown", pointer, true);
       keyboardPresentation = false;
+      delete document.documentElement.dataset.presentationKeyboard;
     };
   }, []);
 }
@@ -56,6 +104,7 @@ export function usePresentationSession(
   useLayoutEffect(() => {
     if (loading) return;
     const current = userId ?? null;
+    presentationUser = expired ? null : current;
     if (
       expired ||
       current === null ||
@@ -63,5 +112,8 @@ export function usePresentationSession(
     )
       clearSessionPresentation();
     previous.current = current;
+    return () => {
+      presentationUser = null;
+    };
   }, [userId, loading, expired]);
 }

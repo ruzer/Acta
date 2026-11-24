@@ -84,6 +84,8 @@ summary:focus-visible {
   box-shadow: var(--ac-focus);
 }
 .button {
+  position: relative;
+  transition: transform 100ms var(--ac-ease-out);
   display: inline-flex;
   justify-content: center;
   align-items: center;
@@ -96,6 +98,20 @@ summary:focus-visible {
   text-decoration: none;
   line-height: 1.3;
 }
+.button:active:not(:disabled):not([aria-disabled="true"]) {
+  transform: scale(0.98);
+}
+/* Keep the original 44px hit target during the 2% visual press. */
+.button:active:not(:disabled):not([aria-disabled="true"])::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .button { transition: none; }
+  .button:active:not(:disabled):not([aria-disabled="true"]) { transform: none; }
+}
+
 .primary {
   background: var(--primary);
   color: white;
@@ -475,6 +491,27 @@ dialog {
 }
 dialog::backdrop {
   background: rgb(18 22 28 / 40%);
+}
+/* Entry only: removing [open] removes transitions, so closing stays immediate. */
+dialog[open] {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 160ms var(--ac-ease-out), transform 160ms var(--ac-ease-out);
+}
+dialog[open]::backdrop {
+  opacity: 1;
+  transition: opacity 160ms var(--ac-ease-out);
+}
+@starting-style {
+  dialog[open] { opacity: 0; transform: scale(0.97); }
+  dialog[open]::backdrop { opacity: 0; }
+}
+:root[data-presentation-keyboard] dialog[open],
+:root[data-presentation-keyboard] dialog[open]::backdrop {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  dialog[open], dialog[open]::backdrop { transition: none; }
 }
 .dialog-head {
   display: flex;

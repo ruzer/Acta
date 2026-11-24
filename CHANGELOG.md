@@ -16,6 +16,16 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Filtros y seguimiento con contexto.** La bandeja conserva sus filtros mientras carga y al volver de una pregunta; las opciones se limitan al proyecto elegido. Organizar y Participación recuerdan los filtros en la dirección de la página. Participación muestra los envíos por persona, las obligatorias pendientes y los cambios sin enviar por separado, con búsqueda y filas más compactas en móvil.
 
+- **Barras que muestran el cambio.** Mi trabajo y la posición en el cuestionario conservan el último valor visto por cuenta y proyecto; solo animan los cambios, sin movimiento en la primera visita, con teclado o con movimiento reducido. Mantienen sus cifras, etiquetas y dimensiones.
+
+- **Confirmación de envío suave.** El aviso de respuesta enviada aparece con un fundido breve, conserva su anuncio y permanece disponible para leerlo; no se anima con teclado ni con movimiento reducido.
+
+- **Cierre con una señal breve.** Al terminar las preguntas, el círculo y la palomita confirman el cierre una sola vez, sin animar las cifras. «Listo por ahora», el teclado y el movimiento reducido permanecen quietos.
+
+- **Respuesta breve al presionar.** Los botones confirman la pulsación con un cambio mínimo de escala, conservando el espacio, el foco y el objetivo táctil. Los controles deshabilitados y el movimiento reducido no cambian.
+
+- **Diálogos con entrada suave.** El diálogo y su fondo aparecen en 160 ms cuando el navegador lo admite. El foco, Escape y Cerrar siguen funcionando de inmediato; el teclado y el movimiento reducido no animan la entrada y el cierre permanece instantáneo.
+
 ### Fixed
 
 - **Formulario del participante más claro y fiable.** Límites y contadores junto a la respuesta, estados de guardado diferenciados y opción de guardar desde el diálogo de salida. «Por consultar» se puede deshacer durante ocho segundos. El avance excluye «No aplica», distingue envíos de posición y explica los borradores sin contarlos dos veces; los campos móviles usan al menos 16 px. Hola muestra el plazo de cada proyecto cuando está disponible, sin bloquear la pantalla. Ayuda y guía actualizadas, sin cambiar los tiempos ni la frecuencia del autoguardado.

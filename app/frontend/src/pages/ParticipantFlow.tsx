@@ -1,3 +1,4 @@
+import { presentationUsesKeyboard } from "../session-presentation";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams, useLocation } from "react-router-dom";
@@ -136,12 +137,15 @@ function Receipt({
     next = participantStart(items);
   const complete =
     !next && data.progress.undetermined === 0 && items.length > 0;
+  const [celebrate] = useState(() => complete && !presentationUsesKeyboard());
   return (
     <section className="participant-page participant-receipt">
       <ParticipantFocus />
       <div className="participant-success">
-        <span className="participant-success-icon">
-          <ParticipantIcon />
+        <span
+          className={`participant-success-icon${complete && celebrate ? " participant-celebrate" : ""}`}
+        >
+          <ParticipantIcon drawCheck={complete} />
         </span>
         <h1>{complete ? "Terminaste tus preguntas" : "Listo por ahora"}</h1>
         <p className="participant-subtitle">
@@ -493,8 +497,12 @@ export function ParticipantNotice() {
   ) : null;
 }
 function Notice({ text }: { text: string }) {
+  const [enter] = useState(() => !presentationUsesKeyboard());
   return (
-    <p role="status" className="participant-feedback">
+    <p
+      role="status"
+      className={`participant-feedback${enter ? " participant-feedback-enter" : ""}`}
+    >
       <ParticipantIcon />
       {text}
     </p>

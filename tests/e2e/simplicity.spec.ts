@@ -1,3 +1,4 @@
+import { settleVisualState } from "./fixtures/page-checks";
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { randomUUID } from "node:crypto";
@@ -22,6 +23,7 @@ async function call(page: Page, path: string, body?: unknown) {
   );
 }
 async function axe(page: Page) {
+  await settleVisualState(page);
   expect(
     (
       await new AxeBuilder({ page })

@@ -1,3 +1,4 @@
+import { settleVisualState } from "./fixtures/page-checks";
 import {
   test,
   expect,
@@ -72,6 +73,7 @@ async function invitation(request: APIRequestContext) {
   };
 }
 async function accessible(page: Page) {
+  await settleVisualState(page);
   expect(
     (
       await new AxeBuilder({ page })

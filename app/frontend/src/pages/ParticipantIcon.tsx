@@ -1,4 +1,10 @@
-export function ParticipantIcon({ name = "check" }: { name?: string }) {
+export function ParticipantIcon({
+  name = "check",
+  drawCheck = false,
+}: {
+  name?: string;
+  drawCheck?: boolean;
+}) {
   const paths: Record<string, string> = {
     check: "m5 12 4 4L19 6",
     arrow: "M5 12h14m-5-5 5 5-5 5",
@@ -41,7 +47,11 @@ export function ParticipantIcon({ name = "check" }: { name?: string }) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d={paths[name] ?? paths.check} />
+      <path
+        d={paths[name] ?? paths.check}
+        pathLength={drawCheck ? 1 : undefined}
+        className={drawCheck ? "participant-success-check" : undefined}
+      />
     </svg>
   );
 }

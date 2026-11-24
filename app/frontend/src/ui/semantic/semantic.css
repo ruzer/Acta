@@ -1028,20 +1028,37 @@
   font: 700 28px/1.2 var(--ac-font-ui);
 }
 .ac-progress-bar {
-  display: flex;
-  gap: 2px;
+  position: relative;
   height: 8px;
   overflow: hidden;
   background: var(--ac-line);
   border-radius: 99px;
 }
 .ac-progress-bar > span {
+  position: absolute;
+  inset: 0;
   display: block;
+  width: 100%;
+  transform-origin: left;
   height: 100%;
   background: var(--ac-accent);
 }
 .ac-progress-bar > .ac-progress-drafts {
   background: color-mix(in srgb, var(--ac-accent) 40%, #fff);
+}
+.ac-progress-bar > .ac-progress-sent {
+  z-index: 1;
+}
+.ac-progress-bar > .ac-progress-gap {
+  width: 2px;
+  background: var(--ac-line);
+  z-index: 2;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ac-progress-bar > span {
+    animation: none;
+    transition: none;
+  }
 }
 .ac-progress-legend {
   display: flex;
