@@ -5,6 +5,7 @@ import {
 } from "@requirements/contracts";
 import { exchangeRequest } from "../api";
 import { useBranding } from "../branding";
+export { responseDueLabel };
 export const responseDeadlineQuery = (projectId: string) => ({
   queryKey: ["response-deadline", projectId],
   queryFn: () =>

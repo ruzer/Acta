@@ -1,3 +1,4 @@
+import { activeParticipantQuestions } from "./participant-progress";
 import { Brand } from "../branding";
 import { Link, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -25,10 +26,9 @@ export function ParticipantHeader({
   const topic = q.data?.sections.find((s) =>
     s.questions.some((q) => q.id === id),
   );
-  const sequence =
-    q.data?.sections
-      .flatMap((s) => s.questions)
-      .filter((q) => q.applicability === "ENABLED") ?? [];
+  const sequence = activeParticipantQuestions(
+    q.data?.sections.flatMap((s) => s.questions) ?? [],
+  );
   const position = sequence.findIndex((q) => q.id === id);
   return (
     <header className="participant-topbar">

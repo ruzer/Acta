@@ -45,6 +45,20 @@ Guardar un borrador conserva el trabajo sin entregarlo al equipo revisor. **Envi
 
 Más información: [Borrador](GLOSARIO.md#borrador).
 
+### ¿Qué pasa si necesito consultar información antes de responder?
+Aplica a: Participante.
+
+**Necesito consultar esto** guarda tu borrador, marca la pregunta como **Por consultar** y abre la siguiente. El aviso se refiere a la pregunta anterior. Puedes pulsar **Deshacer** durante ocho segundos para quitar la marca; tu borrador se conserva. Después, retoma la pregunta desde **Mi trabajo**. Esto no envía una respuesta.
+
+Más información: [Guía de Participante](../pilot/GUIA-PARTICIPANTE.md).
+
+### ¿Por qué el avance no cuenta todas las preguntas que veo?
+Aplica a: Participante.
+
+Solo cuenta preguntas asignadas y aplicables. **No aplica** queda fuera del avance, igual que una pregunta cuya condición todavía no se cumple. La barra distingue **Enviadas**, **Borradores sin enviar** y **Pendientes sin borrador**. Un borrador sobre una pregunta ya enviada se explica aparte: no se cuenta dos veces. La posición de la pregunta indica dónde estás; el número de enviadas indica tu avance. El total puede cambiar cuando se habilita un seguimiento.
+
+Más información: [Guía de Participante](../pilot/GUIA-PARTICIPANTE.md).
+
 ### ¿Por qué no puedo deshacer Enviar respuesta?
 Aplica a: Participante y personas invitadas.
 
@@ -62,7 +76,7 @@ Más información: [Guía de Participante](../pilot/GUIA-PARTICIPANTE.md); si en
 ### ¿Acta guarda mientras escribo?
 Aplica a: Participante.
 
-Acta intenta guardar el borrador después de una pausa al escribir y muestra su estado. Si el intento falla, conserva el texto visible y espacia los reintentos; no debes asumir que el borrador ya está en el servicio. **Guardar y salir** permite intentar el guardado de forma explícita.
+Acta intenta guardar el borrador después de una pausa al escribir. **Cambios sin guardar** indica texto pendiente y **Guardando…**, un intento en curso. Si falla, conserva el texto visible; revisa la causa antes de asumir que llegó al servicio. **Guardar y salir** también está en el diálogo **Tienes cambios sin guardar**: guarda antes de salir y conserva la página si falla. **Volver al borrador** cancela la salida; **Salir sin guardar** sale sin confirmar los cambios pendientes.
 
 Más información: [Guía de Participante](../pilot/GUIA-PARTICIPANTE.md).
 
@@ -73,17 +87,10 @@ Si Acta encuentra una copia pendiente de esa pestaña, ofrece **Restaurar texto 
 
 Más información: [Problemas al guardar](SOLUCION-DE-PROBLEMAS.md#respuestas-y-archivos).
 
-### ¿Por qué veo menos preguntas en el contador que en los temas?
-Aplica a: Participante.
-
-El avance cuenta las preguntas que aplican a tus respuestas actuales. Algunos seguimientos pueden aparecer en los temas como dependientes de una respuesta anterior y no contar todavía. El contador puede cambiar cuando un seguimiento se habilita.
-
-Más información: [Mi trabajo](GLOSARIO.md#mi-trabajo).
-
 ### ¿La fecha límite impide responder después?
 Aplica a: Participante, Administración y Analista.
 
-La fecha límite informa del plazo previsto; Acta permite guardar y enviar después. La institución puede tener acuerdos propios sobre entregas tardías. Consulta esos acuerdos al coordinador.
+En **Hola**, cada proyecto muestra su fecha límite si está disponible. Puedes seguir respondiendo después del plazo. La institución puede tener acuerdos propios sobre entregas tardías. Consulta esos acuerdos al coordinador.
 
 Más información: [Fecha límite](GLOSARIO.md#fecha-límite).
 

@@ -67,7 +67,9 @@ test("A: guardar, cerrar sesión, regresar y recuperar; sin contenido en localSt
     .fill("Consultar una guía ficticia");
   await page.getByRole("button", { name: "Necesito consultar esto" }).click();
   await expect(
-    page.getByRole("status").filter({ hasText: "Pregunta marcada" }),
+    page.getByRole("status").filter({
+      hasText: "La pregunta anterior quedó como Por consultar",
+    }),
   ).toBeVisible();
   await logout(page);
   await login(page, "stakeholder");
@@ -106,7 +108,11 @@ test("C: dos pestañas, conflicto conserva texto y recuperación del servidor gu
   await other
     .getByRole("button", { name: "Guardar y salir", exact: true })
     .click();
-  await expect(other.getByRole("alert")).toContainText(
+  await expect(other.locator(".save-status")).toContainText(
+    "El borrador fue actualizado",
+  );
+  await expect(other.locator(".save-status > span")).toHaveAttribute(
+    "title",
     "El borrador fue actualizado desde otra sesión o pestaña.",
   );
   await expect(other.getByLabel("Tu respuesta", { exact: true })).toHaveValue(
