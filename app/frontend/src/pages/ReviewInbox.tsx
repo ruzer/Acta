@@ -1,5 +1,6 @@
 import { FilterBar } from "../ui/FilterBar";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { queuePath } from "../review-queue";
 import { cleanReviewSearch, rememberReviewSearch } from "../review-context";
 import { AnalystStatus } from "./AnalystVisual";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -13,6 +14,10 @@ export function ReviewInbox({ userId = "" }: { userId?: string }) {
   const [params, setParams] = useSearchParams();
   const input = Object.fromEntries(params);
   const search = cleanReviewSearch(params.toString()) ?? "";
+  const queueToken = useMemo(
+    () => ({ search, token: crypto.randomUUID() }),
+    [search],
+  );
   useEffect(() => {
     rememberReviewSearch(userId, search);
   }, [userId, search]);
@@ -125,7 +130,11 @@ export function ReviewInbox({ userId = "" }: { userId?: string }) {
                     </p>
                     <h2>
                       <Link
-                        to={`/projects/${item.projectId}/review/${item.questionId}?reviewSearch=${encodeURIComponent(search)}`}
+                        to={queuePath(
+                          { projectId: item.projectId, id: item.questionId },
+                          queueToken.token,
+                          search,
+                        )}
                         state={{ reviewSearch: params.toString() }}
                       >
                         {item.question}

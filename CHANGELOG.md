@@ -6,6 +6,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
+### Added
+
+- **Revisión seguida dentro de la lista.** Al abrir una pregunta desde la bandeja, Anterior y Siguiente recorren las mismas preguntas y conservan su orden aunque cambien de estado. Registrar una decisión permite guardar y pasar a la siguiente, con las mismas validaciones y permisos. La carga no se duplica al montar la pantalla y se interrumpe al abandonar la lista o vencer la sesión.
+
 ### Changed
 
 - **Atención con cifras a la vista.** El tablero muestra estados, validación por tema y área, y personas con preguntas pendientes; sus cifras reutilizan los filtros existentes. Distingue las preguntas con al menos una respuesta y conserva la tabla de métricas. Los cambios de avance se señalan entre visitas sin movimiento al usar el teclado o la preferencia de movimiento reducido.
