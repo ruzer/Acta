@@ -1,3 +1,5 @@
+import { useMemo, useRef } from "react";
+import { useBarMotion, progressRatio } from "../ui/useBarMotion";
 import { useQuery } from "@tanstack/react-query";
 import type { PersonalProjectView } from "@requirements/contracts";
 import {
@@ -28,6 +30,14 @@ export function ResponseProgress({
   const position = active
     ? active.findIndex((q) => q.id === id) + 1
     : fallbackPosition;
+  const bar = useRef<HTMLDivElement>(null);
+  const snapshot = useMemo(
+    () => ({
+      position: { value: Math.max(0, position - 1), total: Math.max(0, total) },
+    }),
+    [position, total],
+  );
+  useBarMotion(bar, { projectId, bar: "position" }, snapshot);
   return (
     <>
       <div className="participant-response-summary">
@@ -43,6 +53,7 @@ export function ResponseProgress({
         )}
       </div>
       <div
+        ref={bar}
         className="participant-progress"
         role="progressbar"
         aria-label="Posición en el cuestionario"
@@ -52,8 +63,10 @@ export function ResponseProgress({
         aria-valuenow={Math.max(0, position - 1)}
       >
         <span
+          className="participant-position-fill"
+          data-bar-part="position"
           style={{
-            width: `${total ? (Math.max(0, position - 1) / total) * 100 : 0}%`,
+            transform: `scaleX(${progressRatio(Math.max(0, position - 1), total)})`,
           }}
         />
       </div>

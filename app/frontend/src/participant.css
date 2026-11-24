@@ -541,6 +541,8 @@
   border-radius: 99px;
 }
 .participant-progress > span {
+  width: 100%;
+  transform-origin: left;
   display: block;
   height: 100%;
   background: var(--ac-accent);

@@ -150,9 +150,11 @@ export function Welcome({
   items,
   href,
   progress,
+  projectId,
   waiting,
 }: {
   refreshing?: boolean;
+  projectId?: string;
   items: PersonalQuestion[];
   href?: string;
   progress: {
@@ -172,6 +174,7 @@ export function Welcome({
   return (
     <section className="participant-welcome" aria-label="Resumen de Mi trabajo">
       <ProgressCard
+        memoryKey={projectId ? { projectId, bar: "mywork" } : undefined}
         sent={progress.sent}
         total={progress.total}
         drafts={progress.drafts}
@@ -273,6 +276,7 @@ export function MyWork() {
         <ResponseDeadline projectId={projectId} />
       </div>
       <Welcome
+        projectId={projectId}
         refreshing={q.isFetching}
         items={items}
         progress={participantProgress(items)}

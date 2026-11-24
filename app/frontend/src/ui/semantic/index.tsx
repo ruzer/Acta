@@ -1,6 +1,8 @@
+import { useBarMotion, progressRatio, type BarMemory } from "../useBarMotion";
 import {
   useEffect,
   useId,
+  useMemo,
   useRef,
   type ComponentProps,
   type KeyboardEvent,
@@ -562,15 +564,24 @@ export function ProgressCard({
   drafts = 0,
   noun = "preguntas enviadas",
   children,
+  memoryKey,
 }: {
+  memoryKey?: BarMemory;
   sent: number;
   total: number;
   drafts?: number;
   noun?: string;
   children?: ReactNode;
 }) {
-  const share = (value: number) =>
-    total > 0 ? `${Math.min(100, (value / total) * 100)}%` : "0%";
+  const bar = useRef<HTMLDivElement>(null);
+  const snapshot = useMemo(
+    () => ({
+      sent: { value: Math.max(0, sent), total: Math.max(0, total) },
+      drafts: { value: Math.max(0, drafts), total: Math.max(0, total) },
+    }),
+    [sent, drafts, total],
+  );
+  useBarMotion(bar, memoryKey, snapshot);
   return (
     <section className="ac-progress-card" aria-label="Avance">
       <p className="ac-progress-count">
@@ -579,14 +590,27 @@ export function ProgressCard({
       {total > 0 ? (
         <>
           <div
+            ref={bar}
             className="ac-progress-bar"
             role="img"
             aria-label={`${sent} de ${total} ${noun}${drafts ? `; ${drafts} en borrador` : ""}`}
           >
-            <span style={{ width: share(sent) }} />
+            <span
+              className="ac-progress-sent"
+              data-bar-part="sent"
+              style={{ transform: `scaleX(${progressRatio(sent, total)})` }}
+            />
             <span
               className="ac-progress-drafts"
-              style={{ width: share(drafts) }}
+              data-bar-part="drafts"
+              style={{
+                transform: `scaleX(${progressRatio(sent + drafts, total)})`,
+              }}
+            />
+            <span
+              className="ac-progress-gap"
+              data-bar-part="gap"
+              aria-hidden="true"
             />
           </div>
           <ul className="ac-progress-legend" aria-label="Estados del avance">

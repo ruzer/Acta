@@ -6,6 +6,9 @@ import { useEffect, useMemo, useRef, type RefObject } from "react";
 import { useMediaQuery } from "../ui/useMediaQuery";
 import {
   presentationKey,
+  readPresentationSnapshot,
+  writePresentationSnapshot,
+  type PresentationSnapshot as Snapshot,
   presentationUsesKeyboard,
 } from "../session-presentation";
 import {
@@ -35,28 +38,6 @@ const stateOrder: Record<(typeof reviewStates)[number], number> = {
 };
 
 const easing = "cubic-bezier(0.22,1,0.36,1)";
-const snapshotSchema = z.strictObject({
-  version: z.literal(1),
-  values: z.record(
-    z.string(),
-    z.strictObject({
-      value: z.number().finite().nonnegative(),
-      total: z.number().finite().nonnegative(),
-      start: z.number().finite().nonnegative().optional(),
-    }),
-  ),
-});
-type Snapshot = z.infer<typeof snapshotSchema>["values"];
-function readSnapshot(key: string): Snapshot | null {
-  try {
-    const parsed = snapshotSchema.safeParse(
-      JSON.parse(sessionStorage.getItem(key) ?? "null"),
-    );
-    return parsed.success ? parsed.data.values : null;
-  } catch {
-    return null;
-  }
-}
 function progressSnapshot(data: z.infer<typeof dashboardView>): Snapshot {
   const values: Snapshot = {};
   const count = (status: (typeof reviewStates)[number]) =>
@@ -165,7 +146,9 @@ function revealQuestions(reduced: boolean, keyboard: boolean) {
   if (outline.animate) {
     animation = outline.animate([{ opacity: 1 }, { opacity: 0 }], {
       duration: 800,
-      easing,
+      easing:
+        getComputedStyle(heading).getPropertyValue("--ac-ease-out").trim() ||
+        easing,
     });
     void animation.finished.then(
       () => {
@@ -185,7 +168,10 @@ function useProgressMotion(
   const reduced = useMediaQuery("(prefers-reduced-motion: reduce)");
   const keyboard = useRef(false);
   const scrollCleanup = useRef<() => void>(() => undefined);
-  const visit = useMemo(() => ({ previous: readSnapshot(key) }), [key]);
+  const visit = useMemo(
+    () => ({ previous: readPresentationSnapshot(key) }),
+    [key],
+  );
   useEffect(() => {
     const onKey = () => {
       keyboard.current = true;
@@ -217,14 +203,7 @@ function useProgressMotion(
     const frame = window.requestAnimationFrame(() => {
       const previous = visit.previous;
       visit.previous = snapshot;
-      try {
-        sessionStorage.setItem(
-          key,
-          JSON.stringify({ version: 1, values: snapshot }),
-        );
-      } catch {
-        /* Optional presentation memory. */
-      }
+      writePresentationSnapshot(key, snapshot);
       if (!previous || !root.current) return;
       const byKeyboard =
         presentationUsesKeyboard() ||
@@ -238,7 +217,13 @@ function useProgressMotion(
         duration: number,
       ) => {
         if (!element.animate) return;
-        const animation = element.animate(frames, { duration, easing });
+        const animation = element.animate(frames, {
+          duration,
+          easing:
+            getComputedStyle(element)
+              .getPropertyValue("--ac-ease-out")
+              .trim() || easing,
+        });
         animations.push(animation);
         void animation.finished.catch(() => undefined);
         return animation;
