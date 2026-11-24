@@ -83,6 +83,73 @@ test("G1-a: volver a una posición anterior retrocede sin cambiar el tamaño de 
 });
 
 test.use({ actionTimeout: 15000 });
+for (const reduced of [false, true]) {
+  test(`G1-d: presionar conserva objetivo y foco; reduced=${reduced}`, async ({
+    page,
+  }) => {
+    if (reduced) await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    const button = page.getByRole("button", {
+      name: "Iniciar sesión",
+      exact: true,
+    });
+    await expect(button).toBeVisible();
+    await settleMotion(page);
+    await button.hover();
+    const before = await button.boundingBox();
+    expect(before!.height).toBeGreaterThanOrEqual(44);
+    await button.hover();
+    await page.mouse.down();
+    await expect
+      .poll(() => button.evaluate((el) => getComputedStyle(el).transform))
+      .toBe(reduced ? "none" : "matrix(0.98, 0, 0, 0.98, 0, 0)");
+    expect(
+      await button.evaluate((el) => el.offsetHeight),
+    ).toBeGreaterThanOrEqual(44);
+    // The 44px target remains hit-testable even while the visual surface shrinks.
+    expect(
+      await button.evaluate(
+        (el, box) =>
+          [0.5, box.height - 0.5].every((y) => {
+            const target = document.elementFromPoint(
+              box.x + box.width / 2,
+              box.y + y,
+            );
+            return target === el || (target && el.contains(target));
+          }),
+        before!,
+      ),
+    ).toBe(true);
+    await page.mouse.move(1, 1);
+    await page.mouse.up();
+    await settleMotion(page);
+    expect(await button.boundingBox()).toEqual(before);
+    for (const state of ["disabled", "aria-disabled"]) {
+      await button.evaluate((el, state) => {
+        el.setAttribute(state, state === "disabled" ? "" : "true");
+      }, state);
+      await button.hover();
+      await page.mouse.down();
+      expect(
+        await button.evaluate((el) => getComputedStyle(el).transform),
+      ).toBe("none");
+      await page.mouse.move(1, 1);
+      await page.mouse.up();
+      await button.evaluate((el, state) => el.removeAttribute(state), state);
+    }
+    await page.getByLabel("Usuario", { exact: true }).focus();
+    await page.keyboard.press("Tab");
+    expect(
+      await page
+        .locator(":focus")
+        .evaluate(
+          (el) =>
+            getComputedStyle(el).boxShadow !== "none" ||
+            getComputedStyle(el).outlineStyle !== "none",
+        ),
+    ).toBe(true);
+  });
+}
 for (const preference of ["normal", "reduce", "keyboard"] as const) {
   test(`G1-c: cierre ${preference}, solo celebra al terminar`, async ({
     page,

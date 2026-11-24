@@ -84,6 +84,8 @@ summary:focus-visible {
   box-shadow: var(--ac-focus);
 }
 .button {
+  position: relative;
+  transition: transform 100ms var(--ac-ease-out);
   display: inline-flex;
   justify-content: center;
   align-items: center;
@@ -96,6 +98,20 @@ summary:focus-visible {
   text-decoration: none;
   line-height: 1.3;
 }
+.button:active:not(:disabled):not([aria-disabled="true"]) {
+  transform: scale(0.98);
+}
+/* Keep the original 44px hit target during the 2% visual press. */
+.button:active:not(:disabled):not([aria-disabled="true"])::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .button { transition: none; }
+  .button:active:not(:disabled):not([aria-disabled="true"]) { transform: none; }
+}
+
 .primary {
   background: var(--primary);
   color: white;
