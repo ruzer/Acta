@@ -879,12 +879,12 @@ function ResponseEditor({
                   <ParticipantIcon name="help" />
                   Necesito consultar esto
                 </Button>
+                {saveStatus}
                 <p className="hint">
                   “Guardar y salir” conserva tu borrador privado, incluso si aún
                   no respondes. “Enviar respuesta” registra una versión que no
                   se puede modificar.
                 </p>
-                {saveStatus}
                 <div className="response-footer">
                   <div className="response-actions">
                     <div className="actions">
