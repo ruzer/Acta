@@ -45,13 +45,15 @@ Hay una regla de precedencia: **si defines la variable (no vacía), la infraestr
 | APP_SECONDARY_NAME     | vacío                 | Nombre de esa entidad (hasta 200 caracteres); se escribe bajo el nombre de la institución en el acceso |
 | APP_ACCENT             | #2b4d7c               | Hexadecimal; contraste mínimo 4.5:1 sobre blanco                                             |
 | DEFAULT_LOCALE         | es-MX                 | Locale válido para formato; no implica traducción de toda la UI                              |
-| DEFAULT_TIMEZONE       | UTC                   | Zona IANA válida para fechas de revisión/participante                                        |
+| DEFAULT_TIMEZONE       | UTC                   | Zona IANA válida para Bitácora, guardado, revisión y plazos                                        |
 | SETUP_WIZARD           | auto                  | `auto`: ofrece el asistente de primera instalación mientras no haya administrador. `disabled`: lo apaga (crea al administrador con `bootstrap-admin`) |
 
 La zona predeterminada de Acta sigue siendo **UTC**. Si nadie elige otra zona y
 `DEFAULT_TIMEZONE` no está definido, las horas de guardado, revisión y Bitácora se
 muestran en UTC; los plazos también se calculan con esa zona. No se cambia el valor
-original de las fechas guardadas. Las respuestas que contienen solo un día se leen
+original de las fechas guardadas. Tras actualizar a 0.12.0, la Bitácora puede
+mostrar una hora distinta para el mismo instante: revisa la zona elegida en vez
+de corregir los registros. Las respuestas que contienen solo un día se leen
 como **día/mes/año**, sin desplazarlas por zona.
 
 En la primera instalación, el asistente propone la zona válida del navegador solo
