@@ -212,3 +212,82 @@ it("g: las guías no atribuyen revisión a Administración del proyecto", () => 
   for (const path of paths)
     expect(attributesReviewToAdministration(read(path)), path).toBe(false);
 });
+
+it("el error de guardado en ayuda y guía explica la causa y conserva el texto sin afirmar que se guardó", () => {
+  for (const path of [
+    "app/frontend/src/pages/Help.tsx",
+    "docs/pilot/GUIA-PARTICIPANTE.md",
+    `${folder}/SOLUCION-DE-PROBLEMAS.md`,
+  ]) {
+    const content = compact(read(path));
+    expect(content, path).toContain("No se pudo guardar:");
+    expect(content, path).toContain("Tu texto sigue aquí");
+    expect(content, path).not.toContain(
+      "No se pudo guardar. Tu texto sigue aquí",
+    );
+  }
+});
+
+it("la ayuda explica que Deshacer retira Por consultar, conserva el borrador y dura ocho segundos", () => {
+  for (const path of [
+    "app/frontend/src/pages/Help.tsx",
+    "docs/pilot/GUIA-PARTICIPANTE.md",
+    `${folder}/PREGUNTAS-FRECUENTES.md`,
+  ]) {
+    const content = compact(read(path));
+    expect(content, path).toContain("Necesito consultar esto");
+    expect(content, path).toContain("Por consultar");
+    expect(content, path).toContain("Deshacer");
+    expect(content, path).toContain("ocho segundos");
+    expect(content, path).toContain("borrador se conserva");
+  }
+});
+
+it("la ayuda y la guía aclaran que No aplica queda fuera del avance", () => {
+  for (const path of [
+    "app/frontend/src/pages/Help.tsx",
+    "docs/pilot/GUIA-PARTICIPANTE.md",
+    `${folder}/PREGUNTAS-FRECUENTES.md`,
+  ]) {
+    const content = compact(read(path));
+    expect(content, path).toContain("No aplica");
+    expect(content, path).toMatch(/no cuenta|fuera del avance/);
+  }
+  const faq = read(`${folder}/PREGUNTAS-FRECUENTES.md`);
+  expect(faq).toContain("Borradores sin enviar");
+  expect(faq).toContain("Pendientes sin borrador");
+  expect(faq).toContain("no se cuenta dos veces");
+});
+
+it("el cierre de la guía explica límites y contadores en una página con ocho pasos", () => {
+  for (const path of [
+    "app/frontend/src/pages/Help.tsx",
+    "docs/pilot/GUIA-PARTICIPANTE.md",
+  ]) {
+    const text = compact(read(path));
+    expect(text, path).toContain("límites y el contador");
+  }
+  const guide = read("docs/pilot/GUIA-PARTICIPANTE.md");
+  expect(guide.trim().split(/\s+/).length).toBeLessThanOrEqual(350);
+  expect([...guide.matchAll(/^\d+\. /gm)]).toHaveLength(8);
+  const faq = read(`${folder}/PREGUNTAS-FRECUENTES.md`);
+  expect(faq).toContain("Cambios sin guardar");
+  expect(faq).toContain("Guardando…");
+  expect(faq).toContain("Tienes cambios sin guardar");
+});
+
+it("la ayuda y la guía ubican el plazo disponible por proyecto en Hola y permiten responder después", () => {
+  for (const path of [
+    "app/frontend/src/pages/Help.tsx",
+    "docs/pilot/GUIA-PARTICIPANTE.md",
+    `${folder}/PREGUNTAS-FRECUENTES.md`,
+  ]) {
+    const text = compact(read(path));
+    expect(text, path).toContain("Hola");
+    expect(text, path).toContain("cada proyecto");
+    expect(text, path).toContain("si está disponible");
+    expect(text, path).toContain(
+      "Puedes seguir respondiendo después del plazo",
+    );
+  }
+});
