@@ -1,26 +1,35 @@
+import { FilterBar } from "../ui/FilterBar";
+import { useEffect } from "react";
+import { cleanReviewSearch, rememberReviewSearch } from "../review-context";
 import { AnalystStatus } from "./AnalystVisual";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
 import { priorities, reviewStates } from "@requirements/contracts";
 import { api } from "../api";
 import { Button, EmptyState, ErrorState, LoadingState, Select } from "../ui";
 import { PageHeader } from "../ui/semantic";
 import { dateText, reviewLabels } from "./ReviewShared";
-import { plural } from "../ui/plural";
-export function ReviewInbox() {
+export function ReviewInbox({ userId = "" }: { userId?: string }) {
   const [params, setParams] = useSearchParams();
   const input = Object.fromEntries(params);
+  const search = cleanReviewSearch(params.toString()) ?? "";
+  useEffect(() => {
+    rememberReviewSearch(userId, search);
+  }, [userId, search]);
   const q = useQuery({
     queryKey: ["review-inbox", input],
     queryFn: () => api("listReviewInbox", {}, input),
     staleTime: 0,
+    placeholderData: keepPreviousData,
   });
   function filter(key: string, value: string) {
     const next = new URLSearchParams(params);
     if (value) next.set(key, value);
     else next.delete(key);
     next.delete("page");
-    if (key === "projectId") next.delete("sectionId");
+    if (key === "projectId")
+      for (const dependent of ["sectionId", "areaId", "participantId"])
+        next.delete(dependent);
     setParams(next);
   }
   return (
@@ -32,7 +41,15 @@ export function ReviewInbox() {
         title="Revisar respuestas"
         lead="Consulta las aportaciones y decide qué necesita seguimiento."
       />
-      <div className="review-filters">
+      <FilterBar
+        summary={
+          q.data
+            ? `${q.data.items.length} de ${q.data.total} preguntas en esta página`
+            : ""
+        }
+        hasFilters={params.size > 0}
+        onClear={() => setParams({})}
+      >
         <Select
           label="Estado"
           value={input.status ?? ""}
@@ -82,101 +99,98 @@ export function ReviewInbox() {
               ))}
             </Select>
           ))}
-      </div>
-      {params.size > 0 && (
-        <Button tone="secondary" onClick={() => setParams({})}>
-          Limpiar filtros
-        </Button>
-      )}
-      {q.isPending ? (
-        <LoadingState />
-      ) : q.error ? (
-        <ErrorState error={q.error} retry={() => void q.refetch()} />
-      ) : (
-        <>
-          <p role="status">
-            {plural(
-              q.data.total,
-              "pregunta encontrada",
-              "preguntas encontradas",
+      </FilterBar>
+      <section
+        className="review-results"
+        aria-label="Resultados de revisión"
+        aria-busy={q.isFetching}
+      >
+        {q.isPending ? (
+          <LoadingState />
+        ) : q.error ? (
+          <ErrorState error={q.error} retry={() => void q.refetch()} />
+        ) : (
+          <>
+            {q.data.items.length === 0 ? (
+              <EmptyState title="No hay preguntas para estos filtros">
+                Las preguntas publicadas de los proyectos donde eres analista
+                aparecerán aquí.
+              </EmptyState>
+            ) : (
+              <ul className="review-inbox">
+                {q.data.items.map((item) => (
+                  <li key={item.questionId}>
+                    <p className="eyebrow">
+                      {item.projectName} · {item.sectionTitle}
+                    </p>
+                    <h2>
+                      <Link
+                        to={`/projects/${item.projectId}/review/${item.questionId}?reviewSearch=${encodeURIComponent(search)}`}
+                        state={{ reviewSearch: params.toString() }}
+                      >
+                        {item.question}
+                      </Link>
+                    </h2>
+                    <div className="actions">
+                      <AnalystStatus status={item.status} />
+                      <span className="av-metadata">
+                        Prioridad {item.priority}
+                      </span>
+                      <span className="av-metadata">{item.areaName}</span>
+                    </div>
+                    <p>
+                      {item.respondents.length
+                        ? "Respondieron: " +
+                          item.respondents
+                            .map((r) => `${r.displayName} (${r.areaName})`)
+                            .join(", ")
+                        : "Aún no hay respuestas enviadas."}
+                    </p>
+                    <p className="hint">
+                      Última aportación: {dateText(item.lastContributionAt)} ·{" "}
+                      {item.hasEvidence ? "Con evidencia" : "Sin evidencia"}
+                      {item.openClarifications > 0
+                        ? ` · ${item.openClarifications} aclaraciones abiertas`
+                        : ""}
+                    </p>
+                  </li>
+                ))}
+              </ul>
             )}
-          </p>
-          {q.data.items.length === 0 ? (
-            <EmptyState title="No hay preguntas para estos filtros">
-              Las preguntas publicadas de los proyectos donde eres analista
-              aparecerán aquí.
-            </EmptyState>
-          ) : (
-            <ul className="review-inbox">
-              {q.data.items.map((item) => (
-                <li key={item.questionId}>
-                  <p className="eyebrow">
-                    {item.projectName} · {item.sectionTitle}
-                  </p>
-                  <h2>
-                    <Link
-                      to={`/projects/${item.projectId}/review/${item.questionId}`}
-                      state={{ reviewSearch: params.toString() }}
-                    >
-                      {item.question}
-                    </Link>
-                  </h2>
-                  <div className="actions">
-                    <AnalystStatus status={item.status} />
-                    <span className="av-metadata">
-                      Prioridad {item.priority}
-                    </span>
-                    <span className="av-metadata">{item.areaName}</span>
-                  </div>
-                  <p>
-                    {item.respondents.length
-                      ? "Respondieron: " +
-                        item.respondents
-                          .map((r) => `${r.displayName} (${r.areaName})`)
-                          .join(", ")
-                      : "Aún no hay respuestas enviadas."}
-                  </p>
-                  <p className="hint">
-                    Última aportación: {dateText(item.lastContributionAt)} ·{" "}
-                    {item.hasEvidence ? "Con evidencia" : "Sin evidencia"}
-                    {item.openClarifications > 0
-                      ? ` · ${item.openClarifications} aclaraciones abiertas`
-                      : ""}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-          <div className="actions">
-            <Button
-              tone="secondary"
-              disabled={q.data.page <= 1}
-              onClick={() => {
-                const next = new URLSearchParams(params);
-                next.set("page", String(q.data.page - 1));
-                setParams(next);
-              }}
-            >
-              Anterior
-            </Button>
-            <span>
-              Página {q.data.page} de{" "}
-              {Math.max(1, Math.ceil(q.data.total / q.data.pageSize))}
-            </span>
-            <Button
-              tone="secondary"
-              disabled={q.data.page * q.data.pageSize >= q.data.total}
-              onClick={() => {
-                const next = new URLSearchParams(params);
-                next.set("page", String(q.data.page + 1));
-                setParams(next);
-              }}
-            >
-              Siguiente
-            </Button>
-          </div>
-        </>
-      )}
+            <div className="actions">
+              <Button
+                tone="secondary"
+                disabled={q.isPlaceholderData || q.data.page <= 1}
+                onClick={() => {
+                  const next = new URLSearchParams(params);
+                  next.set("page", String(q.data.page - 1));
+                  setParams(next);
+                }}
+              >
+                Anterior
+              </Button>
+              <span>
+                Página {q.data.page} de{" "}
+                {Math.max(1, Math.ceil(q.data.total / q.data.pageSize))}
+              </span>
+              <Button
+                tone="secondary"
+                disabled={
+                  q.isPlaceholderData ||
+                  q.data.page * q.data.pageSize >= q.data.total
+                }
+                onClick={() => {
+                  const next = new URLSearchParams(params);
+                  next.set("page", String(q.data.page + 1));
+                  setParams(next);
+                }}
+              >
+                Siguiente
+              </Button>
+            </div>
+          </>
+        )}
+      </section>
     </div>
   );
 }

@@ -1,7 +1,9 @@
+import { FilterBar } from "../ui/FilterBar";
+import { ParticipationPeople } from "./ParticipationPeople";
 import { plural } from "../ui/plural";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   participationStates,
   participationView,
@@ -9,10 +11,9 @@ import {
 } from "@requirements/contracts";
 import { exchangeRequest } from "../api";
 import { responseDueLabel } from "../response-deadline-display";
-import { formatDate, useBranding } from "../branding";
+import { useBranding } from "../branding";
 import {
   Button,
-  DataTable,
   EmptyState,
   ErrorState,
   LoadingState,
@@ -63,8 +64,21 @@ export function Participation() {
   const { timezone } = useBranding();
   const { projectId = "" } = useParams();
   const query = useQuery(participationQuery(projectId));
-  const [state, setState] = useState("");
-  const [order, setOrder] = useState("name");
+  const [params, setParams] = useSearchParams();
+  const state = params.get("state") ?? "";
+  const order = params.get("order") ?? "name";
+  const search = params.get("q") ?? "";
+  function filter(key: string, value: string) {
+    const next = new URLSearchParams(params);
+    if (value) next.set(key, value);
+    else next.delete(key);
+    setParams(next, { replace: true, preventScrollReset: true });
+  }
+  function clearFilters() {
+    const next = new URLSearchParams(params);
+    for (const key of ["state", "order", "q"]) next.delete(key);
+    setParams(next, { replace: true, preventScrollReset: true });
+  }
   const [notice, setNotice] = useState("");
   const [fallback, setFallback] = useState("");
   const copy = useRef<HTMLTextAreaElement>(null);
@@ -80,8 +94,19 @@ export function Participation() {
       <ErrorState error={query.error} retry={() => void query.refetch()} />
     );
   const data = query.data;
+  const term = search.trim().toLocaleLowerCase("es-MX");
+  const pendingPeople = data.participants.filter(
+    (person) => person.pending > 0,
+  ).length;
   const people = data.participants
-    .filter((person) => !state || person.state === state)
+    .filter(
+      (person) =>
+        (!state || person.state === state) &&
+        (!term ||
+          [person.name, person.area ?? ""].some((text) =>
+            text.toLocaleLowerCase("es-MX").includes(term),
+          )),
+    )
     .sort((a, b) => {
       const result =
         order === "pending"
@@ -137,11 +162,20 @@ export function Participation() {
         estén revisadas. Las preguntas que dependan de otra respuesta pueden
         aparecer después.
       </p>
-      <div className="actions">
+      <FilterBar
+        search={{
+          label: "Buscar participantes",
+          value: search,
+          onChange: (value) => filter("q", value),
+        }}
+        summary={`${people.length} de ${data.participants.length} personas`}
+        hasFilters={!!(state || order !== "name" || search)}
+        onClear={clearFilters}
+      >
         <Select
           label="Filtrar participación"
           value={state}
-          onChange={(e) => setState(e.target.value)}
+          onChange={(e) => filter("state", e.target.value)}
         >
           <option value="">Todos los estados</option>
           {participationStates.map((s) => (
@@ -151,20 +185,17 @@ export function Participation() {
         <Select
           label="Ordenar participación"
           value={order}
-          onChange={(e) => setOrder(e.target.value)}
+          onChange={(e) => filter("order", e.target.value)}
         >
           <option value="name">Nombre (A a Z)</option>
           <option value="pending">Más pendientes primero</option>
           <option value="activity">Actividad más reciente</option>
           <option value="state">Estado (por avance)</option>
         </Select>
-        <Button
-          disabled={!data.participants.some((p) => p.pending > 0)}
-          onClick={() => void remind()}
-        >
-          Copiar recordatorio
-        </Button>
-      </div>
+      </FilterBar>
+      <Button disabled={pendingPeople === 0} onClick={() => void remind()}>
+        Copiar recordatorio ({plural(pendingPeople, "persona")} con pendientes)
+      </Button>
       {notice && <p role="status">{notice}</p>}
       {fallback && (
         <Textarea
@@ -184,7 +215,7 @@ export function Participation() {
           }
         >
           {data.participants.length ? (
-            "Elige otro estado para ver al equipo."
+            "Cambia o limpia los filtros para ver al equipo."
           ) : (
             <>
               Da acceso a participantes y asígnales preguntas.{" "}
@@ -202,40 +233,9 @@ export function Participation() {
           )}
         </EmptyState>
       ) : (
-        <DataTable
-          caption="Participación por persona"
-          columns={[
-            "Nombre",
-            "Área",
-            "Asignadas",
-            "Borradores",
-            "Enviadas",
-            "Obligatorias pendientes",
-            "Última actividad",
-            "Estado",
-            "Recordatorio",
-          ].map((label) => ({ label }))}
-          rows={people.map((p) => ({
-            key: p.memberId,
-            cells: [
-              p.name,
-              p.area ?? "Sin área",
-              p.assigned,
-              p.drafts,
-              p.sent,
-              p.pending,
-              p.lastActivity ? formatDate(p.lastActivity) : "Sin actividad",
-              p.state,
-              <Button
-                tone="secondary"
-                disabled={p.pending === 0}
-                aria-label={`Copiar recordatorio para ${p.name}`}
-                onClick={() => void remind(p)}
-              >
-                Copiar recordatorio
-              </Button>,
-            ],
-          }))}
+        <ParticipationPeople
+          people={people}
+          remind={(person) => void remind(person)}
         />
       )}
     </>

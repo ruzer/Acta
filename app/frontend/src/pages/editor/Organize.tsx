@@ -312,7 +312,33 @@ export function Organize(
   const selectionStatus = useRef<HTMLParagraphElement>(null);
   const [page, setPage] = useState(props.organizeContext?.page ?? 0);
   const rememberContext = props.onOrganizeContextChange;
+  const synchronizedLocation = useRef(props.organizeLocation);
   useEffect(() => {
+    // A browser Back/Forward change restores filters without remounting the
+    // editor, losing focus, or serializing the selection into the URL.
+    if (props.organizeLocation !== synchronizedLocation.current) {
+      synchronizedLocation.current = props.organizeLocation;
+      const incoming = props.organizeContext;
+      if (
+        bulkIds.size &&
+        (topic !== (incoming?.topic ?? "") ||
+          search !== (incoming?.search ?? "") ||
+          publication !== (incoming?.publication ?? "") ||
+          area !== (incoming?.area ?? ""))
+      ) {
+        setBulkIds(new Set());
+        setSelectionNotice(
+          "Se limpió la selección al cambiar los filtros. Selecciona las preguntas que deseas modificar.",
+        );
+      }
+      setTopic(incoming?.topic ?? "");
+      setSearch(incoming?.search ?? "");
+      setPublication(incoming?.publication ?? "");
+      setArea(incoming?.area ?? "");
+      setApproach(incoming?.approach ?? "prepare");
+      setPage(incoming?.page ?? 0);
+      return;
+    }
     rememberContext?.({
       topic,
       search,
@@ -324,6 +350,8 @@ export function Organize(
       selectedIds: [...bulkIds],
     });
   }, [
+    props.organizeLocation,
+    props.organizeContext,
     rememberContext,
     topic,
     search,

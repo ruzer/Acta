@@ -290,6 +290,7 @@ function Session() {
         }}
       />
     );
+  const userId = me.user.id;
   const currentProject = projects.data?.find(
     (item) =>
       location.pathname === `/projects/${item.id}` ||
@@ -348,7 +349,7 @@ function Session() {
                 />
               }
             />
-            <Route path="/review" element={<ReviewInbox />} />
+            <Route path="/review" element={<ReviewInbox userId={userId} />} />
             <Route
               path="/help"
               element={
@@ -393,7 +394,7 @@ function Session() {
             />
             <Route
               path="/projects/:projectId/review/:id"
-              element={<ReviewDetail />}
+              element={<ReviewDetail userId={userId} />}
             />
             <Route
               path="/projects/:projectId/clarifications/:id"

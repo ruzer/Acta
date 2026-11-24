@@ -203,12 +203,13 @@ it("Mi trabajo y Participación coinciden con el mismo conjunto: No aplica con e
   const table = await screen.findByRole("table", {
     name: "Participación por persona",
   });
-  const cells = within(within(table).getAllByRole("row")[1]!).getAllByRole(
-    "cell",
-  );
-  expect(cells[2]).toHaveTextContent(/^5$/);
-  expect(cells[3]).toHaveTextContent(/^2$/);
-  expect(cells[4]).toHaveTextContent(/^2$/);
+  const personRow = within(within(table).getAllByRole("row")[1]!);
+  const sent = personRow.getByRole("progressbar", {
+    name: "Enviadas 2 de 5 · 40 %",
+  });
+  expect(sent).toHaveAttribute("aria-valuenow", "2");
+  expect(sent).toHaveAttribute("aria-valuemax", "5");
+  expect(personRow.getByText("Con cambios sin enviar: 2")).toBeVisible();
   expect(
     screen.getByRole("img", {
       name: "2 de 5 preguntas enviadas; 1 en borrador",
