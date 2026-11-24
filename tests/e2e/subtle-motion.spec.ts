@@ -83,6 +83,66 @@ test("G1-a: volver a una posición anterior retrocede sin cambiar el tamaño de 
 });
 
 test.use({ actionTimeout: 15000 });
+for (const preference of ["normal", "reduce", "keyboard"] as const) {
+  test(`G1-e: diálogo ${preference}, conserva foco, Escape, cierre y salida inmediata`, async ({
+    page,
+    browser,
+  }) => {
+    const { project, questions } = await motionProject(browser);
+    await observeMotion(page);
+    if (preference === "reduce")
+      await page.emulateMedia({ reducedMotion: "reduce" });
+    await login(page, "stakeholder");
+    await page.goto(`/projects/${project.id}/respond/${questions[2]!.id}`);
+    await page
+      .getByLabel("Tu respuesta", { exact: true })
+      .fill("Borrador para comprobar el diálogo");
+    const link = page.getByRole("link", { name: "Mi trabajo", exact: true });
+    if (preference === "keyboard") {
+      await link.focus();
+      await page.keyboard.press("Enter");
+    } else await link.click();
+    const dialog = page.getByRole("dialog", {
+      name: "Tienes cambios sin guardar",
+    });
+    await expect(dialog).toBeVisible();
+    await expect(
+      dialog.getByRole("button", { name: "Guardar y salir", exact: true }),
+    ).toBeFocused();
+    await settleMotion(page);
+    const records = await motion(page, "DIALOG");
+    if (preference === "normal") {
+      expect(records.length).toBeGreaterThanOrEqual(2);
+      expect(records.every((r) => r.duration === 160)).toBe(true);
+      expect(records.some((r) => r.frames.some((f) => f.opacity === "0"))).toBe(
+        true,
+      );
+      expect(
+        records.some((r) =>
+          r.frames.some((f) => String(f.transform).includes("0.97")),
+        ),
+      ).toBe(true);
+    } else expect(records).toEqual([]);
+    await page.keyboard.press("Escape");
+    await expect(dialog).toHaveCount(0);
+    await expect(link).toBeFocused();
+    expect(
+      await page.evaluate(
+        () =>
+          document
+            .getAnimations()
+            .filter(
+              (a) => (a.effect as KeyframeEffect).target?.tagName === "DIALOG",
+            ).length,
+      ),
+    ).toBe(0);
+    await link.click();
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("button", { name: "Cerrar", exact: true }).click();
+    await expect(dialog).toHaveCount(0);
+    await expect(link).toBeFocused();
+  });
+}
 for (const reduced of [false, true]) {
   test(`G1-d: presionar conserva objetivo y foco; reduced=${reduced}`, async ({
     page,

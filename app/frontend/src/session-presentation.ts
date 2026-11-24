@@ -77,9 +77,11 @@ export function usePresentationModality() {
   useEffect(() => {
     const keyboard = () => {
       keyboardPresentation = true;
+      document.documentElement.dataset.presentationKeyboard = "true";
     };
     const pointer = () => {
       keyboardPresentation = false;
+      delete document.documentElement.dataset.presentationKeyboard;
     };
     window.addEventListener("keydown", keyboard, true);
     window.addEventListener("pointerdown", pointer, true);
@@ -87,6 +89,7 @@ export function usePresentationModality() {
       window.removeEventListener("keydown", keyboard, true);
       window.removeEventListener("pointerdown", pointer, true);
       keyboardPresentation = false;
+      delete document.documentElement.dataset.presentationKeyboard;
     };
   }, []);
 }

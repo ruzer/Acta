@@ -492,6 +492,27 @@ dialog {
 dialog::backdrop {
   background: rgb(18 22 28 / 40%);
 }
+/* Entry only: removing [open] removes transitions, so closing stays immediate. */
+dialog[open] {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 160ms var(--ac-ease-out), transform 160ms var(--ac-ease-out);
+}
+dialog[open]::backdrop {
+  opacity: 1;
+  transition: opacity 160ms var(--ac-ease-out);
+}
+@starting-style {
+  dialog[open] { opacity: 0; transform: scale(0.97); }
+  dialog[open]::backdrop { opacity: 0; }
+}
+:root[data-presentation-keyboard] dialog[open],
+:root[data-presentation-keyboard] dialog[open]::backdrop {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  dialog[open], dialog[open]::backdrop { transition: none; }
+}
 .dialog-head {
   display: flex;
   align-items: center;

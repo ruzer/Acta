@@ -24,6 +24,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Respuesta breve al presionar.** Los botones confirman la pulsación con un cambio mínimo de escala, conservando el espacio, el foco y el objetivo táctil. Los controles deshabilitados y el movimiento reducido no cambian.
 
+- **Diálogos con entrada suave.** El diálogo y su fondo aparecen en 160 ms cuando el navegador lo admite. El foco, Escape y Cerrar siguen funcionando de inmediato; el teclado y el movimiento reducido no animan la entrada y el cierre permanece instantáneo.
+
 ### Fixed
 
 - **Formulario del participante más claro y fiable.** Límites y contadores junto a la respuesta, estados de guardado diferenciados y opción de guardar desde el diálogo de salida. «Por consultar» se puede deshacer durante ocho segundos. El avance excluye «No aplica», distingue envíos de posición y explica los borradores sin contarlos dos veces; los campos móviles usan al menos 16 px. Hola muestra el plazo de cada proyecto cuando está disponible, sin bloquear la pantalla. Ayuda y guía actualizadas, sin cambiar los tiempos ni la frecuencia del autoguardado.
