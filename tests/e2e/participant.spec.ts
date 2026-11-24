@@ -257,9 +257,13 @@ test("guardar intacta, recuperar tras logout, prioridad borrador y consulta recu
   await expect(page).toHaveURL(new RegExp(ids[1] + "$"));
   await open(page, 0);
   await send(page);
-  await expect(page.getByRole("alert")).toContainText(
-    "necesita una respuesta completa",
+  await expect(page.locator(".field-error")).toHaveText(
+    "Esta pregunta necesita una respuesta completa.",
   );
+  await expect(page.locator(".save-status")).toContainText(
+    "Esta pregunta necesita una respuesta completa.",
+  );
+  await expect(page.getByRole("alert")).toHaveCount(0);
   const consulting = await call(
     page,
     `/projects/${projectId}/questions/${ids[0]}/response`,
