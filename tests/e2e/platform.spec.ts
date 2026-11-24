@@ -1,15 +1,11 @@
+import { settleVisualState } from "./fixtures/page-checks";
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { randomBytes } from "node:crypto";
 import { mkdir } from "node:fs/promises";
 import { login, logout } from "./login-helper";
 async function accessible(page: Page) {
-  await page.evaluate(async () => {
-    await document.fonts.ready;
-    await Promise.all(
-      document.getAnimations().map((a) => a.finished.catch(() => {})),
-    );
-  });
+  await settleVisualState(page);
   const r = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
     .analyze();

@@ -1,3 +1,4 @@
+import { settleVisualState } from "./fixtures/page-checks";
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { randomBytes } from "node:crypto";
@@ -11,12 +12,7 @@ let projectId: string,
 const suffix = randomBytes(4).toString("hex");
 test.describe.configure({ mode: "serial" });
 async function accessible(page: Page) {
-  await page.evaluate(async () => {
-    await document.fonts.ready;
-    await Promise.all(
-      document.getAnimations().map((a) => a.finished.catch(() => {})),
-    );
-  });
+  await settleVisualState(page);
   expect(
     (
       await new AxeBuilder({ page })

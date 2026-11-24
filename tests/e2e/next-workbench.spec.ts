@@ -1,3 +1,4 @@
+import { settleVisualState } from "./fixtures/page-checks";
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { login } from "./login-helper";
@@ -16,14 +17,7 @@ function navigation(page: Page) {
 }
 
 async function accessible(page: Page) {
-  await page.evaluate(async () => {
-    await document.fonts.ready;
-    await Promise.all(
-      document
-        .getAnimations()
-        .map((animation) => animation.finished.catch(() => {})),
-    );
-  });
+  await settleVisualState(page);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,

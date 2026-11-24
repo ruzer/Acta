@@ -27,9 +27,13 @@ export async function settleVisualState(page: Page) {
     await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
     await Promise.all(
       document.getAnimations()
-        .filter((animation) =>
-          Number.isFinite(animation.effect?.getComputedTiming().endTime),
-        )
+        .filter((animation) => {
+          const target = (animation.effect as KeyframeEffect | null)?.target;
+          // Chromium can retain an unresolved transition on a now-closed menu.
+          // Only rendered elements participate in the resting-state measurement.
+          return target instanceof Element && target.checkVisibility() &&
+            Number.isFinite(animation.effect?.getComputedTiming().endTime);
+        })
         .map((animation) => animation.finished.catch(() => {})),
     );
   });
