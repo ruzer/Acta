@@ -5,10 +5,10 @@ import { Link, useParams } from "react-router-dom";
 import {
   participationStates,
   participationView,
-  responseDueLabel,
   type ParticipationView,
 } from "@requirements/contracts";
 import { exchangeRequest } from "../api";
+import { responseDueLabel } from "../response-deadline-display";
 import { formatDate, useBranding } from "../branding";
 import {
   Button,

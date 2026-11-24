@@ -26,6 +26,13 @@ Hay dos caminos equivalentes (ver [Instalación guiada y Configuración](ADMIN-C
 
 **Guiado.** `sh scripts/install.sh` comprueba Docker, arranca los servicios y muestra la dirección del asistente de primera instalación con su código de un solo uso. No necesitas `.env`. Si el código caduca: `docker compose exec backend node scripts/setup-token.mjs`.
 
+En **Personalización**, revisa **Zona horaria**. El asistente propone la del navegador
+si es válida y todavía no existe una elección guardada o definida por el servidor;
+puedes cambiarla antes de finalizar. Sin configuración, Acta usa **UTC**, lo que
+afecta la hora de guardado, los plazos, las revisiones y la Bitácora. Una zona ya
+configurada no se reemplaza al abrir el asistente desde otra computadora.
+Consulta la [prioridad de configuración](CONFIGURATION.md#opcional--branding).
+
 **Avanzado.** Con `.env` (opcional; los valores por defecto funcionan sin él):
 
 ```sh

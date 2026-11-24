@@ -1,9 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
-import {
-  answerText,
-  validatedDecisionsExportDocument,
-} from "@requirements/contracts";
+import { validatedDecisionsExportDocument } from "@requirements/contracts";
+import { answerDisplay as answerText } from "../answer-display";
 import { exchangeRequest } from "../api";
 import { formatDate, InstitutionMarks, useBranding } from "../branding";
 import { Button, EmptyState, ErrorState, LoadingState } from "../ui";

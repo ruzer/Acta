@@ -1,4 +1,4 @@
-import { useBranding } from "../branding";
+import { formatTime, useBranding } from "../branding";
 import { useDraftAutosave } from "../use-draft-autosave";
 import {
   draftKey,
@@ -198,12 +198,7 @@ function ResponseEditor({
     busyRef.current = value;
     setBusy(value);
   }
-  const savedTime = (value: string) =>
-    new Intl.DateTimeFormat(branding.locale, {
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZone: branding.timezone,
-    }).format(new Date(value));
+  const savedTime = (value: string) => formatTime(value, branding);
   useEffect(() => {
     mounted.current = true;
     const expired = () => {
