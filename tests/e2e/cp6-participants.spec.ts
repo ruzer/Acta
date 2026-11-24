@@ -144,7 +144,15 @@ test("V-16 · Responder: la pregunta domina, la nota queda junto a los botones y
     const help = page
       .locator("p.hint")
       .filter({ hasText: "“Guardar y salir”" });
-    await help.scrollIntoViewIfNeeded();
+    // Centrar evita dejar una fracción de píxel fuera del borde del viewport.
+    // La comprobación de lectura completa sigue exigiendo ratio 1.
+    await help.evaluate((element) =>
+      element.scrollIntoView({
+        block: "center",
+        inline: "nearest",
+        behavior: "instant",
+      }),
+    );
     await expect(help).toBeInViewport({ ratio: 1 });
     await expect(page.locator(".response-footer p.hint")).toHaveCount(0);
     await expect(page.locator(".response-footer button")).toHaveCount(2);

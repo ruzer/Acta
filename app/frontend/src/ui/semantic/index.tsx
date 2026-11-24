@@ -576,14 +576,37 @@ export function ProgressCard({
       <p className="ac-progress-count">
         <strong>{sent}</strong> de {total} {noun}
       </p>
-      <div
-        className="ac-progress-bar"
-        role="img"
-        aria-label={`${sent} de ${total} ${noun}${drafts ? `; ${drafts} en borrador` : ""}`}
-      >
-        <span style={{ width: share(sent) }} />
-        <span className="ac-progress-drafts" style={{ width: share(drafts) }} />
-      </div>
+      {total > 0 ? (
+        <>
+          <div
+            className="ac-progress-bar"
+            role="img"
+            aria-label={`${sent} de ${total} ${noun}${drafts ? `; ${drafts} en borrador` : ""}`}
+          >
+            <span style={{ width: share(sent) }} />
+            <span
+              className="ac-progress-drafts"
+              style={{ width: share(drafts) }}
+            />
+          </div>
+          <ul className="ac-progress-legend" aria-label="Estados del avance">
+            <li>
+              <span aria-hidden="true" />
+              Enviadas: {sent}
+            </li>
+            <li>
+              <span aria-hidden="true" className="ac-progress-drafts" />
+              Borradores sin enviar: {drafts}
+            </li>
+            <li>
+              <span aria-hidden="true" className="ac-progress-pending" />
+              Pendientes sin borrador: {Math.max(0, total - sent - drafts)}
+            </li>
+          </ul>
+        </>
+      ) : (
+        <p>No hay preguntas que cuenten en el avance por ahora.</p>
+      )}
       {children && <div className="ac-progress-note">{children}</div>}
     </section>
   );
