@@ -795,6 +795,14 @@
   font-size: var(--ac-text-ui);
 }
 
+@keyframes participant-feedback-enter {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.participant-feedback-enter {
+  animation: participant-feedback-enter 160ms var(--ac-ease-out);
+}
+
 /* ---- Narrow screens ---- */
 @media (max-width: 899px) {
   .acta-participant .participant-topbar {

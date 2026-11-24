@@ -1,3 +1,4 @@
+import { presentationUsesKeyboard } from "../session-presentation";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams, useLocation } from "react-router-dom";
@@ -493,8 +494,12 @@ export function ParticipantNotice() {
   ) : null;
 }
 function Notice({ text }: { text: string }) {
+  const [enter] = useState(() => !presentationUsesKeyboard());
   return (
-    <p role="status" className="participant-feedback">
+    <p
+      role="status"
+      className={`participant-feedback${enter ? " participant-feedback-enter" : ""}`}
+    >
       <ParticipantIcon />
       {text}
     </p>

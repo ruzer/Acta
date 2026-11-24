@@ -83,6 +83,49 @@ test("G1-a: volver a una posición anterior retrocede sin cambiar el tamaño de 
 });
 
 test.use({ actionTimeout: 15000 });
+for (const preference of ["normal", "reduce", "keyboard"] as const) {
+  test(`G1-b: aviso de envío ${preference}, conserva su anuncio y solo entra una vez`, async ({
+    page,
+    browser,
+  }) => {
+    const { project, questions } = await motionProject(browser);
+    await observeMotion(page);
+    if (preference === "reduce")
+      await page.emulateMedia({ reducedMotion: "reduce" });
+    await login(page, "stakeholder");
+    await page.goto(`/projects/${project.id}/respond/${questions[1]!.id}`);
+    const send = page.getByRole("button", {
+      name: "Enviar respuesta",
+      exact: true,
+    });
+    await expect(send).toBeVisible();
+    if (preference === "keyboard") {
+      await send.focus();
+      await page.keyboard.press("Enter");
+    } else await send.click();
+    await expect(
+      page.getByRole("heading", { name: questions[2]!.question, exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.locator('.participant-feedback[role="status"]'),
+    ).toContainText("Respuesta enviada");
+    await settleMotion(page);
+    const records = await motion(page, "participant-feedback");
+    expect(records).toHaveLength(preference === "normal" ? 1 : 0);
+    if (preference === "normal") {
+      expect(records[0]!.duration).toBe(160);
+      expect(records[0]!.frames[0]!.opacity).toBe("0");
+      expect(String(records[0]!.frames[0]!.transform)).toMatch(/-4/);
+      expect(records[0]!.frames.at(-1)!.opacity).toBe("1");
+    }
+    await page
+      .getByLabel("Tu respuesta", { exact: true })
+      .fill("El aviso permanece mientras escribo.");
+    expect(await motion(page, "participant-feedback")).toHaveLength(
+      records.length,
+    );
+  });
+}
 test("G1-a: primera visita quieta; enviar y regresar anima solo los valores cambiados", async ({
   page,
   browser,
