@@ -154,3 +154,13 @@ it("conserva el rechazo del servidor y no muestra datos ni ofrece imprimir", asy
     screen.queryByRole("button", { name: "Imprimir o guardar como PDF" }),
   ).not.toBeInTheDocument();
 });
+
+it("presenta la fecha de la fuente como calendario sin modificar el documento recibido", async () => {
+  const data = document();
+  data.decisions[0]!.question.type = "DATE";
+  data.decisions[0]!.submissions[0]!.answer = "2031-03-15";
+  const original = structuredClone(data);
+  setup(data);
+  expect(await screen.findByText("15/03/2031")).toBeVisible();
+  expect(data).toEqual(original);
+});

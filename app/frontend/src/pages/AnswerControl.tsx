@@ -2,7 +2,7 @@ import { useId } from "react";
 import { ResponseContent, ResponseQuestionView } from "@requirements/contracts";
 import { Button, Checkbox, Input, Radio, Select, Textarea } from "../ui";
 type Value = ResponseContent["answer"];
-export { answerText } from "@requirements/contracts";
+export { answerDisplay as answerText } from "../answer-display";
 export function AnswerControl({
   question: q,
   value,

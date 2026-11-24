@@ -1,4 +1,5 @@
 import { FirstSteps } from "./FirstSteps";
+import { formatDate } from "../branding";
 import { ResponseDeadline } from "./ResponseDeadline";
 import { ParticipationCard } from "./Participation";
 import { ProjectAttention } from "./ProjectAttention";
@@ -478,7 +479,7 @@ export function History() {
                 return {
                   key: e.id,
                   cells: [
-                    new Date(e.occurredAt).toLocaleString("es-MX"),
+                    formatDate(e.occurredAt),
                     e.actorName,
                     <span key="a" className="ac-audit-code">
                       {auditActions[e.action] ?? e.action}

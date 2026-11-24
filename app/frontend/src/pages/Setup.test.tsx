@@ -163,6 +163,7 @@ it("valida al administrador antes de seguir y recorre los pasos hasta crear la i
   await user.click(screen.getByRole("button", { name: "Continuar" }));
 
   await screen.findByRole("heading", { name: "Personalización" });
+  await user.selectOptions(screen.getByLabelText("Zona horaria"), "UTC");
   // Un color demasiado claro se explica y no deja continuar.
   const accent = screen.getByLabelText("Color principal");
   await user.clear(accent);
@@ -296,4 +297,88 @@ it("con la base de datos sin respuesta no permite crear la instalación", async 
       screen.getByRole("button", { name: "Crear instalación" }),
     ).toBeDisabled(),
   );
+});
+
+async function appearanceStep(user: ReturnType<typeof userEvent.setup>) {
+  await begin(user);
+  await administrator(user);
+  await screen.findByRole("heading", { name: "Organización" });
+  await user.type(
+    screen.getByLabelText("Nombre de la institución"),
+    "Organización ficticia",
+  );
+  await user.click(screen.getByRole("button", { name: "Continuar" }));
+  await screen.findByRole("heading", { name: "Almacenamiento" });
+  await user.click(screen.getByRole("button", { name: "Continuar" }));
+  await screen.findByRole("heading", { name: "Personalización" });
+}
+function browserTimezone(timeZone: string) {
+  const original = Intl.DateTimeFormat.prototype.resolvedOptions;
+  vi.spyOn(Intl.DateTimeFormat.prototype, "resolvedOptions").mockImplementation(
+    function (this: Intl.DateTimeFormat) {
+      return { ...original.call(this), timeZone };
+    },
+  );
+}
+for (const [source, value, expected] of [
+  ["default", "UTC", "America/Mexico_City"],
+  ["external", "Europe/Madrid", "Europe/Madrid"],
+  ["saved", "Europe/Madrid", "Europe/Madrid"],
+] as const) {
+  it(`la zona del navegador solo sustituye el valor predeterminado: ${source}`, async () => {
+    browserTimezone("America/Mexico_City");
+    const { user } = mount({
+      setupVerify: () => ({
+        defaults: defaults({
+          timezone: field(
+            value,
+            source,
+            source === "external" ? "DEFAULT_TIMEZONE" : null,
+          ),
+        }),
+      }),
+    });
+    await appearanceStep(user);
+    expect(screen.getByLabelText("Zona horaria")).toHaveValue(expected);
+    if (source === "external")
+      expect(screen.getByLabelText("Zona horaria")).toHaveAttribute("readonly");
+    else {
+      await user.selectOptions(screen.getByLabelText("Zona horaria"), "UTC");
+      expect(screen.getByLabelText("Zona horaria")).toHaveValue("UTC");
+    }
+  });
+}
+it.each(["Zona/Inexistente", ""])(
+  "si el navegador informa %s conserva UTC y permite cambiarla",
+  async (zone) => {
+    browserTimezone(zone);
+    const { user } = mount();
+    await appearanceStep(user);
+    expect(screen.getByLabelText("Zona horaria")).toHaveValue("UTC");
+    await user.selectOptions(
+      screen.getByLabelText("Zona horaria"),
+      "America/Mexico_City",
+    );
+    expect(screen.getByLabelText("Zona horaria")).toHaveValue(
+      "America/Mexico_City",
+    );
+  },
+);
+it("conserva un alias válido elegido por el navegador aunque no esté en la lista habitual", async () => {
+  browserTimezone("US/Central");
+  const { user } = mount();
+  await appearanceStep(user);
+  expect(screen.getByLabelText("Zona horaria")).toHaveValue("US/Central");
+  await user.selectOptions(screen.getByLabelText("Zona horaria"), "UTC");
+  expect(screen.getByLabelText("Zona horaria")).toHaveValue("UTC");
+});
+it("conserva un alias válido guardado y no lo sustituye por la zona del navegador", async () => {
+  browserTimezone("America/Mexico_City");
+  const { user } = mount({
+    setupVerify: () => ({
+      defaults: defaults({ timezone: field("US/Central", "saved") }),
+    }),
+  });
+  await appearanceStep(user);
+  expect(screen.getByLabelText("Zona horaria")).toHaveValue("US/Central");
 });

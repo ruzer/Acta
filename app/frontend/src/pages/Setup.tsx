@@ -8,6 +8,7 @@ import {
   type SetupDefaults,
 } from "@requirements/contracts";
 import { ApiFailure, api } from "../api";
+import { initialTimezone } from "../initial-timezone";
 import { Alert, Button, Input, LoadingState } from "../ui";
 import { StatusChip } from "../ui/semantic";
 import {
@@ -140,7 +141,7 @@ export function Setup({ onFinished }: { onFinished: () => void }) {
         shortName: a.shortName.value,
         accent: a.accent.value,
         locale: a.locale.value,
-        timezone: a.timezone.value,
+        timezone: initialTimezone(a.timezone),
         secondaryName: a.secondaryName.value,
       });
       setStep("administrator");

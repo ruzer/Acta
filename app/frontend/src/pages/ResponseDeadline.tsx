@@ -1,8 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  responseDeadlineView,
-  responseDueLabel,
-} from "@requirements/contracts";
+import { responseDeadlineView } from "@requirements/contracts";
+import { responseDueLabel } from "../response-deadline-display";
 import { exchangeRequest } from "../api";
 import { useBranding } from "../branding";
 export { responseDueLabel };

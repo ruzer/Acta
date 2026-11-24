@@ -139,7 +139,7 @@ it.each([false, true])(
     const text = writeText.mock.calls[0]![0] as string;
     expect(text).toContain("Ana Ejemplo: 4 preguntas obligatorias pendientes");
     expect(text).toContain(data.projectName);
-    expect(text).toContain("1 de diciembre");
+    expect(text).toContain("01/12/2026 · hora universal (UTC)");
     expect(text).toContain(window.location.origin);
     expect(text).not.toMatch(/Beatriz|Área privada|3 preguntas/);
     if (fails) {
