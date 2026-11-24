@@ -1,4 +1,5 @@
 import { afterEach, expect, it, vi } from "vitest";
+import { StrictMode } from "react";
 import {
   cleanup,
   render,
@@ -61,6 +62,7 @@ function Screen() {
 }
 function open(
   url = queuePath({ projectId, id: ids[0]! }, token, "status=ANSWERED"),
+  strict = false,
 ) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -69,16 +71,83 @@ function open(
     [{ path: "/projects/:projectId/review/:id", element: <Screen /> }],
     { initialEntries: [url] },
   );
+  const view = (
+    <QueryClientProvider client={client}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
+  );
   return {
-    ...render(
-      <QueryClientProvider client={client}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>,
-    ),
+    ...render(strict ? <StrictMode>{view}</StrictMode> : view),
     router,
     client,
   };
 }
+it("conserva una sola lectura pendiente durante el remontaje de StrictMode", async () => {
+  let resolve!: (value: never) => void;
+  vi.mocked(api).mockImplementation(
+    () =>
+      new Promise((done) => {
+        resolve = done;
+      }),
+  );
+  open(undefined, true);
+  await screen.findByRole("status");
+  expect(api).toHaveBeenCalledTimes(1);
+  await act(async () => resolve(list as never));
+  expect(await screen.findByText(/Pregunta 1 de 3 en/)).toBeVisible();
+  expect(api).toHaveBeenCalledTimes(1);
+});
+it("no inicia la lectura si se abandona la lista antes de terminar el montaje", async () => {
+  vi.mocked(api).mockResolvedValue(list as never);
+  const view = open();
+  view.unmount();
+  await act(async () => {});
+  expect(api).not.toHaveBeenCalled();
+  expect(sessionStorage.length).toBe(0);
+});
+it.each(["salir", "sesión vencida", "otra lista", "desactivar la misma lista"])(
+  "%s interrumpe la captura antes de descargar otra página o guardar datos",
+  async (reason) => {
+    let resolve!: (value: never) => void;
+    vi.mocked(api).mockImplementation(
+      () =>
+        new Promise((done) => {
+          resolve = done;
+        }),
+    );
+    const view = open(
+      reason === "desactivar la misma lista"
+        ? queuePath({ projectId, id: ids[0]! }, token, "")
+        : undefined,
+    );
+    await screen.findByRole("status");
+    expect(api).toHaveBeenCalledTimes(1);
+    if (reason === "salir") view.unmount();
+    else if (reason === "sesión vencida")
+      window.dispatchEvent(new Event("session-expired"));
+    else if (reason === "desactivar la misma lista")
+      await act(() =>
+        view.router.navigate(
+          `/projects/${projectId}/review/${ids[0]}?reviewQueue=${token}`,
+        ),
+      );
+    else
+      await act(() =>
+        view.router.navigate(`/projects/${projectId}/review/${ids[0]}`),
+      );
+    const page = {
+      ...list,
+      total: 101,
+      items: Array.from({ length: 100 }, (_, index) => ({
+        ...list.items[0]!,
+        questionId: `00000000-0000-4000-8000-${String(index + 100).padStart(12, "0")}`,
+      })),
+    };
+    await act(async () => resolve(page as never));
+    expect(api).toHaveBeenCalledTimes(1);
+    expect(sessionStorage.length).toBe(0);
+  },
+);
 it("recorre la lista congelada en ambos sentidos sin volver a consultarla", async () => {
   vi.mocked(api).mockResolvedValue(list as never);
   const { router } = open();

@@ -36,14 +36,31 @@ export function useReviewQueue(userId: string, projectId: string, id: string) {
       const stored = enabled ? readReviewQueue(userId, token) : null;
       return stored?.search === search ? stored : undefined;
     },
-    queryFn: async ({ signal }) => {
+    queryFn: async (context) => {
+      // Espera al ciclo síncrono de efectos (incluido el remontaje de StrictMode)
+      // antes de consumir la señal: TanStack conserva una sola lectura pendiente.
+      await Promise.resolve();
+      const { signal } = context;
+      const query = context.client.getQueryCache().find({
+        queryKey: context.queryKey,
+        exact: true,
+      });
+      const ensureActive = () => {
+        signal.throwIfAborted();
+        // También cubre un cambio de clave o sesión antes de consumir la señal.
+        if (!sessionActive.current || !query?.isActive())
+          throw new DOMException("La lista ya no está abierta.", "AbortError");
+      };
       const snapshot = await loadReviewQueue(
         search,
-        (input) => api("listReviewInbox", {}, input),
+        (input) => {
+          ensureActive();
+          return api("listReviewInbox", {}, input);
+        },
         signal,
       );
-      if (!signal.aborted && sessionActive.current)
-        storeReviewQueue(userId, token, snapshot);
+      ensureActive();
+      storeReviewQueue(userId, token, snapshot);
       return snapshot;
     },
     staleTime: Infinity,

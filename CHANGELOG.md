@@ -8,7 +8,7 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ### Added
 
-- **Revisión seguida dentro de la lista.** Al abrir una pregunta desde la bandeja, Anterior y Siguiente recorren las mismas preguntas y conservan su orden aunque cambien de estado. Registrar una decisión permite guardar y pasar a la siguiente, con las mismas validaciones y permisos.
+- **Revisión seguida dentro de la lista.** Al abrir una pregunta desde la bandeja, Anterior y Siguiente recorren las mismas preguntas y conservan su orden aunque cambien de estado. Registrar una decisión permite guardar y pasar a la siguiente, con las mismas validaciones y permisos. La carga no se duplica al montar la pantalla y se interrumpe al abandonar la lista o vencer la sesión.
 
 ### Fixed
 
