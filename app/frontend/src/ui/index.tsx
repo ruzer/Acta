@@ -6,33 +6,103 @@ import {
   type ReactNode,
   type ComponentProps,
 } from "react";
+import {
+  descriptionIds,
+  requireReason,
+  type Unavailable,
+} from "./control-availability";
+export { UnavailableValue } from "./UnavailableValue";
 export function Button({
   tone = "primary",
+  unavailable,
+  onClick,
+  onKeyDown,
+  "aria-describedby": describedBy,
   ...p
 }: ComponentProps<"button"> & {
   tone?: "primary" | "secondary" | "tertiary" | "danger";
+  unavailable?: Unavailable | false;
 }) {
-  return <button type="button" className={"button " + tone} {...p} />;
+  const id = useId();
+  requireReason(unavailable);
+  const reasonId = unavailable
+    ? unavailable.describedBy || id + "-reason"
+    : undefined;
+  return (
+    <>
+      <button
+        type="button"
+        className={"button " + tone}
+        {...p}
+        aria-disabled={unavailable ? true : p["aria-disabled"]}
+        aria-describedby={descriptionIds(reasonId, describedBy)}
+        onClick={(event) => {
+          if (unavailable) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+          }
+          onClick?.(event);
+        }}
+        onKeyDown={(event) => {
+          if (unavailable && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+          }
+          onKeyDown?.(event);
+        }}
+      />
+      {unavailable && !unavailable.describedBy && (
+        <span id={reasonId} className="hint control-reason">
+          {unavailable.reason}
+        </span>
+      )}
+    </>
+  );
 }
 export function Field({
   label,
   hint,
   error,
+  unavailable,
   children,
 }: {
   label: string;
   hint?: string;
   error?: string;
+  unavailable?: Unavailable | false;
   children: (id: string, description: string | undefined) => ReactNode;
 }) {
   const id = useId();
+  requireReason(unavailable);
+  const reasonId = unavailable
+    ? unavailable.describedBy || id + "-reason"
+    : undefined;
   return (
     <div className="field">
       <label htmlFor={id}>{label}</label>
-      {children(id, hint || error ? id + "-help" : undefined)}
+      {children(
+        id,
+        descriptionIds(
+          hint || error ? id + "-help" : undefined,
+          unavailable && hint && error ? id + "-hint" : undefined,
+          reasonId,
+        ),
+      )}
       {(hint || error) && (
         <p id={id + "-help"} className={error ? "field-error" : "hint"}>
           {error || hint}
+        </p>
+      )}
+      {unavailable && hint && error && (
+        <p id={id + "-hint"} className="hint">
+          {hint}
+        </p>
+      )}
+      {unavailable && !unavailable.describedBy && (
+        <p id={reasonId} className="hint control-reason">
+          {unavailable.reason}
         </p>
       )}
     </div>
@@ -42,12 +112,25 @@ export function Input({
   label,
   hint,
   error,
+  unavailable,
+  "aria-describedby": describedBy,
   ...p
-}: ComponentProps<"input"> & { label: string; hint?: string; error?: string }) {
+}: ComponentProps<"input"> & {
+  label: string;
+  hint?: string;
+  error?: string;
+  unavailable?: Unavailable | false;
+}) {
   return (
-    <Field label={label} hint={hint} error={error}>
+    <Field label={label} hint={hint} error={error} unavailable={unavailable}>
       {(id, d) => (
-        <input id={id} aria-describedby={d} aria-invalid={!!error} {...p} />
+        <input
+          id={id}
+          aria-invalid={!!error}
+          {...p}
+          disabled={!!unavailable || p.disabled}
+          aria-describedby={descriptionIds(d, describedBy)}
+        />
       )}
     </Field>
   );
@@ -82,16 +165,25 @@ export function Select({
   label,
   hint,
   error,
+  unavailable,
+  "aria-describedby": describedBy,
   ...p
 }: ComponentProps<"select"> & {
   label: string;
   hint?: string;
   error?: string;
+  unavailable?: Unavailable | false;
 }) {
   return (
-    <Field label={label} hint={hint} error={error}>
+    <Field label={label} hint={hint} error={error} unavailable={unavailable}>
       {(id, d) => (
-        <select id={id} aria-describedby={d} aria-invalid={!!error} {...p} />
+        <select
+          id={id}
+          aria-invalid={!!error}
+          {...p}
+          disabled={!!unavailable || p.disabled}
+          aria-describedby={descriptionIds(d, describedBy)}
+        />
       )}
     </Field>
   );

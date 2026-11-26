@@ -14,6 +14,16 @@ El área no asigna personas. Añadir participantes conserva las asignaciones act
 
 ## Componentes
 
+### Controles no disponibles
+
+`Button`, `Input` y `Select` comparten el estado `unavailable`, que exige un `reason` no vacío. El motivo se muestra como texto y se asocia con `aria-describedby`; no sustituye el nombre del control ni desaparece si hay un error de validación. Para varios controles relacionados, `describedBy` puede señalar un motivo visible común, cuya asociación debe comprobarse en las pruebas.
+
+Un botón no disponible conserva el foco con `aria-disabled` y bloquea clic, Enter, Espacio y el envío del formulario. No añade un contenedor que cambie los selectores directos de menús o tablas. Los campos que puedan habilitarse más adelante mantienen su control nativo bloqueado con el motivo al lado; un valor que nunca cambia en ese contexto utiliza `UnavailableValue` como texto, con etiqueta y explicación.
+
+El puntero normal indica que una acción no está disponible. `aria-busy="true"` reserva el puntero de espera a una operación ocupada. Los usos anteriores de `disabled` se conservan: este cambio no convierte automáticamente todas las restricciones del producto en estados de espera ni supone que se hayan revisado todas las pantallas.
+
+### Estructura del editor
+
 - `Organize`: filtros, paginación, selección, barra contextual e inspector existente.
 - `bulk-selection`: recorrido de descendientes estructurales; nunca usa condiciones para ampliar selección.
 - `BulkDialog`: configuración, preview, corrección, inclusión explícita de dependencias y confirmación.

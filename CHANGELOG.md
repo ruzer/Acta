@@ -6,7 +6,9 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
-Sin cambios adicionales por anunciar.
+### Fixed
+
+- **Controles no disponibles con motivo.** Los componentes compartidos admiten una explicación visible asociada al control; los botones conservan el foco sin ejecutar la acción. El puntero de espera se reserva a una operación ocupada y los valores fijos pueden presentarse como texto.
 
 ## [0.12.0] - 2026-11-24
 
