@@ -291,3 +291,22 @@ it("la ayuda y la guía ubican el plazo disponible por proyecto en Hola y permit
     );
   }
 });
+
+it("la ayuda de accesos explica la precarga, los cambios y la confirmación propia", () => {
+  for (const path of [
+    "app/frontend/src/pages/Help.tsx",
+    "docs/ayuda/PREGUNTAS-FRECUENTES.md",
+    "docs/PROJECT-ADMINISTRATION.md",
+  ]) {
+    const text = compact(read(path));
+    expect(text, path).toContain("Sin cambios");
+    expect(text, path).toMatch(/rol, área y estado actuales/);
+    expect(text, path).toMatch(/propia administración|propia Administración/);
+  }
+  const guide = read("docs/PROJECT-ADMINISTRATION.md");
+  expect(guide).toContain("Confirmar cambio de acceso");
+  expect(guide).toContain("Selecciona un rol");
+  expect(guide).toContain(
+    "Eres la única administración activa de este proyecto",
+  );
+});
