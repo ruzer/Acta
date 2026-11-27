@@ -16,6 +16,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Datos de la pregunta sin desbordamiento.** El código y el tipo pasan a otra línea cuando no caben juntos en la lista de Organizar, también en pantallas intermedias.
 
+- **Preguntas legibles al abrir el detalle.** Los enlaces de Organizar conservan el tamaño y peso del texto anterior; en móvil el enunciado sigue completo, sin recortarlo a dos líneas.
+
 ### Changed
 
 - **Movimiento y teclado del panel.** El cierre admite interrupciones y recorrer preguntas conserva el panel sin repetir la entrada. En móvil, Más acciones abre una hoja inferior y el pie se ajusta al teclado. El movimiento reducido usa solo fundido y el teclado evita la animación.
