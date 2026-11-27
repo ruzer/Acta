@@ -228,7 +228,7 @@ test("editor: galería responsive, tabs, inspector único, MATRIX y condiciones"
       })
       .click();
     await expect(
-      page.getByRole(width >= 1280 ? "complementary" : "dialog", {
+      page.getByRole(width >= 900 ? "complementary" : "dialog", {
         name: "Detalle de pregunta",
       }),
     ).toHaveCount(1);

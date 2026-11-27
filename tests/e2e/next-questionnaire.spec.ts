@@ -203,14 +203,14 @@ for (const count of [12, 54, 304]) {
           name: "¿Cómo se atiende la solicitud de ejemplo 0?",
           exact: true,
         })
-        .locator("strong")
+        .locator("span:not([aria-hidden])")
         .boundingBox();
       const childBounds = await page
         .getByRole("button", {
           name: "¿Cómo se atiende la solicitud de ejemplo 1?",
           exact: true,
         })
-        .locator("strong")
+        .locator("span:not([aria-hidden])")
         .boundingBox();
       expect(childBounds!.x).toBeGreaterThan(parentBounds!.x);
       expect(
