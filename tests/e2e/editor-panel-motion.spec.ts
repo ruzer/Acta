@@ -276,6 +276,11 @@ for (const width of [1440, 1024, 900, 899, 390]) {
     if (width < 900) {
       const menuBox = (await menu.boundingBox())!;
       expect(Math.round(menuBox.y + menuBox.height)).toBe(844);
+      const scrimBox = (await panel
+        .locator(".qe-inspector-more-scrim")
+        .boundingBox())!;
+      expect(Math.round(scrimBox.height)).toBe(844);
+      expect(Math.round(scrimBox.width)).toBe(width);
       await menu.getByRole("button", { name: "Cerrar acciones" }).click();
       await expect(menu).not.toBeVisible();
     } else {
@@ -324,8 +329,10 @@ test("I4 cierre interrumpido conserva nodo y redirige la pregunta", async ({
   await finishAnimations(panel);
   const node = await panel.elementHandle();
   await page.evaluate((id) => {
-    document
-      .querySelector<HTMLButtonElement>(".qe-inspector-head button")!
+    Array.from(
+      document.querySelectorAll<HTMLButtonElement>(".qe-inspector-head button"),
+    )
+      .find((button) => button.textContent?.trim() === "Cerrar detalle")!
       .click();
     requestAnimationFrame(() =>
       document

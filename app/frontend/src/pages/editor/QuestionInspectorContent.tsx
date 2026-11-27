@@ -28,12 +28,11 @@ export function QuestionInspectorContent({
     <>
       <h3 className="qe-question-text">{q.question}</h3>
       {q.helpText && <p className="qe-question-help">{q.helpText}</p>}
-      <div className="qe-row-meta">
-        <span>{typeLabels[q.type]}</span>
-        <Publication question={q} />
-      </div>
       {q.options.length > 0 && (
-        <section aria-label="Opciones de respuesta">
+        <section
+          className="qe-question-options"
+          aria-label="Opciones de respuesta"
+        >
           <h4>Opciones de respuesta</h4>
           <ol>
             {[...q.options]
@@ -48,6 +47,7 @@ export function QuestionInspectorContent({
         (["rows", "columns"] as const).map((axis) => (
           <section
             key={axis}
+            className="qe-question-options"
             aria-label={axis === "rows" ? "Filas" : "Columnas"}
           >
             <h4>{axis === "rows" ? "Filas" : "Columnas"}</h4>
@@ -58,43 +58,60 @@ export function QuestionInspectorContent({
             </ul>
           </section>
         ))}
-      <dl className="qe-question-facts">
-        <dt>Tema</dt>
-        <dd>
-          {data.sections.find((s) => s.id === q.sectionId)?.title ??
-            "Tema no disponible"}
-          {q.publication === "DRAFT" && (
-            <Button
-              tone="secondary"
-              onClick={onChangeTopic}
-              unavailable={moveReason ? { reason: moveReason } : undefined}
-            >
-              Cambiar de tema
-            </Button>
-          )}
-        </dd>
-        <dt>Área responsable</dt>
-        <dd>
-          {data.areas.find((a) => a.id === q.responsibleAreaId)?.name ??
-            "Área no disponible"}
-        </dd>
-        <dt>Participantes asignados</dt>
-        <dd>
-          {q.assignments
-            .filter((a) => a.active)
-            .map(
-              (a) =>
-                data.members.find((m) => m.id === a.projectMemberId)
-                  ?.displayName ?? "Participante no disponible",
-            )
-            .join(", ") || "Sin participantes asignados"}
-        </dd>
-        <dt>Obligatoria</dt>
-        <dd>{q.required ? "Sí" : "No"}</dd>
-      </dl>
-      <p className="hint">
-        El área responsable no asigna participantes automáticamente.
-      </p>
+      <section
+        className="qe-question-details"
+        aria-label="Datos de la pregunta"
+      >
+        <div className="qe-row-meta">
+          <span>{typeLabels[q.type]}</span>
+          <Publication question={q} />
+        </div>
+        <dl className="qe-question-facts">
+          <div>
+            <dt>Tema</dt>
+            <dd>
+              {data.sections.find((s) => s.id === q.sectionId)?.title ??
+                "Tema no disponible"}
+              {q.publication === "DRAFT" && (
+                <Button
+                  tone="secondary"
+                  onClick={onChangeTopic}
+                  unavailable={moveReason ? { reason: moveReason } : undefined}
+                >
+                  Cambiar de tema
+                </Button>
+              )}
+            </dd>
+          </div>
+          <div>
+            <dt>Área responsable</dt>
+            <dd>
+              {data.areas.find((a) => a.id === q.responsibleAreaId)?.name ??
+                "Área no disponible"}
+            </dd>
+          </div>
+          <div>
+            <dt>Participantes asignados</dt>
+            <dd>
+              {q.assignments
+                .filter((a) => a.active)
+                .map(
+                  (a) =>
+                    data.members.find((m) => m.id === a.projectMemberId)
+                      ?.displayName ?? "Participante no disponible",
+                )
+                .join(", ") || "Sin participantes asignados"}
+            </dd>
+          </div>
+          <div>
+            <dt>Obligatoria</dt>
+            <dd>{q.required ? "Sí" : "No"}</dd>
+          </div>
+        </dl>
+        <p className="hint">
+          El área responsable no asigna participantes automáticamente.
+        </p>
+      </section>
     </>
   );
 }

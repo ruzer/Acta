@@ -44,6 +44,9 @@ it("los motivos del editor y la forma de continuar coinciden en ayuda y guías",
       "área activa",
       "pregunta archivada",
       "Cambiar de tema",
+      "texto seleccionable con su motivo",
+      "identificador se conserva al guardar",
+      "no se envían como cambios",
     ])
       expect(content, `${path}: ${text}`).toContain(text);
   }
@@ -355,6 +358,9 @@ it("la ayuda describe apertura, acciones y recorrido del panel compartido", () =
       "Más acciones",
       "Pregunta anterior",
       "Pregunta siguiente",
+      "Primero aparecen la pregunta y sus opciones",
+      "La acción principal y Más acciones permanecen al pie",
+      "sin estrecharla",
       "Contenido",
       "Respuestas",
       "Escape",

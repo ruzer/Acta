@@ -41,8 +41,8 @@ Ser administrador no sustituye el rol de analista para validar decisiones. El á
 ## Características principales
 
 - Cuestionarios por temas, seguimientos y ocho tipos de respuesta, incluida matriz.
-- Abre una pregunta desde su título subrayado en **Escribir** o **Organizar**. El panel muestra opciones, ayuda y asignaciones; **Pregunta anterior** y **Pregunta siguiente** recorren los resultados, y Atrás o Escape vuelven a la lista. **Cambiar de tema** está junto al tema y **Más acciones** reúne las acciones secundarias. En Organizar, **Contenido / Respuestas** diferencia preparación y aportaciones.
-- En una pantalla amplia, el panel se superpone sin estrechar la lista. En móvil ocupa toda la pantalla; Cerrar detalle o Atrás regresan a la lista. La acción principal permanece al pie y Más acciones abre una hoja inferior; Cerrar acciones vuelve al detalle. Con movimiento reducido solo hay fundido y con teclado el cambio es inmediato.
+- Abre una pregunta desde su título subrayado en **Escribir** o **Organizar**. El panel muestra opciones, ayuda y asignaciones; **Pregunta anterior** y **Pregunta siguiente** recorren los resultados, y Atrás o Escape vuelven a la lista. **Cambiar de tema** está junto al tema y **Más acciones** reúne la configuración, el orden, la selección de grupo y el archivado. En Organizar, **Contenido / Respuestas** diferencia preparación y aportaciones. Primero aparecen la pregunta y sus opciones; después, los datos y las acciones secundarias. La acción principal y Más acciones permanecen al pie. El panel se superpone a la lista sin estrecharla y ocupa toda la pantalla en móvil.
+- El detalle aparece sin estrechar la lista; Cerrar detalle o Atrás regresan a ella. En móvil, Más acciones abre una hoja inferior; Cerrar acciones vuelve al detalle. El pie se ajusta al teclado. Con movimiento reducido solo hay fundido y con teclado el cambio es inmediato.
 - Editor con vistas **Escribir**, **Organizar** y **Revisar publicación**. En Organizar, [selecciona preguntas y revisa operaciones por lote](docs/BULK-QUESTIONNAIRE-OPERATIONS.md) para asignar área, agregar participantes o publicar.
 
 - **Mi trabajo** para participantes: borradores persistentes, envíos y evidencia privada.
@@ -51,6 +51,8 @@ Ser administrador no sustituye el rol de analista para validar decisiones. El á
 - Atención, trazabilidad, importación CSV/JSON, informes para imprimir y exportaciones JSON, CSV y Markdown según permisos.
 - Creación de usuarios en lotes de hasta 50 filas, con contraseñas temporales entregadas una sola vez y cambio obligatorio en el primer acceso.
 - Historial de operaciones y acceso separado por proyecto.
+
+El identificador externo de una pregunta existente, el código interno de la instalación y los valores administrados externamente se muestran como texto seleccionable con su motivo. El identificador se conserva al guardar; los valores de infraestructura no se envían como cambios.
 
 Las acciones no disponibles explican qué falta para continuar; los campos de solo lectura que sirven para copiar conservan esa función. El editor explica sus acciones no disponibles: Editar tema protege nombres con preguntas publicadas o archivadas; una búsqueda mantiene los grupos desplegados; crear preguntas requiere un área activa. Una pregunta archivada se puede consultar, pero no seleccionar. Al editar un borrador puedes cambiar su tema junto con el contenido; Cambiar de tema también permite mover el grupo completo. El aviso distingue entre su único seguimiento y varios seguimientos, y muestra sus nombres. Si algún integrante no es borrador, se muestra quién lo impide. El aviso Ver lleva a la pregunta en su nuevo lugar. [Motivos y pasos para continuar](docs/QUESTIONNAIRE-EDITOR-INTEGRATION.md#acciones-no-disponibles-en-el-editor).
 

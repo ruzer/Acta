@@ -16,6 +16,7 @@ export function InspectorFrame({
   open = true,
   phase = "open",
   elementRef,
+  navigation,
   footer,
 }: {
   children: ReactNode;
@@ -24,6 +25,7 @@ export function InspectorFrame({
   open?: boolean;
   phase?: InspectorPhase;
   elementRef?: RefObject<HTMLElement | null>;
+  navigation?: ReactNode;
   footer?: ReactNode;
 }) {
   const [wide, setWide] = useState(
@@ -33,6 +35,10 @@ export function InspectorFrame({
   );
   const ref = useRef<HTMLDialogElement>(null),
     heading = useRef<HTMLHeadingElement>(null);
+  const body = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    if (body.current) body.current.scrollTop = 0;
+  }, [questionId]);
   const openingTrigger = useRef<HTMLElement | null>(null);
   const openingQuestion = useRef<string | undefined>(undefined);
   const currentQuestion = useRef(questionId);
@@ -107,20 +113,28 @@ export function InspectorFrame({
   const content = (
     <>
       <header className="qe-inspector-head">
-        <h2 ref={heading} tabIndex={-1}>
+        <h2
+          ref={heading}
+          tabIndex={-1}
+          className={navigation ? "sr-only" : undefined}
+        >
           Detalle de pregunta
         </h2>
-        <Button tone="secondary" onClick={onClose}>
-          Cerrar detalle
-        </Button>
+        {navigation ?? (
+          <Button tone="secondary" onClick={onClose}>
+            Cerrar detalle
+          </Button>
+        )}
       </header>
-      <div className="qe-inspector-body">{children}</div>
+      <div ref={body} className="qe-inspector-body">
+        {children}
+      </div>
       <footer className="qe-inspector-footer">{footer}</footer>
     </>
   );
   return wide ? (
     <aside
-      className="qe-inspector qe-inspector-motion"
+      className="qe-inspector qe-inspector-overlay qe-inspector-motion"
       aria-label="Detalle de pregunta"
       data-phase={phase}
       inert={!open}
@@ -130,7 +144,7 @@ export function InspectorFrame({
     </aside>
   ) : (
     <dialog
-      className="qe-inspector qe-inspector-dialog qe-inspector-motion av-scope"
+      className="qe-inspector qe-inspector-dialog qe-inspector-overlay qe-inspector-motion av-scope"
       aria-label="Detalle de pregunta"
       data-phase={phase}
       inert={!open}

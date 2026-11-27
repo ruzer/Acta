@@ -8,7 +8,7 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ### Fixed
 
-- **Controles no disponibles con motivo.** Los componentes compartidos admiten una explicación visible asociada al control; los botones conservan el foco sin ejecutar la acción. El puntero de espera se reserva a una operación ocupada y los valores fijos pueden presentarse como texto.
+- **Controles no disponibles con motivo.** Los componentes compartidos admiten una explicación visible asociada al control; los botones conservan el foco sin ejecutar la acción. El puntero de espera se reserva a una operación ocupada y los valores fijos se presentan como texto seleccionable con su motivo: el identificador de una pregunta existente, el código de instalación y los valores administrados externamente.
 
 - **Motivos claros en el editor.** Los temas protegidos, la búsqueda que mantiene grupos desplegados y la falta de áreas activas explican por qué una acción no está disponible y cómo continuar. Las preguntas archivadas no ofrecen selección y los valores que no se pueden editar muestran su motivo.
 
@@ -16,9 +16,9 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ### Changed
 
-- **Panel estable y móvil.** Abrir una pregunta superpone el detalle sin estrechar la lista. En móvil ocupa toda la pantalla, mantiene la acción principal al pie y presenta Más acciones como hoja inferior. El cierre admite interrupciones; recorrer preguntas conserva el panel. El movimiento reducido usa solo fundido y el teclado evita la animación.
+- **Movimiento y teclado del panel.** El cierre admite interrupciones y recorrer preguntas conserva el panel sin repetir la entrada. En móvil, Más acciones abre una hoja inferior y el pie se ajusta al teclado. El movimiento reducido usa solo fundido y el teclado evita la animación.
 
-- **Abrir y recorrer preguntas.** El título subrayado abre el mismo panel en Escribir y Organizar, con opciones, área, participantes y acciones según el estado. Cambiar de tema está junto al tema y Más acciones reúne las acciones secundarias. La dirección conserva la pregunta; Atrás y Escape vuelven a la lista, y anterior/siguiente respetan los resultados visibles. Organizar distingue Contenido y Respuestas sin cambiar las pestañas.
+- **Abrir y recorrer preguntas.** El título subrayado abre el mismo panel en Escribir y Organizar, con opciones, área, participantes y acciones según el estado. Cambiar de tema está junto al tema y Más acciones reúne la configuración, el orden, la selección de grupo y el archivado. La dirección conserva la pregunta; Atrás y Escape vuelven a la lista, y anterior/siguiente respetan los resultados visibles. Organizar distingue Contenido y Respuestas sin cambiar las pestañas. El panel se superpone sin estrechar la lista; presenta pregunta y opciones antes de los datos, con la acción principal y Más acciones al pie. En móvil ocupa toda la pantalla.
 
 - **Cambiar el tema al editar.** Los borradores permiten elegir el tema antes del contenido y guardar ambos cambios juntos. La pregunta principal y todos sus seguimientos se mueven como un grupo; si alguien no es borrador, el motivo indica quién lo impide.
 

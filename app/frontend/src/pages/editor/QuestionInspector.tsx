@@ -56,12 +56,6 @@ export function QuestionInspector({
       closeForAction();
       props.onAction(...args);
     }) as EditorProps["onAction"],
-    onOpenContributions: props.onOpenContributions
-      ? (id: string) => {
-          closeForAction();
-          props.onOpenContributions?.(id);
-        }
-      : undefined,
   };
   const parent = data.questions.find(
     (p) => p.id === q.condition?.parentQuestionId,
@@ -73,13 +67,16 @@ export function QuestionInspector({
       open={presence.open}
       phase={presence.phase}
       elementRef={presence.elementRef}
-      footer={<QuestionInspectorActions {...actionProps} part="primary" />}
+      navigation={
+        <QuestionInspectorNavigation
+          questionId={q.id}
+          visibleIds={visibleIds}
+          onNavigate={onNavigate}
+          onClose={onClose}
+        />
+      }
+      footer={<QuestionInspectorActions {...actionProps} part="footer" />}
     >
-      <QuestionInspectorNavigation
-        questionId={q.id}
-        visibleIds={visibleIds}
-        onNavigate={onNavigate}
-      />
       <QuestionInspectorContent
         data={data}
         question={q}

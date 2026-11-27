@@ -13,7 +13,7 @@ export function QuestionInspectorActions({
 }: EditorProps & {
   question: QuestionView;
   onSelectGroup?: () => void;
-  part?: "all" | "primary" | "secondary";
+  part?: "all" | "footer" | "secondary";
 }) {
   const menu = useRef<HTMLDetailsElement>(null);
   const [wide, setWide] = useState(
@@ -23,7 +23,7 @@ export function QuestionInspectorActions({
   );
   const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
-    if (part === "primary") return;
+    if (part === "secondary") return;
     const query = window.matchMedia?.("(min-width:900px)");
     if (!query) return;
     const update = () => setWide(query.matches);
@@ -76,142 +76,153 @@ export function QuestionInspectorActions({
     )
     .sort((a, b) => a.order - b.order);
   const index = rows.findIndex((q) => q.id === question.id);
-  const primary = (
-    <div className="qe-inspector-primary">
-      <Button
-        unavailable={
-          actions.primary === "responses" && !props.onOpenContributions
-            ? { reason: "Las respuestas no están disponibles en esta vista." }
-            : undefined
-        }
-        onClick={() => invoke(actions.primary!)}
-      >
-        {labels[actions.primary]}
-      </Button>
-    </div>
-  );
-  if (part === "primary") return primary;
   return (
-    <div className="qe-inspector-actions">
-      {part === "all" && primary}
-      <div className="actions">
-        {actions.secondary.map((action) => (
-          <Button key={action} tone="secondary" onClick={() => invoke(action)}>
-            {labels[action]}
-          </Button>
-        ))}
-      </div>
-      {actions.pending.length > 0 && (
-        <p className="hint">
-          Antes de publicar:{" "}
-          {actions.pending.map((issue) => issue.message).join(" ")}
-        </p>
+    <div className={`qe-inspector-actions qe-inspector-actions-${part}`}>
+      {part !== "footer" && (
+        <>
+          <div className="actions qe-inspector-secondary">
+            {actions.secondary.map((action) => (
+              <Button
+                key={action}
+                tone="secondary"
+                onClick={() => invoke(action)}
+              >
+                {labels[action]}
+              </Button>
+            ))}
+          </div>
+          {actions.pending.length > 0 && (
+            <p className="hint">
+              Antes de publicar:{" "}
+              {actions.pending.map((issue) => issue.message).join(" ")}
+            </p>
+          )}
+        </>
       )}
-      <details
-        className="qe-inspector-more"
-        ref={menu}
-        onToggle={(event) => {
-          setMenuOpen(event.currentTarget.open);
-          if (!wide && event.currentTarget.open)
-            event.currentTarget
-              .querySelector<HTMLButtonElement>(".qe-inspector-more-close")
-              ?.focus();
-        }}
-        onKeyDown={(event) => {
-          if (event.key === "Escape" && menu.current?.open) {
-            event.preventDefault();
-            event.stopPropagation();
-            closeMenu();
-          }
-          if (event.key === "Tab" && !wide && menu.current?.open) {
-            const buttons = Array.from(
-              menu.current.querySelectorAll<HTMLButtonElement>(
-                ".qe-inspector-more-items button:not(:disabled)",
-              ),
-            );
-            const first = buttons[0],
-              last = buttons.at(-1);
-            if (event.shiftKey && document.activeElement === first) {
-              event.preventDefault();
-              last?.focus();
-            } else if (!event.shiftKey && document.activeElement === last) {
-              event.preventDefault();
-              first?.focus();
-            }
-          }
-        }}
-        onClick={(event) => {
-          if ((event.target as HTMLElement).closest("button")) closeMenu();
-        }}
-      >
-        <summary>Más acciones</summary>
-        <div
-          className="qe-inspector-more-scrim"
-          aria-hidden="true"
-          onClick={closeMenu}
-        />
-        <div
-          className="qe-inspector-more-items"
-          role={wide ? "region" : "dialog"}
-          aria-modal={wide ? undefined : true}
-          aria-label="Más acciones"
-        >
-          <Button
-            className="qe-inspector-more-close"
-            tone="secondary"
-            onClick={closeMenu}
+      {part !== "secondary" && (
+        <>
+          <details
+            className="qe-inspector-more"
+            ref={menu}
+            onToggle={(event) => {
+              setMenuOpen(event.currentTarget.open);
+              if (!wide && event.currentTarget.open)
+                event.currentTarget
+                  .querySelector<HTMLButtonElement>(".qe-inspector-more-close")
+                  ?.focus();
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Escape" && menu.current?.open) {
+                event.preventDefault();
+                event.stopPropagation();
+                closeMenu();
+              }
+              if (event.key === "Tab" && !wide && menu.current?.open) {
+                const buttons = Array.from(
+                  menu.current.querySelectorAll<HTMLButtonElement>(
+                    ".qe-inspector-more-items button:not(:disabled)",
+                  ),
+                );
+                const first = buttons[0],
+                  last = buttons.at(-1);
+                if (event.shiftKey && document.activeElement === first) {
+                  event.preventDefault();
+                  last?.focus();
+                } else if (!event.shiftKey && document.activeElement === last) {
+                  event.preventDefault();
+                  first?.focus();
+                }
+              }
+            }}
+            onClick={(event) => {
+              if ((event.target as HTMLElement).closest("button")) closeMenu();
+            }}
           >
-            Cerrar acciones
-          </Button>
-          {(["up", "down"] as const).map((kind) => (
+            <summary>Más acciones</summary>
+            <div
+              className="qe-inspector-more-scrim"
+              aria-hidden="true"
+              onClick={closeMenu}
+            />
+            <div
+              className="qe-inspector-more-items"
+              role={wide ? "region" : "dialog"}
+              aria-modal={wide ? undefined : true}
+              aria-label="Más acciones"
+            >
+              <Button
+                className="qe-inspector-more-close"
+                tone="secondary"
+                onClick={closeMenu}
+              >
+                Cerrar acciones
+              </Button>
+              {(["up", "down"] as const).map((kind) => (
+                <Button
+                  key={kind}
+                  tone="secondary"
+                  unavailable={
+                    index < 0 ||
+                    (kind === "up" ? index === 0 : index === rows.length - 1)
+                      ? {
+                          reason:
+                            index < 0
+                              ? "Esta pregunta no está en la lista que se puede ordenar."
+                              : kind === "up"
+                                ? "Esta pregunta ya está al principio del tema."
+                                : "Esta pregunta ya está al final del tema.",
+                        }
+                      : undefined
+                  }
+                  onClick={() => props.onAction(kind, question)}
+                >
+                  {kind === "up" ? "Mover arriba" : "Mover abajo"}
+                </Button>
+              ))}
+              <Button
+                tone="secondary"
+                onClick={() => props.onAction("metadata", question)}
+              >
+                Configurar
+              </Button>
+              {onSelectGroup && (
+                <div>
+                  <p className="hint">
+                    Se seleccionarán{" "}
+                    {questionGroup(props.data.questions, question.id).length}{" "}
+                    preguntas: esta pregunta y sus seguimientos, incluso fuera
+                    de la página o los filtros actuales.
+                  </p>
+                  <Button tone="secondary" onClick={onSelectGroup}>
+                    Seleccionar grupo completo
+                  </Button>
+                </div>
+              )}
+              <Button
+                tone="danger"
+                onClick={() => props.onAction("archive", question)}
+              >
+                Archivar
+              </Button>
+            </div>
+          </details>
+          <div className="qe-inspector-primary">
             <Button
-              key={kind}
-              tone="secondary"
               unavailable={
-                index < 0 ||
-                (kind === "up" ? index === 0 : index === rows.length - 1)
+                actions.primary === "responses" && !props.onOpenContributions
                   ? {
                       reason:
-                        index < 0
-                          ? "Esta pregunta no está en la lista que se puede ordenar."
-                          : kind === "up"
-                            ? "Esta pregunta ya está al principio del tema."
-                            : "Esta pregunta ya está al final del tema.",
+                        "Las respuestas no están disponibles en esta vista.",
                     }
                   : undefined
               }
-              onClick={() => props.onAction(kind, question)}
+              onClick={() => invoke(actions.primary!)}
             >
-              {kind === "up" ? "Mover arriba" : "Mover abajo"}
+              {labels[actions.primary]}
             </Button>
-          ))}
-          <Button
-            tone="secondary"
-            onClick={() => props.onAction("metadata", question)}
-          >
-            Configurar
-          </Button>
-          {onSelectGroup && (
-            <div>
-              <p className="hint">
-                Se seleccionarán{" "}
-                {questionGroup(props.data.questions, question.id).length}{" "}
-                preguntas: esta pregunta y sus seguimientos, incluso fuera de la
-                página o los filtros actuales.
-              </p>
-              <Button tone="secondary" onClick={onSelectGroup}>
-                Seleccionar grupo completo
-              </Button>
-            </div>
-          )}
-          <Button
-            tone="danger"
-            onClick={() => props.onAction("archive", question)}
-          >
-            Archivar
-          </Button>
-        </div>
-      </details>
+          </div>
+        </>
+      )}
     </div>
   );
 }

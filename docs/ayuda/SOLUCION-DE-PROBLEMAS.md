@@ -155,6 +155,8 @@ Consulta los pasos en las guías de [Participante](../pilot/GUIA-PARTICIPANTE.md
 
 Editar tema explica que el nombre y la descripción están protegidos si el tema tiene preguntas publicadas o archivadas. Mientras hay una búsqueda activa, todos los grupos se muestran desplegados: limpia la búsqueda para contraerlos. Si Nueva pregunta o + Agregar pregunta indican que falta un área activa, pide a la administración de la institución que la active en Administración. Una pregunta archivada se puede consultar, pero no seleccionar para acciones por lote.
 
+El identificador externo de una pregunta existente, el código interno de la instalación y los valores administrados externamente se muestran como texto seleccionable con su motivo. El identificador se conserva al guardar; los valores de infraestructura no se envían como cambios.
+
 En la edición de un borrador, elige **Tema al que pertenece**, arriba del contenido, y guarda. También puedes usar **Cambiar de tema** junto al tema en el panel de la pregunta. La pregunta y su grupo completo pasan al final del destino. El aviso distingue entre su único seguimiento y varios seguimientos, y muestra sus nombres. Si alguna integrante está publicada o archivada, el tema se muestra como texto con el nombre de quien lo impide. Cambia el tema y el vínculo de seguimiento en guardados separados. Tras guardar, **Ver** lleva a la pregunta en su nuevo lugar.
 
 El motivo aparece junto al control; no hace falta pasar el puntero para leerlo. Los botones no disponibles conservan el foco del teclado y no ejecutan la acción. [Guía del editor](../QUESTIONNAIRE-EDITOR-INTEGRATION.md#acciones-no-disponibles-en-el-editor).
@@ -202,7 +204,7 @@ No cambies de cuenta para evitar una restricción.
 
 ### No encuentro cómo abrir o recorrer una pregunta
 
-En **Escribir** y **Organizar**, pulsa el título subrayado: abre el mismo panel con texto completo, ayuda, opciones, área y participantes. **Editar pregunta** abre la edición del borrador. **Cambiar de tema** está junto al tema; **Más acciones** contiene configurar, ordenar, seleccionar grupo y archivar.
+En **Escribir** y **Organizar**, pulsa el título subrayado: abre el mismo panel con texto completo, ayuda, opciones, área y participantes. Primero aparecen la pregunta y sus opciones; después, los datos y las acciones secundarias. La acción principal y Más acciones permanecen al pie. El panel se superpone a la lista sin estrecharla y ocupa toda la pantalla en móvil. **Editar pregunta** abre la edición del borrador. **Cambiar de tema** está junto al tema; **Más acciones** contiene configurar, ordenar, seleccionar grupo y archivar.
 
 **Pregunta anterior** y **Pregunta siguiente** recorren los resultados con tus filtros y búsqueda. La selección masiva sigue en sus casillas. Atrás o Escape cierran el panel y el foco vuelve a la lista; puedes compartir la dirección con la pregunta abierta. En Organizar, **Contenido** y **Respuestas** distinguen preparación y aportaciones. [Guía del editor](../QUESTIONNAIRE-EDITOR-INTEGRATION.md#abrir-y-recorrer-preguntas).
 

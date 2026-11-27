@@ -682,19 +682,25 @@ export function QuestionForm({
               : "Se proponen a partir de lo que escribes y puedes cambiarlos. El identificador es el código único y fijo de la pregunta en este proyecto (aparece en exportaciones y referencias) y no se podrá cambiar después."}
           </p>
           <div className="grid2">
-            <Input
-              label="Identificador externo"
-              required
-              name="externalId"
-              value={value.externalId}
-              readOnly={!!initial}
-              readOnlyReason="El identificador se conserva para mantener las referencias a esta pregunta."
-              error={fieldError("externalId")}
-              onChange={(e) => {
-                setIdAuto(false);
-                patch({ externalId: e.target.value });
-              }}
-            />
+            {initial ? (
+              <UnavailableValue
+                label="Identificador externo"
+                value={value.externalId}
+                reason="El identificador se conserva para mantener las referencias a esta pregunta."
+              />
+            ) : (
+              <Input
+                label="Identificador externo"
+                required
+                name="externalId"
+                value={value.externalId}
+                error={fieldError("externalId")}
+                onChange={(e) => {
+                  setIdAuto(false);
+                  patch({ externalId: e.target.value });
+                }}
+              />
+            )}
 
             <Input
               label="Título breve"
