@@ -257,6 +257,11 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
               grupo no está en borrador, se muestra su nombre y el tema queda
               fijo. Cambia el tema y el vínculo de seguimiento en guardados
               separados. Después, Ver lleva a la pregunta en su nuevo lugar.
+              El identificador externo de una pregunta existente, el código
+              interno de la instalación y los valores administrados externamente
+              se muestran como texto seleccionable con su motivo. El identificador
+              se conserva al guardar; los valores de infraestructura no se envían
+              como cambios.
               Para importar, elige el archivo y corrige la vista previa. Para
               crear usuarios en lote, pega y revisa la tabla. Los recordatorios
               requieren preguntas obligatorias pendientes y el informe requiere

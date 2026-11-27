@@ -155,6 +155,8 @@ Consulta los pasos en las guías de [Participante](../pilot/GUIA-PARTICIPANTE.md
 
 Editar tema explica que el nombre y la descripción están protegidos si el tema tiene preguntas publicadas o archivadas. Mientras hay una búsqueda activa, todos los grupos se muestran desplegados: limpia la búsqueda para contraerlos. Si Nueva pregunta o + Agregar pregunta indican que falta un área activa, pide a la administración de la institución que la active en Administración. Una pregunta archivada se puede consultar, pero no seleccionar para acciones por lote.
 
+El identificador externo de una pregunta existente, el código interno de la instalación y los valores administrados externamente se muestran como texto seleccionable con su motivo. El identificador se conserva al guardar; los valores de infraestructura no se envían como cambios.
+
 En la edición de un borrador, elige **Tema al que pertenece**, arriba del contenido, y guarda. También puedes usar **Cambiar de tema** junto al tema en el panel de la pregunta. La pregunta y su grupo completo pasan al final del destino. El aviso distingue entre su único seguimiento y varios seguimientos, y muestra sus nombres. Si alguna integrante está publicada o archivada, el tema se muestra como texto con el nombre de quien lo impide. Cambia el tema y el vínculo de seguimiento en guardados separados. Tras guardar, **Ver** lleva a la pregunta en su nuevo lugar.
 
 El motivo aparece junto al control; no hace falta pasar el puntero para leerlo. Los botones no disponibles conservan el foco del teclado y no ejecutan la acción. [Guía del editor](../QUESTIONNAIRE-EDITOR-INTEGRATION.md#acciones-no-disponibles-en-el-editor).

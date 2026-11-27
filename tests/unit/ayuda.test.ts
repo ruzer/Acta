@@ -44,6 +44,9 @@ it("los motivos del editor y la forma de continuar coinciden en ayuda y guías",
       "área activa",
       "pregunta archivada",
       "Cambiar de tema",
+      "texto seleccionable con su motivo",
+      "identificador se conserva al guardar",
+      "no se envían como cambios",
     ])
       expect(content, `${path}: ${text}`).toContain(text);
   }

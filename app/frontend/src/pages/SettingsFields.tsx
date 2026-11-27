@@ -7,7 +7,7 @@ import {
 } from "@requirements/contracts";
 import { Marks } from "../branding";
 import { isValidTimezone } from "../initial-timezone";
-import { Input, Select } from "../ui";
+import { Input, Select, UnavailableValue } from "../ui";
 import { StatusChip } from "../ui/semantic";
 
 /** The text that explains a value the infrastructure controls. */
@@ -25,11 +25,10 @@ export function ExternalInput({
   display?: string;
 }) {
   return (
-    <Input
+    <UnavailableValue
       label={label}
       value={display ?? field.value}
-      readOnly
-      readOnlyReason={externalHint(field)}
+      reason={externalHint(field)}
     />
   );
 }
