@@ -202,12 +202,15 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
               limpia la búsqueda para contraer los grupos. Si falta un área
               activa, pide a la administración de la institución que la active.
               Una pregunta archivada se puede consultar, pero no seleccionar. En
-              la edición, el tema se muestra como texto: guarda o descarta tus
-              cambios y usa Mover a otro tema en las acciones de la pregunta.
-              Para importar, elige el archivo y corrige la vista previa. Para
-              crear usuarios en lote, pega y revisa la tabla. Los recordatorios
-              requieren preguntas obligatorias pendientes y el informe requiere
-              una decisión vigente para imprimirse.
+              la edición de un borrador, elige Tema al que pertenece antes de
+              guardar o usa Mover a otro tema. Se mueve el grupo completo al final
+              del destino. Si una pregunta del grupo no está en borrador, se
+              muestra su nombre y el tema queda fijo. Cambia el tema y el
+              vínculo de seguimiento en guardados separados. Para importar, elige el archivo y
+              corrige la vista previa. Para crear usuarios en lote, pega y
+              revisa la tabla. Los recordatorios requieren preguntas
+              obligatorias pendientes y el informe requiere una decisión vigente
+              para imprimirse.
             </li>
             <li>
               <strong>

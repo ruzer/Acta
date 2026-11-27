@@ -23,7 +23,10 @@ import {
 } from "../ui";
 import { ApiFailure } from "../api";
 import { nextQuestionId, suggestTitle } from "./question-suggestions";
-import { fixedQuestionTopicReason } from "./editor/unavailable-reasons";
+import {
+  questionTopicMove,
+  simultaneousTopicAndGroupReason,
+} from "./editor/topic-move";
 
 const typeDescriptions: Record<QuestionInput["type"], string> = {
   YES_NO: "El participante elige entre sí y no.",
@@ -201,10 +204,19 @@ export function QuestionForm({
   const fieldError = (key: string) =>
     fields[key] ??
     Object.entries(fields).find(([path]) => path.startsWith(key + "."))?.[1];
+  const topicMove = initial ? questionTopicMove(data, initial) : null;
   async function submit(e: FormEvent) {
     e.preventDefault();
     setError("");
     setFields({});
+    if (
+      initial &&
+      value.sectionId !== initial.sectionId &&
+      value.groupParentId !== initial.groupParentId
+    ) {
+      setFields({ groupParentId: simultaneousTopicAndGroupReason });
+      return;
+    }
     const invalid: Record<string, string> = {};
     for (const el of Array.from(formRef.current?.elements ?? [])) {
       if (
@@ -342,6 +354,54 @@ export function QuestionForm({
             Cerrar
           </Button>
         </header>
+        <fieldset disabled={busy} aria-busy={busy}>
+          <legend className="sr-only">Tema de la pregunta</legend>
+          {topicMove?.reason ? (
+            <UnavailableValue
+              label="Tema al que pertenece"
+              value={
+                <>
+                  <span aria-hidden="true">🔒</span>{" "}
+                  {data.sections.find(
+                    (section) => section.id === value.sectionId,
+                  )?.title || "Tema no disponible"}
+                </>
+              }
+              reason={topicMove.reason}
+            />
+          ) : (
+            <Select
+              label="Tema al que pertenece"
+              name="sectionId"
+              value={value.sectionId}
+              required
+              error={fieldError("sectionId")}
+              hint="Al guardar, la pregunta pasa al final del tema que elijas, junto con tus cambios."
+              onChange={(e) =>
+                patch({
+                  sectionId: e.target.value,
+                  order:
+                    initial?.order ??
+                    Math.max(
+                      0,
+                      ...data.questions
+                        .filter((q) => q.sectionId === e.target.value)
+                        .map((q) => q.order),
+                    ) + 1,
+                })
+              }
+            >
+              {data.sections.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.title}
+                </option>
+              ))}
+            </Select>
+          )}
+          {topicMove?.notice && !topicMove.reason && (
+            <p className="hint">{topicMove.notice}</p>
+          )}
+        </fieldset>
         <fieldset disabled={busy} aria-busy={busy}>
           <legend className="sr-only">Contenido de la pregunta</legend>
           <div className="next-authoring-prompt">
@@ -602,50 +662,6 @@ export function QuestionForm({
         >
           <legend>Ubicación y obligatoriedad</legend>
           <div className="next-authoring-context">
-            {initial ? (
-              <div>
-                <UnavailableValue
-                  label="Tema al que pertenece"
-                  value={
-                    data.sections.find(
-                      (section) => section.id === value.sectionId,
-                    )?.title || "Tema no disponible"
-                  }
-                  reason={fixedQuestionTopicReason}
-                />
-                {fieldError("sectionId") && (
-                  <p className="field-error" role="alert">
-                    {fieldError("sectionId")}
-                  </p>
-                )}
-              </div>
-            ) : (
-              <Select
-                label="Tema al que pertenece"
-                error={fieldError("sectionId")}
-                name="sectionId"
-                value={value.sectionId}
-                required
-                onChange={(e) =>
-                  patch({
-                    sectionId: e.target.value,
-                    order:
-                      Math.max(
-                        0,
-                        ...data.questions
-                          .filter((q) => q.sectionId === e.target.value)
-                          .map((q) => q.order),
-                      ) + 1,
-                  })
-                }
-              >
-                {data.sections.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.title}
-                  </option>
-                ))}
-              </Select>
-            )}
             <Checkbox
               label="Pregunta obligatoria"
               name="required"
@@ -821,7 +837,11 @@ export function QuestionForm({
               >
                 <option value="">Sin agrupación</option>
                 {candidates
-                  .filter((q) => q.sectionId === value.sectionId)
+                  .filter(
+                    (q) =>
+                      q.sectionId === value.sectionId ||
+                      q.id === initial?.groupParentId,
+                  )
                   .map((q) => (
                     <option key={q.id} value={q.id}>
                       {q.title}
