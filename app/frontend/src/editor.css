@@ -663,3 +663,22 @@
     overflow-y: auto;
   }
 }
+
+/* A topic change is highlighted once; reduced motion keeps a static mark. */
+.qe-topic-moved {
+  animation: qe-topic-moved 1200ms ease-out;
+}
+@keyframes qe-topic-moved {
+  from {
+    background-color: var(--ac-accent-weak);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qe-topic-moved {
+    animation: none;
+    background-color: var(--ac-accent-weak);
+  }
+}

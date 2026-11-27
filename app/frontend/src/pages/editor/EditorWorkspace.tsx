@@ -1,4 +1,10 @@
-import { useCallback, useRef, useState, type KeyboardEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from "react";
 import {
   type QuestionnaireView,
   type QuestionView,
@@ -22,6 +28,8 @@ export type EditorAction =
   "assign" | "publish" | "archive" | "metadata" | "up" | "down" | "move";
 export type EditorProps = {
   data: QuestionnaireView;
+  movedQuestion?: { id: string; sectionId: string } | null;
+  revealMove?: { id: string; sequence: number } | null;
   projectId: string;
   contributionQuestions?: z.infer<typeof dashboardView>["questions"];
   contributionsLoading?: boolean;
@@ -307,6 +315,64 @@ export function EditorWorkspace(props: EditorProps) {
   // questions on, topics start folded (the first stays open), as in "Mi trabajo".
   const [topicOpen, setTopicOpen] = useState<Record<string, boolean>>({});
   const { data, onEdit, onCreateTopic } = props;
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  const highlightTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const highlightedMove = useRef<{
+    moved: EditorProps["movedQuestion"];
+    reveal: EditorProps["revealMove"];
+  } | null>(null);
+  useEffect(
+    () => () => {
+      if (highlightTimer.current) clearTimeout(highlightTimer.current);
+    },
+    [],
+  );
+  const movedQuestion = props.movedQuestion;
+  const revealMove = props.revealMove;
+  useEffect(() => {
+    if (!revealMove) return;
+    const question = data.questions.find((q) => q.id === revealMove.id);
+    if (!question || question.sectionId !== movedQuestion?.sectionId) return;
+    setTopicOpen((previous) =>
+      previous[question.sectionId]
+        ? previous
+        : { ...previous, [question.sectionId]: true },
+    );
+  }, [revealMove, movedQuestion, data]);
+  useEffect(() => {
+    if (
+      !movedQuestion ||
+      !data.questions.some(
+        (q) =>
+          q.id === movedQuestion.id && q.sectionId === movedQuestion.sectionId,
+      )
+    )
+      return;
+    const frame = requestAnimationFrame(() => {
+      const row = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-question-id]"),
+      ).find(
+        (el) =>
+          el.dataset.questionId === movedQuestion.id &&
+          el.getClientRects().length,
+      );
+      if (
+        !row ||
+        (highlightedMove.current?.moved === movedQuestion &&
+          highlightedMove.current?.reveal === revealMove)
+      )
+        return;
+      highlightedMove.current = { moved: movedQuestion, reveal: revealMove };
+      setHighlightId(movedQuestion.id);
+      if (highlightTimer.current) clearTimeout(highlightTimer.current);
+      highlightTimer.current = setTimeout(() => setHighlightId(null), 1200);
+      if (revealMove?.id === movedQuestion.id) {
+        row.scrollIntoView({ block: "center", behavior: "instant" });
+        row.focus({ preventScroll: true });
+      }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [movedQuestion, revealMove, data, mode, topicOpen, preview]);
   const foldTopics = data.questions.length > 40;
   // The topic that was first when this opened stays open by id, so moving a
   // topic never folds the one being handled.
@@ -347,6 +413,7 @@ export function EditorWorkspace(props: EditorProps) {
             <Organize
               {...props}
               initialSelected={inspectId}
+              highlightedQuestionId={highlightId}
               initialSelectionExpanded={selectionExpanded}
               organizeContext={
                 props.organizeLocation === undefined
@@ -467,10 +534,13 @@ export function EditorWorkspace(props: EditorProps) {
                             <article
                               className={
                                 "qe-editorial-row" +
-                                (q.groupParentId ? " qe-followup" : "")
+                                (q.groupParentId ? " qe-followup" : "") +
+                                (highlightId === q.id ? " qe-topic-moved" : "")
                               }
                               key={q.id}
                               aria-label={q.title}
+                              data-question-id={q.id}
+                              tabIndex={-1}
                             >
                               <div>
                                 {q.groupParentId && (

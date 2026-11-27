@@ -248,6 +248,7 @@ export function QuestionInspector({
 }
 export function Organize(
   props: EditorProps & {
+    highlightedQuestionId?: string | null;
     initialSelected?: string;
     initialSelectionExpanded?: boolean;
   },
@@ -890,7 +891,10 @@ export function Organize(
                       <QuestionRow
                         className={
                           "an-question-row" +
-                          (parents.length ? " an-followup" : "")
+                          (parents.length ? " an-followup" : "") +
+                          (props.highlightedQuestionId === q.id
+                            ? " qe-topic-moved"
+                            : "")
                         }
                         data-approach={approach}
                       >

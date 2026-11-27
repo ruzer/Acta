@@ -206,7 +206,8 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
               guardar o usa Cambiar de tema. Se mueve el grupo completo al final
               del destino. Si una pregunta del grupo no está en borrador, se
               muestra su nombre y el tema queda fijo. Cambia el tema y el
-              vínculo de seguimiento en guardados separados. Para importar, elige el archivo y
+              vínculo de seguimiento en guardados separados. Después, Ver lleva
+              a la pregunta en su nuevo lugar. Para importar, elige el archivo y
               corrige la vista previa. Para crear usuarios en lote, pega y
               revisa la tabla. Los recordatorios requieren preguntas
               obligatorias pendientes y el informe requiere una decisión vigente

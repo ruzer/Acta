@@ -22,6 +22,7 @@ El área no asigna personas. Añadir participantes conserva las asignaciones act
 - Una pregunta archivada sigue visible para consulta. No muestra una casilla inutilizable: el texto aclara que no se puede seleccionar.
 - En la edición de un borrador, **Tema al que pertenece** aparece arriba del contenido. Elige el destino y guarda el tema junto con tus cambios. **Cambiar de tema** permite hacerlo sin editar el contenido. Ambos caminos mueven el grupo completo (principal y todos sus seguimientos) al final del destino. Si alguna integrante no es borrador, el tema queda como texto y el motivo nombra a esa pregunta.
 - No cambies el vínculo de seguimiento y el tema en el mismo guardado: guarda uno antes de hacer el otro. El servidor conserva el orden del grupo y las posiciones reservadas; un reintento con información anterior se rechaza sin repetir el movimiento.
+- El aviso **Se movió a «tema» · Ver** permite encontrar la pregunta. **Ver** abre Escribir, despliega el tema y enfoca la fila resaltada durante 1,2 segundos; con movimiento reducido, el resalte es fijo. Los filtros de Organizar se conservan al volver.
 
 Mover arriba o abajo explica cuándo el tema o la pregunta ya está en un extremo. La paginación avisa si estás en la primera o última página. Publicar muestra los problemas concretos que hay que resolver; revisar un lote pide completar su configuración o actualizar una vista previa que haya cambiado.
 

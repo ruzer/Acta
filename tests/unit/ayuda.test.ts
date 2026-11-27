@@ -328,3 +328,14 @@ it("la ayuda explica los controles no disponibles y conserva la copia de valores
     expect(text).toContain("copiar");
   }
 });
+
+it("el aviso tras cambiar de tema explica cómo encontrar la pregunta", () => {
+  for (const path of [
+    "README.md",
+    "docs/QUESTIONNAIRE-EDITOR-INTEGRATION.md",
+    "docs/ayuda/SOLUCION-DE-PROBLEMAS.md",
+    "app/frontend/src/pages/Help.tsx",
+  ]) {
+    expect(readFileSync(path, "utf8")).toContain("Ver");
+  }
+});

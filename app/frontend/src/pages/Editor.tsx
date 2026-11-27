@@ -161,6 +161,15 @@ export function Editor() {
   const [topicExternalId, setTopicExternalId] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [moved, setMoved] = useState<{
+    id: string;
+    sectionId: string;
+    title: string;
+  } | null>(null);
+  const [revealMove, setRevealMove] = useState<{
+    id: string;
+    sequence: number;
+  } | null>(null);
   const [busy, setBusy] = useState(false);
   const q = useQuery({
     queryKey: ["questionnaire", projectId],
@@ -196,9 +205,19 @@ export function Editor() {
             { ...d, expectedVersion: editing.lockVersion },
           );
         setEditing(null);
-        setNotice(
-          "Pregunta guardada. Su contenido sigue en preparación hasta que la publiques.",
-        );
+        if (editing !== "new" && d.sectionId !== editing.sectionId) {
+          setNotice("");
+          setMoved({
+            id: editing.id,
+            sectionId: d.sectionId,
+            title: data.sections.find((s) => s.id === d.sectionId)!.title,
+          });
+        } else {
+          setMoved(null);
+          setNotice(
+            "Pregunta guardada. Su contenido sigue en preparación hasta que la publiques.",
+          );
+        }
         refresh();
       }}
     />
@@ -315,6 +334,28 @@ export function Editor() {
         active="questionnaire"
       />
       {notice && <Alert>{notice}</Alert>}
+      {moved && !notice && (
+        <Alert>
+          Se movió a «{moved.title}» ·{" "}
+          <Button
+            tone="secondary"
+            onClick={() => {
+              // Ver is an explicit jump to the unfiltered writing view; the saved
+              // Organize filters are retained so switching back restores them.
+              setParams(
+                writeEditorLocation(params, 0, locationContext.organize),
+                { replace: true, preventScrollReset: true },
+              );
+              setRevealMove((previous) => ({
+                id: moved.id,
+                sequence: (previous?.sequence ?? 0) + 1,
+              }));
+            }}
+          >
+            Ver
+          </Button>
+        </Alert>
+      )}
       {error && (
         <Alert error>
           {error}{" "}
@@ -340,6 +381,8 @@ export function Editor() {
         </p>
       )}
       <EditorWorkspace
+        movedQuestion={moved}
+        revealMove={revealMove}
         mode={locationContext.mode}
         onModeChange={(mode) => {
           qc.setQueryData(
@@ -388,6 +431,7 @@ export function Editor() {
           setTopic(sectionId);
           setFocusField(field);
           setEditing(question ?? "new");
+          setMoved(null);
           setNotice("");
         }}
         onAction={(kind, question) => {
@@ -446,9 +490,15 @@ export function Editor() {
           question={moving.question}
           projectId={projectId}
           onClose={closeStructureDialog}
-          onMoved={() => {
+          onMoved={(sectionId) => {
+            const questionId = moving.question.id;
             closeStructureDialog();
-            setNotice("Pregunta movida. Se guardaron los órdenes de ambos temas.");
+            setNotice("");
+            setMoved({
+              id: questionId,
+              sectionId,
+              title: data.sections.find((s) => s.id === sectionId)!.title,
+            });
             refresh();
           }}
         />
