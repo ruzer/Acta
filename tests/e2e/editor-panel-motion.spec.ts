@@ -8,7 +8,7 @@ import { checkedPage } from "./fixtures/page-checks";
 const evidence =
   process.env.ACTA_DIRECTION_C_EVIDENCE_DIR ?? "test-results/design-evidence";
 test.use({ hasTouch: true, reducedMotion: "no-preference" });
-async function fixture(page: Page) {
+async function fixture(page: Page, firstQuestionText?: string) {
   await login(page, "admin");
   const project = await command<ProjectView>(page, "/projects", {
     externalId: randomUUID(),
@@ -24,7 +24,7 @@ async function fixture(page: Page) {
       page,
       `/projects/${project.id}/sections`,
       {
-        externalId: randomUUID(),
+        externalId: `T-${topic + 1}`,
         title: `Tema ficticio ${topic + 1}`,
         description: "",
         order: topic,
@@ -33,10 +33,13 @@ async function fixture(page: Page) {
     for (let index = 0; index < 2; index++) {
       questions.push(
         await command<QuestionView>(page, `/projects/${project.id}/questions`, {
-          externalId: randomUUID(),
+          externalId: `P-${String(topic * 2 + index + 1).padStart(3, "0")}`,
           sectionId: section.id,
           title: `Pregunta ficticia ${topic + 1}.${index + 1}`,
-          question: `¿Qué información ficticia corresponde al caso ${topic + 1}.${index + 1} y permite describir de forma completa las necesidades, las opciones disponibles y los pasos necesarios para revisar la propuesta?`,
+          question:
+            topic === 0 && index === 0 && firstQuestionText
+              ? firstQuestionText
+              : `¿Qué información ficticia corresponde al caso ${topic + 1}.${index + 1} y permite describir de forma completa las necesidades, las opciones disponibles y los pasos necesarios para revisar la propuesta?`,
           helpText:
             "Contenido ficticio suficientemente amplio para comprobar el desplazamiento del panel. ".repeat(
               8,
@@ -382,6 +385,104 @@ for (const width of [1440, 1024, 900, 899, 390]) {
     });
   });
 }
+
+for (const [from, to] of [
+  [390, 1440],
+  [1440, 390],
+] as const) {
+  test(`I4 cerrar y redimensionar de ${from} a ${to}px libera modalidad y conserva el foco posterior`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: from, height: 844 });
+    const { questions } = await fixture(page);
+    await page
+      .getByRole("button", { name: questions[0]!.question, exact: true })
+      .click();
+    const panel = page.locator(".qe-inspector-motion");
+    await expect(panel).toHaveAttribute("data-phase", "open");
+    await finishAnimations(panel);
+    expect(await panel.evaluate((element) => element.matches(":modal"))).toBe(
+      from < 900,
+    );
+    // Hold closing beyond the test timeout. Keep its painted state unchanged
+    // so replacing dialog/aside cannot emit transitioncancel and end the hold.
+    // The tests above measure the unmodified 120 ms exit separately.
+    await page.addStyleTag({
+      content: `
+        .qe-workspace .qe-inspector-motion[data-phase="closing"] {
+          --qe-inspector-duration: 60s !important;
+          opacity: 1 !important;
+          transform: none !important;
+        }
+      `,
+    });
+    await panel.getByRole("button", { name: "Cerrar detalle" }).click();
+    await expect(panel).toHaveAttribute("data-phase", "closing");
+    await expect(panel).toHaveAttribute("inert", "");
+    expect(await page.locator("dialog:modal").count()).toBe(0);
+    expect(await page.locator(".qe-inspector-motion[open]").count()).toBe(0);
+
+    const destination = page.getByRole("tab", { name: "Escribir", exact: true });
+    await destination.focus();
+    expect(
+      await destination.evaluate((element) => document.activeElement === element),
+    ).toBe(true);
+    await page.setViewportSize({ width: to, height: 844 });
+    await expect(panel).toHaveJSProperty(
+      "tagName",
+      to < 900 ? "DIALOG" : "ASIDE",
+    );
+    await renderingFrames(page);
+    await expect(panel).toHaveAttribute("data-phase", "closing");
+    expect(await page.locator("dialog:modal").count()).toBe(0);
+    expect(await page.locator(".qe-inspector-motion[open]").count()).toBe(0);
+    expect(
+      await destination.evaluate((element) => document.activeElement === element),
+    ).toBe(true);
+
+    await page.keyboard.press("End");
+    const review = page.getByRole("tab", {
+      name: "Revisar publicación",
+      exact: true,
+    });
+    await expect(review).toHaveAttribute("aria-selected", "true");
+    await renderingFrames(page);
+    await expect(review).toBeFocused();
+    expect(await page.locator("dialog:modal").count()).toBe(0);
+  });
+}
+
+test("I4 los abridores cortos conservan objetivos táctiles de 44px en ambos modos", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const { questions } = await fixture(page, "¿Qué falta?");
+  for (const mode of ["Escribir", "Organizar"] as const) {
+    await page.getByRole("tab", { name: mode, exact: true }).click();
+    const opener = page.getByRole("button", {
+      name: questions[0]!.question,
+      exact: true,
+    });
+    await expect(opener).toBeVisible();
+    const target = await opener.evaluate((element) => {
+      const range = document.createRange();
+      range.selectNodeContents(
+        element.querySelector("span:not([aria-hidden])")!,
+      );
+      const rect = element.getBoundingClientRect();
+      return {
+        width: rect.width,
+        height: rect.height,
+        lines: new Set(
+          [...range.getClientRects()].map((line) => Math.round(line.top)),
+        ).size,
+      };
+    });
+    expect(target.lines, `texto de una línea en ${mode}`).toBe(1);
+    expect(target.width, `ancho táctil en ${mode}`).toBeGreaterThanOrEqual(44);
+    expect(target.height, `alto táctil en ${mode}`).toBeGreaterThanOrEqual(44);
+  }
+});
 
 test("I4 cierre interrumpido conserva nodo y redirige la pregunta", async ({
   page,

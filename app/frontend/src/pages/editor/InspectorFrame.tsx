@@ -59,8 +59,10 @@ export function InspectorFrame({
     const trigger = openingTrigger.current;
     openingQuestion.current ??= trigger?.dataset.questionOpener;
     const dialog = ref.current;
-    if (!wide && !dialog?.open) dialog?.showModal();
-    heading.current?.focus();
+    if (open) {
+      if (!wide && !dialog?.open) dialog?.showModal();
+      heading.current?.focus();
+    }
     return () => {
       if (dialog?.open) dialog.close();
       requestAnimationFrame(() => {
@@ -95,10 +97,7 @@ export function InspectorFrame({
         }
       });
     };
-  }, [wide]);
-  useLayoutEffect(() => {
-    if (open) heading.current?.focus();
-  }, [open]);
+  }, [wide, open]);
   useEffect(() => {
     function escape(event: KeyboardEvent) {
       if (!open) return;

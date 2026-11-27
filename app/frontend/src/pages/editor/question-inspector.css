@@ -295,8 +295,7 @@
   pointer-events: none;
 }
 .qe-inspector button,
-.qe-inspector-more summary,
-.qe-workspace button.qe-question-link {
+.qe-inspector-more summary {
   min-height: 44px;
 }
 .qe-inspector button,
@@ -333,6 +332,9 @@
 }
 
 @media (max-width: 899px) {
+  .qe-workspace button.qe-question-link {
+    min-height: 44px;
+  }
   .qe-workspace .qe-inspector.qe-inspector-motion {
     --qe-inspector-offset: 100%;
     --qe-inspector-duration: 280ms;
