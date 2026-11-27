@@ -764,7 +764,9 @@ test.describe("Direction C · questionnaire", () => {
           const rows = [
             ...document.querySelectorAll<HTMLElement>(".an-question-row"),
           ];
-          const question = rows[0]!.querySelector("strong")!;
+          const question = rows[0]!.querySelector(
+            ".qe-question-link > span:not([aria-hidden])",
+          )!;
           const q = getComputedStyle(question);
           const visible = (el: Element) =>
             el.checkVisibility() &&

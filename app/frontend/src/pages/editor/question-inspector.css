@@ -27,10 +27,18 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   overflow-wrap: anywhere;
+  font-size: var(--ac-text-body);
+  font-weight: 500;
   line-height: 1.4;
 }
 .qe-workspace .qe-question-link > span[aria-hidden] {
   flex: 0 0 auto;
+}
+@media (max-width: 899px) {
+  .qe-workspace .qe-compact-row.qe-question-link > span:first-child {
+    display: block;
+    overflow: visible;
+  }
 }
 .qe-workspace .an-question-row:has([aria-current="true"]),
 .qe-workspace .qe-editorial-row:has([aria-current="true"]) {

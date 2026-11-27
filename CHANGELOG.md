@@ -16,6 +16,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Datos de la pregunta sin desbordamiento.** El código y el tipo pasan a otra línea cuando no caben juntos en la lista de Organizar, también en pantallas intermedias.
 
+- **Preguntas legibles al abrir el detalle.** Los enlaces de Organizar conservan el tamaño y peso del texto anterior; en móvil el enunciado sigue completo, sin recortarlo a dos líneas.
+
 ### Changed
 
 - **Abrir y recorrer preguntas.** El título subrayado abre el mismo panel en Escribir y Organizar, con opciones, área, participantes y acciones según el estado. Cambiar de tema está junto al tema y Más acciones reúne la configuración, el orden, la selección de grupo y el archivado. La dirección conserva la pregunta; Atrás y Escape vuelven a la lista, y anterior/siguiente respetan los resultados visibles. Organizar distingue Contenido y Respuestas sin cambiar las pestañas. El panel se superpone sin estrechar la lista; presenta pregunta y opciones antes de los datos, con la acción principal y Más acciones al pie. En móvil ocupa toda la pantalla.
