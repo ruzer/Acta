@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { QuestionView } from "@requirements/contracts";
+import { readEditorLocation, writeEditorLocation } from "./editor-location";
 const marker = "questionInspectorEntry";
 function searchWithQuestion(search: string, id?: string) {
   const params = new URLSearchParams(search);
@@ -65,12 +66,23 @@ export function useQuestionInspectorLocation(
     }
   }, [id, question, questions, location, navigate]);
   const open = useCallback(
-    (questionId: string) => {
+    (questionId: string, mode?: number) => {
       setNotice("");
+      const params = new URLSearchParams(
+        searchWithQuestion(location.search, questionId),
+      );
+      const search =
+        mode === undefined
+          ? params.toString()
+          : writeEditorLocation(
+              params,
+              mode,
+              readEditorLocation(params).organize,
+            ).toString();
       void navigate(
         {
           ...location,
-          search: searchWithQuestion(location.search, questionId),
+          search: `?${search}`,
         },
         {
           replace: !!id,

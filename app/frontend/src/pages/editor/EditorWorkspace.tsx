@@ -32,7 +32,7 @@ export type EditorAction =
 export type EditorProps = {
   data: QuestionnaireView;
   openedQuestionId?: string | null;
-  onOpenQuestion?: (id: string) => void;
+  onOpenQuestion?: (id: string, mode?: number) => void;
   onCloseQuestion?: () => void;
   movedQuestion?: { id: string; sectionId: string } | null;
   revealMove?: { id: string; sequence: number } | null;
@@ -222,9 +222,10 @@ export function EditorWorkspace(props: EditorProps) {
     props.openedQuestionId === undefined
       ? localQuestionId
       : props.openedQuestionId;
-  const openQuestion = (id: string) => {
+  const openQuestion = (id: string, nextMode?: number) => {
     setLocalQuestionId(id);
-    props.onOpenQuestion?.(id);
+    if (nextMode !== undefined) updateMode(nextMode);
+    props.onOpenQuestion?.(id, nextMode);
   };
   const closeQuestion = () => {
     setLocalQuestionId(null);
@@ -417,10 +418,7 @@ export function EditorWorkspace(props: EditorProps) {
                       document.getElementById("qe-tab-1")?.focus(),
                     );
                   }}
-                  onInspect={(id) => {
-                    openQuestion(id);
-                    setMode(1);
-                  }}
+                  onInspect={(id) => openQuestion(id, 1)}
                 />
               )}
               {mode === i && i === 0 && (

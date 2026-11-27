@@ -17,6 +17,7 @@ export function InspectorFrame({
   const ref = useRef<HTMLDialogElement>(null),
     heading = useRef<HTMLHeadingElement>(null);
   const openingTrigger = useRef<HTMLElement | null>(null);
+  const openingQuestion = useRef<string | undefined>(undefined);
   const currentQuestion = useRef(questionId);
   useEffect(() => {
     currentQuestion.current = questionId;
@@ -32,6 +33,7 @@ export function InspectorFrame({
     // Keep the original opener across Strict Mode effect replay and resize.
     openingTrigger.current ??= document.activeElement as HTMLElement;
     const trigger = openingTrigger.current;
+    openingQuestion.current ??= trigger?.dataset.questionOpener;
     const dialog = ref.current;
     if (!wide) dialog?.showModal();
     heading.current?.focus();
@@ -44,9 +46,14 @@ export function InspectorFrame({
           (active === document.body || active === trigger) &&
           !document.querySelector("dialog[open]")
         ) {
-          const opener = Array.from(
+          const openers = Array.from(
             document.querySelectorAll<HTMLElement>("[data-question-opener]"),
-          ).find(
+          ).filter((element) => !element.closest("[hidden]"));
+          const originalOpener = openers.find(
+            (element) =>
+              element.dataset.questionOpener === openingQuestion.current,
+          );
+          const currentOpener = openers.find(
             (element) =>
               element.dataset.questionOpener === currentQuestion.current,
           );
@@ -55,7 +62,8 @@ export function InspectorFrame({
             trigger !== document.body &&
             !trigger.closest("[hidden]")
               ? trigger
-              : (opener ??
+              : (originalOpener ??
+                currentOpener ??
                 document.querySelector<HTMLElement>(
                   '.qe-modes [aria-selected="true"]',
                 ));
