@@ -16,7 +16,7 @@ Antes de implementar, el propietario debe aprobar:
 4. Aplicar el nuevo criterio a envíos futuros y correcciones, sin revalidar retrospectivamente ni borrar envíos o decisiones anteriores por el solo cambio de versión.
 5. Qué valor inicial tendrán las invitaciones nuevas: se recomienda el de cada pregunta, mostrado antes de confirmar, con excepción explícita por pregunta cuando se autorice el contrato. Hoy siempre es falso.
 
-Este PR es únicamente documental. Una aprobación del concepto no equivale a autorizar cualquier modificación de contratos o migraciones: la implementación debe delimitar y someter esos cambios al propietario.
+El alcance de este diseño es únicamente documental; incorporarlo al PR consolidado no lo aprueba ni lo implementa. Una aprobación del concepto no equivale a autorizar cualquier modificación de contratos o migraciones: la implementación debe delimitar y someter esos cambios al propietario.
 
 ## Problema y alcance
 
@@ -200,6 +200,6 @@ Estimación relativa: **media-alta**, al menos dos PR funcionales coordinados de
 
 ## Impacto y límites
 
-Ningún archivo de producto se toca en este PR; solo se añade este documento. No se ejecutan actualizaciones de tablas. El trabajo futuro afectaría backend, contratos y pantallas indicadas en el inventario; no se puede prometer que sea solo CSS ni que no requiera coordinación de actualización con forks. En particular, el texto de importación vive en `Exchange.tsx`, archivo personalizado en algunos forks: minimizar el cambio y revisarlo durante la integración correspondiente.
+Esta propuesta se entrega solo como documento y no se implementa en esta tanda. No se ejecutan actualizaciones de tablas. El trabajo futuro afectaría backend, contratos y pantallas indicadas en el inventario; no se puede prometer que sea solo CSS ni que no requiera coordinación de actualización con forks. En particular, el texto de importación vive en `Exchange.tsx`, archivo personalizado en algunos forks: minimizar el cambio y revisarlo durante la integración correspondiente.
 
 No se ha ejecutado la matriz de comportamiento nueva, porque aún no existe. No se acredita capacidad, producción, compatibilidad con clientes externos ni una migración de datos. La evidencia actual es lectura del código y la ejecución de la consulta diagnóstica en cinco proyectos ficticios, descrita arriba.
