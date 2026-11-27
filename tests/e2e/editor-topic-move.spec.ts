@@ -314,8 +314,10 @@ test("Cambiar de tema mueve el grupo completo; un integrante publicado impide mo
     exact: true,
   });
   await expect(
-    dialog.getByText(/Se moverá con sus 1 seguimientos/),
-  ).toContainText(child.title);
+    dialog.getByText(`Se moverá con su único seguimiento: «${child.title}».`, {
+      exact: true,
+    }),
+  ).toBeVisible();
   await dialog.getByLabel("Tema de destino").selectOption(sections[1]!.id);
   await dialog
     .getByRole("button", { name: "Cambiar de tema", exact: true })
