@@ -263,6 +263,9 @@ export function EditorWorkspace(props: EditorProps) {
   const movedQuestion = props.movedQuestion;
   const revealMove = props.revealMove;
   useEffect(() => {
+    if (revealMove) setPreview(false);
+  }, [revealMove]);
+  useEffect(() => {
     if (!revealMove) return;
     const question = data.questions.find((q) => q.id === revealMove.id);
     if (!question || question.sectionId !== movedQuestion?.sectionId) return;

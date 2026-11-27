@@ -136,13 +136,34 @@ for (const count of [50, 300])
     await page
       .getByRole("tab", { name: "Revisar publicación", exact: true })
       .click();
-    await expect(page.getByText(/Para publicarla por separado/)).toBeVisible();
-    await expect(
-      page.getByRole("button", {
-        name: `Publicar: Consulta ${count - 1}`,
-        exact: true,
-      }),
-    ).toBeDisabled();
+    const dependencyMessage =
+      "Para publicarla por separado, publica primero la principal. También puedes seleccionar ambas en Organizar y revisar su publicación conjunta.";
+    // The issue summary and the reason beside the action serve different contexts.
+    const dependencyIssue = page
+      .locator(".qe-issue")
+      .getByText(dependencyMessage, { exact: true });
+    await expect(dependencyIssue).toHaveCount(1);
+    await expect(dependencyIssue).toBeVisible();
+    const publish = page.getByRole("button", {
+      name: `Publicar: Consulta ${count - 1}`,
+      exact: true,
+    });
+    await expect(publish).toHaveAttribute("aria-disabled", "true");
+    await expect(publish).toHaveAccessibleDescription(
+      "Antes de publicar: " + dependencyMessage,
+    );
+    const writes: string[] = [];
+    page.on("request", (request) => {
+      if (request.method() === "POST" && request.url().endsWith("/publish"))
+        writes.push(request.url());
+    });
+    // aria-disabled intentionally remains focusable; send a pointer event to
+    // verify the guard instead of waiting for Playwright to consider it enabled.
+    await publish.click({ force: true });
+    await publish.press("Enter");
+    await publish.press("Space");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    expect(writes).toEqual([]);
     await page
       .getByRole("button", { name: "Revisar publicación conjunta" })
       .click();
