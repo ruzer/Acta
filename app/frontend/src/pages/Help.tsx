@@ -88,6 +88,14 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
           </p>
           <h3>Abrir y recorrer preguntas</h3>
           <p>
+            En una pantalla amplia, el panel se superpone sin estrechar la
+            lista. En móvil ocupa toda la pantalla; Cerrar detalle o Atrás
+            regresan a la lista. La acción principal permanece al pie y Más
+            acciones abre una hoja inferior; Cerrar acciones vuelve al detalle.
+            Con movimiento reducido solo hay fundido y con teclado el cambio es
+            inmediato.
+          </p>
+          <p>
             En Escribir y Organizar, pulsa el título subrayado para abrir la
             pregunta completa, incluidas sus opciones, área y participantes.
             Editar pregunta es el atajo para un borrador. Cambiar de tema está
@@ -229,6 +237,14 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
           </ol>
           <h3>Abrir y recorrer preguntas</h3>
           <p>
+            En una pantalla amplia, el panel se superpone sin estrechar la
+            lista. En móvil ocupa toda la pantalla; Cerrar detalle o Atrás
+            regresan a la lista. La acción principal permanece al pie y Más
+            acciones abre una hoja inferior; Cerrar acciones vuelve al detalle.
+            Con movimiento reducido solo hay fundido y con teclado el cambio es
+            inmediato.
+          </p>
+          <p>
             En Escribir y Organizar, pulsa el título subrayado para abrir la
             pregunta completa, incluidas sus opciones, área y participantes.
             Editar pregunta es el atajo para un borrador. Cambiar de tema está
@@ -358,6 +374,14 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
             </li>
           </ol>
           <h3>Abrir y recorrer preguntas</h3>
+          <p>
+            En una pantalla amplia, el panel se superpone sin estrechar la
+            lista. En móvil ocupa toda la pantalla; Cerrar detalle o Atrás
+            regresan a la lista. La acción principal permanece al pie y Más
+            acciones abre una hoja inferior; Cerrar acciones vuelve al detalle.
+            Con movimiento reducido solo hay fundido y con teclado el cambio es
+            inmediato.
+          </p>
           <p>
             En Escribir y Organizar, pulsa el título subrayado para abrir la
             pregunta completa, incluidas sus opciones, área y participantes.

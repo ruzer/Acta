@@ -19,7 +19,6 @@ import { ReadinessPanel } from "./ReadinessPanel";
 import { Organize } from "./Organize";
 import { QuestionInspector } from "./QuestionInspector";
 import { QuestionOpenButton } from "./QuestionOpenButton";
-import { questionTopicMove } from "./topic-move";
 import { StatusChip } from "../../ui/semantic";
 import { plural } from "../../ui/plural";
 import { ParticipantIcon } from "../ParticipantIcon";
@@ -583,24 +582,20 @@ export function EditorWorkspace(props: EditorProps) {
             </div>
           ))}
         </div>
-        {openedQuestion && (
-          <QuestionInspector
-            {...props}
-            question={openedQuestion}
-            visibleIds={mode === 1 ? organizeIds : writeIds}
-            onNavigate={openQuestion}
-            onClose={closeQuestion}
-            moveReason={questionTopicMove(data, openedQuestion).reason}
-            onSelectGroup={
-              mode === 1
-                ? () => {
-                    selectGroup.current?.(openedQuestion.id);
-                    closeQuestion();
-                  }
-                : undefined
-            }
-          />
-        )}
+        <QuestionInspector
+          {...props}
+          question={openedQuestion ?? null}
+          visibleIds={mode === 1 ? organizeIds : writeIds}
+          onNavigate={openQuestion}
+          onClose={closeQuestion}
+          onSelectGroup={
+            mode === 1
+              ? (id) => {
+                  selectGroup.current?.(id);
+                }
+              : undefined
+          }
+        />
       </div>
     </>
   );

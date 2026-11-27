@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "../../ui";
 import type { QuestionView } from "@requirements/contracts";
 import type { EditorProps } from "./EditorWorkspace";
@@ -16,6 +16,40 @@ export function QuestionInspectorActions({
   part?: "all" | "footer" | "secondary";
 }) {
   const menu = useRef<HTMLDetailsElement>(null);
+  const [wide, setWide] = useState(
+    () =>
+      typeof matchMedia !== "function" ||
+      matchMedia("(min-width:900px)").matches,
+  );
+  const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => {
+    if (part === "secondary") return;
+    const query = window.matchMedia?.("(min-width:900px)");
+    if (!query) return;
+    const update = () => setWide(query.matches);
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, [part]);
+  useEffect(() => {
+    if (wide || !menuOpen) return;
+    const sheet = menu.current?.querySelector<HTMLElement>(
+      ".qe-inspector-more-items",
+    );
+    const focus = (event: FocusEvent) => {
+      if (!menu.current?.open) return;
+      const target = event.target;
+      // The containing native dialog owns the overall trap. While its sheet is
+      // visible, keep focus off controls that the sheet or its scrim cover.
+      if (
+        target instanceof Element &&
+        target.closest(".qe-inspector-motion") &&
+        !sheet?.contains(target)
+      )
+        sheet?.querySelector<HTMLButtonElement>("button")?.focus();
+    };
+    document.addEventListener("focusin", focus);
+    return () => document.removeEventListener("focusin", focus);
+  }, [wide, menuOpen]);
   const actions = inspectorActions(props.data, question);
   if (!actions.primary) return null;
   const labels = {
@@ -32,6 +66,7 @@ export function QuestionInspectorActions({
   function closeMenu() {
     if (menu.current) {
       menu.current.open = false;
+      setMenuOpen(false);
       menu.current.querySelector("summary")?.focus();
     }
   }
@@ -69,11 +104,34 @@ export function QuestionInspectorActions({
           <details
             className="qe-inspector-more"
             ref={menu}
+            onToggle={(event) => {
+              setMenuOpen(event.currentTarget.open);
+              if (!wide && event.currentTarget.open)
+                event.currentTarget
+                  .querySelector<HTMLButtonElement>(".qe-inspector-more-close")
+                  ?.focus();
+            }}
             onKeyDown={(event) => {
               if (event.key === "Escape" && menu.current?.open) {
                 event.preventDefault();
                 event.stopPropagation();
                 closeMenu();
+              }
+              if (event.key === "Tab" && !wide && menu.current?.open) {
+                const buttons = Array.from(
+                  menu.current.querySelectorAll<HTMLButtonElement>(
+                    ".qe-inspector-more-items button:not(:disabled)",
+                  ),
+                );
+                const first = buttons[0],
+                  last = buttons.at(-1);
+                if (event.shiftKey && document.activeElement === first) {
+                  event.preventDefault();
+                  last?.focus();
+                } else if (!event.shiftKey && document.activeElement === last) {
+                  event.preventDefault();
+                  first?.focus();
+                }
               }
             }}
             onClick={(event) => {
@@ -81,7 +139,24 @@ export function QuestionInspectorActions({
             }}
           >
             <summary>Más acciones</summary>
-            <div className="qe-inspector-more-items">
+            <div
+              className="qe-inspector-more-scrim"
+              aria-hidden="true"
+              onClick={closeMenu}
+            />
+            <div
+              className="qe-inspector-more-items"
+              role={wide ? "region" : "dialog"}
+              aria-modal={wide ? undefined : true}
+              aria-label="Más acciones"
+            >
+              <Button
+                className="qe-inspector-more-close"
+                tone="secondary"
+                onClick={closeMenu}
+              >
+                Cerrar acciones
+              </Button>
               {(["up", "down"] as const).map((kind) => (
                 <Button
                   key={kind}

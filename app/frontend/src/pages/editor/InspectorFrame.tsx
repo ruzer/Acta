@@ -4,18 +4,27 @@ import {
   useRef,
   useState,
   type ReactNode,
+  type RefObject,
 } from "react";
 import { Button } from "../../ui";
+import type { InspectorPhase } from "./useInspectorPresence";
+import { useInspectorViewport } from "./useInspectorViewport";
 export function InspectorFrame({
   children,
   onClose,
   questionId,
+  open = true,
+  phase = "open",
+  elementRef,
   navigation,
   footer,
 }: {
   children: ReactNode;
   onClose: () => void;
   questionId?: string;
+  open?: boolean;
+  phase?: InspectorPhase;
+  elementRef?: RefObject<HTMLElement | null>;
   navigation?: ReactNode;
   footer?: ReactNode;
 }) {
@@ -32,7 +41,9 @@ export function InspectorFrame({
   }, [questionId]);
   const openingTrigger = useRef<HTMLElement | null>(null);
   const openingQuestion = useRef<string | undefined>(undefined);
+  const wasOpen = useRef(false);
   const currentQuestion = useRef(questionId);
+  const viewport = useInspectorViewport(wide);
   useEffect(() => {
     currentQuestion.current = questionId;
   }, [questionId]);
@@ -43,16 +54,22 @@ export function InspectorFrame({
     m.addEventListener("change", update);
     return () => m.removeEventListener("change", update);
   }, []);
-  useEffect(() => {
-    // Keep the original opener across Strict Mode effect replay and resize.
-    openingTrigger.current ??= document.activeElement as HTMLElement;
+  useLayoutEffect(() => {
+    // A new opening can interrupt exit without remounting. Keep its opener
+    // through question navigation, Strict Mode effect replay and resize.
+    if (open && !wasOpen.current) {
+      openingTrigger.current = document.activeElement as HTMLElement;
+      openingQuestion.current = openingTrigger.current?.dataset.questionOpener;
+    }
+    wasOpen.current = open;
     const trigger = openingTrigger.current;
-    openingQuestion.current ??= trigger?.dataset.questionOpener;
     const dialog = ref.current;
-    if (!wide) dialog?.showModal();
-    heading.current?.focus();
+    if (open) {
+      if (!wide && !dialog?.open) dialog?.showModal();
+      heading.current?.focus();
+    }
     return () => {
-      dialog?.close();
+      if (dialog?.open) dialog.close();
       requestAnimationFrame(() => {
         // A deferred return must not steal focus from a newer user action.
         const active = document.activeElement;
@@ -85,9 +102,10 @@ export function InspectorFrame({
         }
       });
     };
-  }, [wide]);
+  }, [wide, open]);
   useEffect(() => {
     function escape(event: KeyboardEvent) {
+      if (!open) return;
       if (event.key !== "Escape" || event.defaultPrevented) return;
       if (document.querySelector("dialog[open]")) return;
       event.preventDefault();
@@ -95,7 +113,7 @@ export function InspectorFrame({
     }
     document.addEventListener("keydown", escape);
     return () => document.removeEventListener("keydown", escape);
-  }, [onClose]);
+  }, [onClose, open]);
   const content = (
     <>
       <header className="qe-inspector-head">
@@ -120,19 +138,28 @@ export function InspectorFrame({
   );
   return wide ? (
     <aside
-      className="qe-inspector qe-inspector-overlay"
+      className="qe-inspector qe-inspector-overlay qe-inspector-motion"
       aria-label="Detalle de pregunta"
+      data-phase={phase}
+      inert={!open}
+      ref={elementRef}
     >
       {content}
     </aside>
   ) : (
     <dialog
-      className="qe-inspector qe-inspector-dialog qe-inspector-overlay av-scope"
+      className="qe-inspector qe-inspector-dialog qe-inspector-overlay qe-inspector-motion av-scope"
       aria-label="Detalle de pregunta"
-      ref={ref}
+      data-phase={phase}
+      inert={!open}
+      style={viewport}
+      ref={(element) => {
+        ref.current = element;
+        if (elementRef) elementRef.current = element;
+      }}
       onCancel={(e) => {
         e.preventDefault();
-        onClose();
+        if (open) onClose();
       }}
     >
       {content}

@@ -14,8 +14,10 @@
   text-underline-offset: 0.18em;
   cursor: pointer;
 }
-.qe-workspace button.qe-question-link:hover {
-  text-decoration-thickness: 2px;
+@media (hover: hover) and (pointer: fine) {
+  .qe-workspace button.qe-question-link:hover {
+    text-decoration-thickness: 2px;
+  }
 }
 .qe-workspace button.qe-question-link:focus-visible {
   outline: 2px solid currentColor;
@@ -266,5 +268,152 @@
   }
   .qe-inspector-navigation > button {
     padding-inline: 8px;
+  }
+}
+
+/* Motion extends the shared overlay without changing its geometry. */
+.qe-workspace .qe-inspector.qe-inspector-motion {
+  --qe-inspector-offset: 12px;
+  --qe-inspector-duration: 180ms;
+  animation: none;
+  opacity: 1;
+  transform: none;
+  transition-property: opacity, transform;
+  transition-duration: var(--qe-inspector-duration);
+  transition-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+.qe-workspace .qe-inspector-motion[data-phase="entering"],
+.qe-workspace .qe-inspector-motion[data-phase="closing"] {
+  opacity: 0;
+  transform: translateX(var(--qe-inspector-offset));
+}
+.qe-workspace .qe-inspector-motion[data-phase="entering"] {
+  --qe-inspector-duration: 0ms;
+}
+.qe-workspace .qe-inspector-motion[data-phase="closing"] {
+  --qe-inspector-duration: 120ms;
+  pointer-events: none;
+}
+.qe-inspector button,
+.qe-inspector-more summary {
+  min-height: 44px;
+}
+.qe-inspector button,
+.qe-workspace button.qe-question-link {
+  transition:
+    opacity 100ms,
+    transform 100ms;
+}
+.qe-inspector button:active:not(:disabled):not([aria-disabled="true"]),
+.qe-workspace button.qe-question-link:active {
+  opacity: 0.78;
+  transform: translateY(1px);
+}
+.qe-inspector-more-close {
+  display: none;
+}
+.qe-inspector-more-scrim {
+  display: none;
+}
+
+/* Override only this dialog's global scale/starting-style transition. */
+.qe-workspace dialog.qe-inspector-motion::backdrop {
+  opacity: 1;
+  transition: none;
+}
+@starting-style {
+  .qe-workspace dialog.qe-inspector-motion[open] {
+    opacity: 0;
+    transform: translateX(var(--qe-inspector-offset));
+  }
+  .qe-workspace dialog.qe-inspector-motion[open]::backdrop {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 899px) {
+  .qe-workspace button.qe-question-link {
+    min-height: 44px;
+  }
+  .qe-workspace .qe-inspector.qe-inspector-motion {
+    --qe-inspector-offset: 100%;
+    --qe-inspector-duration: 280ms;
+  }
+  .qe-workspace .qe-inspector-motion[data-phase="entering"] {
+    --qe-inspector-duration: 0ms;
+  }
+  .qe-workspace .qe-inspector-motion[data-phase="closing"] {
+    --qe-inspector-duration: 120ms;
+  }
+  .qe-inspector-footer {
+    position: static;
+  }
+  .qe-inspector-more[open] > .qe-inspector-more-items {
+    position: absolute;
+    inset: auto 0 0;
+    z-index: 2;
+    max-height: 70%;
+    padding: 16px 20px max(16px, env(safe-area-inset-bottom));
+    border: 1px solid var(--ac-line);
+    border-radius: 16px 16px 0 0;
+    background: var(--ac-surface);
+    box-shadow: 0 -8px 32px rgb(18 22 28 / 20%);
+  }
+  .qe-inspector-more[open] > .qe-inspector-more-scrim {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: rgb(18 22 28 / 20%);
+  }
+  .qe-inspector-more-close {
+    display: block;
+  }
+  .qe-inspector-navigation button {
+    min-width: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qe-workspace .qe-inspector.qe-inspector-motion {
+    transform: none;
+    transition: opacity var(--qe-inspector-duration)
+      cubic-bezier(0.32, 0.72, 0, 1) !important;
+  }
+  .qe-inspector button,
+  .qe-workspace button.qe-question-link {
+    transition: opacity 100ms !important;
+  }
+  .qe-inspector button:active:not(:disabled):not([aria-disabled="true"]),
+  .qe-workspace button.qe-question-link:active {
+    transform: none;
+  }
+  @starting-style {
+    .qe-workspace dialog.qe-inspector-motion[open] {
+      transform: none;
+    }
+  }
+}
+:root[data-presentation-keyboard]
+  .qe-workspace
+  .qe-inspector.qe-inspector-motion {
+  transform: none;
+  --qe-inspector-duration: 0ms;
+}
+:root[data-presentation-keyboard] .qe-inspector button,
+:root[data-presentation-keyboard]
+  .qe-inspector
+  button:active:not(:disabled):not([aria-disabled="true"]),
+:root[data-presentation-keyboard] .qe-workspace button.qe-question-link,
+:root[data-presentation-keyboard] .qe-workspace button.qe-question-link:active {
+  transform: none;
+  opacity: 1;
+  transition: none !important;
+}
+@starting-style {
+  :root[data-presentation-keyboard]
+    .qe-workspace
+    dialog.qe-inspector-motion[open] {
+    opacity: 1;
+    transform: none;
   }
 }

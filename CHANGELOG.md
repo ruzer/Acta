@@ -22,7 +22,11 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Fila visible al recorrer páginas.** Anterior y Siguiente muestran la fila de la pregunta abierta también al cruzar una página de Organizar, sin perder la selección ni el foco del panel.
 
+- **Cerrar el detalle sin bloquear la navegación.** La salida del panel libera el foco de inmediato y no lo recupera al cambiar el tamaño de la ventana. Si se abre otra pregunta durante la salida, el foco vuelve a esa nueva apertura. La lista conserva su densidad en escritorio y sus objetivos táctiles en móvil.
+
 ### Changed
+
+- **Movimiento y teclado del panel.** El cierre admite interrupciones y recorrer preguntas conserva el panel sin repetir la entrada. En móvil, Más acciones abre una hoja inferior y el pie se ajusta al teclado. El movimiento reducido usa solo fundido y el teclado evita la animación. Los controles responden brevemente al presionarlos; con movimiento reducido, lo hacen sin desplazarse.
 
 - **Abrir y recorrer preguntas.** El título subrayado abre el mismo panel en Escribir y Organizar, con opciones, área, participantes y acciones según el estado. Cambiar de tema está junto al tema y Más acciones reúne la configuración, el orden, la selección de grupo y el archivado. La dirección conserva la pregunta; Atrás y Escape vuelven a la lista, y anterior/siguiente respetan los resultados visibles. Organizar distingue Contenido y Respuestas sin cambiar las pestañas. El panel se superpone sin estrechar la lista; presenta pregunta y opciones antes de los datos, con la acción principal y Más acciones al pie. En móvil ocupa toda la pantalla.
 
@@ -33,6 +37,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 - **Cambiar de tema desde las acciones.** El diálogo usa el mismo nombre en el editor y la ayuda, permite trasladar grupos completos y explica qué pregunta impide el cambio.
 
 - **Encontrar la pregunta trasladada.** El aviso de cambio de tema ofrece Ver, cierra la vista previa si estaba abierta, enfoca la pregunta en su destino y la resalta brevemente; los filtros de Organizar se conservan. Con movimiento reducido, el resalte no se anima.
+
+- **Dependencias e inventario de licencias actualizados.** NestJS common, core y platform-express pasan a 12.6.0; el cliente S3 de AWS a 3.1176.0; jsdom a 31.0.1; typescript-eslint a 8.74.0 y jest-dom a 8.0.0, compatible con Vitest 5. Se regenera el inventario de terceros junto con el archivo de bloqueo: los cinco PR de actualización omitían ese inventario y fallaban su comprobación de correspondencia.
 
 ## [0.12.0] - 2026-11-24
 
