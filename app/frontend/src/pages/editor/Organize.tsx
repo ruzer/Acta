@@ -102,6 +102,7 @@ export function Organize(
   const [selectionNotice, setSelectionNotice] = useState("");
   const bulkTrigger = useRef<HTMLElement | null>(null);
   const selectionStatus = useRef<HTMLParagraphElement>(null);
+  const list = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(props.organizeContext?.page ?? 0);
   const rememberContext = props.onOrganizeContextChange;
   const synchronizedLocation = useRef(props.organizeLocation);
@@ -254,6 +255,19 @@ export function Organize(
     const index = visibleKey.split("|").indexOf(selected);
     if (index >= 0) setPage(Math.floor(index / 40));
   }, [selected, visibleKey]);
+  const selectedOnPage = selected && pageIds.has(selected) ? selected : null;
+  useEffect(() => {
+    if (!selectedOnPage) return;
+    // Wait for this page's rows to mount, not just for the inspector ID to change.
+    const frame = requestAnimationFrame(() => {
+      const opener = Array.from(
+        list.current?.querySelectorAll<HTMLElement>("[data-question-opener]") ??
+          [],
+      ).find((element) => element.dataset.questionOpener === selectedOnPage);
+      opener?.scrollIntoView?.({ block: "nearest", behavior: "instant" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [selectedOnPage, currentPage, visibleKey]);
   // A questionnaire without questions has nothing to search, filter, fold or
   // select: say how to begin and offer the one action that applies.
   if (!data.questions.length) {
@@ -292,7 +306,7 @@ export function Organize(
     );
   }
   return (
-    <div className="qe-organize an-questionnaire">
+    <div ref={list} className="qe-organize an-questionnaire">
       <section className="qe-compact" aria-label="Preguntas del cuestionario">
         <div className="an-approach">
           <div role="group" aria-label="Enfoque del cuestionario">

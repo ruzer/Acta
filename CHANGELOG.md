@@ -18,6 +18,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Preguntas legibles al abrir el detalle.** Los enlaces de Organizar conservan el tamaño y peso del texto anterior; en móvil el enunciado sigue completo, sin recortarlo a dos líneas.
 
+- **Fila visible al recorrer páginas.** Anterior y Siguiente muestran la fila de la pregunta abierta también al cruzar una página de Organizar, sin perder la selección ni el foco del panel.
+
 ### Changed
 
 - **Movimiento y teclado del panel.** El cierre admite interrupciones y recorrer preguntas conserva el panel sin repetir la entrada. En móvil, Más acciones abre una hoja inferior y el pie se ajusta al teclado. El movimiento reducido usa solo fundido y el teclado evita la animación.

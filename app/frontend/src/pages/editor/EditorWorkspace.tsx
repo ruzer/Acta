@@ -325,7 +325,7 @@ export function EditorWorkspace(props: EditorProps) {
       );
   }, [openedQuestion, mode]);
   useEffect(() => {
-    if (!openedQuestionId) return;
+    if (mode !== 0 || !openedQuestionId) return;
     const frame = requestAnimationFrame(() => {
       const opener = Array.from(
         document.querySelectorAll<HTMLElement>("[data-question-opener]"),
@@ -333,7 +333,7 @@ export function EditorWorkspace(props: EditorProps) {
       opener?.scrollIntoView?.({ block: "nearest", behavior: "instant" });
     });
     return () => cancelAnimationFrame(frame);
-  }, [openedQuestionId, mode, topicOpen, organizeIds]);
+  }, [openedQuestionId, mode, topicOpen]);
   const writeIds = [...data.sections]
     .sort((a, b) => a.order - b.order)
     .flatMap((section) =>
