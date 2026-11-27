@@ -85,6 +85,23 @@ function mount(
   );
   return { user: userEvent.setup(), complete, close, correct, dependency };
 }
+async function expectUnavailableWithoutRequest(
+  button: HTMLElement,
+  user: ReturnType<typeof userEvent.setup>,
+  reason: string,
+) {
+  expect(button).toHaveAttribute("aria-disabled", "true");
+  expect(button).not.toBeDisabled();
+  expect(button).toHaveAccessibleDescription(reason);
+  expect(screen.getByText(reason)).toBeVisible();
+  const requests = vi.mocked(fetch).mock.calls.length;
+  await user.click(button);
+  button.focus();
+  await user.keyboard("{Enter} ");
+  expect(button).toHaveFocus();
+  expect(vi.mocked(fetch).mock.calls).toHaveLength(requests);
+}
+
 it("preview does not confirm; cancel preserves data; result and focus are explicit", async () => {
   const calls: { url: string; body: Record<string, unknown> }[] = [];
   vi.stubGlobal(
@@ -216,9 +233,11 @@ it("a conflict requires another review and keeps the selected operation", async 
     await screen.findByRole("button", { name: "Confirmar 1 pregunta" }),
   );
   expect(await screen.findByRole("alert")).toHaveTextContent(/cambió/);
-  expect(
+  await expectUnavailableWithoutRequest(
     screen.getByRole("button", { name: "Confirmar 1 pregunta" }),
-  ).toBeDisabled();
+    user,
+    "Las preguntas cambiaron. Actualiza y revisa nuevamente el lote.",
+  );
   expect(complete).not.toHaveBeenCalled();
   expect(
     screen.getByRole("button", { name: "Actualizar y revisar nuevamente" }),
@@ -312,9 +331,11 @@ it("blocked preview provides correction and explicit dependency inclusion withou
   );
   const { user, dependency } = mount("PUBLISH");
   await user.click(screen.getByRole("button", { name: "Revisar lote" }));
-  expect(
+  await expectUnavailableWithoutRequest(
     await screen.findByRole("button", { name: "Confirmar 0 preguntas" }),
-  ).toBeDisabled();
+    user,
+    "Resuelve los impedimentos indicados en la revisión antes de confirmar el lote.",
+  );
   expect(
     screen.getByRole("button", { name: `Ir a corregir: ${question.title}` }),
   ).toBeVisible();
@@ -336,7 +357,11 @@ it("area source mode is explicit and changing area never sends unrelated metadat
     }),
   );
   const { user } = mount("ASSIGN_AREA");
-  expect(screen.getByRole("button", { name: "Revisar lote" })).toBeDisabled();
+  await expectUnavailableWithoutRequest(
+    screen.getByRole("button", { name: "Revisar lote" }),
+    user,
+    "Completa los datos del cambio antes de revisar el lote.",
+  );
   await user.selectOptions(
     screen.getByLabelText("Área origen"),
     question.responsibleAreaId,
@@ -372,7 +397,11 @@ it("participants require explicit new-assignment policy and explain existing ass
   const group = screen.getByRole("group", { name: "Participantes a agregar" });
   const checks = within(group).getAllByRole("checkbox");
   await user.click(checks[0]!);
-  expect(screen.getByRole("button", { name: "Revisar lote" })).toBeDisabled();
+  await expectUnavailableWithoutRequest(
+    screen.getByRole("button", { name: "Revisar lote" }),
+    user,
+    "Completa los datos del cambio antes de revisar el lote.",
+  );
   await user.selectOptions(
     screen.getByLabelText("Las nuevas asignaciones serán"),
     "no",

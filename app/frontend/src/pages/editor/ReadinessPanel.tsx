@@ -157,14 +157,30 @@ export function ReadinessPanel(
                   <span>{q.question}</span>
                   <Button
                     tone="secondary"
-                    disabled={issues.some(
-                      (i) =>
-                        i.questionId === q.id &&
-                        (i.level === "ERROR" ||
-                          (!!i.targetId &&
-                            (i.field === "groupParentId" ||
-                              i.field === "condition"))),
-                    )}
+                    unavailable={
+                      issues.some(
+                        (i) =>
+                          i.questionId === q.id &&
+                          (i.level === "ERROR" ||
+                            (!!i.targetId &&
+                              (i.field === "groupParentId" ||
+                                i.field === "condition"))),
+                      ) && {
+                        reason:
+                          "Antes de publicar: " +
+                          issues
+                            .filter(
+                              (i) =>
+                                i.questionId === q.id &&
+                                (i.level === "ERROR" ||
+                                  (!!i.targetId &&
+                                    (i.field === "groupParentId" ||
+                                      i.field === "condition"))),
+                            )
+                            .map((i) => i.message)
+                            .join(" "),
+                      }
+                    }
                     onClick={() => props.onAction("publish", q)}
                     aria-label={"Publicar: " + q.title}
                   >

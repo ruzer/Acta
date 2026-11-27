@@ -14,13 +14,27 @@ El área no asigna personas. Añadir participantes conserva las asignaciones act
 
 ## Componentes
 
+### Acciones no disponibles en el editor
+
+- Editar tema conserva el foco y muestra el motivo si hay preguntas publicadas o archivadas: el nombre y la descripción están protegidos.
+- Con una búsqueda activa, Expandir todos los grupos, Contraer todos los grupos y el control de cada fila explican que todos los grupos ya se muestran desplegados. Limpia la búsqueda para volver a plegarlos. Pulsarlos mientras no están disponibles no cambia el plegado guardado ni la selección.
+- Nueva pregunta y + Agregar pregunta explican la falta de un área activa, también si ya hay preguntas. Pide a la administración de la institución que la active en Administración. Antes de crear una pregunta debe existir un tema.
+- Una pregunta archivada sigue visible para consulta. No muestra una casilla inutilizable: el texto aclara que no se puede seleccionar.
+- En la edición, Tema al que pertenece aparece como texto, no como un selector que parezca editable. Guarda o descarta los cambios y usa Mover a otro tema en las acciones de la pregunta. Se conservan las restricciones actuales de publicación y de grupos; este paso no habilita mover un grupo.
+
+Mover arriba o abajo explica cuándo el tema o la pregunta ya está en un extremo. La paginación avisa si estás en la primera o última página. Publicar muestra los problemas concretos que hay que resolver; revisar un lote pide completar su configuración o actualizar una vista previa que haya cambiado.
+
+En Escribir, los menús de acciones en pantallas pequeñas quedan por encima de la navegación inferior y permiten desplazarse si los motivos no caben; conservan Escape y el retorno del foco.
+
+Estos motivos son visibles y están asociados con sus controles. No cambian los permisos ni las reglas del servidor.
+
 ### Controles no disponibles
 
-`Button`, `Input` y `Select` comparten el estado `unavailable`, que exige un `reason` no vacío. El motivo se muestra como texto y se asocia con `aria-describedby`; no sustituye el nombre del control ni desaparece si hay un error de validación. Para varios controles relacionados, `describedBy` puede señalar un motivo visible común, cuya asociación debe comprobarse en las pruebas.
+`Button`, `Input`, `Select`, `Textarea`, `Checkbox` y `Radio` comparten el estado `unavailable`, que exige un `reason` no vacío. El motivo se muestra como texto y se asocia con `aria-describedby`; no sustituye el nombre del control ni desaparece si hay un error de validación. Para varios controles relacionados, `describedBy` puede señalar un motivo visible común, cuya asociación debe comprobarse en las pruebas.
 
 Un botón no disponible conserva el foco con `aria-disabled` y bloquea clic, Enter, Espacio y el envío del formulario. No añade un contenedor que cambie los selectores directos de menús o tablas. Los campos que puedan habilitarse más adelante mantienen su control nativo bloqueado con el motivo al lado; un valor que nunca cambia en ese contexto utiliza `UnavailableValue` como texto, con etiqueta y explicación.
 
-El puntero normal indica que una acción no está disponible. `aria-busy="true"` reserva el puntero de espera a una operación ocupada. Los usos anteriores de `disabled` se conservan: este cambio no convierte automáticamente todas las restricciones del producto en estados de espera ni supone que se hayan revisado todas las pantallas.
+El puntero normal indica que una acción no está disponible. `aria-busy="true"` reserva el puntero de espera a una operación ocupada. `disabled` exige `aria-busy` explícito y verdadero mientras la operación está ocupada. Las restricciones de datos usan `unavailable` con su motivo; no se admite un bloqueo sin explicación. Los campos de solo lectura que sirven para copiar conservan esa función y requieren `readOnlyReason`, visible y asociado aunque haya un error.
 
 ### Estructura del editor
 
@@ -33,3 +47,8 @@ El puntero normal indica que una acción no está disponible. `aria-busy="true"`
 **VERIFICADO localmente:** tests de selección a 10/50/120/304 preguntas, independencia del inspector, alcance de filtros/páginas, cancelación, conflictos y reintentos. Playwright incluye el recorrido de 304 preguntas y cuatro anchos. Los conteos finales y el estado del gate se mantienen en [Operaciones masivas](BULK-QUESTIONNAIRE-OPERATIONS.md#verificación).
 
 **PENDIENTE / fuera de alcance:** archivado, borrado, reemplazo de participantes, condiciones, prioridad y trazabilidad masivos. No hay nuevos estados de aprobación ni una entidad Questionnaire. Este cambio no crea una release ni modifica la versión de paquetes.
+
+
+La misma regla se aplica en las demás pantallas: la restricción indica qué falta,
+y los estados de espera solo corresponden a una operación real en curso. Consulta
+[los casos de acceso, importación, invitaciones y respuesta](ayuda/SOLUCION-DE-PROBLEMAS.md#una-acción-está-atenuada-o-un-dato-no-se-puede-editar).

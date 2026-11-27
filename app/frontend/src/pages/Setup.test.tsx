@@ -107,13 +107,17 @@ it("recoge el código aunque el enlace se pegue en una pestaña que ya tiene Act
 });
 
 it("no avanza con un código incompleto y muestra el rechazo del servidor", async () => {
-  const { user } = mount({
+  const { user, calls } = mount({
     setupVerify: () => {
       throw new Error("El código de instalación no es válido o caducó.");
     },
   });
   const start = screen.getByRole("button", { name: "Comenzar" });
-  expect(start).toBeDisabled();
+  expect(start).toHaveAttribute("aria-disabled", "true");
+  await user.click(start);
+  start.focus();
+  await user.keyboard("{Enter} ");
+  expect(calls).toHaveLength(0);
   await user.type(screen.getByLabelText("Código de instalación"), code);
   await user.click(start);
   expect(await screen.findByRole("alert")).toHaveTextContent(
@@ -277,7 +281,7 @@ it("si otra persona terminó la instalación primero, deja de ofrecer la guía",
 });
 
 it("con la base de datos sin respuesta no permite crear la instalación", async () => {
-  const { user } = mount({
+  const { user, calls } = mount({
     setupChecks: () => ({ ...checks, database: "unavailable" }),
   });
   await begin(user);
@@ -295,8 +299,13 @@ it("con la base de datos sin respuesta no permite crear la instalación", async 
   await waitFor(() =>
     expect(
       screen.getByRole("button", { name: "Crear instalación" }),
-    ).toBeDisabled(),
+    ).toHaveAttribute("aria-disabled", "true"),
   );
+  const create = screen.getByRole("button", { name: "Crear instalación" });
+  await user.click(create);
+  create.focus();
+  await user.keyboard("{Enter} ");
+  expect(calls.filter(([key]) => key === "setupComplete")).toHaveLength(0);
 });
 
 async function appearanceStep(user: ReturnType<typeof userEvent.setup>) {

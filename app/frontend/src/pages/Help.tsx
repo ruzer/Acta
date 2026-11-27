@@ -80,6 +80,12 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
               sobre todo si compartes la computadora.
             </li>
           </ol>
+          <p>
+            Si una acción está atenuada, lee la explicación junto al control:
+            indica qué falta o si ya estás en la primera o última página. Si hay
+            una operación en curso, espera a que termine. Los enlaces privados y
+            los recordatorios de solo lectura se pueden copiar.
+          </p>
           <h3>Si algo no funciona</h3>
           <ul>
             <li>
@@ -190,6 +196,19 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
           </ol>
           <h3>Si algo no funciona</h3>
           <ul>
+            <li>
+              En el editor, Editar tema explica cuándo el nombre está protegido
+              por preguntas publicadas o archivadas. Con una búsqueda activa,
+              limpia la búsqueda para contraer los grupos. Si falta un área
+              activa, pide a la administración de la institución que la active.
+              Una pregunta archivada se puede consultar, pero no seleccionar. En
+              la edición, el tema se muestra como texto: guarda o descarta tus
+              cambios y usa Mover a otro tema en las acciones de la pregunta.
+              Para importar, elige el archivo y corrige la vista previa. Para
+              crear usuarios en lote, pega y revisa la tabla. Los recordatorios
+              requieren preguntas obligatorias pendientes y el informe requiere
+              una decisión vigente para imprimirse.
+            </li>
             <li>
               <strong>
                 No tienes permiso para administrar la institución.

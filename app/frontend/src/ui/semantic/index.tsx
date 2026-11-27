@@ -1,3 +1,4 @@
+import { Button, type Unavailable } from "../index";
 import { useBarMotion, progressRatio, type BarMemory } from "../useBarMotion";
 import {
   useEffect,
@@ -294,13 +295,15 @@ export function EvidenceFile({
   name,
   size,
   onDownload,
-  disabled = false,
+  unavailable,
+  busy = false,
   description,
 }: {
   name: string;
   size: string;
   onDownload: () => void;
-  disabled?: boolean;
+  unavailable?: Unavailable | false;
+  busy?: boolean;
   description?: string;
 }) {
   const id = useId();
@@ -311,17 +314,27 @@ export function EvidenceFile({
         <strong>{name}</strong>
         <span>{size}</span>
         {description && <span id={id}>{description}</span>}
+        {unavailable && !unavailable.describedBy && (
+          <span id={id + "-reason"}>{unavailable.reason}</span>
+        )}
       </div>
-      <button
+      <Button
         type="button"
         className="button tertiary"
         aria-label={`Descargar ${name}`}
         aria-describedby={description ? id : undefined}
-        disabled={disabled}
+        disabled={busy}
+        aria-busy={busy}
+        unavailable={
+          unavailable && {
+            ...unavailable,
+            describedBy: unavailable.describedBy || id + "-reason",
+          }
+        }
         onClick={onDownload}
       >
         Descargar
-      </button>
+      </Button>
     </div>
   );
 }

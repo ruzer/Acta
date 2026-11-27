@@ -62,7 +62,7 @@ export function ActionForm({
       {children}
       {error && <Alert error>{error}</Alert>}
       {success && <Alert>Operación guardada.</Alert>}
-      <Button disabled={busy} type="submit">
+      <Button disabled={busy} aria-busy={busy} type="submit">
         {busy ? "Guardando…" : label}
       </Button>
     </form>

@@ -29,7 +29,7 @@ export function ExternalInput({
       label={label}
       value={display ?? field.value}
       readOnly
-      hint={externalHint(field)}
+      readOnlyReason={externalHint(field)}
     />
   );
 }

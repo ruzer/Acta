@@ -2,8 +2,16 @@ import { afterEach, expect, it, vi } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
-import { type ComponentProps, createRef } from "react";
-import { Button, Input, Select, UnavailableValue } from "./index";
+import { type ComponentProps, type ComponentType, createRef } from "react";
+import {
+  Button,
+  Input,
+  Select,
+  Textarea,
+  Checkbox,
+  Radio,
+  UnavailableValue,
+} from "./index";
 
 afterEach(cleanup);
 const reason = "Agrega un área activa antes de crear una pregunta.";
@@ -191,4 +199,85 @@ it("el botón sigue siendo hijo directo de una celda y no repite un motivo compa
   );
   expect(screen.getByRole("button")).toHaveAccessibleDescription(reason);
   expect(screen.getAllByText(reason)).toHaveLength(1);
+});
+
+it.each([Button, Input, Select, Textarea, Checkbox, Radio])(
+  "rechaza disabled sin una operación ocupada explícita en %s",
+  (Control) => {
+    // Simula un consumidor JS o props recibidas fuera del control de tipos.
+    const Tested = Control as unknown as ComponentType<Record<string, unknown>>;
+    expect(() => render(<Tested disabled label="Dato" />)).toThrow(/ocupado/);
+  },
+);
+it.each([Input, Textarea])(
+  "exige un motivo para un valor de solo lectura copiable en %s",
+  (Control) => {
+    const Tested = Control as unknown as ComponentType<Record<string, unknown>>;
+    expect(() =>
+      render(<Tested readOnly value="valor" label="Dato" />),
+    ).toThrow(/lectura/);
+  },
+);
+it("el valor de solo lectura conserva selección, motivo y error", async () => {
+  render(
+    <Input
+      label="Enlace"
+      value="https://example.invalid"
+      readOnly
+      readOnlyReason="Copia este enlace; no se puede editar."
+      error="Revisa el destinatario."
+    />,
+  );
+  const input = screen.getByRole("textbox");
+  expect(input).not.toBeDisabled();
+  expect(input).toHaveAccessibleDescription(
+    "Revisa el destinatario. Copia este enlace; no se puede editar.",
+  );
+  await userEvent.click(input);
+  expect(input).toHaveFocus();
+});
+
+it.each([Textarea, Checkbox, Radio])(
+  "exige motivo en campos largos y opciones (%s)",
+  (Control) => {
+    const Tested = Control as unknown as ComponentType<Record<string, unknown>>;
+    expect(() =>
+      render(<Tested label="Dato" unavailable={{ reason: " " }} />),
+    ).toThrow(/motivo/);
+  },
+);
+it.each([Button, Input, Select, Textarea, Checkbox, Radio])(
+  "rechaza declarar deshabilitado un control que ya no está ocupado (%s)",
+  (Control) => {
+    const Tested = Control as unknown as ComponentType<Record<string, unknown>>;
+    expect(() =>
+      render(<Tested label="Dato" disabled aria-busy={false} />),
+    ).toThrow(/ocupado/);
+    expect(() => render(<Tested label="Dato" aria-disabled />)).toThrow(
+      /motivo/,
+    );
+  },
+);
+
+it("Enter desde un campo no envía el formulario mediante una acción no disponible", async () => {
+  const submitted = vi.fn();
+  const clicked = vi.fn();
+  render(
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        submitted();
+      }}
+    >
+      <Input label="Título" defaultValue="Pregunta de prueba" />
+      <Button type="submit" unavailable={{ reason }} onClick={clicked}>
+        Guardar
+      </Button>
+    </form>,
+  );
+  const user = userEvent.setup();
+  await user.click(screen.getByRole("textbox", { name: "Título" }));
+  await user.keyboard("{Enter}");
+  expect(submitted).not.toHaveBeenCalled();
+  expect(clicked).not.toHaveBeenCalled();
 });

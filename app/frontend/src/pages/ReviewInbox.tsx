@@ -169,7 +169,11 @@ export function ReviewInbox({ userId = "" }: { userId?: string }) {
             <div className="actions">
               <Button
                 tone="secondary"
-                disabled={q.isPlaceholderData || q.data.page <= 1}
+                disabled={q.isPlaceholderData}
+                aria-busy={q.isPlaceholderData}
+                unavailable={
+                  q.data.page <= 1 && { reason: "Estás en la primera página." }
+                }
                 onClick={() => {
                   const next = new URLSearchParams(params);
                   next.set("page", String(q.data.page - 1));
@@ -184,9 +188,12 @@ export function ReviewInbox({ userId = "" }: { userId?: string }) {
               </span>
               <Button
                 tone="secondary"
-                disabled={
-                  q.isPlaceholderData ||
-                  q.data.page * q.data.pageSize >= q.data.total
+                disabled={q.isPlaceholderData}
+                aria-busy={q.isPlaceholderData}
+                unavailable={
+                  q.data.page * q.data.pageSize >= q.data.total && {
+                    reason: "No hay más páginas de resultados.",
+                  }
                 }
                 onClick={() => {
                   const next = new URLSearchParams(params);

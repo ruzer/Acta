@@ -36,6 +36,7 @@ import {
   nextParticipantPath,
   SubmittedResponseContent,
 } from "./ParticipantFlow";
+import { evidenceDownloadReason } from "../ui/control-availability";
 import { StatusChip } from "../ui/semantic";
 import { ParticipantIcon } from "./ParticipantIcon";
 import { AnswerControl, answerText } from "./AnswerControl";
@@ -614,7 +615,13 @@ function ResponseEditor({
             <div className="actions">
               <Button
                 tone="secondary"
-                disabled={busy || e.status !== "READY"}
+                disabled={busy}
+                aria-busy={busy}
+                unavailable={
+                  e.status !== "READY" && {
+                    reason: evidenceDownloadReason(e.status),
+                  }
+                }
                 onClick={() => void download(e)}
               >
                 Descargar {e.originalName}
@@ -623,6 +630,7 @@ function ResponseEditor({
                 <Button
                   tone="secondary"
                   disabled={busy}
+                  aria-busy={busy}
                   onClick={() => void remove(e.id)}
                 >
                   Retirar {e.originalName}
@@ -636,6 +644,15 @@ function ResponseEditor({
       <p className="hint">Sin evidencias adjuntas.</p>
     );
   }
+  const pendingFileRestriction = (!!file || !!staged) && {
+    reason:
+      "Adjunta el archivo seleccionado o cancela su selección antes de continuar.",
+  };
+  const applicabilityRestriction = server.question.applicability !==
+    "ENABLED" && {
+    reason:
+      "Esta pregunta depende de una respuesta anterior enviada. Espera a que esté habilitada para continuar.",
+  };
   const saveStatus = (
     <SaveStatus
       saving={saving}
@@ -683,8 +700,10 @@ function ResponseEditor({
         )}
         {server.reviewStatus === "NOT_APPLICABLE" && (
           <Alert>
-            El analista marcó esta pregunta como no aplica. Conservamos tu
-            contenido; para aportar de nuevo debe reabrirla.
+            <span id="not-applicable-reason">
+              El analista marcó esta pregunta como no aplica. Conservamos tu
+              contenido; para aportar de nuevo debe reabrirla.
+            </span>
           </Alert>
         )}
         {server.question.applicability !== "ENABLED" && (
@@ -741,6 +760,7 @@ function ResponseEditor({
                 <Button
                   tone="secondary"
                   disabled={busy}
+                  aria-busy={busy}
                   onClick={() => {
                     void api("getDraft", { projectId, id })
                       .then(setConflict)
@@ -765,6 +785,11 @@ function ResponseEditor({
               <fieldset
                 className="formal-contribution"
                 disabled={server.reviewStatus === "NOT_APPLICABLE"}
+                aria-describedby={
+                  server.reviewStatus === "NOT_APPLICABLE"
+                    ? "not-applicable-reason"
+                    : undefined
+                }
               >
                 <legend className="sr-only">Contenido de la aportación</legend>
                 <AnswerControl
@@ -777,6 +802,7 @@ function ResponseEditor({
                   }}
                   error={fields.answer}
                   disabled={busy}
+                  aria-busy={busy}
                 />
                 <Textarea
                   label="Comentario adicional (opcional)"
@@ -787,6 +813,7 @@ function ResponseEditor({
                   maxLength={10000}
                   error={fields.comment}
                   disabled={busy}
+                  aria-busy={busy}
                 />
                 <details className="participant-disclosure">
                   <summary>Agregar un ejemplo (opcional)</summary>
@@ -798,6 +825,7 @@ function ResponseEditor({
                     error={fields.example}
                     maxLength={10000}
                     disabled={busy}
+                    aria-busy={busy}
                   />
                 </details>
                 <details className="participant-disclosure evidence-section next-participant-evidence">
@@ -823,6 +851,7 @@ function ResponseEditor({
                     accept=".pdf,.docx,.xlsx,.png,.jpg,.jpeg"
                     hint={`PDF, Word, Excel o imagen sin macros ni cifrado. Hasta ${server.evidencePolicy.maxBytes / 1048576} MiB por archivo y ${server.evidencePolicy.maxAttachments} adjuntos.`}
                     disabled={busy}
+                    aria-busy={busy}
                     onChange={(e) => {
                       setFile(e.target.files?.[0] ?? null);
                       setStaged(null);
@@ -834,6 +863,7 @@ function ResponseEditor({
                       <Button
                         tone="secondary"
                         disabled={busy}
+                        aria-busy={busy}
                         onClick={() => void attach()}
                       >
                         Adjuntar al borrador
@@ -841,6 +871,7 @@ function ResponseEditor({
                       <Button
                         tone="secondary"
                         disabled={busy}
+                        aria-busy={busy}
                         onClick={() => {
                           setFile(null);
                           setStaged(null);
@@ -863,11 +894,10 @@ function ResponseEditor({
                 )}
                 <Button
                   className="participant-text-button"
-                  disabled={
-                    busy ||
-                    !!file ||
-                    !!staged ||
-                    server.question.applicability !== "ENABLED"
+                  disabled={busy}
+                  aria-busy={busy}
+                  unavailable={
+                    pendingFileRestriction || applicabilityRestriction
                   }
                   onClick={() => void save("consult")}
                 >
@@ -885,18 +915,19 @@ function ResponseEditor({
                     <div className="actions">
                       <Button
                         tone="secondary"
-                        disabled={busy || !!file || !!staged}
+                        disabled={busy}
+                        aria-busy={busy}
+                        unavailable={pendingFileRestriction}
                         onClick={() => void save("exit")}
                       >
                         Guardar y salir
                       </Button>
                       <Button
                         type="submit"
-                        disabled={
-                          busy ||
-                          !!file ||
-                          !!staged ||
-                          server.question.applicability !== "ENABLED"
+                        disabled={busy}
+                        aria-busy={busy}
+                        unavailable={
+                          pendingFileRestriction || applicabilityRestriction
                         }
                       >
                         Enviar respuesta <ParticipantIcon name="arrow" />
@@ -990,7 +1021,9 @@ function ResponseEditor({
           <div className="actions">
             <Button
               data-autofocus
-              disabled={busy || !!file || !!staged}
+              disabled={busy}
+              aria-busy={busy}
+              unavailable={pendingFileRestriction}
               onClick={() => void saveAndLeave()}
             >
               Guardar y salir
@@ -1001,6 +1034,7 @@ function ResponseEditor({
             <Button
               tone="danger"
               disabled={busy}
+              aria-busy={busy}
               onClick={() => {
                 leaveAttempt.current++;
                 allowNavigation.current = true;

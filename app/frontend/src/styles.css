@@ -80,7 +80,7 @@ button[aria-busy="true"] {
   margin: 0;
   white-space: normal;
 }
-.field input:disabled,
+.field input:disabled:not([type="checkbox"]):not([type="radio"]),
 .field select:disabled,
 .unavailable-value-content {
   background: var(--ac-surface-2);

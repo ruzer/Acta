@@ -9,7 +9,20 @@ import {
 import {
   descriptionIds,
   requireReason,
+  requireAvailability,
+  type ControlAvailability,
+  type ReadOnlyAvailability,
   type Unavailable,
+} from "./control-availability";
+type ControlProps<T extends "button" | "input" | "select" | "textarea"> = Omit<
+  ComponentProps<T>,
+  "disabled" | "aria-disabled" | "aria-busy" | "readOnly"
+> &
+  ControlAvailability;
+export type {
+  ControlAvailability,
+  ReadOnlyAvailability,
+  Unavailable,
 } from "./control-availability";
 export { UnavailableValue } from "./UnavailableValue";
 export function Button({
@@ -19,11 +32,12 @@ export function Button({
   onKeyDown,
   "aria-describedby": describedBy,
   ...p
-}: ComponentProps<"button"> & {
+}: ControlProps<"button"> & {
   tone?: "primary" | "secondary" | "tertiary" | "danger";
   unavailable?: Unavailable | false;
 }) {
   const id = useId();
+  requireAvailability(p);
   requireReason(unavailable);
   const reasonId = unavailable
     ? unavailable.describedBy || id + "-reason"
@@ -34,7 +48,7 @@ export function Button({
         type="button"
         className={"button " + tone}
         {...p}
-        aria-disabled={unavailable ? true : p["aria-disabled"]}
+        aria-disabled={unavailable ? true : undefined}
         aria-describedby={descriptionIds(reasonId, describedBy)}
         onClick={(event) => {
           if (unavailable) {
@@ -113,16 +127,22 @@ export function Input({
   hint,
   error,
   unavailable,
+  readOnlyReason,
   "aria-describedby": describedBy,
   ...p
-}: ComponentProps<"input"> & {
-  label: string;
-  hint?: string;
-  error?: string;
-  unavailable?: Unavailable | false;
-}) {
+}: ControlProps<"input"> &
+  ReadOnlyAvailability & {
+    label: string;
+    hint?: string;
+    error?: string;
+    unavailable?: Unavailable | false;
+  }) {
+  requireAvailability({ ...p, readOnlyReason });
+  const explanation =
+    unavailable ||
+    (p.readOnly && readOnlyReason ? { reason: readOnlyReason } : false);
   return (
-    <Field label={label} hint={hint} error={error} unavailable={unavailable}>
+    <Field label={label} hint={hint} error={error} unavailable={explanation}>
       {(id, d) => (
         <input
           id={id}
@@ -138,7 +158,7 @@ export function Input({
 export function PasswordInput({
   label,
   ...props
-}: Omit<ComponentProps<"input">, "type"> & { label: string }) {
+}: ControlProps<"input"> & ReadOnlyAvailability & { label: string }) {
   const [shown, setShown] = useState(false);
   const action = shown ? "Ocultar contraseña" : "Mostrar contraseña";
   const context =
@@ -168,14 +188,16 @@ export function Select({
   unavailable,
   "aria-describedby": describedBy,
   ...p
-}: ComponentProps<"select"> & {
+}: ControlProps<"select"> & {
   label: string;
   hint?: string;
   error?: string;
   unavailable?: Unavailable | false;
 }) {
+  requireAvailability(p);
+  const explanation = unavailable;
   return (
-    <Field label={label} hint={hint} error={error} unavailable={unavailable}>
+    <Field label={label} hint={hint} error={error} unavailable={explanation}>
       {(id, d) => (
         <select
           id={id}
@@ -192,47 +214,73 @@ export function Textarea({
   label,
   hint,
   error,
+  unavailable,
+  readOnlyReason,
+  "aria-describedby": describedBy,
   ...p
-}: ComponentProps<"textarea"> & {
-  label: string;
-  hint?: string;
-  error?: string;
-}) {
+}: ControlProps<"textarea"> &
+  ReadOnlyAvailability & {
+    label: string;
+    hint?: string;
+    error?: string;
+    unavailable?: Unavailable | false;
+  }) {
+  requireAvailability({ ...p, readOnlyReason });
+  const explanation =
+    unavailable ||
+    (p.readOnly && readOnlyReason ? { reason: readOnlyReason } : false);
   return (
-    <Field label={label} hint={hint} error={error}>
+    <Field label={label} hint={hint} error={error} unavailable={explanation}>
       {(id, d) => (
         <textarea
           id={id}
-          aria-describedby={d}
           aria-invalid={!!error}
           rows={3}
           {...p}
+          disabled={!!unavailable || p.disabled}
+          aria-describedby={descriptionIds(d, describedBy)}
         />
       )}
     </Field>
   );
 }
-export function Checkbox({
+function Choice({
   label,
+  unavailable,
+  type,
+  "aria-describedby": describedBy,
   ...p
-}: ComponentProps<"input"> & { label: string }) {
+}: ControlProps<"input"> & { label: string; type: "checkbox" | "radio" }) {
+  const id = useId();
+  requireAvailability(p);
+  requireReason(unavailable);
+  const reasonId = unavailable
+    ? unavailable.describedBy || id + "-reason"
+    : undefined;
   return (
-    <label className="check">
-      <input type="checkbox" {...p} />
-      <span>{label}</span>
-    </label>
+    <>
+      <label className="check">
+        <input
+          type={type}
+          {...p}
+          disabled={!!unavailable || p.disabled}
+          aria-describedby={descriptionIds(reasonId, describedBy)}
+        />
+        <span>{label}</span>
+      </label>
+      {unavailable && !unavailable.describedBy && (
+        <span id={reasonId} className="hint control-reason">
+          {unavailable.reason}
+        </span>
+      )}
+    </>
   );
 }
-export function Radio({
-  label,
-  ...p
-}: ComponentProps<"input"> & { label: string }) {
-  return (
-    <label className="check">
-      <input type="radio" {...p} />
-      <span>{label}</span>
-    </label>
-  );
+export function Checkbox(p: ControlProps<"input"> & { label: string }) {
+  return <Choice {...p} type="checkbox" />;
+}
+export function Radio(p: ControlProps<"input"> & { label: string }) {
+  return <Choice {...p} type="radio" />;
 }
 export function StatusBadge({ children }: { children: ReactNode }) {
   return <span className="badge">{children}</span>;

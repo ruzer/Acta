@@ -81,6 +81,22 @@ function form(overrides: Partial<ComponentProps<typeof QuestionForm>> = {}) {
   return { user: userEvent.setup(), onSave };
 }
 
+it("el tema fijo de una edición es texto y explica cómo cambiarlo sin aparentar un selector", () => {
+  form();
+  expect(
+    screen.queryByRole("combobox", { name: "Tema al que pertenece" }),
+  ).not.toBeInTheDocument();
+  const value = screen.getByRole("group", { name: "Tema al que pertenece" });
+  expect(value).toHaveTextContent(
+    data.sections.find(
+      (section) => section.id === configuredQuestion.sectionId,
+    )!.title,
+  );
+  expect(value).toHaveAccessibleDescription(
+    "En esta edición no se puede cambiar el tema. Guarda o descarta tus cambios y usa «Mover a otro tema» en las acciones de la pregunta.",
+  );
+});
+
 it("guardar solo la redacción conserva el payload completo de los grupos plegados", async () => {
   const { user, onSave } = form();
   expect(

@@ -14,6 +14,10 @@ import { Organize } from "./Organize";
 import { StatusChip } from "../../ui/semantic";
 import { plural } from "../../ui/plural";
 import { ParticipantIcon } from "../ParticipantIcon";
+import {
+  inactiveAreasReason,
+  protectedTopicReason,
+} from "./unavailable-reasons";
 export type EditorAction =
   "assign" | "publish" | "archive" | "metadata" | "up" | "down" | "move";
 export type EditorProps = {
@@ -101,9 +105,18 @@ export function QuestionActions({
             <Button
               key={kind}
               tone="secondary"
-              disabled={
-                index < 0 ||
-                (kind === "up" ? index === 0 : index === rows.length - 1)
+              unavailable={
+                (index < 0 ||
+                  (kind === "up"
+                    ? index === 0
+                    : index === rows.length - 1)) && {
+                  reason:
+                    index < 0
+                      ? "Esta pregunta no está en la lista que se puede ordenar."
+                      : kind === "up"
+                        ? "Esta pregunta ya está al principio del tema."
+                        : "Esta pregunta ya está al final del tema.",
+                }
               }
               onClick={() => onAction(kind, q)}
             >
@@ -176,9 +189,11 @@ export function TopicActions({
       <div className="qe-menu-items">
         <Button
           tone="secondary"
-          disabled={data.questions.some(
-            (q) => q.sectionId === id && q.publication !== "DRAFT",
-          )}
+          unavailable={
+            data.questions.some(
+              (q) => q.sectionId === id && q.publication !== "DRAFT",
+            ) && { reason: protectedTopicReason }
+          }
           onClick={() => {
             close();
             onTopicAction!("edit", id);
@@ -188,7 +203,11 @@ export function TopicActions({
         </Button>
         <Button
           tone="secondary"
-          disabled={index === 0}
+          unavailable={
+            index === 0 && {
+              reason: "Este tema ya está al principio del cuestionario.",
+            }
+          }
           onClick={() => {
             close();
             onTopicAction!("up", id);
@@ -198,7 +217,11 @@ export function TopicActions({
         </Button>
         <Button
           tone="secondary"
-          disabled={index === rows.length - 1}
+          unavailable={
+            index === rows.length - 1 && {
+              reason: "Este tema ya está al final del cuestionario.",
+            }
+          }
           onClick={() => {
             close();
             onTopicAction!("down", id);
@@ -402,7 +425,7 @@ export function EditorWorkspace(props: EditorProps) {
                       aria-label={s.title}
                     >
                       <header>
-                        <h3>
+                        <h3 aria-level={2}>
                           {foldTopics ? (
                             <button
                               className="qe-topic-toggle"
@@ -458,7 +481,7 @@ export function EditorWorkspace(props: EditorProps) {
                                     )?.title ?? "pregunta no disponible"}
                                   </p>
                                 )}
-                                <h4>{q.question}</h4>
+                                <h4 aria-level={3}>{q.question}</h4>
                                 <div className="qe-row-meta">
                                   <span>{typeLabels[q.type]}</span>
                                   <Publication question={q} />
@@ -469,7 +492,11 @@ export function EditorWorkspace(props: EditorProps) {
                           ))}
                           <Button
                             tone="secondary"
-                            disabled={!data.areas.some((a) => a.active)}
+                            unavailable={
+                              !data.areas.some((a) => a.active) && {
+                                reason: inactiveAreasReason,
+                              }
+                            }
                             onClick={() => onEdit(undefined, s.id)}
                           >
                             + Agregar pregunta

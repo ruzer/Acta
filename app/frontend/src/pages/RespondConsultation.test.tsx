@@ -296,7 +296,12 @@ it("un conflicto al deshacer conserva la marca y no sobrescribe cambios concurre
   expect(
     screen.getByRole("link", { name: "Revisar la pregunta anterior" }),
   ).toHaveAttribute("href", "/projects/p/respond/q");
-  expect(screen.getByRole("button", { name: "Deshacer" })).toBeDisabled();
+  const blockedUndo = screen.getByRole("button", { name: "Deshacer" });
+  expect(blockedUndo).toHaveAttribute("aria-disabled", "true");
+  expect(blockedUndo).toHaveAccessibleDescription(
+    "La respuesta cambió. Abre la pregunta anterior para revisar su estado antes de continuar.",
+  );
+  fireEvent.click(blockedUndo);
   expect(writes()).toHaveLength(2);
   expect(writes()[1]![2]).toMatchObject({ expectedVersion: 1 });
 });

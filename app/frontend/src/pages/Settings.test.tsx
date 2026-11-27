@@ -363,7 +363,11 @@ it("una imagen demasiado grande se rechaza antes de enviarla", async () => {
   expect(await screen.findByText(/demasiado grande/)).toBeVisible();
   expect(
     screen.getByRole("button", { name: "Guardar segundo logotipo" }),
-  ).toBeDisabled();
+  ).toHaveAttribute("aria-disabled", "true");
+  const save = screen.getByRole("button", { name: "Guardar segundo logotipo" });
+  await user.click(save);
+  save.focus();
+  await user.keyboard("{Enter} ");
   expect(upload).not.toHaveBeenCalled();
 });
 

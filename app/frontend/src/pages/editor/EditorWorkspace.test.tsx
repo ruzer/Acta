@@ -210,10 +210,10 @@ it("Revisar explica el alcance conjunto, conserva bloqueo individual y reutiliza
     />,
   );
   await user.click(screen.getByRole("tab", { name: "Revisar publicación" }));
-  expect(screen.getByText(/Para publicarla por separado/)).toBeVisible();
+  expect(screen.getByText(/^Para publicarla por separado/)).toBeVisible();
   expect(
     screen.getByRole("button", { name: "Publicar: Seguimiento" }),
-  ).toBeDisabled();
+  ).toHaveAttribute("aria-disabled", "true");
   await user.click(
     screen.getByRole("button", { name: "Revisar publicación conjunta" }),
   );

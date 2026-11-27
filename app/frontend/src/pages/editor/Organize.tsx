@@ -31,6 +31,11 @@ import {
 } from "./questionnaire-presentation";
 import "../../next-questionnaire.css";
 import { plural } from "../../ui/plural";
+import {
+  inactiveAreasReason,
+  missingTopicReason,
+  searchedGroupsReason,
+} from "./unavailable-reasons";
 function InspectorFrame({
   children,
   onClose,
@@ -447,7 +452,7 @@ export function Organize(
               </Button>
               {data.sections.length > 0 && (
                 <Button
-                  disabled={!hasArea}
+                  unavailable={!hasArea && { reason: inactiveAreasReason }}
                   onClick={() => props.onEdit(undefined, undefined)}
                 >
                   Nueva pregunta
@@ -460,11 +465,8 @@ export function Organize(
             ? "Crea la primera con Nueva pregunta o importa una estructura."
             : "Agrega un tema para crear la primera pregunta o importa una estructura."}
         </EmptyState>
-        {!hasArea && (
-          <p className="hint">
-            Para crear preguntas hace falta al menos un área activa; un
-            administrador puede crearla en Administración.
-          </p>
+        {!hasArea && !data.sections.length && (
+          <p className="hint">{inactiveAreasReason}</p>
         )}
       </div>
     );
@@ -518,8 +520,12 @@ export function Organize(
           </Button>
           <Button
             tone={bulkIds.size ? "secondary" : "primary"}
-            disabled={
-              !data.sections.length || !data.areas.some((a) => a.active)
+            unavailable={
+              !data.sections.length
+                ? { reason: missingTopicReason }
+                : !data.areas.some((a) => a.active) && {
+                    reason: inactiveAreasReason,
+                  }
             }
             onClick={() => props.onEdit(undefined, topic || undefined)}
           >
@@ -646,17 +652,36 @@ export function Organize(
               aria-label="Presentación de grupos"
               aria-describedby={`group-scope-${props.projectId}`}
             >
-              <Button tone="secondary" onClick={() => setCollapsed(new Set())}>
+              <Button
+                tone="secondary"
+                unavailable={
+                  !!search.trim() && {
+                    reason: searchedGroupsReason,
+                    describedBy: `group-search-${props.projectId}`,
+                  }
+                }
+                onClick={() => setCollapsed(new Set())}
+              >
                 Expandir todos los grupos
               </Button>
               <Button
                 tone="secondary"
-                disabled={!!search.trim()}
+                unavailable={
+                  !!search.trim() && {
+                    reason: searchedGroupsReason,
+                    describedBy: `group-search-${props.projectId}`,
+                  }
+                }
                 onClick={() => setCollapsed(new Set(groupIds))}
               >
                 Contraer todos los grupos
               </Button>
             </div>
+            {!!search.trim() && (
+              <p className="hint" id={`group-search-${props.projectId}`}>
+                {searchedGroupsReason}
+              </p>
+            )}
             {/* The scope is worth saying only when it reaches beyond what is on
                 screen; otherwise it stays available to assistive technology. */}
             <p
@@ -713,7 +738,12 @@ export function Organize(
             >
               <Button
                 tone="secondary"
-                disabled={!eligible(pageRows).length}
+                unavailable={
+                  !eligible(pageRows).length && {
+                    reason:
+                      "Esta página no tiene preguntas que se puedan seleccionar.",
+                  }
+                }
                 onClick={() => addSelection(pageRows)}
               >
                 Seleccionar esta página ({eligible(pageRows).length})
@@ -721,7 +751,12 @@ export function Organize(
               <Button
                 tone="secondary"
                 aria-describedby="an-selection-scope"
-                disabled={!eligible(questions).length}
+                unavailable={
+                  !eligible(questions).length && {
+                    reason:
+                      "No hay preguntas que se puedan seleccionar en estos resultados.",
+                  }
+                }
                 onClick={() => addSelection(questions)}
               >
                 Seleccionar todos los resultados ({eligible(questions).length})
@@ -860,35 +895,41 @@ export function Organize(
                         data-approach={approach}
                       >
                         <td className="ac-select-cell">
-                          <label className="qe-row-checkbox">
-                            <input
-                              type="checkbox"
-                              aria-label={`Seleccionar pregunta: ${q.question}`}
-                              checked={bulkIds.has(q.id)}
-                              disabled={q.publication === "ARCHIVED"}
-                              onChange={(e) => {
-                                setBulkIds((previous) => {
-                                  const next = new Set(previous);
-                                  if (e.target.checked) next.add(q.id);
-                                  else next.delete(q.id);
-                                  return next;
-                                });
-                                setSelectionNotice("");
-                              }}
-                            />
-                          </label>
+                          {q.publication !== "ARCHIVED" && (
+                            <label className="qe-row-checkbox">
+                              <input
+                                type="checkbox"
+                                aria-label={`Seleccionar pregunta: ${q.question}`}
+                                checked={bulkIds.has(q.id)}
+                                onChange={(e) => {
+                                  setBulkIds((previous) => {
+                                    const next = new Set(previous);
+                                    if (e.target.checked) next.add(q.id);
+                                    else next.delete(q.id);
+                                    return next;
+                                  });
+                                  setSelectionNotice("");
+                                }}
+                              />
+                            </label>
+                          )}
                         </td>
                         <td className="an-question-content">
                           <div className="an-question-heading">
                             {children && (
-                              <button
+                              <Button
                                 className={`an-collapse${groupCollapsed && !search.trim() ? "" : " an-collapse-open"}`}
                                 aria-expanded={
                                   !groupCollapsed || !!search.trim()
                                 }
                                 title={`${groupCollapsed && !search.trim() ? "Expandir" : "Contraer"} seguimientos`}
                                 aria-label={`${groupCollapsed && !search.trim() ? "Expandir" : "Contraer"} seguimientos de ${q.title}`}
-                                disabled={!!search.trim()}
+                                unavailable={
+                                  !!search.trim() && {
+                                    reason: searchedGroupsReason,
+                                    describedBy: `group-search-${props.projectId}`,
+                                  }
+                                }
                                 onClick={() => {
                                   setCollapsed((previous) => {
                                     const next = new Set(previous);
@@ -899,7 +940,7 @@ export function Organize(
                                 }}
                               >
                                 <ParticipantIcon name="chevron" />
-                              </button>
+                              </Button>
                             )}
                             <button
                               className="qe-compact-row"
@@ -910,6 +951,11 @@ export function Organize(
                               <strong>{q.question}</strong>
                             </button>
                           </div>
+                          {q.publication === "ARCHIVED" && (
+                            <p className="hint">
+                              No se puede seleccionar una pregunta archivada.
+                            </p>
+                          )}
                           <div className="an-question-meta">
                             <span>{q.externalId}</span>
                             <span>{typeLabels[q.type]}</span>
@@ -955,10 +1001,17 @@ export function Organize(
                                 <span className="hint">
                                   Sin aportaciones enviadas
                                 </span>
+                              ) : !props.onOpenContributions ? (
+                                <span>
+                                  {count === 1
+                                    ? "1 aportación"
+                                    : `${count} aportaciones`}{" "}
+                                  · Consulta las respuestas en Revisar
+                                  respuestas.
+                                </span>
                               ) : (
                                 <button
                                   className="an-text-action"
-                                  disabled={!props.onOpenContributions}
                                   onClick={() =>
                                     props.onOpenContributions?.(q.id)
                                   }
@@ -1099,27 +1152,50 @@ export function Organize(
           </EmptyState>
         )}
         {pages > 1 && (
-          <div className="qe-pagination">
-            <Button
-              tone="secondary"
-              disabled={currentPage === 0}
-              onClick={() => setPage(currentPage - 1)}
-            >
-              Página anterior
-            </Button>
-            <Button
-              tone="secondary"
-              disabled={currentPage + 1 >= pages}
-              onClick={() => setPage(currentPage + 1)}
-            >
-              Página siguiente
-            </Button>
-          </div>
+          <>
+            <div className="qe-pagination">
+              <Button
+                tone="secondary"
+                unavailable={
+                  currentPage === 0 && {
+                    reason: "Ya estás en la primera página.",
+                    describedBy: `pagination-reason-${props.projectId}`,
+                  }
+                }
+                onClick={() => setPage(currentPage - 1)}
+              >
+                Página anterior
+              </Button>
+              <Button
+                tone="secondary"
+                unavailable={
+                  currentPage + 1 >= pages && {
+                    reason: "Ya estás en la última página.",
+                    describedBy: `pagination-reason-${props.projectId}`,
+                  }
+                }
+                onClick={() => setPage(currentPage + 1)}
+              >
+                Página siguiente
+              </Button>
+            </div>
+            {(currentPage === 0 || currentPage + 1 >= pages) && (
+              <p className="hint" id={`pagination-reason-${props.projectId}`}>
+                {currentPage === 0
+                  ? "Ya estás en la primera página."
+                  : "Ya estás en la última página."}
+              </p>
+            )}
+          </>
         )}
         {topic && (
           <Button
             tone="secondary"
-            disabled={!data.areas.some((a) => a.active)}
+            unavailable={
+              !data.areas.some((a) => a.active) && {
+                reason: inactiveAreasReason,
+              }
+            }
             onClick={() => props.onEdit(undefined, topic)}
           >
             + Agregar pregunta

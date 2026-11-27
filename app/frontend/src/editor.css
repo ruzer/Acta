@@ -650,3 +650,16 @@
 .qe-topic > div > .hint {
   margin-block: 12px;
 }
+
+/* Explanations can make these menus taller than the space below the trigger. */
+@media (max-width: 759px) {
+  .qe-topic .qe-menu > .qe-menu-items {
+    position: fixed;
+    inset-inline: 12px;
+    bottom: calc(80px + env(safe-area-inset-bottom));
+    z-index: 21;
+    max-height: calc(100dvh - 104px - env(safe-area-inset-bottom));
+    min-width: 0;
+    overflow-y: auto;
+  }
+}

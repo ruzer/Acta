@@ -469,13 +469,17 @@ export function Editor() {
               );
             }}
           >
+            <p id="move-topic-reason" className="hint">
+              Selecciona un tema de destino distinto del actual.
+            </p>
             <Select
               label="Tema de destino"
               name="sectionId"
               required
               defaultValue=""
+              hint="Elige otro tema para mover esta pregunta."
             >
-              <option value="" disabled>
+              <option value="" disabled aria-describedby="move-topic-reason">
                 Selecciona un tema
               </option>
               {data.sections
@@ -581,6 +585,7 @@ export function Editor() {
               </p>
               <Button
                 disabled={busy}
+                aria-busy={busy}
                 tone={action.kind === "archive" ? "danger" : "primary"}
                 onClick={() =>
                   void command(action.kind as "publish" | "archive", action.q)

@@ -10,6 +10,10 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Controles no disponibles con motivo.** Los componentes compartidos admiten una explicación visible asociada al control; los botones conservan el foco sin ejecutar la acción. El puntero de espera se reserva a una operación ocupada y los valores fijos pueden presentarse como texto.
 
+- **Motivos claros en el editor.** Los temas protegidos, la búsqueda que mantiene grupos desplegados y la falta de áreas activas explican por qué una acción no está disponible y cómo continuar. Las preguntas archivadas no ofrecen selección y el tema fijo de la edición se muestra como texto con su alternativa.
+
+- **Motivos en todas las pantallas.** Las restricciones de formularios, selecciones, descargas y navegación muestran su causa; los enlaces y textos de solo lectura conservan la copia. Los estados de espera se distinguen de los bloqueos y el editor mantiene una jerarquía accesible de encabezados.
+
 ## [0.12.0] - 2026-11-24
 
 Seguimiento de participación, plazos, autoguardado, plantillas y ayuda para el piloto,

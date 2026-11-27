@@ -29,6 +29,31 @@ const docs = () =>
     path: join(folder, name),
     text: read(join(folder, name)),
   }));
+
+it("los motivos del editor y la forma de continuar coinciden en ayuda y guías", () => {
+  for (const path of [
+    "app/frontend/src/pages/Help.tsx",
+    "docs/ayuda/SOLUCION-DE-PROBLEMAS.md",
+    "docs/QUESTIONNAIRE-EDITOR-INTEGRATION.md",
+    "README.md",
+  ]) {
+    const content = compact(read(path));
+    for (const text of [
+      "Editar tema",
+      "búsqueda",
+      "área activa",
+      "pregunta archivada",
+      "Mover a otro tema",
+    ])
+      expect(content, `${path}: ${text}`).toContain(text);
+  }
+  for (const message of [
+    "Su nombre y descripción están protegidos porque el tema tiene preguntas publicadas o archivadas.",
+    "Con una búsqueda activa se muestran todos los grupos desplegados. Limpia la búsqueda para contraerlos.",
+    "Para crear preguntas hace falta al menos un área activa. Pide a la administración de la institución que la active en Administración.",
+  ])
+    expect(code).toContain(message);
+});
 const links = (text: string) =>
   [...text.matchAll(/\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g)].map(
     (m) => m[1],
@@ -289,5 +314,17 @@ it("la ayuda y la guía ubican el plazo disponible por proyecto en Hola y permit
     expect(text, path).toContain(
       "Puedes seguir respondiendo después del plazo",
     );
+  }
+});
+
+it("la ayuda explica los controles no disponibles y conserva la copia de valores de solo lectura", () => {
+  for (const file of [
+    "app/frontend/src/pages/Help.tsx",
+    "docs/ayuda/SOLUCION-DE-PROBLEMAS.md",
+  ]) {
+    const text = compact(read(file));
+    expect(text).toContain("primera o última página");
+    expect(text).toContain("operación en curso");
+    expect(text).toContain("copiar");
   }
 });

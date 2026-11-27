@@ -19,9 +19,11 @@ import {
   Input,
   Select,
   Textarea,
+  UnavailableValue,
 } from "../ui";
 import { ApiFailure } from "../api";
 import { nextQuestionId, suggestTitle } from "./question-suggestions";
+import { fixedQuestionTopicReason } from "./editor/unavailable-reasons";
 
 const typeDescriptions: Record<QuestionInput["type"], string> = {
   YES_NO: "El participante elige entre sí y no.",
@@ -331,11 +333,16 @@ export function QuestionForm({
           <h2 id={titleId}>
             {initial ? "Editar pregunta" : "Agregar pregunta al cuestionario"}
           </h2>
-          <Button tone="secondary" disabled={busy} onClick={cancel}>
+          <Button
+            tone="secondary"
+            disabled={busy}
+            aria-busy={busy}
+            onClick={cancel}
+          >
             Cerrar
           </Button>
         </header>
-        <fieldset disabled={busy}>
+        <fieldset disabled={busy} aria-busy={busy}>
           <legend className="sr-only">Contenido de la pregunta</legend>
           <div className="next-authoring-prompt">
             <Textarea
@@ -588,37 +595,57 @@ export function QuestionForm({
             ))}
           </fieldset>
         )}
-        <fieldset disabled={busy} className="ac-authoring-placement">
+        <fieldset
+          disabled={busy}
+          aria-busy={busy}
+          className="ac-authoring-placement"
+        >
           <legend>Ubicación y obligatoriedad</legend>
           <div className="next-authoring-context">
-            <Select
-              label="Tema al que pertenece"
-              error={fieldError("sectionId")}
-              name="sectionId"
-              disabled={!!initial}
-              value={value.sectionId}
-              required
-              onChange={(e) =>
-                patch({
-                  sectionId: e.target.value,
-                  order:
-                    e.target.value === initial?.sectionId
-                      ? initial.order
-                      : Math.max(
-                          0,
-                          ...data.questions
-                            .filter((q) => q.sectionId === e.target.value)
-                            .map((q) => q.order),
-                        ) + 1,
-                })
-              }
-            >
-              {data.sections.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.title}
-                </option>
-              ))}
-            </Select>
+            {initial ? (
+              <div>
+                <UnavailableValue
+                  label="Tema al que pertenece"
+                  value={
+                    data.sections.find(
+                      (section) => section.id === value.sectionId,
+                    )?.title || "Tema no disponible"
+                  }
+                  reason={fixedQuestionTopicReason}
+                />
+                {fieldError("sectionId") && (
+                  <p className="field-error" role="alert">
+                    {fieldError("sectionId")}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <Select
+                label="Tema al que pertenece"
+                error={fieldError("sectionId")}
+                name="sectionId"
+                value={value.sectionId}
+                required
+                onChange={(e) =>
+                  patch({
+                    sectionId: e.target.value,
+                    order:
+                      Math.max(
+                        0,
+                        ...data.questions
+                          .filter((q) => q.sectionId === e.target.value)
+                          .map((q) => q.order),
+                      ) + 1,
+                  })
+                }
+              >
+                {data.sections.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.title}
+                  </option>
+                ))}
+              </Select>
+            )}
             <Checkbox
               label="Pregunta obligatoria"
               name="required"
@@ -627,7 +654,11 @@ export function QuestionForm({
             />
           </div>
         </fieldset>
-        <fieldset disabled={busy} className="next-authoring-identification">
+        <fieldset
+          disabled={busy}
+          aria-busy={busy}
+          className="next-authoring-identification"
+        >
           <legend>Identificación de la pregunta</legend>
           <p className="hint">
             {initial
@@ -641,6 +672,7 @@ export function QuestionForm({
               name="externalId"
               value={value.externalId}
               readOnly={!!initial}
+              readOnlyReason="El identificador se conserva para mantener las referencias a esta pregunta."
               error={fieldError("externalId")}
               onChange={(e) => {
                 setIdAuto(false);
@@ -1050,10 +1082,15 @@ export function QuestionForm({
           <span className="hint" role="status">
             {dirty ? "Cambios sin guardar" : "Sin cambios pendientes"}
           </span>
-          <Button tone="secondary" disabled={busy} onClick={cancel}>
+          <Button
+            tone="secondary"
+            disabled={busy}
+            aria-busy={busy}
+            onClick={cancel}
+          >
             Cancelar
           </Button>
-          <Button type="submit" disabled={busy}>
+          <Button type="submit" disabled={busy} aria-busy={busy}>
             {busy
               ? "Guardando pregunta…"
               : initial

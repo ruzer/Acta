@@ -116,7 +116,7 @@ it.each([12, 54, 304])(
     ).toHaveAttribute("aria-expanded", "true");
     if (count > 40) {
       const next = screen.getByRole("button", { name: "Página siguiente" });
-      while (!next.hasAttribute("disabled")) await user.click(next);
+      while (next.getAttribute("aria-disabled") !== "true") await user.click(next);
     }
     expect(
       screen.getByRole("checkbox", {
@@ -144,10 +144,10 @@ it("buscar conserva los seguimientos visibles y explica por qué no se pliegan",
   expect(screen.getAllByRole("checkbox")).toHaveLength(12);
   expect(
     screen.getByRole("button", { name: "Contraer todos los grupos" }),
-  ).toBeDisabled();
+  ).toHaveAttribute("aria-disabled", "true");
   expect(
     screen.getByRole("button", { name: "Contraer seguimientos de Pregunta 0" }),
-  ).toBeDisabled();
+  ).toHaveAttribute("aria-disabled", "true");
   expect(
     screen.getByText(
       "La búsqueda muestra también seguimientos de grupos plegados.",
@@ -163,10 +163,13 @@ it("buscar conserva los seguimientos visibles y explica por qué no se pliegan",
   expect(search).toHaveValue("Consulta de ejemplo");
   expect(child).toBeChecked();
   await user.clear(search);
-  expect(screen.getAllByRole("checkbox")).toHaveLength(12);
+  expect(screen.getAllByRole("checkbox")).toHaveLength(11);
   expect(
     screen.getByRole("button", { name: "Contraer todos los grupos" }),
-  ).toBeEnabled();
+  ).not.toHaveAttribute("aria-disabled", "true");
+  expect(
+    screen.getByRole("button", { name: "Expandir seguimientos de Pregunta 0" }),
+  ).toHaveAttribute("aria-expanded", "false");
 });
 
 it("Organizar conserva plegado y selección al cambiar de modo y volver", async () => {
@@ -519,7 +522,9 @@ it("un cuestionario vacío sin áreas activas explica por qué no se puede crear
       }}
     />,
   );
-  expect(screen.getByRole("button", { name: "Nueva pregunta" })).toBeDisabled();
+  expect(
+    screen.getByRole("button", { name: "Nueva pregunta" }),
+  ).toHaveAttribute("aria-disabled", "true");
   expect(screen.getByText(/hace falta al menos un área activa/)).toBeVisible();
 });
 it("una búsqueda sin coincidencias conserva el mensaje de filtros, sin fingir un cuestionario vacío", async () => {
