@@ -240,12 +240,13 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
               Una pregunta archivada se puede consultar, pero no seleccionar. En
               la edición de un borrador, elige Tema al que pertenece antes de
               guardar o usa Cambiar de tema. Se mueve el grupo completo al final
-              del destino. Si una pregunta del grupo no está en borrador, se
-              muestra su nombre y el tema queda fijo. Cambia el tema y el
-              vínculo de seguimiento en guardados separados. Después, Ver lleva
-              a la pregunta en su nuevo lugar. Para importar, elige el archivo y
-              corrige la vista previa. Para crear usuarios en lote, pega y
-              revisa la tabla. Los recordatorios requieren preguntas
+              del destino. Por ejemplo: Se moverá con su único seguimiento:
+              «Detalle adicional». Si una pregunta del grupo no está en
+              borrador, se muestra su nombre y el tema queda fijo. Cambia el
+              tema y el vínculo de seguimiento en guardados separados. Después,
+              Ver lleva a la pregunta en su nuevo lugar. Para importar, elige el
+              archivo y corrige la vista previa. Para crear usuarios en lote,
+              pega y revisa la tabla. Los recordatorios requieren preguntas
               obligatorias pendientes y el informe requiere una decisión vigente
               para imprimirse.
             </li>

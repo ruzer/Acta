@@ -362,3 +362,16 @@ it("la ayuda describe apertura, acciones y recorrido del panel compartido", () =
       expect(text, path).toContain(label);
   }
 });
+
+it("la ayuda muestra un ejemplo de traslado con un solo seguimiento", () => {
+  for (const path of [
+    "README.md",
+    "docs/QUESTIONNAIRE-EDITOR-INTEGRATION.md",
+    "docs/ayuda/SOLUCION-DE-PROBLEMAS.md",
+    "app/frontend/src/pages/Help.tsx",
+  ]) {
+    const text = compact(read(path));
+    expect(text, path).toContain("Se moverá con su único seguimiento:");
+    expect(text, path).toContain("«Detalle adicional»");
+  }
+});

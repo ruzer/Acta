@@ -189,3 +189,36 @@ it("un conflicto simultáneo se muestra sin anunciar un movimiento inexistente",
   );
   expect(done).not.toHaveBeenCalled();
 });
+
+it.each([
+  {
+    question: root,
+    count: 1,
+    notice: `Se moverá con su único seguimiento: «${child.title}».`,
+  },
+  {
+    question: child,
+    count: 1,
+    notice: `Se moverá con su pregunta principal «${root.title}» y su único seguimiento: «${child.title}».`,
+  },
+  {
+    question: root,
+    count: 2,
+    notice: `Se moverá con sus 2 seguimientos: «${child.title}», «${nested.title}».`,
+  },
+  {
+    question: child,
+    count: 2,
+    notice: `Se moverá con su pregunta principal «${root.title}» y sus 2 seguimientos: «${child.title}», «${nested.title}».`,
+  },
+])(
+  "el aviso de $question.id describe $count seguimientos con sus nombres y conserva el grupo",
+  ({ question, count, notice }) => {
+    const family = count === 1 ? [root, child] : [root, child, nested];
+    const result = questionTopicMove({ ...data, questions: family }, question);
+    expect(result.notice).toBe(notice);
+    expect(result.family.map((member) => member.id)).toEqual(
+      family.map((member) => member.id),
+    );
+  },
+);
