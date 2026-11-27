@@ -90,7 +90,7 @@ it("Ver cierra Vista previa para mostrar y enfocar la pregunta trasladada", asyn
   };
   const { rerender } = render(<EditorWorkspace {...props} />);
   await userEvent.click(
-    screen.getByRole("button", { name: "Vista previa", exact: true }),
+    screen.getByRole("button", { name: "Vista previa" }),
   );
   expect(screen.getByRole("region", { name: "Vista previa" })).toBeVisible();
   const revealMove = { id: target.id, sequence: 1 };
@@ -101,7 +101,7 @@ it("Ver cierra Vista previa para mostrar y enfocar la pregunta trasladada", asyn
     screen.queryByRole("region", { name: "Vista previa" }),
   ).not.toBeInTheDocument();
   await userEvent.click(
-    screen.getByRole("button", { name: "Vista previa", exact: true }),
+    screen.getByRole("button", { name: "Vista previa" }),
   );
   rerender(
     <EditorWorkspace {...props} data={{ ...data }} revealMove={revealMove} />,
