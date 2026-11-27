@@ -122,7 +122,7 @@ it("Editar ejecuta la acción y retira el panel inmediatamente; la principal tie
   const panel = screen.getByRole("complementary");
   expect(panel.querySelector(".qe-inspector-footer .primary")).not.toBeNull();
   fireEvent.click(
-    within(panel).getByRole("button", { name: "Editar pregunta", exact: true }),
+    within(panel).getByRole("button", { name: "Editar pregunta" }),
   );
   expect(action).toHaveBeenCalledWith(first);
   expect(panel).not.toBeInTheDocument();
@@ -185,7 +185,6 @@ it("la hoja móvil mantiene el foco en sus acciones y Escape vuelve al detalle",
   expect(close).toHaveFocus();
   const archive = within(sheet).getByRole("button", {
     name: "Archivar",
-    exact: true,
   });
   archive.focus();
   fireEvent.keyDown(archive, { key: "Tab" });
