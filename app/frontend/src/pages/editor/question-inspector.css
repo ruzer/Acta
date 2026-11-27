@@ -1,0 +1,110 @@
+.qe-workspace button.qe-question-link {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.25rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font: inherit;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  cursor: pointer;
+}
+.qe-workspace button.qe-question-link:hover {
+  text-decoration-thickness: 2px;
+}
+.qe-workspace button.qe-question-link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+.qe-workspace button.qe-question-link[aria-current="true"] {
+  font-weight: 700;
+}
+.qe-inspector .qe-question-help {
+  white-space: pre-wrap;
+}
+.qe-question-facts dd {
+  margin: 0.25rem 0 1rem;
+}
+.qe-question-facts dd button {
+  display: block;
+  margin-top: 0.5rem;
+}
+.qe-inspector-actions {
+  display: grid;
+  gap: 0.75rem;
+}
+.qe-inspector-navigation {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.qe-inspector-more-items {
+  display: grid;
+  gap: 0.5rem;
+  max-height: min(45dvh, 24rem);
+  overflow: auto;
+  padding: 0.5rem;
+}
+.qe-inspector-more summary {
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.qe-workspace-content {
+  min-width: 0;
+}
+.qe-inspector .qe-question-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.qe-workspace .qe-inspector-dialog {
+  width: min(456px, calc(100% - 24px));
+}
+.qe-inspector-navigation {
+  flex-wrap: wrap;
+}
+.qe-inspector-navigation p[role="status"] {
+  flex: 1;
+  text-align: center;
+}
+.qe-inspector-navigation > .hint {
+  flex-basis: 100%;
+}
+@media (min-width: 1280px) {
+  .qe-workspace-inspecting {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 456px;
+    align-items: start;
+    gap: 20px;
+  }
+}
+
+.qe-workspace .qe-compact-row.qe-question-link > span:first-child {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+.qe-workspace .qe-question-link > span[aria-hidden] {
+  flex: 0 0 auto;
+}
+.qe-workspace .an-question-row:has([aria-current="true"]),
+.qe-workspace .qe-editorial-row:has([aria-current="true"]) {
+  background: var(--ac-accent-weak);
+}
+.qe-inspector-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+.qe-inspector .qe-question-text {
+  font-size: 1.12rem;
+  line-height: 1.5;
+}
