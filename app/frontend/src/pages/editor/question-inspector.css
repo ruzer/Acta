@@ -14,15 +14,14 @@
   text-underline-offset: 0.18em;
   cursor: pointer;
 }
-.qe-workspace button.qe-question-link:hover {
-  text-decoration-thickness: 2px;
+@media (hover: hover) and (pointer: fine) {
+  .qe-workspace button.qe-question-link:hover {
+    text-decoration-thickness: 2px;
+  }
 }
 .qe-workspace button.qe-question-link:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 3px;
-}
-.qe-workspace button.qe-question-link[aria-current="true"] {
-  font-weight: 700;
 }
 .qe-inspector .qe-question-help {
   white-space: pre-wrap;
@@ -76,14 +75,6 @@
 .qe-inspector-navigation > .hint {
   flex-basis: 100%;
 }
-@media (min-width: 1280px) {
-  .qe-workspace-inspecting {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 456px;
-    align-items: start;
-    gap: 20px;
-  }
-}
 
 .qe-workspace .qe-compact-row.qe-question-link > span:first-child {
   display: -webkit-box;
@@ -107,4 +98,190 @@
 .qe-inspector .qe-question-text {
   font-size: 1.12rem;
   line-height: 1.5;
+}
+
+/* Always overlay: the list keeps the same width and line wrapping. The one
+   breakpoint agrees with InspectorFrame; it is independent of table layout. */
+.qe-workspace .qe-inspector.qe-inspector-motion {
+  --qe-inspector-offset: 12px;
+  position: fixed;
+  inset: 24px 24px 24px auto;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  width: 456px;
+  max-width: none;
+  height: calc(100dvh - 48px);
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--ac-surface);
+  box-shadow: var(--ac-shadow-dialog);
+  animation: none;
+  opacity: 1;
+  transform: none;
+  transition-property: opacity, transform;
+  transition-duration: 180ms;
+  transition-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+.qe-workspace .qe-inspector-motion[data-phase="entering"],
+.qe-workspace .qe-inspector-motion[data-phase="closing"] {
+  opacity: 0;
+  transform: translateX(var(--qe-inspector-offset));
+}
+.qe-workspace .qe-inspector-motion[data-phase="entering"] {
+  transition-duration: 0ms;
+}
+.qe-workspace .qe-inspector-motion[data-phase="closing"] {
+  transition-duration: 120ms;
+  pointer-events: none;
+}
+.qe-inspector-motion > .qe-inspector-head {
+  flex: 0 0 auto;
+  align-items: center;
+  margin: 0;
+  padding: 16px 20px;
+}
+.qe-inspector-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 20px;
+}
+.qe-inspector-footer {
+  flex: 0 0 auto;
+  padding: 12px 20px;
+  border-top: 1px solid var(--ac-line);
+  background: var(--ac-surface);
+}
+.qe-inspector-footer:empty {
+  display: none;
+}
+.qe-inspector-footer .qe-inspector-primary > button {
+  width: 100%;
+}
+.qe-inspector button,
+.qe-workspace button.qe-question-link {
+  min-height: 44px;
+}
+.qe-inspector button,
+.qe-workspace button.qe-question-link {
+  transition:
+    opacity 100ms,
+    transform 100ms;
+}
+.qe-inspector button:active:not(:disabled):not([aria-disabled="true"]),
+.qe-workspace button.qe-question-link:active {
+  opacity: 0.78;
+  transform: translateY(1px);
+}
+.qe-inspector-more-close {
+  display: none;
+}
+.qe-inspector-more-scrim {
+  display: none;
+}
+
+/* Override only this dialog's global scale/starting-style transition. */
+.qe-workspace dialog.qe-inspector-motion::backdrop {
+  opacity: 1;
+  transition: none;
+}
+@starting-style {
+  .qe-workspace dialog.qe-inspector-motion[open] {
+    opacity: 0;
+    transform: translateX(var(--qe-inspector-offset));
+  }
+  .qe-workspace dialog.qe-inspector-motion[open]::backdrop {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 899px) {
+  .qe-workspace .qe-inspector.qe-inspector-motion {
+    --qe-inspector-offset: 100%;
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    transition-duration: 280ms;
+  }
+  .qe-workspace .qe-inspector-motion[data-phase="entering"] {
+    transition-duration: 0ms;
+  }
+  .qe-workspace .qe-inspector-motion[data-phase="closing"] {
+    transition-duration: 120ms;
+  }
+  .qe-inspector-motion > .qe-inspector-head {
+    padding-top: max(12px, env(safe-area-inset-top));
+  }
+  .qe-inspector-footer {
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+  .qe-inspector-more[open] > .qe-inspector-more-items {
+    position: absolute;
+    inset: auto 0 0;
+    z-index: 2;
+    max-height: 70%;
+    padding: 16px 20px max(16px, env(safe-area-inset-bottom));
+    border: 1px solid var(--ac-line);
+    border-radius: 16px 16px 0 0;
+    background: var(--ac-surface);
+    box-shadow: 0 -8px 32px rgb(18 22 28 / 20%);
+  }
+  .qe-inspector-more[open] > .qe-inspector-more-scrim {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: rgb(18 22 28 / 20%);
+  }
+  .qe-inspector-more-close {
+    display: block;
+  }
+  .qe-inspector-navigation button {
+    min-width: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qe-workspace .qe-inspector.qe-inspector-motion {
+    transform: none;
+    transition-property: opacity;
+  }
+  .qe-inspector button:active:not(:disabled):not([aria-disabled="true"]),
+  .qe-workspace button.qe-question-link:active {
+    transform: none;
+  }
+  @starting-style {
+    .qe-workspace dialog.qe-inspector-motion[open] {
+      transform: none;
+    }
+  }
+}
+:root[data-presentation-keyboard]
+  .qe-workspace
+  .qe-inspector.qe-inspector-motion {
+  transform: none;
+  transition-duration: 0ms;
+}
+:root[data-presentation-keyboard] .qe-inspector button,
+:root[data-presentation-keyboard]
+  .qe-inspector
+  button:active:not(:disabled):not([aria-disabled="true"]),
+:root[data-presentation-keyboard] .qe-workspace button.qe-question-link,
+:root[data-presentation-keyboard] .qe-workspace button.qe-question-link:active {
+  transform: none;
+  opacity: 1;
+  transition: none;
+}
+@starting-style {
+  :root[data-presentation-keyboard]
+    .qe-workspace
+    dialog.qe-inspector-motion[open] {
+    opacity: 1;
+    transform: none;
+  }
 }
