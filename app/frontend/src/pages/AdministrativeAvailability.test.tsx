@@ -108,19 +108,19 @@ it("el valor externo conserva selección, copia y motivo asociado", async () => 
       }}
     />,
   );
-  const input = screen.getByRole("textbox", {
-    name: "Nombre",
-  }) as HTMLInputElement;
-  expect(input).toHaveAttribute("readonly");
-  expect(input).not.toBeDisabled();
-  expect(input).toHaveAccessibleDescription(
+  expect(screen.queryByRole("textbox", { name: "Nombre" })).toBeNull();
+  const fixed = screen.getByRole("group", { name: "Nombre" });
+  expect(fixed).toHaveAccessibleDescription(
     /Se define en la infraestructura y no se puede cambiar desde Acta/,
   );
-  input.focus();
-  input.select();
-  expect(input.selectionEnd! - input.selectionStart!).toBe(input.value.length);
-  await user.type(input, "otro nombre");
-  expect(input).toHaveValue("Aplicación ficticia");
+  const value = screen.getByText("Aplicación ficticia");
+  const range = document.createRange();
+  range.selectNodeContents(value);
+  window.getSelection()!.removeAllRanges();
+  window.getSelection()!.addRange(range);
+  const copied = await user.copy();
+  expect(copied!.getData("text/plain")).toBe("Aplicación ficticia");
+  window.getSelection()!.removeAllRanges();
 });
 
 it("el enlace privado sigue siendo seleccionable y explica por qué no se edita", () => {

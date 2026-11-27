@@ -9,7 +9,7 @@ import {
 } from "@requirements/contracts";
 import { ApiFailure, api } from "../api";
 import { initialTimezone } from "../initial-timezone";
-import { Alert, Button, Input, LoadingState } from "../ui";
+import { Alert, Button, Input, LoadingState, UnavailableValue } from "../ui";
 import { StatusChip } from "../ui/semantic";
 import {
   AccentInput,
@@ -404,11 +404,10 @@ export function Setup({ onFinished }: { onFinished: () => void }) {
               hint="Aparece en la pantalla de acceso y en el encabezado."
               required
             />
-            <Input
+            <UnavailableValue
               label="Código interno de la instalación"
               value={defaults.organizationCode}
-              readOnly
-              readOnlyReason="Lo define la infraestructura (ORGANIZATION_CODE). No se puede cambiar aquí y no es un dato de acceso."
+              reason="Lo define la infraestructura (ORGANIZATION_CODE). No se puede cambiar aquí y no es un dato de acceso."
             />
             <Navigation onBack={back} />
           </form>
