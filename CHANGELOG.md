@@ -6,7 +6,9 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
-Sin cambios adicionales por anunciar.
+### Fixed
+
+- **Accesos sin cambios involuntarios.** Al elegir un miembro se conservan su rol, área y estado actuales; las cuentas nuevas requieren elegir rol. El formulario muestra las diferencias, evita envíos sin cambios y pide confirmar los cambios de acceso sensibles, con advertencia al retirar la propia administración.
 
 ## [0.12.0] - 2026-11-24
 

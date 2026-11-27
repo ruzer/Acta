@@ -341,6 +341,71 @@ test("nobody can raise their own privileges through the project list or the memb
   );
 });
 
+test("project administration can manage members without reading the institutional directory", async () => {
+  const project = await ok("/projects", {
+    externalId: "MEMBER-PERMISSIONS",
+    name: "Permisos de miembros ficticios",
+    description: "",
+  });
+  await ok(`/projects/${project.id}/members`, {
+    userId: viewer.user.id,
+    role: "ADMIN",
+    areaId: null,
+    active: true,
+  });
+  await ok(`/projects/${project.id}/members`, {
+    userId: analyst.user.id,
+    role: "ANALYST",
+    areaId: null,
+    active: true,
+  });
+  assert.equal(viewer.user.isOrganizationAdmin, false);
+  assert.equal((await request("/users", { session: viewer })).status, 403);
+  assert.equal(
+    (await request(`/projects/${project.id}/members`, { session: viewer }))
+      .status,
+    200,
+  );
+  const body = {
+    userId: stakeholder.user.id,
+    role: "VIEWER",
+    areaId: null,
+    active: true,
+  };
+  const added = await request(`/projects/${project.id}/members`, {
+    session: viewer,
+    method: "POST",
+    body,
+  });
+  assert.equal(added.status, 201);
+  assert.equal(added.data.userId, stakeholder.user.id);
+  assert.equal(added.data.role, "VIEWER");
+  assert.equal((await request("/users", { session: analyst })).status, 403);
+  assert.equal(
+    (
+      await request(`/projects/${project.id}/members`, {
+        session: analyst,
+        method: "POST",
+        body: { ...body, role: "ADMIN" },
+      })
+    ).status,
+    403,
+  );
+  assert.equal(
+    (
+      await db.projectMember.findUnique({
+        where: {
+          projectId_userId: {
+            projectId: project.id,
+            userId: stakeholder.user.id,
+          },
+        },
+      })
+    ).role,
+    "VIEWER",
+  );
+});
+
 test("joining a project is an explicit, audited act of the administration, never automatic", async () => {
   const joined = await ok(
     `/projects/${secret.id}/members`,
