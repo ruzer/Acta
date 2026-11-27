@@ -175,6 +175,60 @@ it("mantiene el panel durante cierre, lo redirige a otra pregunta y devuelve foc
   expect(other).toHaveFocus();
 });
 
+it.each([false, true])(
+  "reabrir durante el cierre renueva el abridor y navegar conserva ese origen (StrictMode: %s)",
+  (strict) => {
+    render(
+      strict ? (
+        <StrictMode>
+          <Harness />
+        </StrictMode>
+      ) : (
+        <Harness />
+      ),
+    );
+    const firstOpener = screen.getByText("Abrir primera");
+    const secondOpener = screen.getByText("Abrir segunda");
+    firstOpener.focus();
+    fireEvent.click(firstOpener);
+    const panel = screen.getByRole("complementary");
+    nextFrame();
+    nextFrame();
+    const close = within(panel).getByRole("button", {
+      name: "Cerrar detalle",
+    });
+    close.focus();
+    fireEvent.click(close);
+    expect(panel).toHaveAttribute("data-phase", "closing");
+    act(() => vi.advanceTimersByTime(60));
+    expect(panel).toBeInTheDocument();
+
+    secondOpener.focus();
+    fireEvent.click(secondOpener);
+    expect(screen.getByRole("complementary")).toBe(panel);
+    expect(panel).toHaveAttribute("data-phase", "open");
+    expect(within(panel).getByText(second.question)).toBeInTheDocument();
+    nextFrame();
+    // Navigation changes the content, but the second opener remains the
+    // origin of this opening, even when the content returns to question A.
+    const previous = within(panel).getByRole("button", {
+      name: "Pregunta anterior",
+    });
+    previous.focus();
+    fireEvent.click(previous);
+    expect(screen.getByRole("complementary")).toBe(panel);
+    expect(within(panel).getByText(first.question)).toBeInTheDocument();
+    close.focus();
+    fireEvent.click(close);
+    expect(panel).toHaveAttribute("data-phase", "closing");
+    act(() => vi.advanceTimersByTime(170));
+    nextFrame();
+    expect(panel).not.toBeInTheDocument();
+    expect(secondOpener).toHaveFocus();
+    expect(firstOpener).not.toHaveFocus();
+  },
+);
+
 it("cerrar libera la modalidad móvil antes de terminar la salida visual", () => {
   const { close } = responsiveDialogs(390);
   render(<Harness />);

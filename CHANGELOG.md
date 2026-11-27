@@ -22,7 +22,7 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Fila visible al recorrer páginas.** Anterior y Siguiente muestran la fila de la pregunta abierta también al cruzar una página de Organizar, sin perder la selección ni el foco del panel.
 
-- **Cerrar el detalle sin bloquear la navegación.** La salida del panel libera el foco de inmediato y no lo recupera al cambiar el tamaño de la ventana. La lista conserva su densidad en escritorio y sus objetivos táctiles en móvil.
+- **Cerrar el detalle sin bloquear la navegación.** La salida del panel libera el foco de inmediato y no lo recupera al cambiar el tamaño de la ventana. Si se abre otra pregunta durante la salida, el foco vuelve a esa nueva apertura. La lista conserva su densidad en escritorio y sus objetivos táctiles en móvil.
 
 ### Changed
 

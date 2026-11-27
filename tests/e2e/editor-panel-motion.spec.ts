@@ -407,14 +407,21 @@ for (const [from, to] of [
     // Hold closing beyond the test timeout. Keep its painted state unchanged
     // so replacing dialog/aside cannot emit transitioncancel and end the hold.
     // The tests above measure the unmodified 120 ms exit separately.
-    await page.addStyleTag({
-      content: `
+    await page.evaluate(() => {
+      const sheet = [...document.styleSheets].find(
+        (item) => item.href && new URL(item.href).origin === location.origin,
+      );
+      if (!sheet) throw new Error("No se encontró la hoja de estilos del editor.");
+      sheet.insertRule(
+        `
         .qe-workspace .qe-inspector-motion[data-phase="closing"] {
           --qe-inspector-duration: 60s !important;
           opacity: 1 !important;
           transform: none !important;
         }
       `,
+        sheet.cssRules.length,
+      );
     });
     await panel.getByRole("button", { name: "Cerrar detalle" }).click();
     await expect(panel).toHaveAttribute("data-phase", "closing");

@@ -41,6 +41,7 @@ export function InspectorFrame({
   }, [questionId]);
   const openingTrigger = useRef<HTMLElement | null>(null);
   const openingQuestion = useRef<string | undefined>(undefined);
+  const wasOpen = useRef(false);
   const currentQuestion = useRef(questionId);
   const viewport = useInspectorViewport(wide);
   useEffect(() => {
@@ -54,10 +55,14 @@ export function InspectorFrame({
     return () => m.removeEventListener("change", update);
   }, []);
   useLayoutEffect(() => {
-    // Keep the original opener across Strict Mode effect replay and resize.
-    openingTrigger.current ??= document.activeElement as HTMLElement;
+    // A new opening can interrupt exit without remounting. Keep its opener
+    // through question navigation, Strict Mode effect replay and resize.
+    if (open && !wasOpen.current) {
+      openingTrigger.current = document.activeElement as HTMLElement;
+      openingQuestion.current = openingTrigger.current?.dataset.questionOpener;
+    }
+    wasOpen.current = open;
     const trigger = openingTrigger.current;
-    openingQuestion.current ??= trigger?.dataset.questionOpener;
     const dialog = ref.current;
     if (open) {
       if (!wide && !dialog?.open) dialog?.showModal();
