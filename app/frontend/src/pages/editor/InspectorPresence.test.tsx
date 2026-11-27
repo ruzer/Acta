@@ -180,6 +180,49 @@ it("cerrar antes del primer fotograma cancela la entrada pendiente", () => {
   expect(panel).not.toBeInTheDocument();
 });
 
+it.each([0, 1])(
+  "un fotograma de entrada cancelado no revive el panel cerrado (fotogramas previos: %s)",
+  (previousFrames) => {
+    // Deliver even cancelled callbacks, as can happen to already queued work.
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    const { rerender } = render(<Harness question={first} />);
+    if (previousFrames) frame();
+    const panel = screen.getByRole("complementary");
+    rerender(<Harness question={null} />);
+    transition(panel, "opacity");
+    expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
+    frame();
+    frame();
+    expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
+    expect(mounted).toHaveBeenCalledTimes(1);
+    rerender(<Harness question={second} />);
+    const reopened = screen.getByRole("complementary");
+    expect(reopened).toHaveAttribute("data-phase", "entering");
+    frame();
+    frame();
+    expect(reopened).toHaveAttribute("data-phase", "open");
+    expect(screen.getByText(second.title)).toBeVisible();
+  },
+);
+
+it("una entrada cancelada no termina prematuramente la entrada de una reapertura", () => {
+  vi.stubGlobal("cancelAnimationFrame", vi.fn());
+  const { rerender } = render(<Harness question={first} />);
+  frame();
+  const oldSecondFrame = [...frames.values()][0]!;
+  frames.clear();
+  const panel = screen.getByRole("complementary");
+  rerender(<Harness question={null} />);
+  transition(panel, "opacity");
+  rerender(<Harness question={second} />);
+  const reopened = screen.getByRole("complementary");
+  act(() => oldSecondFrame(performance.now()));
+  expect(reopened).toHaveAttribute("data-phase", "entering");
+  frame();
+  frame();
+  expect(reopened).toHaveAttribute("data-phase", "open");
+});
+
 it.each(["0s", "0ms", ""])(
   "sin duración (%s) no espera un evento inexistente",
   async (value) => {

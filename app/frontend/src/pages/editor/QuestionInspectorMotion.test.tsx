@@ -74,9 +74,19 @@ beforeEach(() => {
   vi.stubGlobal("getComputedStyle", (element: Element) => {
     const style = original(element);
     if (element.classList.contains("qe-inspector-motion")) {
-      style.transitionProperty = "opacity, transform";
-      style.transitionDuration = "120ms";
-      style.transitionDelay = "0s";
+      const transitions: Record<string, string> = {
+        transitionProperty: "opacity, transform",
+        transitionDuration: "120ms",
+        transitionDelay: "0s",
+      };
+      return new Proxy(style, {
+        get(target, property) {
+          if (typeof property === "string" && property in transitions)
+            return transitions[property];
+          const value = Reflect.get(target, property, target);
+          return typeof value === "function" ? value.bind(target) : value;
+        },
+      });
     }
     return style;
   });

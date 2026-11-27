@@ -70,11 +70,16 @@ export function useInspectorPresence<T>(
       setPhase("open");
       return;
     }
+    let cancelled = false;
     let secondFrame = 0;
     const firstFrame = requestAnimationFrame(() => {
-      secondFrame = requestAnimationFrame(() => setPhase("open"));
+      if (cancelled) return;
+      secondFrame = requestAnimationFrame(() => {
+        if (!cancelled) setPhase("open");
+      });
     });
     return () => {
+      cancelled = true;
       cancelAnimationFrame(firstFrame);
       cancelAnimationFrame(secondFrame);
     };
