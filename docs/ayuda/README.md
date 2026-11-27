@@ -1,14 +1,16 @@
 # Centro de ayuda de Acta
 
-Referencia de código: Acta v0.12.0,
-`e2e3a41d7306cfc006eab82b0e2e3e72855f1670`, revisión documental del 2026-11-24.
+Referencia de código: Acta v0.12.1,
+`19d486536de6dac8f0c44f8fe5fdfcb4caf11a9e`, revisión documental del 2026-11-27.
 
-Incluye el formulario del participante, fechas y horas de la organización,
+Incluye la conservación del acceso de Miembros, los controles con motivo,
+el cambio de tema dentro de Editar y el panel superpuesto de preguntas.
+Conserva el formulario del participante, fechas y horas de la organización,
 Atención, filtros con memoria, revisión seguida y movimiento sutil, además
 de las aclaraciones, los permisos descritos en las guías y la mejora de guardado.
 La revisión de textos y las pruebas automáticas no sustituyen un recorrido nuevo
 con personas ni acreditan publicación o producción. Consulta las
-[notas y su evidencia](../releases/v0.12.0.md#evidencia) y a tu administración
+[notas y su evidencia](../releases/v0.12.1.md#evidencia) y a tu administración
 si tu pantalla es distinta.
 
 Acta reúne preguntas, respuestas, comprobantes y decisiones de un proyecto.

@@ -96,12 +96,11 @@ VersityGW es un servicio S3 para guardar adjuntos privados. Las descargas pasan 
 4. Ejecuta `docker compose up --build -d --wait` con la nueva versión autorizada. El trabajo de migración aplica migraciones versionadas; nunca uses db push. Una instalación existente conserva su configuración y usuarios, y no vuelve a ver el asistente de primera instalación.
 5. Verifica salud, login y una descarga conocida. Cambiar código hacia atrás no revierte automáticamente las migraciones; usa una restauración coordinada si hace falta volver.
 
-Para preparar **v0.11.0 → v0.12.0**, consulta las
-[notas de v0.12.0](releases/v0.12.0.md#actualización-desde-v0110) y el
-[ensayo con datos ficticios](UPGRADE-REHEARSAL.md). Hay una migración nueva,
-`202611180001_response_due_at`, que añade una fecha límite vacía a los proyectos
-existentes; son 14 migraciones en total. Las imágenes pasan a Node 26.13.1 y
-las cookies no cambian. Conserva configuración y volúmenes, actualiza frontend y
+Para preparar **v0.12.0 → v0.12.1**, consulta las
+[notas de v0.12.1](releases/v0.12.1.md#actualización-desde-v0120) y el
+[ensayo con datos ficticios](UPGRADE-REHEARSAL.md). No hay migraciones nuevas: se conservan las
+14 existentes. Node 26.13.1 y las cookies no cambian.
+Si partes de v0.11.0, consulta primero las [notas de v0.12.0](releases/v0.12.0.md#actualización-desde-v0110): ese salto sí añade la fecha límite. Conserva configuración y volúmenes, actualiza frontend y
 backend juntos y recarga las pestañas. Comprueba el tag publicado y su commit
 antes de actualizar una instalación: la rama de preparación no es una release.
 

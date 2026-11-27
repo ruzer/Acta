@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   argumentsForRehearsal,
+  rehearsalBase,
   compareSnapshots,
   verifyRehearsalMigrations,
   responseDeadlineMigration,
@@ -96,4 +97,30 @@ it("admite solo la migración de fecha límite y conserva las trece previas", ()
     [...original, responseDeadlineMigration, "extra"],
   ])
     expect(() => verifyRehearsalMigrations(original, after)).toThrow();
+});
+
+
+describe("actualización sin migraciones desde v0.12.0", () => {
+  const original = [...Array.from({ length: 13 }, (_, i) => `migration-${i}`), responseDeadlineMigration];
+  it("conserva exactamente las catorce migraciones", () => {
+    expect(rehearsalBase("0.12.0")).toEqual({migrationCount: 14, alreadyHasDeadline: true});
+    expect(() => verifyRehearsalMigrations(original, [...original].reverse(), "0.12.0")).not.toThrow();
+  });
+  it.each([
+    original.slice(1), [...original, "extra"],
+    [...original.slice(0, -1), "replacement"],
+    [...original.slice(0, -1), original[0]],
+  ])("rechaza pérdida, adición, sustitución o duplicado", (after) => {
+    expect(() => verifyRehearsalMigrations(original, after, "0.12.0")).toThrow();
+  });
+  it("rechaza una base con trece migraciones o sin la de fecha límite", () => {
+    expect(() => verifyRehearsalMigrations(original.slice(0, -1), original, "0.12.0")).toThrow();
+    expect(() => verifyRehearsalMigrations([...original.slice(0, -1), "other"], original, "0.12.0")).toThrow();
+  });
+  it.each(["0.10.0", "0.11.0"])("conserva la ruta histórica de %s", (version) => {
+    expect(() => verifyRehearsalMigrations(original.slice(0, -1), original, version)).not.toThrow();
+  });
+  it.each(["0.12.1", "0.13.0", "unknown"])("rechaza bases no autorizadas: %s", (version) => {
+    expect(() => rehearsalBase(version)).toThrow();
+  });
 });

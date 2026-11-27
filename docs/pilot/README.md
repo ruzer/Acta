@@ -1,6 +1,6 @@
 # Kit de piloto con personas
 
-Este kit acompaña [Acta v0.12.0](../releases/v0.12.0.md) y ayuda
+Este kit acompaña [Acta v0.12.1](../releases/v0.12.1.md) y ayuda
 a probar el producto con personal administrativo sin formación técnica.
 Antes de usarlo, registra la versión y el commit de la instalación que se evaluará;
 comprueba su publicación en las [releases oficiales](https://github.com/ruzer/Acta/releases).

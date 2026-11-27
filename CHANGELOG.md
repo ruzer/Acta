@@ -6,6 +6,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ## Unreleased
 
+## [0.12.1] - 2026-11-27
+
 ### Fixed
 
 - **Accesos sin cambios involuntarios.** Al elegir un miembro se conservan su rol, área y estado actuales; las cuentas nuevas requieren elegir rol. El formulario muestra las diferencias, evita envíos sin cambios y pide confirmar los cambios de acceso sensibles, con advertencia al retirar la propia administración.
@@ -1031,4 +1033,6 @@ Sin entradas por anunciar.
 
 - Reporte de vulnerabilidades exclusivamente privado. La habilitación de GitHub Private Vulnerability Reporting se registró el 2026-10-01; el cierre local no vuelve a comprobar su disponibilidad. El contacto de moderación permanece pendiente. Esta precisión documental no es una corrección nueva de una vulnerabilidad.
 
+[Unreleased]: https://github.com/ruzer/Acta/compare/v0.12.1...HEAD
+[0.12.1]: https://github.com/ruzer/Acta/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/ruzer/Acta/compare/v0.11.0...v0.12.0

@@ -53,16 +53,25 @@ export function argumentsForRehearsal(args) {
 }
 
 export const responseDeadlineMigration = "202611180001_response_due_at";
-export function verifyRehearsalMigrations(before, after) {
-  assert.equal(
-    before.length,
-    13,
-    "La base publicada debe tener 13 migraciones.",
+export function rehearsalBase(version) {
+  assert.ok(
+    ["0.10.0", "0.11.0", "0.12.0"].includes(version),
+    "La base debe ser v0.10.0, v0.11.0 o v0.12.0 publicada.",
   );
+  return { migrationCount: version === "0.12.0" ? 14 : 13,
+    alreadyHasDeadline: version === "0.12.0" };
+}
+export function verifyRehearsalMigrations(before, after, baseVersion = "0.11.0") {
+  const base = rehearsalBase(baseVersion);
+  assert.equal(before.length, base.migrationCount, "Migraciones inesperadas en la base publicada.");
+  assert.equal(new Set(before).size, before.length, "Migraciones duplicadas en la base.");
+  assert.equal(before.includes(responseDeadlineMigration), base.alreadyHasDeadline,
+    "La migración de fecha límite no corresponde a la base.");
   assert.deepEqual(
     [...after].sort(),
-    [...before, responseDeadlineMigration].sort(),
-    "Solo se admite la migración aditiva de fecha límite (13 → 14).",
+    (base.alreadyHasDeadline ? [...before] : [...before, responseDeadlineMigration]).sort(),
+    base.alreadyHasDeadline ? "Desde v0.12.0 deben conservarse las 14 migraciones, sin nuevas."
+      : "Solo se admite la migración aditiva de fecha límite (13 → 14).",
   );
 }
 
@@ -242,7 +251,7 @@ async function run(options) {
       sql(
         "SELECT count(*) FROM information_schema.columns WHERE table_schema='public' AND table_name='Project' AND column_name='responseDueAt'",
       ) === "1";
-    if (hasDeadline)
+    if (hasDeadline && state?.baseVersion !== "0.12.0")
       assert.equal(
         sql('SELECT count(*) FROM "Project" WHERE "responseDueAt" IS NOT NULL'),
         "0",
@@ -255,11 +264,11 @@ async function run(options) {
     for (const table of tables.filter((t) => !volatileTables.has(t))) {
       assert.match(table, /^[A-Za-z_][A-Za-z0-9_]*$/);
       const value =
-        table === "Project" && hasDeadline
+        table === "Project" && hasDeadline && state?.baseVersion !== "0.12.0"
           ? "(to_jsonb(t)-'responseDueAt')"
           : "to_jsonb(t)";
       const where =
-        table === "_prisma_migrations"
+        table === "_prisma_migrations" && state?.baseVersion !== "0.12.0"
           ? `WHERE migration_name <> '${responseDeadlineMigration}'`
           : "";
       const result = sql(
@@ -316,11 +325,10 @@ async function run(options) {
       const baseVersion = JSON.parse(
         readFileSync(join(options.root, "package.json")),
       ).version;
-      assert.ok(
-        ["0.10.0", "0.11.0"].includes(baseVersion),
-        "La base debe ser v0.10.0 o v0.11.0 publicada.",
-      );
-      assert.equal(migrationNames().length, 13);
+      const base = rehearsalBase(baseVersion);
+      const migrations = migrationNames();
+      assert.equal(migrations.length, base.migrationCount);
+      assert.equal(migrations.includes(responseDeadlineMigration), base.alreadyHasDeadline);
       assert.equal(
         sql('SELECT count(*) FROM "User"'),
         "0",
@@ -465,7 +473,7 @@ async function run(options) {
         "El estado de origen está incompleto.",
       );
       if (options.phase === "verify")
-        verifyRehearsalMigrations(state.migrations, migrationNames());
+        verifyRehearsalMigrations(state.migrations, migrationNames(), state.baseVersion);
       compareSnapshots(state.snapshot, snapshot());
     }
     if (options.phase === "measure") {

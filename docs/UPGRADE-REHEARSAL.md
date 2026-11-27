@@ -1,7 +1,8 @@
 # Ensayo de actualización con datos ficticios
 
-Este procedimiento comprueba v0.11.0 → candidata v0.12.0 y conserva la ruta desde
-v0.10.0 sobre los mismos siete volúmenes y una restauración en siete volúmenes nuevos. No opera sobre instalaciones
+Este procedimiento comprueba v0.12.0 → candidata v0.12.1 y conserva las rutas
+históricas desde v0.10.0 y v0.11.0, sobre los mismos siete volúmenes y una
+restauración en siete volúmenes nuevos. No opera sobre instalaciones
 de trabajo. Reutiliza Compose, el importador, el alta de usuarios y los scripts de
 [backup/restauración](BACKUP-RESTORE.md); no escribe datos de negocio por SQL.
 
@@ -15,13 +16,15 @@ encendido: la expiración normal de una sesión no se desactiva para el ensayo.
 Desde un clon de Acta, elige cuatro directorios nuevos, dos nombres Compose exclusivos
 que empiecen por `acta-upgrade-` y dos puertos libres. Ejemplo, sustituyendo los
 nombres si ya existen. `ref` fija la versión candidata: cambia su valor por el
-tag o la rama que quieras evaluar; la base predeterminada es v0.11.0; usa `base_ref=v0.10.0` para el recorrido anterior. El checkout desde el que ejecutas los comandos debe contener la candidata con la migración de fecha límite:
+tag o la rama que quieras evaluar; la base predeterminada es v0.12.0; usa `base_ref=v0.10.0` o
+`base_ref=v0.11.0` para los recorridos anteriores. El checkout debe contener
+el script actualizado que admite las tres bases publicadas:
 
 ```sh
 umask 077
 lab=$(mktemp -d /tmp/acta-upgrade.XXXXXX)
 chmod 700 "$lab"
-base_ref=v0.11.0
+base_ref=v0.12.0
 ref=HEAD
 git worktree add --detach "$lab/base" "$base_ref"
 git worktree add --detach "$lab/candidate" "$ref"
@@ -56,7 +59,7 @@ ACTA_UPGRADE_REHEARSAL_ALLOWED=true node "$candidate/scripts/upgrade-rehearsal.m
   --origin http://127.0.0.1:4491 --state "$lab/state.json"
 ```
 
-`prepare` exige una base vacía de versión 0.10.0 o 0.11.0. Instala fixtures oficiales,
+`prepare` exige una base vacía de versión 0.10.0, 0.11.0 o 0.12.0. Instala fixtures oficiales,
 crea cinco participantes mediante vista previa/confirmación y cambio de contraseña,
 importa un CSV de 300 preguntas por la interfaz y registra cinco respuestas.
 Los fixtures incluyen evidencia, decisión y una invitación externa usada.
@@ -94,7 +97,14 @@ Session, InvitationSession, LoginAttempt e InvitationRateBucket, que cambian al
 usar el sistema; verifica la autenticación funcionalmente. Comprueba el SHA-256 de
 la evidencia, el texto de decisión en el informe HTML y su impresión a PDF.
 
-Se restaura primero con el código de la base: los scripts exigen recuentos iguales, incluidas sus 13 migraciones. Solo después se actualiza el destino a la candidata. No se omite ni relaja esa comprobación del respaldo. El ensayo exige las 13 migraciones anteriores más `202611180001_response_due_at` (14 en total), con huellas intactas de las anteriores. Al comparar proyectos solo retira la columna nueva de la huella y exige que sea nula; cualquier valor previo cambiado sigue siendo un error.
+Se restaura primero con el código de la base: los scripts exigen recuentos iguales,
+incluidas sus migraciones. Solo después se actualiza el destino a la candidata.
+Desde v0.12.0 se exigen las mismas 14 migraciones, sin nuevas, y huellas completas
+de la fecha límite y su migración. Ejecuta también `prisma migrate status` en
+ambas versiones: no debe haber pendientes. Para las rutas históricas desde
+v0.10.0/v0.11.0 se conservan las 13 migraciones anteriores más
+`202611180001_response_due_at` (14 en total); solo en esas rutas se retira la
+columna nueva de la huella y se exige que sea nula. No se relaja el respaldo.
 
 Además verifica: sesión anterior válida (la cookie real de cada base); nuevo acceso con `acta_session` que retira
 `fgeo_session`; cierre que retira ambas e invalida la sesión nueva; ambos smoke
