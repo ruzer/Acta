@@ -408,10 +408,25 @@ for (const [from, to] of [
     // so replacing dialog/aside cannot emit transitioncancel and end the hold.
     // The tests above measure the unmodified 120 ms exit separately.
     await page.evaluate(() => {
-      const sheet = [...document.styleSheets].find(
-        (item) => item.href && new URL(item.href).origin === location.origin,
-      );
-      if (!sheet) throw new Error("No se encontró la hoja de estilos del editor.");
+      const sheet = [...document.styleSheets].find((item) => {
+        const owner = item.ownerNode;
+        const local = item.href
+          ? new URL(item.href).origin === location.origin
+          : owner instanceof HTMLStyleElement &&
+            owner.dataset.viteDevId?.endsWith(
+              "/pages/editor/question-inspector.css",
+            );
+        return (
+          local &&
+          [...item.cssRules].some(
+            (rule) =>
+              rule instanceof CSSStyleRule &&
+              rule.selectorText.includes(".qe-inspector-motion"),
+          )
+        );
+      });
+      if (!sheet)
+        throw new Error("No se encontró la hoja de estilos del editor.");
       sheet.insertRule(
         `
         .qe-workspace .qe-inspector-motion[data-phase="closing"] {
