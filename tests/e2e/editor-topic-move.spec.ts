@@ -277,11 +277,11 @@ test("Ver desde Organizar conserva filtros, grupos plegados y selección al regr
   await expect(
     page.getByLabel("Área responsable", { exact: true }),
   ).toHaveValue(root.responsibleAreaId);
-  await expect(
-    page
-      .getByRole("navigation", { name: "Temas del cuestionario" })
-      .locator("summary"),
-  ).toContainText(sections[0]!.title);
+  const selectedTheme = page
+    .getByRole("navigation", { name: "Temas del cuestionario" })
+    .locator(":scope > details > summary");
+  await expect(selectedTheme).toHaveCount(1);
+  await expect(selectedTheme).toContainText(sections[0]!.title);
   await expect(selection).toBeChecked();
   await expect(
     page.locator(`button[data-question-id="${root.id}"]`),
