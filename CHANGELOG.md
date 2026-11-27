@@ -18,6 +18,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Cambiar el tema al editar.** Los borradores permiten elegir el tema antes del contenido y guardar ambos cambios juntos. La pregunta principal y todos sus seguimientos se mueven como un grupo; si alguien no es borrador, el motivo indica quién lo impide.
 
+- **Grupos completos entre temas.** El traslado conserva la principal y sus seguimientos, respeta las posiciones reservadas y registra la edición y el movimiento en una sola operación. Un reintento desactualizado se rechaza sin repetir cambios.
+
 ## [0.12.0] - 2026-11-24
 
 Seguimiento de participación, plazos, autoguardado, plantillas y ayuda para el piloto,

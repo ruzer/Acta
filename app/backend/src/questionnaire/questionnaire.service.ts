@@ -40,6 +40,15 @@ import {
 import { assertAcyclic, validateQuestion } from "./rules.js";
 import { ResponsesService } from "../responses/responses.service.js";
 import { publicationIssues } from "./publication-rules.js";
+import {
+  readQuestionStructure,
+  movableQuestionFamily,
+  planQuestionOrder,
+  assertCompleteFamilyMove,
+  applyQuestionStructure,
+  auditEditedQuestionMove,
+  type QuestionPosition,
+} from "./question-structure.js";
 const editorRoles = ["ADMIN", "ANALYST"] as const;
 export const questionInclude = {
   QuestionRevision_questionRecord: {
@@ -408,9 +417,8 @@ export class QuestionnaireService {
           })) !== scopeIds.length
         )
           throw new NotFoundException("No se encontró un tema del proyecto.");
-        const rows = await tx.question.findMany({
-          where: { projectId, sectionId: { in: scopeIds } },
-        });
+        const projectRows = await readQuestionStructure(tx, projectId);
+        const rows = projectRows.filter((q) => scopeIds.includes(q.sectionId));
         const byId = new Map(rows.map((q) => [q.id, q]));
         for (const scope of d.sections) {
           if (
@@ -443,69 +451,9 @@ export class QuestionnaireService {
           throw new BadRequestException(
             "El orden final debe incluir todas las preguntas activas y ninguna archivada.",
           );
-        const next = d.sections.flatMap((scope) => {
-          const reserved = new Set(
-            rows
-              .filter(
-                (q) =>
-                  q.sectionId === scope.sectionId &&
-                  q.publication === "ARCHIVED",
-              )
-              .map((q) => q.order),
-          );
-          let order = 0;
-          return scope.orderedIds.map((id) => {
-            while (reserved.has(order)) order++;
-            return { id, sectionId: scope.sectionId, order: order++ };
-          });
-        });
-        const moved = next.filter(
-          (x) => byId.get(x.id)!.sectionId !== x.sectionId,
-        );
-        if (moved.length > 1)
-          throw new BadRequestException(
-            "Mueve una pregunta a la vez entre temas.",
-          );
-        for (const x of moved) {
-          const q = byId.get(x.id)!;
-          if (q.publication !== "DRAFT")
-            throw new ConflictException(
-              "Una pregunta publicada no puede cambiar de tema.",
-            );
-          if (
-            q.groupParentId ||
-            (await tx.question.count({
-              where: { projectId, groupParentId: q.id },
-            }))
-          )
-            throw new ConflictException(
-              "El traslado no puede separar una pregunta de sus seguimientos.",
-            );
-        }
-        // Only structural fields are updated; revisions, grouping and conditions remain untouched.
-        const changed = next.filter((x) => {
-          const q = byId.get(x.id)!;
-          return q.order !== x.order || q.sectionId !== x.sectionId;
-        });
-        const max = Math.max(0, ...rows.map((q) => q.order));
-        if (max + changed.length + 1 > 2147483647)
-          throw new ConflictException("El orden excede el rango permitido.");
-        if (changed.length) {
-          const temporary = Prisma.join(
-            changed.map(
-              (x, i) => Prisma.sql`(${x.id}::uuid, ${max + i + 1}::int)`,
-            ),
-          );
-          await tx.$executeRaw`UPDATE "Question" q SET "order"=v.ord FROM (VALUES ${temporary}) AS v(id,ord) WHERE q.id=v.id AND q."projectId"=${projectId}::uuid`;
-          const final = Prisma.join(
-            changed.map(
-              (x) =>
-                Prisma.sql`(${x.id}::uuid, ${x.sectionId}::uuid, ${x.order}::int)`,
-            ),
-          );
-          await tx.$executeRaw`UPDATE "Question" q SET "sectionId"=v.section, "order"=v.ord, "lockVersion"=q."lockVersion"+1, "updatedAt"=CURRENT_TIMESTAMP FROM (VALUES ${final}) AS v(id,section,ord) WHERE q.id=v.id AND q."projectId"=${projectId}::uuid`;
-        }
-        const result = await this.advanceStructure(tx, projectId);
+        const next = planQuestionOrder(rows, d.sections);
+        const moved = assertCompleteFamilyMove(projectRows, next);
+        const result = await applyQuestionStructure(tx, projectId, rows, next);
         await audit(
           tx,
           req.actor,
@@ -793,12 +741,62 @@ export class QuestionnaireService {
           throw new ConflictException(
             "El identificador externo es estable y no se cambia al editar.",
           );
+        let effective = d;
+        let movement:
+          { before: QuestionPosition[]; after: QuestionPosition[] } | undefined;
+        if (d.sectionId !== old.sectionId) {
+          if (d.groupParentId !== old.groupParentId)
+            throw new ConflictException(
+              "Cambia el tema y el vínculo de seguimiento por separado, un cambio a la vez.",
+            );
+          if (
+            !(await tx.section.count({ where: { id: d.sectionId, projectId } }))
+          )
+            throw new NotFoundException(
+              "No se encontró el tema de destino en este proyecto.",
+            );
+          const rows = await readQuestionStructure(tx, projectId);
+          const family = movableQuestionFamily(rows, id);
+          const groupIds = new Set(family.map((q) => q.id));
+          const scope = rows.filter(
+            (q) => q.sectionId === old.sectionId || q.sectionId === d.sectionId,
+          );
+          const next = planQuestionOrder(
+            scope,
+            [old.sectionId, d.sectionId].map((sectionId) => ({
+              sectionId,
+              orderedIds: [
+                ...scope
+                  .filter(
+                    (q) =>
+                      q.sectionId === sectionId &&
+                      q.publication !== "ARCHIVED" &&
+                      !groupIds.has(q.id),
+                  )
+                  .sort((a, b) => a.order - b.order)
+                  .map((q) => q.id),
+                ...(sectionId === d.sectionId ? family.map((q) => q.id) : []),
+              ],
+            })),
+          );
+          assertCompleteFamilyMove(rows, next);
+          await applyQuestionStructure(tx, projectId, scope, next);
+          effective = { ...d, order: next.find((q) => q.id === id)!.order };
+          movement = {
+            before: scope.map(({ id, sectionId, order }) => ({
+              id,
+              sectionId,
+              order,
+            })),
+            after: next,
+          };
+        }
         const refs = await this.checkLinks(
           tx,
           req.actor,
           projectId,
           id,
-          d,
+          effective,
           old.responsibleAreaId,
         );
         // Changing a parent must not leave a condition or grouping invalid.
@@ -821,13 +819,6 @@ export class QuestionnaireService {
               "Actualiza primero las condiciones que dependen de esta pregunta.",
             );
         }
-        if (
-          d.sectionId !== old.sectionId &&
-          (await tx.question.count({ where: { projectId, groupParentId: id } }))
-        )
-          throw new ConflictException(
-            "La pregunta tiene seguimientos en esta sección.",
-          );
         await tx.question.update({
           where: { id },
           data: {
@@ -836,9 +827,9 @@ export class QuestionnaireService {
             supersedesQuestionId: d.supersedesQuestionId,
             responsibleAreaId: d.responsibleAreaId,
             priority: d.priority,
-            order: d.order,
+            order: effective.order,
             currentRevisionNumber: { increment: 1 },
-            lockVersion: { increment: 1 },
+            ...(movement ? {} : { lockVersion: { increment: 1 } }),
           },
         });
         await this.writeRevision(
@@ -847,7 +838,7 @@ export class QuestionnaireService {
           projectId,
           id,
           old.currentRevisionNumber + 1,
-          d,
+          effective,
           refs,
         );
         await audit(
@@ -858,9 +849,17 @@ export class QuestionnaireService {
           id,
           projectId,
           presentQuestion(old),
-          d,
+          effective,
           req.requestId,
         );
+        if (movement)
+          await auditEditedQuestionMove(
+            tx,
+            req,
+            projectId,
+            movement.before,
+            movement.after,
+          );
         return presentQuestion(await this.get(tx, projectId, id));
       },
     );
