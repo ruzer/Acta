@@ -31,6 +31,7 @@ import {
   Textarea,
 } from "../ui";
 import { ActionForm } from "./Administration";
+import { MoveQuestionDialog } from "./editor/MoveQuestionDialog";
 import { QuestionForm } from "./QuestionForm";
 import { EditorWorkspace } from "./editor/EditorWorkspace";
 import type { OrganizeContext } from "./editor/questionnaire-presentation";
@@ -440,61 +441,17 @@ export function Editor() {
         </Dialog>
       )}
       {moving && (
-        <Dialog title="Mover a otro tema" onClose={closeStructureDialog}>
-          <p>{moving.question.question}</p>
-          <ActionForm
-            label="Mover pregunta"
-            onDone={() => {
-              closeStructureDialog();
-              setNotice(
-                "Pregunta movida. Se guardaron los órdenes de ambos temas.",
-              );
-              refresh();
-            }}
-            onSubmit={(d) => {
-              const snapshot = moving.snapshot,
-                origin = scope(snapshot, moving.question.sectionId),
-                destination = scope(snapshot, d.sectionId!);
-              origin.orderedIds = origin.orderedIds.filter(
-                (id) => id !== moving.question.id,
-              );
-              destination.orderedIds.push(moving.question.id);
-              return api(
-                "reorderQuestions",
-                { projectId },
-                {
-                  expectedVersion: snapshot.structureVersion,
-                  sections: [origin, destination],
-                },
-              );
-            }}
-          >
-            <p id="move-topic-reason" className="hint">
-              Selecciona un tema de destino distinto del actual.
-            </p>
-            <Select
-              label="Tema de destino"
-              name="sectionId"
-              required
-              defaultValue=""
-              hint="Elige otro tema para mover esta pregunta."
-            >
-              <option value="" disabled aria-describedby="move-topic-reason">
-                Selecciona un tema
-              </option>
-              {data.sections
-                .filter((s) => s.id !== moving.question.sectionId)
-                .map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.title}
-                  </option>
-                ))}
-            </Select>
-          </ActionForm>
-          <Button tone="secondary" onClick={closeStructureDialog}>
-            Cancelar
-          </Button>
-        </Dialog>
+        <MoveQuestionDialog
+          data={moving.snapshot}
+          question={moving.question}
+          projectId={projectId}
+          onClose={closeStructureDialog}
+          onMoved={() => {
+            closeStructureDialog();
+            setNotice("Pregunta movida. Se guardaron los órdenes de ambos temas.");
+            refresh();
+          }}
+        />
       )}
       {creatingTopic && (
         <Dialog title="Nuevo tema" onClose={() => setCreatingTopic(false)}>

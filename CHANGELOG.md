@@ -20,6 +20,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Grupos completos entre temas.** El traslado conserva la principal y sus seguimientos, respeta las posiciones reservadas y registra la edición y el movimiento en una sola operación. Un reintento desactualizado se rechaza sin repetir cambios.
 
+- **Cambiar de tema desde las acciones.** El diálogo usa el mismo nombre en el editor y la ayuda, permite trasladar grupos completos y explica qué pregunta impide el cambio.
+
 ## [0.12.0] - 2026-11-24
 
 Seguimiento de participación, plazos, autoguardado, plantillas y ayuda para el piloto,

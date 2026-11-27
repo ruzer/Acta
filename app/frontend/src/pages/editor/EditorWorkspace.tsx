@@ -131,7 +131,7 @@ export function QuestionActions({
               Editar pregunta
             </Button>
             <Button tone="secondary" onClick={() => onAction("move", q)}>
-              Mover a otro tema
+              Cambiar de tema
             </Button>
             <Button onClick={() => onAction("publish", q)}>Publicar</Button>
           </>

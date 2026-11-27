@@ -43,7 +43,7 @@ it("los motivos del editor y la forma de continuar coinciden en ayuda y guías",
       "búsqueda",
       "área activa",
       "pregunta archivada",
-      "Mover a otro tema",
+      "Cambiar de tema",
     ])
       expect(content, `${path}: ${text}`).toContain(text);
   }
