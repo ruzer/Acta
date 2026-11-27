@@ -282,6 +282,37 @@ cambios mayores de PostgreSQL, recuperación de archivos de marca externos ni la
 ruta desde v0.10.0. Los tiempos no son una prueba de carga ni un plazo de
 recuperación garantizado.
 
+## Intento detenido el 2026-11-27 — v0.12.0 a candidata v0.12.1
+
+**No acredita actualización ni restauración.** Host macOS ARM64 y Docker
+29.8.2 Linux aarch64. Base `a16d3ee0b7eda30fb8fd065e468b7503d4f40b6e`
+(v0.12.0); candidata `693742f256ce0b8ae246faac6daedc8ccb8a6123`.
+El script admite la base v0.12.0 por excepción expresa del propietario;
+no se modificó el código de aplicación.
+
+Laboratorio propio `acta-upgrade-20261127-v0121-source` (puerto 4591), destino
+reservado `acta-upgrade-20261127-v0121-restore` (4592), configuración privada,
+demo desactivada y secretos generados solo en volúmenes propios. Las imágenes
+de base, candidata y base de restauración se construyeron correctamente.
+
+| Paso | Resultado real |
+| --- | --- |
+| Construcción de candidata | Salida 0; 136,867 s |
+| Construcción base con caché / base de restauración | Salida 0; 1,919 s / 13,252 s |
+| Pull de imágenes no construibles del destino | Salida 0; 1,353 s |
+| Arranque de v0.12.0 con `up -d --wait --no-build` | **Salida 1; 7,011 s:** object-storage quedó unhealthy; dependencia de almacenamiento no disponible |
+| Fixture, migrate status, backup, actualización y restauración | No ejecutados; se detuvo el procedimiento sin reintentos |
+| Retirada | Siete volúmenes propios con etiqueta individual verificada; `down -v` solo del proyecto origen; destino nunca arrancado |
+| Inventario inicial y final | **81 contenedores / 387 volúmenes**, mismos IDs/nombres; cero añadidos o retirados ajenos |
+
+No se diagnosticó ni corrigió la causa del estado unhealthy; no se atribuye
+el fallo al cambio de versión ni se propone una corrección de producto sin
+evidencia. No se ejecutaron los gates locales completos ni se abrió PR después
+del fallo. La instalación preliminar del clon (`npm ci --ignore-scripts`) sí
+terminó con salida 0 y auditoría informativa de cero vulnerabilidades; no
+sustituye las dos auditorías y las suites requeridas sobre la cabeza final.
+Los ensayos históricos anteriores conservan su propio alcance y SHA.
+
 ## Retirada
 
 Solo después de guardar la evidencia no sensible, confirma para **cada** volumen
