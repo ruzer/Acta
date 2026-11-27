@@ -48,10 +48,14 @@ export function questionTopicMove(
     : "";
   const followers = family.filter((q) => q.id !== root.id);
   const names = followers.map((q) => `«${q.title}»`).join(", ");
+  const followersLabel =
+    followers.length === 1
+      ? "su único seguimiento"
+      : `sus ${followers.length} seguimientos`;
   const notice = followers.length
     ? question.id === root.id
-      ? `Se moverá con sus ${followers.length} seguimientos: ${names}.`
-      : `Se moverá con su pregunta principal «${root.title}» y sus ${followers.length} seguimientos: ${names}.`
+      ? `Se moverá con ${followersLabel}: ${names}.`
+      : `Se moverá con su pregunta principal «${root.title}» y ${followersLabel}: ${names}.`
     : "";
   return { family, reason, notice };
 }
