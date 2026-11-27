@@ -540,19 +540,18 @@ test("editor: reorder temas/preguntas y traslado de 300 preguntas usa una petici
     .getByLabel("Acciones de " + question.title, { exact: true })
     .click();
   await row
-    .getByRole("button", { name: "Mover a otro tema", exact: true })
+    .getByRole("button", { name: "Cambiar de tema", exact: true })
     .click();
   await page.getByLabel("Tema de destino").selectOption(second.id);
   await shot(page, "extension-mover-390");
   await axe(page);
   await page
-    .getByRole("button", { name: "Mover pregunta", exact: true })
+    .getByRole("button", { name: "Cambiar de tema", exact: true })
     .click();
   await expect(
-    page.getByText(
-      "Pregunta movida. Se guardaron los órdenes de ambos temas.",
-      { exact: true },
-    ),
+    page
+      .getByRole("status")
+      .filter({ hasText: `Se movió a «${second.title}»` }),
   ).toBeVisible();
   expect(requests).toHaveLength(3);
   snapshot = await call(page, `/projects/${largeId}/questionnaire`);

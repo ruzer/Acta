@@ -13,8 +13,7 @@ const searchReason =
   "Con una búsqueda activa se muestran todos los grupos desplegados. Limpia la búsqueda para contraerlos.";
 const areaReason =
   "Para crear preguntas hace falta al menos un área activa. Pide a la administración de la institución que la active en Administración.";
-const themeReason =
-  "En esta edición no se puede cambiar el tema. Guarda o descarta tus cambios y usa «Mover a otro tema» en las acciones de la pregunta.";
+
 let projectId: string;
 let draft: QuestionView;
 let parent: QuestionView;
@@ -107,7 +106,7 @@ async function unavailable(button: Locator, reason: string) {
   await expect(button).toBeFocused();
 }
 
-test("editor: un tema protegido explica el bloqueo y la edición muestra el tema fijo", async ({
+test("editor: un tema protegido explica el bloqueo y la edición permite elegir el tema del borrador", async ({
   page,
 }) => {
   await open(page, "Escribir");
@@ -137,16 +136,12 @@ test("editor: un tema protegido explica el bloqueo y la edición muestra el tema
     exact: true,
   });
   await expect(dialog).toBeVisible();
-  await expect(
-    dialog.getByRole("combobox", { name: "Tema al que pertenece" }),
-  ).toHaveCount(0);
-  const reason = dialog.getByText(themeReason, { exact: true });
-  await reason.scrollIntoViewIfNeeded();
-  await expect(reason).toBeVisible();
-  await expect(
-    dialog.getByText("Contexto ficticio", { exact: true }),
-  ).toBeVisible();
-  await checkedPage(page, evidence, "editor-fixed-topic", 390);
+  const topic = dialog.getByRole("combobox", { name: "Tema al que pertenece" });
+  await expect(topic).toBeEnabled();
+  await expect(topic).toHaveAccessibleDescription(
+    "Al guardar, la pregunta pasa al final del tema que elijas, junto con tus cambios.",
+  );
+  await checkedPage(page, evidence, "editor-topic-draft", 390);
   await dialog.getByRole("button", { name: "Cancelar", exact: true }).click();
 });
 
