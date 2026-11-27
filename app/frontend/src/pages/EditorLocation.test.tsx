@@ -26,9 +26,9 @@ afterEach(() => {
   vi.resetAllMocks();
 });
 const data = questionnaireView.parse(fixture.questionnaire);
-function page(search = "") {
+function page(search = "", questionnaire = data) {
   vi.mocked(api).mockImplementation(
-    async (key) => (key === "questionnaire" ? data : []) as never,
+    async (key) => (key === "questionnaire" ? questionnaire : []) as never,
   );
   vi.mocked(exchangeRequest).mockResolvedValue(
     dashboardView.parse(fixture.dashboard),
@@ -266,4 +266,51 @@ it("abre enlace directo en Escribir y retira un id inexistente sin salir del edi
     ),
   ).toBeVisible();
   vi.unstubAllGlobals();
+});
+
+it("Revisar publicación abre una incidencia publicada en Organizar con una sola navegación", async () => {
+  vi.stubGlobal("matchMedia", () => ({
+    matches: true,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  }));
+  try {
+    const published = {
+      ...data.questions[0]!,
+      publication: "PUBLISHED" as const,
+      type: "SINGLE_CHOICE" as const,
+      options: [],
+      condition: null,
+      groupParentId: null,
+    };
+    const router = page("?mode=publish", { ...data, questions: [published] });
+    const correction = await screen.findByRole("button", {
+      name: "Ir a corregir",
+    });
+    const requests = vi.mocked(api).mock.calls.length;
+    const contributionRequests = vi.mocked(exchangeRequest).mock.calls.length;
+    const navigations: string[] = [];
+    const unsubscribe = router.subscribe((state) => {
+      navigations.push(state.location.search);
+    });
+    fireEvent.click(correction);
+    await screen.findByRole("complementary", { name: "Detalle de pregunta" });
+    expect(screen.getByRole("tab", { name: "Organizar" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    const params = new URLSearchParams(router.state.location.search);
+    expect(params.get("mode")).toBe("organize");
+    expect(params.get("question")).toBe(published.id);
+    expect(navigations).toHaveLength(1);
+    expect(router.state.historyAction).toBe("PUSH");
+    expect(api).toHaveBeenCalledTimes(requests);
+    expect(exchangeRequest).toHaveBeenCalledTimes(contributionRequests);
+    unsubscribe();
+    await act(() => router.navigate(-1));
+    expect(router.state.location.search).toBe("?mode=publish");
+    expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
+  } finally {
+    vi.unstubAllGlobals();
+  }
 });

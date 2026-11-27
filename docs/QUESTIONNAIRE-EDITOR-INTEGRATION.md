@@ -79,4 +79,4 @@ Las transiciones usan solo `opacity` y `transform`: entrada de 180 ms en escrito
 
 La cabecera y la barra principal reservan su propio espacio; el cuerpo central se desplaza. La altura sigue el área visible del navegador móvil cuando aparece el teclado. Más acciones tiene desplazamiento propio y en móvil se ancla al pie con Cerrar acciones. Los objetivos del panel tienen al menos 44 px de alto.
 
-[Mapa de comprobación de I4](EDITOR-PANEL-MOTION-VALIDATION.md). Los valores anteriores describen la implementación: las medidas reales, capturas y ejecuciones de navegador deben registrarse por separado antes de declarar su validación.
+Los valores anteriores describen la implementación. Las medidas reales, capturas y resultados de las pruebas se registran en el PR de este cambio; no acreditan pruebas con personas ni dispositivos físicos.

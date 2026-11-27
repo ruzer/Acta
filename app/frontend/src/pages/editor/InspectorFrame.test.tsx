@@ -65,3 +65,61 @@ it("Escape en otra ventana no cierra el inspector y el panel no confina foco", (
   expect(screen.getByRole("complementary")).toBeInTheDocument();
   dialog.remove();
 });
+
+it("cerrar tras cambiar de página recupera el nuevo nodo de la pregunta de origen", () => {
+  vi.stubGlobal("matchMedia", () => ({
+    matches: true,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  }));
+  const frames: FrameRequestCallback[] = [];
+  vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+    frames.push(callback);
+    return frames.length;
+  });
+  function Harness() {
+    const [open, setOpen] = useState(false);
+    const [page, setPage] = useState(1);
+    return (
+      <>
+        <div className="qe-modes">
+          <button aria-selected="true">Organizar</button>
+        </div>
+        <button
+          key={page}
+          data-question-opener={page === 1 ? "origin" : "next"}
+          onClick={() => setOpen(true)}
+        >
+          {page === 1 ? "Pregunta de origen" : "Pregunta siguiente"}
+        </button>
+        {open && (
+          <InspectorFrame
+            questionId={page === 1 ? "origin" : "next"}
+            onClose={() => {
+              setPage(1);
+              setOpen(false);
+            }}
+          >
+            <button onClick={() => setPage(2)}>Recorrer a página dos</button>
+          </InspectorFrame>
+        )}
+      </>
+    );
+  }
+  render(<Harness />);
+  const original = screen.getByRole("button", { name: "Pregunta de origen" });
+  original.focus();
+  fireEvent.click(original);
+  fireEvent.click(
+    screen.getByRole("button", { name: "Recorrer a página dos" }),
+  );
+  expect(original).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Pregunta siguiente" }),
+  ).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Cerrar detalle" }));
+  const restored = screen.getByRole("button", { name: "Pregunta de origen" });
+  expect(restored).not.toBe(original);
+  frames.forEach((callback) => callback(performance.now()));
+  expect(restored).toHaveFocus();
+});
