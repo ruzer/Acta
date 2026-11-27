@@ -1,13 +1,6 @@
 import { ParticipantIcon } from "../ParticipantIcon";
 import { CreateInvitation } from "../Invitations";
-import {
-  Fragment,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import {
   type QuestionView,
   type BulkOperation,
@@ -17,11 +10,11 @@ import { Button, Input, Select, EmptyState } from "../../ui";
 import { QuestionRow, SelectionBar } from "../../ui/semantic";
 import {
   Publication,
-  QuestionActions,
   TopicActions,
   publications,
   type EditorProps,
 } from "./EditorWorkspace";
+import { QuestionOpenButton } from "./QuestionOpenButton";
 import { BulkDialog } from "./BulkDialog";
 import { questionGroup } from "./bulk-selection";
 import { AnalystStatus } from "../AnalystVisual";
@@ -36,220 +29,13 @@ import {
   missingTopicReason,
   searchedGroupsReason,
 } from "./unavailable-reasons";
-function InspectorFrame({
-  children,
-  onClose,
-}: {
-  children: ReactNode;
-  onClose: () => void;
-}) {
-  const [wide, setWide] = useState(
-    () =>
-      typeof matchMedia === "function" &&
-      matchMedia("(min-width:1280px)").matches,
-  );
-  const ref = useRef<HTMLDialogElement>(null),
-    heading = useRef<HTMLHeadingElement>(null);
-  const openingTrigger = useRef<HTMLElement | null>(null);
-  useEffect(() => {
-    const m = window.matchMedia?.("(min-width:1280px)");
-    if (!m) return;
-    const update = () => setWide(m.matches);
-    m.addEventListener("change", update);
-    return () => m.removeEventListener("change", update);
-  }, []);
-  useEffect(() => {
-    // Keep the original opener across Strict Mode effect replay and resize.
-    openingTrigger.current ??= document.activeElement as HTMLElement;
-    const trigger = openingTrigger.current;
-    const dialog = ref.current;
-    if (!wide) dialog?.showModal();
-    else heading.current?.focus();
-    return () => {
-      dialog?.close();
-      requestAnimationFrame(() => {
-        // A deferred return must not steal focus from a newer user action.
-        const active = document.activeElement;
-        if (
-          trigger?.isConnected &&
-          (active === document.body || active === trigger) &&
-          !document.querySelector("dialog[open]")
-        )
-          trigger.focus();
-      });
-    };
-  }, [wide]);
-  const content = (
-    <>
-      <header className="qe-inspector-head">
-        <h3 ref={heading} tabIndex={-1}>
-          Detalle de pregunta
-        </h3>
-        <Button tone="secondary" onClick={onClose}>
-          Cerrar detalle
-        </Button>
-      </header>
-      {children}
-    </>
-  );
-  return wide ? (
-    <aside className="qe-inspector" aria-label="Detalle de pregunta">
-      {content}
-    </aside>
-  ) : (
-    <dialog
-      className="qe-inspector qe-inspector-dialog av-scope"
-      aria-label="Detalle de pregunta"
-      ref={ref}
-      onCancel={(e) => {
-        e.preventDefault();
-        onClose();
-      }}
-    >
-      {content}
-    </dialog>
-  );
-}
-export function QuestionInspector({
-  question: q,
-  onClose,
-  onSelectGroup,
-  ...props
-}: EditorProps & {
-  question: QuestionView;
-  onClose: () => void;
-  onSelectGroup?: () => void;
-}) {
-  const { data } = props;
-  const area = data.areas.find((a) => a.id === q.responsibleAreaId);
-  const parent = data.questions.find(
-    (p) => p.id === q.condition?.parentQuestionId,
-  );
-  return (
-    <InspectorFrame onClose={onClose}>
-      <p className="hint">
-        {data.sections.find((s) => s.id === q.sectionId)?.title}
-      </p>
-      <h4>{q.question}</h4>
-      <div className="qe-row-meta">
-        <span>{typeLabels[q.type]}</span>
-        <Publication question={q} />
-      </div>
-      {q.helpText && <p>{q.helpText}</p>}
-      <p>{q.required ? "Pregunta obligatoria" : "Pregunta opcional"}</p>
-      {onSelectGroup && q.publication !== "ARCHIVED" && (
-        <div className="qe-group-select">
-          <p>
-            Se seleccionarán {questionGroup(data.questions, q.id).length}{" "}
-            preguntas: esta pregunta y sus seguimientos, incluso fuera de la
-            página o los filtros actuales.
-          </p>
-          <Button tone="secondary" onClick={onSelectGroup}>
-            Seleccionar grupo completo
-          </Button>
-        </div>
-      )}
-      <QuestionActions
-        {...props}
-        question={q}
-        onEdit={(...args) => {
-          onClose();
-          props.onEdit(...args);
-        }}
-        onAction={(...args) => {
-          onClose();
-          props.onAction(...args);
-        }}
-      />
-      <details className="qe-inspector-advanced">
-        <summary>Configuración avanzada</summary>
-        <dl>
-          <dt>Identificador externo</dt>
-          <dd>{q.externalId}</dd>
-          <dt>Prioridad</dt>
-          <dd>{q.priority}</dd>
-          <dt>Área responsable</dt>
-          <dd>{area?.name ?? "Área no disponible"}</dd>
-          <dt>Participantes asignados</dt>
-          <dd>
-            {q.assignments
-              .filter((a) => a.active)
-              .map(
-                (a) =>
-                  data.members.find((m) => m.id === a.projectMemberId)
-                    ?.displayName ?? "Participante no disponible",
-              )
-              .join(", ") || "Sin participantes asignados"}
-          </dd>
-        </dl>
-        <p className="hint">
-          El área responsable no asigna participantes automáticamente.
-        </p>
-        {q.groupParentId && (
-          <p>
-            Seguimiento de:{" "}
-            {data.questions.find((p) => p.id === q.groupParentId)?.title ??
-              "Pregunta no disponible"}
-            . La agrupación no implica una condición.
-          </p>
-        )}
-        {q.condition && (
-          <p>
-            Mostrar si «{parent?.question ?? "Pregunta no disponible"}»{" "}
-            {
-              {
-                EQUALS: "es igual a",
-                NOT_EQUALS: "es diferente de",
-                CONTAINS: "incluye",
-              }[q.condition.operator]
-            }{" "}
-            «
-            {typeof q.condition.value === "boolean"
-              ? q.condition.value
-                ? "Sí"
-                : "No"
-              : (parent?.options.find((o) => o.value === q.condition?.value)
-                  ?.label ?? q.condition.value)}
-            ».
-          </p>
-        )}
-        <details>
-          <summary>Trazabilidad</summary>
-          <ul>
-            {q.references.map((r) => {
-              const reference = data.references.find(
-                (x) => x.id === r.referenceId,
-              );
-              return (
-                <li key={r.referenceId}>
-                  {reference?.externalId} · {reference?.label}
-                  {r.scopeNote && <p>{r.scopeNote}</p>}
-                </li>
-              );
-            })}
-          </ul>
-          {!q.references.length && <p>Sin referencias relacionadas.</p>}
-          <p className="hint">
-            Relacionar una referencia no la convierte en validada.
-          </p>
-          <Button
-            tone="secondary"
-            onClick={() => {
-              onClose();
-              props.onCreateReference();
-            }}
-          >
-            Crear referencia
-          </Button>
-        </details>
-      </details>
-    </InspectorFrame>
-  );
-}
 export function Organize(
   props: EditorProps & {
     highlightedQuestionId?: string | null;
-    initialSelected?: string;
+    onInspectorRowsChange: (
+      ids: string[],
+      selectGroup: (id: string) => void,
+    ) => void;
     initialSelectionExpanded?: boolean;
   },
 ) {
@@ -368,9 +154,8 @@ export function Organize(
     collapsed,
     bulkIds,
   ]);
-  const [selected, setSelected] = useState<string | null>(
-    props.initialSelected ?? null,
-  );
+  const selected = props.openedQuestionId;
+  const setSelected = (id: string) => props.onOpenQuestion?.(id);
   const questions = data.questions
     .filter(
       (q) =>
@@ -395,7 +180,6 @@ export function Organize(
   );
   const pages = Math.ceil(unfolded.length / 40);
   const currentPage = Math.min(page, Math.max(0, pages - 1));
-  const selection = data.questions.find((q) => q.id === selected);
   const change = () => {
     if (bulkIds.size)
       setSelectionNotice(
@@ -403,7 +187,6 @@ export function Organize(
       );
     setBulkIds(new Set());
     setPage(0);
-    setSelected(null);
   };
   const eligible = (rows: QuestionView[]) =>
     rows.filter((q) => q.publication !== "ARCHIVED");
@@ -435,6 +218,42 @@ export function Organize(
     bulkTrigger.current = document.activeElement as HTMLElement;
     setBulkOperation(operation);
   }
+  const inspectorRowsChange = props.onInspectorRowsChange;
+  const visibleKey = unfolded.map((q) => q.id).join("|");
+  useEffect(() => {
+    inspectorRowsChange(visibleKey ? visibleKey.split("|") : [], (id) => {
+      const group = questionGroup(data.questions, id);
+      setBulkIds(
+        (previous) =>
+          new Set([
+            ...previous,
+            ...group
+              .filter((q) => q.publication !== "ARCHIVED")
+              .map((q) => q.id),
+          ]),
+      );
+      setSelectionNotice(
+        `Grupo seleccionado: ${plural(group.length, "pregunta")}. La selección incluye seguimientos fuera de la página o los filtros actuales.`,
+      );
+    });
+  }, [visibleKey, inspectorRowsChange, data.questions]);
+  useEffect(() => {
+    if (!selected) return;
+    const current = byId.get(selected);
+    if (!current) return;
+    const ancestors = questionAncestors(current, byId);
+    setCollapsed((previous) => {
+      if (!ancestors.some((parent) => previous.has(parent.id))) return previous;
+      const next = new Set(previous);
+      ancestors.forEach((parent) => next.delete(parent.id));
+      return next;
+    });
+  }, [selected, byId]);
+  useEffect(() => {
+    if (!selected) return;
+    const index = visibleKey.split("|").indexOf(selected);
+    if (index >= 0) setPage(Math.floor(index / 40));
+  }, [selected, visibleKey]);
   // A questionnaire without questions has nothing to search, filter, fold or
   // select: say how to begin and offer the one action that applies.
   if (!data.questions.length) {
@@ -473,11 +292,7 @@ export function Organize(
     );
   }
   return (
-    <div
-      className={
-        "qe-organize an-questionnaire" + (selection ? " qe-has-inspector" : "")
-      }
-    >
+    <div className="qe-organize an-questionnaire">
       <section className="qe-compact" aria-label="Preguntas del cuestionario">
         <div className="an-approach">
           <div role="group" aria-label="Enfoque del cuestionario">
@@ -486,14 +301,14 @@ export function Organize(
               aria-pressed={approach === "prepare"}
               onClick={() => setApproach("prepare")}
             >
-              Preparar
+              Contenido
             </Button>
             <Button
               tone="secondary"
               aria-pressed={approach === "analyze"}
               onClick={() => setApproach("analyze")}
             >
-              Analizar
+              Respuestas
             </Button>
           </div>
           <Input
@@ -811,7 +626,7 @@ export function Organize(
           <table className="ac-questionnaire-table" data-approach={approach}>
             <caption className="sr-only">
               Preguntas del cuestionario ·{" "}
-              {approach === "prepare" ? "Preparar" : "Analizar"}
+              {approach === "prepare" ? "Contenido" : "Respuestas"}
             </caption>
             <colgroup>
               <col className="ac-col-select" />
@@ -879,9 +694,11 @@ export function Organize(
                           <tr className="an-parent-context" key={parent.id}>
                             <td colSpan={6}>
                               Seguimiento de{" "}
-                              <button onClick={() => setSelected(parent.id)}>
-                                {parent.question}
-                              </button>
+                              <QuestionOpenButton
+                                question={parent}
+                                current={selected === parent.id}
+                                onOpen={setSelected}
+                              />
                               <span>
                                 Contexto · fuera de esta página o filtro
                               </span>
@@ -946,14 +763,12 @@ export function Organize(
                                 <ParticipantIcon name="chevron" />
                               </Button>
                             )}
-                            <button
-                              className="qe-compact-row"
-                              data-question-id={q.id}
-                              aria-pressed={selected === q.id}
-                              onClick={() => setSelected(q.id)}
-                            >
-                              <strong>{q.question}</strong>
-                            </button>
+                            <QuestionOpenButton
+                              compact
+                              question={q}
+                              current={selected === q.id}
+                              onOpen={setSelected}
+                            />
                           </div>
                           {q.publication === "ARCHIVED" && (
                             <p className="hint">
@@ -1049,10 +864,9 @@ export function Organize(
                           {q.publication === "DRAFT" ? (
                             <Button
                               tone="secondary"
-                              aria-label={`Editar borrador: ${q.title}`}
                               onClick={() => props.onEdit(q, q.sectionId)}
                             >
-                              Editar
+                              Editar pregunta
                             </Button>
                           ) : q.publication === "PUBLISHED" &&
                             props.onOpenContributions ? (
@@ -1246,21 +1060,6 @@ export function Organize(
             if (props.onBulkComplete) props.onBulkComplete(message);
             else setSelectionNotice(message);
           }}
-        />
-      )}
-      {selection && (
-        <QuestionInspector
-          {...props}
-          question={selection}
-          onSelectGroup={() => {
-            const group = questionGroup(data.questions, selection.id);
-            addSelection(group);
-            setSelectionNotice(
-              `Grupo seleccionado: ${plural(group.length, "pregunta")}. La selección incluye seguimientos fuera de la página o los filtros actuales.`,
-            );
-            setSelected(null);
-          }}
-          onClose={() => setSelected(null)}
         />
       )}
     </div>

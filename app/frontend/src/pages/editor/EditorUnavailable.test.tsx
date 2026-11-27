@@ -5,7 +5,7 @@ import "@testing-library/jest-dom/vitest";
 import { questionnaireView } from "@requirements/contracts";
 import fixture from "../../../../../tests/fixtures/analyst-visual.json";
 import { EditorWorkspace } from "./EditorWorkspace";
-import { Organize } from "./Organize";
+import { EditorWorkspace as Organize } from "./EditorWorkspace";
 
 const data = questionnaireView.parse(fixture.questionnaire);
 const handlers = {
@@ -124,7 +124,11 @@ it("la búsqueda bloquea ambos controles globales y el de fila, sin perder el pl
     order: parent.order + 1,
   };
   render(
-    <Organize {...handlers} data={{ ...data, questions: [parent, child] }} />,
+    <Organize
+      initialMode={1}
+      {...handlers}
+      data={{ ...data, questions: [parent, child] }}
+    />,
   );
   await user.click(
     screen.getByRole("button", { name: "Contraer todos los grupos" }),
@@ -165,7 +169,13 @@ it("la búsqueda bloquea ambos controles globales y el de fila, sin perder el pl
 
 it("una pregunta archivada se consulta pero no ofrece una casilla inutilizable", () => {
   const archived = { ...data.questions[0]!, publication: "ARCHIVED" as const };
-  render(<Organize {...handlers} data={{ ...data, questions: [archived] }} />);
+  render(
+    <Organize
+      initialMode={1}
+      {...handlers}
+      data={{ ...data, questions: [archived] }}
+    />,
+  );
   const title = screen.getByRole("button", { name: archived.question });
   const row = title.closest("tr")!;
   expect(within(row).queryByRole("checkbox")).not.toBeInTheDocument();

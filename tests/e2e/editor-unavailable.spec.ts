@@ -127,8 +127,8 @@ test("editor: un tema protegido explica el bloqueo y la edición permite elegir 
     await checkedPage(page, evidence, "editor-topic-unavailable", width);
   }
   await menu.press("Escape");
-  await page.getByLabel(`Acciones de ${draft.title}`, { exact: true }).click();
   await page
+    .getByRole("article", { name: draft.title, exact: true })
     .getByRole("button", { name: "Editar pregunta", exact: true })
     .click();
   const dialog = page.getByRole("dialog", {

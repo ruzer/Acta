@@ -65,7 +65,10 @@ async function fixture(page: Page) {
   return { project, sections, root, child, existing, create };
 }
 async function menu(page: Page, title: string) {
-  await page.getByLabel(`Acciones de ${title}`, { exact: true }).click();
+  await page
+    .getByRole("article", { name: title, exact: true })
+    .locator("[data-question-opener]")
+    .click();
 }
 async function observeNextHighlight(row: Locator) {
   return row.evaluateHandle((element) => {
@@ -131,6 +134,7 @@ for (const width of [1440, 390])
     await page.goto(`/projects/${project.id}/editor?mode=write`);
     await menu(page, child.title);
     await page
+      .locator(".qe-inspector")
       .getByRole("button", { name: "Editar pregunta", exact: true })
       .click();
     const dialog = page.getByRole("dialog", {
@@ -240,10 +244,11 @@ test("Ver desde Organizar conserva filtros, grupos plegados y selección al regr
   });
   await selection.check();
   await page
-    .getByRole("button", {
-      name: `Editar borrador: ${root.title}`,
-      exact: true,
+    .locator("tr")
+    .filter({
+      has: page.getByRole("button", { name: root.question, exact: true }),
     })
+    .getByRole("button", { name: "Editar pregunta", exact: true })
     .click();
   const edit = page.getByRole("dialog", {
     name: "Editar pregunta",
@@ -331,18 +336,18 @@ test("Cambiar de tema mueve el grupo completo; un integrante publicado impide mo
   });
   await page.reload();
   await menu(page, child.title);
-  await page
-    .getByRole("button", { name: "Cambiar de tema", exact: true })
-    .click();
   await expect(
-    dialog.getByRole("group", { name: "Tema al que pertenece" }),
+    page
+      .locator(".qe-inspector")
+      .getByRole("button", { name: "Cambiar de tema", exact: true }),
+  ).toHaveAttribute("aria-disabled", "true");
+  await expect(
+    page
+      .locator(".qe-inspector")
+      .getByRole("button", { name: "Cambiar de tema", exact: true }),
   ).toHaveAccessibleDescription(new RegExp(root.title));
-  await expect(
-    dialog.getByRole("button", { name: "Cambiar de tema", exact: true }),
-  ).toHaveCount(0);
-  await dialog.getByRole("button", { name: "Cancelar", exact: true }).click();
-  await menu(page, child.title);
   await page
+    .locator(".qe-inspector")
     .getByRole("button", { name: "Editar pregunta", exact: true })
     .click();
   const edit = page.getByRole("dialog", {

@@ -349,3 +349,57 @@ it("Escribir: mover un tema no pliega el que se estaba manejando y un tema vací
     "true",
   );
 });
+
+it("recorrer cruza páginas sin remontar el inspector ni borrar casillas", async () => {
+  vi.stubGlobal("matchMedia", () => ({
+    matches: true,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  }));
+  const user = userEvent.setup();
+  const questions = Array.from({ length: 45 }, (_, index) => ({
+    ...data.questions[0]!,
+    id: `visible-${index}`,
+    title: `Pregunta visible ${index}`,
+    question: `Consulta visible ${index}`,
+    groupParentId: null,
+    condition: null,
+    order: index,
+  }));
+  render(
+    <EditorWorkspace
+      data={{ ...data, questions }}
+      projectId="p"
+      initialMode={1}
+      onEdit={vi.fn()}
+      onAction={vi.fn()}
+      onCreateTopic={vi.fn()}
+      onCreateReference={vi.fn()}
+    />,
+  );
+  await user.click(
+    screen.getByRole("checkbox", {
+      name: "Seleccionar pregunta: Consulta visible 0",
+    }),
+  );
+  await user.click(screen.getByRole("button", { name: "Consulta visible 39" }));
+  const panel = screen.getByRole("complementary", {
+    name: "Detalle de pregunta",
+  });
+  const next = within(panel).getByRole("button", {
+    name: "Pregunta siguiente",
+  });
+  await user.click(next);
+  expect(
+    screen.getByRole("complementary", { name: "Detalle de pregunta" }),
+  ).toBe(panel);
+  expect(within(panel).getByRole("status")).toHaveTextContent(
+    "41 de 45 resultados",
+  );
+  expect(
+    screen.getByRole("button", { name: "Consulta visible 40" }),
+  ).toHaveAttribute("aria-current", "true");
+  expect(screen.getByText("1 pregunta seleccionada")).toBeVisible();
+  expect(next).toHaveFocus();
+  vi.unstubAllGlobals();
+});

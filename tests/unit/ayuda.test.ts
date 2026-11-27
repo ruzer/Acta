@@ -339,3 +339,26 @@ it("el aviso tras cambiar de tema explica cómo encontrar la pregunta", () => {
     expect(readFileSync(path, "utf8")).toContain("Ver");
   }
 });
+
+it("la ayuda describe apertura, acciones y recorrido del panel compartido", () => {
+  for (const path of [
+    "README.md",
+    "docs/QUESTIONNAIRE-EDITOR-INTEGRATION.md",
+    "docs/ayuda/SOLUCION-DE-PROBLEMAS.md",
+    "app/frontend/src/pages/Help.tsx",
+  ]) {
+    const text = compact(read(path));
+    for (const label of [
+      "Escribir",
+      "Organizar",
+      "Cambiar de tema",
+      "Más acciones",
+      "Pregunta anterior",
+      "Pregunta siguiente",
+      "Contenido",
+      "Respuestas",
+      "Escape",
+    ])
+      expect(text, path).toContain(label);
+  }
+});

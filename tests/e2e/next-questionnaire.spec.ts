@@ -125,11 +125,11 @@ for (const count of [12, 54, 304]) {
       .getByLabel("Área responsable", { exact: true })
       .selectOption(area.id);
     await page.getByLabel("Estado de publicación").selectOption("DRAFT");
-    await page.getByRole("button", { name: "Analizar", exact: true }).click();
+    await page.getByRole("button", { name: "Respuestas", exact: true }).click();
     await expect(page.locator(".an-row-contributions").first()).toContainText(
       "Sin aportaciones enviadas",
     );
-    await page.getByRole("button", { name: "Preparar", exact: true }).click();
+    await page.getByRole("button", { name: "Contenido", exact: true }).click();
     const collapse = page.getByRole("button", {
       name: "Contraer seguimientos de Consulta 0",
       exact: true,

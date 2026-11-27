@@ -4,7 +4,7 @@ El cuestionario sigue siendo la estructura de un proyecto: temas, preguntas y se
 
 ## Selección y operaciones por lote
 
-**IMPLEMENTADO:** Organizar mantiene el ID de la pregunta activa separado de los IDs seleccionados. Hay selección individual, de grupo por `groupParentId`, tema completo, página de hasta 40 preguntas y todos los resultados filtrados. La selección no necesita nodos DOM fuera de la página.
+**IMPLEMENTADO:** Editor mantiene el ID de la pregunta activa separado de los IDs seleccionados. Hay selección individual, de grupo por `groupParentId`, tema completo, página de hasta 40 preguntas y todos los resultados filtrados. La selección no necesita nodos DOM fuera de la página.
 
 Búsqueda, tema, estado de publicación y área responsable delimitan resultados. Cambiar de página conserva selección; cambiar filtros la limpia con aviso. Grupo y tema pueden incluir elementos fuera del filtro y lo anuncian explícitamente. Las archivadas permanecen consultables y no se incorporan mediante los controles de selección.
 
@@ -26,7 +26,7 @@ El área no asigna personas. Añadir participantes conserva las asignaciones act
 
 Mover arriba o abajo explica cuándo el tema o la pregunta ya está en un extremo. La paginación avisa si estás en la primera o última página. Publicar muestra los problemas concretos que hay que resolver; revisar un lote pide completar su configuración o actualizar una vista previa que haya cambiado.
 
-En Escribir, los menús de acciones en pantallas pequeñas quedan por encima de la navegación inferior y permiten desplazarse si los motivos no caben; conservan Escape y el retorno del foco.
+El menú Más acciones del panel tiene desplazamiento propio; sus opciones no dependen de un menú flotante recortado por el panel. Escape cierra primero ese menú.
 
 Estos motivos son visibles y están asociados con sus controles. No cambian los permisos ni las reglas del servidor.
 
@@ -40,7 +40,9 @@ El puntero normal indica que una acción no está disponible. `aria-busy="true"`
 
 ### Estructura del editor
 
-- `Organize`: filtros, paginación, selección, barra contextual e inspector existente.
+- `Organize`: filtros, paginación, selección y barra contextual. Comunica la lista visible al inspector compartido.
+- `QuestionInspector`: contenido, jerarquía de acciones y recorrido compartidos entre Escribir y Organizar.
+- `useQuestionInspectorLocation`: identidad abierta e historial del panel desde Editor.
 - `bulk-selection`: recorrido de descendientes estructurales; nunca usa condiciones para ampliar selección.
 - `BulkDialog`: configuración, preview, corrección, inclusión explícita de dependencias y confirmación.
 - `Editor`: feedback e invalidación de caché después de la operación.
@@ -54,3 +56,15 @@ El puntero normal indica que una acción no está disponible. `aria-busy="true"`
 La misma regla se aplica en las demás pantallas: la restricción indica qué falta,
 y los estados de espera solo corresponden a una operación real en curso. Consulta
 [los casos de acceso, importación, invitaciones y respuesta](ayuda/SOLUCION-DE-PROBLEMAS.md#una-acción-está-atenuada-o-un-dato-no-se-puede-editar).
+
+## Abrir y recorrer preguntas
+
+En **Escribir** y **Organizar**, el título subrayado y su flecha abren el mismo panel. El nombre accesible corresponde al enunciado; la flecha no agrega otro destino. El atajo **Editar pregunta** conserva el mismo nombre en ambos modos.
+
+El panel muestra texto y ayuda completos, tipo, opciones ordenadas o filas y columnas de matriz, tema, área responsable, participantes activos, estado y obligatoriedad. **Cambiar de tema** aparece solo junto al tema de un borrador y conserva los bloqueos de grupo. Un borrador con errores o una principal pendiente de publicar prioriza **Editar pregunta**; un borrador listo prioriza **Publicar**. No tener participantes es una advertencia que no impide publicar. Una publicada prioriza **Revisar respuestas**. Hay como máximo dos acciones secundarias; configurar, mover arriba/abajo, seleccionar grupo y archivar están en **Más acciones**.
+
+**Pregunta anterior** y **Pregunta siguiente** recorren los resultados filtrados y desplegados de Organizar, cruzando páginas de 40 sin cambiar las casillas. En Escribir recorren los temas desplegados y su orden actual. Una pregunta contextual fuera del filtro lo indica sin inventar una posición. Abrir desde enlace directo despliega el tema o los antecesores necesarios, sin limpiar filtros. La pregunta abierta se marca con `aria-current` y se mantiene a la vista.
+
+`question=<id>` añade una entrada al abrir; recorrer o abrir otra pregunta con el panel ya abierto reemplaza esa entrada. Atrás y Escape cierran; un enlace directo válido prepara una entrada del editor cerrado para que Atrás no salga del editor. Un id inexistente muestra un aviso y retira el parámetro. Abrir, recorrer y cerrar no consultan otra vez el cuestionario. El foco entra en el encabezado y vuelve al origen al cerrar, sin robar una interacción posterior.
+
+Las pestañas **Escribir**, **Organizar** y **Revisar publicación** conservan sus nombres y explican su propósito. El selector de Organizar se llama **Contenido / Respuestas**. La columna del panel mide 456 px desde 1280 px; debajo conserva el diálogo existente. El ajuste de superposición, movimiento de cierre y pantalla completa móvil pertenece a I4, aún pendiente. Estos cambios no acreditan una prueba con personas ni un lector de pantalla físico.

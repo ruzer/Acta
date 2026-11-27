@@ -155,7 +155,7 @@ Consulta los pasos en las guías de [Participante](../pilot/GUIA-PARTICIPANTE.md
 
 Editar tema explica que el nombre y la descripción están protegidos si el tema tiene preguntas publicadas o archivadas. Mientras hay una búsqueda activa, todos los grupos se muestran desplegados: limpia la búsqueda para contraerlos. Si Nueva pregunta o + Agregar pregunta indican que falta un área activa, pide a la administración de la institución que la active en Administración. Una pregunta archivada se puede consultar, pero no seleccionar para acciones por lote.
 
-En la edición de un borrador, elige **Tema al que pertenece**, arriba del contenido, y guarda. También puedes usar **Cambiar de tema** en sus acciones. La pregunta y su grupo completo pasan al final del destino. Si alguna integrante está publicada o archivada, el tema se muestra como texto con el nombre de quien lo impide. Cambia el tema y el vínculo de seguimiento en guardados separados. Tras guardar, **Ver** lleva a la pregunta en su nuevo lugar.
+En la edición de un borrador, elige **Tema al que pertenece**, arriba del contenido, y guarda. También puedes usar **Cambiar de tema** junto al tema en el panel de la pregunta. La pregunta y su grupo completo pasan al final del destino. Si alguna integrante está publicada o archivada, el tema se muestra como texto con el nombre de quien lo impide. Cambia el tema y el vínculo de seguimiento en guardados separados. Tras guardar, **Ver** lleva a la pregunta en su nuevo lugar.
 
 El motivo aparece junto al control; no hace falta pasar el puntero para leerlo. Los botones no disponibles conservan el foco del teclado y no ejecutan la acción. [Guía del editor](../QUESTIONNAIRE-EDITOR-INTEGRATION.md#acciones-no-disponibles-en-el-editor).
 
@@ -199,3 +199,9 @@ No cambies de cuenta para evitar una restricción.
   de Acta se pueden leer y copiar; pide al equipo técnico que los cambie.
 - En la instalación, completa el código y comprueba que la base de datos responde
   antes de crear la instalación.
+
+### No encuentro cómo abrir o recorrer una pregunta
+
+En **Escribir** y **Organizar**, pulsa el título subrayado: abre el mismo panel con texto completo, ayuda, opciones, área y participantes. **Editar pregunta** abre la edición del borrador. **Cambiar de tema** está junto al tema; **Más acciones** contiene configurar, ordenar, seleccionar grupo y archivar.
+
+**Pregunta anterior** y **Pregunta siguiente** recorren los resultados con tus filtros y búsqueda. La selección masiva sigue en sus casillas. Atrás o Escape cierran el panel y el foco vuelve a la lista; puedes compartir la dirección con la pregunta abierta. En Organizar, **Contenido** y **Respuestas** distinguen preparación y aportaciones. [Guía del editor](../QUESTIONNAIRE-EDITOR-INTEGRATION.md#abrir-y-recorrer-preguntas).

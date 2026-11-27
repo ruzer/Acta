@@ -228,7 +228,9 @@ test("simplicity: keyboard returns after cancel, assignment, publication and ins
   const id = await fixture(page, 10);
   await page.goto(`/projects/${id}/editor`);
   await page.getByRole("tab", { name: "Escribir", exact: true }).click();
-  const trigger = page.getByLabel("Acciones de Consulta 0", { exact: true });
+  const trigger = page
+    .getByRole("article", { name: "Consulta 0", exact: true })
+    .locator("[data-question-opener]");
   for (const name of ["Asignar participantes", "Publicar"]) {
     await trigger.focus();
     await page.keyboard.press("Enter");
@@ -264,7 +266,6 @@ test("simplicity: keyboard returns after cancel, assignment, publication and ins
     name: /¿Cómo se atiende la solicitud de ejemplo 1\?/,
   });
   await row.click();
-  await page.getByLabel("Acciones de Consulta 1", { exact: true }).click();
   await page
     .getByRole("button", { name: "Asignar participantes", exact: true })
     .click();

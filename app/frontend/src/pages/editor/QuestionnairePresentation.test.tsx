@@ -6,7 +6,7 @@ import "@testing-library/jest-dom/vitest";
 import { dashboardView, questionnaireView } from "@requirements/contracts";
 import type { z } from "zod";
 import fixture from "../../../../../tests/fixtures/analyst-visual.json";
-import { Organize } from "./Organize";
+import { EditorWorkspace as Organize } from "./EditorWorkspace";
 import { EditorWorkspace } from "./EditorWorkspace";
 import {
   questionAncestors,
@@ -57,7 +57,14 @@ it.each([12, 54, 304])(
       collapsed: [],
       selectedIds: ["q-2", `q-${count - 1}`],
     };
-    render(<Organize {...handlers} data={data} organizeContext={context} />);
+    render(
+      <Organize
+        initialMode={1}
+        {...handlers}
+        data={data}
+        organizeContext={context}
+      />,
+    );
     const controls = screen.getByRole("group", {
       name: "Presentación de grupos",
     });
@@ -116,7 +123,8 @@ it.each([12, 54, 304])(
     ).toHaveAttribute("aria-expanded", "true");
     if (count > 40) {
       const next = screen.getByRole("button", { name: "Página siguiente" });
-      while (next.getAttribute("aria-disabled") !== "true") await user.click(next);
+      while (next.getAttribute("aria-disabled") !== "true")
+        await user.click(next);
     }
     expect(
       screen.getByRole("checkbox", {
@@ -135,7 +143,7 @@ it.each([12, 54, 304])(
 
 it("buscar conserva los seguimientos visibles y explica por qué no se pliegan", async () => {
   const user = userEvent.setup();
-  render(<Organize {...handlers} data={dataFor(12)} />);
+  render(<Organize initialMode={1} {...handlers} data={dataFor(12)} />);
   await user.click(
     screen.getByRole("button", { name: "Contraer todos los grupos" }),
   );
@@ -200,7 +208,7 @@ it("Organizar conserva plegado y selección al cambiar de modo y volver", async 
 it("sin seguimientos no muestra controles de grupos sin efecto", () => {
   const data = dataFor(3);
   for (const question of data.questions) question.groupParentId = null;
-  render(<Organize {...handlers} data={data} />);
+  render(<Organize initialMode={1} {...handlers} data={data} />);
   expect(
     screen.queryByRole("group", { name: "Presentación de grupos" }),
   ).not.toBeInTheDocument();
@@ -210,7 +218,7 @@ it.each([12, 54, 304])(
   async (count) => {
     const data = dataFor(count);
     const user = userEvent.setup();
-    render(<Organize {...handlers} data={data} />);
+    render(<Organize initialMode={1} {...handlers} data={data} />);
     expect(screen.getAllByRole("checkbox")).toHaveLength(Math.min(count, 40));
     await user.click(
       screen.getByRole("checkbox", {
@@ -262,7 +270,7 @@ it.each([12, 54, 304])(
         name: "Consulta de ejemplo 0",
       }),
     ).toBeVisible();
-    await user.click(screen.getByRole("button", { name: "Analizar" }));
+    await user.click(screen.getByRole("button", { name: "Respuestas" }));
     expect(screen.getAllByRole("checkbox")).toHaveLength(1);
     expect(screen.getAllByText("Por confirmar").length).toBeGreaterThan(0);
     expect(screen.getByText("Sin aportaciones enviadas")).toBeVisible();
@@ -270,7 +278,7 @@ it.each([12, 54, 304])(
 );
 it("al plegar, seleccionar esta página no incluye descendientes ocultos", async () => {
   const user = userEvent.setup();
-  render(<Organize {...handlers} data={dataFor(12)} />);
+  render(<Organize initialMode={1} {...handlers} data={dataFor(12)} />);
   await user.click(
     screen.getByRole("button", { name: "Contraer seguimientos de Pregunta 0" }),
   );
@@ -316,6 +324,7 @@ it("N usa únicamente submittedRespondents de la proyección y distingue carga/e
   const open = vi.fn();
   const view = render(
     <Organize
+      initialMode={1}
       {...handlers}
       data={data}
       contributionQuestions={projection}
@@ -328,7 +337,7 @@ it("N usa únicamente submittedRespondents de la proyección y distingue carga/e
   expect(
     screen.queryByRole("columnheader", { name: "Aportaciones" }),
   ).not.toBeInTheDocument();
-  await user.click(screen.getByRole("button", { name: "Analizar" }));
+  await user.click(screen.getByRole("button", { name: "Respuestas" }));
   expect(
     screen.getByRole("columnheader", { name: "Aportaciones" }),
   ).toBeVisible();
@@ -344,12 +353,16 @@ it("N usa únicamente submittedRespondents de la proyección y distingue carga/e
   expect(
     screen.getByRole("button", { name: "12 aportaciones de Pregunta 3" }),
   ).toBeVisible();
-  view.rerender(<Organize {...handlers} data={data} contributionsLoading />);
+  view.rerender(
+    <Organize initialMode={1} {...handlers} data={data} contributionsLoading />,
+  );
   expect(screen.getAllByText("Cargando…")).toHaveLength(4);
   expect(
     screen.queryByText("Sin aportaciones enviadas"),
   ).not.toBeInTheDocument();
-  view.rerender(<Organize {...handlers} data={data} contributionsError />);
+  view.rerender(
+    <Organize initialMode={1} {...handlers} data={data} contributionsError />,
+  );
   expect(screen.getAllByText("No disponible")).toHaveLength(4);
   expect(
     within(screen.getByRole("alert")).getByRole("button", {
@@ -371,13 +384,14 @@ it("restaura contexto de presentación sin guardar respuestas ni seleccionar pre
   const remember = vi.fn();
   render(
     <Organize
+      initialMode={1}
       {...handlers}
       data={dataFor(54)}
       organizeContext={context}
       onOrganizeContextChange={remember}
     />,
   );
-  expect(screen.getByRole("button", { name: "Analizar" })).toHaveAttribute(
+  expect(screen.getByRole("button", { name: "Respuestas" })).toHaveAttribute(
     "aria-pressed",
     "true",
   );
@@ -414,7 +428,7 @@ it("Strict Mode conserva el botón original al cerrar el inspector", async () =>
   const user = userEvent.setup();
   render(
     <StrictMode>
-      <Organize {...handlers} data={dataFor(12)} />
+      <Organize initialMode={1} {...handlers} data={dataFor(12)} />
     </StrictMode>,
   );
   const opener = screen.getByRole("button", { name: "Consulta de ejemplo 0" });
@@ -436,7 +450,7 @@ it("un filtro de área muestra el seguimiento y su contexto aunque el padre excl
     name: "Equipo de seguimiento",
   });
   data.questions[11]!.responsibleAreaId = "followup-area";
-  render(<Organize {...handlers} data={data} />);
+  render(<Organize initialMode={1} {...handlers} data={data} />);
   await user.click(
     screen.getByRole("button", { name: "Contraer seguimientos de Pregunta 0" }),
   );
@@ -463,7 +477,7 @@ it("plegar un grupo de otra página conserva página y foco del control", async 
   const user = userEvent.setup();
   const data = dataFor(54);
   data.questions[53]!.groupParentId = "q-40";
-  render(<Organize {...handlers} data={data} />);
+  render(<Organize initialMode={1} {...handlers} data={data} />);
   await user.click(screen.getByRole("button", { name: "Página siguiente" }));
   const toggle = screen.getByRole("button", {
     name: "Contraer seguimientos de Pregunta 40",
@@ -479,7 +493,13 @@ it("plegar un grupo de otra página conserva página y foco del control", async 
 });
 
 it("un cuestionario vacío explica cómo empezar, sin atribuir la ausencia a los filtros", () => {
-  render(<Organize {...handlers} data={{ ...dataFor(0), sections: [] }} />);
+  render(
+    <Organize
+      initialMode={1}
+      {...handlers}
+      data={{ ...dataFor(0), sections: [] }}
+    />,
+  );
   expect(
     screen.getByRole("heading", { name: "Todavía no hay preguntas." }),
   ).toBeVisible();
@@ -498,7 +518,7 @@ it("un cuestionario vacío explica cómo empezar, sin atribuir la ausencia a los
   ).not.toBeInTheDocument();
 });
 it("un cuestionario vacío no muestra búsqueda, filtros ni selección: solo cómo empezar", () => {
-  render(<Organize {...handlers} data={dataFor(0)} />);
+  render(<Organize initialMode={1} {...handlers} data={dataFor(0)} />);
   expect(
     screen.queryByRole("searchbox", { name: "Buscar preguntas" }),
   ).not.toBeInTheDocument();
@@ -515,6 +535,7 @@ it("un cuestionario vacío sin áreas activas explica por qué no se puede crear
   const data = dataFor(0);
   render(
     <Organize
+      initialMode={1}
       {...handlers}
       data={{
         ...data,
@@ -529,7 +550,7 @@ it("un cuestionario vacío sin áreas activas explica por qué no se puede crear
 });
 it("una búsqueda sin coincidencias conserva el mensaje de filtros, sin fingir un cuestionario vacío", async () => {
   const user = userEvent.setup();
-  render(<Organize {...handlers} data={dataFor(12)} />);
+  render(<Organize initialMode={1} {...handlers} data={dataFor(12)} />);
   await user.type(
     screen.getByRole("searchbox", { name: "Buscar preguntas" }),
     "sin coincidencias",
@@ -546,7 +567,9 @@ it("una búsqueda sin coincidencias conserva el mensaje de filtros, sin fingir u
 
 it("la frase del alcance de «Expandir/Contraer todos» solo se ve si el alcance va más allá de lo visible", async () => {
   const user = userEvent.setup();
-  const { unmount } = render(<Organize {...handlers} data={dataFor(12)} />);
+  const { unmount } = render(
+    <Organize initialMode={1} {...handlers} data={dataFor(12)} />,
+  );
   const scope = () =>
     screen.getByText(/Todos los grupos, incluso fuera de los filtros/);
   // Everything is on screen: the sentence stays for assistive technology only.
@@ -565,7 +588,7 @@ it("la frase del alcance de «Expandir/Contraer todos» solo se ve si el alcance
   expect(scope()).not.toHaveClass("sr-only");
   unmount();
   // More than one page of results: also worth saying.
-  render(<Organize {...handlers} data={dataFor(54)} />);
+  render(<Organize initialMode={1} {...handlers} data={dataFor(54)} />);
   expect(scope()).toHaveClass("hint");
 });
 
@@ -576,6 +599,7 @@ it.each([0, 3, 304])(
     const onCreateTopic = vi.fn();
     render(
       <Organize
+        initialMode={1}
         {...handlers}
         onCreateTopic={onCreateTopic}
         data={dataFor(count)}
@@ -598,6 +622,7 @@ it("el encabezado de cada tema cuenta en singular y en plural", () => {
   const one = dataFor(1);
   render(
     <Organize
+      initialMode={1}
       {...handlers}
       data={{
         ...one,

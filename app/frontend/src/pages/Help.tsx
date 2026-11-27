@@ -86,6 +86,24 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
             una operación en curso, espera a que termine. Los enlaces privados y
             los recordatorios de solo lectura se pueden copiar.
           </p>
+          <h3>Abrir y recorrer preguntas</h3>
+          <p>
+            En Escribir y Organizar, pulsa el título subrayado para abrir la
+            pregunta completa, incluidas sus opciones, área y participantes.
+            Editar pregunta es el atajo para un borrador. Cambiar de tema está
+            junto al tema. Más acciones reúne la configuración, el orden, la
+            selección de grupo y el archivado. El panel prioriza Editar pregunta
+            si hay pendientes, Publicar si el borrador está listo y Revisar
+            respuestas si ya está publicada.
+          </p>
+          <p>
+            Pregunta anterior y Pregunta siguiente recorren los resultados
+            visibles sin perder filtros ni selección. La dirección guarda la
+            pregunta abierta; Atrás o Escape cierran el panel y devuelven el
+            foco a la lista. En Organizar, Contenido reúne la preparación y
+            Respuestas muestra las aportaciones. Las pestañas Escribir,
+            Organizar y Revisar publicación conservan sus nombres.
+          </p>
           <h3>Si algo no funciona</h3>
           <ul>
             <li>
@@ -194,6 +212,24 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
               .
             </li>
           </ol>
+          <h3>Abrir y recorrer preguntas</h3>
+          <p>
+            En Escribir y Organizar, pulsa el título subrayado para abrir la
+            pregunta completa, incluidas sus opciones, área y participantes.
+            Editar pregunta es el atajo para un borrador. Cambiar de tema está
+            junto al tema. Más acciones reúne la configuración, el orden, la
+            selección de grupo y el archivado. El panel prioriza Editar pregunta
+            si hay pendientes, Publicar si el borrador está listo y Revisar
+            respuestas si ya está publicada.
+          </p>
+          <p>
+            Pregunta anterior y Pregunta siguiente recorren los resultados
+            visibles sin perder filtros ni selección. La dirección guarda la
+            pregunta abierta; Atrás o Escape cierran el panel y devuelven el
+            foco a la lista. En Organizar, Contenido reúne la preparación y
+            Respuestas muestra las aportaciones. Las pestañas Escribir,
+            Organizar y Revisar publicación conservan sus nombres.
+          </p>
           <h3>Si algo no funciona</h3>
           <ul>
             <li>
@@ -294,6 +330,24 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
               <strong>Ayuda</strong>. Cierra sesión al terminar.
             </li>
           </ol>
+          <h3>Abrir y recorrer preguntas</h3>
+          <p>
+            En Escribir y Organizar, pulsa el título subrayado para abrir la
+            pregunta completa, incluidas sus opciones, área y participantes.
+            Editar pregunta es el atajo para un borrador. Cambiar de tema está
+            junto al tema. Más acciones reúne la configuración, el orden, la
+            selección de grupo y el archivado. El panel prioriza Editar pregunta
+            si hay pendientes, Publicar si el borrador está listo y Revisar
+            respuestas si ya está publicada.
+          </p>
+          <p>
+            Pregunta anterior y Pregunta siguiente recorren los resultados
+            visibles sin perder filtros ni selección. La dirección guarda la
+            pregunta abierta; Atrás o Escape cierran el panel y devuelven el
+            foco a la lista. En Organizar, Contenido reúne la preparación y
+            Respuestas muestra las aportaciones. Las pestañas Escribir,
+            Organizar y Revisar publicación conservan sus nombres.
+          </p>
           <h3>Si algo no funciona</h3>
           <ul>
             <li>

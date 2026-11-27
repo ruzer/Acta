@@ -1,5 +1,6 @@
 import {
   readEditorLocation,
+  editorFilterLocation,
   writeEditorLocation,
 } from "./editor/editor-location";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -7,6 +8,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Link,
   useNavigate,
+  useLocation,
   useNavigationType,
   useParams,
   useSearchParams,
@@ -33,6 +35,7 @@ import {
 import { ActionForm } from "./Administration";
 import { MoveQuestionDialog } from "./editor/MoveQuestionDialog";
 import { QuestionForm } from "./QuestionForm";
+import { useQuestionInspectorLocation } from "./editor/use-question-inspector-location";
 import { EditorWorkspace } from "./editor/EditorWorkspace";
 import type { OrganizeContext } from "./editor/questionnaire-presentation";
 import "../editor.css";
@@ -43,6 +46,7 @@ export function Editor() {
   const { projectId = "" } = useParams();
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const location = useLocation();
   const [params, setParams] = useSearchParams();
   const contextKey = ["questionnaire-context", projectId];
   const savedContext = qc.getQueryData<{
@@ -64,7 +68,11 @@ export function Editor() {
         locationContext.organize,
       );
       if (next.toString() !== current.toString())
-        setParams(next, { replace: true, preventScrollReset: true });
+        setParams(next, {
+          replace: true,
+          preventScrollReset: true,
+          state: location.state,
+        });
       qc.setQueryData(
         ["questionnaire-context", projectId],
         (previous: { mode?: number } | undefined) => ({
@@ -75,6 +83,7 @@ export function Editor() {
     },
     [
       qc,
+      location.state,
       projectId,
       params,
       setParams,
@@ -93,8 +102,14 @@ export function Editor() {
   function rememberStructureTrigger(questionId: string | null = null) {
     actionQuestionId.current = questionId;
     const active = document.activeElement as HTMLElement;
+    const opener =
+      active.closest(".qe-inspector") && questionId
+        ? Array.from(
+            document.querySelectorAll<HTMLElement>("[data-question-opener]"),
+          ).find((element) => element.dataset.questionOpener === questionId)
+        : null;
     structureTrigger.current =
-      active.closest("details")?.querySelector("summary") ?? active;
+      opener ?? active.closest("details")?.querySelector("summary") ?? active;
   }
   function restoreStructureFocus() {
     requestAnimationFrame(() => {
@@ -110,9 +125,7 @@ export function Editor() {
       if (target?.isConnected && target.getClientRects().length) target.focus();
       else {
         const row = Array.from(
-          document.querySelectorAll<HTMLElement>(
-            ".qe-compact-row[data-question-id]",
-          ),
+          document.querySelectorAll<HTMLElement>("[data-question-opener]"),
         ).find((el) => el.dataset.questionId === actionQuestionId.current);
         if (row?.getClientRects().length) {
           row.focus();
@@ -138,6 +151,10 @@ export function Editor() {
     kind: "assign" | "publish" | "archive" | "metadata";
     q: QuestionView;
   } | null>(null);
+  function closeEditing() {
+    pendingFocusReturn.current = true;
+    setEditing(null);
+  }
   const [topic, setTopic] = useState<string>();
   const [focusField, setFocusField] = useState<string>();
   const [editingTopic, setEditingTopic] = useState<{
@@ -151,11 +168,17 @@ export function Editor() {
     snapshot: QuestionnaireView;
   } | null>(null);
   useEffect(() => {
-    if (pendingFocusReturn.current && !action && !editingTopic && !moving) {
+    if (
+      pendingFocusReturn.current &&
+      !action &&
+      !editingTopic &&
+      !moving &&
+      !editing
+    ) {
       pendingFocusReturn.current = false;
       restoreStructureFocus();
     }
-  }, [action, editingTopic, moving]);
+  }, [action, editingTopic, moving, editing]);
   const [creatingTopic, setCreatingTopic] = useState(false);
   const [creatingReference, setCreatingReference] = useState(false);
   const [topicExternalId, setTopicExternalId] = useState("");
@@ -184,6 +207,7 @@ export function Editor() {
     void qc.invalidateQueries({ queryKey: ["questionnaire", projectId] });
     void qc.invalidateQueries({ queryKey: ["projects"] });
   };
+  const inspector = useQuestionInspectorLocation(q.data?.questions);
   if (q.isPending) return <LoadingState />;
   if (q.error)
     return <ErrorState error={q.error} retry={() => void q.refetch()} />;
@@ -195,7 +219,7 @@ export function Editor() {
       defaultSectionId={topic}
       focusField={focusField}
       initial={editing === "new" ? undefined : editing}
-      onCancel={() => setEditing(null)}
+      onCancel={closeEditing}
       onSave={async (d) => {
         if (editing === "new") await api("createQuestion", { projectId }, d);
         else
@@ -204,7 +228,7 @@ export function Editor() {
             { projectId, id: editing.id },
             { ...d, expectedVersion: editing.lockVersion },
           );
-        setEditing(null);
+        closeEditing();
         if (editing !== "new" && d.sectionId !== editing.sectionId) {
           setNotice("");
           setMoved({
@@ -334,6 +358,7 @@ export function Editor() {
         active="questionnaire"
       />
       {notice && <Alert>{notice}</Alert>}
+      {inspector.notice && <Alert>{inspector.notice}</Alert>}
       {moved && !notice && (
         <Alert>
           Se movió a «{moved.title}» ·{" "}
@@ -344,7 +369,11 @@ export function Editor() {
               // Organize filters are retained so switching back restores them.
               setParams(
                 writeEditorLocation(params, 0, locationContext.organize),
-                { replace: true, preventScrollReset: true },
+                {
+                  replace: true,
+                  preventScrollReset: true,
+                  state: location.state,
+                },
               );
               setRevealMove((previous) => ({
                 id: moved.id,
@@ -381,6 +410,9 @@ export function Editor() {
         </p>
       )}
       <EditorWorkspace
+        openedQuestionId={inspector.question?.id ?? null}
+        onOpenQuestion={inspector.open}
+        onCloseQuestion={inspector.close}
         movedQuestion={moved}
         revealMove={revealMove}
         mode={locationContext.mode}
@@ -394,11 +426,11 @@ export function Editor() {
           );
           setParams(
             writeEditorLocation(params, mode, locationContext.organize),
-            { replace: true, preventScrollReset: true },
+            { replace: true, preventScrollReset: true, state: location.state },
           );
         }}
         organizeContext={locationContext.organize}
-        organizeLocation={params.toString()}
+        organizeLocation={editorFilterLocation(params)}
         onOrganizeContextChange={rememberOrganize}
         contributionQuestions={contributions.data?.questions}
         contributionsLoading={contributions.isPending}
@@ -428,6 +460,7 @@ export function Editor() {
         onTopicAction={topicAction}
         onCreateReference={() => setCreatingReference(true)}
         onEdit={(question, sectionId, field) => {
+          rememberStructureTrigger(question?.id);
           setTopic(sectionId);
           setFocusField(field);
           setEditing(question ?? "new");
