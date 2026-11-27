@@ -38,6 +38,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Encontrar la pregunta trasladada.** El aviso de cambio de tema ofrece Ver, cierra la vista previa si estaba abierta, enfoca la pregunta en su destino y la resalta brevemente; los filtros de Organizar se conservan. Con movimiento reducido, el resalte no se anima.
 
+- **Dependencias e inventario de licencias actualizados.** NestJS common, core y platform-express pasan a 12.6.0; el cliente S3 de AWS a 3.1176.0; jsdom a 31.0.1; typescript-eslint a 8.74.0 y jest-dom a 8.0.0, compatible con Vitest 5. Se regenera el inventario de terceros junto con el archivo de bloqueo: los cinco PR de actualización omitían ese inventario y fallaban su comprobación de correspondencia.
+
 ## [0.12.0] - 2026-11-24
 
 Seguimiento de participación, plazos, autoguardado, plantillas y ayuda para el piloto,

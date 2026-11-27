@@ -4,17 +4,17 @@ Inventario reproducible de dependencias npm declaradas en `package-lock.json`. R
 
 | Paquete | Versión | Licencia declarada |
 | --- | --- | --- |
-| @aws-sdk/client-s3 | 3.1143.0 | Apache-2.0 |
+| @aws-sdk/client-s3 | 3.1176.0 | Apache-2.0 |
 | @axe-core/playwright | 4.14.0 | MPL-2.0 |
 | @eslint/js | 10.0.1 | MIT |
-| @nestjs/common | 12.5.1 | MIT |
-| @nestjs/core | 12.5.1 | MIT |
-| @nestjs/platform-express | 12.5.1 | MIT |
+| @nestjs/common | 12.6.0 | MIT |
+| @nestjs/core | 12.6.0 | MIT |
+| @nestjs/platform-express | 12.6.0 | MIT |
 | @playwright/test | 1.64.1 | Apache-2.0 |
 | @prisma/adapter-pg | 7.10.1 | Apache-2.0 |
 | @prisma/client | 7.10.1 | Apache-2.0 |
 | @tanstack/react-query | 5.107.1 | MIT |
-| @testing-library/jest-dom | 7.0.1 | MIT |
+| @testing-library/jest-dom | 8.0.0 | MIT |
 | @testing-library/react | 16.3.3 | MIT |
 | @testing-library/user-event | 14.6.12 | MIT |
 | @types/cookie-parser | 1.4.10 | MIT |
@@ -34,7 +34,7 @@ Inventario reproducible de dependencias npm declaradas en `package-lock.json`. R
 | fast-xml-parser | 5.12.0 | MIT |
 | globals | 17.14.0 | MIT |
 | helmet | 8.3.0 | MIT |
-| jsdom | 31.0.0 | MIT |
+| jsdom | 31.0.1 | MIT |
 | pdf-lib | 1.17.1 | MIT |
 | pg | 8.23.1 | MIT |
 | prettier | 3.10.1 | MIT |
@@ -46,7 +46,7 @@ Inventario reproducible de dependencias npm declaradas en `package-lock.json`. R
 | reflect-metadata | 0.2.2 | Apache-2.0 |
 | rxjs | 7.8.2 | Apache-2.0 |
 | sharp | 0.35.5 | Apache-2.0 |
-| typescript-eslint | 8.72.0 | MIT |
+| typescript-eslint | 8.74.0 | MIT |
 | typescript | 6.0.3 | Apache-2.0 |
 | vite | 8.3.7 | MIT |
 | vitest | 5.1.0 | MIT |
