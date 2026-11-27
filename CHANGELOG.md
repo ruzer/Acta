@@ -22,7 +22,7 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Cambiar de tema desde las acciones.** El diálogo usa el mismo nombre en el editor y la ayuda, permite trasladar grupos completos y explica qué pregunta impide el cambio.
 
-- **Encontrar la pregunta trasladada.** El aviso de cambio de tema ofrece Ver, enfoca la pregunta en su destino y la resalta brevemente; los filtros de Organizar se conservan. Con movimiento reducido, el resalte no se anima.
+- **Encontrar la pregunta trasladada.** El aviso de cambio de tema ofrece Ver, cierra la vista previa si estaba abierta, enfoca la pregunta en su destino y la resalta brevemente; los filtros de Organizar se conservan. Con movimiento reducido, el resalte no se anima.
 
 ## [0.12.0] - 2026-11-24
 
