@@ -66,7 +66,12 @@ export function ParticipationPeople({
             person.state,
             <Button
               tone="secondary"
-              disabled={person.pending === 0}
+              unavailable={
+                person.pending === 0 && {
+                  reason:
+                    "Esta persona no tiene preguntas obligatorias pendientes.",
+                }
+              }
               aria-label={`Copiar recordatorio para ${person.name}`}
               onClick={() => remind(person)}
             >

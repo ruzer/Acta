@@ -1,6 +1,15 @@
 import type { OrganizeContext } from "./questionnaire-presentation";
 const modes = ["write", "organize", "publish"];
-const keys = ["mode", "q", "topic", "publication", "area", "approach", "page"];
+const keys = [
+  "mode",
+  "q",
+  "topic",
+  "publication",
+  "area",
+  "approach",
+  "page",
+  "question",
+];
 const empty: OrganizeContext = {
   topic: "",
   search: "",
@@ -21,11 +30,16 @@ export function readEditorLocation(
   // A link back from review may reuse the editor context. Browser history and
   // reload restore the URL itself, including an entry with no filters.
   if (!present && returningFromView)
-    return { mode: saved?.mode ?? 1, organize: base };
+    return {
+      mode: saved?.mode ?? 1,
+      organize: base,
+      question: params.get("question"),
+    };
   const index = modes.indexOf(params.get("mode") ?? "organize");
   const page = params.get("page") ?? "1";
   return {
     mode: index < 0 ? 1 : index,
+    question: params.get("question"),
     organize: {
       ...base,
       topic: params.get("topic") ?? "",
@@ -51,6 +65,7 @@ export function writeEditorLocation(
 ) {
   const next = new URLSearchParams(params);
   for (const key of keys) next.delete(key);
+  if (params.has("question")) next.set("question", params.get("question")!);
   next.set("mode", modes[mode] ?? "organize");
   next.set("approach", context.approach);
   for (const [key, value] of Object.entries({
@@ -62,4 +77,10 @@ export function writeEditorLocation(
     if (value) next.set(key, value);
   if (context.page > 0) next.set("page", String(context.page + 1));
   return next;
+}
+
+export function editorFilterLocation(params: URLSearchParams) {
+  const filters = new URLSearchParams(params);
+  filters.delete("question");
+  return filters.toString();
 }

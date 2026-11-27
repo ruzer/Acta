@@ -1,3 +1,4 @@
+import { evidenceDownloadReason } from "../ui/control-availability";
 import { presentationUsesKeyboard } from "../session-presentation";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -466,7 +467,11 @@ function Sent({
             key={id}
             name={e.originalName}
             size={`${(e.byteSize / 1024).toFixed(1)} KB`}
-            disabled={e.status !== "READY"}
+            unavailable={
+              e.status !== "READY" && {
+                reason: evidenceDownloadReason(e.status),
+              }
+            }
             onDownload={() => void download(e.id, e.originalName)}
           />
         ))

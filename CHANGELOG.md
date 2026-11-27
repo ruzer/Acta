@@ -10,6 +10,30 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 - **Accesos sin cambios involuntarios.** Al elegir un miembro se conservan su rol, área y estado actuales; las cuentas nuevas requieren elegir rol. El formulario muestra las diferencias, evita envíos sin cambios y pide confirmar los cambios de acceso sensibles, con advertencia al retirar la propia administración.
 
+- **Controles no disponibles con motivo.** Los componentes compartidos admiten una explicación visible asociada al control; los botones conservan el foco sin ejecutar la acción. El puntero de espera se reserva a una operación ocupada y los valores fijos se presentan como texto seleccionable con su motivo: el identificador de una pregunta existente, el código de instalación y los valores administrados externamente.
+
+- **Motivos claros en el editor.** Los temas protegidos, la búsqueda que mantiene grupos desplegados y la falta de áreas activas explican por qué una acción no está disponible y cómo continuar. Las preguntas archivadas no ofrecen selección y los valores que no se pueden editar muestran su motivo.
+
+- **Motivos en todas las pantallas.** Las restricciones de formularios, selecciones, descargas y navegación muestran su causa; los enlaces y textos de solo lectura conservan la copia. Los estados de espera se distinguen de los bloqueos y el editor mantiene una jerarquía accesible de encabezados.
+
+- **Datos de la pregunta sin desbordamiento.** El código y el tipo pasan a otra línea cuando no caben juntos en la lista de Organizar, también en pantallas intermedias.
+
+- **Preguntas legibles al abrir el detalle.** Los enlaces de Organizar conservan el tamaño y peso del texto anterior; en móvil el enunciado sigue completo, sin recortarlo a dos líneas.
+
+- **Fila visible al recorrer páginas.** Anterior y Siguiente muestran la fila de la pregunta abierta también al cruzar una página de Organizar, sin perder la selección ni el foco del panel.
+
+### Changed
+
+- **Abrir y recorrer preguntas.** El título subrayado abre el mismo panel en Escribir y Organizar, con opciones, área, participantes y acciones según el estado. Cambiar de tema está junto al tema y Más acciones reúne la configuración, el orden, la selección de grupo y el archivado. La dirección conserva la pregunta; Atrás y Escape vuelven a la lista, y anterior/siguiente respetan los resultados visibles. Organizar distingue Contenido y Respuestas sin cambiar las pestañas. El panel se superpone sin estrechar la lista; presenta pregunta y opciones antes de los datos, con la acción principal y Más acciones al pie. En móvil ocupa toda la pantalla.
+
+- **Cambiar el tema al editar.** Los borradores permiten elegir el tema antes del contenido y guardar ambos cambios juntos. La pregunta principal y todos sus seguimientos se mueven como un grupo; si alguien no es borrador, el motivo indica quién lo impide.
+
+- **Grupos completos entre temas.** El traslado conserva la principal y sus seguimientos, respeta las posiciones reservadas y registra la edición y el movimiento en una sola operación. Un reintento desactualizado se rechaza sin repetir cambios.
+
+- **Cambiar de tema desde las acciones.** El diálogo usa el mismo nombre en el editor y la ayuda, permite trasladar grupos completos y explica qué pregunta impide el cambio.
+
+- **Encontrar la pregunta trasladada.** El aviso de cambio de tema ofrece Ver, cierra la vista previa si estaba abierta, enfoca la pregunta en su destino y la resalta brevemente; los filtros de Organizar se conservan. Con movimiento reducido, el resalte no se anima.
+
 ## [0.12.0] - 2026-11-24
 
 Seguimiento de participación, plazos, autoguardado, plantillas y ayuda para el piloto,

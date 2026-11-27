@@ -225,8 +225,11 @@ test("administración, edición, guardado, publicación y contenido protegido", 
     ),
   ).toBeVisible();
   const row = page.getByRole("article", { name: questionTitle, exact: true });
-  await row.getByLabel("Acciones de " + questionTitle, { exact: true }).click();
-  await row.getByRole("button", { name: "Publicar", exact: true }).click();
+  await row.locator("[data-question-opener]").click();
+  await page
+    .locator(".qe-inspector")
+    .getByRole("button", { name: "Publicar", exact: true })
+    .click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await accessible(page);
   await page.getByRole("button", { name: "Confirmar publicación" }).click();

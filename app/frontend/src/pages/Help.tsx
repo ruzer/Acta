@@ -80,6 +80,36 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
               sobre todo si compartes la computadora.
             </li>
           </ol>
+          <p>
+            Si una acción está atenuada, lee la explicación junto al control:
+            indica qué falta o si ya estás en la primera o última página. Si hay
+            una operación en curso, espera a que termine. Los enlaces privados y
+            los recordatorios de solo lectura se pueden copiar.
+          </p>
+          <h3>Abrir y recorrer preguntas</h3>
+          <p>
+            En Escribir y Organizar, pulsa el título subrayado para abrir la
+            pregunta completa, incluidas sus opciones, área y participantes.
+            Editar pregunta es el atajo para un borrador. Cambiar de tema está
+            junto al tema. Más acciones reúne la configuración, el orden, la
+            selección de grupo y el archivado. El panel prioriza Editar pregunta
+            si hay pendientes, Publicar si el borrador está listo y Revisar
+            respuestas si ya está publicada.
+          </p>
+          <p>
+            Primero aparecen la pregunta y sus opciones; después, los datos y
+            las acciones secundarias. La acción principal y Más acciones
+            permanecen al pie. El panel se superpone a la lista sin estrecharla
+            y ocupa toda la pantalla en móvil.
+          </p>
+          <p>
+            Pregunta anterior y Pregunta siguiente recorren los resultados
+            visibles sin perder filtros ni selección. La dirección guarda la
+            pregunta abierta; Atrás o Escape cierran el panel y devuelven el
+            foco a la lista. En Organizar, Contenido reúne la preparación y
+            Respuestas muestra las aportaciones. Las pestañas Escribir,
+            Organizar y Revisar publicación conservan sus nombres.
+          </p>
           <h3>Si algo no funciona</h3>
           <ul>
             <li>
@@ -197,8 +227,55 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
               .
             </li>
           </ol>
+          <h3>Abrir y recorrer preguntas</h3>
+          <p>
+            En Escribir y Organizar, pulsa el título subrayado para abrir la
+            pregunta completa, incluidas sus opciones, área y participantes.
+            Editar pregunta es el atajo para un borrador. Cambiar de tema está
+            junto al tema. Más acciones reúne la configuración, el orden, la
+            selección de grupo y el archivado. El panel prioriza Editar pregunta
+            si hay pendientes, Publicar si el borrador está listo y Revisar
+            respuestas si ya está publicada.
+          </p>
+          <p>
+            Primero aparecen la pregunta y sus opciones; después, los datos y
+            las acciones secundarias. La acción principal y Más acciones
+            permanecen al pie. El panel se superpone a la lista sin estrecharla
+            y ocupa toda la pantalla en móvil.
+          </p>
+          <p>
+            Pregunta anterior y Pregunta siguiente recorren los resultados
+            visibles sin perder filtros ni selección. La dirección guarda la
+            pregunta abierta; Atrás o Escape cierran el panel y devuelven el
+            foco a la lista. En Organizar, Contenido reúne la preparación y
+            Respuestas muestra las aportaciones. Las pestañas Escribir,
+            Organizar y Revisar publicación conservan sus nombres.
+          </p>
           <h3>Si algo no funciona</h3>
           <ul>
+            <li>
+              En el editor, Editar tema explica cuándo el nombre está protegido
+              por preguntas publicadas o archivadas. Con una búsqueda activa,
+              limpia la búsqueda para contraer los grupos. Si falta un área
+              activa, pide a la administración de la institución que la active.
+              Una pregunta archivada se puede consultar, pero no seleccionar. En
+              la edición de un borrador, elige Tema al que pertenece antes de
+              guardar o usa Cambiar de tema. Se mueve el grupo completo al final
+              del destino. El aviso distingue entre su único seguimiento y
+              varios seguimientos, y muestra sus nombres. Si una pregunta del
+              grupo no está en borrador, se muestra su nombre y el tema queda
+              fijo. Cambia el tema y el vínculo de seguimiento en guardados
+              separados. Después, Ver lleva a la pregunta en su nuevo lugar.
+              El identificador externo de una pregunta existente, el código
+              interno de la instalación y los valores administrados externamente
+              se muestran como texto seleccionable con su motivo. El identificador
+              se conserva al guardar; los valores de infraestructura no se envían
+              como cambios.
+              Para importar, elige el archivo y corrige la vista previa. Para
+              crear usuarios en lote, pega y revisa la tabla. Los recordatorios
+              requieren preguntas obligatorias pendientes y el informe requiere
+              una decisión vigente para imprimirse.
+            </li>
             <li>
               <strong>
                 No tienes permiso para administrar la institución.
@@ -280,6 +357,30 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
               <strong>Ayuda</strong>. Cierra sesión al terminar.
             </li>
           </ol>
+          <h3>Abrir y recorrer preguntas</h3>
+          <p>
+            En Escribir y Organizar, pulsa el título subrayado para abrir la
+            pregunta completa, incluidas sus opciones, área y participantes.
+            Editar pregunta es el atajo para un borrador. Cambiar de tema está
+            junto al tema. Más acciones reúne la configuración, el orden, la
+            selección de grupo y el archivado. El panel prioriza Editar pregunta
+            si hay pendientes, Publicar si el borrador está listo y Revisar
+            respuestas si ya está publicada.
+          </p>
+          <p>
+            Primero aparecen la pregunta y sus opciones; después, los datos y
+            las acciones secundarias. La acción principal y Más acciones
+            permanecen al pie. El panel se superpone a la lista sin estrecharla
+            y ocupa toda la pantalla en móvil.
+          </p>
+          <p>
+            Pregunta anterior y Pregunta siguiente recorren los resultados
+            visibles sin perder filtros ni selección. La dirección guarda la
+            pregunta abierta; Atrás o Escape cierran el panel y devuelven el
+            foco a la lista. En Organizar, Contenido reúne la preparación y
+            Respuestas muestra las aportaciones. Las pestañas Escribir,
+            Organizar y Revisar publicación conservan sus nombres.
+          </p>
           <h3>Si algo no funciona</h3>
           <ul>
             <li>

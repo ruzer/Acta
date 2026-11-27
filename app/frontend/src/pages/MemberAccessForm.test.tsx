@@ -399,6 +399,9 @@ it("confirmar dos veces mientras se guarda envía una sola operación", async ()
   await user.click(confirmationButton);
   expect(command).toHaveBeenCalledTimes(1);
   expect(confirmationButton).toHaveAttribute("aria-disabled", "true");
+  expect(confirmationButton).toHaveAttribute("aria-busy", "true");
+  expect(confirmationButton).toHaveAccessibleDescription("Guardando…");
+  expect(screen.getByLabelText("Usuario")).toHaveAttribute("aria-busy", "true");
   finish({ ...reviewer, role: "ADMIN" });
   expect(await screen.findByText("Operación guardada.")).toBeVisible();
 });

@@ -191,7 +191,14 @@ export function ConsultationNotice({ token }: { token: string }) {
         {!done && (
           <Button
             tone="secondary"
-            disabled={busy || conflict}
+            disabled={busy}
+            aria-busy={busy}
+            unavailable={
+              conflict && {
+                reason:
+                  "La respuesta cambió. Abre la pregunta anterior para revisar su estado antes de continuar.",
+              }
+            }
             onClick={() => void revert()}
           >
             {busy ? "Deshaciendo…" : "Deshacer"}

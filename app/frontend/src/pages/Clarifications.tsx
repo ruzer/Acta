@@ -141,6 +141,7 @@ function Reply({
           <Button
             tone="secondary"
             disabled={busy}
+            aria-busy={busy}
             onClick={() => void refresh()}
           >
             Actualizar información conservando texto
@@ -157,9 +158,10 @@ function Reply({
           onDirty(e.target.value.length > 0);
         }}
         disabled={busy}
+        aria-busy={busy}
         hint="Este mensaje explica tu respuesta enviada; no la reemplaza."
       />
-      <Button type="submit" disabled={busy}>
+      <Button type="submit" disabled={busy} aria-busy={busy}>
         {busy ? "Enviando…" : "Enviar aclaración"}
       </Button>
     </form>

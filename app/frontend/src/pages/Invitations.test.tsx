@@ -221,7 +221,15 @@ it("una condición no agrega silenciosamente la principal ni permite avanzar sin
   expect(screen.getByRole("alert")).toHaveTextContent(
     "Faltan preguntas de las que depende una condición",
   );
-  expect(screen.getByRole("button", { name: "Continuar" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Continuar" })).toHaveAttribute(
+    "aria-disabled",
+    "true",
+  );
+  const next = screen.getByRole("button", { name: "Continuar" });
+  await user.click(next);
+  next.focus();
+  await user.keyboard("{Enter} ");
+  expect(screen.getByRole("heading", { name: "Preguntas" })).toBeVisible();
   expect(
     request.mock.calls.filter((c) => c[0] === "createInvitation"),
   ).toHaveLength(0);
@@ -234,7 +242,15 @@ it("los borradores seleccionados no se publican ni permiten crear una invitació
   expect(screen.getByRole("alert")).toHaveTextContent(
     "Esta acción no publica borradores",
   );
-  expect(screen.getByRole("button", { name: "Continuar" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Continuar" })).toHaveAttribute(
+    "aria-disabled",
+    "true",
+  );
+  const next = screen.getByRole("button", { name: "Continuar" });
+  await user.click(next);
+  next.focus();
+  await user.keyboard("{Enter} ");
+  expect(screen.getByRole("heading", { name: "Preguntas" })).toBeVisible();
   expect(
     request.mock.calls.filter((c) => c[0] !== "invitationPolicy"),
   ).toHaveLength(0);

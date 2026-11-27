@@ -55,7 +55,11 @@ test("Escribir: en cada tema la cuenta va antes del menú, también en móvil", 
     await page.getByRole("tab", { name: "Escribir" }).click();
     const header = page.locator(".qe-topic > header").first();
     await expect(header).toBeVisible();
-    const count = await header.locator(".hint").boundingBox();
+    // Menu explanations also use .hint; only the direct child is the count.
+    const countLabel = header.locator(":scope > .hint");
+    await expect(countLabel).toHaveCount(1);
+    await expect(countLabel).toHaveText(/^\d+ preguntas?$/);
+    const count = await countLabel.boundingBox();
     const menu = await header.locator(".qe-menu").boundingBox();
     expect(count && menu).toBeTruthy();
     expect(

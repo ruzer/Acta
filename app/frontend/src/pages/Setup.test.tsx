@@ -107,13 +107,17 @@ it("recoge el código aunque el enlace se pegue en una pestaña que ya tiene Act
 });
 
 it("no avanza con un código incompleto y muestra el rechazo del servidor", async () => {
-  const { user } = mount({
+  const { user, calls } = mount({
     setupVerify: () => {
       throw new Error("El código de instalación no es válido o caducó.");
     },
   });
   const start = screen.getByRole("button", { name: "Comenzar" });
-  expect(start).toBeDisabled();
+  expect(start).toHaveAttribute("aria-disabled", "true");
+  await user.click(start);
+  start.focus();
+  await user.keyboard("{Enter} ");
+  expect(calls).toHaveLength(0);
   await user.type(screen.getByLabelText("Código de instalación"), code);
   await user.click(start);
   expect(await screen.findByRole("alert")).toHaveTextContent(
@@ -144,8 +148,15 @@ it("valida al administrador antes de seguir y recorre los pasos hasta crear la i
 
   await screen.findByRole("heading", { name: "Organización" });
   expect(
-    screen.getByLabelText("Código interno de la instalación"),
-  ).toHaveAttribute("readonly");
+    screen.queryByRole("textbox", { name: "Código interno de la instalación" }),
+  ).toBeNull();
+  const installationCode = screen.getByRole("group", {
+    name: "Código interno de la instalación",
+  });
+  expect(installationCode).toHaveTextContent("DEFAULT");
+  expect(installationCode).toHaveAccessibleDescription(
+    "Lo define la infraestructura (ORGANIZATION_CODE). No se puede cambiar aquí y no es un dato de acceso.",
+  );
   await user.click(screen.getByRole("button", { name: "Continuar" }));
   expect(
     screen.getByText("Escribe el nombre de la institución."),
@@ -229,14 +240,21 @@ it("lo que define la infraestructura se muestra sin poder editarse y no se enví
   await screen.findByRole("heading", { name: "Almacenamiento" });
   await user.click(screen.getByRole("button", { name: "Continuar" }));
   await screen.findByRole("heading", { name: "Personalización" });
-  const name = screen.getByLabelText("Nombre de la aplicación");
-  expect(name).toHaveValue("Nombre del .env");
-  expect(name).toHaveAttribute("readonly");
+  expect(
+    screen.queryByRole("textbox", { name: "Nombre de la aplicación" }),
+  ).toBeNull();
+  const name = screen.getByRole("group", { name: "Nombre de la aplicación" });
+  expect(name).toHaveTextContent("Nombre del .env");
+  expect(name).toHaveAccessibleDescription(
+    /Administrado externamente \(APP_NAME\)/,
+  );
   expect(
     screen.getAllByText(/Administrado externamente \(APP_NAME\)/)[0],
   ).toBeVisible();
-  expect(screen.getByLabelText("Zona horaria")).toHaveValue("Europe/Madrid");
-  expect(screen.getByLabelText("Zona horaria")).toHaveAttribute("readonly");
+  expect(screen.getByRole("group", { name: "Zona horaria" })).toHaveTextContent(
+    "Europe/Madrid",
+  );
+  expect(screen.queryByRole("textbox", { name: "Zona horaria" })).toBeNull();
   await user.click(screen.getByRole("button", { name: "Continuar" }));
   await screen.findByRole("heading", { name: "Verificación" });
   await user.click(screen.getByRole("button", { name: "Crear instalación" }));
@@ -277,7 +295,7 @@ it("si otra persona terminó la instalación primero, deja de ofrecer la guía",
 });
 
 it("con la base de datos sin respuesta no permite crear la instalación", async () => {
-  const { user } = mount({
+  const { user, calls } = mount({
     setupChecks: () => ({ ...checks, database: "unavailable" }),
   });
   await begin(user);
@@ -295,8 +313,13 @@ it("con la base de datos sin respuesta no permite crear la instalación", async 
   await waitFor(() =>
     expect(
       screen.getByRole("button", { name: "Crear instalación" }),
-    ).toBeDisabled(),
+    ).toHaveAttribute("aria-disabled", "true"),
   );
+  const create = screen.getByRole("button", { name: "Crear instalación" });
+  await user.click(create);
+  create.focus();
+  await user.keyboard("{Enter} ");
+  expect(calls.filter(([key]) => key === "setupComplete")).toHaveLength(0);
 });
 
 async function appearanceStep(user: ReturnType<typeof userEvent.setup>) {
@@ -339,10 +362,15 @@ for (const [source, value, expected] of [
       }),
     });
     await appearanceStep(user);
-    expect(screen.getByLabelText("Zona horaria")).toHaveValue(expected);
-    if (source === "external")
-      expect(screen.getByLabelText("Zona horaria")).toHaveAttribute("readonly");
-    else {
+    if (source === "external") {
+      expect(
+        screen.getByRole("group", { name: "Zona horaria" }),
+      ).toHaveTextContent(expected);
+      expect(
+        screen.queryByRole("textbox", { name: "Zona horaria" }),
+      ).toBeNull();
+    } else {
+      expect(screen.getByLabelText("Zona horaria")).toHaveValue(expected);
       await user.selectOptions(screen.getByLabelText("Zona horaria"), "UTC");
       expect(screen.getByLabelText("Zona horaria")).toHaveValue("UTC");
     }

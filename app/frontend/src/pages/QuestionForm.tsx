@@ -19,9 +19,14 @@ import {
   Input,
   Select,
   Textarea,
+  UnavailableValue,
 } from "../ui";
 import { ApiFailure } from "../api";
 import { nextQuestionId, suggestTitle } from "./question-suggestions";
+import {
+  questionTopicMove,
+  simultaneousTopicAndGroupReason,
+} from "./editor/topic-move";
 
 const typeDescriptions: Record<QuestionInput["type"], string> = {
   YES_NO: "El participante elige entre sí y no.",
@@ -199,10 +204,19 @@ export function QuestionForm({
   const fieldError = (key: string) =>
     fields[key] ??
     Object.entries(fields).find(([path]) => path.startsWith(key + "."))?.[1];
+  const topicMove = initial ? questionTopicMove(data, initial) : null;
   async function submit(e: FormEvent) {
     e.preventDefault();
     setError("");
     setFields({});
+    if (
+      initial &&
+      value.sectionId !== initial.sectionId &&
+      value.groupParentId !== initial.groupParentId
+    ) {
+      setFields({ groupParentId: simultaneousTopicAndGroupReason });
+      return;
+    }
     const invalid: Record<string, string> = {};
     for (const el of Array.from(formRef.current?.elements ?? [])) {
       if (
@@ -331,11 +345,64 @@ export function QuestionForm({
           <h2 id={titleId}>
             {initial ? "Editar pregunta" : "Agregar pregunta al cuestionario"}
           </h2>
-          <Button tone="secondary" disabled={busy} onClick={cancel}>
+          <Button
+            tone="secondary"
+            disabled={busy}
+            aria-busy={busy}
+            onClick={cancel}
+          >
             Cerrar
           </Button>
         </header>
-        <fieldset disabled={busy}>
+        <fieldset disabled={busy} aria-busy={busy}>
+          <legend className="sr-only">Tema de la pregunta</legend>
+          {topicMove?.reason ? (
+            <UnavailableValue
+              label="Tema al que pertenece"
+              value={
+                <>
+                  <span aria-hidden="true">🔒</span>{" "}
+                  {data.sections.find(
+                    (section) => section.id === value.sectionId,
+                  )?.title || "Tema no disponible"}
+                </>
+              }
+              reason={topicMove.reason}
+            />
+          ) : (
+            <Select
+              label="Tema al que pertenece"
+              name="sectionId"
+              value={value.sectionId}
+              required
+              error={fieldError("sectionId")}
+              hint="Al guardar, la pregunta pasa al final del tema que elijas, junto con tus cambios."
+              onChange={(e) =>
+                patch({
+                  sectionId: e.target.value,
+                  order:
+                    initial?.order ??
+                    Math.max(
+                      0,
+                      ...data.questions
+                        .filter((q) => q.sectionId === e.target.value)
+                        .map((q) => q.order),
+                    ) + 1,
+                })
+              }
+            >
+              {data.sections.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.title}
+                </option>
+              ))}
+            </Select>
+          )}
+          {topicMove?.notice && !topicMove.reason && (
+            <p className="hint">{topicMove.notice}</p>
+          )}
+        </fieldset>
+        <fieldset disabled={busy} aria-busy={busy}>
           <legend className="sr-only">Contenido de la pregunta</legend>
           <div className="next-authoring-prompt">
             <Textarea
@@ -588,37 +655,13 @@ export function QuestionForm({
             ))}
           </fieldset>
         )}
-        <fieldset disabled={busy} className="ac-authoring-placement">
+        <fieldset
+          disabled={busy}
+          aria-busy={busy}
+          className="ac-authoring-placement"
+        >
           <legend>Ubicación y obligatoriedad</legend>
           <div className="next-authoring-context">
-            <Select
-              label="Tema al que pertenece"
-              error={fieldError("sectionId")}
-              name="sectionId"
-              disabled={!!initial}
-              value={value.sectionId}
-              required
-              onChange={(e) =>
-                patch({
-                  sectionId: e.target.value,
-                  order:
-                    e.target.value === initial?.sectionId
-                      ? initial.order
-                      : Math.max(
-                          0,
-                          ...data.questions
-                            .filter((q) => q.sectionId === e.target.value)
-                            .map((q) => q.order),
-                        ) + 1,
-                })
-              }
-            >
-              {data.sections.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.title}
-                </option>
-              ))}
-            </Select>
             <Checkbox
               label="Pregunta obligatoria"
               name="required"
@@ -627,7 +670,11 @@ export function QuestionForm({
             />
           </div>
         </fieldset>
-        <fieldset disabled={busy} className="next-authoring-identification">
+        <fieldset
+          disabled={busy}
+          aria-busy={busy}
+          className="next-authoring-identification"
+        >
           <legend>Identificación de la pregunta</legend>
           <p className="hint">
             {initial
@@ -635,18 +682,25 @@ export function QuestionForm({
               : "Se proponen a partir de lo que escribes y puedes cambiarlos. El identificador es el código único y fijo de la pregunta en este proyecto (aparece en exportaciones y referencias) y no se podrá cambiar después."}
           </p>
           <div className="grid2">
-            <Input
-              label="Identificador externo"
-              required
-              name="externalId"
-              value={value.externalId}
-              readOnly={!!initial}
-              error={fieldError("externalId")}
-              onChange={(e) => {
-                setIdAuto(false);
-                patch({ externalId: e.target.value });
-              }}
-            />
+            {initial ? (
+              <UnavailableValue
+                label="Identificador externo"
+                value={value.externalId}
+                reason="El identificador se conserva para mantener las referencias a esta pregunta."
+              />
+            ) : (
+              <Input
+                label="Identificador externo"
+                required
+                name="externalId"
+                value={value.externalId}
+                error={fieldError("externalId")}
+                onChange={(e) => {
+                  setIdAuto(false);
+                  patch({ externalId: e.target.value });
+                }}
+              />
+            )}
 
             <Input
               label="Título breve"
@@ -789,7 +843,11 @@ export function QuestionForm({
               >
                 <option value="">Sin agrupación</option>
                 {candidates
-                  .filter((q) => q.sectionId === value.sectionId)
+                  .filter(
+                    (q) =>
+                      q.sectionId === value.sectionId ||
+                      q.id === initial?.groupParentId,
+                  )
                   .map((q) => (
                     <option key={q.id} value={q.id}>
                       {q.title}
@@ -1050,10 +1108,15 @@ export function QuestionForm({
           <span className="hint" role="status">
             {dirty ? "Cambios sin guardar" : "Sin cambios pendientes"}
           </span>
-          <Button tone="secondary" disabled={busy} onClick={cancel}>
+          <Button
+            tone="secondary"
+            disabled={busy}
+            aria-busy={busy}
+            onClick={cancel}
+          >
             Cancelar
           </Button>
-          <Button type="submit" disabled={busy}>
+          <Button type="submit" disabled={busy} aria-busy={busy}>
             {busy
               ? "Guardando pregunta…"
               : initial

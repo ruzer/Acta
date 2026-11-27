@@ -193,7 +193,15 @@ export function Participation() {
           <option value="state">Estado (por avance)</option>
         </Select>
       </FilterBar>
-      <Button disabled={pendingPeople === 0} onClick={() => void remind()}>
+      <Button
+        unavailable={
+          pendingPeople === 0 && {
+            reason:
+              "No hay personas con preguntas obligatorias pendientes en esta selección.",
+          }
+        }
+        onClick={() => void remind()}
+      >
         Copiar recordatorio ({plural(pendingPeople, "persona")} con pendientes)
       </Button>
       {notice && <p role="status">{notice}</p>}
@@ -202,6 +210,7 @@ export function Participation() {
           ref={copy}
           label="Texto del recordatorio para copiar"
           value={fallback}
+          readOnlyReason="Este texto se genera a partir de los pendientes. Puedes seleccionarlo y copiarlo."
           readOnly
           rows={7}
         />

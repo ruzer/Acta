@@ -566,11 +566,20 @@ function InvitedQuestion({
     view.question.applicability === "ENABLED" &&
     view.reviewStatus !== "NOT_APPLICABLE";
   const latest = view.revisions[0];
+  const conflictRestriction = conflict && {
+    reason:
+      "Esta respuesta cambió en otra pestaña. Copia tu texto y vuelve a abrir la pregunta antes de continuar.",
+    describedBy: "invitation-conflict-reason",
+  };
+  const pendingFileRestriction = (!!file || !!staged) && {
+    reason: "Adjunta el archivo seleccionado antes de enviar la respuesta.",
+  };
   return (
     <article className="invitation-question participant-answer-card">
       <Button
         tone="secondary"
         disabled={busy}
+        aria-busy={busy}
         onClick={() => {
           if (dirty || file || staged || Object.values(reply).some(Boolean))
             setLeave(true);
@@ -594,9 +603,11 @@ function InvitedQuestion({
       {!editable && notice && <p role="status">{notice}</p>}
       {conflict && (
         <Alert error>
-          Esta respuesta cambió en otra pestaña. Copia tu texto antes de volver
-          a las preguntas y abrir la versión actual. No se sobrescribió la otra
-          versión.
+          <span id="invitation-conflict-reason">
+            Esta respuesta cambió en otra pestaña. Copia tu texto antes de
+            volver a las preguntas y abrir la versión actual. No se sobrescribió
+            la otra versión.
+          </span>
         </Alert>
       )}
       {view.question.applicability !== "ENABLED" && (
@@ -617,7 +628,9 @@ function InvitedQuestion({
             question={view.question}
             value={values.answer}
             error={fields.answer}
-            disabled={busy || conflict}
+            disabled={busy}
+            aria-busy={busy}
+            unavailable={conflictRestriction}
             onChange={(answer) => {
               setValues({ ...values, answer });
               setDirty(true);
@@ -627,7 +640,9 @@ function InvitedQuestion({
             label="Comentario"
             value={values.comment}
             maxLength={10000}
-            disabled={busy || conflict}
+            disabled={busy}
+            aria-busy={busy}
+            unavailable={conflictRestriction}
             error={fields.comment}
             onChange={(e) => {
               setValues({ ...values, comment: e.target.value });
@@ -638,7 +653,9 @@ function InvitedQuestion({
             label="Ejemplo (opcional)"
             value={values.example}
             maxLength={10000}
-            disabled={busy || conflict}
+            disabled={busy}
+            aria-busy={busy}
+            unavailable={conflictRestriction}
             error={fields.example}
             onChange={(e) => {
               setValues({ ...values, example: e.target.value });
@@ -648,7 +665,9 @@ function InvitedQuestion({
           <Checkbox
             label="Necesito consultar información antes de enviar"
             checked={values.consultationRequested}
-            disabled={busy || conflict}
+            disabled={busy}
+            aria-busy={busy}
+            unavailable={conflictRestriction}
             onChange={(e) => {
               setValues({ ...values, consultationRequested: e.target.checked });
               setDirty(true);
@@ -664,7 +683,9 @@ function InvitedQuestion({
               <Input
                 type="file"
                 label="Elegir archivo"
-                disabled={busy || conflict}
+                disabled={busy}
+                aria-busy={busy}
+                unavailable={conflictRestriction}
                 onChange={(e) => {
                   setFile(e.target.files?.[0] ?? null);
                   setStaged(null);
@@ -672,7 +693,16 @@ function InvitedQuestion({
               />
               <Button
                 tone="secondary"
-                disabled={busy || conflict || (!file && !staged)}
+                disabled={busy}
+                aria-busy={busy}
+                unavailable={
+                  conflictRestriction ||
+                  (!file &&
+                    !staged && {
+                      reason:
+                        "Elige un archivo antes de adjuntarlo al borrador.",
+                    })
+                }
                 onClick={() =>
                   void run(async () => {
                     const saved = dirty || !view.draft ? await save() : view;
@@ -735,7 +765,9 @@ function InvitedQuestion({
           <div className="invitation-actions">
             <Button
               tone="secondary"
-              disabled={busy || conflict}
+              disabled={busy}
+              aria-busy={busy}
+              unavailable={conflictRestriction}
               onClick={() =>
                 void run(async () => {
                   await save();
@@ -748,7 +780,9 @@ function InvitedQuestion({
               Guardar borrador
             </Button>
             <Button
-              disabled={busy || conflict || !!file || !!staged}
+              disabled={busy}
+              aria-busy={busy}
+              unavailable={conflictRestriction || pendingFileRestriction}
               onClick={() => setConfirm(true)}
             >
               Enviar respuesta
@@ -787,6 +821,7 @@ function InvitedQuestion({
             <Button
               tone="secondary"
               disabled={busy}
+              aria-busy={busy}
               onClick={() =>
                 void run(async () => {
                   saveDownload(
@@ -801,7 +836,9 @@ function InvitedQuestion({
             {editable && view.draft && (
               <Button
                 tone="secondary"
-                disabled={busy || conflict}
+                disabled={busy}
+                aria-busy={busy}
+                unavailable={conflictRestriction}
                 onClick={() =>
                   void run(async () => {
                     const saved = dirty ? await save() : view;
@@ -841,13 +878,22 @@ function InvitedQuestion({
                     label="Tu aclaración"
                     value={reply[t.id] ?? ""}
                     maxLength={10000}
-                    disabled={busy || conflict}
+                    disabled={busy}
+                    aria-busy={busy}
+                    unavailable={conflictRestriction}
                     onChange={(e) =>
                       setReply({ ...reply, [t.id]: e.target.value })
                     }
                   />
                   <Button
-                    disabled={busy || conflict || !reply[t.id]?.trim()}
+                    disabled={busy}
+                    aria-busy={busy}
+                    unavailable={
+                      conflictRestriction ||
+                      (!reply[t.id]?.trim() && {
+                        reason: "Escribe tu aclaración antes de enviarla.",
+                      })
+                    }
                     onClick={() =>
                       void run(async () => {
                         const d = {
@@ -896,6 +942,7 @@ function InvitedQuestion({
           </p>
           <Button
             disabled={busy}
+            aria-busy={busy}
             onClick={() =>
               void run(async () => {
                 const saved = dirty || !view.draft ? await save() : view;
@@ -919,6 +966,7 @@ function InvitedQuestion({
           <Button
             tone="secondary"
             disabled={busy}
+            aria-busy={busy}
             onClick={() => setConfirm(false)}
           >
             Volver
@@ -948,6 +996,7 @@ function InvitedQuestion({
           <Button
             tone="secondary"
             disabled={busy}
+            aria-busy={busy}
             onClick={() => {
               if (blocker.state === "blocked") blocker.proceed();
               else onBack();

@@ -228,7 +228,7 @@ test("editor: galería responsive, tabs, inspector único, MATRIX y condiciones"
       })
       .click();
     await expect(
-      page.getByRole(width >= 1280 ? "complementary" : "dialog", {
+      page.getByRole(width >= 900 ? "complementary" : "dialog", {
         name: "Detalle de pregunta",
       }),
     ).toHaveCount(1);
@@ -249,7 +249,6 @@ test("editor: galería responsive, tabs, inspector único, MATRIX y condiciones"
     ["Pregunta ficticia 9", "condicion"],
   ]) {
     const row = page.getByRole("article", { name: title, exact: true });
-    await row.getByLabel("Acciones de " + title, { exact: true }).click();
     await row
       .getByRole("button", { name: "Editar pregunta", exact: true })
       .click();
@@ -522,9 +521,10 @@ test("editor: reorder temas/preguntas y traslado de 300 preguntas usa una petici
   )[0];
   const row = page.getByRole("article", { name: question.title, exact: true });
   await row
-    .getByLabel("Acciones de " + question.title, { exact: true })
+    .getByRole("button", { name: question.question, exact: true })
     .click();
-  await row.getByRole("button", { name: "Mover abajo", exact: true }).click();
+  await page.getByText("Más acciones", { exact: true }).click();
+  await page.getByRole("button", { name: "Mover abajo", exact: true }).click();
   await expect(
     page.getByText("Orden de preguntas guardado.", { exact: true }),
   ).toBeVisible();
@@ -537,22 +537,21 @@ test("editor: reorder temas/preguntas y traslado de 300 preguntas usa una petici
   ).toBe(question.id);
   await page.setViewportSize({ width: 390, height: 1000 });
   await row
-    .getByLabel("Acciones de " + question.title, { exact: true })
+    .getByRole("button", { name: question.question, exact: true })
     .click();
-  await row
-    .getByRole("button", { name: "Mover a otro tema", exact: true })
+  await page
+    .getByRole("button", { name: "Cambiar de tema", exact: true })
     .click();
   await page.getByLabel("Tema de destino").selectOption(second.id);
   await shot(page, "extension-mover-390");
   await axe(page);
   await page
-    .getByRole("button", { name: "Mover pregunta", exact: true })
+    .getByRole("button", { name: "Cambiar de tema", exact: true })
     .click();
   await expect(
-    page.getByText(
-      "Pregunta movida. Se guardaron los órdenes de ambos temas.",
-      { exact: true },
-    ),
+    page
+      .getByRole("status")
+      .filter({ hasText: `Se movió a «${second.title}»` }),
   ).toBeVisible();
   expect(requests).toHaveLength(3);
   snapshot = await call(page, `/projects/${largeId}/questionnaire`);

@@ -1,3 +1,4 @@
+import { evidenceDownloadReason } from "../ui/control-availability";
 import { formatDate } from "../branding";
 import { useState } from "react";
 import type {
@@ -70,7 +71,11 @@ export function EvidenceList({
             key={id}
             name={e.originalName}
             size={`${e.byteSize.toLocaleString()} bytes`}
-            disabled={e.status !== "READY"}
+            unavailable={
+              e.status !== "READY" && {
+                reason: evidenceDownloadReason(e.status),
+              }
+            }
             onDownload={() => void download(e)}
           />
         ))
@@ -129,7 +134,11 @@ export function SubmittedAnswer({
                 key={id}
                 name={e.originalName}
                 size={`${e.byteSize.toLocaleString()} bytes`}
-                disabled={e.status !== "READY"}
+                unavailable={
+                  e.status !== "READY" && {
+                    reason: evidenceDownloadReason(e.status),
+                  }
+                }
                 onDownload={() => void download(e)}
               />
             ))
@@ -172,7 +181,11 @@ export function SubmittedAnswer({
               <span>{e.originalName}</span>
               <Button
                 tone="secondary"
-                disabled={e.status !== "READY"}
+                unavailable={
+                  e.status !== "READY" && {
+                    reason: evidenceDownloadReason(e.status),
+                  }
+                }
                 onClick={() => void download(e)}
               >
                 Descargar {e.originalName}

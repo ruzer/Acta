@@ -17,8 +17,7 @@ const widths = [
   [320, 640],
 ] as const;
 const output =
-  process.env.ACTA_DIRECTION_C_EVIDENCE_DIR ??
-  "test-results/design-evidence";
+  process.env.ACTA_DIRECTION_C_EVIDENCE_DIR ?? "test-results/design-evidence";
 const records: unknown[] = [];
 
 test.describe("Direction C · foundation", () => {
@@ -564,7 +563,11 @@ test.describe("Direction C · shell and attention", () => {
         await expect(
           page.getByText("Te toca a ti", { exact: true }),
         ).toHaveCount(0);
-        for (const name of ["Invitaciones", "Miembros", "Importar cuestionario"])
+        for (const name of [
+          "Invitaciones",
+          "Miembros",
+          "Importar cuestionario",
+        ])
           await expect(
             page.getByRole("link", { name, exact: true }),
           ).toHaveCount(0);
@@ -740,8 +743,8 @@ test.describe("Direction C · questionnaire", () => {
         "304 preguntas",
       );
       for (const [lens, id] of [
-        ["Preparar", "V-02b"],
-        ["Analizar", "V-02"],
+        ["Contenido", "V-02b"],
+        ["Respuestas", "V-02"],
       ] as const) {
         await page.getByRole("button", { name: lens, exact: true }).click();
         await expect(
@@ -749,7 +752,7 @@ test.describe("Direction C · questionnaire", () => {
         ).toHaveAttribute("aria-pressed", "true");
         await expect(
           page.getByRole("columnheader", {
-            name: lens === "Preparar" ? "Participantes" : "Aportaciones",
+            name: lens === "Contenido" ? "Participantes" : "Aportaciones",
             exact: true,
           }),
         ).toBeAttached();
@@ -761,7 +764,9 @@ test.describe("Direction C · questionnaire", () => {
           const rows = [
             ...document.querySelectorAll<HTMLElement>(".an-question-row"),
           ];
-          const question = rows[0]!.querySelector("strong")!;
+          const question = rows[0]!.querySelector(
+            ".qe-question-link > span:not([aria-hidden])",
+          )!;
           const q = getComputedStyle(question);
           const visible = (el: Element) =>
             el.checkVisibility() &&

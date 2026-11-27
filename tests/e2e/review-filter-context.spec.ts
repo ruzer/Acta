@@ -18,7 +18,7 @@ test("F4: Organizar conserva búsqueda y Analizar al recargar y volver sin consu
   await page.goto(`/projects/${fixture.project.id}/editor`);
   await page.getByRole("tab", { name: "Organizar", exact: true }).click();
   const search = page.getByLabel("Buscar preguntas", { exact: true });
-  const analyze = page.getByRole("button", { name: "Analizar", exact: true });
+  const analyze = page.getByRole("button", { name: "Respuestas", exact: true });
   await expect(page.locator(".qe-compact-row").first()).toBeVisible();
   const requests: string[] = [];
   page.on("request", (request) => {

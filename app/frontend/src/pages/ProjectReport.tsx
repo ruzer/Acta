@@ -47,7 +47,15 @@ export function ProjectReport() {
         >
           {canManage ? "Volver a decisiones" : "Volver a preguntas publicadas"}
         </Link>
-        <Button onClick={() => window.print()} disabled={!decisions.length}>
+        <Button
+          onClick={() => window.print()}
+          unavailable={
+            !decisions.length && {
+              reason:
+                "El informe se puede imprimir cuando hay una decisión vigente.",
+            }
+          }
+        >
           Imprimir o guardar como PDF
         </Button>
       </div>

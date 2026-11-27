@@ -103,6 +103,13 @@ export function ImportStructure() {
       structure.data.questions.length > 0 ||
       structure.data.references.length > 0);
   const unavailable = !structure.data || !!structure.error || hasStructure;
+  const importBlock = !structure.isPending &&
+    unavailable && {
+      describedBy: "import-unavailable-reason",
+      reason: hasStructure
+        ? "Este proyecto ya contiene estructura. La importación requiere un proyecto vacío."
+        : "No se pudo comprobar si el proyecto está vacío. Vuelve a cargar su información antes de importar.",
+    };
   const projectExternalId = projects.data?.find(
     (p) => p.id === projectId,
   )?.externalId;
@@ -272,9 +279,14 @@ export function ImportStructure() {
               retry={() => void structure.refetch()}
             />
           )}
+          {importBlock && !hasStructure && (
+            <p id="import-unavailable-reason" className="hint">
+              {importBlock.reason}
+            </p>
+          )}
           {hasStructure && (
             <Alert>
-              <p>
+              <p id="import-unavailable-reason">
                 Este proyecto ya contiene estructura. La importación requiere un
                 proyecto vacío.
               </p>
@@ -296,7 +308,9 @@ export function ImportStructure() {
               <Select
                 label="Proyecto de origen"
                 value={sourceProject}
-                disabled={busy || unavailable}
+                disabled={busy || structure.isPending}
+                aria-busy={busy || structure.isPending}
+                unavailable={importBlock}
                 onChange={(e) => {
                   setSourceProject(e.target.value);
                   setPreview(undefined);
@@ -317,7 +331,15 @@ export function ImportStructure() {
                   ))}
               </Select>
               <Button
-                disabled={busy || unavailable || !sourceProject}
+                disabled={busy || structure.isPending}
+                aria-busy={busy || structure.isPending}
+                unavailable={
+                  importBlock ||
+                  (!sourceProject && {
+                    reason:
+                      "Elige un proyecto de origen para revisar su cuestionario.",
+                  })
+                }
                 onClick={() => void reuse()}
               >
                 Revisar este cuestionario
@@ -439,7 +461,9 @@ export function ImportStructure() {
             label="Archivo CSV o JSON"
             type="file"
             accept=".json,.csv,application/json,text/csv"
-            disabled={busy || unavailable}
+            disabled={busy || structure.isPending}
+            aria-busy={busy || structure.isPending}
+            unavailable={importBlock}
             hint="Máximo 5 MiB. No incluye respuestas ni participantes."
             onChange={(e) => {
               const f = e.target.files?.[0];
@@ -457,7 +481,14 @@ export function ImportStructure() {
             }}
           />
           <Button
-            disabled={!file || busy || unavailable}
+            disabled={busy || structure.isPending}
+            aria-busy={busy || structure.isPending}
+            unavailable={
+              importBlock ||
+              (!file && {
+                reason: "Selecciona un archivo CSV o JSON antes de revisarlo.",
+              })
+            }
             onClick={() => void review()}
           >
             {busy ? "Procesando…" : "Revisar archivo"}
@@ -517,6 +548,7 @@ export function ImportStructure() {
                       label="Confirmo crear estas áreas en la institución"
                       checked={areas}
                       disabled={busy}
+                      aria-busy={busy}
                       onChange={(e) => setAreas(e.target.checked)}
                     />
                   )}
@@ -532,11 +564,21 @@ export function ImportStructure() {
                 Después podrás asignar participantes y publicar.
               </p>
               <Button
-                disabled={
-                  busy ||
-                  unavailable ||
-                  !preview.canConfirm ||
-                  (preview.missingAreas.length > 0 && !areas)
+                disabled={busy || structure.isPending}
+                aria-busy={busy || structure.isPending}
+                unavailable={
+                  importBlock ||
+                  (!preview.canConfirm
+                    ? {
+                        reason:
+                          "Resuelve los errores indicados en la vista previa y vuelve a revisar el archivo.",
+                      }
+                    : preview.missingAreas.length > 0 && !areas
+                      ? {
+                          reason:
+                            "Confirma la creación de las áreas faltantes antes de importar.",
+                        }
+                      : false)
                 }
                 onClick={() => void confirm()}
               >
@@ -616,6 +658,7 @@ export function ExportProject() {
             label="Formato de exportación"
             value={format}
             disabled={busy}
+            aria-busy={busy}
             onChange={(e) => setFormat(e.target.value as typeof format)}
           >
             <option value="JSON">JSON completo</option>
@@ -636,7 +679,7 @@ export function ExportProject() {
         evidencia no se incrustan; sus descargas requieren autorización.
       </p>
       {!viewer && <TemplateDownload projectId={projectId} />}
-      <Button disabled={busy} onClick={() => void download()}>
+      <Button disabled={busy} aria-busy={busy} onClick={() => void download()}>
         {busy ? "Generando archivo…" : "Descargar exportación"}
       </Button>
     </>
@@ -685,7 +728,7 @@ function TemplateDownload({ projectId }: { projectId: string }) {
       </p>
       {error && <Alert error>{error}</Alert>}
       {notice && <p role="status">{notice}</p>}
-      <Button disabled={busy} onClick={() => void download()}>
+      <Button disabled={busy} aria-busy={busy} onClick={() => void download()}>
         Descargar este cuestionario como plantilla
       </Button>
     </section>

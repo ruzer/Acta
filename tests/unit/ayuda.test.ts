@@ -29,6 +29,34 @@ const docs = () =>
     path: join(folder, name),
     text: read(join(folder, name)),
   }));
+
+it("los motivos del editor y la forma de continuar coinciden en ayuda y guías", () => {
+  for (const path of [
+    "app/frontend/src/pages/Help.tsx",
+    "docs/ayuda/SOLUCION-DE-PROBLEMAS.md",
+    "docs/QUESTIONNAIRE-EDITOR-INTEGRATION.md",
+    "README.md",
+  ]) {
+    const content = compact(read(path));
+    for (const text of [
+      "Editar tema",
+      "búsqueda",
+      "área activa",
+      "pregunta archivada",
+      "Cambiar de tema",
+      "texto seleccionable con su motivo",
+      "identificador se conserva al guardar",
+      "no se envían como cambios",
+    ])
+      expect(content, `${path}: ${text}`).toContain(text);
+  }
+  for (const message of [
+    "Su nombre y descripción están protegidos porque el tema tiene preguntas publicadas o archivadas.",
+    "Con una búsqueda activa se muestran todos los grupos desplegados. Limpia la búsqueda para contraerlos.",
+    "Para crear preguntas hace falta al menos un área activa. Pide a la administración de la institución que la active en Administración.",
+  ])
+    expect(code).toContain(message);
+});
 const links = (text: string) =>
   [...text.matchAll(/\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g)].map(
     (m) => m[1],
@@ -309,4 +337,66 @@ it("la ayuda de accesos explica la precarga, los cambios y la confirmación prop
   expect(guide).toContain(
     "Eres la única administración activa de este proyecto",
   );
+});
+
+it("la ayuda explica los controles no disponibles y conserva la copia de valores de solo lectura", () => {
+  for (const file of [
+    "app/frontend/src/pages/Help.tsx",
+    "docs/ayuda/SOLUCION-DE-PROBLEMAS.md",
+  ]) {
+    const text = compact(read(file));
+    expect(text).toContain("primera o última página");
+    expect(text).toContain("operación en curso");
+    expect(text).toContain("copiar");
+  }
+});
+
+it("el aviso tras cambiar de tema explica cómo encontrar la pregunta", () => {
+  for (const path of [
+    "README.md",
+    "docs/QUESTIONNAIRE-EDITOR-INTEGRATION.md",
+    "docs/ayuda/SOLUCION-DE-PROBLEMAS.md",
+    "app/frontend/src/pages/Help.tsx",
+  ]) {
+    expect(readFileSync(path, "utf8")).toContain("Ver");
+  }
+});
+
+it("la ayuda describe apertura, acciones y recorrido del panel compartido", () => {
+  for (const path of [
+    "README.md",
+    "docs/QUESTIONNAIRE-EDITOR-INTEGRATION.md",
+    "docs/ayuda/SOLUCION-DE-PROBLEMAS.md",
+    "app/frontend/src/pages/Help.tsx",
+  ]) {
+    const text = compact(read(path));
+    for (const label of [
+      "Escribir",
+      "Organizar",
+      "Cambiar de tema",
+      "Más acciones",
+      "Pregunta anterior",
+      "Pregunta siguiente",
+      "Primero aparecen la pregunta y sus opciones",
+      "La acción principal y Más acciones permanecen al pie",
+      "sin estrecharla",
+      "Contenido",
+      "Respuestas",
+      "Escape",
+    ])
+      expect(text, path).toContain(label);
+  }
+});
+
+it("la ayuda explica el aviso de traslado singular y plural", () => {
+  for (const path of [
+    "README.md",
+    "docs/QUESTIONNAIRE-EDITOR-INTEGRATION.md",
+    "docs/ayuda/SOLUCION-DE-PROBLEMAS.md",
+    "app/frontend/src/pages/Help.tsx",
+  ]) {
+    const text = compact(read(path));
+    expect(text, path).toContain("su único seguimiento");
+    expect(text, path).toContain("muestra sus nombres");
+  }
 });

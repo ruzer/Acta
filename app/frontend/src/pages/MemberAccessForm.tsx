@@ -203,6 +203,7 @@ export function MemberAccessForm({
           value={selection.userId}
           error={errors.userId}
           disabled={busy}
+          aria-busy={busy}
           onChange={(e) => choose(e.target.value)}
         >
           <option value="">Selecciona una cuenta</option>
@@ -223,6 +224,7 @@ export function MemberAccessForm({
             value={selection.role}
             error={errors.role}
             disabled={busy}
+            aria-busy={busy}
             onChange={(e) =>
               update("role", e.target.value as Selection["role"])
             }
@@ -241,6 +243,7 @@ export function MemberAccessForm({
             value={selection.areaId || ""}
             error={errors.areaId}
             disabled={busy}
+            aria-busy={busy}
             onChange={(e) => update("areaId", e.target.value || null)}
           >
             <option value="">Sin área</option>
@@ -256,6 +259,7 @@ export function MemberAccessForm({
           name="active"
           checked={selection.active}
           disabled={busy}
+          aria-busy={busy}
           onChange={(e) => update("active", e.target.checked)}
         />
         <p id={summaryId} aria-live="polite" aria-atomic="true">
@@ -267,10 +271,18 @@ export function MemberAccessForm({
         <Button
           ref={saveButton}
           type="submit"
-          aria-disabled={busy || unchanged}
+          aria-busy={busy}
+          unavailable={
+            (busy || unchanged) && {
+              reason: busy ? "Guardando…" : summary,
+              describedBy: busy ? `${summaryId}-save-label` : summaryId,
+            }
+          }
           aria-describedby={summaryId}
         >
-          {busy ? "Guardando…" : "Guardar acceso al proyecto"}
+          <span id={`${summaryId}-save-label`}>
+            {busy ? "Guardando…" : "Guardar acceso al proyecto"}
+          </span>
         </Button>
       </form>
       {confirmation && (
@@ -290,15 +302,24 @@ export function MemberAccessForm({
             tone="secondary"
             data-autofocus
             disabled={busy}
+            aria-busy={busy}
             onClick={closeConfirmation}
           >
             Cancelar
           </Button>
           <Button
-            aria-disabled={busy}
+            aria-busy={busy}
+            unavailable={
+              busy && {
+                reason: "Guardando…",
+                describedBy: `${summaryId}-confirm-label`,
+              }
+            }
             onClick={() => void save(confirmation.access)}
           >
-            {busy ? "Guardando…" : "Confirmar cambio de acceso"}
+            <span id={`${summaryId}-confirm-label`}>
+              {busy ? "Guardando…" : "Confirmar cambio de acceso"}
+            </span>
           </Button>
         </Dialog>
       )}

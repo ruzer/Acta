@@ -544,7 +544,9 @@ export function History() {
           <div className="actions">
             <Button
               tone="secondary"
-              disabled={q.data.page <= 1}
+              unavailable={
+                q.data.page <= 1 && { reason: "Estás en la primera página." }
+              }
               onClick={() =>
                 setParams({ ...input, page: String(q.data.page - 1) })
               }
@@ -557,7 +559,11 @@ export function History() {
             </span>
             <Button
               tone="secondary"
-              disabled={q.data.page * q.data.pageSize >= q.data.total}
+              unavailable={
+                q.data.page * q.data.pageSize >= q.data.total && {
+                  reason: "No hay más resultados.",
+                }
+              }
               onClick={() =>
                 setParams({ ...input, page: String(q.data.page + 1) })
               }
