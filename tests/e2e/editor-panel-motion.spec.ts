@@ -57,6 +57,12 @@ async function fixture(page: Page) {
     }
   }
   await page.goto(`/projects/${project.id}/editor?mode=organize`);
+  await expect(
+    page.getByRole("heading", { name: "Cuestionario", level: 1 }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: questions[0]!.question, exact: true }),
+  ).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
   return { project, questions };
 }
@@ -143,6 +149,50 @@ async function renderingFrames(page: Page) {
       ),
   );
 }
+async function pressWithFeedback(page: Page, control: Locator) {
+  const box = (await control.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  const before = (await motionRecords(page)).length;
+  await page.mouse.down();
+  await expect
+    .poll(() =>
+      control.evaluate((element) => Number(getComputedStyle(element).opacity)),
+    )
+    .toBeLessThan(1);
+  expect(await control.evaluate((element) => element.matches(":active"))).toBe(
+    true,
+  );
+  await renderingFrames(page);
+  const press = (await motionRecords(page))
+    .slice(before)
+    .filter((record) => record.target === "control");
+  expect([...new Set(press.map((record) => record.property))].sort()).toEqual([
+    "opacity",
+    "transform",
+  ]);
+  expect(press.every((record) => record.animations.length > 0)).toBe(true);
+  expect(
+    press
+      .flatMap((record) => record.animations)
+      .every((animation) => animation.duration === 100),
+  ).toBe(true);
+  await page.mouse.up();
+}
+async function touchTargets(container: Locator) {
+  const tooSmall = await container
+    .locator("button, summary, a, input, select, textarea")
+    .evaluateAll((elements) =>
+      elements
+        .filter((element) => element.checkVisibility())
+        .map((element) => ({
+          name: element.getAttribute("aria-label") ?? element.textContent,
+          width: element.getBoundingClientRect().width,
+          height: element.getBoundingClientRect().height,
+        }))
+        .filter((rect) => rect.width < 44 || rect.height < 44),
+    );
+  expect(tooSmall).toEqual([]);
+}
 async function entryRecords(page: Page, properties: string[]) {
   await expect
     .poll(async () =>
@@ -214,6 +264,7 @@ for (const width of [1440, 1024, 900, 899, 390]) {
     });
     await recordMotion(page);
     if (width < 900) await opener.tap();
+    else if (width === 1440) await pressWithFeedback(page, opener);
     else await opener.click({ position: { x: 20, y: 15 } });
     const panel = page.locator(".qe-inspector-motion");
     await expect(panel).toHaveAttribute("data-phase", "open");
@@ -245,7 +296,9 @@ for (const width of [1440, 1024, 900, 899, 390]) {
       ).toBeVisible();
     const node = await panel.elementHandle();
     const beforeNavigation = (await motionRecords(page)).length;
-    await panel.getByRole("button", { name: "Pregunta siguiente" }).click();
+    const next = panel.getByRole("button", { name: "Pregunta siguiente" });
+    if (width === 1440) await pressWithFeedback(page, next);
+    else await next.click();
     await expect(panel.getByRole("status")).toHaveText("2 de 4 resultados");
     expect(
       await node!.evaluate(
@@ -263,7 +316,8 @@ for (const width of [1440, 1024, 900, 899, 390]) {
       element.scrollTop = element.scrollHeight;
     });
     const primary = panel.locator(".qe-inspector-footer .primary");
-    await expect(primary).toBeInViewport();
+    await expect(primary).toBeInViewport({ ratio: 1 });
+    await touchTargets(panel);
     const primaryBox = (await primary.boundingBox())!;
     expect(primaryBox.height).toBeGreaterThanOrEqual(44);
     await panel.getByText("Más acciones", { exact: true }).click();
@@ -272,7 +326,8 @@ for (const width of [1440, 1024, 900, 899, 390]) {
     });
     const archive = menu.getByRole("button", { name: "Archivar", exact: true });
     await archive.scrollIntoViewIfNeeded();
-    await expect(archive).toBeInViewport();
+    await expect(archive).toBeInViewport({ ratio: 1 });
+    await touchTargets(menu);
     if (width < 900) {
       const menuBox = (await menu.boundingBox())!;
       expect(Math.round(menuBox.y + menuBox.height)).toBe(844);
@@ -281,8 +336,20 @@ for (const width of [1440, 1024, 900, 899, 390]) {
         .boundingBox())!;
       expect(Math.round(scrimBox.height)).toBe(844);
       expect(Math.round(scrimBox.width)).toBe(width);
-      await menu.getByRole("button", { name: "Cerrar acciones" }).click();
+      const closeActions = menu.getByRole("button", {
+        name: "Cerrar acciones",
+      });
+      await expect(closeActions).toBeFocused();
+      await page.keyboard.press("Shift+Tab");
+      await expect(archive).toBeFocused();
+      await page.keyboard.press("Tab");
+      await expect(closeActions).toBeFocused();
+      await checkedPage(page, evidence, "i4-actions-open", width);
+      await closeActions.click();
       await expect(menu).not.toBeVisible();
+      await expect(
+        panel.getByText("Más acciones", { exact: true }),
+      ).toBeFocused();
     } else {
       await panel.getByText("Más acciones", { exact: true }).click();
     }
@@ -415,58 +482,69 @@ for (const width of [1440, 390]) {
           animation.frames.every((frame) => frame.transform === undefined),
         ),
     ).toBe(true);
+    expect(
+      reducedPress
+        .flatMap((record) => record.animations)
+        .every((animation) => animation.duration === 100),
+    ).toBe(true);
     await page.mouse.up();
     await page.keyboard.press("Escape");
     await expect(panel).toHaveCount(0);
-    await page.emulateMedia({ reducedMotion: "no-preference" });
-    await clearMotionRecords(page);
-    await opener.focus();
-    await page.keyboard.down("Space");
-    await renderingFrames(page);
-    expect(
-      await opener.evaluate((element) => ({
-        pressed: element.matches(":active"),
-        transform: getComputedStyle(element).transform,
-        opacity: getComputedStyle(element).opacity,
-        transition: getComputedStyle(element).transitionProperty,
-        animations: element.getAnimations().length,
-      })),
-    ).toEqual({
-      pressed: true,
-      transform: "none",
-      opacity: "1",
-      transition: "none",
-      animations: 0,
-    });
-    await page.keyboard.up("Space");
-    await expect(panel).toHaveAttribute("data-phase", "open");
-    expect(await animations(panel)).toEqual([]);
-    await renderingFrames(page);
-    expect(await motionRecords(page)).toEqual([]);
-    const keyboardNext = panel.getByRole("button", {
-      name: "Pregunta siguiente",
-    });
-    await keyboardNext.focus();
-    await page.keyboard.down("Space");
-    await renderingFrames(page);
-    expect(
-      await keyboardNext.evaluate((element) => ({
-        pressed: element.matches(":active"),
-        transform: getComputedStyle(element).transform,
-        opacity: getComputedStyle(element).opacity,
-        transition: getComputedStyle(element).transitionProperty,
-        animations: element.getAnimations().length,
-      })),
-    ).toEqual({
-      pressed: true,
-      transform: "none",
-      opacity: "1",
-      transition: "none",
-      animations: 0,
-    });
-    await page.keyboard.up("Space");
-    await renderingFrames(page);
-    expect(await motionRecords(page)).toEqual([]);
+    for (const reducedMotion of ["reduce", "no-preference"] as const) {
+      await page.emulateMedia({ reducedMotion });
+      await clearMotionRecords(page);
+      await opener.focus();
+      await page.keyboard.down("Space");
+      await renderingFrames(page);
+      expect(
+        await opener.evaluate((element) => ({
+          pressed: element.matches(":active"),
+          transform: getComputedStyle(element).transform,
+          opacity: getComputedStyle(element).opacity,
+          transition: getComputedStyle(element).transitionProperty,
+          animations: element.getAnimations().length,
+        })),
+      ).toEqual({
+        pressed: true,
+        transform: "none",
+        opacity: "1",
+        transition: "none",
+        animations: 0,
+      });
+      await page.keyboard.up("Space");
+      await expect(panel).toHaveAttribute("data-phase", "open");
+      expect(await animations(panel)).toEqual([]);
+      await renderingFrames(page);
+      expect(await motionRecords(page)).toEqual([]);
+      const keyboardNext = panel.getByRole("button", {
+        name: "Pregunta siguiente",
+      });
+      await keyboardNext.focus();
+      await page.keyboard.down("Space");
+      await renderingFrames(page);
+      expect(
+        await keyboardNext.evaluate((element) => ({
+          pressed: element.matches(":active"),
+          transform: getComputedStyle(element).transform,
+          opacity: getComputedStyle(element).opacity,
+          transition: getComputedStyle(element).transitionProperty,
+          animations: element.getAnimations().length,
+        })),
+      ).toEqual({
+        pressed: true,
+        transform: "none",
+        opacity: "1",
+        transition: "none",
+        animations: 0,
+      });
+      await page.keyboard.up("Space");
+      await renderingFrames(page);
+      expect(await motionRecords(page)).toEqual([]);
+      if (reducedMotion === "reduce") {
+        await page.keyboard.press("Escape");
+        await expect(panel).toHaveCount(0);
+      }
+    }
     await panel
       .getByRole("button", { name: "Editar pregunta", exact: true })
       .click();
@@ -479,3 +557,53 @@ for (const width of [1440, 390]) {
     ).toBeVisible();
   });
 }
+
+test("I4 el pie permanece dentro del espacio visible al simular teclado móvil", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const { questions } = await fixture(page);
+  await page
+    .getByRole("button", { name: questions[0]!.question, exact: true })
+    .tap();
+  const panel = page.getByRole("dialog", {
+    name: "Detalle de pregunta",
+    exact: true,
+  });
+  await expect(panel).toHaveAttribute("data-phase", "open");
+  await finishAnimations(panel);
+  await page.evaluate(() => {
+    const viewport = window.visualViewport!;
+    Object.defineProperties(viewport, {
+      height: { configurable: true, get: () => 480 },
+      offsetTop: { configurable: true, get: () => 24 },
+    });
+    viewport.dispatchEvent(new Event("resize"));
+  });
+  await expect
+    .poll(() =>
+      panel.evaluate((element) => ({
+        top: element.getBoundingClientRect().top,
+        height: element.getBoundingClientRect().height,
+      })),
+    )
+    .toEqual({ top: 24, height: 480 });
+  const primary = panel.locator(".qe-inspector-footer .primary");
+  const box = (await primary.boundingBox())!;
+  expect(box.y).toBeGreaterThanOrEqual(24);
+  expect(box.y + box.height).toBeLessThanOrEqual(504);
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(390);
+  await touchTargets(panel);
+  await page.evaluate(() => {
+    const viewport = window.visualViewport!;
+    Reflect.deleteProperty(viewport, "height");
+    Reflect.deleteProperty(viewport, "offsetTop");
+    viewport.dispatchEvent(new Event("resize"));
+  });
+  await expect
+    .poll(() =>
+      panel.evaluate((element) => element.getBoundingClientRect().height),
+    )
+    .toBe(844);
+});

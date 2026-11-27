@@ -274,11 +274,12 @@
 /* Motion extends the shared overlay without changing its geometry. */
 .qe-workspace .qe-inspector.qe-inspector-motion {
   --qe-inspector-offset: 12px;
+  --qe-inspector-duration: 180ms;
   animation: none;
   opacity: 1;
   transform: none;
   transition-property: opacity, transform;
-  transition-duration: 180ms;
+  transition-duration: var(--qe-inspector-duration);
   transition-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
 }
 .qe-workspace .qe-inspector-motion[data-phase="entering"],
@@ -287,10 +288,10 @@
   transform: translateX(var(--qe-inspector-offset));
 }
 .qe-workspace .qe-inspector-motion[data-phase="entering"] {
-  transition-duration: 0ms;
+  --qe-inspector-duration: 0ms;
 }
 .qe-workspace .qe-inspector-motion[data-phase="closing"] {
-  transition-duration: 120ms;
+  --qe-inspector-duration: 120ms;
   pointer-events: none;
 }
 .qe-inspector button,
@@ -334,13 +335,13 @@
 @media (max-width: 899px) {
   .qe-workspace .qe-inspector.qe-inspector-motion {
     --qe-inspector-offset: 100%;
-    transition-duration: 280ms;
+    --qe-inspector-duration: 280ms;
   }
   .qe-workspace .qe-inspector-motion[data-phase="entering"] {
-    transition-duration: 0ms;
+    --qe-inspector-duration: 0ms;
   }
   .qe-workspace .qe-inspector-motion[data-phase="closing"] {
-    transition-duration: 120ms;
+    --qe-inspector-duration: 120ms;
   }
   .qe-inspector-footer {
     position: static;
@@ -373,7 +374,12 @@
 @media (prefers-reduced-motion: reduce) {
   .qe-workspace .qe-inspector.qe-inspector-motion {
     transform: none;
-    transition-property: opacity;
+    transition: opacity var(--qe-inspector-duration)
+      cubic-bezier(0.32, 0.72, 0, 1) !important;
+  }
+  .qe-inspector button,
+  .qe-workspace button.qe-question-link {
+    transition: opacity 100ms !important;
   }
   .qe-inspector button:active:not(:disabled):not([aria-disabled="true"]),
   .qe-workspace button.qe-question-link:active {
@@ -389,7 +395,7 @@
   .qe-workspace
   .qe-inspector.qe-inspector-motion {
   transform: none;
-  transition-duration: 0ms;
+  --qe-inspector-duration: 0ms;
 }
 :root[data-presentation-keyboard] .qe-inspector button,
 :root[data-presentation-keyboard]
@@ -399,7 +405,7 @@
 :root[data-presentation-keyboard] .qe-workspace button.qe-question-link:active {
   transform: none;
   opacity: 1;
-  transition: none;
+  transition: none !important;
 }
 @starting-style {
   :root[data-presentation-keyboard]
