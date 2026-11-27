@@ -149,6 +149,15 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
             registrar decisiones con esa cuenta: para la revisión, crea o usa
             una cuenta con perfil Analista.
           </p>
+          <p>
+            En <strong>Miembros</strong>, elegir una cuenta existente carga su
+            rol, área y estado actuales. Revisa el resumen antes de
+            <strong> Guardar acceso al proyecto</strong>. Con
+            <strong> Sin cambios</strong> no se envía nada. Acta pide confirmar
+            ascensos a Administración, quitar el área o desactivar el acceso;
+            también avisa si pierdes tu propia administración. Si la lista puede
+            estar incompleta, no afirma que eres la única administración.
+          </p>
           <ol>
             <li>
               Pide al equipo técnico confirmar un{" "}

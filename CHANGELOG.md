@@ -8,6 +8,8 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ### Fixed
 
+- **Accesos sin cambios involuntarios.** Al elegir un miembro se conservan su rol, área y estado actuales; las cuentas nuevas requieren elegir rol. El formulario muestra las diferencias, evita envíos sin cambios y pide confirmar los cambios de acceso sensibles, con advertencia al retirar la propia administración.
+
 - **Controles no disponibles con motivo.** Los componentes compartidos admiten una explicación visible asociada al control; los botones conservan el foco sin ejecutar la acción. El puntero de espera se reserva a una operación ocupada y los valores fijos se presentan como texto seleccionable con su motivo: el identificador de una pregunta existente, el código de instalación y los valores administrados externamente.
 
 - **Motivos claros en el editor.** Los temas protegidos, la búsqueda que mantiene grupos desplegados y la falta de áreas activas explican por qué una acción no está disponible y cómo continuar. Las preguntas archivadas no ofrecen selección y los valores que no se pueden editar muestran su motivo.

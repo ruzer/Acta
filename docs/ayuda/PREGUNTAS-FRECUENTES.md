@@ -207,3 +207,11 @@ Las dudas generales pueden preguntarse en Discussions, categoría Q&A, que funci
 Más información: [Canales de soporte](../../SUPPORT.md).
 
 ¿No encontraste tu duda? [Pregúntala en Discussions (Preguntas y respuestas)](https://github.com/ruzer/Acta/discussions/categories/q-a).
+
+
+### ¿Cómo cambio el acceso de alguien sin reemplazar sus permisos por error?
+Aplica a: Administración del proyecto y de la institución.
+
+En **Miembros**, elegir una cuenta existente carga su rol, área y estado actuales. El resumen muestra únicamente lo que cambiará. Con **Sin cambios**, el botón no envía nada. Para una cuenta nueva debes elegir el rol. Acta pide confirmar ascensos a Administración, quitar un área o desactivar el acceso; también avisa si estás quitando tu propia administración. Cancelar conserva los valores para revisarlos. Si la lista puede estar incompleta, Acta no afirma que eres la única administración: pide consultar a la administración de la institución.
+
+Más información: [Actualizar el acceso al proyecto](../PROJECT-ADMINISTRATION.md#actualizar-el-acceso-al-proyecto).

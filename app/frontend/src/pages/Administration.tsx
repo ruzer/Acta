@@ -8,7 +8,7 @@ import {
 import { useState, type FormEvent, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useParams } from "react-router-dom";
-import { roles, roleLabels, type Me } from "@requirements/contracts";
+import { roleLabels, type Me } from "@requirements/contracts";
 import { api, formValues, exchangeRequest } from "../api";
 import {
   Alert,
@@ -19,13 +19,13 @@ import {
   ErrorState,
   Input,
   LoadingState,
-  Select,
   DataTable,
   Textarea,
 } from "../ui";
 import { Avatar, PageHeader, StatusChip } from "../ui/semantic";
 import { ParticipantIcon } from "./ParticipantIcon";
 import { BulkUsers } from "./BulkUsers";
+import { MemberAccessForm } from "./MemberAccessForm";
 export function ActionForm({
   children,
   onSubmit,
@@ -728,65 +728,14 @@ export function Members() {
             de la institución. Puedes actualizar miembros existentes.
           </Alert>
         )}
-        <ActionForm
-          label="Guardar acceso al proyecto"
+        <MemberAccessForm
+          key={projectId}
+          projectId={projectId}
+          members={members.data}
+          users={users.data}
+          areas={areas.data}
           onDone={() => void qc.invalidateQueries()}
-          onSubmit={(d) =>
-            api(
-              "setMember",
-              { projectId },
-              {
-                userId: d.userId,
-                role: d.role,
-                areaId: d.areaId || null,
-                active: d.active === "on",
-              },
-            )
-          }
-        >
-          <Select label="Usuario" name="userId" required>
-            <option value="">Selecciona una cuenta</option>
-            {(
-              users.data?.filter((u) => u.active) ||
-              members.data.map((m) => ({
-                id: m.userId,
-                displayName: m.displayName,
-              }))
-            ).map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.displayName}
-              </option>
-            ))}
-          </Select>
-          <div className="grid2">
-            <Select label="Rol" name="role">
-              {roles.map((r) => (
-                <option key={r} value={r}>
-                  {roleLabels[r]}
-                </option>
-              ))}
-            </Select>
-            <Select
-              label="Área"
-              name="areaId"
-              hint="Obligatoria para participantes activos."
-            >
-              <option value="">Sin área</option>
-              {areas.data
-                ?.filter((a) => a.active)
-                .map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.name}
-                  </option>
-                ))}
-            </Select>
-          </div>
-          <Checkbox
-            label="Acceso al proyecto activo"
-            name="active"
-            defaultChecked
-          />
-        </ActionForm>
+        />
       </section>
     </>
   );

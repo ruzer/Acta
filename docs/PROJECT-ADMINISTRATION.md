@@ -63,3 +63,16 @@ Atención muestra **Primeros pasos** mientras no hay respuestas enviadas. Usa pr
 Una pregunta aparece una sola vez: primero conflictos o respuestas listas, después aclaraciones, pendientes de otras personas y preguntas sin asignación. «Otras preguntas» reúne lo que no entró en esos grupos. Los filtros mantienen las mismas acciones. Los contadores del resumen pueden coincidir porque una pregunta puede tener conflicto y aclaración a la vez.
 
 Atención anuncia los envíos nuevos desde la visita anterior; cuenta cada envío, no los borradores. La fecha de visita se guarda en este navegador por cuenta y proyecto, sin respuestas. La primera visita no anuncia novedades; otro navegador tiene su propio historial.
+
+
+## Actualizar el acceso al proyecto
+
+En **Miembros**, el formulario **Asignar o actualizar acceso al proyecto** conserva el orden Usuario, Rol, Área y Acceso al proyecto activo.
+
+1. Elige la cuenta. Si ya pertenece al proyecto, se cargan su rol, área y estado actuales, incluso si su acceso está inactivo. En el directorio institucional aparece «ya está en el proyecto» junto al nombre.
+2. Cambia solo lo necesario. El resumen muestra las diferencias; **Sin cambios** indica que el botón no enviará una operación. Para agregar una cuenta, **Selecciona un rol** exige una elección explícita; nunca se asigna Administración por omisión.
+3. Pulsa **Guardar acceso al proyecto**. Los ascensos a Administración, quitar un área existente y desactivar el acceso abren **Confirmar cambio de acceso**. **Cancelar**, **Cerrar** o Escape vuelven al formulario sin guardar y devuelven el foco al botón.
+4. Si quitas tu propia Administración o desactivas tu acceso, aparece «Estás quitando tu propio acceso de administración». Si la lista tiene menos de 500 personas y no muestra otra activa con Administración, aparece además «Eres la única administración activa de este proyecto; después solo la administración de la institución podrá devolverla». Revisa esa consecuencia antes de confirmar. Con 500 personas o más, la lista puede estar incompleta y el aviso pide consultar a la administración de la institución, sin afirmar que eres la única administración.
+5. Comprueba **Operación guardada.** Si aparece un error, los valores propuestos permanecen para corregirlos. El servidor sigue validando los permisos y las asignaciones activas; una confirmación no omite esas reglas.
+
+Estos avisos ayudan a decidir; no agregan una prohibición de retirar al último administrador ni cambian permisos. Tampoco amplían el directorio de usuarios: quien no administra la institución conserva el aviso actual y la selección de miembros existentes. Las limitaciones de listados y búsqueda se diseñan por separado.
