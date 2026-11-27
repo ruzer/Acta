@@ -26,9 +26,9 @@ afterEach(() => {
   vi.resetAllMocks();
 });
 const data = questionnaireView.parse(fixture.questionnaire);
-function page(search = "") {
+function page(search = "", questionnaire = data) {
   vi.mocked(api).mockImplementation(
-    async (key) => (key === "questionnaire" ? data : []) as never,
+    async (key) => (key === "questionnaire" ? questionnaire : []) as never,
   );
   vi.mocked(exchangeRequest).mockResolvedValue(
     dashboardView.parse(fixture.dashboard),
@@ -51,12 +51,12 @@ function page(search = "") {
   );
   return router;
 }
-it("restaura los filtros y Analizar desde la URL, sin guardar selección masiva en ella", async () => {
+it("restaura los filtros y Respuestas desde la URL, sin guardar selección masiva en ella", async () => {
   const router = page(
     "?mode=organize&approach=analyze&q=Consulta&publication=PUBLISHED",
   );
   expect(
-    await screen.findByRole("button", { name: "Analizar" }),
+    await screen.findByRole("button", { name: "Respuestas" }),
   ).toHaveAttribute("aria-pressed", "true");
   expect(screen.getByLabelText("Buscar preguntas")).toHaveValue("Consulta");
   expect(screen.getByLabelText("Estado de publicación")).toHaveValue(
@@ -70,7 +70,7 @@ it("editar filtros conserva foco, sobrevive recarga y volver, sin consultas por 
   search.focus();
   const calls = vi.mocked(api).mock.calls.length;
   fireEvent.change(search, { target: { value: "Recepción" } });
-  fireEvent.click(screen.getByRole("button", { name: "Analizar" }));
+  fireEvent.click(screen.getByRole("button", { name: "Respuestas" }));
   await waitFor(() =>
     expect(new URLSearchParams(router.state.location.search).get("q")).toBe(
       "Recepción",
@@ -95,7 +95,7 @@ it("editar filtros conserva foco, sobrevive recarga y volver, sin consultas por 
   expect(await screen.findByLabelText("Buscar preguntas")).toHaveValue(
     "Recepción",
   );
-  expect(screen.getByRole("button", { name: "Analizar" })).toHaveAttribute(
+  expect(screen.getByRole("button", { name: "Respuestas" })).toHaveAttribute(
     "aria-pressed",
     "true",
   );
@@ -113,7 +113,7 @@ it("Atrás y Adelante restauran filtros en el editor que sigue montado", async (
     await router.navigate(-1);
   });
   await waitFor(() => expect(input).toHaveValue("Primera"));
-  expect(screen.getByRole("button", { name: "Preparar" })).toHaveAttribute(
+  expect(screen.getByRole("button", { name: "Contenido" })).toHaveAttribute(
     "aria-pressed",
     "true",
   );
@@ -121,7 +121,7 @@ it("Atrás y Adelante restauran filtros en el editor que sigue montado", async (
     await router.navigate(1);
   });
   await waitFor(() => expect(input).toHaveValue("Segunda"));
-  expect(screen.getByRole("button", { name: "Analizar" })).toHaveAttribute(
+  expect(screen.getByRole("button", { name: "Respuestas" })).toHaveAttribute(
     "aria-pressed",
     "true",
   );
@@ -184,4 +184,133 @@ it("Atrás restaura el editor sin filtros cuando la entrada original no tenía q
   });
   expect(router.state.location.search).toBe("");
   expect(screen.getByLabelText("Buscar preguntas")).toHaveValue("");
+});
+
+it("abrir y recorrer conserva filtros y casillas; Atrás cierra y devuelve foco", async () => {
+  vi.stubGlobal("matchMedia", () => ({
+    matches: true,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  }));
+  const router = page("?mode=organize");
+  const first = data.questions[0]!;
+  await screen.findByLabelText("Buscar preguntas");
+  const checkbox = screen.getByRole("checkbox", {
+    name: `Seleccionar pregunta: ${first.question}`,
+  });
+  fireEvent.click(checkbox);
+  const requestsBeforeOpening = vi.mocked(api).mock.calls.length;
+  const contributionRequestsBeforeOpening =
+    vi.mocked(exchangeRequest).mock.calls.length;
+  const opener = screen.getByRole("button", { name: first.question });
+  opener.focus();
+  fireEvent.click(opener);
+  expect(
+    await screen.findByRole("complementary", { name: "Detalle de pregunta" }),
+  ).toBeVisible();
+  expect(router.state.historyAction).toBe("PUSH");
+  expect(
+    new URLSearchParams(router.state.location.search).get("question"),
+  ).toBe(first.id);
+  expect(checkbox).toBeChecked();
+  fireEvent.change(screen.getByLabelText("Buscar preguntas"), {
+    target: { value: first.question },
+  });
+  await waitFor(() =>
+    expect(new URLSearchParams(router.state.location.search).get("q")).toBe(
+      first.question,
+    ),
+  );
+  // Normal filter changes keep their usual selection reset; changing only question does not.
+  expect(screen.getByText("1 de 1 resultados")).toBeVisible();
+  expect(router.state.location.state.questionInspectorEntry).toBe(true);
+  await act(() => router.navigate(-1));
+  expect(
+    screen.queryByRole("complementary", { name: "Detalle de pregunta" }),
+  ).not.toBeInTheDocument();
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: first.question })).toHaveFocus(),
+  );
+  expect(api).toHaveBeenCalledTimes(requestsBeforeOpening);
+  expect(exchangeRequest).toHaveBeenCalledTimes(
+    contributionRequestsBeforeOpening,
+  );
+  vi.unstubAllGlobals();
+});
+
+it("abre enlace directo en Escribir y retira un id inexistente sin salir del editor", async () => {
+  vi.stubGlobal("matchMedia", () => ({
+    matches: true,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  }));
+  const question = data.questions[0]!;
+  const router = page(`?mode=write&question=${question.id}`);
+  await waitFor(() => expect(router.state.historyAction).toBe("PUSH"));
+  expect(
+    screen.getByRole("complementary", { name: "Detalle de pregunta" }),
+  ).toBeVisible();
+  expect(
+    screen.getByRole("button", { name: question.question }),
+  ).toHaveAttribute("aria-current", "true");
+  await act(() => router.navigate(-1));
+  expect(router.state.location.pathname).toContain("/editor");
+  expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
+  await act(() => router.navigate("?mode=write&question=missing"));
+  await waitFor(() =>
+    expect(router.state.location.search).not.toContain("question="),
+  );
+  expect(
+    screen.getByText(
+      "La pregunta del enlace no está disponible en este cuestionario.",
+    ),
+  ).toBeVisible();
+  vi.unstubAllGlobals();
+});
+
+it("Revisar publicación abre una incidencia publicada en Organizar con una sola navegación", async () => {
+  vi.stubGlobal("matchMedia", () => ({
+    matches: true,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  }));
+  try {
+    const published = {
+      ...data.questions[0]!,
+      publication: "PUBLISHED" as const,
+      type: "SINGLE_CHOICE" as const,
+      options: [],
+      condition: null,
+      groupParentId: null,
+    };
+    const router = page("?mode=publish", { ...data, questions: [published] });
+    const correction = await screen.findByRole("button", {
+      name: "Ir a corregir",
+    });
+    const requests = vi.mocked(api).mock.calls.length;
+    const contributionRequests = vi.mocked(exchangeRequest).mock.calls.length;
+    const navigations: string[] = [];
+    const unsubscribe = router.subscribe((state) => {
+      navigations.push(state.location.search);
+    });
+    fireEvent.click(correction);
+    await screen.findByRole("complementary", { name: "Detalle de pregunta" });
+    expect(screen.getByRole("tab", { name: "Organizar" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    const params = new URLSearchParams(router.state.location.search);
+    expect(params.get("mode")).toBe("organize");
+    expect(params.get("question")).toBe(published.id);
+    expect(navigations).toHaveLength(1);
+    expect(router.state.historyAction).toBe("PUSH");
+    expect(api).toHaveBeenCalledTimes(requests);
+    expect(exchangeRequest).toHaveBeenCalledTimes(contributionRequests);
+    unsubscribe();
+    await act(() => router.navigate(-1));
+    expect(router.state.location.search).toBe("?mode=publish");
+    expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
+  } finally {
+    vi.unstubAllGlobals();
+  }
 });

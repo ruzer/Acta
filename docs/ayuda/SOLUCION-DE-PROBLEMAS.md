@@ -151,6 +151,16 @@ Consulta los pasos en las guías de [Participante](../pilot/GUIA-PARTICIPANTE.md
 
 ¿No encontraste tu duda? [Pregúntala en Discussions (Preguntas y respuestas)](https://github.com/ruzer/Acta/discussions/categories/q-a).
 
+### El editor muestra una acción no disponible
+
+Editar tema explica que el nombre y la descripción están protegidos si el tema tiene preguntas publicadas o archivadas. Mientras hay una búsqueda activa, todos los grupos se muestran desplegados: limpia la búsqueda para contraerlos. Si Nueva pregunta o + Agregar pregunta indican que falta un área activa, pide a la administración de la institución que la active en Administración. Una pregunta archivada se puede consultar, pero no seleccionar para acciones por lote.
+
+El identificador externo de una pregunta existente, el código interno de la instalación y los valores administrados externamente se muestran como texto seleccionable con su motivo. El identificador se conserva al guardar; los valores de infraestructura no se envían como cambios.
+
+En la edición de un borrador, elige **Tema al que pertenece**, arriba del contenido, y guarda. También puedes usar **Cambiar de tema** junto al tema en el panel de la pregunta. La pregunta y su grupo completo pasan al final del destino. El aviso distingue entre su único seguimiento y varios seguimientos, y muestra sus nombres. Si alguna integrante está publicada o archivada, el tema se muestra como texto con el nombre de quien lo impide. Cambia el tema y el vínculo de seguimiento en guardados separados. Tras guardar, **Ver** lleva a la pregunta en su nuevo lugar.
+
+El motivo aparece junto al control; no hace falta pasar el puntero para leerlo. Los botones no disponibles conservan el foco del teclado y no ejecutan la acción. [Guía del editor](../QUESTIONNAIRE-EDITOR-INTEGRATION.md#acciones-no-disponibles-en-el-editor).
+
 ### La revisión no muestra botones para actuar
 
 «Esta pantalla es de solo lectura para tu perfil. Solo el perfil Analista puede pedir aclaraciones y registrar decisiones.»
@@ -159,3 +169,41 @@ El proyecto está activo, pero tu perfil permite consultar esta pantalla, no ped
 aclaraciones ni registrar decisiones. Usa una cuenta con perfil Analista para
 revisar; no uses la contraseña de otra persona.
 [Perfiles de revisión](PREGUNTAS-FRECUENTES.md#por-qué-no-veo-los-botones-para-pedir-una-aclaración-o-registrar-una-decisión).
+
+
+### Una acción está atenuada o un dato no se puede editar
+
+Lee la explicación junto al botón o campo. Indica qué falta: elegir un archivo,
+completar una selección, resolver los problemas de la revisión o actualizar los
+datos que cambiaron. En la primera o última página, la navegación explica que ya
+no hay otra página en esa dirección. Si hay una operación en curso, espera a que
+termine antes de intentarlo de nuevo.
+
+Los enlaces privados y los textos de recordatorio se pueden seleccionar y copiar,
+pero no editar ahí. Un archivo que sigue en revisión o fue rechazado no permite
+descarga. Antes de enviar una respuesta, adjunta el archivo elegido o retíralo;
+si hay cambios de otra sesión, actualiza la información conservando tu texto.
+No cambies de cuenta para evitar una restricción.
+
+
+- En Importar, elige el archivo o el proyecto de origen. Corrige la vista previa y,
+  si corresponde, confirma la creación de áreas. El destino debe estar vacío.
+- En Crear usuarios en lote, pega la tabla antes de revisarla; corrige los errores
+  antes de crear las cuentas.
+- En Invitaciones, selecciona de 1 a 500 preguntas e incluye las principales de
+  las que dependan. La política de la instalación puede exigir datos personales.
+- En Participación, un recordatorio requiere preguntas obligatorias pendientes.
+  El informe requiere al menos una decisión vigente para imprimirse.
+- En Mi trabajo, limpia los filtros para volver a contraer los temas.
+- Al comparar aportaciones, elige dos distintas: no se puede seleccionar la misma
+  en ambas posturas.
+- Para guardar una imagen, selecciona un archivo. Los valores administrados fuera
+  de Acta se pueden leer y copiar; pide al equipo técnico que los cambie.
+- En la instalación, completa el código y comprueba que la base de datos responde
+  antes de crear la instalación.
+
+### No encuentro cómo abrir o recorrer una pregunta
+
+En **Escribir** y **Organizar**, pulsa el título subrayado: abre el mismo panel con texto completo, ayuda, opciones, área y participantes. Primero aparecen la pregunta y sus opciones; después, los datos y las acciones secundarias. La acción principal y Más acciones permanecen al pie. El panel se superpone a la lista sin estrecharla y ocupa toda la pantalla en móvil. **Editar pregunta** abre la edición del borrador. **Cambiar de tema** está junto al tema; **Más acciones** contiene configurar, ordenar, seleccionar grupo y archivar.
+
+**Pregunta anterior** y **Pregunta siguiente** recorren los resultados con tus filtros y búsqueda. La selección masiva sigue en sus casillas. Atrás o Escape cierran el panel y el foco vuelve a la lista; puedes compartir la dirección con la pregunta abierta. En Organizar, **Contenido** y **Respuestas** distinguen preparación y aportaciones. [Guía del editor](../QUESTIONNAIRE-EDITOR-INTEGRATION.md#abrir-y-recorrer-preguntas).

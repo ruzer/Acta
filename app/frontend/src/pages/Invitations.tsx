@@ -55,6 +55,7 @@ export function InvitationLink({
       </p>
       <Textarea
         label="Enlace privado"
+        readOnlyReason="El enlace lo genera Acta. Puedes seleccionarlo y copiarlo; para cambiarlo, renueva la invitación."
         readOnly
         value={url}
         onFocus={(e) => e.target.select()}
@@ -318,10 +319,19 @@ export function CreateInvitation({
                   <div className="actions">
                     <Button
                       tone="secondary"
-                      disabled={
-                        !visible.length ||
-                        new Set([...selection, ...visible.map((q) => q.id)])
-                          .size > 500
+                      unavailable={
+                        !visible.length
+                          ? {
+                              reason:
+                                "No hay preguntas publicadas que coincidan con esta búsqueda.",
+                            }
+                          : new Set([...selection, ...visible.map((q) => q.id)])
+                                .size > 500
+                            ? {
+                                reason:
+                                  "Una invitación admite hasta 500 preguntas. Reduce la selección.",
+                              }
+                            : false
                       }
                       onClick={() =>
                         setSelection(
@@ -334,7 +344,11 @@ export function CreateInvitation({
                     </Button>
                     <Button
                       tone="secondary"
-                      disabled={!selection.size}
+                      unavailable={
+                        !selection.size && {
+                          reason: "No hay preguntas seleccionadas para quitar.",
+                        }
+                      }
                       onClick={() => setSelection(new Set())}
                     >
                       Limpiar selección
@@ -500,13 +514,19 @@ export function CreateInvitation({
             </>
           )}
           <div className="actions next-invitation-step-actions">
-            <Button tone="secondary" disabled={busy} onClick={onClose}>
+            <Button
+              tone="secondary"
+              disabled={busy}
+              aria-busy={busy}
+              onClick={onClose}
+            >
               Cancelar
             </Button>
             {step > 0 && (
               <Button
                 tone="secondary"
                 disabled={busy}
+                aria-busy={busy}
                 onClick={() => {
                   setError("");
                   setStep(step - 1);
@@ -517,9 +537,21 @@ export function CreateInvitation({
             )}
             <Button
               type="submit"
-              disabled={
-                busy ||
-                ((step === 1 || step === 3) && (!validScope || missingParents))
+              disabled={busy}
+              aria-busy={busy}
+              unavailable={
+                (step === 1 || step === 3) &&
+                (!validScope
+                  ? {
+                      reason:
+                        "Selecciona entre 1 y 500 preguntas publicadas. Esta acción no publica borradores.",
+                    }
+                  : missingParents
+                    ? {
+                        reason:
+                          "Incluye las preguntas principales de las que dependen las preguntas seleccionadas.",
+                      }
+                    : false)
               }
             >
               {busy
@@ -769,7 +801,9 @@ export function Invitations() {
             <div className="actions">
               <Button
                 tone="secondary"
-                disabled={currentPage === 1}
+                unavailable={
+                  currentPage === 1 && { reason: "Estás en la primera página." }
+                }
                 onClick={() => setPage(currentPage - 1)}
               >
                 Anterior
@@ -777,7 +811,11 @@ export function Invitations() {
               <span>Página {currentPage}</span>
               <Button
                 tone="secondary"
-                disabled={currentPage * 25 >= filtered.length}
+                unavailable={
+                  currentPage * 25 >= filtered.length && {
+                    reason: "No hay más resultados.",
+                  }
+                }
                 onClick={() => setPage(currentPage + 1)}
               >
                 Siguiente
@@ -804,7 +842,14 @@ export function Invitations() {
           <Checkbox
             label="Permitir invitaciones sin datos personales en este proyecto"
             checked={policy.data.allowNonNominal}
-            disabled={busy || policy.data.identityRequirement !== "NONE"}
+            disabled={busy}
+            aria-busy={busy}
+            unavailable={
+              policy.data.identityRequirement !== "NONE" && {
+                reason:
+                  "Esta instalación exige datos personales para las invitaciones. La administración de este proyecto no puede omitirlos.",
+              }
+            }
             onChange={(e) => {
               setBusy(true);
               setError("");
@@ -865,6 +910,7 @@ export function Invitations() {
           </p>
           <Button
             disabled={busy}
+            aria-busy={busy}
             onClick={() => {
               setBusy(true);
               setError("");
@@ -899,6 +945,7 @@ export function Invitations() {
           <Button
             tone="secondary"
             disabled={busy}
+            aria-busy={busy}
             onClick={() => setCommand(undefined)}
           >
             Cancelar

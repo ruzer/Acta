@@ -264,6 +264,7 @@ export function ReviewActionDialog({
           <Button
             tone="secondary"
             disabled={busy}
+            aria-busy={busy}
             onClick={() =>
               void refresh().then(() => {
                 setConflict(false);
@@ -276,7 +277,11 @@ export function ReviewActionDialog({
             Actualizar información conservando texto
           </Button>
         )}
-        <fieldset disabled={busy} className="review-form-fields">
+        <fieldset
+          disabled={busy}
+          aria-busy={busy}
+          className="review-form-fields"
+        >
           <legend className="sr-only">
             Datos de {actionLabels[action].toLowerCase()}
           </legend>
@@ -451,7 +456,13 @@ export function ReviewActionDialog({
         </fieldset>
         <div className="actions">
           {action === "validateQuestion" && onDoneAndNext && (
-            <Button type="submit" name="intent" value="next" disabled={busy}>
+            <Button
+              type="submit"
+              name="intent"
+              value="next"
+              disabled={busy}
+              aria-busy={busy}
+            >
               {busy ? "Registrando…" : "Guardar y pasar a la siguiente"}
             </Button>
           )}
@@ -463,6 +474,7 @@ export function ReviewActionDialog({
                 : "primary"
             }
             disabled={busy}
+            aria-busy={busy}
           >
             {busy
               ? "Registrando…"
@@ -472,7 +484,12 @@ export function ReviewActionDialog({
                   ? "Enviar solicitud"
                   : actionLabels[action]}
           </Button>
-          <Button tone="secondary" disabled={busy} onClick={close}>
+          <Button
+            tone="secondary"
+            disabled={busy}
+            aria-busy={busy}
+            onClick={close}
+          >
             Cancelar
           </Button>
         </div>

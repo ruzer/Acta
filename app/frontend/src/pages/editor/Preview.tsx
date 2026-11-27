@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { type QuestionnaireView, type ResponseContent } from "@requirements/contracts";
+import {
+  type QuestionnaireView,
+  type ResponseContent,
+} from "@requirements/contracts";
 import { Button, Select, Alert, EmptyState } from "../../ui";
 import { AnswerControl } from "../AnswerControl";
 import {
@@ -140,7 +143,12 @@ export function Preview({
                       const next = questions[questions.indexOf(q) + 1];
                       if (next) setId(next.id);
                     }}
-                    disabled={questions.indexOf(q) === questions.length - 1}
+                    unavailable={
+                      questions.indexOf(q) === questions.length - 1 && {
+                        reason:
+                          "Esta es la última pregunta de la vista previa.",
+                      }
+                    }
                   >
                     Siguiente pregunta
                   </Button>

@@ -190,7 +190,7 @@ export function BulkDialog({
                     </li>
                   ))}
                 </ul>
-                <fieldset disabled={busy}>
+                <fieldset disabled={busy} aria-busy={busy}>
                   <legend>Qué preguntas cambiar</legend>
                   <Radio
                     name="bulk-area-mode"
@@ -247,7 +247,7 @@ export function BulkDialog({
             )}
             {operation === "ADD_PARTICIPANTS" && (
               <>
-                <fieldset disabled={busy}>
+                <fieldset disabled={busy} aria-busy={busy}>
                   <legend>Participantes a agregar</legend>
                   {participants.map((m) => (
                     <Checkbox
@@ -296,7 +296,14 @@ export function BulkDialog({
               </p>
             )}
             <Button
-              disabled={!configured || busy}
+              disabled={busy}
+              aria-busy={busy}
+              unavailable={
+                !configured && {
+                  reason:
+                    "Completa los datos del cambio antes de revisar el lote.",
+                }
+              }
               onClick={() => void review()}
             >
               {busy ? "Revisando…" : "Revisar lote"}
@@ -427,6 +434,7 @@ export function BulkDialog({
                 <Button
                   tone="secondary"
                   disabled={busy}
+                  aria-busy={busy}
                   onClick={() => {
                     onAddDependency(d.dependsOnId);
                     setPreview(null);
@@ -465,6 +473,7 @@ export function BulkDialog({
                         <Button
                           tone="secondary"
                           disabled={busy}
+                          aria-busy={busy}
                           onClick={() => onCorrect(item.questionId, e.field)}
                         >
                           Ir a corregir: {item.title}
@@ -482,6 +491,7 @@ export function BulkDialog({
               <Button
                 tone="secondary"
                 disabled={busy}
+                aria-busy={busy}
                 onClick={() => {
                   setPreview(null);
                   setCommand(null);
@@ -493,12 +503,21 @@ export function BulkDialog({
               <Button
                 tone="secondary"
                 disabled={busy}
+                aria-busy={busy}
                 onClick={() => void review(true)}
               >
                 Actualizar y revisar nuevamente
               </Button>
               <Button
-                disabled={busy || stale || !preview.canConfirm}
+                disabled={busy}
+                aria-busy={busy}
+                unavailable={
+                  (stale || !preview.canConfirm) && {
+                    reason: stale
+                      ? "Las preguntas cambiaron. Actualiza y revisa nuevamente el lote."
+                      : "Resuelve los impedimentos indicados en la revisión antes de confirmar el lote.",
+                  }
+                }
                 onClick={() => void confirm()}
               >
                 {busy
@@ -508,7 +527,12 @@ export function BulkDialog({
             </div>
           </>
         )}
-        <Button tone="secondary" disabled={busy} onClick={onClose}>
+        <Button
+          tone="secondary"
+          disabled={busy}
+          aria-busy={busy}
+          onClick={onClose}
+        >
           Cancelar
         </Button>
         {busy && <p role="status">Espera mientras se procesa la solicitud.</p>}

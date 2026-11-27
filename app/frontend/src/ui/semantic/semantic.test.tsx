@@ -176,15 +176,22 @@ it("la evidencia muestra nombre completo, tamaño y descarga; respeta bloqueo de
       name="Acta_de_recepción_documental.pdf"
       size="214 KB"
       onDownload={download}
-      disabled
-      description="Archivo todavía no disponible"
+      unavailable={{ reason: "Archivo todavía no disponible" }}
     />,
   );
   const button = screen.getByRole("button", {
     name: "Descargar Acta_de_recepción_documental.pdf",
   });
-  expect(button).toBeDisabled();
+  expect(button).toHaveAttribute("aria-disabled", "true");
   expect(button).toHaveAccessibleDescription("Archivo todavía no disponible");
+  expect(button.closest(".ac-evidence-file")?.children).toHaveLength(3);
+  expect(
+    screen
+      .getByText("Archivo todavía no disponible")
+      .closest(".ac-evidence-name"),
+  ).not.toBeNull();
+  await userEvent.click(button);
+  expect(download).toHaveBeenCalledOnce();
 });
 it("la comparación tiene campos únicos y encabezados explícitos", () => {
   render(

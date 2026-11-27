@@ -105,7 +105,7 @@ export function Login({
             required
             maxLength={128}
           />
-          <Button type="submit" disabled={pending}>
+          <Button type="submit" disabled={pending} aria-busy={pending}>
             {pending ? "Iniciando sesión…" : "Iniciar sesión"}
           </Button>
         </form>
@@ -176,7 +176,7 @@ export function Password({
           autoComplete="new-password"
           required
         />
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" disabled={pending} aria-busy={pending}>
           {pending ? "Actualizando…" : "Actualizar contraseña"}
         </Button>
       </form>

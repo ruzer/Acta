@@ -235,6 +235,7 @@ export function BulkUsers({
               data-autofocus
               value={text}
               disabled={busy}
+              aria-busy={busy}
               maxLength={65536}
               rows={8}
               hint="Copia también la fila de encabezados. La revisión no crea cuentas ni contraseñas."
@@ -253,7 +254,16 @@ export function BulkUsers({
                 <Alert error>{error}</Alert>
               </>
             )}
-            <Button disabled={busy || !text} onClick={() => void review()}>
+            <Button
+              disabled={busy}
+              aria-busy={busy}
+              unavailable={
+                !text && {
+                  reason: "Pega la tabla de usuarios antes de revisarla.",
+                }
+              }
+              onClick={() => void review()}
+            >
               {busy ? "Procesando…" : "Revisar usuarios"}
             </Button>
             {preview && (
@@ -356,7 +366,14 @@ export function BulkUsers({
                   />
                 </div>
                 <Button
-                  disabled={busy || !preview.canConfirm}
+                  disabled={busy}
+                  aria-busy={busy}
+                  unavailable={
+                    !preview.canConfirm && {
+                      reason:
+                        "Corrige los errores de la tabla y vuelve a revisar el lote antes de crear las cuentas.",
+                    }
+                  }
                   onClick={() => void confirm()}
                 >
                   Crear {plural(preview.users, "cuenta")} y{" "}

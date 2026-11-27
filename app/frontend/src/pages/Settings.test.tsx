@@ -170,7 +170,7 @@ it("General guarda solo lo que cambió, con la versión que se vio, y no llama a
   });
 });
 
-it("General muestra de solo lectura lo que define la infraestructura", async () => {
+it("General muestra como texto con motivo lo que define la infraestructura", async () => {
   mount("general", {
     settings: () =>
       settings({
@@ -178,9 +178,12 @@ it("General muestra de solo lectura lo que define la infraestructura", async () 
         locale: field("es-ES", "saved"),
       }),
   });
-  const zone = await screen.findByLabelText("Zona horaria");
-  expect(zone).toHaveValue("Europe/Madrid");
-  expect(zone).toHaveAttribute("readonly");
+  const zone = await screen.findByRole("group", { name: "Zona horaria" });
+  expect(zone).toHaveTextContent("Europe/Madrid");
+  expect(zone).toHaveAccessibleDescription(
+    /Administrado externamente \(DEFAULT_TIMEZONE\)/,
+  );
+  expect(screen.queryByRole("textbox", { name: "Zona horaria" })).toBeNull();
   expect(
     screen.getByText(/Administrado externamente \(DEFAULT_TIMEZONE\)/),
   ).toBeVisible();
@@ -253,15 +256,24 @@ it("un valor de la infraestructura se muestra sin poder editarse ni restablecers
         shortName: field("Corto", "saved"),
       }),
   });
-  const name = await screen.findByLabelText("Nombre de la aplicación");
-  expect(name).toHaveValue("Nombre del .env");
-  expect(name).toHaveAttribute("readonly");
+  const name = await screen.findByRole("group", {
+    name: "Nombre de la aplicación",
+  });
+  expect(name).toHaveTextContent("Nombre del .env");
+  expect(name).toHaveAccessibleDescription(
+    /Administrado externamente \(APP_NAME\)/,
+  );
+  expect(
+    screen.queryByRole("textbox", { name: "Nombre de la aplicación" }),
+  ).toBeNull();
   expect(
     screen.getByText(/Administrado externamente \(APP_NAME\)/),
   ).toBeVisible();
   expect(
-    screen.getByLabelText("Entidad del segundo logotipo (opcional)"),
-  ).toHaveAttribute("readonly");
+    screen.getByRole("group", {
+      name: "Entidad del segundo logotipo (opcional)",
+    }),
+  ).toHaveTextContent("Área del .env");
   // Solo lo guardado desde Acta se puede devolver a su valor predeterminado.
   expect(
     screen.getByRole("button", {
@@ -363,7 +375,11 @@ it("una imagen demasiado grande se rechaza antes de enviarla", async () => {
   expect(await screen.findByText(/demasiado grande/)).toBeVisible();
   expect(
     screen.getByRole("button", { name: "Guardar segundo logotipo" }),
-  ).toBeDisabled();
+  ).toHaveAttribute("aria-disabled", "true");
+  const save = screen.getByRole("button", { name: "Guardar segundo logotipo" });
+  await user.click(save);
+  save.focus();
+  await user.keyboard("{Enter} ");
   expect(upload).not.toHaveBeenCalled();
 });
 

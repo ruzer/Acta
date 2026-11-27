@@ -173,6 +173,7 @@ function ResetButton({
         tone="tertiary"
         onClick={onReset}
         disabled={busy}
+        aria-busy={busy}
         aria-label={`Usar el valor predeterminado (${fallback}) de ${name}`}
       >
         Usar el valor predeterminado ({fallback})
@@ -308,7 +309,11 @@ function General({ settings }: { settings: SettingsView }) {
             void queryClient.invalidateQueries({ queryKey: ["settings"] })
           }
         />
-        <Button type="submit" disabled={mutation.isPending}>
+        <Button
+          type="submit"
+          disabled={mutation.isPending}
+          aria-busy={mutation.isPending}
+        >
           {mutation.isPending ? "Guardando…" : "Guardar cambios"}
         </Button>
       </form>
@@ -478,7 +483,11 @@ function Appearance({ settings }: { settings: SettingsView }) {
             void queryClient.invalidateQueries({ queryKey: ["settings"] })
           }
         />
-        <Button type="submit" disabled={mutation.isPending}>
+        <Button
+          type="submit"
+          disabled={mutation.isPending}
+          aria-busy={mutation.isPending}
+        >
           {mutation.isPending ? "Guardando…" : "Guardar identidad"}
         </Button>
       </form>
@@ -627,7 +636,13 @@ function AssetControl({
             </div>
             <div className="actions">
               <Button
-                disabled={busy || !file}
+                disabled={busy}
+                aria-busy={busy}
+                unavailable={
+                  !file && {
+                    reason: "Selecciona un archivo válido antes de guardarlo.",
+                  }
+                }
                 onClick={() =>
                   file &&
                   void run(
@@ -642,6 +657,7 @@ function AssetControl({
                 <Button
                   tone="danger"
                   disabled={busy}
+                  aria-busy={busy}
                   onClick={() =>
                     void run(
                       () =>
@@ -748,6 +764,7 @@ function StorageSection() {
           tone="secondary"
           onClick={() => test.mutate()}
           disabled={test.isPending}
+          aria-busy={test.isPending}
         >
           {test.isPending ? "Probando…" : "Probar conexión"}
         </Button>
@@ -867,6 +884,7 @@ function SystemSection() {
           tone="secondary"
           onClick={() => void system.refetch()}
           disabled={system.isFetching}
+          aria-busy={system.isFetching}
         >
           {system.isFetching ? "Actualizando…" : "Actualizar"}
         </Button>

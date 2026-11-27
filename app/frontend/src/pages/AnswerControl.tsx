@@ -1,6 +1,15 @@
 import { useId } from "react";
 import { ResponseContent, ResponseQuestionView } from "@requirements/contracts";
-import { Button, Checkbox, Input, Radio, Select, Textarea } from "../ui";
+import {
+  Button,
+  Checkbox,
+  Input,
+  Radio,
+  Select,
+  Textarea,
+  type ControlAvailability,
+} from "../ui";
+import { requireAvailability, requireReason } from "../ui/control-availability";
 type Value = ResponseContent["answer"];
 export { answerDisplay as answerText } from "../answer-display";
 export function AnswerControl({
@@ -9,17 +18,32 @@ export function AnswerControl({
   onChange,
   error,
   disabled = false,
+  "aria-busy": busy = false,
+  unavailable,
   compact = false,
 }: {
   question: ResponseQuestionView;
   value: Value;
   onChange: (a: Value) => void;
   error?: string;
-  disabled?: boolean;
   compact?: boolean;
-}) {
+} & ControlAvailability) {
+  requireAvailability({ disabled, "aria-busy": busy });
+  requireReason(unavailable);
   const id = useId(),
     cfg = q.config || {};
+  const reasonId = unavailable
+    ? unavailable.describedBy || id + "-unavailable"
+    : undefined;
+  const groupedRestriction = unavailable && {
+    ...unavailable,
+    describedBy: reasonId,
+  };
+  const groupReason = unavailable && !unavailable.describedBy && (
+    <p id={reasonId} className="hint">
+      {unavailable.reason}
+    </p>
+  );
   const hint =
     compact && q.required
       ? "Obligatoria para enviar."
@@ -43,6 +67,8 @@ export function AnswerControl({
           error={error}
           hint={hint}
           disabled={disabled}
+          aria-busy={busy}
+          unavailable={unavailable}
         />
         {showCount && (
           <p className="hint">
@@ -80,6 +106,8 @@ export function AnswerControl({
           error={error}
           hint={[hint, bounds].filter(Boolean).join(" ")}
           disabled={disabled}
+          aria-busy={busy}
+          unavailable={unavailable}
         />
         {error && bounds && <p className="hint">{bounds}</p>}
       </>
@@ -114,6 +142,8 @@ export function AnswerControl({
             .filter(Boolean)
             .join(" ")}
           disabled={disabled}
+          aria-busy={busy}
+          unavailable={unavailable}
         />
         {error && bounds && <p className="hint">{bounds}</p>}
       </>
@@ -129,8 +159,13 @@ export function AnswerControl({
         ? value
         : {};
     return (
-      <fieldset disabled={disabled} aria-describedby={id}>
+      <fieldset
+        disabled={disabled}
+        aria-busy={busy}
+        aria-describedby={[id, reasonId].filter(Boolean).join(" ")}
+      >
         <legend>Tu respuesta por fila</legend>
+        {groupReason}
         <p id={id} className={error ? "field-error" : "hint"}>
           {error || hint}
         </p>
@@ -139,6 +174,7 @@ export function AnswerControl({
             <Select
               key={row.key}
               label={row.label}
+              unavailable={groupedRestriction}
               value={Object.hasOwn(values, row.key) ? values[row.key] : ""}
               onChange={(e) => {
                 const next = { ...values };
@@ -179,14 +215,19 @@ export function AnswerControl({
         compact && q.type === "YES_NO" ? "participant-yesno" : undefined
       }
       disabled={disabled}
-      aria-describedby={
+      aria-busy={busy}
+      aria-describedby={[
         q.type === "MULTIPLE_CHOICE"
           ? `${id} ${id}-rules ${id}-count${atMaximum ? ` ${id}-maximum` : ""}`
-          : id
-      }
+          : id,
+        reasonId,
+      ]
+        .filter(Boolean)
+        .join(" ")}
       aria-invalid={!!error}
     >
       <legend>Tu respuesta</legend>
+      {groupReason}
       <p id={id} className={error ? "field-error" : "hint"}>
         {error || hint}
       </p>
@@ -208,12 +249,14 @@ export function AnswerControl({
       {q.type === "YES_NO" ? (
         <>
           <Radio
+            unavailable={groupedRestriction}
             name={id}
             label="Sí"
             checked={value === true}
             onChange={() => onChange(true)}
           />
           <Radio
+            unavailable={groupedRestriction}
             name={id}
             label="No"
             checked={value === false}
@@ -222,6 +265,7 @@ export function AnswerControl({
           {compact ? (
             value !== null && (
               <Button
+                unavailable={groupedRestriction}
                 className="participant-text-button participant-clear"
                 onClick={() => onChange(null)}
               >
@@ -230,6 +274,7 @@ export function AnswerControl({
             )
           ) : (
             <Radio
+              unavailable={groupedRestriction}
               name={id}
               label="Sin selección"
               checked={value === null}
@@ -242,6 +287,7 @@ export function AnswerControl({
           {compact ? (
             value !== null && (
               <Button
+                unavailable={groupedRestriction}
                 className="participant-text-button participant-clear"
                 onClick={() => onChange(null)}
               >
@@ -250,6 +296,7 @@ export function AnswerControl({
             )
           ) : (
             <Radio
+              unavailable={groupedRestriction}
               name={id}
               label="Sin selección"
               checked={value === null}
@@ -258,6 +305,7 @@ export function AnswerControl({
           )}
           {q.options.map((o) => (
             <Radio
+              unavailable={groupedRestriction}
               key={o.value}
               name={id}
               label={o.label}
@@ -272,7 +320,14 @@ export function AnswerControl({
             key={o.value}
             label={o.label}
             checked={Array.isArray(value) && value.includes(o.value)}
-            disabled={atMaximum && !selected.includes(o.value)}
+            unavailable={
+              groupedRestriction ||
+              (atMaximum &&
+                !selected.includes(o.value) && {
+                  reason: "Quita una opción para elegir otra.",
+                  describedBy: id + "-maximum",
+                })
+            }
             aria-describedby={atMaximum ? id + "-maximum" : undefined}
             onChange={(e) =>
               onChange(

@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 import { questionnaireView } from "@requirements/contracts";
 import fixture from "../../../../../tests/fixtures/analyst-visual.json";
-import { Organize } from "./Organize";
+import { EditorWorkspace as Organize } from "./EditorWorkspace";
 const base = questionnaireView.parse(fixture.questionnaire);
 afterEach(cleanup);
 function setup(count: number) {
@@ -20,6 +20,7 @@ function setup(count: number) {
   }));
   render(
     <Organize
+      initialMode={1}
       data={{ ...base, questions }}
       projectId="p"
       onEdit={vi.fn()}
@@ -107,6 +108,7 @@ it("el grupo incluye seguimientos fuera de página sin confundir selección e in
   await user.click(
     screen.getByRole("button", { name: /Consulta de ejemplo 0/ }),
   );
+  await user.click(screen.getByText("Más acciones"));
   expect(screen.getByText(/Se seleccionarán 2 preguntas/)).toBeVisible();
   await user.click(
     screen.getByRole("button", { name: "Seleccionar grupo completo" }),

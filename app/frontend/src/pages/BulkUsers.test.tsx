@@ -83,7 +83,7 @@ it("muestra errores por fila vinculados a sus celdas e impide confirmar", async 
     ],
   });
   setup();
-  await review();
+  const user = await review();
   expect(
     screen.getByRole("link", { name: "Fila 2, Usuario: Ya existe" }),
   ).toHaveAttribute("href", "#bulk-cell-2-Usuario");
@@ -101,10 +101,18 @@ it("muestra errores por fila vinculados a sus celdas e impide confirmar", async 
     screen.getByRole("button", {
       name: "Crear 1 cuenta y 1 acceso al proyecto",
     }),
-  ).toBeDisabled();
+  ).toHaveAttribute("aria-disabled", "true");
   expect(
     screen.getByRole("heading", { name: "Revisar el lote" }),
   ).toHaveFocus();
+  const confirm = screen.getByRole("button", {
+    name: "Crear 1 cuenta y 1 acceso al proyecto",
+  });
+  const callsBefore = vi.mocked(api).mock.calls.length;
+  await user.click(confirm);
+  confirm.focus();
+  await user.keyboard("{Enter} ");
+  expect(api).toHaveBeenCalledTimes(callsBefore);
 });
 it("entrega efímera sin caché ni almacenamiento e imprime solo por petición, una hoja por persona", async () => {
   const secret = crypto.randomUUID();

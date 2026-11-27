@@ -439,11 +439,18 @@ function Topic({
   return (
     <section className="participant-topic">
       <h3>
-        <button
+        <Button
+          className=""
           aria-expanded={expanded}
           aria-controls={`topic-${section.id}`}
           onClick={() => setOpen(!open)}
-          disabled={forceOpen}
+          unavailable={
+            forceOpen && {
+              reason:
+                "Los temas se muestran abiertos mientras filtras las preguntas. Limpia los filtros para contraerlos.",
+              describedBy: `topic-${section.id}-reason`,
+            }
+          }
         >
           <span
             className={
@@ -460,8 +467,14 @@ function Topic({
               {section.questions.length === 1 ? "pregunta" : "preguntas"}
             </span>
           </span>
-        </button>
+        </Button>
       </h3>
+      {forceOpen && (
+        <p id={`topic-${section.id}-reason`} className="hint">
+          Los temas se muestran abiertos mientras filtras las preguntas. Limpia
+          los filtros para contraerlos.
+        </p>
+      )}
       <div id={`topic-${section.id}`} hidden={!expanded}>
         {expanded && (
           <ul>

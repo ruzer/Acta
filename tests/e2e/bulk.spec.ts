@@ -198,6 +198,7 @@ test("304 questions: area filter → all results → area; group → participant
       name: /¿Cómo se atiende la solicitud de ejemplo 0\?/,
     })
     .click();
+  await page.getByText("Más acciones", { exact: true }).click();
   await expect(page.getByText(/Se seleccionarán 2 preguntas/)).toBeVisible();
   await page
     .getByRole("button", { name: "Seleccionar grupo completo" })

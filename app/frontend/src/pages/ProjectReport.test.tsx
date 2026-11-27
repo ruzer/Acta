@@ -135,13 +135,22 @@ it.each([
   },
 );
 it("no imprime preguntas reabiertas ni un informe vacío", async () => {
+  const user = userEvent.setup();
+  const print = vi.spyOn(window, "print").mockImplementation(() => undefined);
   const data = document();
   data.decisions[0]!.status = "ANSWERED";
   setup(data);
   await screen.findByText("Todavía no hay decisiones vigentes");
   expect(
     screen.getByRole("button", { name: "Imprimir o guardar como PDF" }),
-  ).toBeDisabled();
+  ).toHaveAttribute("aria-disabled", "true");
+  const button = screen.getByRole("button", {
+    name: "Imprimir o guardar como PDF",
+  });
+  await user.click(button);
+  button.focus();
+  await user.keyboard("{Enter} ");
+  expect(print).not.toHaveBeenCalled();
   expect(screen.queryByRole("article")).not.toBeInTheDocument();
 });
 it("conserva el rechazo del servidor y no muestra datos ni ofrece imprimir", async () => {

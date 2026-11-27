@@ -91,6 +91,7 @@ export function ContributionComparison({
               {ids.length > 2 && (
                 <Select
                   label={`Aportación para postura ${index === 0 ? "A" : "B"}${labelSuffix}`}
+                  hint="La aportación elegida en la otra postura no se puede seleccionar dos veces."
                   value={pair[index]}
                   onChange={(e) =>
                     setChosen(
@@ -111,6 +112,9 @@ export function ContributionComparison({
                         {option
                           ? `${option.respondent.displayName} · ${option.area.name} · envío #${option.number}`
                           : "Fuente vinculada sin detalle disponible"}
+                        {id === pair[1 - index]
+                          ? " · elegida en la otra postura"
+                          : ""}
                       </option>
                     );
                   })}

@@ -89,7 +89,7 @@ describe("Import guidance without a new import contract", () => {
   it.each(["sections", "questions", "references"])(
     "blocks a project with %s before selecting a file",
     async (collection) => {
-      setup({
+      const user = setup({
         sections: [],
         questions: [],
         references: [],
@@ -103,13 +103,17 @@ describe("Import guidance without a new import contract", () => {
       expect(screen.getByLabelText("Archivo CSV o JSON")).toBeDisabled();
       expect(
         screen.getByRole("button", { name: "Revisar archivo" }),
-      ).toBeDisabled();
+      ).toHaveAttribute("aria-disabled", "true");
       expect(
         screen.getByRole("link", { name: "Ir al cuestionario" }),
       ).toHaveAttribute("href", "/projects/example/editor");
       expect(
         screen.getByText("Descargar ejemplo completo").closest("details"),
       ).not.toHaveAttribute("open");
+      const review = screen.getByRole("button", { name: "Revisar archivo" });
+      await user.click(review);
+      review.focus();
+      await user.keyboard("{Enter} ");
       expect(exchangeRequest).not.toHaveBeenCalled();
     },
   );
@@ -121,7 +125,7 @@ describe("Import guidance without a new import contract", () => {
     expect(screen.getByLabelText("Archivo CSV o JSON")).toBeDisabled();
     expect(
       screen.getByRole("button", { name: "Revisar archivo" }),
-    ).toBeDisabled();
+    ).toHaveAttribute("aria-disabled", "true");
   });
 
   it("says the project's identifier inside advanced JSON help", async () => {
@@ -218,7 +222,7 @@ describe("Import guidance without a new import contract", () => {
     expect(screen.getByText("/questions/7/responsibleAreaCode")).toBeVisible();
     expect(
       screen.getByRole("button", { name: "Confirmar importación" }),
-    ).toBeDisabled();
+    ).toHaveAttribute("aria-disabled", "true");
     await waitFor(() =>
       expect(screen.getByLabelText("Archivo CSV o JSON")).toBeEnabled(),
     );
@@ -248,7 +252,12 @@ describe("Import guidance without a new import contract", () => {
     const confirm = screen.getByRole("button", {
       name: "Confirmar importación",
     });
-    expect(confirm).toBeDisabled();
+    expect(confirm).toHaveAttribute("aria-disabled", "true");
+    const callsBefore = vi.mocked(exchangeRequest).mock.calls.length;
+    await user.click(confirm);
+    confirm.focus();
+    await user.keyboard("{Enter} ");
+    expect(exchangeRequest).toHaveBeenCalledTimes(callsBefore);
     await user.click(
       screen.getByLabelText("Confirmo crear estas áreas en la institución"),
     );

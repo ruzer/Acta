@@ -280,7 +280,7 @@
 }
 .an-question-meta {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 0 var(--ac-space-2);
   color: var(--ac-muted);
   font-size: var(--ac-text-overline);

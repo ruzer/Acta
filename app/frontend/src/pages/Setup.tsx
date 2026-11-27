@@ -9,7 +9,7 @@ import {
 } from "@requirements/contracts";
 import { ApiFailure, api } from "../api";
 import { initialTimezone } from "../initial-timezone";
-import { Alert, Button, Input, LoadingState } from "../ui";
+import { Alert, Button, Input, LoadingState, UnavailableValue } from "../ui";
 import { StatusChip } from "../ui/semantic";
 import {
   AccentInput,
@@ -317,7 +317,17 @@ export function Setup({ onFinished }: { onFinished: () => void }) {
               required
               hint="Es de un solo uso y caduca. Si abriste el enlace que muestra el comando, ya viene escrito."
             />
-            <Button type="submit" disabled={busy || code.trim().length < 20}>
+            <Button
+              type="submit"
+              disabled={busy}
+              aria-busy={busy}
+              unavailable={
+                code.trim().length < 20 && {
+                  reason:
+                    "Escribe el código de instalación completo para comenzar.",
+                }
+              }
+            >
               {busy ? "Comprobando…" : "Comenzar"}
             </Button>
             <p className="hint">
@@ -394,11 +404,10 @@ export function Setup({ onFinished }: { onFinished: () => void }) {
               hint="Aparece en la pantalla de acceso y en el encabezado."
               required
             />
-            <Input
+            <UnavailableValue
               label="Código interno de la instalación"
               value={defaults.organizationCode}
-              readOnly
-              hint="Lo define la infraestructura (ORGANIZATION_CODE). No es un dato de acceso."
+              reason="Lo define la infraestructura (ORGANIZATION_CODE). No se puede cambiar aquí y no es un dato de acceso."
             />
             <Navigation onBack={back} />
           </form>
@@ -422,6 +431,7 @@ export function Setup({ onFinished }: { onFinished: () => void }) {
                 tone="secondary"
                 onClick={() => void runChecks()}
                 disabled={checking}
+                aria-busy={checking}
               >
                 Probar de nuevo
               </Button>
@@ -545,7 +555,12 @@ export function Setup({ onFinished }: { onFinished: () => void }) {
             <Navigation
               onBack={back}
               submitLabel={busy ? "Creando…" : "Crear instalación"}
-              disabled={busy || checking || checks?.database !== "ok"}
+              busy={busy || checking}
+              unavailableReason={
+                checks?.database !== "ok"
+                  ? "La base de datos debe responder correctamente antes de crear la instalación."
+                  : undefined
+              }
               onSubmit={() => void finish()}
             />
             {checks && checks.storage !== "ok" && (
@@ -582,12 +597,14 @@ export function Setup({ onFinished }: { onFinished: () => void }) {
 function Navigation({
   onBack,
   submitLabel = "Continuar",
-  disabled,
+  busy = false,
+  unavailableReason,
   onSubmit,
 }: {
   onBack: () => void;
   submitLabel?: string;
-  disabled?: boolean;
+  busy?: boolean;
+  unavailableReason?: string;
   onSubmit?: () => void;
 }) {
   return (
@@ -596,11 +613,25 @@ function Navigation({
         Atrás
       </Button>
       {onSubmit ? (
-        <Button disabled={disabled} onClick={onSubmit}>
+        <Button
+          disabled={busy}
+          aria-busy={busy}
+          unavailable={
+            unavailableReason ? { reason: unavailableReason } : false
+          }
+          onClick={onSubmit}
+        >
           {submitLabel}
         </Button>
       ) : (
-        <Button type="submit" disabled={disabled}>
+        <Button
+          type="submit"
+          disabled={busy}
+          aria-busy={busy}
+          unavailable={
+            unavailableReason ? { reason: unavailableReason } : false
+          }
+        >
           {submitLabel}
         </Button>
       )}
