@@ -26,7 +26,7 @@ El área no asigna personas. Añadir participantes conserva las asignaciones act
 
 Mover arriba o abajo explica cuándo el tema o la pregunta ya está en un extremo. La paginación avisa si estás en la primera o última página. Publicar muestra los problemas concretos que hay que resolver; revisar un lote pide completar su configuración o actualizar una vista previa que haya cambiado.
 
-El menú Más acciones del panel tiene desplazamiento propio; sus opciones no dependen de un menú flotante recortado por el panel. Escape cierra primero ese menú.
+El menú Más acciones está en el pie y abre hacia arriba con desplazamiento propio, fuera del cuerpo desplazable. Sus opciones caben en la ventana sin quedar recortadas por el cuerpo del panel. Escape cierra primero ese menú.
 
 Estos motivos son visibles y están asociados con sus controles. No cambian los permisos ni las reglas del servidor.
 
@@ -61,10 +61,12 @@ y los estados de espera solo corresponden a una operación real en curso. Consul
 
 En **Escribir** y **Organizar**, el título subrayado y su flecha abren el mismo panel. El nombre accesible corresponde al enunciado; la flecha no agrega otro destino. El atajo **Editar pregunta** conserva el mismo nombre en ambos modos.
 
+Primero aparecen la pregunta y sus opciones; después, los datos y las acciones secundarias. La acción principal y Más acciones permanecen al pie. El panel se superpone a la lista sin estrecharla y ocupa toda la pantalla en móvil.
+
 El panel muestra texto y ayuda completos, tipo, opciones ordenadas o filas y columnas de matriz, tema, área responsable, participantes activos, estado y obligatoriedad. **Cambiar de tema** aparece solo junto al tema de un borrador y conserva los bloqueos de grupo. Un borrador con errores o una principal pendiente de publicar prioriza **Editar pregunta**; un borrador listo prioriza **Publicar**. No tener participantes es una advertencia que no impide publicar. Una publicada prioriza **Revisar respuestas**. Hay como máximo dos acciones secundarias; configurar, mover arriba/abajo, seleccionar grupo y archivar están en **Más acciones**.
 
 **Pregunta anterior** y **Pregunta siguiente** recorren los resultados filtrados y desplegados de Organizar, cruzando páginas de 40 sin cambiar las casillas. En Escribir recorren los temas desplegados y su orden actual. Una pregunta contextual fuera del filtro lo indica sin inventar una posición. Abrir desde enlace directo despliega el tema o los antecesores necesarios, sin limpiar filtros. La pregunta abierta se marca con `aria-current` y se mantiene a la vista.
 
 `question=<id>` añade una entrada al abrir; recorrer o abrir otra pregunta con el panel ya abierto reemplaza esa entrada. Atrás y Escape cierran; un enlace directo válido prepara una entrada del editor cerrado para que Atrás no salga del editor. Un id inexistente muestra un aviso y retira el parámetro. Abrir, recorrer y cerrar no consultan otra vez el cuestionario. El foco entra en el encabezado y vuelve al origen al cerrar, sin robar una interacción posterior.
 
-Las pestañas **Escribir**, **Organizar** y **Revisar publicación** conservan sus nombres y explican su propósito. El selector de Organizar se llama **Contenido / Respuestas**. La columna del panel mide 456 px desde 1280 px; debajo conserva el diálogo existente. El ajuste de superposición, movimiento de cierre y pantalla completa móvil pertenece a I4, aún pendiente. Estos cambios no acreditan una prueba con personas ni un lector de pantalla físico.
+Las pestañas **Escribir**, **Organizar** y **Revisar publicación** conservan sus nombres y explican su propósito. El selector de Organizar se llama **Contenido / Respuestas**. El panel mide 456 px y se superpone desde 900 px, sin estrechar la lista; debajo usa un diálogo de pantalla completa. Esta estructura se adelanta de I4 para que I3 no entregue una lista que se reacomode al abrir. La entrada conserva la animación existente; el movimiento de cierre, los ajustes al teclado móvil y la hoja inferior de Más acciones pertenecen a I4, aún pendiente. Estos cambios no acreditan una prueba con personas ni un lector de pantalla físico.

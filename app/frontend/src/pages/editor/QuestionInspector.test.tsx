@@ -8,6 +8,7 @@ import { inspectorActions } from "./inspector-actions";
 import { QuestionInspectorContent } from "./QuestionInspectorContent";
 import { QuestionInspectorActions } from "./QuestionInspectorActions";
 import { QuestionInspectorNavigation } from "./QuestionInspectorNavigation";
+import { QuestionInspector } from "./QuestionInspector";
 import { QuestionOpenButton } from "./QuestionOpenButton";
 const data = questionnaireView.parse(fixture.questionnaire);
 const draft = {
@@ -30,6 +31,7 @@ const props = {
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  vi.unstubAllGlobals();
 });
 it("sin participantes permite publicar; errores y principal borrador priorizan editar", () => {
   expect(inspectorActions(props.data, draft).primary).toBe("publish");
@@ -183,4 +185,104 @@ it("recorre solo ids visibles y explica una pregunta fuera de filtros", async ()
   expect(
     screen.getByRole("button", { name: "Pregunta siguiente" }),
   ).toHaveAttribute("aria-disabled", "true");
+});
+
+it("ordena lectura antes de datos y conserva las acciones exigidas fuera del menú", () => {
+  vi.stubGlobal("matchMedia", () => ({
+    matches: true,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  }));
+  vi.stubGlobal("requestAnimationFrame", vi.fn());
+  const question = {
+    ...draft,
+    type: "SINGLE_CHOICE" as const,
+    options: [
+      { value: "one", label: "Opción ficticia", order: 0 },
+      { value: "two", label: "Otra opción ficticia", order: 1 },
+    ],
+  };
+  const { container } = render(
+    <QuestionInspector
+      {...props}
+      data={{ ...props.data, questions: [question] }}
+      question={question}
+      onClose={vi.fn()}
+      onNavigate={vi.fn()}
+      visibleIds={[question.id]}
+    />,
+  );
+  const panel = screen.getByRole("complementary", {
+    name: "Detalle de pregunta",
+  });
+  expect(
+    within(panel).getByRole("heading", { name: "Detalle de pregunta" }),
+  ).toHaveFocus();
+  const options = screen.getByRole("region", { name: "Opciones de respuesta" });
+  const facts = screen.getByRole("region", { name: "Datos de la pregunta" });
+  expect(
+    options.compareDocumentPosition(facts) & Node.DOCUMENT_POSITION_FOLLOWING,
+  ).toBeTruthy();
+  const footer = container.querySelector(
+    ".qe-inspector-footer",
+  )! as HTMLElement;
+  expect(within(footer).getByRole("button", { name: "Publicar" })).toHaveClass(
+    "primary",
+  );
+  expect(within(footer).getByText("Más acciones")).toBeVisible();
+  expect(footer.closest(".qe-inspector-body")).toBeNull();
+  expect(
+    screen.getByRole("button", { name: "Editar pregunta" }).closest("details"),
+  ).toBeNull();
+  expect(
+    screen
+      .getByRole("button", { name: "Asignar participantes" })
+      .closest("details"),
+  ).toBeNull();
+});
+it("una pregunta única comparte un motivo visible y bloquea ambos sentidos sin perder foco", async () => {
+  const user = userEvent.setup();
+  const navigate = vi.fn();
+  render(
+    <QuestionInspectorNavigation
+      questionId="only"
+      visibleIds={["only"]}
+      onNavigate={navigate}
+    />,
+  );
+  const reason = "Esta es la única pregunta de los resultados.";
+  expect(screen.getAllByText(reason)).toHaveLength(1);
+  for (const name of ["Pregunta anterior", "Pregunta siguiente"]) {
+    const button = screen.getByRole("button", { name });
+    expect(button).toHaveAccessibleDescription(reason);
+    await user.click(button);
+    expect(button).toHaveFocus();
+    await user.keyboard("{Enter}");
+  }
+  expect(navigate).not.toHaveBeenCalled();
+});
+
+it("Revisar respuestas navega una sola vez sin cerrar antes el historial del editor", async () => {
+  vi.stubGlobal("matchMedia", () => ({
+    matches: true,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  }));
+  vi.stubGlobal("requestAnimationFrame", vi.fn());
+  const user = userEvent.setup();
+  const close = vi.fn();
+  const review = vi.fn();
+  render(
+    <QuestionInspector
+      {...props}
+      question={{ ...draft, publication: "PUBLISHED" }}
+      onClose={close}
+      onOpenContributions={review}
+      onNavigate={vi.fn()}
+      visibleIds={[draft.id]}
+    />,
+  );
+  await user.click(screen.getByRole("button", { name: "Revisar respuestas" }));
+  expect(review).toHaveBeenCalledExactlyOnceWith(draft.id);
+  expect(close).not.toHaveBeenCalled();
 });

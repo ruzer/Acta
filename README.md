@@ -41,7 +41,7 @@ Ser administrador no sustituye el rol de analista para validar decisiones. El á
 ## Características principales
 
 - Cuestionarios por temas, seguimientos y ocho tipos de respuesta, incluida matriz.
-- Abre una pregunta desde su título subrayado en **Escribir** o **Organizar**. El panel muestra opciones, ayuda y asignaciones; **Pregunta anterior** y **Pregunta siguiente** recorren los resultados, y Atrás o Escape vuelven a la lista. **Cambiar de tema** está junto al tema y **Más acciones** reúne las acciones secundarias. En Organizar, **Contenido / Respuestas** diferencia preparación y aportaciones.
+- Abre una pregunta desde su título subrayado en **Escribir** o **Organizar**. El panel muestra opciones, ayuda y asignaciones; **Pregunta anterior** y **Pregunta siguiente** recorren los resultados, y Atrás o Escape vuelven a la lista. **Cambiar de tema** está junto al tema y **Más acciones** reúne la configuración, el orden, la selección de grupo y el archivado. En Organizar, **Contenido / Respuestas** diferencia preparación y aportaciones. Primero aparecen la pregunta y sus opciones; después, los datos y las acciones secundarias. La acción principal y Más acciones permanecen al pie. El panel se superpone a la lista sin estrecharla y ocupa toda la pantalla en móvil.
 - Editor con vistas **Escribir**, **Organizar** y **Revisar publicación**. En Organizar, [selecciona preguntas y revisa operaciones por lote](docs/BULK-QUESTIONNAIRE-OPERATIONS.md) para asignar área, agregar participantes o publicar.
 
 - **Mi trabajo** para participantes: borradores persistentes, envíos y evidencia privada.

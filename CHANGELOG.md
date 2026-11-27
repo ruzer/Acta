@@ -16,7 +16,7 @@ La historia pública comienza con Acta. No se reconstruyen releases ni fechas de
 
 ### Changed
 
-- **Abrir y recorrer preguntas.** El título subrayado abre el mismo panel en Escribir y Organizar, con opciones, área, participantes y acciones según el estado. Cambiar de tema está junto al tema y Más acciones reúne las acciones secundarias. La dirección conserva la pregunta; Atrás y Escape vuelven a la lista, y anterior/siguiente respetan los resultados visibles. Organizar distingue Contenido y Respuestas sin cambiar las pestañas.
+- **Abrir y recorrer preguntas.** El título subrayado abre el mismo panel en Escribir y Organizar, con opciones, área, participantes y acciones según el estado. Cambiar de tema está junto al tema y Más acciones reúne la configuración, el orden, la selección de grupo y el archivado. La dirección conserva la pregunta; Atrás y Escape vuelven a la lista, y anterior/siguiente respetan los resultados visibles. Organizar distingue Contenido y Respuestas sin cambiar las pestañas. El panel se superpone sin estrechar la lista; presenta pregunta y opciones antes de los datos, con la acción principal y Más acciones al pie. En móvil ocupa toda la pantalla.
 
 - **Cambiar el tema al editar.** Los borradores permiten elegir el tema antes del contenido y guardar ambos cambios juntos. La pregunta principal y todos sus seguimientos se mueven como un grupo; si alguien no es borrador, el motivo indica quién lo impide.
 

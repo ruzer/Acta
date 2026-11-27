@@ -27,13 +27,33 @@ export function QuestionInspector({
   const parent = data.questions.find(
     (p) => p.id === q.condition?.parentQuestionId,
   );
+  const actionProps = {
+    ...props,
+    question: q,
+    onSelectGroup,
+    onEdit: ((...args) => {
+      onClose();
+      props.onEdit(...args);
+    }) as EditorProps["onEdit"],
+    onAction: ((...args) => {
+      onClose();
+      props.onAction(...args);
+    }) as EditorProps["onAction"],
+  };
   return (
-    <InspectorFrame onClose={onClose} questionId={q.id}>
-      <QuestionInspectorNavigation
-        questionId={q.id}
-        visibleIds={visibleIds}
-        onNavigate={onNavigate}
-      />
+    <InspectorFrame
+      onClose={onClose}
+      questionId={q.id}
+      navigation={
+        <QuestionInspectorNavigation
+          questionId={q.id}
+          visibleIds={visibleIds}
+          onNavigate={onNavigate}
+          onClose={onClose}
+        />
+      }
+      footer={<QuestionInspectorActions {...actionProps} part="footer" />}
+    >
       <QuestionInspectorContent
         data={data}
         question={q}
@@ -43,19 +63,7 @@ export function QuestionInspector({
           props.onAction("move", q);
         }}
       />
-      <QuestionInspectorActions
-        {...props}
-        question={q}
-        onSelectGroup={onSelectGroup}
-        onEdit={(...args) => {
-          onClose();
-          props.onEdit(...args);
-        }}
-        onAction={(...args) => {
-          onClose();
-          props.onAction(...args);
-        }}
-      />
+      <QuestionInspectorActions {...actionProps} part="secondary" />
       <details className="qe-inspector-advanced">
         <summary>Configuración avanzada</summary>
         <dl>

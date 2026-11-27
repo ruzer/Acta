@@ -123,3 +123,35 @@ it("cerrar tras cambiar de página recupera el nuevo nodo de la pregunta de orig
   frames.forEach((callback) => callback(performance.now()));
   expect(restored).toHaveFocus();
 });
+
+it("reinicia la lectura al cambiar de pregunta sin remontar el panel ni su cuerpo", () => {
+  vi.stubGlobal("matchMedia", () => ({
+    matches: true,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  }));
+  vi.stubGlobal("requestAnimationFrame", vi.fn());
+  const close = vi.fn();
+  const view = render(
+    <InspectorFrame questionId="first" onClose={close}>
+      <p>Primera pregunta extensa</p>
+    </InspectorFrame>,
+  );
+  const panel = screen.getByRole("complementary");
+  const body = panel.querySelector<HTMLElement>(".qe-inspector-body")!;
+  body.scrollTop = 100;
+  view.rerender(
+    <InspectorFrame questionId="first" onClose={close}>
+      <p>Primera pregunta actualizada</p>
+    </InspectorFrame>,
+  );
+  expect(body.scrollTop).toBe(100);
+  view.rerender(
+    <InspectorFrame questionId="next" onClose={close}>
+      <p>Siguiente pregunta</p>
+    </InspectorFrame>,
+  );
+  expect(screen.getByRole("complementary")).toBe(panel);
+  expect(panel.querySelector(".qe-inspector-body")).toBe(body);
+  expect(body.scrollTop).toBe(0);
+});

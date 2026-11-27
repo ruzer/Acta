@@ -97,6 +97,12 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
             respuestas si ya está publicada.
           </p>
           <p>
+            Primero aparecen la pregunta y sus opciones; después, los datos y
+            las acciones secundarias. La acción principal y Más acciones
+            permanecen al pie. El panel se superpone a la lista sin estrecharla
+            y ocupa toda la pantalla en móvil.
+          </p>
+          <p>
             Pregunta anterior y Pregunta siguiente recorren los resultados
             visibles sin perder filtros ni selección. La dirección guarda la
             pregunta abierta; Atrás o Escape cierran el panel y devuelven el
@@ -223,6 +229,12 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
             respuestas si ya está publicada.
           </p>
           <p>
+            Primero aparecen la pregunta y sus opciones; después, los datos y
+            las acciones secundarias. La acción principal y Más acciones
+            permanecen al pie. El panel se superpone a la lista sin estrecharla
+            y ocupa toda la pantalla en móvil.
+          </p>
+          <p>
             Pregunta anterior y Pregunta siguiente recorren los resultados
             visibles sin perder filtros ni selección. La dirección guarda la
             pregunta abierta; Atrás o Escape cierran el panel y devuelven el
@@ -340,6 +352,12 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
             selección de grupo y el archivado. El panel prioriza Editar pregunta
             si hay pendientes, Publicar si el borrador está listo y Revisar
             respuestas si ya está publicada.
+          </p>
+          <p>
+            Primero aparecen la pregunta y sus opciones; después, los datos y
+            las acciones secundarias. La acción principal y Más acciones
+            permanecen al pie. El panel se superpone a la lista sin estrecharla
+            y ocupa toda la pantalla en móvil.
           </p>
           <p>
             Pregunta anterior y Pregunta siguiente recorren los resultados

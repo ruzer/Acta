@@ -1,21 +1,35 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { Button } from "../../ui";
 export function InspectorFrame({
   children,
   onClose,
   questionId,
+  navigation,
+  footer,
 }: {
   children: ReactNode;
   onClose: () => void;
   questionId?: string;
+  navigation?: ReactNode;
+  footer?: ReactNode;
 }) {
   const [wide, setWide] = useState(
     () =>
       typeof matchMedia === "function" &&
-      matchMedia("(min-width:1280px)").matches,
+      matchMedia("(min-width:900px)").matches,
   );
   const ref = useRef<HTMLDialogElement>(null),
     heading = useRef<HTMLHeadingElement>(null);
+  const body = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    if (body.current) body.current.scrollTop = 0;
+  }, [questionId]);
   const openingTrigger = useRef<HTMLElement | null>(null);
   const openingQuestion = useRef<string | undefined>(undefined);
   const currentQuestion = useRef(questionId);
@@ -23,7 +37,7 @@ export function InspectorFrame({
     currentQuestion.current = questionId;
   }, [questionId]);
   useEffect(() => {
-    const m = window.matchMedia?.("(min-width:1280px)");
+    const m = window.matchMedia?.("(min-width:900px)");
     if (!m) return;
     const update = () => setWide(m.matches);
     m.addEventListener("change", update);
@@ -85,23 +99,35 @@ export function InspectorFrame({
   const content = (
     <>
       <header className="qe-inspector-head">
-        <h2 ref={heading} tabIndex={-1}>
+        <h2
+          ref={heading}
+          tabIndex={-1}
+          className={navigation ? "sr-only" : undefined}
+        >
           Detalle de pregunta
         </h2>
-        <Button tone="secondary" onClick={onClose}>
-          Cerrar detalle
-        </Button>
+        {navigation ?? (
+          <Button tone="secondary" onClick={onClose}>
+            Cerrar detalle
+          </Button>
+        )}
       </header>
-      {children}
+      <div ref={body} className="qe-inspector-body">
+        {children}
+      </div>
+      <footer className="qe-inspector-footer">{footer}</footer>
     </>
   );
   return wide ? (
-    <aside className="qe-inspector" aria-label="Detalle de pregunta">
+    <aside
+      className="qe-inspector qe-inspector-overlay"
+      aria-label="Detalle de pregunta"
+    >
       {content}
     </aside>
   ) : (
     <dialog
-      className="qe-inspector qe-inspector-dialog av-scope"
+      className="qe-inspector qe-inspector-dialog qe-inspector-overlay av-scope"
       aria-label="Detalle de pregunta"
       ref={ref}
       onCancel={(e) => {
