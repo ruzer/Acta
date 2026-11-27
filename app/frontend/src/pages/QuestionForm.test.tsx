@@ -97,6 +97,24 @@ it("el tema fijo de una edición es texto y explica cómo cambiarlo sin aparenta
   );
 });
 
+it("el identificador existente es texto con motivo y conserva su valor al guardar", async () => {
+  const { user, onSave } = form();
+  expect(
+    screen.queryByRole("textbox", { name: "Identificador externo" }),
+  ).toBeNull();
+  const fixed = screen.getByRole("group", { name: "Identificador externo" });
+  expect(fixed).toHaveTextContent(configuredQuestion.externalId);
+  expect(fixed).toHaveAccessibleDescription(
+    "El identificador se conserva para mantener las referencias a esta pregunta.",
+  );
+  await user.click(screen.getByRole("button", { name: "Guardar cambios" }));
+  await waitFor(() =>
+    expect(onSave).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ externalId: configuredQuestion.externalId }),
+    ),
+  );
+});
+
 it("guardar solo la redacción conserva el payload completo de los grupos plegados", async () => {
   const { user, onSave } = form();
   expect(
@@ -249,6 +267,9 @@ it("una pregunta nueva propone identificador y título, editables y sin pisar lo
   const id = screen.getByLabelText("Identificador externo");
   const title = screen.getByLabelText("Título breve");
   expect(id).toHaveValue("P-008");
+  expect(
+    screen.queryByRole("group", { name: "Identificador externo" }),
+  ).toBeNull();
   const statement = screen.getByLabelText("Pregunta", { exact: true });
   await user.type(statement, "¿Qué canal se usa para recibir solicitudes?");
   expect(title).toHaveValue("Qué canal se usa para recibir solicitudes");
@@ -267,12 +288,13 @@ it("editar una pregunta existente no propone ni cambia identificador ni título"
   const { user } = form();
   const statement = screen.getByLabelText("Pregunta", { exact: true });
   const before = {
-    id: (screen.getByLabelText("Identificador externo") as HTMLInputElement)
-      .value,
+    id: configuredQuestion.externalId,
     title: (screen.getByLabelText("Título breve") as HTMLInputElement).value,
   };
   await user.type(statement, " Más contexto.");
-  expect(screen.getByLabelText("Identificador externo")).toHaveValue(before.id);
+  expect(
+    screen.getByRole("group", { name: "Identificador externo" }),
+  ).toHaveTextContent(before.id);
   expect(screen.getByLabelText("Título breve")).toHaveValue(before.title);
 });
 

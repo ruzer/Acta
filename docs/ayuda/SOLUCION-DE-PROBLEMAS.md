@@ -155,6 +155,8 @@ Consulta los pasos en las guías de [Participante](../pilot/GUIA-PARTICIPANTE.md
 
 Editar tema explica que el nombre y la descripción están protegidos si el tema tiene preguntas publicadas o archivadas. Mientras hay una búsqueda activa, todos los grupos se muestran desplegados: limpia la búsqueda para contraerlos. Si Nueva pregunta o + Agregar pregunta indican que falta un área activa, pide a la administración de la institución que la active en Administración. Una pregunta archivada se puede consultar, pero no seleccionar para acciones por lote.
 
+El identificador externo de una pregunta existente, el código interno de la instalación y los valores administrados externamente se muestran como texto seleccionable con su motivo. El identificador se conserva al guardar; los valores de infraestructura no se envían como cambios.
+
 En la edición de una pregunta, el tema se muestra como texto con su motivo. Guarda o descarta tus cambios antes de usar Mover a otro tema en las acciones de la pregunta. Esto no permite mover preguntas publicadas ni separar un grupo de seguimientos.
 
 El motivo aparece junto al control; no hace falta pasar el puntero para leerlo. Los botones no disponibles conservan el foco del teclado y no ejecutan la acción. [Guía del editor](../QUESTIONNAIRE-EDITOR-INTEGRATION.md#acciones-no-disponibles-en-el-editor).

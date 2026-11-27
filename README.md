@@ -50,6 +50,8 @@ Ser administrador no sustituye el rol de analista para validar decisiones. El á
 - Creación de usuarios en lotes de hasta 50 filas, con contraseñas temporales entregadas una sola vez y cambio obligatorio en el primer acceso.
 - Historial de operaciones y acceso separado por proyecto.
 
+El identificador externo de una pregunta existente, el código interno de la instalación y los valores administrados externamente se muestran como texto seleccionable con su motivo. El identificador se conserva al guardar; los valores de infraestructura no se envían como cambios.
+
 Las acciones no disponibles explican qué falta para continuar; los campos de solo lectura que sirven para copiar conservan esa función. El editor explica sus acciones no disponibles: Editar tema protege nombres con preguntas publicadas o archivadas; una búsqueda mantiene los grupos desplegados; crear preguntas requiere un área activa. Una pregunta archivada se puede consultar, pero no seleccionar. Al editar, el tema fijo explica cómo guardar o descartar cambios antes de usar Mover a otro tema. [Motivos y pasos para continuar](docs/QUESTIONNAIRE-EDITOR-INTEGRATION.md#acciones-no-disponibles-en-el-editor).
 
 ## Quiero probarlo con datos ficticios

@@ -203,11 +203,15 @@ export const helpGuides: Record<Guide, { title: string; content: ReactNode }> =
               activa, pide a la administración de la institución que la active.
               Una pregunta archivada se puede consultar, pero no seleccionar. En
               la edición, el tema se muestra como texto: guarda o descarta tus
-              cambios y usa Mover a otro tema en las acciones de la pregunta.
-              Para importar, elige el archivo y corrige la vista previa. Para
-              crear usuarios en lote, pega y revisa la tabla. Los recordatorios
-              requieren preguntas obligatorias pendientes y el informe requiere
-              una decisión vigente para imprimirse.
+              cambios y usa Mover a otro tema en las acciones de la pregunta. El
+              identificador externo de una pregunta existente, el código interno
+              de la instalación y los valores administrados externamente se
+              muestran como texto seleccionable con su motivo. El identificador
+              se conserva al guardar; los valores de infraestructura no se
+              envían como cambios. Para importar, elige el archivo y corrige la
+              vista previa. Para crear usuarios en lote, pega y revisa la tabla.
+              Los recordatorios requieren preguntas obligatorias pendientes y el
+              informe requiere una decisión vigente para imprimirse.
             </li>
             <li>
               <strong>

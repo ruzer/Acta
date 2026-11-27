@@ -34,6 +34,8 @@ Estos motivos son visibles y están asociados con sus controles. No cambian los 
 
 Un botón no disponible conserva el foco con `aria-disabled` y bloquea clic, Enter, Espacio y el envío del formulario. No añade un contenedor que cambie los selectores directos de menús o tablas. Los campos que puedan habilitarse más adelante mantienen su control nativo bloqueado con el motivo al lado; un valor que nunca cambia en ese contexto utiliza `UnavailableValue` como texto, con etiqueta y explicación.
 
+El identificador externo de una pregunta existente, el código interno de la instalación y los valores administrados externamente se muestran como texto seleccionable con su motivo. El identificador se conserva al guardar; los valores de infraestructura no se envían como cambios.
+
 El puntero normal indica que una acción no está disponible. `aria-busy="true"` reserva el puntero de espera a una operación ocupada. `disabled` exige `aria-busy` explícito y verdadero mientras la operación está ocupada. Las restricciones de datos usan `unavailable` con su motivo; no se admite un bloqueo sin explicación. Los campos de solo lectura que sirven para copiar conservan esa función y requieren `readOnlyReason`, visible y asociado aunque haya un error.
 
 ### Estructura del editor

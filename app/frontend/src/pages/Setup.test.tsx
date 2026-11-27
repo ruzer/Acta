@@ -148,8 +148,15 @@ it("valida al administrador antes de seguir y recorre los pasos hasta crear la i
 
   await screen.findByRole("heading", { name: "Organización" });
   expect(
-    screen.getByLabelText("Código interno de la instalación"),
-  ).toHaveAttribute("readonly");
+    screen.queryByRole("textbox", { name: "Código interno de la instalación" }),
+  ).toBeNull();
+  const installationCode = screen.getByRole("group", {
+    name: "Código interno de la instalación",
+  });
+  expect(installationCode).toHaveTextContent("DEFAULT");
+  expect(installationCode).toHaveAccessibleDescription(
+    "Lo define la infraestructura (ORGANIZATION_CODE). No se puede cambiar aquí y no es un dato de acceso.",
+  );
   await user.click(screen.getByRole("button", { name: "Continuar" }));
   expect(
     screen.getByText("Escribe el nombre de la institución."),
@@ -233,14 +240,21 @@ it("lo que define la infraestructura se muestra sin poder editarse y no se enví
   await screen.findByRole("heading", { name: "Almacenamiento" });
   await user.click(screen.getByRole("button", { name: "Continuar" }));
   await screen.findByRole("heading", { name: "Personalización" });
-  const name = screen.getByLabelText("Nombre de la aplicación");
-  expect(name).toHaveValue("Nombre del .env");
-  expect(name).toHaveAttribute("readonly");
+  expect(
+    screen.queryByRole("textbox", { name: "Nombre de la aplicación" }),
+  ).toBeNull();
+  const name = screen.getByRole("group", { name: "Nombre de la aplicación" });
+  expect(name).toHaveTextContent("Nombre del .env");
+  expect(name).toHaveAccessibleDescription(
+    /Administrado externamente \(APP_NAME\)/,
+  );
   expect(
     screen.getAllByText(/Administrado externamente \(APP_NAME\)/)[0],
   ).toBeVisible();
-  expect(screen.getByLabelText("Zona horaria")).toHaveValue("Europe/Madrid");
-  expect(screen.getByLabelText("Zona horaria")).toHaveAttribute("readonly");
+  expect(screen.getByRole("group", { name: "Zona horaria" })).toHaveTextContent(
+    "Europe/Madrid",
+  );
+  expect(screen.queryByRole("textbox", { name: "Zona horaria" })).toBeNull();
   await user.click(screen.getByRole("button", { name: "Continuar" }));
   await screen.findByRole("heading", { name: "Verificación" });
   await user.click(screen.getByRole("button", { name: "Crear instalación" }));
@@ -348,10 +362,15 @@ for (const [source, value, expected] of [
       }),
     });
     await appearanceStep(user);
-    expect(screen.getByLabelText("Zona horaria")).toHaveValue(expected);
-    if (source === "external")
-      expect(screen.getByLabelText("Zona horaria")).toHaveAttribute("readonly");
-    else {
+    if (source === "external") {
+      expect(
+        screen.getByRole("group", { name: "Zona horaria" }),
+      ).toHaveTextContent(expected);
+      expect(
+        screen.queryByRole("textbox", { name: "Zona horaria" }),
+      ).toBeNull();
+    } else {
+      expect(screen.getByLabelText("Zona horaria")).toHaveValue(expected);
       await user.selectOptions(screen.getByLabelText("Zona horaria"), "UTC");
       expect(screen.getByLabelText("Zona horaria")).toHaveValue("UTC");
     }
