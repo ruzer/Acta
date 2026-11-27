@@ -67,4 +67,16 @@ El panel muestra texto y ayuda completos, tipo, opciones ordenadas o filas y col
 
 `question=<id>` añade una entrada al abrir; recorrer o abrir otra pregunta con el panel ya abierto reemplaza esa entrada. Atrás y Escape cierran; un enlace directo válido prepara una entrada del editor cerrado para que Atrás no salga del editor. Un id inexistente muestra un aviso y retira el parámetro. Abrir, recorrer y cerrar no consultan otra vez el cuestionario. El foco entra en el encabezado y vuelve al origen al cerrar, sin robar una interacción posterior.
 
-Las pestañas **Escribir**, **Organizar** y **Revisar publicación** conservan sus nombres y explican su propósito. El selector de Organizar se llama **Contenido / Respuestas**. La columna del panel mide 456 px desde 1280 px; debajo conserva el diálogo existente. El ajuste de superposición, movimiento de cierre y pantalla completa móvil pertenece a I4, aún pendiente. Estos cambios no acreditan una prueba con personas ni un lector de pantalla físico.
+Las pestañas **Escribir**, **Organizar** y **Revisar publicación** conservan sus nombres y explican su propósito. El selector de Organizar se llama **Contenido / Respuestas**. El panel se superpone siempre: mide 456 px a partir de 900 px y ocupa toda la pantalla por debajo de ese umbral. No agrega una columna ni cambia la tipografía de la fila abierta. Estos cambios no acreditan una prueba con personas ni un lector de pantalla físico.
+
+En una pantalla amplia, el panel se superpone sin estrechar la lista. En móvil ocupa toda la pantalla; Cerrar detalle o Atrás regresan a la lista. La acción principal permanece al pie y Más acciones abre una hoja inferior; Cerrar acciones vuelve al detalle. Con movimiento reducido solo hay fundido y con teclado el cambio es inmediato.
+
+### Movimiento y presencia del panel
+
+`useInspectorPresence` mantiene la última pregunta durante la salida y cancela el cierre anterior si se abre otra. La instancia compartida permanece montada; recorrer preguntas actualiza el contenido sin otra entrada. El cierre lógico actualiza el historial inmediatamente. Editar, asignar, cambiar de tema y las demás acciones omiten la salida decorativa para abrir su destino sin espera.
+
+Las transiciones usan solo `opacity` y `transform`: entrada de 180 ms en escritorio, 280 ms en móvil y salida de 120 ms, con curva `cubic-bezier(0.32, 0.72, 0, 1)`. El movimiento reducido mantiene únicamente el fundido; la interacción con teclado elimina la duración. La salida concluye con `transitionend` del panel o un respaldo según la duración CSS; los eventos de hijos no la terminan. Se conserva `qe-enter` para otros usos y se neutraliza únicamente en este panel.
+
+La cabecera y la barra principal reservan su propio espacio; el cuerpo central se desplaza. La altura sigue el área visible del navegador móvil cuando aparece el teclado. Más acciones tiene desplazamiento propio y en móvil se ancla al pie con Cerrar acciones. Los objetivos del panel tienen al menos 44 px de alto.
+
+[Mapa de comprobación de I4](EDITOR-PANEL-MOTION-VALIDATION.md). Los valores anteriores describen la implementación: las medidas reales, capturas y ejecuciones de navegador deben registrarse por separado antes de declarar su validación.

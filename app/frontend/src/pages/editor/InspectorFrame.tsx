@@ -1,42 +1,62 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import { Button } from "../../ui";
+import type { InspectorPhase } from "./useInspectorPresence";
+import { useInspectorViewport } from "./useInspectorViewport";
 export function InspectorFrame({
   children,
   onClose,
   questionId,
+  open = true,
+  phase = "open",
+  elementRef,
+  footer,
 }: {
   children: ReactNode;
   onClose: () => void;
   questionId?: string;
+  open?: boolean;
+  phase?: InspectorPhase;
+  elementRef?: RefObject<HTMLElement | null>;
+  footer?: ReactNode;
 }) {
   const [wide, setWide] = useState(
     () =>
       typeof matchMedia === "function" &&
-      matchMedia("(min-width:1280px)").matches,
+      matchMedia("(min-width:900px)").matches,
   );
   const ref = useRef<HTMLDialogElement>(null),
     heading = useRef<HTMLHeadingElement>(null);
   const openingTrigger = useRef<HTMLElement | null>(null);
+  const openingQuestion = useRef<string | undefined>(undefined);
   const currentQuestion = useRef(questionId);
+  const viewport = useInspectorViewport(wide);
   useEffect(() => {
     currentQuestion.current = questionId;
   }, [questionId]);
   useEffect(() => {
-    const m = window.matchMedia?.("(min-width:1280px)");
+    const m = window.matchMedia?.("(min-width:900px)");
     if (!m) return;
     const update = () => setWide(m.matches);
     m.addEventListener("change", update);
     return () => m.removeEventListener("change", update);
   }, []);
-  useEffect(() => {
+  useLayoutEffect(() => {
     // Keep the original opener across Strict Mode effect replay and resize.
     openingTrigger.current ??= document.activeElement as HTMLElement;
     const trigger = openingTrigger.current;
+    openingQuestion.current ??= trigger?.dataset.questionOpener;
     const dialog = ref.current;
-    if (!wide) dialog?.showModal();
+    if (!wide && !dialog?.open) dialog?.showModal();
     heading.current?.focus();
     return () => {
-      dialog?.close();
+      if (dialog?.open) dialog.close();
       requestAnimationFrame(() => {
         // A deferred return must not steal focus from a newer user action.
         const active = document.activeElement;
@@ -44,9 +64,14 @@ export function InspectorFrame({
           (active === document.body || active === trigger) &&
           !document.querySelector("dialog[open]")
         ) {
-          const opener = Array.from(
+          const openers = Array.from(
             document.querySelectorAll<HTMLElement>("[data-question-opener]"),
-          ).find(
+          ).filter((element) => !element.closest("[hidden]"));
+          const originalOpener = openers.find(
+            (element) =>
+              element.dataset.questionOpener === openingQuestion.current,
+          );
+          const currentOpener = openers.find(
             (element) =>
               element.dataset.questionOpener === currentQuestion.current,
           );
@@ -55,7 +80,8 @@ export function InspectorFrame({
             trigger !== document.body &&
             !trigger.closest("[hidden]")
               ? trigger
-              : (opener ??
+              : (originalOpener ??
+                currentOpener ??
                 document.querySelector<HTMLElement>(
                   '.qe-modes [aria-selected="true"]',
                 ));
@@ -64,8 +90,12 @@ export function InspectorFrame({
       });
     };
   }, [wide]);
+  useLayoutEffect(() => {
+    if (open) heading.current?.focus();
+  }, [open]);
   useEffect(() => {
     function escape(event: KeyboardEvent) {
+      if (!open) return;
       if (event.key !== "Escape" || event.defaultPrevented) return;
       if (document.querySelector("dialog[open]")) return;
       event.preventDefault();
@@ -73,7 +103,7 @@ export function InspectorFrame({
     }
     document.addEventListener("keydown", escape);
     return () => document.removeEventListener("keydown", escape);
-  }, [onClose]);
+  }, [onClose, open]);
   const content = (
     <>
       <header className="qe-inspector-head">
@@ -84,21 +114,34 @@ export function InspectorFrame({
           Cerrar detalle
         </Button>
       </header>
-      {children}
+      <div className="qe-inspector-body">{children}</div>
+      <footer className="qe-inspector-footer">{footer}</footer>
     </>
   );
   return wide ? (
-    <aside className="qe-inspector" aria-label="Detalle de pregunta">
+    <aside
+      className="qe-inspector qe-inspector-motion"
+      aria-label="Detalle de pregunta"
+      data-phase={phase}
+      inert={!open}
+      ref={elementRef}
+    >
       {content}
     </aside>
   ) : (
     <dialog
-      className="qe-inspector qe-inspector-dialog av-scope"
+      className="qe-inspector qe-inspector-dialog qe-inspector-motion av-scope"
       aria-label="Detalle de pregunta"
-      ref={ref}
+      data-phase={phase}
+      inert={!open}
+      style={viewport}
+      ref={(element) => {
+        ref.current = element;
+        if (elementRef) elementRef.current = element;
+      }}
       onCancel={(e) => {
         e.preventDefault();
-        onClose();
+        if (open) onClose();
       }}
     >
       {content}

@@ -205,3 +205,5 @@ No cambies de cuenta para evitar una restricción.
 En **Escribir** y **Organizar**, pulsa el título subrayado: abre el mismo panel con texto completo, ayuda, opciones, área y participantes. **Editar pregunta** abre la edición del borrador. **Cambiar de tema** está junto al tema; **Más acciones** contiene configurar, ordenar, seleccionar grupo y archivar.
 
 **Pregunta anterior** y **Pregunta siguiente** recorren los resultados con tus filtros y búsqueda. La selección masiva sigue en sus casillas. Atrás o Escape cierran el panel y el foco vuelve a la lista; puedes compartir la dirección con la pregunta abierta. En Organizar, **Contenido** y **Respuestas** distinguen preparación y aportaciones. [Guía del editor](../QUESTIONNAIRE-EDITOR-INTEGRATION.md#abrir-y-recorrer-preguntas).
+
+En una pantalla amplia, el panel se superpone sin estrechar la lista. En móvil ocupa toda la pantalla; Cerrar detalle o Atrás regresan a la lista. La acción principal permanece al pie y Más acciones abre una hoja inferior; Cerrar acciones vuelve al detalle. Con movimiento reducido solo hay fundido y con teclado el cambio es inmediato.

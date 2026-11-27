@@ -362,3 +362,24 @@ it("la ayuda describe apertura, acciones y recorrido del panel compartido", () =
       expect(text, path).toContain(label);
   }
 });
+
+it("la ayuda explica el panel móvil y cómo cerrar la hoja de acciones", () => {
+  for (const path of [
+    "README.md",
+    "docs/QUESTIONNAIRE-EDITOR-INTEGRATION.md",
+    "docs/ayuda/SOLUCION-DE-PROBLEMAS.md",
+    "app/frontend/src/pages/Help.tsx",
+  ]) {
+    const text = compact(read(path));
+    for (const label of [
+      "sin estrechar la lista",
+      "toda la pantalla",
+      "Cerrar detalle",
+      "Cerrar acciones",
+      "hoja inferior",
+      "movimiento reducido",
+      "teclado",
+    ])
+      expect(text, path).toContain(label);
+  }
+});

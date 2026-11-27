@@ -1,34 +1,80 @@
 import type { QuestionView } from "@requirements/contracts";
+import { useEffect, useState } from "react";
 import { Button } from "../../ui";
 import type { EditorProps } from "./EditorWorkspace";
 import { InspectorFrame } from "./InspectorFrame";
 import { QuestionInspectorContent } from "./QuestionInspectorContent";
 import { QuestionInspectorActions } from "./QuestionInspectorActions";
 import { QuestionInspectorNavigation } from "./QuestionInspectorNavigation";
+import { useInspectorPresence } from "./useInspectorPresence";
+import { questionTopicMove } from "./topic-move";
 import "./question-inspector.css";
 
 export function QuestionInspector({
-  question: q,
+  question,
   onClose,
   onSelectGroup,
   visibleIds,
   onNavigate,
-  moveReason,
   ...props
 }: EditorProps & {
-  question: QuestionView;
+  question: QuestionView | null;
   onClose: () => void;
-  onSelectGroup?: () => void;
+  onSelectGroup?: (id: string) => void;
   visibleIds: readonly string[];
   onNavigate: (id: string) => void;
-  moveReason?: string;
 }) {
+  const [exitImmediately, setExitImmediately] = useState(false);
+  useEffect(() => {
+    if (question) setExitImmediately(false);
+  }, [question]);
+  const presence = useInspectorPresence(question, {
+    animateExit: !exitImmediately,
+  });
+  const q = presence.question;
+  if (!q) return null;
   const { data } = props;
+  const moveReason = questionTopicMove(data, q).reason;
+  const closeForAction = () => {
+    setExitImmediately(true);
+    onClose();
+  };
+  const actionProps = {
+    ...props,
+    question: q,
+    onSelectGroup: onSelectGroup
+      ? () => {
+          closeForAction();
+          onSelectGroup(q.id);
+        }
+      : undefined,
+    onEdit: ((...args) => {
+      closeForAction();
+      props.onEdit(...args);
+    }) as EditorProps["onEdit"],
+    onAction: ((...args) => {
+      closeForAction();
+      props.onAction(...args);
+    }) as EditorProps["onAction"],
+    onOpenContributions: props.onOpenContributions
+      ? (id: string) => {
+          closeForAction();
+          props.onOpenContributions?.(id);
+        }
+      : undefined,
+  };
   const parent = data.questions.find(
     (p) => p.id === q.condition?.parentQuestionId,
   );
   return (
-    <InspectorFrame onClose={onClose} questionId={q.id}>
+    <InspectorFrame
+      onClose={onClose}
+      questionId={q.id}
+      open={presence.open}
+      phase={presence.phase}
+      elementRef={presence.elementRef}
+      footer={<QuestionInspectorActions {...actionProps} part="primary" />}
+    >
       <QuestionInspectorNavigation
         questionId={q.id}
         visibleIds={visibleIds}
@@ -39,23 +85,11 @@ export function QuestionInspector({
         question={q}
         moveReason={moveReason}
         onChangeTopic={() => {
-          onClose();
+          closeForAction();
           props.onAction("move", q);
         }}
       />
-      <QuestionInspectorActions
-        {...props}
-        question={q}
-        onSelectGroup={onSelectGroup}
-        onEdit={(...args) => {
-          onClose();
-          props.onEdit(...args);
-        }}
-        onAction={(...args) => {
-          onClose();
-          props.onAction(...args);
-        }}
-      />
+      <QuestionInspectorActions {...actionProps} part="secondary" />
       <details className="qe-inspector-advanced">
         <summary>Configuración avanzada</summary>
         <dl>
@@ -114,7 +148,7 @@ export function QuestionInspector({
           <Button
             tone="secondary"
             onClick={() => {
-              onClose();
+              closeForAction();
               props.onCreateReference();
             }}
           >
