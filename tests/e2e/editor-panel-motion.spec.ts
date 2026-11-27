@@ -74,6 +74,103 @@ async function animations(panel: Locator) {
     }),
   );
 }
+type MotionSnapshot = {
+  target: "panel" | "control";
+  phase: string | null;
+  isConnected: boolean;
+  property: string;
+  animations: {
+    duration: number | string;
+    frames: { opacity: unknown; transform: unknown }[];
+  }[];
+};
+type MotionWindow = Window & { actaInspectorTransitions: MotionSnapshot[] };
+async function recordMotion(page: Page) {
+  await page.evaluate(() => {
+    const records: MotionSnapshot[] = [];
+    (window as MotionWindow).actaInspectorTransitions = records;
+    // Capture at transition creation, before an assertion or a busy CI worker
+    // can outlive the 120/180 ms window. Keep plain snapshots after DOM removal.
+    document.addEventListener(
+      "transitionrun",
+      (event) => {
+        const element = event.target;
+        if (!(element instanceof HTMLElement)) return;
+        const panel = element.matches(".qe-inspector-motion");
+        if (
+          !panel &&
+          !element.matches(".qe-inspector button, .qe-question-link")
+        )
+          return;
+        records.push({
+          target: panel ? "panel" : "control",
+          phase:
+            element.closest<HTMLElement>(".qe-inspector-motion")?.dataset
+              .phase ?? null,
+          isConnected: element.isConnected,
+          property: event.propertyName,
+          animations: element.getAnimations().map((animation) => {
+            const effect = animation.effect as KeyframeEffect;
+            const duration = effect.getTiming().duration;
+            return {
+              duration:
+                typeof duration === "number" ? duration : String(duration),
+              frames: effect.getKeyframes().map((frame) => ({
+                opacity: frame.opacity,
+                transform: frame.transform,
+              })),
+            };
+          }),
+        });
+      },
+      true,
+    );
+  });
+}
+async function motionRecords(page: Page) {
+  return page.evaluate(() => (window as MotionWindow).actaInspectorTransitions);
+}
+async function clearMotionRecords(page: Page) {
+  await page.evaluate(() => {
+    (window as MotionWindow).actaInspectorTransitions.length = 0;
+  });
+}
+async function renderingFrames(page: Page) {
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+      ),
+  );
+}
+async function entryRecords(page: Page, properties: string[]) {
+  await expect
+    .poll(async () =>
+      [
+        ...new Set(
+          (await motionRecords(page))
+            .filter(
+              (record) => record.target === "panel" && record.phase === "open",
+            )
+            .map((record) => record.property),
+        ),
+      ].sort(),
+    )
+    .toEqual(properties);
+  await renderingFrames(page);
+  const records = (await motionRecords(page)).filter(
+    (record) => record.target === "panel" && record.phase === "open",
+  );
+  expect([...new Set(records.map((record) => record.property))].sort()).toEqual(
+    properties,
+  );
+  expect(
+    records.every(
+      (record) => record.isConnected && record.animations.length > 0,
+    ),
+  ).toBe(true);
+  return records;
+}
 async function finishAnimations(panel: Locator) {
   await panel.evaluate((element) =>
     Promise.all(
@@ -115,19 +212,20 @@ for (const width of [1440, 1024, 900, 899, 390]) {
       name: questions[0]!.question,
       exact: true,
     });
+    await recordMotion(page);
     if (width < 900) await opener.tap();
     else await opener.click({ position: { x: 20, y: 15 } });
     const panel = page.locator(".qe-inspector-motion");
     await expect(panel).toHaveAttribute("data-phase", "open");
-    const entry = await animations(panel);
-    expect(entry.length).toBeGreaterThan(0);
+    const entry = await entryRecords(page, ["opacity", "transform"]);
+    const entryAnimations = entry.flatMap((record) => record.animations);
     expect(
-      entry.every(
+      entryAnimations.every(
         (animation) => animation.duration === (width < 900 ? 280 : 180),
       ),
     ).toBe(true);
     expect(
-      entry.some((animation) =>
+      entryAnimations.some((animation) =>
         animation.frames.some((frame) => frame.transform !== undefined),
       ),
     ).toBe(true);
@@ -146,6 +244,7 @@ for (const width of [1440, 1024, 900, 899, 390]) {
         page.getByRole("complementary", { name: "Detalle de pregunta" }),
       ).toBeVisible();
     const node = await panel.elementHandle();
+    const beforeNavigation = (await motionRecords(page)).length;
     await panel.getByRole("button", { name: "Pregunta siguiente" }).click();
     await expect(panel.getByRole("status")).toHaveText("2 de 4 resultados");
     expect(
@@ -154,6 +253,12 @@ for (const width of [1440, 1024, 900, 899, 390]) {
       ),
     ).toBe(true);
     expect(await animations(panel)).toEqual([]);
+    await renderingFrames(page);
+    expect(
+      (await motionRecords(page))
+        .slice(beforeNavigation)
+        .filter((record) => record.target === "panel"),
+    ).toEqual([]);
     await panel.locator(".qe-inspector-body").evaluate((element) => {
       element.scrollTop = element.scrollHeight;
     });
@@ -179,10 +284,25 @@ for (const width of [1440, 1024, 900, 899, 390]) {
     if (width === 1440 || width === 390)
       await checkedPage(page, evidence, "i4-open", width);
     await panel.getByRole("button", { name: "Cerrar detalle" }).click();
-    await expect(panel).toHaveAttribute("data-phase", "closing");
-    const exit = await animations(panel);
-    expect(exit.some((animation) => animation.duration === 120)).toBe(true);
     await expect(panel).toHaveCount(0);
+    const exit = (await motionRecords(page)).filter(
+      (record) => record.target === "panel" && record.phase === "closing",
+    );
+    expect(exit.length).toBeGreaterThan(0);
+    expect(
+      exit.every(
+        (record) => record.isConnected && record.animations.length > 0,
+      ),
+    ).toBe(true);
+    expect([...new Set(exit.map((record) => record.property))].sort()).toEqual([
+      "opacity",
+      "transform",
+    ]);
+    expect(
+      exit
+        .flatMap((record) => record.animations)
+        .every((animation) => animation.duration === 120),
+    ).toBe(true);
     await expect(opener).toBeFocused();
     await test.info().attach(`i4-measurements-${width}`, {
       body: JSON.stringify({ before, after, box, entry, exit }, null, 2),
@@ -237,13 +357,19 @@ for (const width of [1440, 390]) {
       name: questions[0]!.question,
       exact: true,
     });
+    await recordMotion(page);
     await opener.click();
     const panel = page.locator(".qe-inspector-motion");
     await expect(panel).toHaveAttribute("data-phase", "open");
-    const reduced = await animations(panel);
-    expect(reduced.length).toBeGreaterThan(0);
+    const reduced = await entryRecords(page, ["opacity"]);
+    const reducedAnimations = reduced.flatMap((record) => record.animations);
     expect(
-      reduced.every((animation) =>
+      reducedAnimations.every(
+        (animation) => animation.duration === (width < 900 ? 280 : 180),
+      ),
+    ).toBe(true);
+    expect(
+      reducedAnimations.every((animation) =>
         animation.frames.every((frame) => frame.transform === undefined),
       ),
     ).toBe(true);
@@ -256,24 +382,40 @@ for (const width of [1440, 390]) {
       reducedNextBox.x + reducedNextBox.width / 2,
       reducedNextBox.y + reducedNextBox.height / 2,
     );
+    const beforePress = (await motionRecords(page)).length;
     await page.mouse.down();
+    await renderingFrames(page);
     expect(
       await reducedNext.evaluate((element) => ({
         pressed: element.matches(":active"),
         transform: getComputedStyle(element).transform,
       })),
     ).toEqual({ pressed: true, transform: "none" });
+    const reducedPress = (await motionRecords(page))
+      .slice(beforePress)
+      .filter((record) => record.target === "control");
+    expect(reducedPress.length).toBeGreaterThan(0);
     expect(
-      (await animations(reducedNext)).every((animation) =>
-        animation.frames.every((frame) => frame.transform === undefined),
+      reducedPress.every(
+        (record) =>
+          record.property === "opacity" && record.animations.length > 0,
       ),
+    ).toBe(true);
+    expect(
+      reducedPress
+        .flatMap((record) => record.animations)
+        .every((animation) =>
+          animation.frames.every((frame) => frame.transform === undefined),
+        ),
     ).toBe(true);
     await page.mouse.up();
     await page.keyboard.press("Escape");
     await expect(panel).toHaveCount(0);
     await page.emulateMedia({ reducedMotion: "no-preference" });
+    await clearMotionRecords(page);
     await opener.focus();
     await page.keyboard.down("Space");
+    await renderingFrames(page);
     expect(
       await opener.evaluate((element) => ({
         pressed: element.matches(":active"),
@@ -292,11 +434,14 @@ for (const width of [1440, 390]) {
     await page.keyboard.up("Space");
     await expect(panel).toHaveAttribute("data-phase", "open");
     expect(await animations(panel)).toEqual([]);
+    await renderingFrames(page);
+    expect(await motionRecords(page)).toEqual([]);
     const keyboardNext = panel.getByRole("button", {
       name: "Pregunta siguiente",
     });
     await keyboardNext.focus();
     await page.keyboard.down("Space");
+    await renderingFrames(page);
     expect(
       await keyboardNext.evaluate((element) => ({
         pressed: element.matches(":active"),
@@ -313,6 +458,8 @@ for (const width of [1440, 390]) {
       animations: 0,
     });
     await page.keyboard.up("Space");
+    await renderingFrames(page);
+    expect(await motionRecords(page)).toEqual([]);
     await panel
       .getByRole("button", { name: "Editar pregunta", exact: true })
       .click();
