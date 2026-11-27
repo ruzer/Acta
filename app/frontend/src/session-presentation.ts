@@ -41,6 +41,11 @@ export function writePresentationSnapshot(
 
 // Session already knows the account. Bar effects read it after the session's
 // layout effect, without fetching /me or changing route props.
+// Read-only identity for presentation warnings; never an authorization check.
+export function sessionPresentationUserId() {
+  return presentationUser;
+}
+
 export function sessionPresentationKey(projectId: string, feature: string) {
   return presentationUser
     ? presentationKey(presentationUser, projectId, feature)
