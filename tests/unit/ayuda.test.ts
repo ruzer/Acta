@@ -363,7 +363,7 @@ it("la ayuda describe apertura, acciones y recorrido del panel compartido", () =
   }
 });
 
-it("la ayuda muestra un ejemplo de traslado con un solo seguimiento", () => {
+it("la ayuda explica el aviso de traslado singular y plural", () => {
   for (const path of [
     "README.md",
     "docs/QUESTIONNAIRE-EDITOR-INTEGRATION.md",
@@ -371,7 +371,7 @@ it("la ayuda muestra un ejemplo de traslado con un solo seguimiento", () => {
     "app/frontend/src/pages/Help.tsx",
   ]) {
     const text = compact(read(path));
-    expect(text, path).toContain("Se moverá con su único seguimiento:");
-    expect(text, path).toContain("«Detalle adicional»");
+    expect(text, path).toContain("su único seguimiento");
+    expect(text, path).toContain("muestra sus nombres");
   }
 });
