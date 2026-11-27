@@ -322,3 +322,43 @@ sus directorios respectivos. Compara los identificadores de contenedores ajenos
 con el inventario anterior. Nunca uses comodines ni prune. Retira enlaces privados
 y worktrees propios; conserva o elimina el backup privado según tu política, nunca
 lo publiques. No ejecutes estos comandos sobre una instalación de trabajo.
+
+
+## Control de diagnóstico del 2026-11-27 (sin ensayo completo)
+
+Tras autorizar el propietario subredes privadas exclusivamente para el laboratorio,
+se ejecutó el instalador oficial `sh scripts/install.sh` de v0.12.0
+(`230a8833c41d230be0fe4da55e271fd527e5195e`), siguiendo la ruta del job
+`guided-install`, sin el script adaptado de ensayo. Proyecto propio
+`acta-diag-20261127-2251`, puerto local 4495; sin modificar producto ni healthchecks.
+
+El primer control terminó con salida 1 antes de arrancar servicios: Docker informó
+`all predefined address pools have been fully subnetted`. Se retiraron sus recursos.
+El control autorizado posterior usó un override privado con web `10.253.241.0/28`
+y data `10.253.241.16/28`, comprobados sin solapamiento con las redes Docker y
+las rutas IPv4 específicas observadas (se excluye la ruta por defecto).
+El instalador terminó con salida 0; object-storage quedó `healthy`, sin fallos,
+en su primera comprobación registrada, 2026-11-27T23:00:06Z.
+
+Se observaron UID/GID 1000:1000 (`node`), directorios de datos internos modo 700,
+volumen object-secrets de solo lectura, directorio modo 700 y sus dos archivos
+modo 600. No se leyó su contenido. El healthcheck original conserva intervalo
+5 s, timeout 3 s y 30 reintentos; no hay publicación de puerto del almacenamiento.
+Compose, Dockerfile y arranque de Versity del laboratorio anterior coinciden
+byte a byte con este control. Su source.env difiere del ejemplo únicamente en
+APP_ORIGIN y APP_PORT (comparación sin publicar valores ni secretos).
+
+El contenedor del intento histórico ya había sido eliminado: no se recuperaron
+su Health.Log, logs, permisos ni tiempos internos. El control sano apunta al
+laboratorio previo y no reproduce un defecto del producto, pero **no determina
+la causa concreta de aquel unhealthy**. El agotamiento actual de subredes no
+se presenta como explicación del fallo histórico, que sí llegó a arrancar el
+almacenamiento. Se detuvo la fase por falta de causa demostrable, sin inventar
+una corrección ni transformar el intento detenido en PASS. No se ejecutaron el
+ensayo completo, las comprobaciones finales ni el push/PR de preparación.
+
+
+El propietario autorizó después continuar el ensayo completo conservando el
+incidente como «causa no determinada; no reproducido en el control». Esta
+excepción levanta únicamente esa parada; no afirma una corrección del producto.
+El alcance autorizado termina en el PR de preparación de upstream.
