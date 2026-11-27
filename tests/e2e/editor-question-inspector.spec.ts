@@ -11,6 +11,7 @@ async function fixture(
   page: Page,
   sectionTitle = "Tema ficticio",
   helpText = "Lee las cinco opciones antes de responder.",
+  setup: { navigation?: boolean; count?: number } = {},
 ) {
   await login(page, "admin");
   const project = await command<ProjectView>(page, "/projects", {
@@ -31,14 +32,26 @@ async function fixture(
       order: 0,
     },
   );
+  const nextSection = setup.navigation
+    ? await command<{ id: string }>(page, `/projects/${project.id}/sections`, {
+        externalId: randomUUID(),
+        title: "Segundo tema ficticio",
+        description: "",
+        order: 1,
+      })
+    : section;
   const questions: QuestionView[] = [];
-  for (let index = 0; index < 3; index++)
+  for (let index = 0; index < (setup.count ?? 3); index++)
     questions.push(
       await command<QuestionView>(page, `/projects/${project.id}/questions`, {
         externalId: randomUUID(),
-        sectionId: section.id,
+        sectionId: index === 2 ? nextSection.id : section.id,
         title: `Lectura ficticia ${index + 1}`,
-        question: `¿Qué opción ficticia corresponde al caso ${index + 1}?`,
+        question: setup.navigation
+          ? index === 1
+            ? "¿Qué dato excluido corresponde al caso intermedio?"
+            : `¿Qué información seleccionada corresponde al caso ${index + 1}?`
+          : `¿Qué opción ficticia corresponde al caso ${index + 1}?`,
         helpText,
         type: "SINGLE_CHOICE",
         required: false,
@@ -100,6 +113,44 @@ for (const width of [1440, 1280, 1024, 390]) {
       await expect(
         panel.getByRole("heading", { name: "Detalle de pregunta" }),
       ).toBeFocused();
+      await page.keyboard.press("Shift+Tab");
+      if (width >= 900) {
+        expect(
+          await panel.evaluate((element) => ({
+            inside: element.contains(document.activeElement),
+            editorControl:
+              document.activeElement?.closest(".qe-workspace") !== null &&
+              document.activeElement?.matches(
+                "button, input, select, textarea, summary, a",
+              ),
+            documentFocused: document.hasFocus(),
+          })),
+        ).toEqual({
+          inside: false,
+          editorControl: true,
+          documentFocused: true,
+        });
+      } else {
+        // Native dialogs may yield to the browser chrome, never to page controls
+        // behind the modal. Chromium reports BODY and hasFocus=false there.
+        expect(
+          await panel.evaluate(
+            (element) =>
+              element.contains(document.activeElement) ||
+              (document.activeElement === document.body &&
+                !document.hasFocus()),
+          ),
+        ).toBe(true);
+        expect(
+          await panel.evaluate((element) => element.matches(":modal")),
+        ).toBe(true);
+      }
+      await page.keyboard.press("Tab");
+      expect(
+        await panel.evaluate((element) =>
+          element.contains(document.activeElement),
+        ),
+      ).toBe(true);
       await expect(
         panel
           .getByRole("region", { name: "Opciones de respuesta" })
@@ -151,11 +202,20 @@ for (const width of [1440, 1280, 1024, 390]) {
 test("I3 recorre filtro sin perder casillas y abre enlaces directos válidos e inválidos", async ({
   page,
 }) => {
-  const { project, questions } = await fixture(page);
+  const { project, questions } = await fixture(page, undefined, undefined, {
+    navigation: true,
+  });
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto(`/projects/${project.id}/editor?mode=organize&q=opción`);
+  await page.goto(
+    `/projects/${project.id}/editor?mode=organize&q=seleccionada`,
+  );
   const first = questions[0]!,
-    second = questions[1]!;
+    excluded = questions[1]!,
+    second = questions[2]!;
+  await expect(page.locator("[data-question-opener]")).toHaveCount(2);
+  await expect(
+    page.getByRole("button", { name: excluded.question, exact: true }),
+  ).toHaveCount(0);
   const selected = page.getByRole("checkbox", {
     name: `Seleccionar pregunta: ${first.question}`,
     exact: true,
@@ -166,9 +226,18 @@ test("I3 recorre filtro sin perder casillas y abre enlaces directos válidos e i
     name: "Detalle de pregunta",
   });
   await panel.getByRole("button", { name: "Pregunta siguiente" }).click();
-  await expect(panel.getByRole("status")).toHaveText("2 de 3 resultados");
+  await expect(panel.getByRole("status")).toHaveText("2 de 2 resultados");
+  await expect(page).toHaveURL(new RegExp(`question=${second.id}`));
+  await expect(
+    panel.getByRole("heading", { name: second.question, exact: true }),
+  ).toBeVisible();
+  await panel.getByRole("button", { name: "Pregunta anterior" }).click();
+  await expect(panel.getByRole("status")).toHaveText("1 de 2 resultados");
+  await expect(page).toHaveURL(new RegExp(`question=${first.id}`));
+  await panel.getByRole("button", { name: "Pregunta siguiente" }).click();
+  await expect(panel.getByRole("status")).toHaveText("2 de 2 resultados");
   await expect(selected).toBeChecked();
-  await expect(page.getByLabel("Buscar preguntas")).toHaveValue("opción");
+  await expect(page.getByLabel("Buscar preguntas")).toHaveValue("seleccionada");
   await expect(
     panel.getByRole("button", { name: "Publicar", exact: true }),
   ).toHaveClass(/primary/);
@@ -188,6 +257,19 @@ test("I3 recorre filtro sin perder casillas y abre enlaces directos válidos e i
     `/projects/${project.id}/editor?mode=write&question=${second.id}`,
   );
   await expect(panel).toBeVisible();
+  await expect(panel.getByRole("status")).toHaveText("3 de 3 resultados");
+  await panel.getByRole("button", { name: "Pregunta anterior" }).click();
+  await expect(panel.getByRole("status")).toHaveText("2 de 3 resultados");
+  await expect(page).toHaveURL(new RegExp(`question=${excluded.id}`));
+  await expect(
+    panel.getByRole("heading", { name: excluded.question, exact: true }),
+  ).toBeVisible();
+  await panel.getByRole("button", { name: "Pregunta siguiente" }).click();
+  await expect(panel.getByRole("status")).toHaveText("3 de 3 resultados");
+  await expect(page).toHaveURL(new RegExp(`question=${second.id}`));
+  await expect(
+    panel.getByRole("heading", { name: second.question, exact: true }),
+  ).toBeVisible();
   await page.goBack();
   await expect(panel).toHaveCount(0);
   await expect(page).toHaveURL(/\/editor\?mode=write$/);
@@ -292,3 +374,60 @@ for (const width of [1440, 390]) {
     expect(await body.evaluate((element) => element.scrollTop)).toBe(0);
   });
 }
+
+test("I3 cruza páginas y mantiene visible la fila abierta y la selección", async ({
+  page,
+}) => {
+  const { project, questions } = await fixture(page, undefined, undefined, {
+    count: 43,
+  });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(`/projects/${project.id}/editor?mode=organize`);
+  await page
+    .getByRole("checkbox", {
+      name: `Seleccionar pregunta: ${questions[0]!.question}`,
+      exact: true,
+    })
+    .check();
+  await page
+    .getByRole("button", {
+      name: questions[39]!.question,
+      exact: true,
+    })
+    .click();
+  const panel = page.getByRole("complementary", {
+    name: "Detalle de pregunta",
+  });
+  const original = await panel.elementHandle();
+  const next = panel.getByRole("button", { name: "Pregunta siguiente" });
+  await next.click();
+  await expect(panel.getByRole("status")).toHaveText("41 de 43 resultados");
+  await expect(page).toHaveURL(new RegExp(`question=${questions[40]!.id}`));
+  const current = page.getByRole("button", {
+    name: questions[40]!.question,
+    exact: true,
+  });
+  await expect(current).toHaveAttribute("aria-current", "true");
+  await expect(current).toBeInViewport({ ratio: 1 });
+  await expect(next).toBeFocused();
+  expect(
+    await original!.evaluate(
+      (element) => element === document.querySelector(".qe-inspector-overlay"),
+    ),
+  ).toBe(true);
+  await panel.getByRole("button", { name: "Pregunta anterior" }).click();
+  await expect(panel.getByRole("status")).toHaveText("40 de 43 resultados");
+  await expect(page).toHaveURL(new RegExp(`question=${questions[39]!.id}`));
+  await expect(
+    page.getByRole("button", {
+      name: questions[39]!.question,
+      exact: true,
+    }),
+  ).toBeInViewport({ ratio: 1 });
+  await expect(
+    page.getByRole("checkbox", {
+      name: `Seleccionar pregunta: ${questions[0]!.question}`,
+      exact: true,
+    }),
+  ).toBeChecked();
+});
