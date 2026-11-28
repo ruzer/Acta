@@ -328,7 +328,8 @@ lo publiques. No ejecutes estos comandos sobre una instalación de trabajo.
 
 Tras autorizar el propietario subredes privadas exclusivamente para el laboratorio,
 se ejecutó el instalador oficial `sh scripts/install.sh` de v0.12.0
-(`230a8833c41d230be0fe4da55e271fd527e5195e`), siguiendo la ruta del job
+(commit `a16d3ee0b7eda30fb8fd065e468b7503d4f40b6e`; objeto del tag anotado
+`230a8833c41d230be0fe4da55e271fd527e5195e`), siguiendo la ruta del job
 `guided-install`, sin el script adaptado de ensayo. Proyecto propio
 `acta-diag-20261127-2251`, puerto local 4495; sin modificar producto ni healthchecks.
 
@@ -362,3 +363,43 @@ El propietario autorizó después continuar el ensayo completo conservando el
 incidente como «causa no determinada; no reproducido en el control». Esta
 excepción levanta únicamente esa parada; no afirma una corrección del producto.
 El alcance autorizado termina en el PR de preparación de upstream.
+
+
+## Ensayo completo autorizado del 2026-11-27
+
+Host macOS ARM64; Docker Linux aarch64. Base v0.12.0, commit
+`a16d3ee0b7eda30fb8fd065e468b7503d4f40b6e`; candidata
+`6acc6ac28b662dc8b2513e9a1c4286cd6e040b0f`. Este resultado corresponde a esos
+SHA; el commit posterior registra únicamente esta evidencia documental.
+El incidente histórico sigue con causa no determinada y no reproducido en el
+control oficial. El propietario autorizó expresamente continuar con ese límite.
+
+Se ejecutó una vez el recorrido completo con datos ficticios y demo desactivada.
+La base arrancó con el instalador oficial `scripts/install.sh`, usando proyecto,
+puerto y volúmenes propios. Las subredes privadas de ambos proyectos se comprobaron
+sin solapamiento con redes Docker ni rutas IPv4 específicas actuales; no se
+modificaron redes ajenas ni la configuración global. Solo hubo un laboratorio
+activo; el origen se detuvo antes de arrancar el destino restaurado.
+
+| Comprobación | Resultado leído de la ejecución |
+| --- | --- |
+| Base sana por instalador oficial | PASS, salida 0; 34,006 s incluyendo construcción con caché |
+| Fixture oficial y por interfaz | PASS; cinco cuentas nuevas, CSV de 300 preguntas / 12 temas, 5 publicadas y 295 borradores |
+| Conjunto con fixtures | 3 proyectos, 13 temas, 302 preguntas, 7 revisiones de respuesta, 1 validación, 2 evidencias, 0 assets de marca |
+| Migraciones | 14 en base, candidata y destino actualizado; `prisma migrate status` sin pendientes en los tres; ninguna nueva |
+| Backup y verificación | PASS; 20,171 s + 0,274 s; 9 archivos con hashes/tar/PGDMP comprobados |
+| Actualización en mismos volúmenes | PASS; 33,395 s incluyendo construcción con caché |
+| Restauración con código base en volúmenes nuevos | PASS; 33,613 s; ocho recuentos de control iguales |
+| Actualización del destino restaurado | PASS; 36,792 s incluyendo construcción con caché |
+| Huellas por fila | PASS al actualizar y al restaurar/actualizar: 788 filas previas de 38 tablas; 98 eventos previos conservados y solo se permiten eventos adicionales |
+| Sesiones, evidencia, informe e invitación | PASS en ambas verificaciones: cookie original válida, nuevo acceso/cierre, HTML y PDF, ambos smoke oficiales `--verify` |
+| Retirada | Inventarios inicial/final idénticos por identificador: 81 contenedores y 387 volúmenes |
+
+SHA-256 de la evidencia comprobado en ambas rutas:
+`cd4c2a363517eddfce9c89194d21a4e18e7aaeb2aac649804d35fe3488c4ac55`.
+La comparación excluye las cuatro tablas volátiles documentadas arriba;
+AuditEvent conserva todas sus filas previas y admite eventos nuevos. Las otras
+37 tablas conservan huellas y recuentos exactos, incluidas las 14 migraciones y
+responseDueAt. No se sustituyó ni extendió la sesión anterior. Estos resultados
+son de un fixture pequeño y caché local: no acreditan datos institucionales,
+capacidad, dispositivos físicos, lectores de pantalla ni otros hosts.
