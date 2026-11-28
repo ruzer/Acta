@@ -1,7 +1,8 @@
 # Ensayo de actualización con datos ficticios
 
-Este procedimiento comprueba v0.11.0 → candidata v0.12.0 y conserva la ruta desde
-v0.10.0 sobre los mismos siete volúmenes y una restauración en siete volúmenes nuevos. No opera sobre instalaciones
+Este procedimiento comprueba v0.12.0 → candidata v0.12.1 y conserva las rutas
+históricas desde v0.10.0 y v0.11.0, sobre los mismos siete volúmenes y una
+restauración en siete volúmenes nuevos. No opera sobre instalaciones
 de trabajo. Reutiliza Compose, el importador, el alta de usuarios y los scripts de
 [backup/restauración](BACKUP-RESTORE.md); no escribe datos de negocio por SQL.
 
@@ -15,13 +16,15 @@ encendido: la expiración normal de una sesión no se desactiva para el ensayo.
 Desde un clon de Acta, elige cuatro directorios nuevos, dos nombres Compose exclusivos
 que empiecen por `acta-upgrade-` y dos puertos libres. Ejemplo, sustituyendo los
 nombres si ya existen. `ref` fija la versión candidata: cambia su valor por el
-tag o la rama que quieras evaluar; la base predeterminada es v0.11.0; usa `base_ref=v0.10.0` para el recorrido anterior. El checkout desde el que ejecutas los comandos debe contener la candidata con la migración de fecha límite:
+tag o la rama que quieras evaluar; la base predeterminada es v0.12.0; usa `base_ref=v0.10.0` o
+`base_ref=v0.11.0` para los recorridos anteriores. El checkout debe contener
+el script actualizado que admite las tres bases publicadas:
 
 ```sh
 umask 077
 lab=$(mktemp -d /tmp/acta-upgrade.XXXXXX)
 chmod 700 "$lab"
-base_ref=v0.11.0
+base_ref=v0.12.0
 ref=HEAD
 git worktree add --detach "$lab/base" "$base_ref"
 git worktree add --detach "$lab/candidate" "$ref"
@@ -56,7 +59,7 @@ ACTA_UPGRADE_REHEARSAL_ALLOWED=true node "$candidate/scripts/upgrade-rehearsal.m
   --origin http://127.0.0.1:4491 --state "$lab/state.json"
 ```
 
-`prepare` exige una base vacía de versión 0.10.0 o 0.11.0. Instala fixtures oficiales,
+`prepare` exige una base vacía de versión 0.10.0, 0.11.0 o 0.12.0. Instala fixtures oficiales,
 crea cinco participantes mediante vista previa/confirmación y cambio de contraseña,
 importa un CSV de 300 preguntas por la interfaz y registra cinco respuestas.
 Los fixtures incluyen evidencia, decisión y una invitación externa usada.
@@ -94,7 +97,14 @@ Session, InvitationSession, LoginAttempt e InvitationRateBucket, que cambian al
 usar el sistema; verifica la autenticación funcionalmente. Comprueba el SHA-256 de
 la evidencia, el texto de decisión en el informe HTML y su impresión a PDF.
 
-Se restaura primero con el código de la base: los scripts exigen recuentos iguales, incluidas sus 13 migraciones. Solo después se actualiza el destino a la candidata. No se omite ni relaja esa comprobación del respaldo. El ensayo exige las 13 migraciones anteriores más `202611180001_response_due_at` (14 en total), con huellas intactas de las anteriores. Al comparar proyectos solo retira la columna nueva de la huella y exige que sea nula; cualquier valor previo cambiado sigue siendo un error.
+Se restaura primero con el código de la base: los scripts exigen recuentos iguales,
+incluidas sus migraciones. Solo después se actualiza el destino a la candidata.
+Desde v0.12.0 se exigen las mismas 14 migraciones, sin nuevas, y huellas completas
+de la fecha límite y su migración. Ejecuta también `prisma migrate status` en
+ambas versiones: no debe haber pendientes. Para las rutas históricas desde
+v0.10.0/v0.11.0 se conservan las 13 migraciones anteriores más
+`202611180001_response_due_at` (14 en total); solo en esas rutas se retira la
+columna nueva de la huella y se exige que sea nula. No se relaja el respaldo.
 
 Además verifica: sesión anterior válida (la cookie real de cada base); nuevo acceso con `acta_session` que retira
 `fgeo_session`; cierre que retira ambas e invalida la sesión nueva; ambos smoke
@@ -272,6 +282,37 @@ cambios mayores de PostgreSQL, recuperación de archivos de marca externos ni la
 ruta desde v0.10.0. Los tiempos no son una prueba de carga ni un plazo de
 recuperación garantizado.
 
+## Intento detenido el 2026-11-27 — v0.12.0 a candidata v0.12.1
+
+**No acredita actualización ni restauración.** Host macOS ARM64 y Docker
+29.8.2 Linux aarch64. Base `a16d3ee0b7eda30fb8fd065e468b7503d4f40b6e`
+(v0.12.0); candidata `693742f256ce0b8ae246faac6daedc8ccb8a6123`.
+El script admite la base v0.12.0 por excepción expresa del propietario;
+no se modificó el código de aplicación.
+
+Laboratorio propio `acta-upgrade-20261127-v0121-source` (puerto 4591), destino
+reservado `acta-upgrade-20261127-v0121-restore` (4592), configuración privada,
+demo desactivada y secretos generados solo en volúmenes propios. Las imágenes
+de base, candidata y base de restauración se construyeron correctamente.
+
+| Paso | Resultado real |
+| --- | --- |
+| Construcción de candidata | Salida 0; 136,867 s |
+| Construcción base con caché / base de restauración | Salida 0; 1,919 s / 13,252 s |
+| Pull de imágenes no construibles del destino | Salida 0; 1,353 s |
+| Arranque de v0.12.0 con `up -d --wait --no-build` | **Salida 1; 7,011 s:** object-storage quedó unhealthy; dependencia de almacenamiento no disponible |
+| Fixture, migrate status, backup, actualización y restauración | No ejecutados; se detuvo el procedimiento sin reintentos |
+| Retirada | Siete volúmenes propios con etiqueta individual verificada; `down -v` solo del proyecto origen; destino nunca arrancado |
+| Inventario inicial y final | **81 contenedores / 387 volúmenes**, mismos IDs/nombres; cero añadidos o retirados ajenos |
+
+No se diagnosticó ni corrigió la causa del estado unhealthy; no se atribuye
+el fallo al cambio de versión ni se propone una corrección de producto sin
+evidencia. No se ejecutaron los gates locales completos ni se abrió PR después
+del fallo. La instalación preliminar del clon (`npm ci --ignore-scripts`) sí
+terminó con salida 0 y auditoría informativa de cero vulnerabilidades; no
+sustituye las dos auditorías y las suites requeridas sobre la cabeza final.
+Los ensayos históricos anteriores conservan su propio alcance y SHA.
+
 ## Retirada
 
 Solo después de guardar la evidencia no sensible, confirma para **cada** volumen
@@ -281,3 +322,84 @@ sus directorios respectivos. Compara los identificadores de contenedores ajenos
 con el inventario anterior. Nunca uses comodines ni prune. Retira enlaces privados
 y worktrees propios; conserva o elimina el backup privado según tu política, nunca
 lo publiques. No ejecutes estos comandos sobre una instalación de trabajo.
+
+
+## Control de diagnóstico del 2026-11-27 (sin ensayo completo)
+
+Tras autorizar el propietario subredes privadas exclusivamente para el laboratorio,
+se ejecutó el instalador oficial `sh scripts/install.sh` de v0.12.0
+(commit `a16d3ee0b7eda30fb8fd065e468b7503d4f40b6e`; objeto del tag anotado
+`230a8833c41d230be0fe4da55e271fd527e5195e`), siguiendo la ruta del job
+`guided-install`, sin el script adaptado de ensayo. Proyecto propio
+`acta-diag-20261127-2251`, puerto local 4495; sin modificar producto ni healthchecks.
+
+El primer control terminó con salida 1 antes de arrancar servicios: Docker informó
+`all predefined address pools have been fully subnetted`. Se retiraron sus recursos.
+El control autorizado posterior usó un override privado con web `10.253.241.0/28`
+y data `10.253.241.16/28`, comprobados sin solapamiento con las redes Docker y
+las rutas IPv4 específicas observadas (se excluye la ruta por defecto).
+El instalador terminó con salida 0; object-storage quedó `healthy`, sin fallos,
+en su primera comprobación registrada, 2026-11-27T23:00:06Z.
+
+Se observaron UID/GID 1000:1000 (`node`), directorios de datos internos modo 700,
+volumen object-secrets de solo lectura, directorio modo 700 y sus dos archivos
+modo 600. No se leyó su contenido. El healthcheck original conserva intervalo
+5 s, timeout 3 s y 30 reintentos; no hay publicación de puerto del almacenamiento.
+Compose, Dockerfile y arranque de Versity del laboratorio anterior coinciden
+byte a byte con este control. Su source.env difiere del ejemplo únicamente en
+APP_ORIGIN y APP_PORT (comparación sin publicar valores ni secretos).
+
+El contenedor del intento histórico ya había sido eliminado: no se recuperaron
+su Health.Log, logs, permisos ni tiempos internos. El control sano apunta al
+laboratorio previo y no reproduce un defecto del producto, pero **no determina
+la causa concreta de aquel unhealthy**. El agotamiento actual de subredes no
+se presenta como explicación del fallo histórico, que sí llegó a arrancar el
+almacenamiento. Se detuvo la fase por falta de causa demostrable, sin inventar
+una corrección ni transformar el intento detenido en PASS. No se ejecutaron el
+ensayo completo, las comprobaciones finales ni el push/PR de preparación.
+
+
+El propietario autorizó después continuar el ensayo completo conservando el
+incidente como «causa no determinada; no reproducido en el control». Esta
+excepción levanta únicamente esa parada; no afirma una corrección del producto.
+El alcance autorizado termina en el PR de preparación de upstream.
+
+
+## Ensayo completo autorizado del 2026-11-27
+
+Host macOS ARM64; Docker Linux aarch64. Base v0.12.0, commit
+`a16d3ee0b7eda30fb8fd065e468b7503d4f40b6e`; candidata
+`6acc6ac28b662dc8b2513e9a1c4286cd6e040b0f`. Este resultado corresponde a esos
+SHA; el commit posterior registra únicamente esta evidencia documental.
+El incidente histórico sigue con causa no determinada y no reproducido en el
+control oficial. El propietario autorizó expresamente continuar con ese límite.
+
+Se ejecutó una vez el recorrido completo con datos ficticios y demo desactivada.
+La base arrancó con el instalador oficial `scripts/install.sh`, usando proyecto,
+puerto y volúmenes propios. Las subredes privadas de ambos proyectos se comprobaron
+sin solapamiento con redes Docker ni rutas IPv4 específicas actuales; no se
+modificaron redes ajenas ni la configuración global. Solo hubo un laboratorio
+activo; el origen se detuvo antes de arrancar el destino restaurado.
+
+| Comprobación | Resultado leído de la ejecución |
+| --- | --- |
+| Base sana por instalador oficial | PASS, salida 0; 34,006 s incluyendo construcción con caché |
+| Fixture oficial y por interfaz | PASS; cinco cuentas nuevas, CSV de 300 preguntas / 12 temas, 5 publicadas y 295 borradores |
+| Conjunto con fixtures | 3 proyectos, 13 temas, 302 preguntas, 7 revisiones de respuesta, 1 validación, 2 evidencias, 0 assets de marca |
+| Migraciones | 14 en base, candidata y destino actualizado; `prisma migrate status` sin pendientes en los tres; ninguna nueva |
+| Backup y verificación | PASS; 20,171 s + 0,274 s; 9 archivos con hashes/tar/PGDMP comprobados |
+| Actualización en mismos volúmenes | PASS; 33,395 s incluyendo construcción con caché |
+| Restauración con código base en volúmenes nuevos | PASS; 33,613 s; ocho recuentos de control iguales |
+| Actualización del destino restaurado | PASS; 36,792 s incluyendo construcción con caché |
+| Huellas por fila | PASS al actualizar y al restaurar/actualizar: 788 filas previas de 38 tablas; 98 eventos previos conservados y solo se permiten eventos adicionales |
+| Sesiones, evidencia, informe e invitación | PASS en ambas verificaciones: cookie original válida, nuevo acceso/cierre, HTML y PDF, ambos smoke oficiales `--verify` |
+| Retirada | Inventarios inicial/final idénticos por identificador: 81 contenedores y 387 volúmenes |
+
+SHA-256 de la evidencia comprobado en ambas rutas:
+`cd4c2a363517eddfce9c89194d21a4e18e7aaeb2aac649804d35fe3488c4ac55`.
+La comparación excluye las cuatro tablas volátiles documentadas arriba;
+AuditEvent conserva todas sus filas previas y admite eventos nuevos. Las otras
+37 tablas conservan huellas y recuentos exactos, incluidas las 14 migraciones y
+responseDueAt. No se sustituyó ni extendió la sesión anterior. Estos resultados
+son de un fixture pequeño y caché local: no acreditan datos institucionales,
+capacidad, dispositivos físicos, lectores de pantalla ni otros hosts.

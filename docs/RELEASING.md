@@ -14,6 +14,40 @@ Se prepara [Semantic Versioning](https://semver.org/lang/es/) en formato **MAJOR
 
 El contrato público incluye API documentada, configuración, formatos de intercambio y requisitos de actualización/persistencia. No basta con que TypeScript compile para afirmar compatibilidad. Antes de 1.0 no se promete estabilidad absoluta; los cambios incompatibles deben anunciarse, agruparse en un incremento MINOR de `0.x` y acompañarse de instrucciones de migración. PATCH seguirá reservado para cambios compatibles. Una corrección de seguridad que rompa compatibilidad debe decirlo y usar la versión apropiada.
 
+### Preparación de 0.12.1 — Accesos y claridad del editor
+
+Base publicada: tag v0.12.0, commit `a16d3ee0b7eda30fb8fd065e468b7503d4f40b6e`.
+Código candidato: `19d486536de6dac8f0c44f8fe5fdfcb4caf11a9e`, merge #188;
+67 commits y 114 archivos desde el tag. Incluye #179 (Miembros conserva rol,
+área y estado), #184/#187 (controles con motivo y cambio de tema dentro de
+Editar) y #187/#188 (panel superpuesto y recorrido, Fase 1 de #183), además de
+las cinco actualizaciones de dependencias y sus inventarios. Las
+[notas de 0.12.1](releases/v0.12.1.md) detallan clasificación, actualización y límites.
+
+Se prepara PATCH por correcciones compatibles: sin nuevos contratos públicos,
+variables, esquema ni migraciones; tampoco cambian Dockerfiles, Compose o CI.
+Se conservan las 14 migraciones. Actualizar frontend/backend juntos, con respaldo
+verificado, mismos secretos y volúmenes, y recarga de pestañas. Los diseños #175,
+#176 y #177 siguen sin aprobar ni implementar; la Fase 2 de #183 queda fuera.
+No se acreditan dispositivos físicos ni lectores de pantalla reales.
+
+El [ensayo](UPGRADE-REHEARSAL.md) registra v0.12.0 → candidata y restauración,
+con SHA, conteos y huellas. Para admitir esta base, el propietario autorizó
+únicamente adaptar el script de ensayo y sus pruebas, además del alcance de
+versiones/documentación; no cambia el código de aplicación. La ruta histórica
+13 → 14 se conserva; desde v0.12.0 se exige 14 → 14 y no se excluye fecha límite
+ni su migración de las huellas.
+
+Exigir `verify`, `secrets`, `selfhosting`, `guided-install` y `codeql` en verde
+sobre la cabeza final. El propietario revisa y fusiona. **Únicamente una persona
+expresamente autorizada**, después de comprobar CI y CodeQL del commit exacto
+del merge, creará allí el tag anotado `v0.12.1`. Quien publique ejecutará
+`gh workflow run ci.yml --ref v0.12.1` y comprobará el mismo SHA: CI no escucha tags.
+Es una instrucción futura: esta preparación no ejecuta esa publicación.
+Los enlaces absolutos `blob/v0.12.1` no acreditan existencia del tag.
+La fecha 2026-11-27 de CHANGELOG identifica la preparación. No se publica tag,
+Release o imágenes, no se fusiona ni se despliega desde esta tarea.
+
 ### Preparación de 0.12.0 — Seguimiento y pulido del piloto
 
 Base comprobada: `e2e3a41d7306cfc006eab82b0e2e3e72855f1670`, merge del PR #165.
